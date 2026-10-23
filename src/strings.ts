@@ -32,7 +32,7 @@ export const it = {
   failed: "Appunti non salvati",
   dateMissing: "Data non indicata",
   editorHint:
-    "Scrivi ciò che sai, distingui ciò che sospetti. Usa / per titoli, elenchi e citazioni.",
+    "Scrivi ciò che sai, distingui ciò che sospetti. Usa / per formattare e [[ per collegare una pagina del Codex.",
   editorLoading: "Apertura editor…",
   unavailable:
     "Impossibile aprire gli appunti. Il documento originale è conservato.",

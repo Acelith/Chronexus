@@ -2,75 +2,64 @@
 
 ## Milestone
 
-M0 e M1 completate. M2 in corso: persistenza completata, UI da integrare.
+**M0, M1 e M2 completate.** Nessun lavoro iniziato su M3.
 
-Checkpoint M2: migrazione 003, pagine tipizzate, alias e menzioni con backlink
-transazionali. `cargo test --offline --manifest-path src-tauri/Cargo.toml`:
-PASS (13 test); Clippy con `-D warnings`: PASS. Nessuna nuova dipendenza.
-Verifica desktop dei collegamenti ancora da eseguire.
-
-Scenario verificato su desktop Windows: crea/rinomina campagna, crea sessioni 12
-poi 2, scrive due paragrafi, chiude e riapre il processo; JSON e ID dei blocchi
-identici, ordine 2/12 corretto. Anche la battuta aggiunta immediatamente prima
-della chiusura è persistita. Grassetto, titoli ed elenchi verificati nell'editor.
+Ultimo scenario desktop verificato: nella Sessione 12 crea `[[Varek]]`, apre la
+pagina e il backlink, rinomina in «Varek il grigio», torna al blocco sorgente e
+riavvia. Documenti, UUID e alias sono identici; collegamento e backlink risolvono
+ancora la stessa pagina. Verificati anche pagina→pagina, alias ambiguo, recupero
+mancante e creazione fallita con testo digitato conservato.
 
 ## Funziona
 
-- Shell italiana, campagne selezionabili/rinominabili e sessioni con numero,
-  titolo e data facoltativa. Nessun dato dimostrativo nel profilo personale.
-- Rust + SQLite locale con migrazioni 001/002, UUID e confini di campagna.
-- BlockNote italiano, documento JSON canonico, autosave serializzato (500 ms),
-  stato visibile, riprova e flush prima di navigazione/chiusura normale.
-- Errori di accesso/salvataggio visibili; fallimento blocca la navigazione.
-  Revisioni obsolete non possono sovrascrivere altre modifiche.
-- Eseguibile release Windows prodotto e avviato con asset incorporati e DB reale.
+- Campagne e sessioni persistenti, editor italiano condiviso con il Codex.
+- Migrazione 003 additiva: pagine tipizzate con alias/bozze e menzioni esplicite.
+- Menu `[[` con selezione o creazione, titoli correnti risolti per ID stabili.
+- Backlink raggruppati per sessione/pagina, anteprima e navigazione al blocco.
+- Documento e indice aggiornati nella stessa transazione; confini di campagna
+  verificati nel backend. Le menzioni non generano relazioni fattuali.
+- Autosave serializzato e flush prima di navigare/chiudere; anche la creazione
+  delle pagine pendenti è attesa. Errori visibili e appunti preservati.
 
-## Verifiche effettive
+## Verifiche effettive M2
 
 | Comando / prova | Esito |
 | --- | --- |
-| `pnpm lint` | PASS |
-| `pnpm typecheck` | PASS |
-| `pnpm format:check` | PASS |
-| `pnpm test` | PASS, 8 test UI/autosave |
-| `pnpm peers check` | PASS, nessun conflitto |
-| `cargo test --offline --manifest-path src-tauri/Cargo.toml` | PASS, 7 test DB/migrazioni |
+| `pnpm lint`, `pnpm typecheck`, `pnpm format:check` | PASS |
+| `pnpm test` | PASS, 12 test UI/autosave/risoluzione nomi |
+| `cargo test --offline --manifest-path src-tauri/Cargo.toml` | PASS, 13 test DB/migrazioni/menzioni |
 | `cargo clippy --offline --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings` | PASS |
 | `cargo fmt --manifest-path src-tauri/Cargo.toml -- --check` | PASS |
-| `pnpm build` | PASS; avviso dimensione chunk editor |
-| `pnpm build:desktop` | PASS Windows x64 release, senza installer |
-| `node scripts/desktop-smoke.mjs prepare` / `verify` | PASS, WebView2 + Rust + SQLite reali |
-| Avvio release `http://tauri.localhost/` | PASS, shell e lettura campagne senza server di sviluppo |
+| `pnpm build`, `pnpm build:desktop` | PASS, Windows x64 release; avviso chunk editor ~966 kB |
+| `node scripts/knowledge-smoke.mjs prepare` / `verify` | PASS, WebView2 + Tauri + SQLite reali e riavvio |
+| Release `http://tauri.localhost/` | PASS, avvio e lettura archivio reale con asset incorporati |
 | macOS/Linux, installer e QA manuale estesa | NON ESEGUITI |
 
-Rust locale in `.tools/` (ignorata). Per riusarlo: istruzioni PowerShell nel README.
-Il sandbox impedisce scrittura dell'indice Git, TLS Cargo e accesso app-data:
-le operazioni interessate sono state eseguite fuori sandbox. Il tentativo nativo
-computer-use non ha ottenuto accesso alla finestra entro il timeout; QA reale
-eseguita mediante collegamento alla WebView, con screenshot ispezionato.
+Protocollo ripetibile in `docs/QA.md`. Screenshot ispezionati, dati di prova
+separati in `.tools/m2-smoke6`, esclusi da Git. Nessuna nuova dipendenza.
+Rust locale `.tools/`: avvio PowerShell nel README. Sandbox: Git/app-data
+richiedono esecuzione fuori sandbox; nessun push remoto.
 
-## Commit
+## Commit recenti
 
-- `6b7c073 build(core): inizializza desktop Tauri e archivio SQLite locale`
-- `34f480b feat(journal): persiste campagne e sessioni con revisioni sicure`
-- Il commit editor M1 contiene questo checkpoint e il protocollo `docs/QA.md`.
-- I documenti iniziali sono stati preservati; commit utente `5251e99`.
-- Nessun push remoto.
+- `e9c1fc0 feat(knowledge): persiste pagine Codex e menzioni per blocco`
+- Il commit UI M2 contiene questo checkpoint e lo smoke ripetibile.
+- Base precedente: `414415b feat(journal): aggiunge editor italiano e autosave affidabile`.
 
 ## Limiti noti
 
-1. Nessun backup/ripristino fino a M4; nessuna cancellazione o archiviazione esposta.
-2. Chiusura forzata o blackout possono perdere modifiche non ancora salvate.
-3. Conflitti tra istanze richiedono copia degli appunti e riapertura; nessun merge.
-4. Editor caricato separatamente ma chunk ~947 kB minificati; ottimizzazione M6.
-5. QA multipiattaforma, installer, note molto grandi e accessibilità manuale estesa pendenti.
+1. Nessun backup fino a M4, nessuna cancellazione/archiviazione esposta.
+2. Chiusura forzata può perdere modifiche ancora pendenti; conflitti di documento
+   richiedono copia e riapertura, senza merge automatico.
+3. Testo `[[...]]` non confermato resta testo; nessuna inferenza automatica.
+4. Le anteprime delle fonti conservano il nome scritto all'epoca, anche dopo rinomina.
+5. Editor voluminoso, QA multipiattaforma e distribuzione rinviati a M6.
 
 ## Prossimo passo esatto
 
-**M2 — Codex pages, `[[links]]` and backlinks**. Verifica obiettivo: digitare
-`[[Varek]]` nella Sessione 12, aprire la pagina, vedere il backlink, rinominarla
-e ritrovare collegamento e backlink corretti dopo riavvio.
+**M3 — Meaningful graph**: grafo navigabile con menzioni e relazioni dichiarate
+separate, tipo/direzione/certezza e fonte. Verificare che citare Varek e la Gilda
+non crei un'alleanza; una relazione sospetta esplicita deve essere distinta.
 
-Skill applicate: frontend-design (tema e revisione visiva),
-vercel-react-best-practices (caricamento differito editor e stato derivato).
-computer-use consultata per QA; limite di accesso descritto sopra.
+Skill riutilizzate: frontend-design (coerenza e revisione visiva),
+vercel-react-best-practices (caricamento differito e fetch indipendenti paralleli).

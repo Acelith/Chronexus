@@ -16,6 +16,17 @@
   co-occorrenze non generano collegamenti né relazioni fattuali.
 - Nessuna nuova dipendenza. Skill React/design già lette riutilizzate per la UI;
   livello Rust/SQLite implementato e verificato con strumenti ordinari.
+- L'editor condiviso tra sessioni e pagine usa l'inline custom BlockNote e il
+  menu `[[` (nessuna scansione automatica dei nomi nel testo). In caso di creazione
+  fallita ripristina il testo digitato; navigazione/chiusura attendono anche la
+  creazione in corso. Durante i cambi vista asincroni il documento è in sola lettura.
+- La menzione mostra il titolo corrente dal Codex della campagna, mantenendo
+  nel documento il label originale di ripiego. Il preview dei backlink è un
+  estratto della fonte, quindi può ancora riportare il nome usato all'epoca.
+- L'apertura di un backlink riposiziona il cursore e scorre al blocco per ID;
+  l'evidenziazione CSS non altera il DOM canonico gestito da ProseMirror.
+- API di riferimento: [inline custom BlockNote](https://www.blocknotejs.org/docs/features/custom-schemas/custom-inline-content)
+  e [menu suggerimenti](https://www.blocknotejs.org/docs/react/components/suggestion-menus).
 
 ## 2026-10-23 — Fondazione M0
 

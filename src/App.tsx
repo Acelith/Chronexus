@@ -17,14 +17,29 @@ import {
 } from "./features/journal/api";
 import type { SaveGuard } from "./features/journal/Editor";
 import { it } from "./strings";
+import {
+  knowledgeApi,
+  type KnowledgePage,
+  type PageMetadata,
+  type Backlink,
+} from "./features/knowledge/api";
+import { KnowledgeContext } from "./features/knowledge/context";
 
 const Editor = lazy(() => import("./features/journal/Editor"));
+const CodexWorkspace = lazy(
+  () => import("./features/knowledge/CodexWorkspace"),
+);
 
 export function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [pages, setPages] = useState<KnowledgePage[]>([]);
+  const [pageId, setPageId] = useState<string | null>(null);
+  const [fallback, setFallback] = useState("");
+  const [view, setView] = useState<"journal" | "codex">("journal");
+  const [focusBlock, setFocusBlock] = useState<string | undefined>();
   const [form, setForm] = useState<"campaign" | "rename" | "session" | null>(
     null,
   );
@@ -46,18 +61,35 @@ export function App() {
       ),
     [],
   );
+  const onPageSaved = useCallback(
+    (saved: KnowledgePage) =>
+      setPages((items) => {
+        const exists = items.some((item) => item.id === saved.id);
+        return exists
+          ? items.map((item) => (item.id === saved.id ? saved : item))
+          : [...items, saved];
+      }),
+    [],
+  );
 
   const load = useCallback(async () => {
     const version = ++loadVersion.current;
     try {
       const items = await api.campaigns();
       const first = items[0];
-      const notes = first ? await api.sessions(first.id) : [];
+      const [notes, knowledge] = first
+        ? await Promise.all([
+            api.sessions(first.id),
+            knowledgeApi.pages(first.id),
+          ])
+        : [[], []];
       if (version !== loadVersion.current) return;
       setCampaigns(items);
       setCampaignId(first?.id ?? null);
       setSessions(notes);
       setSessionId(notes[0]?.id ?? null);
+      setPages(knowledge);
+      setPageId(null);
     } catch (reason) {
       if (version === loadVersion.current) setError(errorMessage(reason));
     } finally {
@@ -70,21 +102,24 @@ export function App() {
     void load();
   }, [load]);
 
-  const run = useCallback(async (action: () => Promise<void>) => {
-    if (operation.current) return;
-    operation.current = true;
-    setBusy(true);
-    setError("");
-    try {
-      await guard.current?.flush();
-      await action();
-    } catch (reason) {
-      setError(errorMessage(reason));
-    } finally {
-      operation.current = false;
-      setBusy(false);
-    }
-  }, []);
+  const run = useCallback(
+    async <T,>(action: () => Promise<T>): Promise<T | undefined> => {
+      if (operation.current) return;
+      operation.current = true;
+      setBusy(true);
+      setError("");
+      try {
+        await guard.current?.flush();
+        return await action();
+      } catch (reason) {
+        setError(errorMessage(reason));
+      } finally {
+        operation.current = false;
+        setBusy(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
@@ -120,10 +155,17 @@ export function App() {
   function selectCampaign(id: string) {
     if (id === campaignId) return;
     void run(async () => {
-      const items = await api.sessions(id);
+      const [items, knowledge] = await Promise.all([
+        api.sessions(id),
+        knowledgeApi.pages(id),
+      ]);
       setCampaignId(id);
       setSessions(items);
       setSessionId(items[0]?.id ?? null);
+      setPages(knowledge);
+      setPageId(null);
+      setView("journal");
+      setFocusBlock(undefined);
       setForm(null);
     });
   }
@@ -141,6 +183,9 @@ export function App() {
         setCampaignId(saved.id);
         setSessions([]);
         setSessionId(null);
+        setPages([]);
+        setPageId(null);
+        setView("journal");
       }
       setForm(null);
     });
@@ -158,191 +203,321 @@ export function App() {
         [...items, saved].sort((a, b) => a.sequence - b.sequence),
       );
       setSessionId(saved.id);
+      setView("journal");
+      setFocusBlock(undefined);
       setForm(null);
     });
   }
 
+  function openPage(id: string, label: string) {
+    if (!campaignId) return;
+    void run(async () => {
+      const knowledge = await knowledgeApi.pages(campaignId);
+      setPages(knowledge);
+      setPageId(id);
+      setFallback(label);
+      setView("codex");
+      setForm(null);
+      setFocusBlock(undefined);
+    });
+  }
+  function openSource(link: Backlink) {
+    void run(async () => {
+      if (link.sourceKind === "session") {
+        setSessionId(link.sourceId);
+        setView("journal");
+      } else {
+        setPageId(link.sourceId);
+        setFallback(link.sourceTitle);
+        setView("codex");
+      }
+      setFocusBlock(link.blockId);
+      setForm(null);
+    });
+  }
+  const createLinkedPage = useCallback(
+    async (title: string) => {
+      if (!campaignId) throw Error("Seleziona una campagna.");
+      const saved = await knowledgeApi.create(campaignId, {
+        title,
+        kind: "note",
+        status: "stub",
+        aliases: [],
+      });
+      onPageSaved(saved);
+      return saved;
+    },
+    [campaignId, onPageSaved],
+  );
+  async function createPage(metadata: PageMetadata) {
+    if (!campaignId) return;
+    return run(async () => {
+      const saved = await knowledgeApi.create(campaignId, metadata);
+      onPageSaved(saved);
+      setPageId(saved.id);
+      return saved;
+    });
+  }
+  async function updatePage(id: string, metadata: PageMetadata) {
+    if (!campaignId) return;
+    return run(async () => {
+      const saved = await knowledgeApi.update(campaignId, id, metadata);
+      onPageSaved(saved);
+      return saved;
+    });
+  }
+  async function recoverPage(id: string, title: string) {
+    if (!campaignId) return;
+    return run(async () => {
+      const saved = await knowledgeApi.recover(campaignId, id, title);
+      onPageSaved(saved);
+      return saved;
+    });
+  }
   return (
-    <div className="shell" aria-busy={busy || loading}>
-      <aside>
-        <div className="brand">
-          <h1>{it.appName}</h1>
-          <p>{it.tagline}</p>
-        </div>
-        <nav aria-label={it.campaigns}>
-          <h2>{it.campaigns}</h2>
-          {campaigns.map((item) => (
-            <button
-              className="campaign-link"
-              key={item.id}
-              aria-current={item.id === campaignId ? "page" : undefined}
-              disabled={busy}
-              onClick={() => selectCampaign(item.id)}
-            >
-              {item.name}
-            </button>
-          ))}
-          <button
-            className="quiet"
-            disabled={busy || loading}
-            onClick={() => setForm("campaign")}
-          >
-            + {it.newCampaign}
-          </button>
-        </nav>
-        <div className="local-mark">
-          <span aria-hidden="true">◇</span>
-          <footer>{it.local}</footer>
-        </div>
-      </aside>
-      <main>
-        {error ? (
-          <div className="error" role="alert">
-            <p>{error}</p>
-            {!campaigns.length ? (
-              <button
-                disabled={loading}
-                onClick={() => {
-                  setLoading(true);
-                  setError("");
-                  void load();
-                }}
-              >
-                {it.retry}
-              </button>
-            ) : null}
+    <KnowledgeContext.Provider
+      value={{ pages, open: openPage, create: createLinkedPage }}
+    >
+      <div className="shell" aria-busy={busy || loading}>
+        <aside>
+          <div className="brand">
+            <h1>{it.appName}</h1>
+            <p>{it.tagline}</p>
           </div>
-        ) : null}
-        {loading ? (
-          <p role="status">{it.loading}</p>
-        ) : (
-          <>
-            <header className="campaign-header">
-              <div>
-                <p>{it.journal}</p>
-                <h2>{campaign?.name ?? it.emptyCampaigns}</h2>
-              </div>
+          <nav aria-label={it.campaigns}>
+            <h2>{it.campaigns}</h2>
+            {campaigns.map((item) => (
+              <button
+                className="campaign-link"
+                key={item.id}
+                aria-current={item.id === campaignId ? "page" : undefined}
+                disabled={busy}
+                onClick={() => selectCampaign(item.id)}
+              >
+                {item.name}
+              </button>
+            ))}
+            <button
+              className="quiet"
+              disabled={busy || loading}
+              onClick={() => setForm("campaign")}
+            >
+              + {it.newCampaign}
+            </button>
+          </nav>
+          <div className="local-mark">
+            <span aria-hidden="true">◇</span>
+            <footer>{it.local}</footer>
+          </div>
+        </aside>
+        <main>
+          {error ? (
+            <div className="error" role="alert">
+              <p>{error}</p>
+              {!campaigns.length ? (
+                <button
+                  disabled={loading}
+                  onClick={() => {
+                    setLoading(true);
+                    setError("");
+                    void load();
+                  }}
+                >
+                  {it.retry}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+          {loading ? (
+            <p role="status">{it.loading}</p>
+          ) : (
+            <>
+              <header className="campaign-header">
+                <div>
+                  <p>{it.journal}</p>
+                  <h2>{campaign?.name ?? it.emptyCampaigns}</h2>
+                </div>
+                {campaign ? (
+                  <div className="actions">
+                    <button disabled={busy} onClick={() => setForm("rename")}>
+                      {it.rename}
+                    </button>
+                    <button
+                      className="primary"
+                      disabled={busy}
+                      onClick={() => setForm("session")}
+                    >
+                      + {it.newSession}
+                    </button>
+                  </div>
+                ) : null}
+              </header>
               {campaign ? (
-                <div className="actions">
-                  <button disabled={busy} onClick={() => setForm("rename")}>
-                    {it.rename}
+                <nav className="view-tabs" aria-label="Viste della campagna">
+                  <button
+                    aria-current={view === "journal" ? "page" : undefined}
+                    disabled={busy}
+                    onClick={() => {
+                      void run(async () => {
+                        setView("journal");
+                        setForm(null);
+                        setFocusBlock(undefined);
+                      });
+                    }}
+                  >
+                    Diario
                   </button>
+                  <button
+                    aria-current={view === "codex" ? "page" : undefined}
+                    disabled={busy}
+                    onClick={() => {
+                      void run(async () => {
+                        setView("codex");
+                        setForm(null);
+                        if (!pageId) setPageId(pages[0]?.id ?? null);
+                        setFocusBlock(undefined);
+                      });
+                    }}
+                  >
+                    Codex
+                  </button>
+                </nav>
+              ) : null}
+              {form === "campaign" || form === "rename" ? (
+                <CampaignForm
+                  key={`${form}-${campaignId}`}
+                  initialName={form === "rename" ? (campaign?.name ?? "") : ""}
+                  rename={form === "rename"}
+                  busy={busy}
+                  onSave={saveCampaign}
+                  onCancel={() => setForm(null)}
+                />
+              ) : null}
+              {form === "session" ? (
+                <SessionForm
+                  initialSequence={Math.min(
+                    999999,
+                    Math.max(0, ...sessions.map((item) => item.sequence)) + 1,
+                  )}
+                  busy={busy}
+                  onSave={saveSession}
+                  onCancel={() => setForm(null)}
+                />
+              ) : null}
+              {!campaign && !error ? (
+                <section className="empty">
+                  <span className="book-mark" aria-hidden="true">
+                    ◇
+                  </span>
+                  <p>{it.emptyCampaignHint}</p>
+                  {form !== "campaign" ? (
+                    <button
+                      className="primary"
+                      onClick={() => setForm("campaign")}
+                    >
+                      {it.createCampaign}
+                    </button>
+                  ) : null}
+                </section>
+              ) : null}
+              {campaign && view === "codex" ? (
+                <Suspense fallback={<p role="status">Apertura Codex…</p>}>
+                  <CodexWorkspace
+                    key={campaign.id}
+                    campaignId={campaign.id}
+                    pages={pages}
+                    selectedId={pageId}
+                    fallback={fallback}
+                    busy={busy}
+                    focusBlock={focusBlock}
+                    register={register}
+                    onSaved={onPageSaved}
+                    onSelect={openPage}
+                    onSource={openSource}
+                    onCreate={createPage}
+                    onUpdate={updatePage}
+                    onRecover={recoverPage}
+                  />
+                </Suspense>
+              ) : null}
+              {campaign &&
+              view === "journal" &&
+              !sessions.length &&
+              form !== "session" ? (
+                <section className="empty">
+                  <h3>{it.emptySessions}</h3>
+                  <p>{it.emptySessionsHint}</p>
                   <button
                     className="primary"
                     disabled={busy}
                     onClick={() => setForm("session")}
                   >
-                    + {it.newSession}
+                    {it.newSession}
                   </button>
+                </section>
+              ) : null}
+              {view === "journal" && sessions.length ? (
+                <div className="journal-layout">
+                  <nav className="session-list" aria-label={it.journal}>
+                    {sessions.map((item) => (
+                      <button
+                        key={item.id}
+                        disabled={busy}
+                        aria-current={
+                          item.id === sessionId ? "page" : undefined
+                        }
+                        onClick={() => {
+                          if (item.id !== sessionId)
+                            void run(async () => {
+                              setSessionId(item.id);
+                              setFocusBlock(undefined);
+                              setForm(null);
+                            });
+                        }}
+                      >
+                        <span className="session-number">
+                          Sessione {item.sequence}
+                        </span>
+                        <strong>{item.title}</strong>
+                        <span>{formatDate(item.playedOn)}</span>
+                      </button>
+                    ))}
+                  </nav>
+                  <article className="journal-page">
+                    {session ? (
+                      <>
+                        <header className="note-header">
+                          <p>
+                            Sessione {session.sequence}{" "}
+                            <span aria-hidden="true">/</span>{" "}
+                            {formatDate(session.playedOn)}
+                          </p>
+                          <h3>{session.title}</h3>
+                        </header>
+                        <Suspense
+                          fallback={<p role="status">{it.editorLoading}</p>}
+                        >
+                          <Editor
+                            key={session.id}
+                            session={session}
+                            register={register}
+                            onSaved={onSaved}
+                            focusBlock={focusBlock}
+                            disabled={busy}
+                          />
+                        </Suspense>
+                      </>
+                    ) : (
+                      <p>{it.chooseSession}</p>
+                    )}
+                  </article>
                 </div>
               ) : null}
-            </header>
-            {form === "campaign" || form === "rename" ? (
-              <CampaignForm
-                key={`${form}-${campaignId}`}
-                initialName={form === "rename" ? (campaign?.name ?? "") : ""}
-                rename={form === "rename"}
-                busy={busy}
-                onSave={saveCampaign}
-                onCancel={() => setForm(null)}
-              />
-            ) : null}
-            {form === "session" ? (
-              <SessionForm
-                initialSequence={Math.min(
-                  999999,
-                  Math.max(0, ...sessions.map((item) => item.sequence)) + 1,
-                )}
-                busy={busy}
-                onSave={saveSession}
-                onCancel={() => setForm(null)}
-              />
-            ) : null}
-            {!campaign && !error ? (
-              <section className="empty">
-                <span className="book-mark" aria-hidden="true">
-                  ◇
-                </span>
-                <p>{it.emptyCampaignHint}</p>
-                {form !== "campaign" ? (
-                  <button
-                    className="primary"
-                    onClick={() => setForm("campaign")}
-                  >
-                    {it.createCampaign}
-                  </button>
-                ) : null}
-              </section>
-            ) : null}
-            {campaign && !sessions.length && form !== "session" ? (
-              <section className="empty">
-                <h3>{it.emptySessions}</h3>
-                <p>{it.emptySessionsHint}</p>
-                <button
-                  className="primary"
-                  disabled={busy}
-                  onClick={() => setForm("session")}
-                >
-                  {it.newSession}
-                </button>
-              </section>
-            ) : null}
-            {sessions.length ? (
-              <div className="journal-layout">
-                <nav className="session-list" aria-label={it.journal}>
-                  {sessions.map((item) => (
-                    <button
-                      key={item.id}
-                      disabled={busy}
-                      aria-current={item.id === sessionId ? "page" : undefined}
-                      onClick={() => {
-                        if (item.id !== sessionId)
-                          void run(async () => {
-                            setSessionId(item.id);
-                            setForm(null);
-                          });
-                      }}
-                    >
-                      <span className="session-number">
-                        Sessione {item.sequence}
-                      </span>
-                      <strong>{item.title}</strong>
-                      <span>{formatDate(item.playedOn)}</span>
-                    </button>
-                  ))}
-                </nav>
-                <article className="journal-page">
-                  {session ? (
-                    <>
-                      <header className="note-header">
-                        <p>
-                          Sessione {session.sequence}{" "}
-                          <span aria-hidden="true">/</span>{" "}
-                          {formatDate(session.playedOn)}
-                        </p>
-                        <h3>{session.title}</h3>
-                      </header>
-                      <Suspense
-                        fallback={<p role="status">{it.editorLoading}</p>}
-                      >
-                        <Editor
-                          key={session.id}
-                          session={session}
-                          register={register}
-                          onSaved={onSaved}
-                        />
-                      </Suspense>
-                    </>
-                  ) : (
-                    <p>{it.chooseSession}</p>
-                  )}
-                </article>
-              </div>
-            ) : null}
-          </>
-        )}
-      </main>
-    </div>
+            </>
+          )}
+        </main>
+      </div>
+    </KnowledgeContext.Provider>
   );
 }
 

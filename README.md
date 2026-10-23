@@ -58,7 +58,7 @@ in M4; questa prima versione non offre ancora tale protezione.
 
 Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
 
-## Funzioni attuali (M0 e M1)
+## Funzioni attuali (M0, M1 e M2)
 
 - Creazione, selezione e rinomina di campagne indipendenti.
 - Sessioni ordinate per numero, con titolo e data reale facoltativa.
@@ -67,15 +67,28 @@ Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
 - Salvataggio automatico dopo 500 ms, stato visibile, pulsante «Salva ora» e
   riprova. Cambio nota/campagna e chiusura normale attendono la persistenza.
   Un errore impedisce la navigazione e conserva gli appunti nell'editor.
-- Non sono ancora presenti cancellazione, archiviazione, backup o collegamenti
-  Codex. Nessuna eliminazione dei dati è esposta nell'interfaccia.
+- Codex con pagine tipizzate, titolo, alias, bozza/attiva e appunti a blocchi.
+- Menu `[[`: scrivi un nome e scegli una pagina esistente o «Crea bozza» con
+  mouse, frecce e Invio. Anche `[[Nome]]` resta testo finché non scegli un risultato.
+  I riferimenti confermati conservano UUID stabili e sopravvivono alle rinomine.
+- Backlink da sessioni e pagine, raggruppati per fonte con anteprima e apertura
+  del blocco di origine. Il vecchio titolo rimane un alias dopo una rinomina.
+- Alias ambigui presentati come risultati distinti; riferimenti mancanti
+  recuperabili esplicitamente come bozze con lo stesso ID.
+- Non sono ancora presenti cancellazione, archiviazione, grafo o backup.
+  Nessuna eliminazione dei dati è esposta nell'interfaccia.
 
 La chiusura forzata del processo o un'interruzione elettrica possono perdere
 le modifiche che non hanno ancora raggiunto SQLite. Attendere «Salvato sul computer».
 In caso di conflitto tra due istanze, copiare gli appunti prima di riaprire:
 la versione meno recente non viene sovrascritta automaticamente.
 
-Prova desktop ripetibile e matrice delle verifiche: [docs/QA.md](docs/QA.md).
+Una menzione indica soltanto che una pagina è citata negli appunti: non crea
+alleanze, accuse o altre relazioni fattuali. Queste arriveranno in M3 con certezza
+e fonte esplicite. La ricerca del Codex riguarda titoli e alias; la ricerca globale
+nel testo è prevista in M6.
+
+Prove desktop ripetibili e matrice delle verifiche: [docs/QA.md](docs/QA.md).
 
 ## Dipendenze principali e licenze
 

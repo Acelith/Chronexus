@@ -19,7 +19,7 @@ export interface Session {
   updatedAt: string;
 }
 
-async function command<T>(
+export async function command<T>(
   name: string,
   payload?: Record<string, unknown>,
 ): Promise<T> {

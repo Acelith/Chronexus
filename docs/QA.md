@@ -1,4 +1,4 @@
-# Verifiche M0 e M1
+# Verifiche M0, M1 e M2
 
 ## Suite automatizzate
 
@@ -57,6 +57,45 @@ Il test non elimina dati: per ripetere da zero usare un altro profilo nuovo.
 - Due istanze sulla stessa sessione: la seconda scrittura obsoleta deve essere
   fermata; copiare gli appunti prima di riaprire. Non è previsto un merge in M1.
 - Non terminare forzatamente il processo per simulare la chiusura normale.
+
+## Smoke M2 — Codex, collegamenti e backlink
+
+Richiede la stessa build debug, server Vite e porta WebView2 del test M1.
+Usare un **nuovo** profilo vuoto, ad esempio:
+
+```powershell
+$env:NODEX_DEV_DATA_DIR="$PWD/.tools/m2-nuova-prova"
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
+Start-Process "$PWD/src-tauri/target/debug/nodex.exe"
+node scripts/knowledge-smoke.mjs prepare
+```
+
+La fase `prepare` usa UI e comandi reali per verificare:
+
+- Sessione 12 → `[[Varek` → creazione bozza → apertura pagina e backlink.
+- Rinomina in «Varek il grigio», tipo/stato/alias e UUID conservato.
+- Ritorno dal backlink al blocco sorgente con evidenziazione, poi menzione
+  pagina→pagina verso «Gilda» e backlink dalla pagina.
+- Alias «Custode» condiviso da due pagine: scelta esplicita, nessun duplicato.
+- Un secondo writer crea un nome prima della conferma del menu: errore reale
+  di duplicato e testo `[[Contesa]]` conservato nell'editor e salvato.
+- Riferimento mancante inserito tramite il comando Rust reale: recupero esplicito
+  come bozza con lo stesso UUID, senza modificare i collegamenti sorgenti.
+
+La finestra si chiude. Riaprirla con lo stesso profilo ed eseguire:
+
+```powershell
+Start-Process "$PWD/src-tauri/target/debug/nodex.exe"
+node scripts/knowledge-smoke.mjs verify
+```
+
+`verify` confronta tutti i documenti, UUID e alias prima/dopo il riavvio e
+verifica navigazione e backlink da sessioni e pagine. Nessun mock di persistenza.
+Aspettative e screenshot sono in `.tools/`, mai in Git. Non eliminare profili
+personali per ripetere i test: scegliere un'altra cartella di prova vuota.
+
+Le suite isolate coprono inoltre validazione, upgrade M1→M2, ricorsione dei
+blocchi, rimozione menzioni, conflitti e rollback dei collegamenti cross-campagna.
 
 ## Piattaforme
 
