@@ -2,17 +2,14 @@
 
 ## Milestone
 
-**M0–M5 completate. Estensione scheda/catalogo richiesta in corso. M6 non iniziata.**
+**M0–M5 ed estensione scheda/catalogo completate. M6 non iniziata.**
 
-Revisione corrente: persistenza aggiuntiva della scheda ispirata al PDF e cache
-SRD opzionale, migrazione 006 additiva. Interfaccia e verifica desktop ancora da
-completare; i risultati sotto riguardano la precedente consegna M5.
-
-Ultimo scenario reale: Neme riceve la chiave da Varek nella Sessione 12; dal
-proprio inventario apre il PNG e il blocco fonte, poi torna all'oggetto selezionato.
-PF, risorse/slot, quantità, equipaggiamento, capacità e marcatori restano identici
-dopo riavvio. Backup M5 con PNG ripristinato su profilo vuoto e riavviato: scheda,
-asset, documenti, UUID, grafo, fonti e hash immagine coincidono con la sorgente.
+Ultimo scenario reale Windows: scheda Neme compilata nelle sezioni del PDF,
+Magic Missile scaricato dall'API e personalizzato come Dardi di Neme; creazione
+di Segnale delle memorie con testo originale. Ricerca classi, equipaggiamento e
+regole/sottosezioni. Riavvio, consultazione offline, backup e ripristino su profilo
+vuoto, secondo riavvio: scheda, incantesimi, fonti, UUID e cache identici.
+Gli aggiornamenti API falliti mostrano l'avviso della copia locale.
 
 ## Funziona
 
@@ -23,53 +20,59 @@ asset, documenti, UUID, grafo, fonti e hash immagine coincidono con la sorgente.
 - Personaggio generico per campagna: identità, sistema libero, livello/esperienza,
   PF, condizioni/note e statistiche configurabili. Risorse/slot con UUID stabili
   e contatori +/− salvati immediatamente, senza formule o consumi automatici.
+- Scheda estesa: combattimento/sensi, competenza/maestria e modificatori manuali,
+  ispirazione/tiri morte, armi/munizioni, storia e competenze, denaro/carico e
+  magia. Preset etichette D&D 2014 senza sostituzioni; slot 1–9 inizialmente a zero.
 - Inventario: CRUD con revisioni, quantità anche zero, equipaggiamento, categoria,
   peso/valore liberi, consumabili e note; provenienza sessione/blocco/PNG/luogo/
   missione e pagina Codex. Eliminazione confermata, fonti conservate.
-- Incantesimi/capacità manuali, conosciuta/preparata indipendenti, metadati e
-  filtri nome/rango/stato/tipo. Contratto adattatori locale, solo modalità manuale.
+- Incantesimi/capacità manuali, rituale/concentrazione, conosciuta/preparata
+  indipendenti. Catalogo SRD 2014 opzionale, filtri locali, anteprima e importazione
+  esplicita modificabile con fonte e attribuzione. Ricerca dal modulo personale;
+  nessun upload. GET solo sull'host approvato, 10 s / 2 MiB e cache SQLite 150 voci.
 - Moduli con salvataggio esplicito, errori che conservano input, guardie contro
   navigazione/chiusura, stati vuoti/lettura fallita e Tab/Escape nelle conferme.
   Navigazione alle fonti con ritorno alla voce selezionata.
-- Backup/ripristino M4 esteso a tutti i dati M5 e conteggi player. Migrazione 005
-  additiva, FK composite, transazioni e controlli Rust. Backup schemi 1–5 leggibili;
-  DB 005 richiede M5 o successivo. Vecchi manifest conteggi interpretati con zero.
+- Backup/ripristino M4 comprende scheda estesa e cache. Migrazioni 005/006
+  additive, FK composite, transazioni e controlli Rust. Backup schemi 1–6 leggibili;
+  nuovi archivi richiedono una build che supporti lo schema 006. JSON M5 ha default
+  per i campi aggiunti; niente cancellazioni o rinomina dei percorsi dati legacy.
 
 ## Verifiche effettive
 
 | Comando / prova | Esito |
 | --- | --- |
 | `pnpm lint`, `pnpm typecheck`, `pnpm format:check` | PASS |
-| `pnpm test` | PASS, 30 test in 6 file |
-| `pnpm peers check` | PASS, nessun conflitto |
-| `cargo test --offline --manifest-path src-tauri/Cargo.toml` | PASS, 38 test (9 player) |
+| `pnpm test` | PASS, 39 test in 10 file |
+| `cargo test --offline --manifest-path src-tauri/Cargo.toml` | PASS, 40 test; test cache ripetuto dopo aggiunta caso orologio arretrato |
 | `cargo clippy --offline --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings` | PASS |
 | `cargo fmt --manifest-path src-tauri/Cargo.toml -- --check` | PASS |
 | `cargo build --offline --manifest-path src-tauri/Cargo.toml` | PASS, debug Windows x64 |
 | `pnpm build:desktop` (include `pnpm build`) | PASS, release Windows x64 senza installer |
-| `scripts/player-smoke.mjs prepare/verify/restore/verify-restored` | PASS, desktop/SQLite/ZIP reali |
-| Riapertura profilo M4 con eseguibile rinominato | PASS, documenti/grafo/fonti/hash PNG identici |
-| Tre viste player a 760 px e screenshot a 1200 px | PASS, nessun overflow orizzontale |
-| Release: avvio, titolo Chronexus, lettura archivio e schermata backup | PASS, asset incorporati; CSP offline e variabili debug escluse |
+| `scripts/sheet-catalog-smoke.mjs prepare/verify/restore/verify-restored` | PASS, API e desktop/SQLite/ZIP reali; solo indisponibilità rete simulata nei passi offline |
+| Scheda caricata a 760/1200 px e screenshot compendio | PASS, nessun overflow, lettura visiva completata |
+| Collegamento API nella release con origine `tauri.localhost` | NON ESEGUITO; build release compilata, ricerca provata nel desktop debug |
 | macOS/Linux, installer, rete/disco esterno e QA assistiva estesa | NON ESEGUITI |
 
 La prova desktop usa solo la scelta file predefinita nel debug con profilo
 esplicito: persistenza, comandi, ZIP e validazioni sono reali. La procedura nativa
 completa dei selettori rimane da verificare (limite QA M4). Dati sintetici in
-`.tools/m5-source-final` e `.tools/m5-restored`, ignorati da Git. Nessun dato di
+`.tools/sheet-catalog-final-source` e `.tools/sheet-catalog-final-restored`, ignorati da Git. Nessun dato di
 prova creato nel profilo personale. Nessun push remoto.
 
 ## Commit recenti
 
 - `9eabd4d refactor(brand): rinomina il prodotto in Chronexus`
 - `e756ea4 feat(player): persiste scheda, risorse e asset con provenienza`
-- Il commit UI M5 contiene questo checkpoint, le viste e lo smoke ripetibile.
-- Base M4: `8277c78 feat(backup): integra backup e ripristino guidato`.
+- `e964e94 feat(player): integra scheda e inventario con fonti navigabili`
+- `a15366e feat(player): estende scheda e persiste la cache SRD opzionale`
+- Il commit della UI estesa contiene questo checkpoint e lo smoke ripetibile.
 
 ## Limiti noti
 
-1. Un personaggio per campagna; nessun motore di regolamento, riposo o catalogo
-   commerciale. Moduli player espliciti, nessun autosave implicito delle schede.
+1. Un personaggio per campagna, nessun motore di formule/riposi. Catalogo SRD
+   2014 in inglese, incompleto rispetto ai manuali commerciali; API read-only.
+   Nuove voci richiedono rete, copie importate e voci già in cache funzionano offline.
 2. Backup manuali non cifrati/firmati: 256 MiB/file, 512 MiB totali, 9998 allegati.
    Gestore allegati UI, pianificazione ed export Markdown/JSON ancora assenti.
 3. Generazioni/copie preventive non rimosse automaticamente. DB non apribile:
@@ -85,7 +88,8 @@ indice, rifinitura/accessibilità, completamento export/allegati e pipeline CI c
 build Windows/macOS/Linux dove disponibili. Verifica: trovare una nota nel testo,
 riavviare, fare backup/ripristino, navigare grafo/provenienza e verificare i pacchetti.
 
-Skill applicate: frontend-design per continuità visiva e revisione screenshot;
+Skill applicate: PDF per estrazione e lettura visiva delle quattro pagine;
+frontend-design per continuità visiva e revisione screenshot;
 vercel-react-best-practices per caricamento differito e stato derivato. Nessuna
 Skill specializzata database/testing disponibile; test Rust e Playwright ordinari.
 Istruzioni: README; QA ripetibile: docs/QA.md; contratto adattatori: docs/RULESETS.md.

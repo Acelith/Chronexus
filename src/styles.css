@@ -974,6 +974,144 @@ select {
 .player-return {
   margin: 0 0 20px;
 }
+.sheet-sections {
+  margin: 24px 0;
+}
+.sheet-sections details {
+  border-top: 1px solid #465268;
+  padding: 14px 0;
+}
+.sheet-sections summary {
+  cursor: pointer;
+  color: #d7b978;
+  font-size: 17px;
+  padding: 6px 0;
+}
+.sheet-sections summary:focus-visible {
+  outline: 2px solid #d7b978;
+  outline-offset: 4px;
+}
+.sheet-sections .player-fields {
+  margin-top: 18px;
+}
+.sheet-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 30px;
+}
+.sheet-summary dt {
+  color: #a9b4c7;
+  font-size: 14px;
+}
+.sheet-summary dd {
+  margin: 6px 0 0;
+}
+.sheet-attack {
+  border-left: 2px solid #465268;
+  padding: 14px;
+  margin: 14px 0;
+}
+.sheet-attack h5 {
+  margin: 0;
+  font-size: 17px;
+}
+.dnd-catalog {
+  margin: 24px 0;
+  padding: 24px;
+  border: 1px solid #465268;
+  background: #101623;
+  min-width: 0;
+}
+.dnd-catalog h4 {
+  font:
+    25px Georgia,
+    serif;
+  margin: 8px 0 0;
+}
+.dnd-catalog .player-filters {
+  flex-wrap: wrap;
+  align-items: end;
+}
+.catalog-layout {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.catalog-layout nav {
+  max-height: 580px;
+  overflow: auto;
+  padding-right: 6px;
+}
+.catalog-document {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.catalog-document h5 {
+  color: #d7b978;
+  font-size: 16px;
+}
+.catalog-metadata {
+  display: grid;
+  gap: 16px;
+}
+.catalog-document > .catalog-metadata {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.catalog-extra summary,
+.unused-slots summary {
+  cursor: pointer;
+  color: #d7b978;
+  padding: 12px 0;
+}
+.unused-slots {
+  margin: 16px 0;
+}
+.catalog-metadata > div {
+  border-top: 1px solid #303a4b;
+  padding-top: 12px;
+}
+.catalog-metadata dt {
+  color: #a9b4c7;
+  margin-bottom: 8px;
+}
+.catalog-metadata dd {
+  margin: 0;
+}
+.catalog-license {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #a9b4c7;
+  overflow-wrap: anywhere;
+  margin: 24px 0 0;
+  border-top: 1px solid #303a4b;
+  padding-top: 12px;
+}
+aside.catalog-license {
+  display: block;
+  border-right: 0;
+  background: transparent;
+  padding: 12px 0 0;
+}
+.catalog-license p {
+  margin: 8px 0;
+}
+@media (max-width: 1100px) {
+  .catalog-layout {
+    grid-template-columns: 1fr;
+  }
+  .catalog-layout nav {
+    max-height: 250px;
+  }
+}
+@media (max-width: 850px) {
+  .sheet-summary {
+    grid-template-columns: 1fr;
+  }
+  .dnd-catalog {
+    padding: 16px;
+  }
+}
 .player-confirm-overlay {
   position: fixed;
   inset: 0;

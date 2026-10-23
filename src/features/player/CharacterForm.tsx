@@ -6,6 +6,8 @@ import {
   type CharacterInput,
 } from "./api";
 import { NumberField, TextField } from "./fields";
+import { dndPreset, emptySheet, trainingLabels } from "./sheet";
+import { SheetEditor } from "./SheetSections";
 
 export default function CharacterForm({
   initial,
@@ -80,6 +82,10 @@ export default function CharacterForm({
             onChange={(v) => update("experience", v)}
           />
         </div>
+        <SheetEditor
+          value={data.sheet ?? emptySheet()}
+          onChange={(v) => update("sheet", v)}
+        />
         <h4>Punti vita</h4>
         <div className="player-fields">
           <NumberField
@@ -100,89 +106,167 @@ export default function CharacterForm({
           />
         </div>
         <h4>Statistiche configurabili</h4>
+        <button type="button" onClick={() => setData(dndPreset(data))}>
+          Aggiungi campi D&D 2014
+        </button>
         <p className="muted">
-          Aggiungi caratteristiche, abilità, tiri, difese e movimento con le
-          etichette del tuo sistema.
+          Aggiunge le sei caratteristiche, i tiri salvezza e le abilità
+          mancanti, senza modificare i valori già presenti.
         </p>
-        {data.stats.map((stat, index) => (
-          <div className="player-edit-row" key={stat.id}>
-            <TextField
-              label={`Statistica ${index + 1}: nome`}
-              value={stat.label}
-              required
-              onChange={(v) =>
-                update(
-                  "stats",
-                  data.stats.map((s) =>
-                    s.id === stat.id ? { ...s, label: v } : s,
-                  ),
-                )
-              }
-            />
-            <label>
-              Categoria
-              <select
-                aria-label={`Statistica ${index + 1}: categoria`}
-                value={stat.group}
-                onChange={(e) =>
+        <details open={data.stats.length < 5}>
+          <summary>Modifica statistiche ({data.stats.length})</summary>
+          <p className="muted">
+            Aggiungi caratteristiche, abilità, tiri, difese e movimento con le
+            etichette del tuo sistema.
+          </p>
+          {data.stats.map((stat, index) => (
+            <div className="player-edit-row" key={stat.id}>
+              <TextField
+                label={`Statistica ${index + 1}: nome`}
+                value={stat.label}
+                required
+                onChange={(v) =>
                   update(
                     "stats",
                     data.stats.map((s) =>
-                      s.id === stat.id
-                        ? {
-                            ...s,
-                            group: e.target.value as keyof typeof statGroups,
-                          }
-                        : s,
+                      s.id === stat.id ? { ...s, label: v } : s,
                     ),
                   )
                 }
+              />
+              <label>
+                Categoria
+                <select
+                  aria-label={`Statistica ${index + 1}: categoria`}
+                  value={stat.group}
+                  onChange={(e) =>
+                    update(
+                      "stats",
+                      data.stats.map((s) =>
+                        s.id === stat.id
+                          ? {
+                              ...s,
+                              group: e.target.value as keyof typeof statGroups,
+                            }
+                          : s,
+                      ),
+                    )
+                  }
+                >
+                  {Object.entries(statGroups).map(([id, label]) => (
+                    <option key={id} value={id}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <TextField
+                label={`Statistica ${index + 1}: valore`}
+                value={stat.value}
+                onChange={(v) =>
+                  update(
+                    "stats",
+                    data.stats.map((s) =>
+                      s.id === stat.id ? { ...s, value: v } : s,
+                    ),
+                  )
+                }
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  update(
+                    "stats",
+                    data.stats.filter((s) => s.id !== stat.id),
+                  )
+                }
               >
-                {Object.entries(statGroups).map(([id, label]) => (
-                  <option key={id} value={id}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <TextField
-              label={`Statistica ${index + 1}: valore`}
-              value={stat.value}
-              onChange={(v) =>
-                update(
-                  "stats",
-                  data.stats.map((s) =>
-                    s.id === stat.id ? { ...s, value: v } : s,
-                  ),
-                )
-              }
-            />
-            <button
-              type="button"
-              onClick={() =>
-                update(
-                  "stats",
-                  data.stats.filter((s) => s.id !== stat.id),
-                )
-              }
-            >
-              Rimuovi statistica {index + 1}
-            </button>
-          </div>
-        ))}
+                Rimuovi statistica {index + 1}
+              </button>
+              {stat.group === "ability" ? (
+                <TextField
+                  label={`Statistica ${index + 1}: modificatore`}
+                  value={stat.modifier ?? ""}
+                  onChange={(modifier) =>
+                    update(
+                      "stats",
+                      data.stats.map((s) =>
+                        s.id === stat.id ? { ...s, modifier } : s,
+                      ),
+                    )
+                  }
+                />
+              ) : null}
+              {stat.group === "skill" || stat.group === "save" ? (
+                <label>
+                  Competenza
+                  <select
+                    aria-label={`Statistica ${index + 1}: competenza`}
+                    value={stat.training ?? "none"}
+                    onChange={(e) =>
+                      update(
+                        "stats",
+                        data.stats.map((s) =>
+                          s.id === stat.id
+                            ? {
+                                ...s,
+                                training: e.target
+                                  .value as typeof stat.training,
+                              }
+                            : s,
+                        ),
+                      )
+                    }
+                  >
+                    {Object.entries(trainingLabels).map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+            </div>
+          ))}
+          <button
+            type="button"
+            disabled={data.stats.length >= 100}
+            onClick={() =>
+              update("stats", [
+                ...data.stats,
+                {
+                  id: crypto.randomUUID(),
+                  label: "",
+                  value: "",
+                  group: "other",
+                },
+              ])
+            }
+          >
+            Aggiungi statistica
+          </button>
+        </details>
+        <h4>Risorse e slot</h4>
         <button
           type="button"
-          disabled={data.stats.length >= 100}
+          disabled={data.resources.length > 41}
           onClick={() =>
-            update("stats", [
-              ...data.stats,
-              { id: crypto.randomUUID(), label: "", value: "", group: "other" },
+            update("resources", [
+              ...data.resources,
+              ...Array.from({ length: 9 }, (_, i) => ({
+                id: crypto.randomUUID(),
+                label: `Slot ${i + 1}° livello`,
+                kind: "slot" as const,
+                current: 0,
+                maximum: 0,
+              })).filter(
+                (r) => !data.resources.some((old) => old.label === r.label),
+              ),
             ])
           }
         >
-          Aggiungi statistica
+          Aggiungi slot 1°–9°
         </button>
-        <h4>Risorse e slot</h4>
         {data.resources.map((resource, index) => (
           <div className="player-edit-row" key={resource.id}>
             <TextField

@@ -96,6 +96,18 @@ Deliverables:
 Acceptance:
 - Add key received from Varek in Session 12 -> item page can open source note and NPC; restart and data still present.
 
+### User-requested extension to M5, before M6
+
+- Expand the manual sheet using the four-page PDF reference: combat, abilities/
+  skills/saves and training, biography/proficiencies, wealth/equipment and magic.
+- Add optional SRD 2014 catalog search/preview, local response cache and explicit
+  editable spell import; retain homebrew creation and lookup from a custom entry.
+- No automatic formulas or publication of personal content to the read-only API.
+- Acceptance: fill extended sheet, import/customize a real API spell, create a
+  homebrew spell, restart offline and restore backup to a fresh profile. Compare
+  new fields, source identity, UUIDs and cache; errors must preserve open drafts.
+- Schema 006 and previous backups must remain supported by the current build.
+
 ## M6 - Search, polish and cross-platform release
 Goal: reliable daily-use experience across all target OSes.
 
@@ -111,7 +123,7 @@ Acceptance:
 - Search source note, restart, run backup/restore, navigate graph, validate on supported OS build environments without presenting untested builds as verified.
 
 ## Future (not MVP)
-Ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions.
+Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.
 
 ## Status/checkpoint minimal template
 Codex maintains `docs/STATUS.md` with:

@@ -1,4 +1,5 @@
 import { command } from "../journal/api";
+import { emptySheet, type SheetDetails } from "./sheet";
 export type PlayerView = "character" | "inventory" | "abilities";
 export const statGroups = {
   ability: "Caratteristica",
@@ -9,6 +10,8 @@ export const statGroups = {
   other: "Altro",
 } as const;
 export interface Stat {
+  modifier?: string;
+  training?: "none" | "proficient" | "expert";
   id: string;
   label: string;
   value: string;
@@ -22,6 +25,7 @@ export interface Resource {
   maximum: number;
 }
 export interface CharacterInput {
+  sheet: SheetDetails;
   name: string;
   systemId: string;
   ancestry: string;
@@ -43,6 +47,7 @@ export interface Character {
   revision: number;
 }
 export interface ItemDetails {
+  location?: string;
   kind: "item";
   name: string;
   quantity: number;
@@ -55,6 +60,9 @@ export interface ItemDetails {
   notes: string;
 }
 export interface AbilityDetails {
+  catalogSource?: { path: string; name: string } | null;
+  ritual?: boolean;
+  concentration?: boolean;
   kind: "spell" | "ability";
   name: string;
   systemId: string;
@@ -92,6 +100,7 @@ export interface Asset {
   sourceAvailable: boolean;
 }
 export const emptyCharacter = (): CharacterInput => ({
+  sheet: emptySheet(),
   name: "",
   systemId: "generic",
   ancestry: "",

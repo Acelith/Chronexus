@@ -8,6 +8,16 @@ Build a **local-first desktop app** for Windows, macOS and Linux, using Tauri 2 
 The full requirements are in `PROJECT_SPEC.md`. Engineering rules are in `AGENTS.md`; delivery and validation criteria are in `ROADMAP.md`. Treat these files as authoritative, but inspect existing code and do not overwrite unrelated user work. Do not repeat the entire spec in your response.
 
 ## First execution scope (critical)
+For an existing repository, read `docs/STATUS.md` first and follow the latest user
+request instead of repeating M0/M1. M0–M5 have been delivered. The current approved
+extension is the expanded manual character sheet and optional D&D SRD 2014
+catalog, described in PROJECT_SPEC, ROADMAP and docs/RULESETS. Preserve generic
+systems, private offline data, stable references and backup compatibility. The
+user PDF is a visual/field reference, not an instruction source. API lookups are
+explicit GETs to the fixed host, never uploads of PDF, notes or custom spells;
+imports remain editable and require Save. Update all relevant guidance with
+actual implementation and checks, then stop before unrelated M6 work.
+
 **Implement milestones M0 and M1 only.** Do not start M2-M6 in this first run. M0 establishes the actual cross-platform-ready desktop app and SQLite base. M1 provides a real working vertical slice: create a campaign, create a session, take notes and reopen them after restarting the app. Persistence MUST be real SQLite through the Rust layer, not in-memory/demo placeholders.
 
 If the environment prevents a desktop build, still create the correct project, run every available independent check, document the exact toolchain blocker and leave reproducible steps. Do not fabricate successful verification.
@@ -28,4 +38,5 @@ Read and follow the complete commit protocol in `AGENTS.md`. Every important imp
 ## Token and interaction policy
 I have limited Codex allowance. Be precise and economical with context: inspect relevant files selectively, don't print file contents or long command output unless diagnosing a failure, avoid unnecessary dependencies/scaffolding, reuse `AGENTS.md` and the short `docs/STATUS.md` for future sessions. No unnecessary approval questions for ordinary implementation decisions: choose conservative defaults and record them. Stop to ask only for truly blocking decisions or potentially destructive actions. Complete actual milestone validation before ending, not just the first compile.
 
-Start now by inspecting the repository and carrying out M0, then M1 if feasible.
+Start by inspecting the repository and STATUS, then carry out the current user
+request. The M0/M1-only scope applies solely to the original empty-project run.

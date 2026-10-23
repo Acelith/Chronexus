@@ -104,7 +104,7 @@ pub fn store(c: &Connection, path: &str, payload: Value) -> AppResult<CacheEntry
     let tx = c.unchecked_transaction().map_err(storage)?;
     tx.execute("INSERT INTO catalog_cache(path,payload) VALUES(?1,?2) ON CONFLICT(path) DO UPDATE SET payload=excluded.payload,fetched_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')",params![path,payload.to_string()]).map_err(storage)?;
     // This is a disposable cache; imported user assets are independent copies.
-    tx.execute("DELETE FROM catalog_cache WHERE path IN (SELECT path FROM catalog_cache ORDER BY fetched_at DESC,path LIMIT -1 OFFSET 150)", []).map_err(storage)?;
+    tx.execute("DELETE FROM catalog_cache WHERE path IN (SELECT path FROM catalog_cache WHERE path<>?1 ORDER BY fetched_at DESC,path LIMIT -1 OFFSET 149)", [path]).map_err(storage)?;
     let entry = read(&tx, path)?.ok_or("Copia locale non disponibile.")?;
     tx.commit().map_err(storage)?;
     Ok(entry)
@@ -165,6 +165,11 @@ mod tests {
                 .unwrap(),
             150
         );
+        c.execute(
+            "UPDATE catalog_cache SET fetched_at='2099-01-01T00:00:00Z'",
+            [],
+        )
+        .unwrap();
         store(
             &c,
             "spells/acid-arrow",

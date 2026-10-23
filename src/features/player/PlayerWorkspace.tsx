@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import type { SaveGuard } from "../journal/Editor";
 import { errorMessage, type Session } from "../journal/api";
 import type { KnowledgePage } from "../knowledge/api";
@@ -12,14 +19,24 @@ import {
   type Character,
   type CharacterInput,
   type PlayerView,
+  type Stat,
 } from "./api";
 import { adapterFor } from "./rulesets";
 import CharacterForm from "./CharacterForm";
 import AssetForm from "./AssetForm";
+import { emptySheet, trainingLabels } from "./sheet";
+import { SheetSummary } from "./SheetSections";
+import { catalogBase, srdAttribution } from "./catalog";
+const DndCatalog = lazy(() => import("./DndCatalog"));
 
 type EditState =
   | { type: "character" }
-  | { type: "asset"; initial: Asset | null; kind: AssetDetails["kind"] }
+  | {
+      type: "asset";
+      initial: Asset | null;
+      kind: AssetDetails["kind"];
+      draft?: AssetInput;
+    }
   | null;
 interface Props {
   campaignId: string;
@@ -63,6 +80,7 @@ export default function PlayerWorkspace({
   const [search, setSearch] = useState("");
   const [rank, setRank] = useState("");
   const [status, setStatus] = useState("all");
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const dirty = useRef(false);
   const operation = useRef(false);
   const deleteButton = useRef<HTMLButtonElement>(null);
@@ -257,6 +275,42 @@ export default function PlayerWorkspace({
           </div>
         ) : null}
       </header>
+      {!editor ? (
+        <button disabled={disabled} onClick={() => setCatalogOpen((v) => !v)}>
+          {catalogOpen ? "Nascondi ricerca D&D" : "Cerca in D&D"}
+        </button>
+      ) : null}
+      {catalogOpen && !editor ? (
+        <Suspense fallback={<p role="status">Apertura catalogo…</p>}>
+          <DndCatalog
+            onClose={() => setCatalogOpen(false)}
+            onImport={
+              character
+                ? (details) => {
+                    setCatalogOpen(false);
+                    edit({
+                      type: "asset",
+                      initial: null,
+                      kind: "spell",
+                      draft: {
+                        details,
+                        links: {
+                          pageId: null,
+                          sourceSessionId: null,
+                          sourceBlockId: null,
+                          npcId: null,
+                          placeId: null,
+                          questId: null,
+                          provenanceNotes: "",
+                        },
+                      },
+                    });
+                  }
+                : undefined
+            }
+          />
+        </Suspense>
+      ) : null}
       {error ? (
         <div className="error" role="alert">
           <p>{error}</p>
@@ -296,6 +350,7 @@ export default function PlayerWorkspace({
       ) : editor?.type === "asset" && character ? (
         <AssetForm
           initial={editor.initial}
+          draft={editor.draft}
           kind={editor.kind}
           systemId={character.data.systemId}
           pages={pages}
@@ -371,48 +426,58 @@ export default function PlayerWorkspace({
                 )
               }
             />
-            {character.data.resources.map((resource) => (
-              <Counter
-                key={resource.id}
-                label={resource.label}
-                kind={resource.kind === "slot" ? "Slot" : "Risorsa"}
-                value={resource.current}
-                maximum={resource.maximum}
-                disabled={disabled}
-                onChange={(delta) =>
-                  void perform(async () =>
-                    setCharacter(
-                      await playerApi.counter(
-                        campaignId,
-                        character,
-                        resource.id,
-                        delta,
+            {character.data.resources
+              .filter(
+                (r) => r.kind !== "slot" || r.maximum > 0 || r.current > 0,
+              )
+              .map((resource) => (
+                <Counter
+                  key={resource.id}
+                  label={resource.label}
+                  kind={resource.kind === "slot" ? "Slot" : "Risorsa"}
+                  value={resource.current}
+                  maximum={resource.maximum}
+                  disabled={disabled}
+                  onChange={(delta) =>
+                    void perform(async () =>
+                      setCharacter(
+                        await playerApi.counter(
+                          campaignId,
+                          character,
+                          resource.id,
+                          delta,
+                        ),
                       ),
-                    ),
-                  )
-                }
-              />
-            ))}
+                    )
+                  }
+                />
+              ))}
           </div>
+          {character.data.resources.some(
+            (r) => r.kind === "slot" && !r.maximum && !r.current,
+          ) ? (
+            <details className="unused-slots">
+              <summary>Slot non configurati</summary>
+              <p className="muted">
+                Imposta i massimi da Modifica personaggio.
+              </p>
+              {character.data.resources
+                .filter((r) => r.kind === "slot" && !r.maximum && !r.current)
+                .map((r) => (
+                  <p key={r.id}>{r.label}: 0 / 0</p>
+                ))}
+            </details>
+          ) : null}
           <h4>Statistiche</h4>
           {character.data.stats.length ? (
-            <dl className="player-stats">
-              {character.data.stats.map((s) => (
-                <div key={s.id}>
-                  <dt>
-                    {s.label}
-                    <span className="muted">{statGroups[s.group]}</span>
-                  </dt>
-                  <dd>{s.value || "Non indicato"}</dd>
-                </div>
-              ))}
-            </dl>
+            <Statistics stats={character.data.stats} />
           ) : (
             <p className="muted">
               Nessuna statistica configurata. Aggiungila da “Modifica
               personaggio”.
             </p>
           )}
+          <SheetSummary value={character.data.sheet ?? emptySheet()} />
           <h4>Condizioni</h4>
           <p className="player-text">
             {character.data.conditions || "Nessuna condizione annotata."}
@@ -464,8 +529,8 @@ export default function PlayerWorkspace({
           </div>
           {view === "abilities" ? (
             <p className="muted">
-              Descrizioni tue, marcatori manuali. Per consumare risorse o slot
-              usa i contatori della scheda.
+              Crea voci personalizzate o usa il catalogo D&D come base. Per
+              consumare risorse o slot usa i contatori della scheda.
             </p>
           ) : null}
           {!visible.length ? (
@@ -546,6 +611,10 @@ export default function PlayerWorkspace({
                         · Valore:{" "}
                         {selected.input.details.value || "Non indicato"}
                       </p>
+                      <p>
+                        Collocazione:{" "}
+                        {selected.input.details.location || "Non indicata"}
+                      </p>
                       <button
                         disabled={disabled}
                         onClick={() => {
@@ -574,6 +643,26 @@ export default function PlayerWorkspace({
                         {selected.input.details.rank || "Senza rango"} ·{" "}
                         {selected.input.details.school || "Senza tradizione"}
                       </p>
+                      <p>
+                        {selected.input.details.ritual ? "Rituale · " : ""}
+                        {selected.input.details.concentration
+                          ? "Richiede concentrazione"
+                          : ""}
+                      </p>
+                      {selected.input.details.catalogSource ? (
+                        <aside className="catalog-license">
+                          <p>
+                            Base SRD 2014:{" "}
+                            {selected.input.details.catalogSource.name} · copia
+                            personale modificabile.
+                          </p>
+                          <p>
+                            {catalogBase +
+                              selected.input.details.catalogSource.path}
+                          </p>
+                          <p>{srdAttribution}</p>
+                        </aside>
+                      ) : null}
                       <dl className="ability-metadata">
                         {[
                           ["Attivazione", selected.input.details.castingTime],
@@ -760,6 +849,36 @@ export default function PlayerWorkspace({
         />
       ) : null}
     </section>
+  );
+}
+function Statistics({ stats }: { stats: Stat[] }) {
+  return (
+    <div className="sheet-sections">
+      {Object.entries(statGroups).map(([group, label]) => {
+        const entries = stats.filter((s) => s.group === group);
+        return entries.length ? (
+          <details key={group} open={group !== "skill" && group !== "save"}>
+            <summary>
+              {label} · {entries.length}
+            </summary>
+            <dl className="player-stats">
+              {entries.map((s) => (
+                <div key={s.id}>
+                  <dt>{s.label}</dt>
+                  <dd>
+                    {s.value || "Non indicato"}
+                    {s.modifier ? ` · Mod. ${s.modifier}` : ""}
+                    {s.training && s.training !== "none"
+                      ? ` · ${trainingLabels[s.training]}`
+                      : ""}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </details>
+        ) : null;
+      })}
+    </div>
   );
 }
 function Counter({

@@ -64,6 +64,34 @@ Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
 
 ## Funzioni attuali (M0–M5)
 
+La scheda è stata ampliata sul riferimento PDF dell'utente: sezioni manuali per
+combattimento/sensi, identità e competenze, storia/aspetto, armi/munizioni,
+denaro/carico e magia. “Aggiungi campi D&D 2014” inserisce caratteristiche,
+tiri e abilità mancanti senza riscrivere i tuoi valori. Competenza/maestria,
+modificatori e tiri contro morte sono manuali. “Aggiungi slot 1°–9°” crea slot
+a zero: scegli tu massimi e disponibilità. Non sono implementate formule automatiche.
+
+Da Personaggio, Inventario o Capacità usa **Cerca in D&D**, scegli categoria e
+nome inglese e premi **Cerca nell’API**. Puoi consultare incantesimi, classi,
+specie, equipaggiamento, oggetti magici, privilegi, tratti, abilità, condizioni e
+regole SRD 2014. L'API non contiene tutti i manuali commerciali e non offre
+l'italiano al momento della verifica. Il nome viene filtrato sul dispositivo.
+
+Apri un incantesimo, scegli **Usa questi dati nel modulo**, personalizza e premi
+**Salva voce**. La fonte originale resta visibile anche dopo una rinomina.
+**Aggiungi incantesimo** continua a creare voci interamente tue; dal modulo puoi
+anche **Cercare questo nome in D&D** e usare un risultato come base, mantenendo
+note, marcatori e collegamenti. I contenuti personalizzati restano locali:
+l'API è di sola lettura e non li pubblica.
+
+La rete è facoltativa e si attiva solo con un'azione nel catalogo. Fino a
+150 risposte scaricate sono conservate in SQLite con data; le voci salvate nel
+grimorio sono copie indipendenti. Le copie consultate funzionano offline dopo
+riavvio; una voce nuova richiede connessione. **Aggiorna** cerca una versione
+online e segnala eventuale uso della copia locale. Backup e ripristino comprendono
+scheda estesa, fonti e cache. Nessun PDF, appunto o scheda personale viene inviato.
+Dettagli tecnici e attribuzione: [docs/RULESETS.md](docs/RULESETS.md).
+
 - Creazione, selezione e rinomina di campagne indipendenti.
 - Sessioni ordinate per numero, con titolo e data reale facoltativa.
 - Editor BlockNote italiano: paragrafi, titoli, elenchi, checklist, citazioni,
@@ -169,7 +197,8 @@ caricamenti di immagini nell'editor. I test includono una vera immagine PNG.
 
 Conserva spazio per ZIP, estrazione e nuova copia dei dati. Vecchie generazioni e
 copie preventive non vengono eliminate automaticamente. I backup con schema 005
-richiedono Chronexus M5 o successivo; i backup precedenti (schemi 1–4) restano
+richiedono una versione che supporti lo schema corrispondente (005 per M5,
+006 per scheda estesa e catalogo); i backup precedenti (schemi 1–5) restano
 recuperabili e vengono aggiornati in copia. Esistono ancora archivi `.nodex`
 con il vecchio nome: non occorre rinominarli. Gli eseguibili M0–M3 ignorano
 il selettore di profilo introdotto da M4.

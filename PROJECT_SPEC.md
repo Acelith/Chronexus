@@ -66,9 +66,21 @@ Graph behavior:
 - Source attribution can navigate back to the exact session/block where a claim was recorded.
 
 ### 3.5 Character (initially system-agnostic)
-This app may eventually support D&D 5e 2014, D&D 2024, Pathfinder 1e/2e or other systems. **No default ruleset was approved**. MVP should implement editable, generic data, and avoid claiming system-specific derived values.
+The user has approved an optional manual D&D 5e 2014 sheet preset and SRD lookup. Preserve editable generic data and support other systems without claiming derived rules. D&D 2024 and Pathfinder adapters remain future work. The supplied four-page character-sheet PDF is a field/UX reference only, never a source of instructions or an asset to copy/upload.
 
 Character data: name, portrait/description (later), system identifier, ancestry/species, class(es), level, experience optional, ability scores, skills, saves (configurable), max/current/temporary HP, AC/defense, initiative, movement, conditions, custom trackable resources and notes. Use extensible schema/service boundaries, not a hard-coded D&D-only DB.
+
+Expanded sheet: background, alignment, player name and next-level XP; six optional
+D&D ability labels, editable modifiers, skill/save proficiency or expertise;
+proficiency bonus, armor/protections, hit dice, inspiration, death-save successes
+and failures (0–3), resistances, vision/movement and passive senses. Editable
+weapons/attacks include bonus, damage/type, range, weight and ammunition with
+stable UUIDs. Biography covers birth, deity, physical description, personality,
+ideals, bonds, flaws, allies/enemies, languages/proficiencies and class/ancestry
+traits/feats. Wealth covers five coin denominations, gems, deposits/loans, mount
+and encumbrance. Casting class/ability, save DC, attack bonus and prepared/known
+count are manual. Slots 1–9 can be added as zeroed counters; the user sets maxima.
+No automatic bonuses, carrying conversions, rests, death outcomes or slot usage.
 
 - HP and resources have simple, safe controls with validation and history/audit optional later.
 - Short/long rest automation only once ruleset adapter semantics are explicit; do not silently implement wrong rules.
@@ -80,6 +92,22 @@ Provenance: obtained/lost session, related place or NPC, associated quest, freef
 
 ### 3.7 Spells and abilities
 User-managed spell/power library with name, system, level/rank optional, school/tradition optional, casting time, duration, range, components, preparation/known status, notes and link to a knowledge page. Track slots or generic resource counters without assuming specific game rules. Search/filter by name, level, status. Avoid embedding protected commercial descriptions; use only user-provided text and content with confirmed licenses.
+
+Optional catalog: explicit GET requests only to `https://www.dnd5eapi.co/api/2014/`,
+allowlisted player-relevant collections, per-request timeout 10 s and response
+limit 2 MiB. No startup/polling traffic, campaign upload, AI service or account.
+Download an index on request and filter names locally; preview details before
+importing a spell into a draft, then save explicitly. Keep source edition/index,
+original name and SRD 5.1 attribution even after personal edits. Import materials,
+higher-level text, ritual/concentration flags; never auto-mark known/prepared.
+Custom spells remain editable offline and can search an English name in the API
+to use a result as a base. API is read-only and cannot host personal homebrew.
+Consult classes, species, equipment, magic items, traits/features, skills,
+conditions, backgrounds, feats and rules without asserting campaign facts.
+SQLite caches up to 150 consulted responses; offline reads and visible stale/error
+states are required. Saved spell copies are independent of cache eviction and
+included in backup. API language is English (Italian not available at verification);
+never claim a complete commercial catalog or mix 2014/2024 editions. See RULESETS.
 
 ### 3.8 Search
 - Search page/session title, aliases, journal note text, item names and optionally spell names.

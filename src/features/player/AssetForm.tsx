@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import type { Session } from "../journal/api";
 import type { KnowledgePage } from "../knowledge/api";
 import { blockOptions } from "../knowledge/blocks";
@@ -10,9 +10,12 @@ import {
   type AssetLinks,
 } from "./api";
 import { Flag, NumberField, TextField } from "./fields";
+import { catalogBase, srdAttribution } from "./catalog";
+const DndCatalog = lazy(() => import("./DndCatalog"));
 
 export default function AssetForm({
   initial,
+  draft,
   kind,
   systemId,
   pages,
@@ -22,6 +25,7 @@ export default function AssetForm({
   onCancel,
 }: {
   initial: Asset | null;
+  draft?: AssetInput;
   kind: AssetDetails["kind"];
   systemId: string;
   pages: KnowledgePage[];
@@ -31,8 +35,9 @@ export default function AssetForm({
   onCancel: () => void;
 }) {
   const [input, setInput] = useState<AssetInput>(
-    () => initial?.input ?? emptyAsset(kind, systemId),
+    () => initial?.input ?? draft ?? emptyAsset(kind, systemId),
   );
+  const [lookup, setLookup] = useState(false);
   const details = input.details;
   const change = (details: AssetDetails) => setInput({ ...input, details });
   const links = input.links;
@@ -67,218 +72,285 @@ export default function AssetForm({
     );
   }
   return (
-    <form
-      className="player-form"
-      aria-label={
-        details.kind === "item" ? "Dettagli oggetto" : "Dettagli capacità"
-      }
-      onSubmit={(e) => {
-        e.preventDefault();
-        void onSave(input);
-      }}
-    >
-      <fieldset disabled={busy}>
-        <legend>
-          {initial ? "Modifica" : "Aggiungi"}{" "}
-          {details.kind === "item"
-            ? "oggetto"
-            : details.kind === "spell"
-              ? "incantesimo"
-              : "capacità"}
-        </legend>
-        <div className="player-fields">
-          <TextField
-            label="Nome della voce"
-            autoFocus
-            value={details.name}
-            required
-            onChange={(name) => change({ ...details, name })}
+    <>
+      {lookup && details.kind === "spell" ? (
+        <Suspense fallback={<p role="status">Apertura catalogo…</p>}>
+          <DndCatalog
+            initialQuery={details.name}
+            onClose={() => setLookup(false)}
+            onImport={(spell) => {
+              change({
+                ...spell,
+                known: details.known,
+                prepared: details.prepared,
+                notes: details.notes,
+              });
+              setLookup(false);
+            }}
           />
-          {details.kind === "item" ? (
+        </Suspense>
+      ) : null}
+      <form
+        className="player-form"
+        aria-label={
+          details.kind === "item" ? "Dettagli oggetto" : "Dettagli capacità"
+        }
+        onSubmit={(e) => {
+          e.preventDefault();
+          void onSave(input);
+        }}
+      >
+        <fieldset disabled={busy || lookup}>
+          <legend>
+            {initial ? "Modifica" : "Aggiungi"}{" "}
+            {details.kind === "item"
+              ? "oggetto"
+              : details.kind === "spell"
+                ? "incantesimo"
+                : "capacità"}
+          </legend>
+          {details.kind === "spell" ? (
             <>
-              <NumberField
-                label="Quantità"
-                value={details.quantity}
-                onChange={(quantity) =>
-                  change({ ...details, quantity: quantity ?? 0 })
-                }
-              />
-              <TextField
-                label="Categoria oggetto"
-                value={details.category}
-                max={100}
-                onChange={(category) => change({ ...details, category })}
-              />
-              <NumberField
-                label="Peso (unità personale, facoltativo)"
-                value={details.weight}
-                optional
-                decimal
-                onChange={(weight) => change({ ...details, weight })}
-              />
-              <TextField
-                label="Valore o valuta (testo libero)"
-                value={details.value}
-                onChange={(value) => change({ ...details, value })}
-              />
-              <div className="player-flags">
-                <Flag
-                  label="Equipaggiato"
-                  value={details.equipped}
-                  onChange={(equipped) => change({ ...details, equipped })}
-                />
-                <Flag
-                  label="Consumabile"
-                  value={details.consumable}
-                  onChange={(consumable) => change({ ...details, consumable })}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <TextField
-                label="Regolamento della capacità"
-                value={details.systemId}
-                max={80}
-                required
-                onChange={(systemId) => change({ ...details, systemId })}
-              />
-              <TextField
-                label="Livello o rango (testo libero)"
-                value={details.rank}
-                onChange={(rank) => change({ ...details, rank })}
-              />
-              <TextField
-                label="Scuola o tradizione"
-                value={details.school}
-                onChange={(school) => change({ ...details, school })}
-              />
-              <TextField
-                label="Tempo di attivazione"
-                value={details.castingTime}
-                onChange={(castingTime) => change({ ...details, castingTime })}
-              />
-              <TextField
-                label="Durata"
-                value={details.duration}
-                onChange={(duration) => change({ ...details, duration })}
-              />
-              <TextField
-                label="Portata"
-                value={details.range}
-                onChange={(range) => change({ ...details, range })}
-              />
-              <TextField
-                label="Componenti"
-                value={details.components}
-                onChange={(components) => change({ ...details, components })}
-              />
-              <div className="player-flags">
-                <Flag
-                  label="Conosciuta"
-                  value={details.known}
-                  onChange={(known) => change({ ...details, known })}
-                />
-                <Flag
-                  label="Preparata"
-                  value={details.prepared}
-                  onChange={(prepared) => change({ ...details, prepared })}
-                />
-              </div>
-            </>
-          )}
-        </div>
-        <TextField
-          label="Descrizione"
-          value={details.description}
-          max={16000}
-          multiline
-          onChange={(description) => change({ ...details, description })}
-        />
-        <TextField
-          label="Note della voce"
-          value={details.notes}
-          max={16000}
-          multiline
-          onChange={(notes) => change({ ...details, notes })}
-        />
-        <h4>Collegamenti e provenienza</h4>
-        <p className="muted">
-          Collega pagine e sessioni della campagna. Per aggiungere un PNG, un
-          luogo o una missione, crea prima la pagina nel Codex.
-        </p>
-        <div className="player-fields">
-          {pageSelector("Pagina della voce nel Codex", "pageId")}
-          <label>
-            Sessione fonte
-            <select
-              aria-label="Sessione fonte"
-              value={links.sourceSessionId ?? ""}
-              onChange={(e) =>
-                setInput({
-                  ...input,
-                  links: {
-                    ...links,
-                    sourceSessionId: e.target.value || null,
-                    sourceBlockId: null,
-                  },
-                })
-              }
-            >
-              <option value="">Nessuna sessione</option>
-              {sessions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  Sessione {s.sequence}: {s.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Blocco fonte
-            <select
-              aria-label="Blocco fonte"
-              disabled={!source}
-              value={links.sourceBlockId ?? ""}
-              onChange={(e) => link("sourceBlockId", e.target.value || null)}
-            >
-              <option value="">Intera sessione</option>
-              {links.sourceBlockId &&
-              !blocks.some((b) => b.id === links.sourceBlockId) ? (
-                <option value={links.sourceBlockId}>
-                  Blocco non più presente (riferimento conservato)
-                </option>
-              ) : null}
-              {blocks.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.text}
-                </option>
-              ))}
-            </select>
-          </label>
-          {details.kind === "item" ? (
-            <>
-              {pageSelector("PNG collegato", "npcId", "npc")}
-              {pageSelector("Luogo collegato", "placeId", "place")}
-              {pageSelector("Missione collegata", "questId", "quest")}
+              <p className="muted">
+                Scrivi un incantesimo personalizzato o cerca un nome inglese nel
+                catalogo SRD 2014. “Usa questi dati nel modulo” sostituisce nome
+                e campi dell’incantesimo; conserva note, marcatori e
+                collegamenti. Il salvataggio resta esplicito.
+              </p>
+              <button type="button" onClick={() => setLookup((v) => !v)}>
+                Cerca questo nome in D&D
+              </button>
             </>
           ) : null}
-        </div>
-        <TextField
-          label="Note di provenienza"
-          value={links.provenanceNotes}
-          max={4000}
-          multiline
-          onChange={(v) => link("provenanceNotes", v)}
-        />
-        <div className="actions">
-          <button className="primary" disabled={!details.name.trim()}>
-            Salva voce
-          </button>
-          <button type="button" onClick={onCancel}>
-            Annulla modifiche
-          </button>
-        </div>
-      </fieldset>
-    </form>
+          <div className="player-fields">
+            <TextField
+              label="Nome della voce"
+              autoFocus
+              value={details.name}
+              required
+              onChange={(name) => change({ ...details, name })}
+            />
+            {details.kind === "item" ? (
+              <>
+                <NumberField
+                  label="Quantità"
+                  value={details.quantity}
+                  onChange={(quantity) =>
+                    change({ ...details, quantity: quantity ?? 0 })
+                  }
+                />
+                <TextField
+                  label="Collocazione (zaino, tasca, indossato…)"
+                  value={details.location ?? ""}
+                  onChange={(location) => change({ ...details, location })}
+                />
+                <TextField
+                  label="Categoria oggetto"
+                  value={details.category}
+                  max={100}
+                  onChange={(category) => change({ ...details, category })}
+                />
+                <NumberField
+                  label="Peso (unità personale, facoltativo)"
+                  value={details.weight}
+                  optional
+                  decimal
+                  onChange={(weight) => change({ ...details, weight })}
+                />
+                <TextField
+                  label="Valore o valuta (testo libero)"
+                  value={details.value}
+                  onChange={(value) => change({ ...details, value })}
+                />
+                <div className="player-flags">
+                  <Flag
+                    label="Equipaggiato"
+                    value={details.equipped}
+                    onChange={(equipped) => change({ ...details, equipped })}
+                  />
+                  <Flag
+                    label="Consumabile"
+                    value={details.consumable}
+                    onChange={(consumable) =>
+                      change({ ...details, consumable })
+                    }
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <TextField
+                  label="Regolamento della capacità"
+                  value={details.systemId}
+                  max={80}
+                  required
+                  onChange={(systemId) => change({ ...details, systemId })}
+                />
+                <TextField
+                  label="Livello o rango (testo libero)"
+                  value={details.rank}
+                  onChange={(rank) => change({ ...details, rank })}
+                />
+                <TextField
+                  label="Scuola o tradizione"
+                  value={details.school}
+                  onChange={(school) => change({ ...details, school })}
+                />
+                <TextField
+                  label="Tempo di attivazione"
+                  value={details.castingTime}
+                  onChange={(castingTime) =>
+                    change({ ...details, castingTime })
+                  }
+                />
+                <TextField
+                  label="Durata"
+                  value={details.duration}
+                  onChange={(duration) => change({ ...details, duration })}
+                />
+                <TextField
+                  label="Portata"
+                  value={details.range}
+                  onChange={(range) => change({ ...details, range })}
+                />
+                <TextField
+                  label="Componenti"
+                  value={details.components}
+                  onChange={(components) => change({ ...details, components })}
+                />
+                <Flag
+                  label="Rituale"
+                  value={details.ritual ?? false}
+                  onChange={(ritual) => change({ ...details, ritual })}
+                />
+                <Flag
+                  label="Concentrazione"
+                  value={details.concentration ?? false}
+                  onChange={(concentration) =>
+                    change({ ...details, concentration })
+                  }
+                />
+                <div className="player-flags">
+                  <Flag
+                    label="Conosciuta"
+                    value={details.known}
+                    onChange={(known) => change({ ...details, known })}
+                  />
+                  <Flag
+                    label="Preparata"
+                    value={details.prepared}
+                    onChange={(prepared) => change({ ...details, prepared })}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <TextField
+            label="Descrizione"
+            value={details.description}
+            max={16000}
+            multiline
+            onChange={(description) => change({ ...details, description })}
+          />
+          <TextField
+            label="Note della voce"
+            value={details.notes}
+            max={16000}
+            multiline
+            onChange={(notes) => change({ ...details, notes })}
+          />
+          <h4>Collegamenti e provenienza</h4>
+          <p className="muted">
+            Collega pagine e sessioni della campagna. Per aggiungere un PNG, un
+            luogo o una missione, crea prima la pagina nel Codex.
+          </p>
+          <div className="player-fields">
+            {pageSelector("Pagina della voce nel Codex", "pageId")}
+            <label>
+              Sessione fonte
+              <select
+                aria-label="Sessione fonte"
+                value={links.sourceSessionId ?? ""}
+                onChange={(e) =>
+                  setInput({
+                    ...input,
+                    links: {
+                      ...links,
+                      sourceSessionId: e.target.value || null,
+                      sourceBlockId: null,
+                    },
+                  })
+                }
+              >
+                <option value="">Nessuna sessione</option>
+                {sessions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    Sessione {s.sequence}: {s.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Blocco fonte
+              <select
+                aria-label="Blocco fonte"
+                disabled={!source}
+                value={links.sourceBlockId ?? ""}
+                onChange={(e) => link("sourceBlockId", e.target.value || null)}
+              >
+                <option value="">Intera sessione</option>
+                {links.sourceBlockId &&
+                !blocks.some((b) => b.id === links.sourceBlockId) ? (
+                  <option value={links.sourceBlockId}>
+                    Blocco non più presente (riferimento conservato)
+                  </option>
+                ) : null}
+                {blocks.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.text}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {details.kind === "item" ? (
+              <>
+                {pageSelector("PNG collegato", "npcId", "npc")}
+                {pageSelector("Luogo collegato", "placeId", "place")}
+                {pageSelector("Missione collegata", "questId", "quest")}
+              </>
+            ) : null}
+          </div>
+          <TextField
+            label="Note di provenienza"
+            value={links.provenanceNotes}
+            max={4000}
+            multiline
+            onChange={(v) => link("provenanceNotes", v)}
+          />
+          <div className="actions">
+            <button className="primary" disabled={!details.name.trim()}>
+              Salva voce
+            </button>
+            <button type="button" onClick={onCancel}>
+              Annulla modifiche
+            </button>
+          </div>
+        </fieldset>
+        {details.kind !== "item" && details.catalogSource ? (
+          <aside className="catalog-license">
+            <p>
+              Base: {details.catalogSource.name} ·{" "}
+              {catalogBase + details.catalogSource.path}
+            </p>
+            <p>{srdAttribution}</p>
+            <p>
+              SRD 5.1:
+              https://dnd.wizards.com/resources/systems-reference-document · CC
+              BY 4.0: https://creativecommons.org/licenses/by/4.0/
+            </p>
+          </aside>
+        ) : null}
+      </form>
+    </>
   );
 }

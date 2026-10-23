@@ -240,6 +240,56 @@ Solo il risultato del selettore è predefinito nel debug, come per M4: persisten
 ZIP e validazioni sono reali. Screenshot di scheda/inventario/capacità controllati;
 le tre viste sono state verificate anche a 760 px senza overflow orizzontale.
 
+## Estensione scheda e catalogo SRD 2014
+
+Skill applicate: PDF per estrazione e ispezione visiva delle quattro pagine del
+riferimento; frontend-design per sezioni e gerarchia; vercel-react-best-practices
+per compendio differito e filtri locali derivati. Nessuna Skill specifica per
+database/testing disponibile; verifiche con strumenti ordinari.
+
+Nuovi test automatici: default dei payload M5 dopo migrazione 006, limiti della
+scheda e mancata sostituzione su errore, fonte SRD validata, cache persistente e
+limitata a 150 voci anche con orologio arretrato, backup scheda/cache. Frontend:
+nessuna rete all'apertura, GET vincolato, copia offline, fallback visibile,
+risposte errate/sovradimensionate e disco pieno; importazione materiali/livelli
+superiori, preset senza formule e conservazione note/marcatori/fonti del modulo.
+
+Eseguiti Windows: 39 test frontend e 40 Rust; lint, typecheck, formattazione,
+Clippy e build debug/release. Smoke reale WebView2 con API pubblica: Magic Missile
+importato e rinominato, incantesimo originale con ricerca senza risultati,
+consultazione classi/equipaggiamento/regole e sottosezione. Ricerca per nome
+locale; richieste osservate solo GET categoria/indice, nessun nome personale.
+Backup reale, riavvio, ripristino su archivio vuoto e secondo riavvio confrontano
+scheda, UUID, incantesimi, fonti e risposte in cache. Nei passi offline si simula
+solo l'indisponibilità dell'host API; DB, IPC e backup non sono simulati.
+Screenshot ispezionati, scheda caricata verificata a 760 e 1200 px senza overflow.
+
+Per ripetere con cartelle/file nuovi, server `pnpm dev`, debug compilato e Rust
+locale configurato come sopra:
+
+```powershell
+$env:NODEX_DEV_DATA_DIR="$PWD/.tools/sheet-catalog-source-new"
+$env:NODEX_DEV_BACKUP_FILE="$PWD/.tools/sheet-catalog-new.nodex"
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
+node scripts/sheet-catalog-smoke.mjs prepare
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
+node scripts/sheet-catalog-smoke.mjs verify
+$env:NODEX_DEV_DATA_DIR="$PWD/.tools/sheet-catalog-restored-new"
+$env:NODEX_DEV_RESTORE_FILE="$PWD/.tools/sheet-catalog-new.nodex"
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
+node scripts/sheet-catalog-smoke.mjs restore
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
+node scripts/sheet-catalog-smoke.mjs verify-restored
+```
+
+`prepare` richiede un profilo vuoto e accesso Internet; ogni fase chiude la
+finestra normalmente. Il risultato del selettore file è predefinito solo in debug.
+La fixture attesa e gli screenshot restano ignorati in `.tools/`. Nessun PDF o
+dato personale nel repository. Il funzionamento della ricerca nella build
+release con origine `tauri.localhost` non è stato provato in questa revisione;
+la compilazione release e la CSP con host API esplicito sono verificate.
+
 ## Piattaforme
 
 Windows x64: suite DB/frontend, build debug e smoke WebView2 eseguiti.
