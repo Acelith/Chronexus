@@ -2,7 +2,13 @@
 
 ## Milestone
 
-**M0–M5 ed estensione scheda/catalogo completate. M6 non iniziata.**
+**M0–M5 ed estensione scheda/catalogo completate. M6 in corso.**
+
+Prima parte M6: ricerca FTS5 locale su blocchi/titoli/alias/personaggio/asset,
+aggiornata nelle transazioni dei dati e ricostruibile. Migrazione 007 indicizza
+gli archivi precedenti. Ricerca da pulsante o Ctrl/⌘K, nuova sessione Ctrl/⌘ShiftN.
+Immagini, export, pacchetti e campagna Speratia sono le parti ancora da completare.
+Le verifiche storiche sotto saranno sostituite al termine della milestone.
 
 Ultimo scenario reale Windows: scheda Neme compilata nelle sezioni del PDF,
 Magic Missile scaricato dall'API e personalizzato come Dardi di Neme; creazione

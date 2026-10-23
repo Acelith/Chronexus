@@ -12,6 +12,56 @@
 body {
   margin: 0;
 }
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  background: #080d18cc;
+  z-index: 50;
+  display: grid;
+  place-items: start center;
+  padding: 5vh 24px;
+  overflow: auto;
+}
+.search-panel {
+  background: #161c28;
+  border: 1px solid #64718a;
+  padding: 28px;
+  width: min(850px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+}
+.search-results {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0;
+}
+.search-results button {
+  display: grid;
+  gap: 5px;
+}
+.search-results span {
+  font-size: 13px;
+  color: #a9b4c7;
+}
+.search-results p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid #d7b978;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
 button,
 input,
 textarea {

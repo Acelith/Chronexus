@@ -270,6 +270,18 @@ pub fn save_character(
     revision: Option<i64>,
     input: CharacterInput,
 ) -> AppResult<Character> {
+    let tx = c.unchecked_transaction().map_err(storage)?;
+    let saved = save_character_inner(&tx, campaign, id, revision, input)?;
+    tx.commit().map_err(storage)?;
+    Ok(saved)
+}
+fn save_character_inner(
+    c: &Connection,
+    campaign: &str,
+    id: Option<&str>,
+    revision: Option<i64>,
+    input: CharacterInput,
+) -> AppResult<Character> {
     require_campaign(c, campaign)?;
     validate_character(&input)?;
     let data = serde_json::to_string(&input).map_err(|_| "Scheda non leggibile.")?;
@@ -293,6 +305,7 @@ pub fn save_character(
         )
         .map_err(storage)?;
     }
+    crate::search::character(c, campaign)?;
     require_character(c, campaign, &chosen)
 }
 pub fn change_counter(
@@ -325,7 +338,7 @@ pub fn change_counter(
     *value = value
         .checked_add(delta)
         .ok_or("Variazione troppo grande.")?;
-    let saved = save_character(&tx, campaign, Some(id), Some(revision), character.data)?;
+    let saved = save_character_inner(&tx, campaign, Some(id), Some(revision), character.data)?;
     tx.commit().map_err(storage)?;
     Ok(saved)
 }
@@ -613,6 +626,7 @@ pub fn save_asset(
         );
     }
     let saved = get_asset(&tx, campaign, character, &chosen)?;
+    crate::search::asset(&tx, campaign, &chosen)?;
     tx.commit().map_err(storage)?;
     Ok(saved)
 }
@@ -623,12 +637,18 @@ pub fn delete_asset(
     id: &str,
     revision: i64,
 ) -> AppResult<()> {
+    let tx = c.unchecked_transaction().map_err(storage)?;
+    let c = &tx;
     require_character(c, campaign, character)?;
     identifier(id)?;
     let changed=c.execute("DELETE FROM player_assets WHERE campaign_id=?1 AND character_id=?2 AND id=?3 AND revision=?4",params![campaign,character,id,revision]).map_err(storage)?;
     if changed != 1 {
         return Err("Voce modificata altrove o non trovata. Riaprila prima di eliminarla.".into());
     }
+    for kind in ["item", "spell", "ability"] {
+        crate::search::remove(c, campaign, kind, id)?;
+    }
+    tx.commit().map_err(storage)?;
     Ok(())
 }
 pub fn validate_archive(c: &Connection) -> AppResult<()> {

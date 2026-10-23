@@ -1,13 +1,14 @@
 use rusqlite::Connection;
 use std::{path::Path, time::Duration};
 
-pub const MIGRATIONS: [&str; 6] = [
+pub const MIGRATIONS: [&str; 7] = [
     include_str!("../migrations/001_foundation.sql"),
     include_str!("../migrations/002_journal.sql"),
     include_str!("../migrations/003_knowledge.sql"),
     include_str!("../migrations/004_relationships.sql"),
     include_str!("../migrations/005_player.sql"),
     include_str!("../migrations/006_sheet_catalog.sql"),
+    include_str!("../migrations/007_search.sql"),
 ];
 pub const LATEST_SCHEMA: i64 = MIGRATIONS.len() as i64;
 
@@ -34,6 +35,9 @@ pub fn open(path: &Path) -> rusqlite::Result<Connection> {
     for migration in MIGRATIONS.iter().skip(version as usize) {
         let transaction = connection.transaction()?;
         transaction.execute_batch(migration)?;
+        if migration.contains("CREATE TABLE search_documents") {
+            crate::search::rebuild_all(&transaction).map_err(|_| rusqlite::Error::InvalidQuery)?;
+        }
         transaction.commit()?;
     }
     Ok(connection)

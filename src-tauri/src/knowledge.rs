@@ -162,6 +162,7 @@ pub fn create_page(
     ensure_available(&transaction, campaign_id, name, "")?;
     transaction.execute("INSERT INTO pages(id,campaign_id,title,title_key,kind,status,document) VALUES (?1,?2,?3,?4,?5,?6,?7)",params![id,campaign_id,name,key(name),kind,status,empty_document().to_string()]).map_err(storage)?;
     write_aliases(&transaction, &id, alias_values, name)?;
+    crate::search::page(&transaction, campaign_id, &id)?;
     transaction.commit().map_err(storage)?;
     get_page(connection, campaign_id, &id)
 }
@@ -186,6 +187,7 @@ pub fn update_page(
     }
     write_aliases(&transaction, id, &values, name)?;
     transaction.execute("UPDATE pages SET title=?1,title_key=?2,kind=?3,status=?4,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?5 AND campaign_id=?6",params![name,key(name),kind,status,id,campaign_id]).map_err(storage)?;
+    crate::search::page(&transaction, campaign_id, id)?;
     transaction.commit().map_err(storage)?;
     get_page(connection, campaign_id, id)
 }
@@ -280,6 +282,7 @@ pub fn save_page_document(
         return Err("Salvataggio fermato: pagina modificata altrove o non appartenente alla campagna. Copia gli appunti prima di riaprirla.".into());
     }
     index_document(&transaction, campaign_id, None, Some(id), &document)?;
+    crate::search::page(&transaction, campaign_id, id)?;
     transaction.commit().map_err(storage)?;
     get_page(connection, campaign_id, id)
 }
@@ -339,6 +342,7 @@ pub fn recover_page(
     }
     ensure_available(&transaction, campaign_id, name, "")?;
     transaction.execute("INSERT INTO pages(id,campaign_id,title,title_key,kind,status,document) VALUES (?1,?2,?3,?4,'note','stub',?5)",params![id,campaign_id,name,key(name),empty_document().to_string()]).map_err(storage)?;
+    crate::search::page(&transaction, campaign_id, id)?;
     transaction.commit().map_err(storage)?;
     get_page(connection, campaign_id, id)
 }

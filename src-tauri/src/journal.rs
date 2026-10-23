@@ -151,7 +151,10 @@ pub fn create_session(
     }
     let id = Uuid::new_v4().to_string();
     let document = empty_document();
-    connection.execute("INSERT INTO sessions(id,campaign_id,sequence,title,played_on,document) VALUES (?1,?2,?3,?4,?5,?6)",params![id,campaign_id,sequence,name,played_on,document.to_string()]).map_err(storage)?;
+    let tx = connection.unchecked_transaction().map_err(storage)?;
+    tx.execute("INSERT INTO sessions(id,campaign_id,sequence,title,played_on,document) VALUES (?1,?2,?3,?4,?5,?6)",params![id,campaign_id,sequence,name,played_on,document.to_string()]).map_err(storage)?;
+    crate::search::session(&tx, campaign_id, &id)?;
+    tx.commit().map_err(storage)?;
     get_session(connection, campaign_id, &id)
 }
 
@@ -261,6 +264,7 @@ pub fn save_document(
         return Err("Salvataggio fermato: la sessione è stata modificata altrove o non appartiene alla campagna. Copia gli appunti prima di riaprire la sessione.".into());
     }
     crate::knowledge::index_document(&transaction, campaign_id, Some(id), None, &document)?;
+    crate::search::session(&transaction, campaign_id, id)?;
     transaction.commit().map_err(storage)?;
     get_session(connection, campaign_id, id)
 }

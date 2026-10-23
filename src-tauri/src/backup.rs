@@ -657,6 +657,7 @@ impl Store {
             sync_dir(&next.join("attachments"))?;
         }
         let connection = db::open(&next.join("nodex.sqlite3")).map_err(journal::storage)?;
+        crate::search::rebuild(&connection)?;
         File::options()
             .read(true)
             .write(true)

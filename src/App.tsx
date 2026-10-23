@@ -26,6 +26,8 @@ import {
 import { KnowledgeContext } from "./features/knowledge/context";
 import type { GraphNode, SourceRef } from "./features/graph/api";
 import type { PlayerView } from "./features/player/api";
+import type { SearchResult } from "./features/search/SearchPanel";
+const SearchPanel = lazy(() => import("./features/search/SearchPanel"));
 
 const Editor = lazy(() => import("./features/journal/Editor"));
 const CodexWorkspace = lazy(
@@ -57,6 +59,8 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchButton = useRef<HTMLButtonElement>(null);
   const [error, setError] = useState("");
   const guard = useRef<SaveGuard | null>(null);
   const operation = useRef(false);
@@ -237,6 +241,58 @@ export function App() {
       setFocusBlock(undefined);
     });
   }
+  function openSearch() {
+    if (!campaignId || busy || backupOpen) return;
+    if (form) {
+      setError("Completa o annulla il modulo aperto prima di cercare.");
+      return;
+    }
+    void run(async () => setSearchOpen(true));
+  }
+  function selectSearch(result: SearchResult) {
+    void run(async () => {
+      if (result.kind === "session") {
+        setSessionId(result.sourceId);
+        setView("journal");
+      } else if (result.kind === "page") {
+        setPageId(result.sourceId);
+        setFallback(result.title);
+        setView("codex");
+      } else {
+        const target =
+          result.kind === "character"
+            ? "character"
+            : result.kind === "item"
+              ? "inventory"
+              : "abilities";
+        setView(target);
+        setPlayerReturn({ view: target, assetId: result.sourceId });
+      }
+      setFocusBlock(result.blockId ?? undefined);
+      setForm(null);
+      setSearchOpen(false);
+    });
+  }
+  useEffect(() => {
+    const keyboard = (event: globalThis.KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+      if (event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        openSearch();
+      }
+      if (
+        event.shiftKey &&
+        event.key.toLowerCase() === "n" &&
+        campaignId &&
+        !backupOpen
+      ) {
+        event.preventDefault();
+        void run(async () => setForm("session"));
+      }
+    };
+    window.addEventListener("keydown", keyboard);
+    return () => window.removeEventListener("keydown", keyboard);
+  });
   function openSource(link: Backlink) {
     void run(async () => {
       if (link.sourceKind === "session") {
@@ -364,6 +420,18 @@ export function App() {
           </div>
         </aside>
         <main>
+          {searchOpen && campaignId ? (
+            <Suspense fallback={<p role="status">Apertura ricerca…</p>}>
+              <SearchPanel
+                campaignId={campaignId}
+                onSelect={selectSearch}
+                onClose={() => {
+                  setSearchOpen(false);
+                  searchButton.current?.focus();
+                }}
+              />
+            </Suspense>
+          ) : null}
           {error ? (
             <div className="error" role="alert">
               <p>{error}</p>
@@ -415,6 +483,14 @@ export function App() {
                 </div>
                 {campaign ? (
                   <div className="actions">
+                    <button
+                      ref={searchButton}
+                      disabled={busy}
+                      onClick={openSearch}
+                      title="Ctrl+K / ⌘K"
+                    >
+                      Cerca nella campagna
+                    </button>
                     <button
                       disabled={busy}
                       onClick={() => {
