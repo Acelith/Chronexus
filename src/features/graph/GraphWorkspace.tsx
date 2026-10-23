@@ -45,6 +45,7 @@ export default function GraphWorkspace({
   const [relationLoading, setRelationLoading] = useState(false);
   const [form, setForm] = useState<"new" | Relationship | null>(null);
   const [confirm, setConfirm] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [edgeId, setEdgeId] = useState<string | null>(null);
   const [relationship, setRelationship] = useState<Relationship | null>(null);
   const selectionVersion = useRef(0);
@@ -90,6 +91,7 @@ export default function GraphWorkspace({
   function apply(next: GraphQuery) {
     selectionVersion.current += 1;
     setRelationLoading(false);
+    setSelectedNode(null);
     setData(null);
     setLoading(true);
     setError("");
@@ -105,6 +107,7 @@ export default function GraphWorkspace({
   }
   async function selectEdge(selected: GraphEdge) {
     if (form || confirm || pending) return;
+    setSelectedNode(null);
     const version = ++selectionVersion.current;
     setEdgeId(selected.id);
     setRelationship(null);
@@ -201,150 +204,153 @@ export default function GraphWorkspace({
           Nuova relazione
         </button>
       </div>
-      <form
-        className="graph-filters"
-        aria-label="Filtri del grafo"
-        onSubmit={(event) => {
-          event.preventDefault();
-          apply(draft);
-        }}
-      >
-        <fieldset disabled={disabled}>
-          <label>
-            Cerca nodi
-            <input
-              type="search"
-              maxLength={200}
-              value={draft.search}
-              onChange={(event) =>
-                setDraft({ ...draft, search: event.target.value })
-              }
-            />
-          </label>
-          <label>
-            Tipo nodo
-            <select
-              aria-label="Tipo nodo"
-              value={draft.kind ?? ""}
-              onChange={(event) =>
-                setDraft({
-                  ...draft,
-                  kind: (event.target.value as GraphNode["kind"]) || null,
-                })
-              }
-            >
-              <option value="">Tutti i tipi</option>
-              {Object.entries(pageKinds).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-              <option value="session">Sessione</option>
-              <option value="missing">Pagina mancante</option>
-            </select>
-          </label>
-          <label>
-            Collegamenti
-            <select
-              aria-label="Collegamenti"
-              value={draft.edgeKind}
-              onChange={(event) =>
-                setDraft({
-                  ...draft,
-                  edgeKind: event.target.value as GraphQuery["edgeKind"],
-                })
-              }
-            >
-              <option value="all">Menzioni e relazioni</option>
-              <option value="mentions">Solo menzioni</option>
-              <option value="assertions">Solo relazioni dichiarate</option>
-            </select>
-          </label>
-          <label>
-            Certezza delle relazioni
-            <select
-              aria-label="Certezza delle relazioni"
-              value={draft.certainty ?? ""}
-              onChange={(event) =>
-                setDraft({
-                  ...draft,
-                  certainty:
-                    (event.target.value as GraphQuery["certainty"]) || null,
-                })
-              }
-            >
-              <option value="">Tutte le certezze</option>
-              {Object.entries(certainties).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Fonte sessione
-            <select
-              aria-label="Fonte sessione"
-              value={draft.sessionId ?? ""}
-              onChange={(event) =>
-                setDraft({ ...draft, sessionId: event.target.value || null })
-              }
-            >
-              <option value="">Tutte le sessioni</option>
-              {sessions.map((session) => (
-                <option key={session.id} value={session.id}>
-                  Sessione {session.sequence}: {session.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Nodo centrale
-            <select
-              aria-label="Nodo centrale"
-              value={draft.focusId ?? ""}
-              onChange={(event) =>
-                setDraft({ ...draft, focusId: event.target.value || null })
-              }
-            >
-              <option value="">Nessun centro</option>
-              {pages.map((page) => (
-                <option key={page.id} value={`page:${page.id}`}>
-                  {page.title}
-                </option>
-              ))}
-              {sessions.map((session) => (
-                <option key={session.id} value={`session:${session.id}`}>
-                  Sessione {session.sequence}: {session.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Profondità
-            <select
-              aria-label="Profondità"
-              value={draft.depth}
-              disabled={!draft.focusId || disabled}
-              onChange={(event) =>
-                setDraft({
-                  ...draft,
-                  depth: Number(event.target.value) as 1 | 2,
-                })
-              }
-            >
-              <option value={1}>1 passaggio</option>
-              <option value={2}>2 passaggi</option>
-            </select>
-          </label>
-          <div className="actions">
-            <button className="primary">Applica filtri</button>
-            <button type="button" onClick={() => apply(defaultQuery)}>
-              Azzera filtri
-            </button>
-          </div>
-        </fieldset>
-      </form>
+      <details className="graph-filter-details">
+        <summary>Filtri e nodo centrale</summary>
+        <form
+          className="graph-filters"
+          aria-label="Filtri del grafo"
+          onSubmit={(event) => {
+            event.preventDefault();
+            apply(draft);
+          }}
+        >
+          <fieldset disabled={disabled}>
+            <label>
+              Cerca nodi
+              <input
+                type="search"
+                maxLength={200}
+                value={draft.search}
+                onChange={(event) =>
+                  setDraft({ ...draft, search: event.target.value })
+                }
+              />
+            </label>
+            <label>
+              Tipo nodo
+              <select
+                aria-label="Tipo nodo"
+                value={draft.kind ?? ""}
+                onChange={(event) =>
+                  setDraft({
+                    ...draft,
+                    kind: (event.target.value as GraphNode["kind"]) || null,
+                  })
+                }
+              >
+                <option value="">Tutti i tipi</option>
+                {Object.entries(pageKinds).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+                <option value="session">Sessione</option>
+                <option value="missing">Pagina mancante</option>
+              </select>
+            </label>
+            <label>
+              Collegamenti
+              <select
+                aria-label="Collegamenti"
+                value={draft.edgeKind}
+                onChange={(event) =>
+                  setDraft({
+                    ...draft,
+                    edgeKind: event.target.value as GraphQuery["edgeKind"],
+                  })
+                }
+              >
+                <option value="all">Menzioni e relazioni</option>
+                <option value="mentions">Solo menzioni</option>
+                <option value="assertions">Solo relazioni dichiarate</option>
+              </select>
+            </label>
+            <label>
+              Certezza delle relazioni
+              <select
+                aria-label="Certezza delle relazioni"
+                value={draft.certainty ?? ""}
+                onChange={(event) =>
+                  setDraft({
+                    ...draft,
+                    certainty:
+                      (event.target.value as GraphQuery["certainty"]) || null,
+                  })
+                }
+              >
+                <option value="">Tutte le certezze</option>
+                {Object.entries(certainties).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Fonte sessione
+              <select
+                aria-label="Fonte sessione"
+                value={draft.sessionId ?? ""}
+                onChange={(event) =>
+                  setDraft({ ...draft, sessionId: event.target.value || null })
+                }
+              >
+                <option value="">Tutte le sessioni</option>
+                {sessions.map((session) => (
+                  <option key={session.id} value={session.id}>
+                    Sessione {session.sequence}: {session.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Nodo centrale
+              <select
+                aria-label="Nodo centrale"
+                value={draft.focusId ?? ""}
+                onChange={(event) =>
+                  setDraft({ ...draft, focusId: event.target.value || null })
+                }
+              >
+                <option value="">Nessun centro</option>
+                {pages.map((page) => (
+                  <option key={page.id} value={`page:${page.id}`}>
+                    {page.title}
+                  </option>
+                ))}
+                {sessions.map((session) => (
+                  <option key={session.id} value={`session:${session.id}`}>
+                    Sessione {session.sequence}: {session.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Profondità
+              <select
+                aria-label="Profondità"
+                value={draft.depth}
+                disabled={!draft.focusId || disabled}
+                onChange={(event) =>
+                  setDraft({
+                    ...draft,
+                    depth: Number(event.target.value) as 1 | 2,
+                  })
+                }
+              >
+                <option value={1}>1 passaggio</option>
+                <option value={2}>2 passaggi</option>
+              </select>
+            </label>
+            <div className="actions">
+              <button className="primary">Applica filtri</button>
+              <button type="button" onClick={() => apply(defaultQuery)}>
+                Azzera filtri
+              </button>
+            </div>
+          </fieldset>
+        </form>
+      </details>
       {error ? (
         <div className="error" role="alert">
           {error}
@@ -413,7 +419,12 @@ export default function GraphWorkspace({
                 >
                   <GraphCanvas
                     data={data}
-                    onNode={onNode}
+                    focusId={query.focusId}
+                    onNode={(node) => {
+                      setSelectedNode(node);
+                      setEdgeId(null);
+                      setRelationship(null);
+                    }}
                     onEdge={(selected) => {
                       void selectEdge(selected);
                     }}
@@ -436,7 +447,42 @@ export default function GraphWorkspace({
               ) : null}
             </div>
             <aside className="graph-detail" aria-label="Dettaglio collegamento">
-              {relationLoading ? (
+              {selectedNode ? (
+                <div className="graph-node-detail">
+                  <p className="muted">
+                    {selectedNode.kind === "session"
+                      ? "Sessione"
+                      : selectedNode.kind === "missing"
+                        ? "Pagina mancante"
+                        : pageKinds[selectedNode.kind]}
+                  </p>
+                  <h4>{selectedNode.title}</h4>
+                  <p>
+                    Seleziona un collegamento per leggerne la fonte e la
+                    certezza.
+                  </p>
+                  <div className="actions">
+                    <button
+                      disabled={disabled}
+                      onClick={() => onNode(selectedNode)}
+                    >
+                      Apri la voce
+                    </button>
+                    <button
+                      disabled={disabled}
+                      onClick={() =>
+                        apply({
+                          ...query,
+                          focusId: selectedNode.id,
+                          search: "",
+                        })
+                      }
+                    >
+                      Esplora i collegamenti
+                    </button>
+                  </div>
+                </div>
+              ) : relationLoading ? (
                 <p role="status">Apertura relazione…</p>
               ) : relationship ? (
                 <>

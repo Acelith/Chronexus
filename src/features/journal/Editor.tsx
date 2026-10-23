@@ -222,7 +222,7 @@ function NoteEditor(props: Props) {
         ) : null}
         <BlockNoteView
           editor={editor}
-          theme="dark"
+          theme="light"
           emojiPicker={false}
           editable={!linking && !props.disabled}
           onChange={() =>

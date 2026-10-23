@@ -253,3 +253,20 @@ solo cambio di nome. I backup M4 sono ancora leggibili.
 - Skill frontend-design per gerarchia e leggibilità; vercel-react-best-practices
   per composizione e caricamento differito. Nessuna Skill database/testing
   specializzata disponibile: test Rust, frontend e WebView reali.
+
+## Restyling e grafo — estensione richiesta a M6
+
+Direzione: codice medievale leggibile, pergamena #e6d8b8, inchiostro #30251d,
+cuoio #211a16, ottone #b99855, borgogna #6e302b e verde #354c3a. Cornice
+scura, area di lettura chiara, titoli Palatino/Georgia locali; nessun font remoto.
+Navigazione e semantica dei dati conservate. Riferimento visuale generato con
+dati fittizi in .tools/medieval-ui-target.png (1584x992), non asset dell'app.
+L'implementazione adatta proporzioni e controlli reali: nessuna pretesa pixel-perfect.
+Grafo con layout COSE integrato, sottoinsieme compatto di 18 nodi, espansione
+esplicita e dettaglio alla selezione; etichette degli archi solo in evidenza.
+Il sottoinsieme contiene esclusivamente nodi e archi esistenti, senza nuove
+relazioni inferite. Filtri in disclosure, elenco accessibile conservato.
+Skill: find-skills per ricerca CLI/catalogo, frontend-design e ui-taste per
+materiali/gerarchia e confronto visuale; imagegen per il solo riferimento fittizio.
+webapp-testing Anthropic consultata e valutata; automazione Tauri resta quella
+Playwright JS già in uso nel repository, senza installazioni globali.
