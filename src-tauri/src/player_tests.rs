@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 fn sheet() -> CharacterInput {
     CharacterInput {
+        sheet: SheetDetails::default(),
         name: "Neme".into(),
         system_id: "generic".into(),
         ancestry: "Viandante".into(),
@@ -14,6 +15,8 @@ fn sheet() -> CharacterInput {
         hp_maximum: 10,
         hp_temporary: 2,
         stats: vec![Stat {
+            modifier: String::new(),
+            training: Training::None,
             id: Uuid::new_v4().to_string(),
             label: "Difesa".into(),
             value: "12 (manuale)".into(),
@@ -42,6 +45,7 @@ fn sheet() -> CharacterInput {
 fn item() -> AssetInput {
     AssetInput {
         details: AssetDetails::Item {
+            location: String::new(),
             name: "Chiave del ponte".into(),
             quantity: 1,
             category: "Chiavi".into(),
@@ -60,6 +64,74 @@ fn ability(kind: &str) -> AssetInput {
 }
 fn document() -> Value {
     json!({"version":1,"blocks":[{"id":"key-source","type":"paragraph","props":{},"children":[],"content":[{"type":"text","text":"Varek mi ha dato la chiave.","styles":{}}]}]})
+}
+#[test]
+fn legacy_sheet_defaults_and_expanded_validation_preserve_saved_data() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("legacy-sheet.sqlite3");
+    let old = rusqlite::Connection::open(&path).unwrap();
+    for m in db::MIGRATIONS.iter().take(5) {
+        old.execute_batch(m).unwrap();
+    }
+    let campaign = journal::create_campaign(&old, "Legacy").unwrap();
+    let mut legacy = serde_json::to_value(sheet()).unwrap();
+    legacy.as_object_mut().unwrap().remove("sheet");
+    legacy["stats"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("modifier");
+    legacy["stats"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("training");
+    let id = Uuid::new_v4().to_string();
+    old.execute(
+        "INSERT INTO characters(id,campaign_id,data) VALUES(?1,?2,?3)",
+        rusqlite::params![id, campaign.id, legacy.to_string()],
+    )
+    .unwrap();
+    drop(old);
+    let c = db::open(&path).unwrap();
+    let existing = get_character(&c, &campaign.id).unwrap().unwrap();
+    assert_eq!(existing.data.name, "Neme");
+    assert!(existing.data.sheet.fields.is_empty());
+    for n in 0..4 {
+        let mut bad = existing.data.clone();
+        match n {
+            0 => bad.sheet.death_successes = 4,
+            1 => {
+                bad.sheet.fields.insert("unexpected".into(), "value".into());
+            }
+            2 => {
+                bad.sheet
+                    .fields
+                    .insert("background".into(), "x".repeat(4001));
+            }
+            _ => bad.stats[0].modifier = "x".repeat(201),
+        }
+        assert!(save_character(&c, &campaign.id, Some(&id), Some(0), bad).is_err());
+        assert_eq!(
+            get_character(&c, &campaign.id).unwrap().unwrap().revision,
+            0
+        );
+    }
+    let mut imported = ability("spell");
+    if let AssetDetails::Spell { fields } = &mut imported.details {
+        fields.catalog_source = Some(crate::catalog::CatalogSource {
+            path: "spells/acid-arrow".into(),
+            name: "Acid Arrow".into(),
+        });
+        fields.ritual = true;
+    }
+    let saved = save_asset(&c, &campaign.id, &id, None, None, imported.clone()).unwrap();
+    assert_eq!(
+        serde_json::to_value(saved.input).unwrap(),
+        serde_json::to_value(&imported).unwrap()
+    );
+    if let AssetDetails::Spell { fields } = &mut imported.details {
+        fields.catalog_source.as_mut().unwrap().path = "https://evil.test".into();
+    }
+    assert!(save_asset(&c, &campaign.id, &id, None, None, imported).is_err());
 }
 #[test]
 fn character_stats_hp_resources_and_slots_persist_and_reject_stale_or_out_of_range_changes() {
@@ -314,7 +386,7 @@ fn migration_from_m4_preserves_notes_and_is_atomic_and_applied_once() {
         let count: i64 = c
             .query_row("SELECT COUNT(*) FROM schema_migrations", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(count, 5);
+        assert_eq!(count, db::LATEST_SCHEMA);
     }
     let bad = temp.path().join("conflict.sqlite3");
     let old = rusqlite::Connection::open(&bad).unwrap();
@@ -346,7 +418,25 @@ fn backup_round_trip_includes_character_resources_items_and_abilities_with_stabl
     let temp = tempfile::tempdir().unwrap();
     let source = backup::Store::open(&temp.path().join("source")).unwrap();
     let a = journal::create_campaign(&source.connection, "A").unwrap();
-    let character = save_character(&source.connection, &a.id, None, None, sheet()).unwrap();
+    let mut input = sheet();
+    input
+        .sheet
+        .fields
+        .insert("background".into(), "Cartografa".into());
+    input.sheet.fields.insert("spellSaveDc".into(), "13".into());
+    input.sheet.inspiration = true;
+    input.sheet.death_successes = 2;
+    input.sheet.attacks.push(Attack {
+        id: Uuid::new_v4().to_string(),
+        name: "Arco".into(),
+        bonus: "+4".into(),
+        damage: "1d6".into(),
+        range: "24 m".into(),
+        weight: "1 kg".into(),
+        ammunition: "12".into(),
+    });
+    let character = save_character(&source.connection, &a.id, None, None, input).unwrap();
+    crate::catalog::store(&source.connection, "spells", json!({"results":[]})).unwrap();
     for input in [item(), ability("spell"), ability("ability")] {
         save_asset(&source.connection, &a.id, &character.id, None, None, input).unwrap();
     }
@@ -362,6 +452,9 @@ fn backup_round_trip_includes_character_resources_items_and_abilities_with_stabl
     let preview = target.prepare(&bundle).unwrap();
     target.restore(&preview.token).unwrap();
     let actual = get_character(&target.connection, &a.id).unwrap().unwrap();
+    assert!(crate::catalog::read(&target.connection, "spells")
+        .unwrap()
+        .is_some());
     assert_eq!(
         serde_json::to_value(actual).unwrap(),
         serde_json::to_value(&character).unwrap()

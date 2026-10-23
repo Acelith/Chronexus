@@ -189,3 +189,26 @@ solo cambio di nome. I backup M4 sono ancora leggibili.
   vercel-react-best-practices per caricamento differito. computer-use ha aperto e
   letto il selettore nativo; successivi input bloccati dallo strumento, quindi
   il round trip desktop usa la scelta predefinita nel debug, con ZIP/DB reali.
+
+## Scheda estesa e catalogo opzionale (23 ottobre 2026)
+
+- La richiesta di modificare M4 riguarda la scheda consegnata in M5. M4 mantiene
+  il recupero dati; l'estensione appartiene a M5, prima di M6.
+- Il PDF dell'utente è solo una fonte di campi e gerarchia. Nessuna copia di logo,
+  impaginazione o contenuti personali viene inserita nel repository. La scheda
+  resta generica, con campi manuali per combattimento, biografia, valori e magia;
+  un preset D&D aggiunge etichette, senza formule o valori inventati.
+- Migrazione 006 additiva: cache SQLite e confine di compatibilità per i nuovi
+  payload. I campi JSON aggiunti hanno default per leggere schede M5; UUID,
+  revisioni e fonti restano stabili. I backup precedenti restano ripristinabili;
+  una build precedente non deve aprire lo schema 006.
+- Eccezione di rete autorizzata: solo GET espliciti verso D&D 5e API, edizione
+  2014. Fetch frontend limitato all'host nella CSP; percorsi allowlist, timeout,
+  dimensioni limitate e nessun redirect. Ricerca per nome eseguita sugli indici
+  scaricati, senza inviare il testo digitato. Nessuna nuova dipendenza HTTP.
+- Cache Rust parametrizzata, massimo 150 risposte; un'importazione è una copia
+  personale indipendente con riferimento alla fonte, conservata nel backup.
+  Il catalogo non scrive nel grafo e non rende fatti le descrizioni di regole.
+  API di sola lettura: gli incantesimi personalizzati non vengono pubblicati.
+- Skill: PDF per estrazione e lettura visiva delle quattro pagine; frontend-design
+  e vercel-react-best-practices per interfaccia e caricamento del catalogo.

@@ -5,7 +5,7 @@ use crate::{
 };
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use uuid::Uuid;
 
 const LIMIT: i64 = 1_000_000;
@@ -32,6 +32,96 @@ pub struct Stat {
     pub label: String,
     pub value: String,
     pub group: String,
+    #[serde(default)]
+    pub modifier: String,
+    #[serde(default)]
+    pub training: Training,
+}
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Training {
+    #[default]
+    None,
+    Proficient,
+    Expert,
+}
+
+pub const SHEET_FIELDS: &[&str] = &[
+    "playerName",
+    "background",
+    "alignment",
+    "nextLevelXp",
+    "armorClass",
+    "initiative",
+    "proficiencyBonus",
+    "armor",
+    "hitDiceTotal",
+    "hitDiceUsed",
+    "resistances",
+    "vision",
+    "speed",
+    "specialMovement",
+    "passivePerception",
+    "passiveInvestigation",
+    "createdOn",
+    "birth",
+    "deity",
+    "age",
+    "gender",
+    "height",
+    "weight",
+    "size",
+    "appearance",
+    "personality",
+    "ideals",
+    "bonds",
+    "flaws",
+    "allies",
+    "enemies",
+    "proficiencies",
+    "languages",
+    "ancestryTraits",
+    "classFeatures",
+    "feats",
+    "platinum",
+    "gold",
+    "electrum",
+    "silver",
+    "copper",
+    "gems",
+    "valuables",
+    "mount",
+    "encumbrance",
+    "castingClass",
+    "castingAbility",
+    "spellSaveDc",
+    "spellAttackBonus",
+    "spellCount",
+];
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SheetDetails {
+    #[serde(default)]
+    pub fields: BTreeMap<String, String>,
+    #[serde(default)]
+    pub inspiration: bool,
+    #[serde(default)]
+    pub death_successes: i64,
+    #[serde(default)]
+    pub death_failures: i64,
+    #[serde(default)]
+    pub attacks: Vec<Attack>,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Attack {
+    pub id: String,
+    pub name: String,
+    pub bonus: String,
+    pub damage: String,
+    pub range: String,
+    pub weight: String,
+    pub ammunition: String,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -45,6 +135,8 @@ pub struct Resource {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CharacterInput {
+    #[serde(default)]
+    pub sheet: SheetDetails,
     pub name: String,
     pub system_id: String,
     pub ancestry: String,
@@ -75,6 +167,18 @@ fn validate_character(input: &CharacterInput) -> AppResult<()> {
     text(&input.vocation, 200)?;
     text(&input.conditions, 2000)?;
     text(&input.notes, 16000)?;
+    let sheet = &input.sheet;
+    for (key, value) in &sheet.fields {
+        if !SHEET_FIELDS.contains(&key.as_str()) {
+            return Err("Campo della scheda sconosciuto.".into());
+        }
+        text(value, 4000)?;
+    }
+    bounded(sheet.death_successes, 0, 3, "Successi contro morte")?;
+    bounded(sheet.death_failures, 0, 3, "Fallimenti contro morte")?;
+    if sheet.attacks.len() > 30 {
+        return Err("Massimo 30 armi o attacchi.".into());
+    }
     for (number, label) in [(input.level, "Livello"), (input.experience, "Esperienza")] {
         if let Some(n) = number {
             bounded(n, 0, LIMIT, label)?;
@@ -87,10 +191,27 @@ fn validate_character(input: &CharacterInput) -> AppResult<()> {
         return Err("Massimo 100 statistiche e 50 risorse per personaggio.".into());
     }
     let mut ids = HashSet::new();
+    for attack in &sheet.attacks {
+        identifier(&attack.id)?;
+        title(&attack.name)?;
+        if !ids.insert(&attack.id) {
+            return Err("Attacco duplicato.".into());
+        }
+        for value in [
+            &attack.bonus,
+            &attack.damage,
+            &attack.range,
+            &attack.weight,
+            &attack.ammunition,
+        ] {
+            text(value, 200)?;
+        }
+    }
     for stat in &input.stats {
         identifier(&stat.id)?;
         title(&stat.label)?;
         text(&stat.value, 200)?;
+        text(&stat.modifier, 200)?;
         if !ids.insert(&stat.id)
             || !["ability", "skill", "save", "defense", "movement", "other"]
                 .contains(&stat.group.as_str())
@@ -213,6 +334,8 @@ pub fn change_counter(
 #[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
 pub enum AssetDetails {
     Item {
+        #[serde(default)]
+        location: String,
         name: String,
         quantity: i64,
         category: String,
@@ -235,6 +358,12 @@ pub enum AssetDetails {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AbilityFields {
+    #[serde(default)]
+    pub catalog_source: Option<crate::catalog::CatalogSource>,
+    #[serde(default)]
+    pub ritual: bool,
+    #[serde(default)]
+    pub concentration: bool,
     pub name: String,
     pub system_id: String,
     pub rank: String,
@@ -278,6 +407,7 @@ pub struct Asset {
 fn validate_details(details: &AssetDetails) -> AppResult<()> {
     match details {
         AssetDetails::Item {
+            location,
             name,
             quantity,
             category,
@@ -293,6 +423,7 @@ fn validate_details(details: &AssetDetails) -> AppResult<()> {
             text(description, 16000)?;
             text(value, 200)?;
             text(notes, 16000)?;
+            text(location, 200)?;
             if weight.is_some_and(|w| !w.is_finite() || !(0.0..=1_000_000.0).contains(&w)) {
                 return Err(
                     "Peso: inserisci un valore da 0 a 1000000, nella tua unità di misura.".into(),
@@ -315,6 +446,9 @@ fn validate_details(details: &AssetDetails) -> AppResult<()> {
             }
             text(&fields.description, 16000)?;
             text(&fields.notes, 16000)?;
+            if let Some(source) = &fields.catalog_source {
+                source.validate()?;
+            }
         }
     }
     Ok(())

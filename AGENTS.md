@@ -23,7 +23,7 @@ You are the engineering agent maintaining **Chronexus**, a personal, offline-fir
 - Graph: Cytoscape.js, with relationship types and filters; do not equate co-occurrence with an asserted relationship.
 - UI: accessible React components and a cohesive dark-fantasy theme, usable for long writing sessions. Prefer a small, maintained dependency set; check current package compatibility and licenses before adopting it.
 - Organize by feature/domain. Keep Rust commands narrow, validate incoming payloads, propagate actionable errors to the UI. Avoid overengineering generic frameworks.
-- Avoid using remote services to store application data. Network is permitted for installing build dependencies only when explicitly available.
+- Avoid using remote services to store application data. The user has authorized optional, explicit GET lookups at `https://www.dnd5eapi.co/api/2014/` for the D&D SRD catalog. Fetch only allowlisted collections/details, never upload notes, sheets, PDF files or custom spells. Keep name filtering local, bound time/size, cache consulted content in SQLite and retain offline manual editing. No startup/background network requests.
 
 ## Non-negotiable engineering rules
 1. Respect the working tree. Run `git status --short` first; never overwrite unrelated user changes, force-push, reset hard, or rewrite history.
@@ -32,7 +32,7 @@ You are the engineering agent maintaining **Chronexus**, a personal, offline-fir
 4. Use parameterized SQL, foreign keys, schema migrations, validated input, safe file paths, and careful error handling.
 5. Autosave must persist reliably and surface failure. No silent data loss, no destructive migration without a recovery path.
 6. A note mention and a factual relationship are different edge types. Every asserted relationship should be attributable to its source when possible and support certainty: confirmed, suspected, disproven or unknown.
-7. Use a generic character model initially. Do not invent D&D/Pathfinder rules or bundle copyrighted spell text. Future ruleset adapters belong behind an interface.
+7. Preserve the generic character model and offer a manual D&D 5e 2014 sheet preset based on the user's four-page reference (combat, identity/proficiencies, equipment/wealth, spellcasting). Do not copy its artwork, logos or personal contents. Do not invent formulas. Catalog spells are explicit editable imports with edition, original entry and SRD attribution; custom spells stay local and can use an API result as a base. The read-only API cannot publish homebrew. No silent overwrites, automatic resource consumption or inferred world facts. See `docs/RULESETS.md`.
 8. Handle empty, loading, error, confirmation and keyboard states; consider accessibility and navigation.
 9. Add focused automated tests with domain changes. Repair test/build/type errors caused by your changes before declaring completion.
 10. Never claim a check passed if it was not actually executed. Mark unsupported-platform verification as pending, not successful.
@@ -96,4 +96,4 @@ Prima di iniziare una nuova attività, identifica le Skill effettivamente dispon
 - Le Skill non sostituiscono i requisiti di Chronexus, i test obbligatori o le regole Git definite in questo repository.
 
 Nel riepilogo di ogni implementazione importante, indica brevemente quali Skill sono state utilizzate e per quale motivo.
-  
+

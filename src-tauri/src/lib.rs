@@ -1,6 +1,7 @@
 mod backup;
 #[cfg(test)]
 mod backup_tests;
+mod catalog;
 mod db;
 mod graph;
 #[cfg(test)]
@@ -327,6 +328,21 @@ fn delete_player_asset(
     db.with(|c| player::delete_asset(c, &campaign_id, &character_id, &id, revision))
 }
 
+#[tauri::command]
+fn read_catalog_cache(
+    db: tauri::State<Database>,
+    path: String,
+) -> AppResult<Option<catalog::CacheEntry>> {
+    db.with(|c| catalog::read(c, &path))
+}
+#[tauri::command]
+fn store_catalog_cache(
+    db: tauri::State<Database>,
+    path: String,
+    payload: serde_json::Value,
+) -> AppResult<catalog::CacheEntry> {
+    db.with(|c| catalog::store(c, &path, payload))
+}
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -350,7 +366,7 @@ pub fn run() {
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset])
+        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,read_catalog_cache,store_catalog_cache])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
 }

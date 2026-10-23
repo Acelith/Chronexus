@@ -2,7 +2,11 @@
 
 ## Milestone
 
-**M0–M5 completate. M6 non iniziata.**
+**M0–M5 completate. Estensione scheda/catalogo richiesta in corso. M6 non iniziata.**
+
+Revisione corrente: persistenza aggiuntiva della scheda ispirata al PDF e cache
+SRD opzionale, migrazione 006 additiva. Interfaccia e verifica desktop ancora da
+completare; i risultati sotto riguardano la precedente consegna M5.
 
 Ultimo scenario reale: Neme riceve la chiave da Varek nella Sessione 12; dal
 proprio inventario apre il PNG e il blocco fonte, poi torna all'oggetto selezionato.
