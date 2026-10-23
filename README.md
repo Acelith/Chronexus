@@ -62,7 +62,7 @@ database resta `nodex.sqlite3` nella cartella base. Non spostare il solo databas
 
 Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
 
-## Funzioni attuali (M0–M4)
+## Funzioni attuali (M0–M5)
 
 - Creazione, selezione e rinomina di campagne indipendenti.
 - Sessioni ordinate per numero, con titolo e data reale facoltativa.
@@ -95,12 +95,47 @@ Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
   non sono ancora presenti.
 - Backup manuale `.nodex` dell'intero archivio e ripristino con anteprima,
   verifica integrità, conferma e copia preventiva dei dati correnti.
+- Un personaggio per campagna con identità, regolamento libero, livello/esperienza
+  facoltativi, PF attuali/massimi/temporanei, condizioni e note. Statistiche,
+  abilità, tiri, difese e movimento sono valori configurabili manualmente.
+- Risorse e slot personali con massimo scelto, comandi +/− e persistenza di ogni
+  variazione. Nessuna formula di regolamento, riposo o consumo automatico.
+- Inventario con quantità (anche zero), categoria, peso/valore liberi,
+  equipaggiamento, consumabili, descrizione e note. Modifica ed eliminazione
+  confermata; gli appunti e le pagine collegate non vengono cancellati.
+- Provenienza degli oggetti: sessione/blocco, PNG, luogo e missione della campagna,
+  con note e pagina Codex facoltativa. Apertura della fonte e ritorno alla voce
+  selezionata. Nomi modificati nel Codex non cambiano gli UUID dei collegamenti.
+- Incantesimi/capacità con testo personale, sistema, rango, scuola/tradizione,
+  attivazione/durata/portata/componenti e marcatori conosciuta/preparata indipendenti.
+  Filtri per nome, rango, stato/tipo e collegamenti a Codex/sessione.
 
 La chiusura forzata del processo o un'interruzione elettrica possono perdere
 le modifiche che non hanno ancora raggiunto SQLite. Attendere «Salvato sul computer».
 Una sola istanza può aprire lo stesso archivio; il lock viene rilasciato dal
 sistema anche alla chiusura forzata. Le revisioni continuano a impedire scritture
 obsolete, senza fusione automatica degli appunti.
+
+## Personaggio, inventario e capacità
+
+Apri una campagna e scegli **Personaggio → Crea personaggio**. Inserisci solo i
+valori utili al tuo sistema; da **Modifica personaggio** aggiungi statistiche e
+risorse/slot. I moduli usano **Salva personaggio** / **Salva voce** espliciti;
+non sono autosalvati. Navigazione e chiusura attendono la fine di una scrittura
+e richiedono di salvare o annullare un modulo aperto. Un errore conserva il modulo.
+I comandi rapidi +/−, equipaggiamento e marcatori delle capacità salvano subito.
+
+Da **Inventario → Aggiungi oggetto**, annota nome e quantità. Per registrare una
+chiave ricevuta da Varek nella Sessione 12, seleziona il PNG, la sessione e il
+blocco fonte già presenti nella campagna. Se necessario crea prima le pagine
+nel Codex, con tipo PNG/luogo/missione. Dal dettaglio dell'oggetto apri la fonte;
+**Torna alla voce del personaggio** riapre l'oggetto selezionato.
+
+Un blocco eliminato dagli appunti non cancella la provenienza: viene segnalato
+come mancante e si può aprire l'intera sessione. I collegamenti di provenienza
+non producono relazioni fattuali nel grafo. In **Capacità** scrivi il tuo testo:
+non sono inclusi cataloghi commerciali. Nessun marcatore consuma PF, risorse o slot.
+Il contratto per adattatori futuri è documentato in [docs/RULESETS.md](docs/RULESETS.md).
 
 ## Backup e recupero
 
@@ -110,7 +145,8 @@ obsolete, senza fusione automatica degli appunti.
    estensione `.nodex`, anche su disco esterno o unità di rete montata. Un file
    esistente viene sempre rifiutato, anche se il selettore ne propone la sostituzione.
 3. Attendi **Backup creato e verificato** e controlla percorso e conteggi.
-   Include **tutte le campagne**, documenti, UUID, menzioni, relazioni e allegati
+   Include **tutte le campagne**, personaggi, risorse, oggetti/capacità, documenti,
+   UUID, menzioni, relazioni e allegati
    nella cartella gestita. Non include file esterni semplicemente citati nelle note.
 4. Per recuperare su un altro computer o su un profilo nuovo: **Seleziona backup**,
    controlla data e conteggi, poi **Sostituisci archivio**. Tutte le campagne correnti
@@ -132,8 +168,11 @@ layout `attachments/<UUID campagna>/<UUID file>[.<estensione>]`, senza introdurr
 caricamenti di immagini nell'editor. I test includono una vera immagine PNG.
 
 Conserva spazio per ZIP, estrazione e nuova copia dei dati. Vecchie generazioni e
-copie preventive non vengono eliminate automaticamente. Dopo un ripristino usa
-M4 o versioni successive: eseguibili M0–M3 ignorano il nuovo selettore di profilo.
+copie preventive non vengono eliminate automaticamente. I backup con schema 005
+richiedono Chronexus M5 o successivo; i backup precedenti (schemi 1–4) restano
+recuperabili e vengono aggiornati in copia. Esistono ancora archivi `.nodex`
+con il vecchio nome: non occorre rinominarli. Gli eseguibili M0–M3 ignorano
+il selettore di profilo introdotto da M4.
 Se il database corrente è talmente danneggiato da impedire l'apertura, il ripristino
 in quella cartella è bloccato: a Chronexus chiuso conserva **l'intera cartella dati**
 separatamente, poi avvia su una cartella dati vuota e seleziona un backup valido.

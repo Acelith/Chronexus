@@ -25,6 +25,7 @@ import {
 } from "./features/knowledge/api";
 import { KnowledgeContext } from "./features/knowledge/context";
 import type { GraphNode, SourceRef } from "./features/graph/api";
+import type { PlayerView } from "./features/player/api";
 
 const Editor = lazy(() => import("./features/journal/Editor"));
 const CodexWorkspace = lazy(
@@ -32,6 +33,7 @@ const CodexWorkspace = lazy(
 );
 const GraphWorkspace = lazy(() => import("./features/graph/GraphWorkspace"));
 const BackupWorkspace = lazy(() => import("./features/backup/BackupWorkspace"));
+const PlayerWorkspace = lazy(() => import("./features/player/PlayerWorkspace"));
 
 export function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -41,7 +43,13 @@ export function App() {
   const [pages, setPages] = useState<KnowledgePage[]>([]);
   const [pageId, setPageId] = useState<string | null>(null);
   const [fallback, setFallback] = useState("");
-  const [view, setView] = useState<"journal" | "codex" | "graph">("journal");
+  const [view, setView] = useState<"journal" | "codex" | "graph" | PlayerView>(
+    "journal",
+  );
+  const [playerReturn, setPlayerReturn] = useState<{
+    view: PlayerView;
+    assetId: string;
+  } | null>(null);
   const [focusBlock, setFocusBlock] = useState<string | undefined>();
   const [form, setForm] = useState<"campaign" | "rename" | "session" | null>(
     null,
@@ -94,6 +102,7 @@ export function App() {
       setSessionId(notes[0]?.id ?? null);
       setPages(knowledge);
       setPageId(null);
+      setPlayerReturn(null);
     } catch (reason) {
       if (version === loadVersion.current) setError(errorMessage(reason));
     } finally {
@@ -164,6 +173,7 @@ export function App() {
         knowledgeApi.pages(id),
       ]);
       setCampaignId(id);
+      setPlayerReturn(null);
       setBackupOpen(false);
       setSessions(items);
       setSessionId(items[0]?.id ?? null);
@@ -186,6 +196,7 @@ export function App() {
         const saved = await api.createCampaign(name);
         setCampaigns((items) => [...items, saved]);
         setCampaignId(saved.id);
+        setPlayerReturn(null);
         setSessions([]);
         setSessionId(null);
         setPages([]);
@@ -391,18 +402,33 @@ export function App() {
             <>
               <header className="campaign-header">
                 <div>
-                  <p>{it.journal}</p>
+                  <p>
+                    {view === "character"
+                      ? "Scheda del giocatore"
+                      : view === "inventory"
+                        ? "Equipaggiamento e provenienza"
+                        : view === "abilities"
+                          ? "Incantesimi e capacità"
+                          : it.journal}
+                  </p>
                   <h2>{campaign?.name ?? it.emptyCampaigns}</h2>
                 </div>
                 {campaign ? (
                   <div className="actions">
-                    <button disabled={busy} onClick={() => setForm("rename")}>
+                    <button
+                      disabled={busy}
+                      onClick={() => {
+                        void run(async () => setForm("rename"));
+                      }}
+                    >
                       {it.rename}
                     </button>
                     <button
                       className="primary"
                       disabled={busy}
-                      onClick={() => setForm("session")}
+                      onClick={() => {
+                        void run(async () => setForm("session"));
+                      }}
                     >
                       + {it.newSession}
                     </button>
@@ -451,7 +477,44 @@ export function App() {
                   >
                     Grafo
                   </button>
+                  {(
+                    [
+                      ["character", "Personaggio"],
+                      ["inventory", "Inventario"],
+                      ["abilities", "Capacità"],
+                    ] as const
+                  ).map(([id, label]) => (
+                    <button
+                      key={id}
+                      aria-current={view === id ? "page" : undefined}
+                      disabled={busy}
+                      onClick={() => {
+                        void run(async () => {
+                          setView(id);
+                          setForm(null);
+                          setFocusBlock(undefined);
+                        });
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </nav>
+              ) : null}
+              {playerReturn && (view === "journal" || view === "codex") ? (
+                <button
+                  className="player-return"
+                  disabled={busy}
+                  onClick={() => {
+                    void run(async () => {
+                      setView(playerReturn.view);
+                      setForm(null);
+                      setFocusBlock(undefined);
+                    });
+                  }}
+                >
+                  Torna alla voce del personaggio
+                </button>
               ) : null}
               {form === "campaign" || form === "rename" ? (
                 <CampaignForm
@@ -521,6 +584,35 @@ export function App() {
                     register={register}
                     onNode={openGraphNode}
                     onSource={openGraphSource}
+                  />
+                </Suspense>
+              ) : null}
+              {campaign &&
+              (view === "character" ||
+                view === "inventory" ||
+                view === "abilities") ? (
+                <Suspense fallback={<p role="status">Apertura personaggio…</p>}>
+                  <PlayerWorkspace
+                    key={`${campaign.id}-${view}`}
+                    campaignId={campaign.id}
+                    view={view}
+                    pages={pages}
+                    sessions={sessions}
+                    busy={busy}
+                    register={register}
+                    initialSelection={
+                      playerReturn?.view === view
+                        ? playerReturn.assetId
+                        : undefined
+                    }
+                    onPage={(id, title, assetId, view) => {
+                      setPlayerReturn({ view, assetId });
+                      openPage(id, title);
+                    }}
+                    onSource={(source, assetId, view) => {
+                      setPlayerReturn({ view, assetId });
+                      openGraphSource(source);
+                    }}
                   />
                 </Suspense>
               ) : null}

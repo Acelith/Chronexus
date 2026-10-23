@@ -284,6 +284,9 @@ function ArchiveSummary({ counts }: { counts: ArchiveCounts }) {
           ["Menzioni", counts.mentions],
           ["Relazioni", counts.relationships],
           ["Allegati", counts.attachments],
+          ["Personaggi", counts.characters ?? 0],
+          ["Oggetti", counts.items ?? 0],
+          ["Capacità e incantesimi", counts.spells ?? 0],
         ] as const
       ).map(([label, count]) => (
         <div key={label}>

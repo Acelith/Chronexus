@@ -7,6 +7,9 @@ export interface ArchiveCounts {
   mentions: number;
   relationships: number;
   attachments: number;
+  characters?: number;
+  items?: number;
+  spells?: number;
 }
 export interface BackupPreview {
   token: string;

@@ -1,4 +1,4 @@
-# Verifiche M0–M4
+# Verifiche M0–M5
 
 ## Suite automatizzate
 
@@ -192,6 +192,53 @@ OS, annullare il selettore, provare disco esterno/rete non disponibile e spazio
 insufficiente. Su Windows M4 `computer-use` ha osservato il selettore nativo;
 gli input successivi sono falliti con errore dello strumento sul processo in
 primo piano. Il round trip effettivo usa la scelta predefinita nel debug.
+
+## Personaggio e provenienza M5
+
+Test Rust aggiunti: persistenza di scheda/statistiche/PF/risorse/slot, limiti e
+revisioni obsolete, inventario con provenienza e rinomina, indipendenza dei
+marcatori capacità, separazione campagne, blocchi rimossi, cambio del tipo Codex,
+migrazione 004→005 atomica/idempotente, errori scrittura e round trip backup M5.
+Test UI aggiunti: moduli conservati su errore, guardie di navigazione, contatori
+in attesa, selezione fonti, eliminazione confermata/Escape, filtri, lettura fallita
+con riprova e comportamento manuale degli adattatori sconosciuti.
+
+Smoke ripetibile solo su profili sintetici vuoti, con server Vite e debug compilato:
+
+```powershell
+$env:NODEX_DEV_DATA_DIR="$PWD/.tools/m5-source"
+$env:NODEX_SMOKE_SOURCE="$PWD/.tools/m5-source"
+$env:NODEX_DEV_BACKUP_FILE="$PWD/.tools/m5-portable.nodex"
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
+node scripts/player-smoke.mjs prepare
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
+node scripts/player-smoke.mjs verify
+$env:NODEX_DEV_DATA_DIR="$PWD/.tools/m5-restored"
+$env:NODEX_DEV_RESTORE_FILE="$PWD/.tools/m5-portable.nodex"
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
+node scripts/player-smoke.mjs restore
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
+node scripts/player-smoke.mjs verify-restored
+```
+
+`prepare` crea sessione/pagine con comandi Rust reali, poi usa l'interfaccia per
+creare/modificare la scheda, risorse/slot, oggetto e capacità; verifica guardie,
+quantità zero, equipaggiamento, filtri e conferma eliminazione. Dal dettaglio
+della chiave apre Varek e il blocco fonte della Sessione 12 e torna alla chiave,
+anche quando questa non è la prima voce dell'elenco. Verifica assenza di archi
+fattuali automatici e consumo implicito di risorse, poi crea il backup con PNG.
+Ogni fase chiude normalmente la finestra. `verify` e `verify-restored` confrontano
+interi documenti/scheda/asset/grafo/UUID e hash dell'immagine dopo riavvio.
+
+Le prove di questa esecuzione usano `.tools/m5-source-final` e `.tools/m5-restored`;
+`NODEX_SMOKE_SOURCE` / `NODEX_SMOKE_RESTORED` scelgono cartelle alternative dentro
+`.tools/`. `NODEX_SMOKE_BACKUP` sceglie il file che lo smoke verifica, da impostare
+allo stesso percorso di `NODEX_DEV_BACKUP_FILE` e `NODEX_DEV_RESTORE_FILE`.
+Usare file backup nuovi per ripetere, senza sovrascrivere fixture precedenti.
+Solo il risultato del selettore è predefinito nel debug, come per M4: persistenza,
+ZIP e validazioni sono reali. Screenshot di scheda/inventario/capacità controllati;
+le tre viste sono state verificate anche a 760 px senza overflow orizzontale.
 
 ## Piattaforme
 

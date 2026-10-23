@@ -28,8 +28,21 @@ solo cambio di nome. I backup M4 sono ancora leggibili.
   includono ora conteggi personaggi/oggetti/capacità quando non nulli, con default
   zero per manifest precedenti. DB 1–5 leggibili; schema 5 richiede Chronexus M5
   o successivo per il recupero. Validazione M5 eseguita prima di pubblicare backup.
-- Interfaccia React e contratto adattatori sono il successivo passo della stessa
-  milestone; non è stato selezionato o implementato un regolamento commerciale.
+- Tre viste React caricate su richiesta: Personaggio, Inventario, Capacità.
+  Moduli espliciti con guardie, contatori e marcatori con salvataggio immediato,
+  dettaglio della voce e ritorno contestuale dal Codex o dal diario.
+- Contratto locale `RulesetAdapter` con derivazione pura separata dai valori
+  manuali. Solo l'adattatore generico è disponibile; identificatori sconosciuti
+  hanno lo stesso comportamento manuale. Nessun regolamento commerciale scelto.
+  Dettagli in `docs/RULESETS.md`. Nessuna nuova dipendenza.
+- Palette esistente #101623/#161c28/#465268, testo #e7e8ed/#a9b4c7 e ottone
+  #d7b978; Georgia per titoli, Segoe UI per dati/controlli. Scheda leggibile,
+  contatori rapidi e dettaglio con provenienza prioritari rispetto a decorazioni.
+  Screenshot verificati a 1200 px, tre viste senza overflow a 760 px.
+- Helper delle anteprime blocco condiviso con il grafo in `knowledge/blocks.ts`,
+  senza dipendenze inverse sul canvas. Skill frontend-design e
+  vercel-react-best-practices applicate a gerarchia, caricamento differito e
+  stato derivato. QA desktop con Playwright, bridge Tauri e SQLite reali.
 
 ## M3 — Relazioni dichiarate e grafo
 

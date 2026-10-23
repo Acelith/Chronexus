@@ -1,0 +1,880 @@
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import type { SaveGuard } from "../journal/Editor";
+import { errorMessage, type Session } from "../journal/api";
+import type { KnowledgePage } from "../knowledge/api";
+import type { SourceRef } from "../graph/api";
+import {
+  playerApi,
+  statGroups,
+  type Asset,
+  type AssetDetails,
+  type AssetInput,
+  type Character,
+  type CharacterInput,
+  type PlayerView,
+} from "./api";
+import { adapterFor } from "./rulesets";
+import CharacterForm from "./CharacterForm";
+import AssetForm from "./AssetForm";
+
+type EditState =
+  | { type: "character" }
+  | { type: "asset"; initial: Asset | null; kind: AssetDetails["kind"] }
+  | null;
+interface Props {
+  campaignId: string;
+  view: PlayerView;
+  pages: KnowledgePage[];
+  sessions: Session[];
+  busy?: boolean;
+  initialSelection?: string;
+  register: (guard: SaveGuard | null) => void;
+  onPage: (
+    id: string,
+    title: string,
+    assetId: string,
+    view: PlayerView,
+  ) => void;
+  onSource: (source: SourceRef, assetId: string, view: PlayerView) => void;
+}
+export default function PlayerWorkspace({
+  campaignId,
+  view,
+  pages,
+  sessions,
+  busy = false,
+  initialSelection,
+  register,
+  onPage,
+  onSource,
+}: Props) {
+  const [character, setCharacter] = useState<Character | null>(null);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [refresh, setRefresh] = useState(0);
+  const [editor, setEditor] = useState<EditState>(null);
+  const [pending, setPending] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    initialSelection ?? null,
+  );
+  const [confirm, setConfirm] = useState<Asset | null>(null);
+  const [search, setSearch] = useState("");
+  const [rank, setRank] = useState("");
+  const [status, setStatus] = useState("all");
+  const dirty = useRef(false);
+  const operation = useRef(false);
+  const deleteButton = useRef<HTMLButtonElement>(null);
+  function edit(value: EditState) {
+    dirty.current = value !== null;
+    setEditor(value);
+    setError("");
+  }
+  function askDelete(value: Asset | null) {
+    dirty.current = value !== null;
+    setConfirm(value);
+  }
+  useEffect(() => {
+    register({
+      dirty: () => dirty.current || operation.current,
+      flush: async () => {
+        if (operation.current)
+          throw Error("Attendi il salvataggio della scheda o della voce.");
+        if (dirty.current)
+          throw Error(
+            "Salva o annulla le modifiche aperte prima di cambiare vista o chiudere Chronexus.",
+          );
+      },
+    });
+    return () => register(null);
+  }, [register]);
+  useEffect(() => {
+    let active = true;
+    playerApi
+      .character(campaignId)
+      .then(async (sheet) => ({
+        sheet,
+        items: sheet ? await playerApi.assets(campaignId, sheet.id) : [],
+      }))
+      .then(({ sheet, items }) => {
+        if (active) {
+          setCharacter(sheet);
+          setAssets(items);
+          setError("");
+        }
+      })
+      .catch((reason) => {
+        if (active) setError(errorMessage(reason));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [campaignId, refresh]);
+  const disabled = busy || pending;
+  async function perform(
+    action: () => Promise<void>,
+    message = "Salvato sul computer.",
+  ) {
+    if (operation.current || busy) return;
+    operation.current = true;
+    setPending(true);
+    setError("");
+    setNotice("");
+    try {
+      await action();
+      setNotice(message);
+    } catch (reason) {
+      setError(errorMessage(reason));
+    } finally {
+      operation.current = false;
+      setPending(false);
+    }
+  }
+  function saveAsset(input: AssetInput, initial: Asset | null) {
+    if (!character) return Promise.resolve();
+    return perform(async () => {
+      const saved = await playerApi.saveAsset(
+        campaignId,
+        character.id,
+        initial,
+        input,
+      );
+      setAssets((items) => [...items.filter((a) => a.id !== saved.id), saved]);
+      setSelectedId(saved.id);
+      edit(null);
+    });
+  }
+  const visible = assets
+    .filter((asset) => {
+      const d = asset.input.details;
+      if (view === "inventory" ? d.kind !== "item" : d.kind === "item")
+        return false;
+      if (
+        !d.name.toLocaleLowerCase("it").includes(search.toLocaleLowerCase("it"))
+      )
+        return false;
+      if (view === "abilities" && d.kind !== "item") {
+        if (
+          rank &&
+          !d.rank.toLocaleLowerCase("it").includes(rank.toLocaleLowerCase("it"))
+        )
+          return false;
+        if (
+          (status === "known" && !d.known) ||
+          (status === "prepared" && !d.prepared) ||
+          (status === "spell" && d.kind !== "spell") ||
+          (status === "ability" && d.kind !== "ability")
+        )
+          return false;
+      }
+      return true;
+    })
+    .sort((a, b) =>
+      a.input.details.name.localeCompare(b.input.details.name, "it"),
+    );
+  const selected = visible.find((a) => a.id === selectedId) ?? visible[0];
+  const title =
+    view === "character"
+      ? "Personaggio"
+      : view === "inventory"
+        ? "Inventario"
+        : "Incantesimi e capacità";
+  if (loading) return <p role="status">Apertura scheda e inventario…</p>;
+  if (error && !character && !editor)
+    return (
+      <section aria-label={title}>
+        <div role="alert" className="error">
+          <p>{error}</p>
+          <button
+            disabled={disabled}
+            onClick={() => {
+              setLoading(true);
+              setRefresh((n) => n + 1);
+            }}
+          >
+            Ricarica scheda
+          </button>
+        </div>
+      </section>
+    );
+  return (
+    <section
+      className="player-workspace"
+      aria-label={title}
+      aria-busy={disabled}
+    >
+      <header className="player-heading">
+        <div>
+          <h3>{title}</h3>
+          <p className="muted">
+            {character
+              ? `${character.data.name} · ${adapterFor(character.data.systemId).label}`
+              : "Crea il personaggio per raccogliere risorse, oggetti e capacità."}
+          </p>
+        </div>
+        {!editor && character ? (
+          <div className="actions">
+            {view === "character" ? (
+              <button
+                disabled={disabled}
+                onClick={() => edit({ type: "character" })}
+              >
+                Modifica personaggio
+              </button>
+            ) : (
+              <>
+                <button
+                  className="primary"
+                  disabled={disabled}
+                  onClick={() =>
+                    edit({
+                      type: "asset",
+                      initial: null,
+                      kind: view === "inventory" ? "item" : "spell",
+                    })
+                  }
+                >
+                  {view === "inventory"
+                    ? "Aggiungi oggetto"
+                    : "Aggiungi incantesimo"}
+                </button>
+                {view === "abilities" ? (
+                  <button
+                    disabled={disabled}
+                    onClick={() =>
+                      edit({ type: "asset", initial: null, kind: "ability" })
+                    }
+                  >
+                    Aggiungi capacità
+                  </button>
+                ) : null}
+              </>
+            )}
+          </div>
+        ) : null}
+      </header>
+      {error ? (
+        <div className="error" role="alert">
+          <p>{error}</p>
+          {!editor && !confirm ? (
+            <button
+              disabled={disabled}
+              onClick={() => {
+                setLoading(true);
+                setRefresh((n) => n + 1);
+              }}
+            >
+              Ricarica scheda
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+      <p className="player-save-status" role="status">
+        {pending ? "Salvataggio…" : notice}
+      </p>
+      {editor?.type === "character" ? (
+        <CharacterForm
+          initial={character}
+          busy={disabled}
+          onCancel={() => edit(null)}
+          onSave={async (input: CharacterInput) => {
+            await perform(async () => {
+              const saved = await playerApi.saveCharacter(
+                campaignId,
+                character,
+                input,
+              );
+              setCharacter(saved);
+              edit(null);
+            });
+          }}
+        />
+      ) : editor?.type === "asset" && character ? (
+        <AssetForm
+          initial={editor.initial}
+          kind={editor.kind}
+          systemId={character.data.systemId}
+          pages={pages}
+          sessions={sessions}
+          busy={disabled}
+          onCancel={() => edit(null)}
+          onSave={(input) => saveAsset(input, editor.initial)}
+        />
+      ) : !character ? (
+        <div className="empty player-empty">
+          <h4>La scheda è ancora vuota</h4>
+          <p>
+            I valori saranno quelli che inserisci tu, indipendentemente dal
+            regolamento.
+          </p>
+          <button
+            className="primary"
+            disabled={disabled}
+            onClick={() => edit({ type: "character" })}
+          >
+            Crea personaggio
+          </button>
+        </div>
+      ) : view === "character" ? (
+        <>
+          <div className="character-identity">
+            <h4>{character.data.name}</h4>
+            <dl>
+              {[
+                ["Regolamento", character.data.systemId],
+                ["Origine", character.data.ancestry],
+                ["Vocazione", character.data.vocation],
+                ["Livello", character.data.level],
+                ["Esperienza", character.data.experience],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{value ?? "Non indicato"}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <div className="player-counters">
+            <Counter
+              label="Punti vita"
+              value={character.data.hpCurrent}
+              maximum={character.data.hpMaximum}
+              disabled={disabled}
+              onChange={(delta) =>
+                void perform(async () =>
+                  setCharacter(
+                    await playerApi.counter(campaignId, character, "hp", delta),
+                  ),
+                )
+              }
+            />
+            <Counter
+              label="Punti vita temporanei"
+              value={character.data.hpTemporary}
+              maximum={1000000}
+              hideMaximum
+              disabled={disabled}
+              onChange={(delta) =>
+                void perform(async () =>
+                  setCharacter(
+                    await playerApi.counter(
+                      campaignId,
+                      character,
+                      "temporaryHp",
+                      delta,
+                    ),
+                  ),
+                )
+              }
+            />
+            {character.data.resources.map((resource) => (
+              <Counter
+                key={resource.id}
+                label={resource.label}
+                kind={resource.kind === "slot" ? "Slot" : "Risorsa"}
+                value={resource.current}
+                maximum={resource.maximum}
+                disabled={disabled}
+                onChange={(delta) =>
+                  void perform(async () =>
+                    setCharacter(
+                      await playerApi.counter(
+                        campaignId,
+                        character,
+                        resource.id,
+                        delta,
+                      ),
+                    ),
+                  )
+                }
+              />
+            ))}
+          </div>
+          <h4>Statistiche</h4>
+          {character.data.stats.length ? (
+            <dl className="player-stats">
+              {character.data.stats.map((s) => (
+                <div key={s.id}>
+                  <dt>
+                    {s.label}
+                    <span className="muted">{statGroups[s.group]}</span>
+                  </dt>
+                  <dd>{s.value || "Non indicato"}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p className="muted">
+              Nessuna statistica configurata. Aggiungila da “Modifica
+              personaggio”.
+            </p>
+          )}
+          <h4>Condizioni</h4>
+          <p className="player-text">
+            {character.data.conditions || "Nessuna condizione annotata."}
+          </p>
+          <h4>Note</h4>
+          <p className="player-text">
+            {character.data.notes || "Nessuna nota del personaggio."}
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="player-filters">
+            <label>
+              Cerca per nome
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                disabled={disabled}
+              />
+            </label>
+            {view === "abilities" ? (
+              <>
+                <label>
+                  Filtra per rango
+                  <input
+                    value={rank}
+                    onChange={(e) => setRank(e.target.value)}
+                    disabled={disabled}
+                  />
+                </label>
+                <label>
+                  Stato o tipo
+                  <select
+                    aria-label="Stato o tipo"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    disabled={disabled}
+                  >
+                    <option value="all">Tutte</option>
+                    <option value="known">Conosciute</option>
+                    <option value="prepared">Preparate</option>
+                    <option value="spell">Incantesimi</option>
+                    <option value="ability">Capacità</option>
+                  </select>
+                </label>
+              </>
+            ) : null}
+          </div>
+          {view === "abilities" ? (
+            <p className="muted">
+              Descrizioni tue, marcatori manuali. Per consumare risorse o slot
+              usa i contatori della scheda.
+            </p>
+          ) : null}
+          {!visible.length ? (
+            <div className="player-empty">
+              <p>
+                {search || rank || status !== "all"
+                  ? "Nessuna voce corrisponde ai filtri."
+                  : view === "inventory"
+                    ? "L’inventario è vuoto. Aggiungi il primo oggetto e annota da chi lo hai ricevuto."
+                    : "Nessuna capacità annotata. Aggiungi un incantesimo o una capacità con il tuo testo."}
+              </p>
+            </div>
+          ) : (
+            <div className="player-assets-layout">
+              <nav
+                className="player-asset-list"
+                aria-label="Voci del personaggio"
+              >
+                {visible.map((a) => (
+                  <button
+                    key={a.id}
+                    disabled={disabled}
+                    aria-current={a.id === selected?.id ? "page" : undefined}
+                    onClick={() => {
+                      setSelectedId(a.id);
+                      setError("");
+                    }}
+                  >
+                    <strong>{a.input.details.name}</strong>
+                    <span>
+                      {a.input.details.kind === "item"
+                        ? `Quantità ${a.input.details.quantity}${a.input.details.equipped ? " · Equipaggiato" : ""}`
+                        : `${a.input.details.kind === "spell" ? "Incantesimo" : "Capacità"} · ${a.input.details.rank || "Senza rango"}`}
+                    </span>
+                  </button>
+                ))}
+              </nav>
+              {selected ? (
+                <article
+                  className="player-asset-detail"
+                  aria-label="Dettaglio voce"
+                >
+                  <h4>{selected.input.details.name}</h4>
+                  {selected.input.details.kind === "item" ? (
+                    <>
+                      <Counter
+                        label="Quantità"
+                        value={selected.input.details.quantity}
+                        maximum={1000000}
+                        hideMaximum
+                        disabled={disabled}
+                        onChange={(delta) => {
+                          if (selected.input.details.kind === "item")
+                            void saveAsset(
+                              {
+                                ...selected.input,
+                                details: {
+                                  ...selected.input.details,
+                                  quantity:
+                                    selected.input.details.quantity + delta,
+                                },
+                              },
+                              selected,
+                            );
+                        }}
+                      />
+                      <p>
+                        {selected.input.details.category || "Senza categoria"} ·{" "}
+                        {selected.input.details.equipped
+                          ? "Equipaggiato"
+                          : "Non equipaggiato"}
+                        {selected.input.details.consumable
+                          ? " · Consumabile"
+                          : ""}
+                      </p>
+                      <p>
+                        Peso: {selected.input.details.weight ?? "Non indicato"}{" "}
+                        · Valore:{" "}
+                        {selected.input.details.value || "Non indicato"}
+                      </p>
+                      <button
+                        disabled={disabled}
+                        onClick={() => {
+                          if (selected.input.details.kind === "item")
+                            void saveAsset(
+                              {
+                                ...selected.input,
+                                details: {
+                                  ...selected.input.details,
+                                  equipped: !selected.input.details.equipped,
+                                },
+                              },
+                              selected,
+                            );
+                        }}
+                      >
+                        {selected.input.details.equipped
+                          ? "Togli equipaggiamento"
+                          : "Equipaggia"}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        {selected.input.details.systemId} ·{" "}
+                        {selected.input.details.rank || "Senza rango"} ·{" "}
+                        {selected.input.details.school || "Senza tradizione"}
+                      </p>
+                      <dl className="ability-metadata">
+                        {[
+                          ["Attivazione", selected.input.details.castingTime],
+                          ["Durata", selected.input.details.duration],
+                          ["Portata", selected.input.details.range],
+                          ["Componenti", selected.input.details.components],
+                        ].map(([label, value]) => (
+                          <div key={label}>
+                            <dt>{label}</dt>
+                            <dd>{value || "Non indicato"}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                      <p>
+                        {selected.input.details.known
+                          ? "Conosciuta"
+                          : "Non segnata come conosciuta"}{" "}
+                        ·{" "}
+                        {selected.input.details.prepared
+                          ? "Preparata"
+                          : "Non preparata"}
+                      </p>
+                      <div className="actions">
+                        <button
+                          disabled={disabled}
+                          onClick={() => {
+                            if (selected.input.details.kind !== "item")
+                              void saveAsset(
+                                {
+                                  ...selected.input,
+                                  details: {
+                                    ...selected.input.details,
+                                    known: !selected.input.details.known,
+                                  },
+                                },
+                                selected,
+                              );
+                          }}
+                        >
+                          Cambia conosciuta
+                        </button>
+                        <button
+                          disabled={disabled}
+                          onClick={() => {
+                            if (selected.input.details.kind !== "item")
+                              void saveAsset(
+                                {
+                                  ...selected.input,
+                                  details: {
+                                    ...selected.input.details,
+                                    prepared: !selected.input.details.prepared,
+                                  },
+                                },
+                                selected,
+                              );
+                          }}
+                        >
+                          Cambia preparata
+                        </button>
+                      </div>
+                    </>
+                  )}
+                  <p className="player-text">
+                    {selected.input.details.description ||
+                      "Nessuna descrizione."}
+                  </p>
+                  {selected.input.details.notes ? (
+                    <p className="player-text">
+                      {selected.input.details.notes}
+                    </p>
+                  ) : null}
+                  <h5>Provenienza e collegamenti</h5>
+                  <div className="player-provenance">
+                    {(
+                      [
+                        [selected.input.links.pageId, "Pagina Codex"],
+                        [selected.input.links.npcId, "PNG"],
+                        [selected.input.links.placeId, "Luogo"],
+                        [selected.input.links.questId, "Missione"],
+                      ] as const
+                    ).map(([id, label]) => {
+                      const page = pages.find((p) => p.id === id);
+                      return id ? (
+                        <button
+                          key={label}
+                          disabled={disabled}
+                          onClick={() =>
+                            onPage(
+                              id,
+                              page?.title ?? "Pagina collegata",
+                              selected.id,
+                              view,
+                            )
+                          }
+                        >
+                          {label}: {page?.title ?? "Apri pagina"}
+                        </button>
+                      ) : null;
+                    })}
+                    {selected.input.links.sourceSessionId ? (
+                      <button
+                        disabled={disabled}
+                        onClick={() => {
+                          const session = sessions.find(
+                            (s) =>
+                              s.id === selected.input.links.sourceSessionId,
+                          );
+                          if (session)
+                            onSource(
+                              {
+                                kind: "session",
+                                id: session.id,
+                                title: session.title,
+                                blockId: selected.sourceAvailable
+                                  ? selected.input.links.sourceBlockId
+                                  : null,
+                              },
+                              selected.id,
+                              view,
+                            );
+                        }}
+                      >
+                        Apri sessione fonte
+                        {selected.input.links.sourceBlockId &&
+                        selected.sourceAvailable
+                          ? " al blocco"
+                          : ""}
+                      </button>
+                    ) : null}
+                  </div>
+                  {!selected.sourceAvailable ? (
+                    <p role="status">
+                      Il blocco fonte non è più presente. La provenienza è
+                      conservata; puoi aprire l’intera sessione.
+                    </p>
+                  ) : null}
+                  <p className="player-text">
+                    {selected.input.links.provenanceNotes ||
+                      "Nessuna nota di provenienza."}
+                  </p>
+                  <div className="actions">
+                    <button
+                      disabled={disabled}
+                      onClick={() =>
+                        edit({
+                          type: "asset",
+                          initial: selected,
+                          kind: selected.input.details.kind,
+                        })
+                      }
+                    >
+                      Modifica voce
+                    </button>
+                    <button
+                      ref={deleteButton}
+                      disabled={disabled}
+                      onClick={() => askDelete(selected)}
+                    >
+                      Elimina voce
+                    </button>
+                  </div>
+                </article>
+              ) : null}
+            </div>
+          )}
+        </>
+      )}
+      {confirm ? (
+        <DeleteConfirmation
+          asset={confirm}
+          busy={disabled}
+          error={error}
+          onCancel={() => {
+            askDelete(null);
+            deleteButton.current?.focus();
+          }}
+          onDelete={() =>
+            void perform(async () => {
+              await playerApi.deleteAsset(confirm);
+              setAssets((items) => items.filter((a) => a.id !== confirm.id));
+              askDelete(null);
+            }, "Voce eliminata. Pagine e appunti conservati.")
+          }
+        />
+      ) : null}
+    </section>
+  );
+}
+function Counter({
+  label,
+  value,
+  maximum,
+  disabled,
+  onChange,
+  hideMaximum = false,
+  kind,
+}: {
+  label: string;
+  value: number;
+  maximum: number;
+  disabled: boolean;
+  onChange: (delta: number) => void;
+  hideMaximum?: boolean;
+  kind?: string;
+}) {
+  return (
+    <div className="player-counter">
+      <div>
+        <span>{label}</span>
+        {kind ? <small>{kind}</small> : null}
+        <output aria-label={label}>
+          {value}
+          {hideMaximum ? "" : ` / ${maximum}`}
+        </output>
+      </div>
+      <div className="actions">
+        <button
+          aria-label={`Riduci ${label}`}
+          disabled={disabled || value <= 0}
+          onClick={() => onChange(-1)}
+        >
+          −
+        </button>
+        <button
+          aria-label={`Aumenta ${label}`}
+          disabled={disabled || value >= maximum}
+          onClick={() => onChange(1)}
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+function DeleteConfirmation({
+  asset,
+  busy,
+  error,
+  onCancel,
+  onDelete,
+}: {
+  asset: Asset;
+  busy: boolean;
+  error: string;
+  onCancel: () => void;
+  onDelete: () => void;
+}) {
+  const dialog = useRef<HTMLDivElement>(null);
+  const cancel = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    cancel.current?.focus();
+  }, []);
+  function keys(e: KeyboardEvent) {
+    if (e.key === "Escape" && !busy) {
+      e.preventDefault();
+      onCancel();
+    }
+    if (e.key !== "Tab") return;
+    const buttons = dialog.current?.querySelectorAll<HTMLButtonElement>(
+      "button:not(:disabled)",
+    );
+    if (!buttons?.length) {
+      e.preventDefault();
+      return;
+    }
+    const first = buttons[0],
+      last = buttons[buttons.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+  return (
+    <div className="player-confirm-overlay">
+      <div
+        ref={dialog}
+        className="player-confirm"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="player-delete-title"
+        aria-describedby="player-delete-description"
+        onKeyDown={keys}
+      >
+        <h4 id="player-delete-title">Eliminare {asset.input.details.name}?</h4>
+        <p id="player-delete-description">
+          La voce sarà rimossa dal personaggio. Le pagine del Codex e gli
+          appunti fonte saranno conservati.
+        </p>
+        {error ? <p role="alert">{error}</p> : null}
+        <div className="actions">
+          <button ref={cancel} disabled={busy} onClick={onCancel}>
+            Annulla eliminazione
+          </button>
+          <button className="danger" disabled={busy} onClick={onDelete}>
+            Conferma eliminazione
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
