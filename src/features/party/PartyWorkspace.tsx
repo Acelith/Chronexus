@@ -3,6 +3,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -64,7 +65,9 @@ export default function PartyWorkspace({
     [attempt, setAttempt] = useState(0);
   const editor = useRef<SaveGuard | null>(null),
     state = useRef({ draft, pending, confirm });
-  state.current = { draft, pending, confirm };
+  useLayoutEffect(() => {
+    state.current = { draft, pending, confirm };
+  }, [draft, pending, confirm]);
   const registerEditor = useCallback((g: SaveGuard | null) => {
     editor.current = g;
   }, []);
