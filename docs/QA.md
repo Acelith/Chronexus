@@ -360,3 +360,39 @@ Per ripetere lo smoke estensione (ogni fase chiude l'app):
 
 Usare percorsi assoluti per tutte le variabili NODEX; non usare profili personali.
 Lo script contiene soltanto dati fittizi e un minuscolo PNG di test; output in .tools/.
+## M7 — verifica locale del 23 ottobre 2026
+
+- Runtime Ollama portable 0.40.10, Qwen3:4b-instruct Q4_K_M su RTX 4080 SUPER.
+  Identità/pesi/licenze, configurazione e limiti: AI_LOCAL.md.
+- Modello specifico D&D 1.5B realmente caricato su GPU ma scartato per risposte
+  italiane ripetitive. Alternativa multilingue approvata esplicitamente dall'utente.
+- 63 test Rust: PASS; Clippy -D warnings, build debug: PASS.
+- 55 test React, lint/typecheck e format:check: PASS; ultimi ritocchi verificati
+  anche con i 3 test mirati. Pacchetto NSIS M7: PASS; installazione non ripetuta.
+- Prove native su profilo fittizio: streaming/cancel, annullamento durante
+  navigazione, apertura blocco citato, rinomina con avviso, scelta regole 2024,
+  cancellazione confermata, backup ed export: PASS.
+- Backup nativo ripristinato in un nuovo profilo e riavviato senza Ollama:
+  confronto esatto di 90 conversazioni/fonti/metriche, 25 pagine, un membro
+  Party e configurazione: PASS. Immagine originale inclusa nel backup/export.
+  Checksum manifest, hash delle fonti e byte originali PNG verificati anche
+  leggendo i due archivi; pesi dei modelli assenti.
+- Errori con server locale simulato (non prove di guasto GPU reale): cloud
+  attivo, modello assente, CPU esclusiva e OOM fermano prima di inviare appunti;
+  NDJSON malformato, frammento eccessivo, stream interrotto e citazione inventata
+  conservano errore/bozza. Dati canonici invariati. Runtime realmente assente:
+  errore gestito e conservato; campagne e cronologia restano consultabili.
+- Prova con cloud disabilitato e proxy esterni non raggiungibili: 40 scenari
+  eseguiti sulla GPU. 80 campioni, 173 connessioni del runtime/esecutore, tutte
+  verso 127.0.0.1. Non equivale a rete fisicamente disconnessa/firewall.
+- Il modello da solo non supera i criteri rigorosi sui documenti malevoli:
+  recupera il dato ma ripete attacchi e dubbi fuorvianti; una citazione [S99]
+  viene correttamente respinta. Aggiunto gate lessicale prudente prima del
+  modello per segnali espliciti di manipolazione; 5 casi dedicati e test benigni.
+  Non è una classificazione infallibile: possibili falsi positivi e attacchi nuovi.
+- Benchmark finale con il gate: 40/40 esiti attesi, 35 inferenze GPU e 5 richieste
+  fermate prima del modello. Dati canonici invariati. Script pubblico sintetico
+  scripts/qa/local-ai-evaluation.mjs: solo profilo debug vuoto e flag
+  CHRONEXUS_AI_QA=isolated. Verificare anche le risposte, non solo parole chiave.
+- Mancano: prova con rete fisicamente disconnessa/blocco firewall, GPU e
+  pacchetti macOS/Linux; OOM fisico non provocato. Nessun risultato inventato.

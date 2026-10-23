@@ -1,4 +1,4 @@
-param([string]$OllamaPath = '', [string]$ModelsPath = '')
+﻿param([string]$OllamaPath = '', [string]$ModelsPath = '')
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 $runtimeDirectory = Join-Path $projectRoot '.tools/m7-runtime'

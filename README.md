@@ -257,6 +257,8 @@ Prove desktop ripetibili e matrice delle verifiche: [docs/QA.md](docs/QA.md).
 
 React, Vite, Mantine, Cytoscape.js, rusqlite, zip, uuid: MIT (uuid anche Apache-2.0).
 Tauri, tauri-plugin-dialog, sha2 e tempfile: MIT/Apache-2.0.
+M7: reqwest 0.13.5 MIT/Apache-2.0 (HTTP loopback, feature predefinite escluse),
+Tokio 1.54.1 MIT. Licenze e versioni verificate nei manifest dei pacchetti locali.
 BlockNote core/react/mantine: MPL-2.0, utilizzati senza
 modificare i sorgenti e senza funzionalità commerciali XL. TypeScript: Apache-2.0.
 Le distribuzioni future dovranno includere gli avvisi delle licenze applicabili.
@@ -320,6 +322,25 @@ locale con avviso. Cache limitata a 100 risposte: le meno recenti possono essere
 sostituite. Fonti e copertura non equivalgono a tutti i manuali commerciali.
 Ricerca API/Skill: [docs/RESEARCH_DND.md](docs/RESEARCH_DND.md).
 
-**M7 è pianificata**, non attiva: assistente D&D con modello locale e GPU,
-retrieval citato e separazione delle edizioni. Candidati, limiti e accettazione:
-[docs/AI_LOCAL.md](docs/AI_LOCAL.md). Nessun runtime o modello AI installato.
+## Assistente locale M7
+
+La sezione **Assistente locale** interroga gli appunti della campagna e le voci
+D&D già salvate nella Wiki, separate per edizione. Risposte italiane con fonti
+riapribili, streaming, annullamento e cronologia conservata nei backup/export.
+Non modifica appunti, relazioni, scheda o inventario.
+
+Modello provato: **Qwen3:4b-instruct**, multilingue con fonti locali, scelto
+esplicitamente dopo le prove insufficienti del candidato specifico D&D.
+Non è fine-tuned su D&D; citazioni e risposte richiedono verifica del giocatore.
+Ollama e i pesi sono separati dall'installer e dai backup; nessun download o
+inferenza automatica all'avvio. L'app funziona anche senza runtime.
+
+Nel progetto di questa sessione, avvia `powershell -File scripts/Start-LocalAI.ps1`,
+poi Chronexus, una campagna → **Assistente locale** → **Controlla Ollama** →
+`qwen3:4b-instruct` → conferma il profilo multilingue → **Attiva modello locale**.
+Il runtime deve confermare cloud disabilitato e GPU disponibile; CPU esclusiva
+bloccata prima di inviare gli appunti. Nessun ripiego su cloud.
+
+Setup su nuove macchine, identità del modello, collaudi e limiti:
+[docs/AI_LOCAL.md](docs/AI_LOCAL.md). La ricerca è lessicale e usa estratti
+limitati: nomi/alias precisi aiutano. Una citazione valida non garantisce verità.

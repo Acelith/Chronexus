@@ -324,3 +324,11 @@ non usata come nuova fonte. Migrazione 012 additiva, configurazione disattivata
 inizialmente, conversazioni cancellabili/esportabili/backuppate; pesi esclusi.
 Le citazioni verificano appartenenza e versione, non la verità semantica.
 Skill vercel-react-best-practices per caricamento differito e letture indipendenti.
+
+La valutazione reale ha mostrato che le istruzioni del solo prompt non bastano:
+il modello può ripetere un attacco o citare identificativi non forniti. Un gate
+lessicale prudente esclude prima dell'invio estratti con segnali espliciti di
+manipolazione, conservando le altre fonti pulite. Se tutte sono sospette, ferma
+la domanda e ne conserva le copie per revisione. Metriche tracciano esclusioni
+e possibile invio. Non è una classificazione infallibile; possibili falsi positivi.
+Nessun tool del modello, nessuna scrittura implicita nel mondo di gioco.

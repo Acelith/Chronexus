@@ -127,7 +127,7 @@ Deliverables:
 Acceptance:
 - Search source note, restart, run backup/restore, navigate graph, validate on supported OS build environments without presenting untested builds as verified.
 
-## M7 - Assistente D&D locale con GPU (pianificata, non implementata)
+## M7 - Assistente D&D locale con GPU
 
 Richiesta esplicita: domande e analisi della propria campagna con inferenza
 locale Ollama/adapter equivalente, modello specifico D&D quando disponibile,
@@ -142,7 +142,16 @@ GPU reale verificata e nessun cloud. Specifica, candidati e accettazione in
 - Accettazione: inferenza reale sulla GPU e offline, domande con fonti e senza
   risposta, isolamento campagne/edizioni, fonti rinominate e documenti malevoli.
 - Nessun fatto, relazione, contatore o appunto modificato senza revisione utente.
-- Prima completare le verifiche disponibili di M6; M7 non è avviata in questo giro.
+- Implementazione M7 successivamente autorizzata: adapter Rust Ollama, schema
+  012, retrieval, UI e cronologia/backup/export presenti. Il candidato D&D
+  specifico è stato provato su GPU ma scartato per qualità; l'utente ha approvato
+  Qwen3:4b-instruct multilingue con fonti locali, non fine-tuned D&D.
+- Guard aggiuntiva prima dell'inferenza: estratti con segnali espliciti di
+  manipolazione esclusi e segnalati; se mancano fonti pulite la richiesta viene
+  fermata. Nessuna modifica degli appunti e nessuna garanzia semantica assoluta.
+- Evidenza corrente, conteggi e limiti: docs/STATUS.md e docs/AI_LOCAL.md.
+  Rimane la prova di accettazione con rete fisicamente disconnessa/firewall;
+  proxy non raggiungibili e osservazione loopback sono verifiche distinte.
 
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.
@@ -166,7 +175,7 @@ actual macOS/Linux CI/package checks. M7 is now explicitly planned in docs/AI_LO
 after the requested M6 continuation and a subsequent user instruction. See docs/STATUS.md for evidence.
 
 
-## Current checkpoint — M6 extension and M7 plan
+## Checkpoint precedente — M6 extension and M7 plan
 
 M6 Windows extension delivered: medieval reading theme, readable/organic graph,
 Party linked to Codex, Open5e wiki/cache, additive schemas 010/011. Native
@@ -174,4 +183,7 @@ restart/restore and older Speratia backup verified. Windows NSIS silent install,
 installed launch/API access and uninstall preserving data passed. Remaining M6:
 actual macOS/Linux CI/package validation and interactive wizard visual review;
 no remote push authorized. M7 local GPU D&D assistant is planned, not implemented.
-Current counts, checks and limitations: docs/STATUS.md.
+Questo è il checkpoint precedente all'autorizzazione M7. Stato aggiornato,
+verifiche e limiti: docs/STATUS.md. La prossima attività della roadmap dopo
+questa implementazione resta completare M6 sui runner macOS/Linux e il wizard
+interattivo Windows; nessuna M8 è ancora definita.

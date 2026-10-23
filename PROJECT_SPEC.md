@@ -217,11 +217,21 @@ backups; failure retains the cached copy visibly. Existing SRD spell imports
 and custom editing remain unchanged. Details and sources: docs/RESEARCH_DND.md.
 
 
-## M7 approved planning: local D&D assistant
+## M7 approved implementation: local D&D assistant
 
 The user explicitly requested a new milestone for local GPU inference with
 Ollama or an equivalent runtime, specialized in D&D where such a model exists.
-See docs/AI_LOCAL.md and ROADMAP M7. This is planning only: no AI implementation,
-model download, runtime installation or campaign upload is authorized by the
-milestone document itself. Preserve player knowledge, source citations and
-edition separation; no implicit mutations. Current M6 remains independently usable.
+The user subsequently authorized M7 implementation and explicitly selected a
+multilingual model with local D&D/campaign sources after the specific D&D
+candidate failed real quality tests. Qwen3:4b-instruct is not D&D fine-tuned.
+See docs/AI_LOCAL.md for verified identities, GPU evidence, setup and limits.
+Optional, default-disabled Rust adapter to fixed loopback Ollama; verified cloud
+disabled/local weights/pinned digest and GPU before sending sources. No runtime
+or weights bundled in the app, no automatic downloads or cloud fallback.
+FTS5 scoped to selected campaign, bounded excerpts with stable IDs/revisions;
+rules only from explicitly selected cached Wiki sources of the same edition.
+No implicit mutations, GM secrets or claims promoted to facts. Conversations
+are not independent evidence. Persist streaming drafts/answers/source snapshots
+in additive schema 012; delete/export/backup defined, model weights excluded.
+All earlier restrictions on external AI remain in force. Chronexus remains
+independently usable with the local assistant disabled or Ollama unavailable.

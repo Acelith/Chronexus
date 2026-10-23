@@ -77,7 +77,8 @@ Archivi/foto/DB/profili/modelli restano fuori Git; nessun dato privato pubblicat
 - a89874e fix(ai): evita prove duplicate e recupera i ruoli del party
 - d63ba16 fix(ai): restringe le fonti ai nomi presenti nella domanda
 - cf39425 fix(ai): esclude istruzioni sospette prima dell inferenza
-- Interfaccia, avviatore e checkpoint finale: vedere gli ultimi commit Git.
+- 4ac9f7f feat(ai): aggiunge interfaccia assistente e avvio locale
+- Guide e checkpoint finale: vedere l'ultimo commit Git.
 
 ## Avvio, Skill e limiti
 
