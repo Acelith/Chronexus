@@ -18,12 +18,17 @@ pub fn open(path: &Path) -> rusqlite::Result<Connection> {
         connection.query_row("SELECT MAX(version) FROM schema_migrations", [], |row| {
             row.get(0)
         })?;
-    if version > 2 {
+    if version > 3 {
         return Err(rusqlite::Error::InvalidQuery);
     }
     if version < 2 {
         let transaction = connection.transaction()?;
         transaction.execute_batch(include_str!("../migrations/002_journal.sql"))?;
+        transaction.commit()?;
+    }
+    if version < 3 {
+        let transaction = connection.transaction()?;
+        transaction.execute_batch(include_str!("../migrations/003_knowledge.sql"))?;
         transaction.commit()?;
     }
     Ok(connection)
@@ -60,7 +65,7 @@ mod tests {
                 .query_row("SELECT COUNT(*) FROM schema_migrations", [], |row| row
                     .get::<_, i64>(0))
                 .unwrap(),
-            2
+            3
         );
         assert_eq!(
             connection

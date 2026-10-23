@@ -2,6 +2,9 @@ mod db;
 mod journal;
 #[cfg(test)]
 mod journal_tests;
+mod knowledge;
+#[cfg(test)]
+mod knowledge_tests;
 use journal::{AppResult, Campaign, Session};
 use std::sync::Mutex;
 use tauri::Manager;
@@ -53,6 +56,61 @@ fn save_document(
     db.with(|c| journal::save_document(c, &campaign_id, &id, revision, document))
 }
 
+#[tauri::command]
+fn list_pages(db: tauri::State<Database>, campaign_id: String) -> AppResult<Vec<knowledge::Page>> {
+    db.with(|c| knowledge::list_pages(c, &campaign_id))
+}
+#[tauri::command]
+fn create_page(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    title: String,
+    kind: String,
+    status: String,
+    aliases: Vec<String>,
+) -> AppResult<knowledge::Page> {
+    db.with(|c| knowledge::create_page(c, &campaign_id, &title, &kind, &status, &aliases))
+}
+#[tauri::command]
+fn update_page(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    id: String,
+    title: String,
+    kind: String,
+    status: String,
+    aliases: Vec<String>,
+) -> AppResult<knowledge::Page> {
+    db.with(|c| knowledge::update_page(c, &campaign_id, &id, &title, &kind, &status, &aliases))
+}
+#[tauri::command]
+fn save_page_document(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    id: String,
+    revision: i64,
+    document: serde_json::Value,
+) -> AppResult<knowledge::Page> {
+    db.with(|c| knowledge::save_page_document(c, &campaign_id, &id, revision, document))
+}
+#[tauri::command]
+fn get_backlinks(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    id: String,
+) -> AppResult<Vec<knowledge::Backlink>> {
+    db.with(|c| knowledge::backlinks(c, &campaign_id, &id))
+}
+#[tauri::command]
+fn recover_page(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    id: String,
+    title: String,
+) -> AppResult<knowledge::Page> {
+    db.with(|c| knowledge::recover_page(c, &campaign_id, &id, &title))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
@@ -74,7 +132,7 @@ pub fn run() {
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document])
+        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Nodex.");
 }

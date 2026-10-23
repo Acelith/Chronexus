@@ -1,5 +1,22 @@
 # Decisioni
 
+## M2 — Pagine e menzioni esplicite
+
+- Migrazione 003 additiva: pagine Codex tipizzate, alias e indice delle menzioni.
+  Le sessioni M1 e i loro documenti rimangono intatti.
+- Il documento JSON contiene inline `pageMention` con `pageId` UUID e `label`
+  di ripiego. Il nome corrente si risolve per ID; rinominare conserva il vecchio
+  titolo come alias. Gli alias possono essere ambigui e richiedono scelta esplicita.
+- Scrittura del documento e sostituzione dell'indice avvengono nella stessa
+  transazione. Un record per sorgente/blocco/destinazione, anche per blocchi annidati.
+- I confini delle sorgenti sono vincolati da FK composite; ogni destinazione
+  esistente viene verificata dal backend. Le destinazioni assenti conservano
+  l'ID nell'indice per un recupero esplicito come bozza, senza creare duplicati.
+- Solo inline espliciti generano menzioni. Testo `[[...]]` non risolto e semplici
+  co-occorrenze non generano collegamenti né relazioni fattuali.
+- Nessuna nuova dipendenza. Skill React/design già lette riutilizzate per la UI;
+  livello Rust/SQLite implementato e verificato con strumenti ordinari.
+
 ## 2026-10-23 — Fondazione M0
 
 - Rust possiede una connessione SQLite protetta da mutex, aperta nella directory

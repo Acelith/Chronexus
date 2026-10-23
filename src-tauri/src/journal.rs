@@ -26,7 +26,7 @@ pub struct Session {
     pub updated_at: String,
 }
 
-fn storage(error: rusqlite::Error) -> String {
+pub(crate) fn storage(error: rusqlite::Error) -> String {
     match error {
         rusqlite::Error::SqliteFailure(ref e, _) if e.code == rusqlite::ErrorCode::ConstraintViolation =>
             "Operazione non valida: verifica che il numero di sessione sia unico nella campagna.".into(),
@@ -34,7 +34,7 @@ fn storage(error: rusqlite::Error) -> String {
     }
 }
 
-fn title(value: &str) -> AppResult<&str> {
+pub(crate) fn title(value: &str) -> AppResult<&str> {
     let value = value.trim();
     if value.is_empty() || value.chars().count() > 200 || value.contains('\0') {
         return Err("Inserisci un nome o titolo da 1 a 200 caratteri.".into());
@@ -42,13 +42,13 @@ fn title(value: &str) -> AppResult<&str> {
     Ok(value)
 }
 
-fn identifier(id: &str) -> AppResult<()> {
+pub(crate) fn identifier(id: &str) -> AppResult<()> {
     Uuid::parse_str(id)
         .map(|_| ())
         .map_err(|_| "Identificatore non valido. Riapri la campagna.".into())
 }
 
-fn require_campaign(connection: &Connection, id: &str) -> AppResult<()> {
+pub(crate) fn require_campaign(connection: &Connection, id: &str) -> AppResult<()> {
     identifier(id)?;
     let found: bool = connection
         .query_row(
@@ -150,7 +150,7 @@ pub fn create_session(
         }
     }
     let id = Uuid::new_v4().to_string();
-    let document = json!({"version":1,"blocks":[{"id":Uuid::new_v4().to_string(),"type":"paragraph","props":{},"content":[],"children":[]}]});
+    let document = empty_document();
     connection.execute("INSERT INTO sessions(id,campaign_id,sequence,title,played_on,document) VALUES (?1,?2,?3,?4,?5,?6)",params![id,campaign_id,sequence,name,played_on,document.to_string()]).map_err(storage)?;
     get_session(connection, campaign_id, &id)
 }
@@ -163,6 +163,10 @@ pub fn get_session(connection: &Connection, campaign_id: &str, id: &str) -> AppR
 }
 
 // Validate the supported editor subset before replacing canonical user content.
+pub(crate) fn empty_document() -> Value {
+    json!({"version":1,"blocks":[{"id":Uuid::new_v4().to_string(),"type":"paragraph","props":{},"content":[],"children":[]}]})
+}
+
 pub fn validate_document(document: &Value) -> AppResult<()> {
     if document.to_string().len() > 2_000_000 {
         return Err("Appunti troppo grandi (massimo 2 MB per sessione).".into());
@@ -219,6 +223,14 @@ pub fn validate_document(document: &Value) -> AppResult<()> {
                             }
                         }
                     }
+                    Some("pageMention") => {
+                        let props = inline.get("props").ok_or(())?;
+                        let id = props.get("pageId").and_then(Value::as_str).ok_or(())?;
+                        let label = props.get("label").and_then(Value::as_str).ok_or(())?;
+                        if Uuid::parse_str(id).is_err() || title(label).is_err() {
+                            return Err(());
+                        }
+                    }
                     _ => return Err(()),
                 }
             }
@@ -243,9 +255,12 @@ pub fn save_document(
     identifier(campaign_id)?;
     identifier(id)?;
     validate_document(&document)?;
-    let affected = connection.execute("UPDATE sessions SET document=?1,revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?2 AND campaign_id=?3 AND revision=?4",params![document.to_string(),id,campaign_id,revision]).map_err(storage)?;
+    let transaction = connection.unchecked_transaction().map_err(storage)?;
+    let affected = transaction.execute("UPDATE sessions SET document=?1,revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?2 AND campaign_id=?3 AND revision=?4",params![document.to_string(),id,campaign_id,revision]).map_err(storage)?;
     if affected != 1 {
         return Err("Salvataggio fermato: la sessione è stata modificata altrove o non appartiene alla campagna. Copia gli appunti prima di riaprire la sessione.".into());
     }
+    crate::knowledge::index_document(&transaction, campaign_id, Some(id), None, &document)?;
+    transaction.commit().map_err(storage)?;
     get_session(connection, campaign_id, id)
 }

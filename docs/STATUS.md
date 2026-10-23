@@ -2,7 +2,12 @@
 
 ## Milestone
 
-M0 e M1 completate. Nessun lavoro iniziato su M2.
+M0 e M1 completate. M2 in corso: persistenza completata, UI da integrare.
+
+Checkpoint M2: migrazione 003, pagine tipizzate, alias e menzioni con backlink
+transazionali. `cargo test --offline --manifest-path src-tauri/Cargo.toml`:
+PASS (13 test); Clippy con `-D warnings`: PASS. Nessuna nuova dipendenza.
+Verifica desktop dei collegamenti ancora da eseguire.
 
 Scenario verificato su desktop Windows: crea/rinomina campagna, crea sessioni 12
 poi 2, scrive due paragrafi, chiude e riapre il processo; JSON e ID dei blocchi
