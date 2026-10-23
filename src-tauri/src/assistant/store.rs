@@ -124,6 +124,19 @@ fn block_identifier(block: &str) -> AppResult<()> {
     }
     Ok(())
 }
+fn mentions_name(text: &str, name: &str) -> bool {
+    let text = text.to_lowercase();
+    let name = name.to_lowercase();
+    let words: Vec<_> = text
+        .split(|c: char| !c.is_alphanumeric())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let name: Vec<_> = name
+        .split(|c: char| !c.is_alphanumeric())
+        .filter(|s| !s.is_empty())
+        .collect();
+    !name.is_empty() && words.windows(name.len()).any(|w| w == name)
+}
 pub fn canonical(
     c: &Connection,
     campaign: &str,
@@ -258,6 +271,14 @@ pub fn retrieve(
             return Err("La modalità Campagna non accetta fonti di regole esterne.".into());
         }
         let terms = tokens(q);
+        // If the question names a known page/alias, keep matching evidence from
+        // any note, including sessions, and discard hits sharing only generic
+        // words such as "chiave". This is lexical scope, not a factual inference.
+        let names: Vec<String> = crate::knowledge::list_pages(c, campaign)?
+            .into_iter()
+            .flat_map(|p| std::iter::once(p.title).chain(p.aliases))
+            .filter(|name| mentions_name(q, name))
+            .collect();
         if !terms.is_empty() {
             let expression = terms
                 .iter()
@@ -294,6 +315,13 @@ pub fn retrieve(
                     continue;
                 }
                 if let Some(s) = canonical(c, campaign, kind, id, block.as_deref())? {
+                    if !names.is_empty()
+                        && !names.iter().any(|name| {
+                            mentions_name(&s.title, name) || mentions_name(&s.text, name)
+                        })
+                    {
+                        continue;
+                    }
                     if !s.text.trim().is_empty() {
                         out.push(s)
                     }
