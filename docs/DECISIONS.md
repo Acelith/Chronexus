@@ -1,5 +1,20 @@
 # Decisioni
 
+## M3 — Relazioni dichiarate e grafo
+
+- Migrazione 004 additiva: relazioni direzionali separate dalle menzioni,
+  certezza esplicita, evidenza/note e fonte opzionale sessione/pagina/blocco.
+  Revisioni ottimistiche proteggono modifica ed eliminazione concorrenti.
+- I nodi includono pagine, sessioni e destinazioni mancanti. Una co-menzione
+  non genera mai un arco pagina→pagina; le menzioni mantengono la sorgente reale.
+- Confini di campagna validati e FK composite. Un blocco di fonte rimosso non
+  cancella la relazione: la fonte viene marcata non disponibile, evidenza conservata.
+- Vista inviata al client limitata a 150 nodi e 400 archi, con conteggi e avviso
+  di troncamento; metadati filtrati nel backend senza caricare i documenti nel grafo.
+- Profondità 1/2 sul vicinato non direzionale; frecce conservano la direzione.
+  Filtri tipo/ricerca rimuovono i nodi e i relativi archi; certezza riguarda solo
+  le relazioni dichiarate. Filtro sessione usa la fonte delle menzioni/relazioni.
+
 ## M2 — Pagine e menzioni esplicite
 
 - Migrazione 003 additiva: pagine Codex tipizzate, alias e indice delle menzioni.

@@ -2,7 +2,11 @@
 
 ## Milestone
 
-**M0, M1 e M2 completate.** Nessun lavoro iniziato su M3.
+**M0, M1 e M2 completate. M3 in corso.**
+
+Checkpoint M3: migrazione 004, CRUD relazioni con revisioni, fonti e query grafo
+filtrata/limitata implementati. Test Rust: PASS (20); Clippy: PASS.
+Interfaccia del grafo e smoke desktop ancora da completare.
 
 Ultimo scenario desktop verificato: nella Sessione 12 crea `[[Varek]]`, apre la
 pagina e il backlink, rinomina in «Varek il grigio», torna al blocco sorgente e

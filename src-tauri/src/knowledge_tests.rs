@@ -153,7 +153,7 @@ fn m1_migration_keeps_documents_and_is_applied_once() {
             c.query_row("SELECT COUNT(*) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            3
+            4
         );
     }
 }

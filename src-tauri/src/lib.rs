@@ -1,4 +1,7 @@
 mod db;
+mod graph;
+#[cfg(test)]
+mod graph_tests;
 mod journal;
 #[cfg(test)]
 mod journal_tests;
@@ -111,6 +114,42 @@ fn recover_page(
     db.with(|c| knowledge::recover_page(c, &campaign_id, &id, &title))
 }
 
+#[tauri::command]
+fn get_graph(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    query: graph::GraphQuery,
+) -> AppResult<graph::GraphData> {
+    db.with(|c| graph::graph(c, &campaign_id, query))
+}
+#[tauri::command]
+fn get_relationship(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    id: String,
+) -> AppResult<graph::Relationship> {
+    db.with(|c| graph::get_relationship(c, &campaign_id, &id))
+}
+#[tauri::command]
+fn save_relationship(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    id: Option<String>,
+    revision: Option<i64>,
+    input: graph::RelationshipInput,
+) -> AppResult<graph::Relationship> {
+    db.with(|c| graph::save_relationship(c, &campaign_id, id.as_deref(), revision, input))
+}
+#[tauri::command]
+fn delete_relationship(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    id: String,
+    revision: i64,
+) -> AppResult<()> {
+    db.with(|c| graph::delete_relationship(c, &campaign_id, &id, revision))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
@@ -132,7 +171,7 @@ pub fn run() {
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page])
+        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Nodex.");
 }
