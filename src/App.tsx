@@ -41,6 +41,9 @@ const ExportButton = lazy(() => import("./features/export/ExportButton"));
 const Dashboard = lazy(() => import("./features/dashboard/Dashboard"));
 const WikiWorkspace = lazy(() => import("./features/wiki/WikiWorkspace"));
 const PartyWorkspace = lazy(() => import("./features/party/PartyWorkspace"));
+const AssistantWorkspace = lazy(
+  () => import("./features/assistant/AssistantWorkspace"),
+);
 const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
 
 export function App() {
@@ -52,7 +55,14 @@ export function App() {
   const [pageId, setPageId] = useState<string | null>(null);
   const [fallback, setFallback] = useState("");
   const [view, setView] = useState<
-    "overview" | "journal" | "codex" | "graph" | "wiki" | "party" | PlayerView
+    | "overview"
+    | "journal"
+    | "codex"
+    | "graph"
+    | "wiki"
+    | "party"
+    | "assistant"
+    | PlayerView
   >("journal");
   const [playerReturn, setPlayerReturn] = useState<{
     view: PlayerView;
@@ -597,6 +607,18 @@ export function App() {
                     >
                       Party
                     </button>
+                    <button
+                      aria-current={view === "assistant" ? "page" : undefined}
+                      disabled={busy}
+                      onClick={() =>
+                        void run(async () => {
+                          setView("assistant");
+                          setForm(null);
+                        })
+                      }
+                    >
+                      Assistente locale
+                    </button>
                     {(
                       [
                         ["character", "Personaggio"],
@@ -704,6 +726,18 @@ export function App() {
                       onCreate={createPage}
                       onUpdate={updatePage}
                       onRecover={recoverPage}
+                    />
+                  </Suspense>
+                ) : null}
+                {campaign && view === "assistant" ? (
+                  <Suspense
+                    fallback={<p role="status">Apertura assistente…</p>}
+                  >
+                    <AssistantWorkspace
+                      key={campaign.id}
+                      campaignId={campaign.id}
+                      register={register}
+                      onSource={selectSearch}
                     />
                   </Suspense>
                 ) : null}

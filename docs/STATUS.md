@@ -2,104 +2,98 @@
 
 ## Milestone e prossimo passo
 
-M0–M5 e funzioni M6 consegnate su Windows, incluse estensioni grafo/tema/Party/wiki.
-Continuazione M6 eseguita: package NSIS, installazione silenziosa, avvio e
-rimozione senza perdita dati verificati. **Restano M6 macOS/Linux/CI reali e
-revisione visuale del wizard interattivo**. Nessun push autorizzato/eseguito.
-**M7 in corso su richiesta successiva dell'utente**: adapter Ollama locale,
-retrieval e conversazioni SQLite, backup/export con fonti. Modello D&D provato
-su GPU ma scartato per qualità; l'utente ha approvato Qwen multilingue con fonti
-locali. UI e valutazione completa in verifica; non dichiarare ancora M7 conclusa.
+M7 operativa e collaudata su Windows: assistente locale con fonti, GPU e cronologia.
+**Accettazione completa ancora parziale**: manca la prova con rete fisicamente
+scollegata/blocco firewall. La prova proxy e le connessioni loopback sono distinte.
+Restano inoltre M6 macOS/Linux/CI reali e revisione del wizard Windows interattivo.
+Nessuna M8 definita, nessun push autorizzato o eseguito.
+
+Il modello specifico D&D 1.5B è stato provato su GPU e scartato per qualità.
+L'utente ha approvato esplicitamente Qwen3:4b-instruct multilingue con fonti locali,
+**non fine-tuned D&D**. Setup e identità verificabili: [AI_LOCAL.md](AI_LOCAL.md).
 
 ## Funziona
 
-- Campagne, diario/autosave, Codex UUID/backlink, relazioni con fonte/certezza,
-  scheda estesa generica, inventario e incantesimi personali/SRD 2014.
-- Tema pergamena/cuoio/ottone; grafo iniziale ordinato (18 nodi), alternativa
-  organica, filtri/nodo centrale, evidenza vicini e dettaglio prima dell'apertura.
-  Solo coordinate/stili, nessuna relazione inferita. Limite dati 150 nodi/400 archi.
-- Party: crea/collega personaggi Codex, giocatore/ruolo/presenza, note autosalvate
-  nella stessa pagina, immagini e navigazione. Rimozione mantiene tutti gli appunti.
-- Wiki D&D Open5e v2: ricerca pubblica esplicita, testo completo, fonte/edizione/
-  licenze, cache SQLite offline (100 risposte), aggiornamento con fallback visibile.
-  Nessun upload degli appunti o modifica implicita degli incantesimi personali.
-- FTS5 locale e rebuild, Ctrl/⌘K / Ctrl/⌘ShiftN, riepilogo, immagini originali
-  gestite e backuppate, ZIP Markdown/JSON con immagini e sorgenti Logseq immutabili.
-- Schema corrente **012**: impostazioni e conversazioni AI additive. Vecchi
-  backup migrati in copia; nuovi richiedono versione compatibile. Percorsi e
-  identificatore legacy it.nodex.desktop/.nodex conservati.
+- M0–M6: campagne e diario/autosave, Codex UUID/backlink, relazioni con fonte e
+  certezza, scheda estesa, inventario/incantesimi, FTS5, dashboard, immagini gestite
+  incluse nei backup, export Markdown/JSON e originali Logseq immutabili.
+- Tema pergamena/cuoio/ottone, grafo ordinato/organico con filtri e dettaglio;
+  Party sulle pagine Codex; Wiki Open5e multi-fonte con cache offline.
+- Assistente facoltativo, disattivato inizialmente: adapter Rust su loopback fisso,
+  cloud disabilitato verificato, identità GGUF/digest, preflight GPU prima degli
+  appunti. Nessun download, inferenza all'avvio, cloud fallback o tool del modello.
+- Retrieval lessicale per sola campagna e regole cache scelte per edizione;
+  estratti limitati con ID/blocco/revisione/hash. Fonti riapribili con avviso di
+  modifica/mancanza; affermazioni dei PNG non promosse automaticamente a fatti.
+- Streaming, cancellazione anche durante la risposta, bozze persistenti e recovery.
+  Cronologia paginata, cancellazione confermata, backup/export di conversazioni
+  e fonti; runtime/pesi esclusi. Nessuna scrittura implicita in note/grafo/scheda.
+- Gate prudente esclude estratti con possibili istruzioni al modello. Se tutti
+  sono sospetti ferma la richiesta e conserva le copie per revisione.
+- Schema **012 additivo**; vecchi backup migrati in copia, nuovi richiedono versione
+  compatibile. Identificatori legacy it.nodex.desktop/nodex.sqlite3/.nodex mantenuti.
 
-## Verifiche effettive
+## Verifiche effettive M7
 
-Checkpoint M7 backend: 63 test Rust superati, Clippy con warning negati e build
-debug superati; 55 test React, lint, typecheck superati nella stessa esecuzione.
-Valutazione finale: 40/40 scenari con esito atteso (20 campagna, 10 regole, 5
-senza risposta su GPU reale; 5 attacchi fermati prima del modello). Non è una
-misura universale di accuratezza: le prime prove hanno mostrato che il modello
-da solo ripete istruzioni malevole e produce citazioni non valide. Il gate
-prudente esclude solo estratti sospetti; se tutti sono sospetti ferma la domanda.
-Corretto retrieval: riepilogo e blocco dello stesso appunto non diventano prove
-indipendenti; metadati Party inclusi anche quando la ricerca trova un blocco.
-Nomi/alias riconosciuti nella domanda restringono le evidenze pertinenti anche
-in altre pagine/sessioni, riducendo i falsi risultati su termini generici.
-Prova con proxy esterni non raggiungibili e cloud disabilitato: inferenza reale
-riuscita, 80 campioni/173 connessioni del runtime osservati soltanto su loopback.
-Non equivale a prova con rete fisicamente scollegata o firewall.
-UI nativa: streaming, annullamento anche dopo token GPU, fonti/rename/edizioni,
-delete, backup/export verificati. Ripristino e riavvio senza Ollama preservano
-90 conversazioni/fonti, 25 pagine, un membro Party e configurazione.
-I risultati M6 sottostanti restano riferiti al checkpoint precedente.
+- `cargo test --offline --manifest-path src-tauri/Cargo.toml`: **63 PASS**.
+- `cargo clippy --offline --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings`:
+  PASS. Build debug: PASS.
+- `pnpm test`: **55 PASS / 19 file**; ultimi ritocchi verificati anche con i 3
+  test mirati dell'assistente. Lint, typecheck, format:check: PASS.
+- `pnpm package:desktop`: PASS, installer Windows NSIS non firmato. L'installazione
+  M7 non è stata ripetuta; installazione/avvio/rimozione M6 erano stati verificati
+  preservando due DB personali con SHA-256 identico.
+- GPU reale: Ollama 0.40.10, Qwen3:4b-instruct Q4_K_M, contesto 8192, **3539 MiB
+  interamente in VRAM** sulla RTX 4080 SUPER. Le prestazioni dipendono dal carico.
+- Benchmark finale **40/40 esiti attesi**: 20 campagna, 10 regole originali di
+  prova in conflitto fra edizioni, 5 assenze con inferenza GPU; 5 attacchi bloccati
+  prima del modello. Dati canonici invariati. Non è accuratezza universale.
+- Prove native: streaming, annullamento dopo token GPU con bozza non vuota,
+  navigazione, blocco citato, rinomina, regole 2024, delete, backup/export: PASS.
+- Ripristino e secondo riavvio senza Ollama: identiche **90 conversazioni/fonti/
+  metriche, 25 pagine, un membro Party e configurazione**. Immagine originale
+  inclusa nel backup/export. Nessuna campagna di prova nel profilo personale.
+- Errori di protocollo nativi simulati: cloud attivo, modello mancante, CPU,
+  OOM, stream incompleto/malformato/eccessivo, citazione inventata; nessun invio
+  appunti nei primi quattro casi. Runtime realmente assente: errore conservato.
+- Cloud disabilitato + proxy esterni non raggiungibili: inferenza reale riuscita;
+  **80 campioni, 173 connessioni del runtime/esecutore, solo 127.0.0.1**.
+  Non è una prova fisica offline o una verifica firewall. Nessun guasto GPU provocato.
 
-- pnpm lint / typecheck / format:check: PASS.
-- pnpm test: PASS, 52 test / 18 file. Dopo l'ultima correzione visuale grafo,
-  rieseguiti i 5 test pertinenti, typecheck/lint/format e build: PASS.
-- cargo test --offline --manifest-path src-tauri/Cargo.toml: PASS, 49 test.
-- cargo fmt e clippy --all-targets -- -D warnings: PASS; build debug Windows PASS.
-- pnpm build / package:desktop: PASS, release e NSIS Windows x64.
-- Smoke estensione prepare/verify/restore/verify: PASS, Party/nota/PNG/wiki/API
-  e backup reali, UUID e cache identici dopo i riavvii; offline simulato solo
-  bloccando la rete e selettori predefiniti debug, mai SQLite/dati simulati.
-- Sei viste a 1584/1200/760 px senza overflow; screenshot ispezionati. Selezione
-  canvas, dettagli, esplorazione e cambio layout grafo reali PASS.
-- Installer NSIS: installato in .tools dopo controllo assenza installazioni,
-  eseguibile installato aperto e GET Open5e 200 da tauri.localhost PASS;
-  disinstallazione silenziosa rimuove executable/registrazione e mantiene
-  2 database personali con SHA-256 identico. Wizard interattivo non ispezionato.
-- macOS/Linux/CI: NON ESEGUITI, matrice predisposta. Installer non firmato.
-- Inferenza AI/GPU: NON ESEGUITA. Solo hardware rilevato: RTX 4080 SUPER,
-  16376 MiB, driver 621.01. Modelli D&D ricercati, non scaricati né installati.
+## Campagna privata preesistente
 
-## Campagna privata e compatibilità
+Speratia M6: 84 sessioni, 209 pagine, 18 asset, 36 immagini, 207 Markdown originali.
+Backup schema 009 verificato nella build 011 durante M6; UUID/checksum preservati.
+Trascrizione Oran parziale; PF attuali illeggibili segnalati, da aggiornare.
+Backup già consegnato: C:/Users/Joel/Downloads/Speratia_Chronexus_M6_2026-10-23.nodex
+(52.321.017 byte), SHA-256
+58a3e5fdc05670b46536c911eb92e5c83d7b8f86b5721c3c3adda5b893fd714c.
+Ripristino sostituisce l'intero archivio con copia preventiva, non fonde campagne.
+Archivi/foto/DB/profili/modelli restano fuori Git; nessun dato privato pubblicato.
 
-Speratia: 84 sessioni, 209 pagine, 18 asset, 36 immagini, 207 Markdown originali.
-Backup schema 009 ripristinato nella build 011: tutti i dati/UUID/checksum identici.
-Due alias ambigui conservati nel testo; trascrizione Oran parziale e foto incluse.
-PF attuali non leggibili: zero tecnico segnalato, da aggiornare prima dell'uso.
-Non dedurre automaticamente membership Party dal solo tipo player di Logseq.
-Profili/testdata/foto restano in .tools ignorata, nessuna campagna fittizia
-aggiunta al profilo personale. Backup già consegnato e ancora compatibile:
-C:/Users/Joel/Downloads/Speratia_Chronexus_M6_2026-10-23.nodex (52.321.017 byte),
-SHA-256 58a3e5fdc05670b46536c911eb92e5c83d7b8f86b5721c3c3adda5b893fd714c.
-Ripristinare sostituisce l'intero archivio con copia preventiva, non fonde campagne.
+## Commit M7
 
-## Commit di questa estensione
-
-- b22a033 feat(ui): ridisegna il grafo e introduce il tema medievale
-- dc29fe6 feat(party): aggiunge membri e conoscenze condivise con il Codex
-- f5bb67b fix(party): sincronizza le guardie dopo il rendering
-- d765db1 feat(wiki): integra Open5e con fonti e consultazione offline
-- 409c3ab docs(roadmap): pianifica assistente D&D locale con GPU in M7
-- 6735251 fix(graph): mantiene leggibili i nomi nelle campagne dense
-- Checkpoint documentazione: vedere git log.
+- e6f1763 feat(ai): integra inferenza GPU locale e conversazioni persistenti
+- a89874e fix(ai): evita prove duplicate e recupera i ruoli del party
+- d63ba16 fix(ai): restringe le fonti ai nomi presenti nella domanda
+- cf39425 fix(ai): esclude istruzioni sospette prima dell inferenza
+- Interfaccia, avviatore e checkpoint finale: vedere gli ultimi commit Git.
 
 ## Avvio, Skill e limiti
 
-`pnpm desktop` con Rust; `pnpm package:desktop` per il pacchetto.
+`powershell -File scripts/Start-LocalAI.ps1`, poi `pnpm desktop` nell'ambiente Rust
+configurato. In app: campagna → Assistente locale → Controlla Ollama → scegli
+qwen3:4b-instruct → consenso multilingue → Attiva modello locale.
 Installer: src-tauri/target/release/bundle/nsis/Chronexus_0.1.0_x64-setup.exe.
-Skill applicate: find-skills per ricerca CLI/catalogo; frontend-design e ui-taste
-per direzione e verifica visuale; vercel-react-best-practices per caricamento
-su richiesta; imagegen solo per riferimento fittizio. webapp-testing consultata,
-non installata/applicata come workflow Python. Dettagli in docs/RESEARCH_DND.md.
-Limiti: wiki principalmente inglese e fonti commerciali non tutte disponibili;
-cache wiki espellibile; un solo PG giocabile (Party usa pagine Codex);
-bundle editor grande, backup manuali, import Logseq solo strumento debug.
+
+Skill M7 effettivamente letta/applicata: **vercel-react-best-practices**, per
+caricamento differito, richieste indipendenti e aggiornamenti dello streaming.
+Il tema esistente è mantenuto; nessuna nuova Skill AI/Rust/database disponibile
+applicata. Ricerca Skill/design M6 già documentata in RESEARCH_DND.md.
+
+Limiti: citazioni controllate strutturalmente, non verità semantica; modello
+prolisso e non esperto D&D addestrato ad hoc; gate lessicale con possibili falsi
+positivi/attacchi nuovi. Retrieval a estratti, non intera campagna o embeddings.
+Wiki principalmente inglese/cache espellibile; un solo PG giocabile, Party in Codex;
+bundle editor grande, backup manuali. Prossime verifiche: offline fisico M7 e
+attività residue M6 macOS/Linux/CI e wizard Windows. Vedere ROADMAP.md.

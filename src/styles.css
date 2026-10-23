@@ -1726,6 +1726,134 @@ textarea::placeholder {
     17px/1.8 Georgia,
     serif;
 }
+.assistant-workspace {
+  padding: 28px;
+  max-width: 1500px;
+  margin: auto;
+}
+.assistant-settings {
+  border: 3px double #b49968;
+  background: #f0e3c5;
+  padding: 18px;
+  margin: 20px 0 30px;
+}
+.assistant-settings summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.assistant-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 30%);
+  gap: 32px;
+  align-items: start;
+}
+.assistant-layout fieldset {
+  border: 1px solid #b49968;
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+.assistant-layout label,
+.assistant-settings label {
+  display: grid;
+  gap: 8px;
+}
+.assistant-layout .checkbox-row,
+.assistant-settings .checkbox-row {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+  margin: 12px 0;
+}
+.assistant-layout input[type="checkbox"],
+.assistant-settings input[type="checkbox"] {
+  width: auto;
+}
+.assistant-workspace textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 110px;
+}
+.assistant-rule-list {
+  max-height: 240px;
+  overflow: auto;
+}
+.assistant-digest {
+  overflow-wrap: anywhere;
+  font: 12px monospace;
+}
+.assistant-answer,
+.assistant-snapshot {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    17px/1.8 Georgia,
+    serif;
+}
+.assistant-answer {
+  min-height: 2em;
+}
+.assistant-result {
+  margin-top: 30px;
+  border-top: 3px double #b49968;
+  padding-top: 22px;
+}
+.assistant-result details {
+  border-bottom: 1px solid #b49968;
+  padding: 16px 0;
+}
+.assistant-result details summary {
+  cursor: pointer;
+}
+.assistant-result > button {
+  margin-top: 22px;
+}
+.assistant-history {
+  display: block;
+  background: transparent;
+  border-right: 0;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 8px 0 24px;
+  border-left: 3px double #b49968;
+  max-height: 74vh;
+  overflow-y: auto;
+  position: sticky;
+  top: 20px;
+}
+.assistant-history h3 {
+  margin: 0 0 12px;
+}
+.assistant-history > p {
+  margin: 0 0 18px;
+}
+.assistant-history button {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+.assistant-history button[aria-current] {
+  box-shadow: inset 3px 0 #6e302b;
+}
+.assistant-history small,
+.assistant-metrics {
+  color: #65553e;
+  font-size: 12px;
+}
+@media (max-width: 1100px) {
+  .assistant-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .assistant-history {
+    border-left: none;
+    border-top: 3px double #b49968;
+    padding: 16px 0;
+    position: static;
+    max-height: 420px;
+  }
+}
 .wiki-entry dl > div {
   border-top: 1px solid #bca77c;
   padding: 12px 0;
