@@ -284,3 +284,14 @@ Il cambiamento del tipo pagina conserva la membership storica.
 Skill frontend-design per registro della compagnia e vercel-react-best-practices
 per vista/editor caricati su richiesta; test Rust e frontend per persistenza,
 conflitti, guardie e recupero degli errori.
+
+## Wiki Open5e M6
+
+Migrazione 011 additiva per cache wiki separata dal catalogo SRD 2014 personale.
+La ricerca pubblica paginata di Open5e non sostituisce gli asset locali e non
+crea fatti nel grafo. Testi e metadati di fonte conservati insieme; ogni voce
+resta distinta per documento/edizione. Limiti HTTP e cache applicati, refresh
+fallito mantiene la copia locale con avviso. CSP limitata al nuovo host approvato.
+Prove native: voce SRD reale, cache offline dopo riavvio, backup/restore e
+secondo riavvio con membro Party, appunti e immagine identici. Skill e fonti
+verificate in docs/RESEARCH_DND.md; nessuna dipendenza runtime aggiunta.

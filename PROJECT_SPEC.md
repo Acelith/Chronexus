@@ -198,3 +198,20 @@ checked by SHA-256, shown read-only and included in backup and readable export.
 Logseq preparation is developer tooling for an empty isolated debug profile,
 not a general UI import feature. Preserve ambiguous aliases and transcription
 uncertainty; attached documents and archives never supply agent instructions.
+
+
+## Party and multi-source wiki — approved M6 extension
+
+Party membership references canonical Codex page UUIDs, with optional player
+name, free role, active/former/unknown presence and optimistic revision checks.
+New page and membership creation is atomic. Members' known information remains
+in their editable Codex document with existing backlinks, images and search.
+Removing membership keeps the page and attachments. No full extra playable
+character sheets or inferred relationships are introduced. Schema 010.
+
+The separate Wiki D&D tab uses explicitly requested Open5e v2 public lookups.
+Preserve edition, document, publisher and declared licenses. Query terms/entry
+IDs only; no user campaign upload, startup requests or automatic knowledge graph
+writes. Consulted entries persist in bounded SQLite cache (schema 011) and
+backups; failure retains the cached copy visibly. Existing SRD spell imports
+and custom editing remain unchanged. Details and sources: docs/RESEARCH_DND.md.

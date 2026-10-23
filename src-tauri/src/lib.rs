@@ -30,6 +30,7 @@ mod player_tests;
 mod search;
 #[cfg(test)]
 mod search_tests;
+mod wiki;
 use journal::{AppResult, Campaign, Session};
 use std::sync::Mutex;
 use tauri::Manager;
@@ -515,6 +516,18 @@ fn remove_party_member(
     db.with(|c| party::remove(c, &campaign_id, &page_id, revision))
 }
 
+#[tauri::command]
+fn read_wiki_cache(db: tauri::State<Database>, key: String) -> AppResult<Option<wiki::Entry>> {
+    db.with(|c| wiki::read(c, &key))
+}
+#[tauri::command]
+fn store_wiki_cache(
+    db: tauri::State<Database>,
+    key: String,
+    payload: serde_json::Value,
+) -> AppResult<wiki::Entry> {
+    db.with(|c| wiki::store(c, &key, payload))
+}
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -538,7 +551,7 @@ pub fn run() {
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
+        .invoke_handler(tauri::generate_handler![read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
 }

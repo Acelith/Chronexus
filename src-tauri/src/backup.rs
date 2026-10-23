@@ -275,6 +275,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if expected_version >= 6 {
         crate::catalog::validate_archive(&connection)?;
     }
+    if expected_version >= 11 {
+        crate::wiki::validate_archive(&connection)?;
+    }
     if expected_version >= 10 {
         crate::party::validate_archive(&connection)?;
     }

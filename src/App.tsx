@@ -39,6 +39,7 @@ const BackupWorkspace = lazy(() => import("./features/backup/BackupWorkspace"));
 const PlayerWorkspace = lazy(() => import("./features/player/PlayerWorkspace"));
 const ExportButton = lazy(() => import("./features/export/ExportButton"));
 const Dashboard = lazy(() => import("./features/dashboard/Dashboard"));
+const WikiWorkspace = lazy(() => import("./features/wiki/WikiWorkspace"));
 const PartyWorkspace = lazy(() => import("./features/party/PartyWorkspace"));
 const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
 
@@ -51,7 +52,7 @@ export function App() {
   const [pageId, setPageId] = useState<string | null>(null);
   const [fallback, setFallback] = useState("");
   const [view, setView] = useState<
-    "overview" | "journal" | "codex" | "graph" | "party" | PlayerView
+    "overview" | "journal" | "codex" | "graph" | "wiki" | "party" | PlayerView
   >("journal");
   const [playerReturn, setPlayerReturn] = useState<{
     view: PlayerView;
@@ -618,6 +619,18 @@ export function App() {
                         {label}
                       </button>
                     ))}
+                    <button
+                      aria-current={view === "wiki" ? "page" : undefined}
+                      disabled={busy}
+                      onClick={() =>
+                        void run(async () => {
+                          setView("wiki");
+                          setForm(null);
+                        })
+                      }
+                    >
+                      Wiki D&amp;D
+                    </button>
                   </nav>
                 ) : null}
                 {playerReturn && (view === "journal" || view === "codex") ? (
@@ -692,6 +705,11 @@ export function App() {
                       onUpdate={updatePage}
                       onRecover={recoverPage}
                     />
+                  </Suspense>
+                ) : null}
+                {campaign && view === "wiki" ? (
+                  <Suspense fallback={<p role="status">Apertura wiki…</p>}>
+                    <WikiWorkspace />
                   </Suspense>
                 ) : null}
                 {campaign && view === "party" ? (
