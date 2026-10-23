@@ -10,7 +10,8 @@ The full requirements are in `PROJECT_SPEC.md`. Engineering rules are in `AGENTS
 ## First execution scope (critical)
 For an existing repository, read `docs/STATUS.md` first and follow the latest user
 request instead of repeating M0/M1. M0–M6 features have been delivered on Windows; consult STATUS for remaining
-platform and installer validation. The latest approved scope includes managed
+platform and installer validation. The latest approved scope includes medieval visual styling, readable/organic graph,
+Party reusing Codex pages, Open5e multi-source wiki, and managed
 images in backups, FTS5 search, readable export, and private Logseq/Oran test
 data. The extended manual sheet and optional D&D SRD 2014 catalog remain
 described in PROJECT_SPEC, ROADMAP and docs/RULESETS. Preserve generic

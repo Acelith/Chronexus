@@ -322,3 +322,41 @@ alla finestra è scaduta: lo smoke effettivo usa la WebView e il DB Rust reali.
   `.tools/`. La prova usa il selettore predefinito debug, SQLite/file/ZIP reali.
 - QA rimanente: installare/disinstallare NSIS su macchina di prova, eseguire CI
   e controllare pacchetti su macOS/Linux; firme di distribuzione non predisposte.
+
+
+## Estensione M6: grafo, tema, Party e Open5e
+
+- Frontend: 52 test in 18 file PASS; grafo mirato rieseguito dopo l'ultima
+  correzione: 5 PASS. Rust: 49 test PASS. Lint/typecheck/format/clippy PASS.
+- Migrazioni 010/011 additive. Backup Speratia schema 009 ripristinato nella
+  build schema 011: 84 sessioni, 209 pagine, 207 sorgenti e 36 immagini identiche.
+- `scripts/m6-extension-smoke.mjs prepare/verify/restore/verify`: PASS reale con
+  membro creato da UI, appunti autosalvati, PNG, incantesimo Open5e SRD 5.1,
+  documento/licenze, export, backup, riavvii e offline. Solo rete indisponibile
+  e destinazioni dei selettori debug sono controllate, non dati/SQLite/ZIP.
+- Sei viste controllate a 1584/1200/760 px senza overflow orizzontale; screenshot
+  finali ispezionati. Grafo: 18 nodi, selezione canvas reale, dettaglio, focus
+  e passaggio fra Mappa leggibile e Organica verificati.
+- NSIS installato in una nuova cartella .tools, dopo verifica dell'assenza di
+  installazioni esistenti. Eseguibile installato avviato, SQLite letto e GET
+  Open5e 200 da `tauri.localhost` verificato. Disinstallazione silenziosa senza
+  cancellare dati: eseguibile/registrazione rimossi, 2 DB personali con SHA-256
+  identico prima/dopo. Wizard interattivo non ispezionato.
+- Installer rigenerato dopo la correzione finale delle etichette; nessuna modifica
+  al flusso di installazione/disinstallazione fra le due build.
+- macOS/Linux/CI non eseguiti; installer non firmato. Nessuna prova AI/GPU di
+  inferenza eseguita: nvidia-smi rileva solo l'hardware per la M7 pianificata.
+
+Per ripetere lo smoke estensione (ogni fase chiude l'app):
+
+1. Avviare debug con NODEX_DEV_DATA_DIR assoluto nuovo `.tools/m6-extension-source`,
+   NODEX_DEV_BACKUP_FILE `.tools/m6-extension.nodex`, NODEX_DEV_EXPORT_FILE
+   `.tools/m6-extension-export.zip` e WebView2 CDP 9223; Vite sulla porta 1420.
+2. `node scripts/m6-extension-smoke.mjs prepare`.
+3. Riavviare lo stesso profilo; `node scripts/m6-extension-smoke.mjs verify`.
+4. Avviare profilo nuovo `.tools/m6-extension-restored` con NODEX_DEV_RESTORE_FILE
+   al backup creato; `node scripts/m6-extension-smoke.mjs restore`.
+5. Riavviare il ripristinato; `node scripts/m6-extension-smoke.mjs verify`.
+
+Usare percorsi assoluti per tutte le variabili NODEX; non usare profili personali.
+Lo script contiene soltanto dati fittizi e un minuscolo PNG di test; output in .tools/.

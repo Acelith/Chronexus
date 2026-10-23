@@ -1,7 +1,8 @@
 # Chronexus
 
 Diario personale per il giocatore di una campagna GDR. Desktop, dati locali,
-nessun account o servizio remoto a runtime. Nome e branding sono centralizzati
+nessun account e funzioni principali offline; ricerche dei cataloghi online
+solo su richiesta. Nome e branding sono centralizzati
 in `src/strings.ts`, `package.json` e `src-tauri/tauri.conf.json`.
 L'identificatore Tauri determina la cartella dati: non cambiarlo senza migrare i dati.
 Chronexus è il nuovo nome di Nodex: l'identificatore `it.nodex.desktop`, i nomi
@@ -236,7 +237,7 @@ recupero; gli originali mancanti o corrotti impediscono il backup.
 Conserva spazio per ZIP, estrazione e nuova copia dei dati. Vecchie generazioni e
 copie preventive non vengono eliminate automaticamente. I backup con schema 005
 richiedono una versione che supporti lo schema corrispondente (005 per M5,
-006 per scheda estesa e catalogo, 009 per M6 e sorgenti Logseq); i backup precedenti (schemi 1–8) restano
+006 per scheda estesa e catalogo, 011 per M6, sorgenti Logseq, Party e wiki); i backup precedenti (schemi 1–10) restano
 recuperabili e vengono aggiornati in copia. Esistono ancora archivi `.nodex`
 con il vecchio nome: non occorre rinominarli. Gli eseguibili M0–M3 ignorano
 il selettore di profilo introdotto da M4.
@@ -267,8 +268,10 @@ Le versioni risolte e le dipendenze transitive sono nei due lockfile.
 `pnpm package:desktop` genera le icone e il pacchetto della piattaforma corrente.
 Su Windows l’installer si trova in
 `src-tauri/target/release/bundle/nsis/Chronexus_0.1.0_x64-setup.exe`.
-Build e avvio Windows verificati; installazione/disinstallazione interattiva,
-firma e verifiche macOS/Linux restano da eseguire. La matrice CI è in
+Build e avvio Windows verificati. Installazione, avvio e disinstallazione NSIS
+provati in modalità silenziosa, preservando i database personali con hash
+identici. Il wizard interattivo non è stato ispezionato; firma e verifiche
+macOS/Linux restano da eseguire. La matrice CI è in
 `.github/workflows/desktop.yml`; non è stata eseguita da questa sessione.
 
 Gli strumenti `scripts/prepare-logseq.py` e `scripts/import-logseq.mjs` preparano
@@ -290,3 +293,34 @@ nel Codex collegata tramite backlink al diario. Gli alias ambigui non vengono
 uniti. Foto, appunti, report e profili personali rimangono in `.tools/` ignorata.
 La conversione non promette equivalenza completa del formato Logseq: per dubbi
 consultare sorgente originale e rapporto d’importazione.
+
+
+## Grafo, Party e wiki
+
+L'aspetto usa pergamena, cuoio scuro, ottone e titoli serif locali; la navigazione
+rimane ordinaria. Il grafo parte da una mappa leggibile di massimo 18 nodi;
+**Mostra tutti i nodi**, **Disposizione → Organica** e i filtri permettono di
+esplorare altri insiemi. Seleziona un nodo per evidenziare i collegamenti e
+aprire la voce o esplorarne i vicini. Il limite dati della vista rimane
+150 nodi/400 archi; l'elenco accessibile conserva tutte le fonti restituite.
+
+Da **Party → Aggiungi membro** crea un personaggio o collega una pagina del
+Codex esistente, aggiungi giocatore/ruolo/presenza e scrivi in **Quello che so**.
+Gli appunti si salvano automaticamente nella stessa pagina del Codex e sono
+ricercabili. Le immagini usano gli allegati esistenti e sono incluse nel backup.
+Rimuovere dal party conserva pagina, appunti e immagini. Il party non crea
+schede giocabili complete aggiuntive o relazioni fattuali implicite.
+
+**Wiki D&D** consulta [Open5e v2](https://open5e.com/api-docs/), accanto al catalogo
+SRD personale esistente. Cerca termini inglesi, apri una voce e controlla fonte,
+edizione e licenze; le risposte consultate rimangono in SQLite e nel backup.
+La ricerca invia solo il termine esplicitamente digitato; nessun appunto viene
+caricato. **Aggiorna online** è esplicito; un fallimento mantiene la copia
+locale con avviso. Cache limitata a 100 risposte: le meno recenti possono essere
+sostituite. Fonti e copertura non equivalgono a tutti i manuali commerciali.
+Ricerca API/Skill: [docs/RESEARCH_DND.md](docs/RESEARCH_DND.md).
+
+**M7 è pianificata**, non attiva: assistente D&D con modello locale e GPU,
+retrieval citato e separazione delle edizioni. Candidati, limiti e accettazione:
+[docs/AI_LOCAL.md](docs/AI_LOCAL.md). Nessun runtime o modello AI installato.
+

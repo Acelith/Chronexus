@@ -164,3 +164,14 @@ Schema 009, 47 frontend tests and 47 Rust tests verified; NSIS package built.
 Remaining M6 release validation: interactive installation/uninstallation and
 actual macOS/Linux CI/package checks. M7 is now explicitly planned in docs/AI_LOCAL.md; implementation starts only
 after the requested M6 continuation and a subsequent user instruction. See docs/STATUS.md for evidence.
+
+
+## Current checkpoint — M6 extension and M7 plan
+
+M6 Windows extension delivered: medieval reading theme, readable/organic graph,
+Party linked to Codex, Open5e wiki/cache, additive schemas 010/011. Native
+restart/restore and older Speratia backup verified. Windows NSIS silent install,
+installed launch/API access and uninstall preserving data passed. Remaining M6:
+actual macOS/Linux CI/package validation and interactive wizard visual review;
+no remote push authorized. M7 local GPU D&D assistant is planned, not implemented.
+Current counts, checks and limitations: docs/STATUS.md.

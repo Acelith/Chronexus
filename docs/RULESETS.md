@@ -91,3 +91,15 @@ quelli mancanti vanno verificati sulle foto. Nessuna formula o descrizione
 commerciale viene ricostruita. Gli incantesimi personali rimangono modificabili
 con la ricerca SRD esplicita disponibile; la conversione Logseq non invia dati
 all’API e non crea fatti nel grafo.
+
+
+## Wiki multi-fonte e futura AI
+
+Wiki D&D usa Open5e v2 per consultazione esplicita con fonte/edizione/licenze.
+Non converte una descrizione di regole in un fatto della campagna e non
+sovrascrive homebrew o importazioni SRD 2014 esistenti. Le risposte possono
+provenire da editori/edizioni differenti: restano voci separate, prevalentemente
+in inglese. La cache è locale, limitata e compresa nel backup schema 011.
+M7 è soltanto pianificata: modello specifico D&D da valutare, retrieval sulle
+fonti selezionate, edizioni separate e nessuna formula applicata automaticamente.
+Vedere docs/AI_LOCAL.md; nessun runtime o modello è stato eseguito.
