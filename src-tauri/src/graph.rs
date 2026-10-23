@@ -30,7 +30,7 @@ pub struct Relationship {
     pub revision: i64,
     pub source_available: bool,
 }
-fn block_exists(document: &Value, id: &str) -> bool {
+pub(crate) fn block_exists(document: &Value, id: &str) -> bool {
     document
         .get("blocks")
         .and_then(Value::as_array)

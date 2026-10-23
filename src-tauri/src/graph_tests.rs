@@ -204,7 +204,7 @@ fn migration_from_m2_preserves_documents_and_applies_once() {
             c.query_row("SELECT COUNT(*) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            4
+            db::LATEST_SCHEMA
         );
     }
 }

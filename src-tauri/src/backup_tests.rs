@@ -117,7 +117,8 @@ fn backup_restore_round_trip_preserves_all_campaigns_documents_links_relationshi
             pages: 2,
             mentions: 4,
             relationships: 1,
-            attachments: 1
+            attachments: 1,
+            ..Default::default()
         }
     );
     let target_root = temp.path().join("fresh");
@@ -424,7 +425,7 @@ fn old_schema_snapshot_is_validated_then_migrated_in_new_generation() {
             r.get(0)
         })
         .unwrap();
-    assert_eq!(migrations, 4);
+    assert_eq!(migrations, db::LATEST_SCHEMA);
     assert!(knowledge::list_pages(&store.connection, &campaign.id)
         .unwrap()
         .is_empty());

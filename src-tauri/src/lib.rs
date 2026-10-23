@@ -11,6 +11,9 @@ mod journal_tests;
 mod knowledge;
 #[cfg(test)]
 mod knowledge_tests;
+mod player;
+#[cfg(test)]
+mod player_tests;
 use journal::{AppResult, Campaign, Session};
 use std::sync::Mutex;
 use tauri::Manager;
@@ -257,6 +260,73 @@ fn cancel_restore(db: tauri::State<Database>) -> AppResult<()> {
     })
 }
 
+#[tauri::command]
+fn get_character(
+    db: tauri::State<Database>,
+    campaign_id: String,
+) -> AppResult<Option<player::Character>> {
+    db.with(|c| player::get_character(c, &campaign_id))
+}
+#[tauri::command]
+fn save_character(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    id: Option<String>,
+    revision: Option<i64>,
+    input: player::CharacterInput,
+) -> AppResult<player::Character> {
+    db.with(|c| player::save_character(c, &campaign_id, id.as_deref(), revision, input))
+}
+#[tauri::command]
+fn change_character_counter(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    id: String,
+    revision: i64,
+    target: String,
+    delta: i64,
+) -> AppResult<player::Character> {
+    db.with(|c| player::change_counter(c, &campaign_id, &id, revision, &target, delta))
+}
+#[tauri::command]
+fn list_player_assets(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    character_id: String,
+) -> AppResult<Vec<player::Asset>> {
+    db.with(|c| player::list_assets(c, &campaign_id, &character_id))
+}
+#[tauri::command]
+fn save_player_asset(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    character_id: String,
+    id: Option<String>,
+    revision: Option<i64>,
+    input: player::AssetInput,
+) -> AppResult<player::Asset> {
+    db.with(|c| {
+        player::save_asset(
+            c,
+            &campaign_id,
+            &character_id,
+            id.as_deref(),
+            revision,
+            input,
+        )
+    })
+}
+#[tauri::command]
+fn delete_player_asset(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    character_id: String,
+    id: String,
+    revision: i64,
+) -> AppResult<()> {
+    db.with(|c| player::delete_asset(c, &campaign_id, &character_id, &id, revision))
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -280,7 +350,7 @@ pub fn run() {
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore])
+        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
 }

@@ -8,6 +8,29 @@ variabili debug `NODEX_*` restano stabili: cambiare questi identificatori
 separerebbe gli utenti dai dati esistenti. Nessuna migrazione necessaria per il
 solo cambio di nome. I backup M4 sono ancora leggibili.
 
+## M5 — scheda generica e dati giocabili
+
+- Migrazione 005 additiva: `characters` (un personaggio per campagna in questa
+  fase) e `player_assets` (oggetti, incantesimi e capacità discriminati per tipo).
+  UUID e revisioni proteggono aggiornamenti ed eliminazioni obsolete; FK composite
+  impediscono riferimenti a personaggi, pagine e sessioni di altre campagne.
+- La scheda JSON tipizzata conserva identità, sistema libero, PF, statistiche
+  configurabili, condizioni e risorse/slot con ID stabili. I valori delle statistiche
+  sono manuali; contatori interi da 0 al massimo esplicito, nessuna formula o riposo.
+- Gli asset conservano dettagli tipizzati in JSON e provenienza in colonne con FK,
+  senza copie sincronizzate delle stesse informazioni. Quantità zero non elimina
+  l'oggetto; preparato/conosciuto sono marcatori indipendenti, senza consumo implicito.
+- Provenienza sessione/blocco, PNG, luogo e missione; collegamento facoltativo a una
+  pagina Codex. Un blocco rimosso viene segnalato ma il riferimento resta; un cambio
+  successivo del tipo Codex non invalida il ruolo storico. Nessun arco fattuale è
+  inferito da inventario o provenienza.
+- Elenco migrazioni condiviso da apertura DB e validazione backup. I backup v1
+  includono ora conteggi personaggi/oggetti/capacità quando non nulli, con default
+  zero per manifest precedenti. DB 1–5 leggibili; schema 5 richiede Chronexus M5
+  o successivo per il recupero. Validazione M5 eseguita prima di pubblicare backup.
+- Interfaccia React e contratto adattatori sono il successivo passo della stessa
+  milestone; non è stato selezionato o implementato un regolamento commerciale.
+
 ## M3 — Relazioni dichiarate e grafo
 
 - Migrazione 004 additiva: relazioni direzionali separate dalle menzioni,

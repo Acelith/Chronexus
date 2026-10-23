@@ -11,6 +11,11 @@ Verifica rinomina: 23 test frontend e 29 Rust superati, lint/typecheck/format,
 Clippy e build frontend/debug riusciti. Chronexus ha riaperto il profilo M4:
 documenti, grafo, relazioni/fonti e hash PNG identici allo smoke precedente.
 
+Checkpoint backend M5: migrazione 005 additiva, scheda/PF/risorse/slot, asset
+inventario/capacità e provenienza persistenti. 38 test Rust superati, compresi
+9 nuovi scenari player e round trip backup M5; Clippy superato. UI e smoke M5
+ancora da completare. Le verifiche M4 sotto restano lo storico della base.
+
 Ultimo scenario: esportazione `.nodex` reale di due campagne, una sessione,
 due pagine/alias, quattro menzioni, una relazione sospetta con fonte/blocco e
 un'immagine PNG. Ripristino in profilo temporaneo distinto con campagna precedente,

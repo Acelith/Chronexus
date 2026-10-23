@@ -1,6 +1,15 @@
 use rusqlite::Connection;
 use std::{path::Path, time::Duration};
 
+pub const MIGRATIONS: [&str; 5] = [
+    include_str!("../migrations/001_foundation.sql"),
+    include_str!("../migrations/002_journal.sql"),
+    include_str!("../migrations/003_knowledge.sql"),
+    include_str!("../migrations/004_relationships.sql"),
+    include_str!("../migrations/005_player.sql"),
+];
+pub const LATEST_SCHEMA: i64 = MIGRATIONS.len() as i64;
+
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
     let mut connection = Connection::open(path)?;
     connection.busy_timeout(Duration::from_secs(5))?;
@@ -18,22 +27,12 @@ pub fn open(path: &Path) -> rusqlite::Result<Connection> {
         connection.query_row("SELECT MAX(version) FROM schema_migrations", [], |row| {
             row.get(0)
         })?;
-    if version > 4 {
+    if version > LATEST_SCHEMA {
         return Err(rusqlite::Error::InvalidQuery);
     }
-    if version < 2 {
+    for migration in MIGRATIONS.iter().skip(version as usize) {
         let transaction = connection.transaction()?;
-        transaction.execute_batch(include_str!("../migrations/002_journal.sql"))?;
-        transaction.commit()?;
-    }
-    if version < 3 {
-        let transaction = connection.transaction()?;
-        transaction.execute_batch(include_str!("../migrations/003_knowledge.sql"))?;
-        transaction.commit()?;
-    }
-    if version < 4 {
-        let transaction = connection.transaction()?;
-        transaction.execute_batch(include_str!("../migrations/004_relationships.sql"))?;
+        transaction.execute_batch(migration)?;
         transaction.commit()?;
     }
     Ok(connection)
@@ -70,7 +69,7 @@ mod tests {
                 .query_row("SELECT COUNT(*) FROM schema_migrations", [], |row| row
                     .get::<_, i64>(0))
                 .unwrap(),
-            4
+            LATEST_SCHEMA
         );
         assert_eq!(
             connection

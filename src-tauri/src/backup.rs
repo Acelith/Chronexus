@@ -85,7 +85,7 @@ fn checksum(path: &Path) -> AppResult<(u64, String)> {
     Ok((size, format!("{:x}", hash.finalize())))
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Counts {
     pub campaigns: u64,
@@ -94,6 +94,15 @@ pub struct Counts {
     pub mentions: u64,
     pub relationships: u64,
     pub attachments: u64,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub characters: u64,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub items: u64,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub spells: u64,
+}
+fn is_zero(value: &u64) -> bool {
+    *value == 0
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", deny_unknown_fields)]
@@ -183,6 +192,21 @@ fn counts(connection: &Connection, attachments: u64, schema: i64) -> AppResult<C
             0
         },
         attachments,
+        characters: if schema >= 5 {
+            count(connection, "characters")?
+        } else {
+            0
+        },
+        items: if schema >= 5 {
+            connection.query_row("SELECT COUNT(*) FROM player_assets WHERE json_extract(details,'$.kind')='item'",[],|r|r.get::<_,i64>(0)).map_err(journal::storage)? as u64
+        } else {
+            0
+        },
+        spells: if schema >= 5 {
+            connection.query_row("SELECT COUNT(*) FROM player_assets WHERE json_extract(details,'$.kind') IN ('spell','ability')",[],|r|r.get::<_,i64>(0)).map_err(journal::storage)? as u64
+        } else {
+            0
+        },
     })
 }
 fn schema(connection: &Connection) -> AppResult<Vec<(String, String, String)>> {
@@ -200,7 +224,7 @@ fn schema(connection: &Connection) -> AppResult<Vec<(String, String, String)>> {
 }
 
 fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
-    if !(1..=4).contains(&expected_version) {
+    if !(1..=db::LATEST_SCHEMA).contains(&expected_version) {
         return Err(invalid(
             "versione database non supportata; aggiorna Chronexus",
         ));
@@ -220,15 +244,7 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
         return Err(invalid("integrità o versione del database incoerente"));
     }
     let expected = Connection::open_in_memory().map_err(journal::storage)?;
-    for migration in [
-        include_str!("../migrations/001_foundation.sql"),
-        include_str!("../migrations/002_journal.sql"),
-        include_str!("../migrations/003_knowledge.sql"),
-        include_str!("../migrations/004_relationships.sql"),
-    ]
-    .into_iter()
-    .take(expected_version as usize)
-    {
+    for migration in db::MIGRATIONS.into_iter().take(expected_version as usize) {
         expected
             .execute_batch(migration)
             .map_err(journal::storage)?;
@@ -253,6 +269,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
         return Err(invalid("riferimenti del database incoerenti"));
     }
     drop(foreign);
+    if expected_version >= 5 {
+        crate::player::validate_archive(&connection)?;
+    }
     if expected_version >= 2 {
         for campaign in journal::list_campaigns(&connection)? {
             journal::identifier(&campaign.id)?;
