@@ -12,6 +12,75 @@
 body {
   margin: 0;
 }
+.dashboard-ledger {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 48px;
+  border-block: 1px solid #465268;
+  padding: 18px 0;
+  margin: 24px 0;
+}
+.dashboard-ledger dt {
+  font-size: 14px;
+  color: #a9b4c7;
+}
+.dashboard-ledger dd {
+  font:
+    30px Georgia,
+    serif;
+  margin: 8px 0 0;
+}
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 36px;
+}
+.dashboard-columns h4 {
+  font:
+    23px Georgia,
+    serif;
+  margin: 24px 0 18px;
+}
+.dashboard-session {
+  width: 100%;
+  border-left: 3px solid #d7b978;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 24px;
+}
+.dashboard-session strong {
+  font:
+    26px Georgia,
+    serif;
+}
+.dashboard-session p {
+  margin: 0;
+  line-height: 1.7;
+}
+.dashboard-pages {
+  display: grid;
+  gap: 10px;
+}
+.dashboard-pages button {
+  display: grid;
+  gap: 5px;
+}
+.dashboard-pages span,
+.dashboard-session span {
+  font-size: 13px;
+  color: #a9b4c7;
+}
+@media (max-width: 1000px) {
+  .dashboard-columns {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .campaign-header {
+    align-items: start;
+    flex-wrap: wrap;
+  }
+}
 .export-control {
   max-width: 380px;
 }

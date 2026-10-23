@@ -38,6 +38,7 @@ const GraphWorkspace = lazy(() => import("./features/graph/GraphWorkspace"));
 const BackupWorkspace = lazy(() => import("./features/backup/BackupWorkspace"));
 const PlayerWorkspace = lazy(() => import("./features/player/PlayerWorkspace"));
 const ExportButton = lazy(() => import("./features/export/ExportButton"));
+const Dashboard = lazy(() => import("./features/dashboard/Dashboard"));
 
 export function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -47,9 +48,9 @@ export function App() {
   const [pages, setPages] = useState<KnowledgePage[]>([]);
   const [pageId, setPageId] = useState<string | null>(null);
   const [fallback, setFallback] = useState("");
-  const [view, setView] = useState<"journal" | "codex" | "graph" | PlayerView>(
-    "journal",
-  );
+  const [view, setView] = useState<
+    "overview" | "journal" | "codex" | "graph" | PlayerView
+  >("journal");
   const [playerReturn, setPlayerReturn] = useState<{
     view: PlayerView;
     assetId: string;
@@ -530,6 +531,18 @@ export function App() {
                 {campaign ? (
                   <nav className="view-tabs" aria-label="Viste della campagna">
                     <button
+                      aria-current={view === "overview" ? "page" : undefined}
+                      disabled={busy}
+                      onClick={() =>
+                        void run(async () => {
+                          setView("overview");
+                          setForm(null);
+                        })
+                      }
+                    >
+                      Riepilogo
+                    </button>
+                    <button
                       aria-current={view === "journal" ? "page" : undefined}
                       disabled={busy}
                       onClick={() => {
@@ -664,6 +677,33 @@ export function App() {
                       onCreate={createPage}
                       onUpdate={updatePage}
                       onRecover={recoverPage}
+                    />
+                  </Suspense>
+                ) : null}
+                {campaign && view === "overview" ? (
+                  <Suspense fallback={<p role="status">Apertura riepilogo…</p>}>
+                    <Dashboard
+                      key={campaign.id}
+                      campaignId={campaign.id}
+                      sessions={sessions}
+                      pages={pages}
+                      onSession={(s) =>
+                        openSource({
+                          sourceKind: "session",
+                          sourceId: s.id,
+                          sourceTitle: s.title,
+                          sequence: s.sequence,
+                          blockId: "",
+                          preview: "",
+                        })
+                      }
+                      onPage={(p) => openPage(p.id, p.title)}
+                      onCharacter={() =>
+                        void run(async () => setView("character"))
+                      }
+                      onNewSession={() =>
+                        void run(async () => setForm("session"))
+                      }
                     />
                   </Suspense>
                 ) : null}
