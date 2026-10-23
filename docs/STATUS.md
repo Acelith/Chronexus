@@ -14,3 +14,13 @@
 - macOS/Linux: NON ESEGUITI. Installer rinviati a M6.
 - Documenti iniziali preservati, nel frattempo registrati dall'utente in `5251e99`.
 - Passo successivo: M1, campagne/sessioni/editor e autosave con persistenza reale.
+
+## M1 — persistenza completata, interfaccia in corso
+
+- Comandi Rust: creazione/elenco/rinomina campagne, creazione/elenco sessioni,
+  salvataggio documento con revisione. Migrazione 002 additiva.
+- `cargo test --offline --manifest-path src-tauri/Cargo.toml`: PASS, 5 test
+  (riapertura con 2 paragrafi, ordine, migrazione M0, isolamento, validazione,
+  conflitti e DB non scrivibile).
+- Ultimo commit: `6b7c073 build(core): inizializza desktop Tauri e archivio SQLite locale`.
+- Prossimo passo: completare e verificare editor BlockNote e autosave M1.

@@ -16,3 +16,15 @@
   per comandi. Sidebar archivio a sinistra, diario al centro; nessun dato fittizio.
 - Skill lette e applicate: frontend-design (palette, tipografia e struttura),
   vercel-react-best-practices (stato derivato e caricamento differito editor).
+
+## 2026-10-23 — Persistenza M1
+
+- Migrazione 002 aggiunge campagne/sessioni con UUID, vincoli, indice cronologico
+  per numero e documento JSON canonico versionato. Nessuna copia Markdown modificabile.
+- Ogni comando di sessione riceve la campagna e ne verifica i confini nel backend.
+- Revisioni ottimistiche impediscono sovrascritture da finestre/app concorrenti:
+  un conflitto blocca il salvataggio e invita a copiare gli appunti.
+- Documenti limitati a 2 MB, 10.000 blocchi e profondità 12; solo paragrafi,
+  titoli, elenchi e citazioni. Media e upload fuori scope.
+- Errori di apertura DB tornano al frontend: la finestra rimane disponibile
+  anche con directory non accessibile o schema più recente.
