@@ -1,7 +1,10 @@
 # M7 — Assistente D&D locale sulla GPU
 
-Stato: **pianificata su richiesta dell'utente, non implementata**. Nessun modello
-è stato scaricato, installato o eseguito. Nessuna chiamata AI è stata aggiunta.
+Stato: **M7 in implementazione su successiva richiesta esplicita dell'utente**.
+Adapter Rust, schema 012, retrieval e UI presenti; valutazione in corso.
+Il candidato D&D è stato provato realmente su GPU e scartato per qualità.
+L'utente ha approvato il modello multilingue con fonti locali e citazioni.
+Modello attuale: Qwen3:4b-instruct Q4_K_M, non fine-tuned su D&D.
 
 ## Risultato atteso
 
@@ -31,7 +34,8 @@ un assistente del giocatore: niente segreti del GM o eventi inventati.
 
 Hardware rilevato in questa sessione: NVIDIA RTX 4080 SUPER, 16.376 MiB di VRAM,
 driver 621.01 (`nvidia-smi`). È un dato locale, non un requisito universale.
-Nessun benchmark o compatibilità di caricamento modello ancora verificati.
+Entrambi i modelli 1.5B e Qwen3 4B sono stati caricati interamente su GPU.
+Risultati e limiti finali verranno registrati al termine della verifica.
 
 ## Specializzazione D&D obbligatoria quando disponibile
 
@@ -48,8 +52,9 @@ Un modello con “DND” nel nome non è necessariamente specializzato nelle reg
 le schede di alcuni risultati descrivono semplice modifica del comportamento o
 roleplay. Non trattarli come esperti D&D. Il modello 1.5B è un candidato da
 valutare, non una raccomandazione con accuratezza o italiano già dimostrati.
-Se i candidati specifici non superano criteri minimi, documentare il risultato
-e chiedere una scelta prima di adottare un generico; non dichiarare M7 completa.
+Il candidato 1.5B ha fallito le prove; la scelta dell'alternativa multilingue è
+stata chiesta e approvata dall'utente prima di procedere. Resta necessario
+completare la valutazione dell'integrazione prima di dichiarare M7 conclusa.
 
 ## Contesto, fonti e dati
 

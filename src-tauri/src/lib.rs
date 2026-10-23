@@ -1,3 +1,4 @@
+mod assistant;
 mod backup;
 #[cfg(test)]
 mod backup_tests;
@@ -528,9 +529,111 @@ fn store_wiki_cache(
 ) -> AppResult<wiki::Entry> {
     db.with(|c| wiki::store(c, &key, payload))
 }
+#[tauri::command]
+async fn probe_local_ai() -> AppResult<assistant::runtime::Runtime> {
+    let client = assistant::runtime::client()?;
+    assistant::runtime::probe_at(&client, assistant::runtime::BASE).await
+}
+#[tauri::command]
+fn get_ai_settings(db: tauri::State<Database>) -> AppResult<assistant::store::Settings> {
+    db.with(assistant::store::settings)
+}
+#[tauri::command]
+async fn configure_local_ai(
+    db: tauri::State<'_, Database>,
+    state: tauri::State<'_, assistant::service::State>,
+    enabled: bool,
+    model: String,
+    multilingual_consent: bool,
+) -> AppResult<assistant::store::Settings> {
+    if assistant::service::busy(&state)? {
+        return Err("Annulla la generazione prima di modificare la configurazione AI.".into());
+    }
+    if !enabled {
+        return db.with(|c| {
+            let mut s = assistant::store::settings(c)?;
+            s.enabled = false;
+            assistant::store::set_settings(c, &s)
+        });
+    }
+    if !multilingual_consent {
+        return Err("Conferma il modello multilingue con fonti locali; il candidato D&D non ha superato la valutazione.".into());
+    }
+    assistant::runtime::check_model_name(&model)?;
+    let client = assistant::runtime::client()?;
+    let runtime = assistant::runtime::probe_at(&client, assistant::runtime::BASE).await?;
+    let selected=runtime.models.into_iter().find(|m|m.name==model&&!m.dnd_specialized&&m.weight_digest.is_some()).ok_or("Scegli un modello multilingue GGUF locale verificabile. Il modello D&D di prova non è qualificato.")?;
+    db.with(|c| {
+        assistant::store::set_settings(
+            c,
+            &assistant::store::Settings {
+                enabled: true,
+                model: selected.name,
+                digest: selected.digest,
+                specialization: "multilingual-rag".into(),
+            },
+        )
+    })
+}
+#[tauri::command]
+async fn ask_local_ai(
+    db: tauri::State<'_, Database>,
+    state: tauri::State<'_, assistant::service::State>,
+    request: assistant::service::Request,
+    events: tauri::ipc::Channel<assistant::service::Event>,
+) -> AppResult<assistant::store::Turn> {
+    assistant::service::ask(&db, &state, request, events).await
+}
+#[tauri::command]
+fn cancel_local_ai(state: tauri::State<assistant::service::State>, id: String) -> AppResult<()> {
+    assistant::service::cancel(&state, &id)
+}
+#[tauri::command]
+fn list_ai_history(
+    db: tauri::State<Database>,
+    state: tauri::State<assistant::service::State>,
+    campaign_id: String,
+    offset: u32,
+) -> AppResult<Vec<assistant::store::Turn>> {
+    db.with(|c| {
+        if !assistant::service::busy(&state)? {
+            assistant::store::recover(c)?
+        }
+        assistant::store::history(c, &campaign_id, offset)
+    })
+}
+#[tauri::command]
+fn delete_ai_turn(
+    db: tauri::State<Database>,
+    state: tauri::State<assistant::service::State>,
+    campaign_id: String,
+    id: String,
+) -> AppResult<()> {
+    if assistant::service::busy(&state)? {
+        return Err("Annulla prima la generazione in corso.".into());
+    }
+    db.with(|c| assistant::store::delete(c, &campaign_id, &id))
+}
+#[tauri::command]
+fn check_ai_source(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    turn_id: String,
+    key: String,
+) -> AppResult<serde_json::Value> {
+    db.with(|c| assistant::store::source_state(c, &campaign_id, &turn_id, &key))
+}
+#[tauri::command]
+fn list_ai_rule_sources(
+    db: tauri::State<Database>,
+    edition: String,
+) -> AppResult<serde_json::Value> {
+    db.with(|c|{let mut q=c.prepare("SELECT key,payload FROM wiki_cache WHERE key LIKE 'entry/%' ORDER BY fetched_at DESC").map_err(journal::storage)?;let rows=q.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(journal::storage)?.collect::<rusqlite::Result<Vec<_>>>().map_err(journal::storage)?;let mut out=Vec::new();for (key,raw) in rows{let value:serde_json::Value=serde_json::from_str(&raw).map_err(|_|"Fonte wiki illeggibile.")?;if value["document"]["gamesystem"]["key"].as_str()==Some(&edition){out.push(serde_json::json!({"key":key,"title":value["entry"]["name"],"document":value["document"]["name"]}))}}Ok(serde_json::json!(out))})
+}
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .manage(assistant::service::State::default())
         .setup(|app| {
             // Keep the window usable when initialization fails so the UI can explain recovery.
             let connection = (|| -> Result<_, Box<dyn std::error::Error>> {
@@ -546,12 +649,13 @@ pub fn run() {
                 };
                 std::fs::create_dir_all(&directory)?;
                 let store = backup::Store::open(&directory).map_err(std::io::Error::other)?;
+                assistant::store::recover(&store.connection).map_err(std::io::Error::other)?;
                 Ok(Mutex::new(store))
             })().map_err(|error| format!("Archivio non disponibile: {error}. Verifica spazio e permessi della cartella dati e riavvia Chronexus. Se usi una versione precedente, torna a quella più recente."));
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
+        .invoke_handler(tauri::generate_handler![get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
 }

@@ -121,6 +121,8 @@ pub struct Manifest {
     pub scope: String,
     pub counts: Counts,
     pub files: Vec<Entry>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assistant_settings: Option<crate::assistant::store::Settings>,
 }
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -275,6 +277,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if expected_version >= 6 {
         crate::catalog::validate_archive(&connection)?;
     }
+    if expected_version >= 12 {
+        crate::assistant::store::validate_archive(&connection)?;
+    }
     if expected_version >= 11 {
         crate::wiki::validate_archive(&connection)?;
     }
@@ -400,6 +405,11 @@ pub fn write_backup(
         scope: "all_campaigns".into(),
         counts: counts.clone(),
         files,
+        assistant_settings: if schema_version >= 12 {
+            Some(crate::assistant::store::settings(&validated)?)
+        } else {
+            None
+        },
     };
     let manifest_json = serde_json::to_vec_pretty(&manifest).map_err(io)?;
     if manifest_json.len() as u64 > MAX_MANIFEST {
@@ -537,6 +547,12 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
     }
     sync_dir(directory.path())?;
     let connection = validate_db(&directory.path().join(DB_ENTRY), manifest.schema_version)?;
+    if manifest.schema_version >= 12
+        && manifest.assistant_settings.as_ref()
+            != Some(&crate::assistant::store::settings(&connection)?)
+    {
+        return Err(invalid("configurazione AI del manifest incoerente"));
+    }
     let actual = counts(
         &connection,
         (manifest.files.len() - 1) as u64,

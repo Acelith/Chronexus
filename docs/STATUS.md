@@ -6,8 +6,10 @@ M0–M5 e funzioni M6 consegnate su Windows, incluse estensioni grafo/tema/Party
 Continuazione M6 eseguita: package NSIS, installazione silenziosa, avvio e
 rimozione senza perdita dati verificati. **Restano M6 macOS/Linux/CI reali e
 revisione visuale del wizard interattivo**. Nessun push autorizzato/eseguito.
-**M7 pianificata, non implementata**: docs/AI_LOCAL.md; modello D&D locale,
-GPU verificata e risposte citate. Non scaricare/avviare modelli in questo giro.
+**M7 in corso su richiesta successiva dell'utente**: adapter Ollama locale,
+retrieval e conversazioni SQLite, backup/export con fonti. Modello D&D provato
+su GPU ma scartato per qualità; l'utente ha approvato Qwen multilingue con fonti
+locali. UI e valutazione completa in verifica; non dichiarare ancora M7 conclusa.
 
 ## Funziona
 
@@ -23,11 +25,17 @@ GPU verificata e risposte citate. Non scaricare/avviare modelli in questo giro.
   Nessun upload degli appunti o modifica implicita degli incantesimi personali.
 - FTS5 locale e rebuild, Ctrl/⌘K / Ctrl/⌘ShiftN, riepilogo, immagini originali
   gestite e backuppate, ZIP Markdown/JSON con immagini e sorgenti Logseq immutabili.
-- Schema corrente **011**: 010 Party e 011 cache wiki sono additive. Vecchi
+- Schema corrente **012**: impostazioni e conversazioni AI additive. Vecchi
   backup migrati in copia; nuovi richiedono versione compatibile. Percorsi e
   identificatore legacy it.nodex.desktop/.nodex conservati.
 
 ## Verifiche effettive
+
+Checkpoint M7 backend: 59 test Rust superati, Clippy con warning negati e build
+debug superati; 55 test React, lint, typecheck superati nella stessa esecuzione.
+La valutazione nativa iniziale di 40 domande ha richiesto miglioramenti a
+concisione/gestione istruzioni malevole; ripetizione e prove UI ancora in corso.
+I risultati M6 sottostanti restano riferiti al checkpoint precedente.
 
 - pnpm lint / typecheck / format:check: PASS.
 - pnpm test: PASS, 52 test / 18 file. Dopo l'ultima correzione visuale grafo,

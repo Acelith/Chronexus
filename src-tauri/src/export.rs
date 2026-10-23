@@ -125,6 +125,14 @@ pub fn write_export(
     let pictures = images::all(c, campaign_id)?;
     let sources = crate::import_sources::all(c, campaign_id)?;
     let party = crate::party::list(c, campaign_id)?;
+    let mut conversations = Vec::new();
+    loop {
+        let batch = crate::assistant::store::history(c, campaign_id, conversations.len() as u32)?;
+        if batch.is_empty() {
+            break;
+        }
+        conversations.extend(batch);
+    }
     let mut q = c
         .prepare("SELECT id FROM relationships WHERE campaign_id=?1 ORDER BY id")
         .map_err(storage)?;
@@ -138,7 +146,7 @@ pub fn write_export(
         .into_iter()
         .map(|id| graph::get_relationship(c, campaign_id, &id))
         .collect::<AppResult<Vec<_>>>()?;
-    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"importSources":sources,"party":party});
+    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"importSources":sources,"party":party,"assistantConversations":conversations});
     let mut files: Vec<(String, Vec<u8>)> = vec![(
         "campaign.json".into(),
         serde_json::to_vec_pretty(&data).map_err(|_| "Esportazione JSON non riuscita.")?,
@@ -211,6 +219,30 @@ pub fn write_export(
         );
         append_images(&mut text, &pictures, None, None, Some(&asset.id));
         files.push((format!("assets/{}.md", asset.id), text.into_bytes()));
+    }
+    if !conversations.is_empty() {
+        index.push_str("\n## Conversazioni AI locali\n\nRisposte da verificare; non costituiscono fatti della campagna. I pesi del modello non sono inclusi.\n\n");
+    }
+    for turn in &conversations {
+        let mut text = format!("# {}\n\nStato: {}\n\nModello: {} ({})\n\nEdizione: {}\n\n{}\n\n{}\n\n## Fonti al momento della risposta\n\n", turn.question,turn.status,turn.model,turn.digest,turn.edition.as_deref().unwrap_or("appunti campagna"),turn.answer,turn.error);
+        for source in &turn.sources {
+            text.push_str(&format!(
+                "### [{}] {}\n\nTipo: {}; ID: {}; blocco: {}; revisione: {}; SHA-256: {}\n\n{}\n\n",
+                source.key,
+                source.title,
+                source.kind,
+                source.source_id,
+                source.block_id.as_deref().unwrap_or("intera voce"),
+                source.revision,
+                source.hash,
+                source.text
+            ));
+        }
+        index.push_str(&format!(
+            "- [Risposta {}](assistant/{}.md)\n",
+            turn.created_at, turn.id
+        ));
+        files.push((format!("assistant/{}.md", turn.id), text.into_bytes()));
     }
     files.push(("README.md".into(), index.into_bytes()));
     for source in &sources {

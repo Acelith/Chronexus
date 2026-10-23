@@ -302,3 +302,25 @@ zone dense di Speratia. La vista iniziale usa quindi una mappa ordinata con
 spazio calcolato anche per le etichette; il layout COSE rimane selezionabile.
 Nessuna relazione è dedotta dalla posizione spaziale. Riordinate solo le
 coordinate del canvas, non i dati o la membership.
+
+## M7 — inferenza locale e scelta del modello
+
+Ollama portable isolato nel percorso ignorato `.tools/m7-runtime`, senza
+installazione di sistema. Adapter HTTP Rust fisso su 127.0.0.1:11434, senza
+proxy/redirect, verifica `/api/status` cloud disabilitato prima di ogni richiesta,
+digest manifest e pesi GGUF locali. Precaricamento senza appunti e verifica GPU;
+CPU esclusiva bloccata, caricamento misto dichiarato. Nessun tool del modello.
+
+Il candidato dnd-unified-1.5b Q4_K_M è stato realmente caricato interamente su
+GPU ma fallisce le prime domande italiane. L'utente ha esplicitamente scelto
+un modello multilingue più capace con fonti D&D locali e citazioni.
+Qwen3:4b-instruct Q4_K_M produce risposte dirette; Qwen3:4b standard esponeva
+ragionamento nel contenuto e non è il modello qualificato. Le licenze dei
+modelli sono dichiarate dagli autori; pesi non redistribuiti nel repository.
+
+Retrieval FTS5 per sola campagna e fonti regole selezionate per edizione;
+copie con ID/blocco/revisione/hash, limite di contesto conservativo. Cronologia
+non usata come nuova fonte. Migrazione 012 additiva, configurazione disattivata
+inizialmente, conversazioni cancellabili/esportabili/backuppate; pesi esclusi.
+Le citazioni verificano appartenenza e versione, non la verità semantica.
+Skill vercel-react-best-practices per caricamento differito e letture indipendenti.
