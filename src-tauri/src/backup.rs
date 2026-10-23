@@ -43,13 +43,17 @@ fn attachment_path(name: &str) -> bool {
     if parts.len() != 3 || parts[0] != "attachments" || !canonical_id(parts[1]) {
         return false;
     }
-    let (stem, extension) = parts[2].split_once('.').unwrap_or((parts[2], ""));
-    canonical_id(stem)
-        && (extension.is_empty()
-            || (extension.len() <= 12
+    match parts[2].split_once('.') {
+        None => canonical_id(parts[2]),
+        Some((stem, extension)) => {
+            canonical_id(stem)
+                && !extension.is_empty()
+                && extension.len() <= 12
                 && extension
                     .bytes()
-                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit())))
+                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit())
+        }
+    }
 }
 fn allowed_path(name: &str) -> bool {
     name == DB_ENTRY || attachment_path(name)
@@ -182,7 +186,11 @@ fn counts(connection: &Connection, attachments: u64, schema: i64) -> AppResult<C
     })
 }
 fn schema(connection: &Connection) -> AppResult<Vec<(String, String, String)>> {
-    let mut statement = connection.prepare("SELECT type,name,sql FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%' ORDER BY type,name").map_err(journal::storage)?;
+    // Auto-indexes have NULL SQL. Do not filter names with LIKE: '_' is a
+    // wildcard and could hide unexpected objects such as sqliteXunexpected.
+    let mut statement = connection
+        .prepare("SELECT type,name,sql FROM sqlite_master WHERE sql IS NOT NULL ORDER BY type,name")
+        .map_err(journal::storage)?;
     let rows = statement
         .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))
         .map_err(journal::storage)?
@@ -190,6 +198,7 @@ fn schema(connection: &Connection) -> AppResult<Vec<(String, String, String)>> {
         .map_err(journal::storage)?;
     Ok(rows)
 }
+
 fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if !(1..=4).contains(&expected_version) {
         return Err(invalid("versione database non supportata; aggiorna Nodex"));
@@ -644,5 +653,20 @@ impl Store {
         // A directory sync failure here cannot be reported as a cancelled restore.
         let durability_warning = sync_dir(&self.root).err();
         Ok(RestoreReceipt {safety_path:safety_path.display().to_string(),counts:prepared.manifest.counts,warning:durability_warning.map(|_|"Ripristino applicato, ma il sistema non ha confermato la sincronizzazione della cartella su disco. Conserva la copia preventiva e verifica dopo il riavvio.".into())})
+    }
+}
+
+#[cfg(test)]
+mod path_tests {
+    use super::attachment_path;
+    #[test]
+    fn attachment_names_are_portable_and_cannot_alias_windows_trailing_dots() {
+        let prefix =
+            "attachments/56dc229c-00e7-486b-8e95-a99c0e2d403e/33efd3db-9236-4ba6-abc8-3b072fb0c630";
+        assert!(attachment_path(prefix));
+        assert!(attachment_path(&format!("{prefix}.png")));
+        for suffix in [".", "..", ".PNG", ".png.exe", ".png:", ". ", "/nested"] {
+            assert!(!attachment_path(&format!("{prefix}{suffix}")));
+        }
     }
 }

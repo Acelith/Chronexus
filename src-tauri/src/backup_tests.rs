@@ -331,17 +331,25 @@ fn damaged_database_with_matching_checksum_and_unexpected_schema_are_rejected() 
     seed(&store);
     let valid = temp.path().join("valid.nodex");
     write_backup(&store.connection, &store.directory, &valid).unwrap();
-    for extra_schema in [false, true] {
+    for scenario in 0..3 {
         let mut entries = contents(&valid);
         let db = entries
             .iter_mut()
             .find(|(n, _)| n == "data/nodex.sqlite3")
             .unwrap();
-        if extra_schema {
+        if scenario != 0 {
             let path = temp.path().join("edit.sqlite3");
             fs::write(&path, &db.1).unwrap();
             let c = rusqlite::Connection::open(&path).unwrap();
-            c.execute_batch("CREATE TRIGGER unexpected AFTER INSERT ON campaigns BEGIN DELETE FROM sessions; END;").unwrap();
+            let name = if scenario == 1 {
+                "unexpected"
+            } else {
+                "sqliteXunexpected"
+            };
+            c.execute_batch(&format!(
+                "CREATE TRIGGER {name} AFTER INSERT ON campaigns BEGIN DELETE FROM sessions; END;"
+            ))
+            .unwrap();
             drop(c);
             db.1 = fs::read(&path).unwrap();
         } else {

@@ -103,7 +103,8 @@
 - Skill applicate: frontend-design (revisione visiva, palette e gerarchia),
   vercel-react-best-practices (lazy loading e stato derivato). computer-use letta
   per QA nativa; accesso finestra scaduto, prova effettiva tramite WebView locale.
-# M4 — backup portabile e attivazione del ripristino
+
+## M4 — backup portabile e attivazione del ripristino
 
 - Il bundle `.nodex` v1 salva **tutte le campagne**: snapshot tramite API backup
   SQLite, `manifest.json`, SHA-256 di ogni payload e allegati gestiti. Nessuna
@@ -129,3 +130,18 @@
 - Non si aggiunge ancora un gestore allegati: M4 conserva i file già presenti
   nel layout gestito, verificato con fixture nei test. Esportazione Markdown/JSON
   e backup pianificati sono rinviati: M4 dà priorità al recupero manuale.
+- La copia dei payload inattivi, invece dello spostamento della cartella estratta,
+  tollera handle di directory Windows senza condivisione DELETE; ogni copia è
+  ricontrollata con SHA-256 prima di attivarla. Un test Windows riproduce il caso.
+- Il confronto schema comprende ogni oggetto con SQL dichiarato: non usa `LIKE`
+  sui nomi SQLite, perché il carattere `_` potrebbe nascondere trigger inattesi.
+  Nomi di allegati con punto finale o estensione vuota sono respinti per evitare
+  alias differenti fra Windows e Unix.
+- `NODEX_DEV_BACKUP_FILE` / `NODEX_DEV_RESTORE_FILE` predefiniscono solo il risultato
+  del selettore per QA ripetibile, richiedono `NODEX_DEV_DATA_DIR` esplicita e
+  percorsi assoluti. L'intero ramo è escluso dalle build release. Nessun comando
+  accetta percorsi filesystem da React.
+- Skill UI: frontend-design per gerarchia/palette esistenti e verifica screenshot;
+  vercel-react-best-practices per caricamento differito. computer-use ha aperto e
+  letto il selettore nativo; successivi input bloccati dallo strumento, quindi
+  il round trip desktop usa la scelta predefinita nel debug, con ZIP/DB reali.

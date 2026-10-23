@@ -9,8 +9,9 @@ su generazioni con copia preventiva. Il desktop ha rilevato un blocco Windows
 nello spostamento della cartella allegati: ora copia i soli payload verificati
 e ne ricontrolla gli hash; test dedicato con handle senza condivisione DELETE.
 Interfaccia M4 in completamento; esportazione, ripristino e riavvio desktop reali
-riusciti, compreso confronto dell'hash immagine. 21 test frontend e 8 test Rust
-backup superati; suite Rust completa precedente: 27 superati. Clippy superato.
+riusciti, compreso confronto dell'hash immagine. 23 test frontend e 29 Rust
+superati, Clippy superato. Revisione schema: respinti anche trigger con nomi
+simili agli oggetti interni SQLite; vietate estensioni vuote/trailing dot.
 Nessuna migrazione aggiunta; schema corrente 004.
 
 Scenario M3 verificato nel desktop reale: Varek e Gilda citati nella Sessione 12
