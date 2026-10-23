@@ -39,6 +39,7 @@ const BackupWorkspace = lazy(() => import("./features/backup/BackupWorkspace"));
 const PlayerWorkspace = lazy(() => import("./features/player/PlayerWorkspace"));
 const ExportButton = lazy(() => import("./features/export/ExportButton"));
 const Dashboard = lazy(() => import("./features/dashboard/Dashboard"));
+const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
 
 export function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -818,6 +819,16 @@ export function App() {
                               disabled={busy}
                             />
                           </Suspense>
+                          {session.document.importedFrom === "logseq" ? (
+                            <Suspense fallback={null}>
+                              <ImportSource
+                                key={session.id}
+                                campaignId={session.campaignId}
+                                kind="session"
+                                id={session.id}
+                              />
+                            </Suspense>
+                          ) : null}
                         </>
                       ) : (
                         <p>{it.chooseSession}</p>

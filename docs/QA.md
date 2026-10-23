@@ -289,6 +289,7 @@ La fixture attesa e gli screenshot restano ignorati in `.tools/`. Nessun PDF o
 dato personale nel repository. Il funzionamento della ricerca nella build
 release con origine `tauri.localhost` non è stato provato in questa revisione;
 la compilazione release e la CSP con host API esplicito sono verificate.
+Aggiornamento M6: GET Magic Missile dalla release tauri.localhost verificato (200).
 
 ## Piattaforme
 
@@ -297,6 +298,27 @@ Build release: compilata e avviata, shell e comando SQLite verificati da
 `http://tauri.localhost/` con asset incorporati. L'archivio personale vuoto è
 stato soltanto letto, senza aggiungere dati di prova. Non avviare insieme
 WebView con argomenti di debug diversi sullo stesso profilo WebView2.
-macOS/Linux, installer e matrice CI: non eseguiti, previsti in M6.
+Installer NSIS Windows generato; installazione/disinstallazione non eseguite.
+macOS/Linux e matrice CI predisposta: non eseguiti in questo ambiente.
 Il controllo nativo `computer-use` è stato consultato ma la richiesta di accesso
 alla finestra è scaduta: lo smoke effettivo usa la WebView e il DB Rust reali.
+
+## M6 — verifiche Windows del 23 ottobre 2026
+
+- Frontend: 47 test in 15 file; Rust: 47 test. Lint, typecheck, format,
+  cargo fmt/clippy e build Windows verificati (vedere STATUS).
+- Smoke immagini con profilo isolato: caricamento PNG reale, anteprima/zoom,
+  ricerca con blocco fonte, creazione `.nodex` reale. Test Rust coprono file
+  corrotti, payload/percorso ostile, proprietà e backup/ripristino.
+- Speratia: 84 sessioni, 209 pagine, 18 asset, 36 immagini (32 archivio + 4 foto),
+  207 sorgenti Markdown con hash verificati. Verificati riepilogo, scheda,
+  visualizzatore foto, sorgente in sola lettura e ricerca. Due alias coincidono
+  con altri titoli: conservati nel testo senza fusione.
+- Riavvio sorgente, restore su profilo vuoto e riavvio ripristinato: confronto
+  completo di dati, UUID, sorgenti e hash byte per byte delle 36 immagini PASS.
+- Export reale: 209 pagine, 84 sessioni, 207 Markdown originali e 36 immagini;
+  confrontati i checksum. Backup copiato nei Download con SHA-256 identico.
+- Profili e script di accettazione con dati personali restano ignorati in
+  `.tools/`. La prova usa il selettore predefinito debug, SQLite/file/ZIP reali.
+- QA rimanente: installare/disinstallare NSIS su macchina di prova, eseguire CI
+  e controllare pacchetti su macOS/Linux; firme di distribuzione non predisposte.

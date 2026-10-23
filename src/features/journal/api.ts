@@ -5,6 +5,7 @@ export interface Campaign {
   name: string;
 }
 export interface JournalDocument {
+  importedFrom?: "logseq";
   version: 1;
   blocks: unknown[];
 }

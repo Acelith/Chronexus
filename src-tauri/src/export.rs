@@ -123,6 +123,7 @@ pub fn write_export(
         vec![]
     };
     let pictures = images::all(c, campaign_id)?;
+    let sources = crate::import_sources::all(c, campaign_id)?;
     let mut q = c
         .prepare("SELECT id FROM relationships WHERE campaign_id=?1 ORDER BY id")
         .map_err(storage)?;
@@ -136,7 +137,7 @@ pub fn write_export(
         .into_iter()
         .map(|id| graph::get_relationship(c, campaign_id, &id))
         .collect::<AppResult<Vec<_>>>()?;
-    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships});
+    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"importSources":sources});
     let mut files: Vec<(String, Vec<u8>)> = vec![(
         "campaign.json".into(),
         serde_json::to_vec_pretty(&data).map_err(|_| "Esportazione JSON non riuscita.")?,
@@ -201,6 +202,12 @@ pub fn write_export(
         files.push((format!("assets/{}.md", asset.id), text.into_bytes()));
     }
     files.push(("README.md".into(), index.into_bytes()));
+    for source in &sources {
+        files.push((
+            format!("sources/{}.md", source.id),
+            source.content.as_bytes().to_vec(),
+        ));
+    }
     if assets.iter().any(|asset| match &asset.input.details {
         player::AssetDetails::Spell { fields } | player::AssetDetails::Ability { fields } => {
             fields.catalog_source.is_some()

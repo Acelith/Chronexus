@@ -2,106 +2,72 @@
 
 ## Milestone
 
-**M0–M5 ed estensione scheda/catalogo completate. M6 in corso.**
-
-Prima parte M6: ricerca FTS5 locale su blocchi/titoli/alias/personaggio/asset,
-aggiornata nelle transazioni dei dati e ricostruibile. Migrazione 007 indicizza
-gli archivi precedenti. Ricerca da pulsante o Ctrl/⌘K, nuova sessione Ctrl/⌘ShiftN.
-Immagini: copie reali PNG/JPEG/WebP per pagine, personaggio e asset con didascalia,
-ruolo e visualizzatore con zoom; file originali conservati byte per byte, verifica
-SHA-256 e backup/ripristino. Migrazione 008 additiva. Rimozione dalla voce mantiene
-il file recuperabile. Export ZIP Markdown/JSON con immagini collegate e manifest
-aggiunto. Riepilogo navigabile e pacchetto NSIS Windows creati; release avviata con
-SQLite e API funzionanti da tauri.localhost. CI per tre OS predisposta, non eseguita;
-installer non installato automaticamente. Preparazione Speratia ancora da completare.
-Le verifiche storiche sotto saranno sostituite al termine della milestone.
-
-Ultimo scenario reale Windows: scheda Neme compilata nelle sezioni del PDF,
-Magic Missile scaricato dall'API e personalizzato come Dardi di Neme; creazione
-di Segnale delle memorie con testo originale. Ricerca classi, equipaggiamento e
-regole/sottosezioni. Riavvio, consultazione offline, backup e ripristino su profilo
-vuoto, secondo riavvio: scheda, incantesimi, fonti, UUID e cache identici.
-Gli aggiornamenti API falliti mostrano l'avviso della copia locale.
+M0–M5 ed estensione scheda/catalogo completate. **Funzionalità M6 consegnate su
+Windows**, campagna di prova e backup verificati. Restano le verifiche di
+installazione/disinstallazione e quelle effettive macOS/Linux della stessa M6.
 
 ## Funziona
 
-- Nome pubblico, finestra, pacchetti ed eseguibile: Chronexus/chronexus.
-  Identificatore `it.nodex.desktop`, database `.sqlite3`, `.nodex` e variabili
-  debug legacy conservati. Il profilo M4 è stato riaperto senza spostare dati.
-- Campagne, diario/autosave, Codex, `[[`, backlink e grafo M0–M3 conservati.
-- Personaggio generico per campagna: identità, sistema libero, livello/esperienza,
-  PF, condizioni/note e statistiche configurabili. Risorse/slot con UUID stabili
-  e contatori +/− salvati immediatamente, senza formule o consumi automatici.
-- Scheda estesa: combattimento/sensi, competenza/maestria e modificatori manuali,
-  ispirazione/tiri morte, armi/munizioni, storia e competenze, denaro/carico e
-  magia. Preset etichette D&D 2014 senza sostituzioni; slot 1–9 inizialmente a zero.
-- Inventario: CRUD con revisioni, quantità anche zero, equipaggiamento, categoria,
-  peso/valore liberi, consumabili e note; provenienza sessione/blocco/PNG/luogo/
-  missione e pagina Codex. Eliminazione confermata, fonti conservate.
-- Incantesimi/capacità manuali, rituale/concentrazione, conosciuta/preparata
-  indipendenti. Catalogo SRD 2014 opzionale, filtri locali, anteprima e importazione
-  esplicita modificabile con fonte e attribuzione. Ricerca dal modulo personale;
-  nessun upload. GET solo sull'host approvato, 10 s / 2 MiB e cache SQLite 150 voci.
-- Moduli con salvataggio esplicito, errori che conservano input, guardie contro
-  navigazione/chiusura, stati vuoti/lettura fallita e Tab/Escape nelle conferme.
-  Navigazione alle fonti con ritorno alla voce selezionata.
-- Backup/ripristino M4 comprende scheda estesa e cache. Migrazioni 005/006
-  additive, FK composite, transazioni e controlli Rust. Backup schemi 1–6 leggibili;
-  nuovi archivi richiedono una build che supporti lo schema 006. JSON M5 ha default
-  per i campi aggiunti; niente cancellazioni o rinomina dei percorsi dati legacy.
+- Campagne, sessioni/autosave, Codex con UUID/backlink, grafo con fonti/certezza,
+  scheda generica estesa, inventario e incantesimi personali/catalogo opzionale.
+- Ricerca FTS5 locale per campagna, filtri, apertura del blocco fonte e rebuild;
+  Ctrl/⌘K e Ctrl/⌘ShiftN, riepilogo navigabile, guardie di salvataggio.
+- PNG/JPEG/WebP per pagine/PG/asset, didascalia, ruolo, anteprime e zoom. Copia
+  originale gestita e SHA-256; immagini comprese nel backup e nel ripristino.
+  Scollegare mantiene il file recuperabile. Nessun percorso esterno necessario.
+- Export ZIP Markdown/JSON con immagini, sorgenti originali e manifest.
+- Sorgenti Logseq immutabili consultabili, strumenti di conversione per profili
+  debug isolati; nessuna configurazione/script/Git dell’archivio viene eseguito.
+- Migrazioni additive 007/008/009, backup precedenti migrati in copia. Nuovi
+  backup richiedono una build compatibile con schema 009. Identificatore legacy
+  it.nodex.desktop ed estensione .nodex conservati.
+
+## Ultimo scenario reale
+
+Speratia creata da ZIP Logseq e foto di Oran: 84 sessioni, 209 pagine, 18 asset,
+36 immagini, 207 Markdown originali. Due alias in conflitto conservati nel testo
+senza fusione. Foto e testo originali inclusi; trascrizione Oran parziale, valori
+incerti segnalati (PF attuali non leggibili: zero tecnico da aggiornare).
+Verificati riepilogo, foto/zoom, sorgente in sola lettura e ricerca.
+Riavvio, backup reale, restore su profilo vuoto e secondo riavvio: dati e UUID
+identici, tutti i checksum immagini/sorgenti corrispondono. Export controllato.
+Dati privati in .tools/, mai nei commit o nel profilo personale.
+
+Backup consegnato: `C:/Users/Joel/Downloads/Speratia_Chronexus_M6_2026-10-23.nodex`,
+52.321.017 byte, SHA-256
+`58a3e5fdc05670b46536c911eb92e5c83d7b8f86b5721c3c3adda5b893fd714c`.
+Ripristinare sostituisce l’intero archivio con copia preventiva, non fonde campagne.
 
 ## Verifiche effettive
 
-| Comando / prova | Esito |
-| --- | --- |
-| `pnpm lint`, `pnpm typecheck`, `pnpm format:check` | PASS |
-| `pnpm test` | PASS, 39 test in 10 file |
-| `cargo test --offline --manifest-path src-tauri/Cargo.toml` | PASS, 40 test; test cache ripetuto dopo aggiunta caso orologio arretrato |
-| `cargo clippy --offline --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings` | PASS |
-| `cargo fmt --manifest-path src-tauri/Cargo.toml -- --check` | PASS |
-| `cargo build --offline --manifest-path src-tauri/Cargo.toml` | PASS, debug Windows x64 |
-| `pnpm build:desktop` (include `pnpm build`) | PASS, release Windows x64 senza installer |
-| `scripts/sheet-catalog-smoke.mjs prepare/verify/restore/verify-restored` | PASS, API e desktop/SQLite/ZIP reali; solo indisponibilità rete simulata nei passi offline |
-| Scheda caricata a 760/1200 px e screenshot compendio | PASS, nessun overflow, lettura visiva completata |
-| Collegamento API nella release con origine `tauri.localhost` | NON ESEGUITO; build release compilata, ricerca provata nel desktop debug |
-| macOS/Linux, installer, rete/disco esterno e QA assistiva estesa | NON ESEGUITI |
+- pnpm lint / typecheck / format:check: PASS.
+- pnpm test: PASS, 47 test in 15 file.
+- cargo test --offline --manifest-path src-tauri/Cargo.toml: PASS, 47 test.
+- cargo fmt --manifest-path src-tauri/Cargo.toml -- --check: PASS.
+- cargo clippy --offline --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings: PASS.
+- cargo build debug, pnpm build e pnpm package:desktop: PASS Windows x64.
+- Smoke desktop immagini/ricerca, export, Speratia prepare/verify/restore/verify:
+  PASS, WebView2 + SQLite + file reali; solo selettori file predefiniti in debug.
+- Release tauri.localhost: avvio, lettura SQLite e GET Magic Missile 200 PASS.
+- Installer NSIS generato, non installato; macOS/Linux/CI non eseguiti.
 
-La prova desktop usa solo la scelta file predefinita nel debug con profilo
-esplicito: persistenza, comandi, ZIP e validazioni sono reali. La procedura nativa
-completa dei selettori rimane da verificare (limite QA M4). Dati sintetici in
-`.tools/sheet-catalog-final-source` e `.tools/sheet-catalog-final-restored`, ignorati da Git. Nessun dato di
-prova creato nel profilo personale. Nessun push remoto.
+## Commit M6
 
-## Commit recenti
+- 70e7880 feat(search): aggiunge ricerca FTS5 e apertura dei blocchi fonte
+- 0bf403b feat(images): aggiunge immagini locali comprese nei backup
+- 858085a feat(export): esporta campagne in Markdown e JSON con immagini
+- ca0e79e feat(ui): aggiunge il riepilogo navigabile della campagna
+- 738eb62 build(release): prepara installer Windows e matrice desktop CI
+- Commit sorgenti/importazione: vedere git log (questo checkpoint accompagna la modifica).
 
-- `9eabd4d refactor(brand): rinomina il prodotto in Chronexus`
-- `e756ea4 feat(player): persiste scheda, risorse e asset con provenienza`
-- `e964e94 feat(player): integra scheda e inventario con fonti navigabili`
-- `a15366e feat(player): estende scheda e persiste la cache SRD opzionale`
-- Il commit della UI estesa contiene questo checkpoint e lo smoke ripetibile.
+## Avvio, Skill e prossimo passo
 
-## Limiti noti
+`pnpm desktop` con toolchain Rust; `pnpm package:desktop` per il pacchetto.
+Installer: src-tauri/target/release/bundle/nsis/Chronexus_0.1.0_x64-setup.exe.
+Skill lette e applicate: frontend-design (gerarchia/leggibilità),
+vercel-react-best-practices (composizione e caricamento differito).
 
-1. Un personaggio per campagna, nessun motore di formule/riposi. Catalogo SRD
-   2014 in inglese, incompleto rispetto ai manuali commerciali; API read-only.
-   Nuove voci richiedono rete, copie importate e voci già in cache funzionano offline.
-2. Backup manuali non cifrati/firmati: 256 MiB/file, 512 MiB totali, 9998 allegati.
-   Gestore allegati UI, pianificazione ed export Markdown/JSON ancora assenti.
-3. Generazioni/copie preventive non rimosse automaticamente. DB non apribile:
-   recuperare su cartella vuota conservando prima l'intera cartella danneggiata.
-4. Chiusura forzata può perdere input non salvati. Nessun merge automatico;
-   grafo limitato a 150 nodi/400 archi, chunk editor ~966 kB e canvas ~438 kB.
-5. Build/QA verificati solo Windows; installer e QA nativa completa pendenti.
-
-## Prossimo passo esatto
-
-**M6 — Search, polish and cross-platform release**: ricerca FTS5 locale e rebuild
-indice, rifinitura/accessibilità, completamento export/allegati e pipeline CI con
-build Windows/macOS/Linux dove disponibili. Verifica: trovare una nota nel testo,
-riavviare, fare backup/ripristino, navigare grafo/provenienza e verificare i pacchetti.
-
-Skill applicate: PDF per estrazione e lettura visiva delle quattro pagine;
-frontend-design per continuità visiva e revisione screenshot;
-vercel-react-best-practices per caricamento differito e stato derivato. Nessuna
-Skill specializzata database/testing disponibile; test Rust e Playwright ordinari.
-Istruzioni: README; QA ripetibile: docs/QA.md; contratto adattatori: docs/RULESETS.md.
+Prossimo passo esatto: **validazione release M6 su tutti i target**, installazione
+Windows e CI/pacchetti macOS/Linux. Nessuna M7 definita. Limiti: installer non
+firmato, bundle editor grande segnalato da Vite, backup manuali, import Logseq
+solo strumento debug, un PG per campagna. Nessun push remoto eseguito.

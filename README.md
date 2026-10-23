@@ -222,16 +222,21 @@ ZIP/Deflate con manifest v1 e SHA-256 per ogni file; snapshot tramite API SQLite
 controlli di integrità e riferimenti, blocco di percorsi ostili e file alterati.
 **Non è cifrato né firmato**: conserva copie private e usa backup di provenienza
 fidata. Limiti iniziali: 256 MiB per file, 512 MiB complessivi e 9998 allegati.
-I backup automatici e l'esportazione Markdown/JSON sono ancora da implementare.
+L’esportazione ZIP Markdown/JSON è disponibile da **Esporta campagna**; comprende
+immagini, fonti originali importate e manifest SHA-256. Il ripristino autorevole
+usa il `.nodex`; il reimport dell’export e i backup automatici restano futuri.
 
-Il gestore allegati nell'interfaccia è previsto più avanti: M4 conserva file del
-layout `attachments/<UUID campagna>/<UUID file>[.<estensione>]`, senza introdurre
-caricamenti di immagini nell'editor. I test includono una vera immagine PNG.
+Da **Immagini della voce** nelle pagine Codex, nella scheda e negli oggetti puoi
+aggiungere PNG/JPEG/WebP con didascalia e ruolo, visualizzarli e ingrandirli. Per
+una mappa usa una pagina Luogo e il ruolo Mappa. Sono copie locali reali incluse
+nel backup, senza dipendere dal percorso originale. Limiti: 20 MiB, 8192 pixel
+per lato, 32 milioni di pixel. Rimuovere il collegamento conserva il file per
+recupero; gli originali mancanti o corrotti impediscono il backup.
 
 Conserva spazio per ZIP, estrazione e nuova copia dei dati. Vecchie generazioni e
 copie preventive non vengono eliminate automaticamente. I backup con schema 005
 richiedono una versione che supporti lo schema corrispondente (005 per M5,
-006 per scheda estesa e catalogo); i backup precedenti (schemi 1–5) restano
+006 per scheda estesa e catalogo, 009 per M6 e sorgenti Logseq); i backup precedenti (schemi 1–8) restano
 recuperabili e vengono aggiornati in copia. Esistono ancora archivi `.nodex`
 con il vecchio nome: non occorre rinominarli. Gli eseguibili M0–M3 ignorano
 il selettore di profilo introdotto da M4.
@@ -242,7 +247,8 @@ separatamente, poi avvia su una cartella dati vuota e seleziona un backup valido
 Una menzione indica soltanto che una pagina è citata negli appunti: non crea
 alleanze, accuse o altre relazioni fattuali: queste vengono dichiarate manualmente
 nel grafo, con certezza e fonte esplicite. La ricerca del Codex riguarda titoli e alias; la ricerca globale
-nel testo è prevista in M6.
+nel testo è disponibile da **Cerca** o Ctrl/⌘K, con filtri e apertura del blocco
+fonte. Ctrl/⌘ShiftN crea una sessione. **Riepilogo** apre le voci recenti.
 
 Prove desktop ripetibili e matrice delle verifiche: [docs/QA.md](docs/QA.md).
 
@@ -255,3 +261,32 @@ modificare i sorgenti e senza funzionalità commerciali XL. TypeScript: Apache-2
 Le distribuzioni future dovranno includere gli avvisi delle licenze applicabili.
 Le versioni risolte e le dipendenze transitive sono nei due lockfile.
 
+
+## Distribuzione e importazione Logseq
+
+`pnpm package:desktop` genera le icone e il pacchetto della piattaforma corrente.
+Su Windows l’installer si trova in
+`src-tauri/target/release/bundle/nsis/Chronexus_0.1.0_x64-setup.exe`.
+Build e avvio Windows verificati; installazione/disinstallazione interattiva,
+firma e verifiche macOS/Linux restano da eseguire. La matrice CI è in
+`.github/workflows/desktop.yml`; non è stata eseguita da questa sessione.
+
+Gli strumenti `scripts/prepare-logseq.py` e `scripts/import-logseq.mjs` preparano
+un archivio Logseq in un **profilo debug vuoto e isolato**, tramite i comandi Rust
+reali. Non sono un importatore generale nell’interfaccia. Esempio:
+
+```powershell
+py scripts/prepare-logseq.py C:/percorso/campagna.zip .tools/logseq-source
+# Avviare prima pnpm desktop con NODEX_DEV_DATA_DIR assoluto e vuoto,
+# WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9223
+node scripts/import-logseq.mjs .tools/logseq-source "Campagna di prova"
+```
+
+Sono letti solo Markdown e immagini raster: configurazioni, Git e script del
+grafo non vengono eseguiti. I sorgenti Markdown originali rimangono immutabili,
+consultabili nell’app e inclusi in backup/export. Le menzioni conservano UUID e
+backlink; non generano relazioni fattuali. Le sessioni hanno una pagina indice
+nel Codex collegata tramite backlink al diario. Gli alias ambigui non vengono
+uniti. Foto, appunti, report e profili personali rimangono in `.tools/` ignorata.
+La conversione non promette equivalenza completa del formato Logseq: per dubbi
+consultare sorgente originale e rapporto d’importazione.

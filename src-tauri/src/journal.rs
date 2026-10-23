@@ -179,6 +179,12 @@ pub fn validate_document(document: &Value) -> AppResult<()> {
     if document.get("version").and_then(Value::as_u64) != Some(1) {
         return Err(invalid());
     }
+    if document
+        .get("importedFrom")
+        .is_some_and(|v| v.as_str() != Some("logseq"))
+    {
+        return Err(invalid());
+    }
     let blocks = document
         .get("blocks")
         .and_then(Value::as_array)

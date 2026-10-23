@@ -225,7 +225,13 @@ function NoteEditor(props: Props) {
           theme="dark"
           emojiPicker={false}
           editable={!linking && !props.disabled}
-          onChange={() => saver.change({ version: 1, blocks: editor.document })}
+          onChange={() =>
+            saver.change({
+              ...session.document,
+              version: 1,
+              blocks: editor.document,
+            })
+          }
         >
           <SuggestionMenuController
             triggerCharacter="[["

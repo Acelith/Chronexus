@@ -236,3 +236,20 @@ solo cambio di nome. I backup M4 sono ancora leggibili.
   Pulizia fisica degli orfani rinviata e dichiarata nell'interfaccia.
 - Skill frontend-design e vercel-react-best-practices per gerarchia, tastiera,
   caricamento differito e lettura visiva; nessuna Skill DB/testing disponibile.
+
+## Export e sorgenti Logseq M6
+
+- Export ZIP con snapshot SQLite coerente, Markdown per UUID, JSON canonico,
+  immagini originali e manifest; nessuna nuova dipendenza e nessun reimport MVP.
+- Migrazione 009 additiva: sorgenti originali immutabili con FK composite e
+  checksum. Il marker `importedFrom` sopravvive all’autosave; la copia originale
+  è indipendente dal documento modificabile e viene verificata nel backup.
+- Conversione tramite IPC in profilo debug vuoto: sessioni nel Diario e pagine
+  indice nel Codex per preservare i vecchi riferimenti. Nessuna relazione
+  fattuale inferita, alias conflittuali mantenuti nel testo, nessun dato privato
+  versionato. Foto originali incluse; trascrizione parziale dichiarata.
+- Riepilogo e nuove viste caricati su richiesta. Installer NSIS Windows generato,
+  CI Windows/macOS/Linux predisposta; firma e QA installazione restano pendenti.
+- Skill frontend-design per gerarchia e leggibilità; vercel-react-best-practices
+  per composizione e caricamento differito. Nessuna Skill database/testing
+  specializzata disponibile: test Rust, frontend e WebView reali.

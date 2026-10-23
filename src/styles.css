@@ -12,6 +12,18 @@
 body {
   margin: 0;
 }
+.import-source {
+  border-top: 1px solid #465268;
+  margin-top: 24px;
+  padding: 14px 0;
+}
+.import-source summary {
+  cursor: pointer;
+  color: #d7b978;
+}
+.import-source p {
+  overflow-wrap: anywhere;
+}
 .dashboard-ledger {
   display: flex;
   flex-wrap: wrap;

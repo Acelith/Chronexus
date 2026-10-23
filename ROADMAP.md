@@ -139,3 +139,11 @@ Codex maintains `docs/STATUS.md` with:
 - Up to 5 known issues/blockers.
 - Next single actionable milestone + a concrete verification target.
 Do not turn status into a transcript or paste build logs into it.
+
+## Checkpoint M6 — 23 October 2026
+
+Windows features and private Logseq campaign/backup acceptance delivered.
+Schema 009, 47 frontend tests and 47 Rust tests verified; NSIS package built.
+Remaining M6 release validation: interactive installation/uninstallation and
+actual macOS/Linux CI/package checks. No M7 is defined; do not start future
+features without a new user request. See docs/STATUS.md for evidence.

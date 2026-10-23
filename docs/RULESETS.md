@@ -82,3 +82,12 @@ copie personali modificabili. Non confondere la licenza software con quella dei 
 Skill applicate: PDF per lettura visiva/estrazione del riferimento; frontend-design
 per sezioni e gerarchia coerenti; vercel-react-best-practices per caricamento
 differito del compendio e filtri derivati senza richieste a ogni tasto.
+
+## Provenienza di immagini e schede importate
+
+Le fotografie di Oran sono riferimenti privati conservati integralmente nei
+backup, non un ruleset. La trascrizione è parziale e manuale; i valori dubbi e
+quelli mancanti vanno verificati sulle foto. Nessuna formula o descrizione
+commerciale viene ricostruita. Gli incantesimi personali rimangono modificabili
+con la ricerca SRD esplicita disponibile; la conversione Logseq non invia dati
+all’API e non crea fatti nel grafo.

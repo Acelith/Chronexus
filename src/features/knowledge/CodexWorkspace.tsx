@@ -11,6 +11,7 @@ import {
 import { matchingPages } from "./links";
 const Editor = lazy(() => import("../journal/Editor"));
 const ImageGallery = lazy(() => import("../images/ImageGallery"));
+const ImportSource = lazy(() => import("./ImportSource"));
 
 interface Props {
   campaignId: string;
@@ -140,6 +141,16 @@ export default function CodexWorkspace(props: Props) {
                   busy={props.busy}
                 />
               </Suspense>
+              {page.document.importedFrom === "logseq" ? (
+                <Suspense fallback={null}>
+                  <ImportSource
+                    key={page.id}
+                    campaignId={props.campaignId}
+                    kind="page"
+                    id={page.id}
+                  />
+                </Suspense>
+              ) : null}
               <Backlinks
                 key={`${page.id}-${page.revision}`}
                 campaignId={props.campaignId}
