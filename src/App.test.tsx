@@ -4,6 +4,16 @@ import { beforeEach, vi, test, expect } from "vitest";
 import { App } from "./App";
 import { api, type Session } from "./features/journal/api";
 import { knowledgeApi, type KnowledgePage } from "./features/knowledge/api";
+import { backupApi } from "./features/backup/api";
+
+vi.mock("./features/backup/api", () => ({
+  backupApi: {
+    create: vi.fn(),
+    inspect: vi.fn(),
+    restore: vi.fn(),
+    cancel: vi.fn(),
+  },
+}));
 
 vi.mock("./features/journal/api", async (original) => ({
   ...(await original<typeof import("./features/journal/api")>()),
@@ -100,6 +110,86 @@ const knowledgePage: KnowledgePage = {
   revision: 0,
   updatedAt: "2026-10-23",
 };
+
+test("apertura backup attende gli appunti e rimane nell'editor se il salvataggio fallisce", async () => {
+  const user = userEvent.setup();
+  vi.mocked(api.campaigns).mockResolvedValue([{ id: "a", name: "Campagna" }]);
+  vi.mocked(api.sessions).mockResolvedValue([session]);
+  render(<App />);
+  await screen.findByText("Editor di test");
+  flush.mockRejectedValueOnce(new Error("Appunti non salvati"));
+  await user.click(screen.getByRole("button", { name: "Backup e ripristino" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Appunti non salvati",
+  );
+  expect(screen.getByText("Editor di test")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("heading", { name: "Backup e ripristino" }),
+  ).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Backup e ripristino" }));
+  expect(
+    await screen.findByRole("heading", { name: "Backup e ripristino" }),
+  ).toBeInTheDocument();
+  expect(screen.queryByText("Editor di test")).not.toBeInTheDocument();
+});
+
+test("ripristino da archivio vuoto aggiorna la barra campagne e apre i documenti ripristinati", async () => {
+  const user = userEvent.setup();
+  const counts = {
+    campaigns: 1,
+    sessions: 1,
+    pages: 0,
+    mentions: 0,
+    relationships: 0,
+    attachments: 0,
+  };
+  vi.mocked(backupApi.inspect).mockResolvedValue({
+    token: "verified",
+    fileName: "recupero.nodex",
+    manifest: {
+      format_version: 1,
+      app_version: "0.1.0",
+      created_at: "2026-10-23T10:00:00Z",
+      schema_version: 4,
+      scope: "all_campaigns",
+      counts,
+    },
+  });
+  vi.mocked(backupApi.restore).mockImplementation(async () => {
+    vi.mocked(api.campaigns).mockResolvedValue([
+      { id: "a", name: "Campagna recuperata" },
+    ]);
+    vi.mocked(api.sessions).mockResolvedValue([session]);
+    return { safetyPath: "C:/backup/prima.nodex", counts, warning: null };
+  });
+  render(<App />);
+  await screen.findByRole("button", { name: "Crea campagna" });
+  await user.click(screen.getByRole("button", { name: "Backup e ripristino" }));
+  await user.click(
+    await screen.findByRole("button", {
+      name: "Seleziona backup",
+    }),
+  );
+  await screen.findByRole("alertdialog");
+  await user.click(screen.getByRole("button", { name: "+ Nuova campagna" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Conferma o annulla",
+  );
+  await user.click(
+    await screen.findByRole("button", {
+      name: "Sostituisci archivio",
+    }),
+  );
+  await screen.findByRole("region", { name: "Ripristino completato" });
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  await user.click(
+    await screen.findByRole("button", {
+      name: "Campagna recuperata",
+    }),
+  );
+  expect(await screen.findByText("Editor di test")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Il ponte" })).toBeInTheDocument();
+});
 
 test("crea una pagina tipizzata e la rinomina conservando il Codex", async () => {
   const user = userEvent.setup();

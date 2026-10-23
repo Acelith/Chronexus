@@ -664,3 +664,83 @@ select {
     padding-inline: 36px 20px;
   }
 }
+.backup-workspace {
+  max-width: 940px;
+  margin: 0 auto;
+}
+.backup-heading h2 {
+  font:
+    30px Georgia,
+    serif;
+  margin: 0 0 14px;
+}
+.backup-heading p,
+.backup-action p,
+.backup-footnote {
+  color: #a9b4c7;
+  max-width: 70ch;
+}
+.restore-confirmation .danger {
+  border-color: #d69a94;
+  color: #f2b6b1;
+}
+.backup-action {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 32px;
+  align-items: start;
+  padding: 28px 0;
+  border-bottom: 1px solid #465268;
+}
+.backup-action h3 {
+  margin-top: 0;
+}
+.backup-action button {
+  margin-top: 4px;
+}
+.backup-status {
+  min-height: 24px;
+  color: #d7b978;
+}
+.backup-receipt,
+.restore-confirmation {
+  border-left: 3px solid #d7b978;
+  background: #101623;
+  padding: 20px 24px;
+  margin: 24px 0;
+}
+.backup-receipt h3,
+.restore-confirmation h3 {
+  margin-top: 0;
+}
+.archive-counts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+.archive-counts dt {
+  font-size: 14px;
+  color: #a9b4c7;
+}
+.archive-counts dd {
+  margin: 2px 0 0;
+  font-size: 22px;
+}
+.archive-path {
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.backup-footnote {
+  font-size: 13px;
+  margin-top: 28px;
+}
+@media (max-width: 950px) {
+  .backup-action {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .backup-action button {
+    justify-self: start;
+  }
+}

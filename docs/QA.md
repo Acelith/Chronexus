@@ -1,10 +1,11 @@
-# Verifiche M0–M3
+# Verifiche M0–M4
 
 ## Suite automatizzate
 
 - `pnpm test`: schermate (creazione/rinomina, sessione, errori, navigazione
   bloccata) e autosave (debounce, concorrenza, flush, errore e riprova).
-  Solo questi test UI isolati sostituiscono il bridge con un mock.
+  I test UI isolati sostituiscono il bridge con un mock; gli smoke desktop usano
+  persistenza reale. M4 aggiunge form backup, conferme, errori e guardie autosave.
 - `pnpm test:rust`: database reale in file temporanei, due paragrafi identici
   dopo riapertura, ordine numerico, rinomina stabile, campagne separate,
   validazione, scrittura fallita, revisione obsoleta e migrazioni.
@@ -134,6 +135,63 @@ Le suite Rust coprono inoltre fonti rimosse, confini di campagna, revisioni obso
 upgrade M2→M3, vicinato 1/2 e limiti di 150 nodi/400 archi senza estremi mancanti.
 Le suite UI isolate coprono form, errori, conferma e filtri usando un canvas mock;
 il test desktop usa invece Cytoscape, Tauri e SQLite reali.
+
+## Backup e ripristino M4
+
+Suite Rust: snapshot con WAL attivo; round trip di due campagne, documenti,
+alias, menzioni, relazioni con certezza/fonti e PNG; riapertura; ritorno alla copia
+preventiva; migrazione di backup M1 in copia. Respinti checksum alterati, DB
+danneggiato con hash ricalcolato, trigger inattesi (anche `sqliteXunexpected`),
+versioni future, conteggi errati, file extra/mancanti, duplicati, link simbolici,
+percorsi assoluti/traversal e dimensioni fuori limite. Testano anche lock OS,
+destinazioni non scrivibili, divieto sovrascrittura e fallimento copia preventiva
+o attivazione. Test Windows dedicato a directory occupate senza DELETE sharing.
+
+Smoke desktop ripetibile, solo su profili di prova vuoti in `.tools/`:
+
+```powershell
+# Prima compilare il debug, configurare Rust come nel README, avviare pnpm dev.
+cargo build --offline --manifest-path src-tauri/Cargo.toml
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
+$env:NODEX_DEV_DATA_DIR="$PWD/.tools/m4-source"
+$env:NODEX_DEV_BACKUP_FILE="$PWD/.tools/m4-portable.nodex"
+Start-Process -FilePath "$PWD/src-tauri/target/debug/nodex.exe" -WindowStyle Hidden
+node scripts/backup-smoke.mjs seed
+node scripts/backup-smoke.mjs create
+node scripts/backup-smoke.mjs created
+# created chiude normalmente la finestra dopo la ricevuta.
+$env:NODEX_DEV_DATA_DIR="$PWD/.tools/m4-target"
+$env:NODEX_DEV_RESTORE_FILE="$PWD/.tools/m4-portable.nodex"
+Start-Process -FilePath "$PWD/src-tauri/target/debug/nodex.exe" -WindowStyle Hidden
+node scripts/backup-smoke.mjs select
+node scripts/backup-smoke.mjs cancel
+node scripts/backup-smoke.mjs select
+node scripts/backup-smoke.mjs restore
+# restore chiude normalmente dopo confronto e verifica della copia preventiva.
+Start-Process -FilePath "$PWD/src-tauri/target/debug/nodex.exe" -WindowStyle Hidden
+node scripts/backup-smoke.mjs verify
+```
+
+Le variabili `NODEX_DEV_BACKUP_FILE` e `NODEX_DEV_RESTORE_FILE` sostituiscono
+**soltanto il risultato del selettore**, esclusivamente in debug con profilo
+esplicito: non simulano dati, comando, ZIP o controlli. Senza queste variabili
+gli step `create`/`select` richiedono la scelta manuale del file nel dialogo nativo.
+I rami di prova non esistono nella release. Il file `.nodex` deve avere un nome
+nuovo: una seconda esecuzione sullo stesso percorso fallisce intenzionalmente.
+Conservare le fixture precedenti e scegliere nuovi nomi/profili per ripetere.
+`NODEX_SMOKE_TARGET` può indicare una diversa cartella target dentro `.tools/`.
+
+`verify` confronta documenti e metadati completi, UUID, grafo, relazioni/fonti e
+SHA-256 dell'immagine nel profilo attivo dopo riavvio, poi apre il canvas reale.
+Screenshot ignorati da Git sono controllati visivamente. Il target contiene
+inizialmente una campagna di prova per verificare anche la sostituzione e la
+copia preventiva, oltre al recupero in un profilo nuovo.
+
+QA manuale ancora necessaria: completare nativamente salvataggio/apertura su ogni
+OS, annullare il selettore, provare disco esterno/rete non disponibile e spazio
+insufficiente. Su Windows M4 `computer-use` ha osservato il selettore nativo;
+gli input successivi sono falliti con errore dello strumento sul processo in
+primo piano. Il round trip effettivo usa la scelta predefinita nel debug.
 
 ## Piattaforme
 

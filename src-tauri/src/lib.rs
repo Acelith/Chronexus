@@ -167,23 +167,49 @@ fn delete_relationship(
 
 // Native choosers and archive work run outside the UI thread. Paths are never
 // supplied by React: only the native chooser may select an external location.
+fn choose_backup_file(app: &tauri::AppHandle, save: bool) -> AppResult<Option<std::path::PathBuf>> {
+    // Reproducible desktop tests can supply only the chooser result, never the
+    // archive data. This branch is absent from release builds and requires an
+    // explicit isolated developer profile as well as a developer-selected file.
+    #[cfg(debug_assertions)]
+    if std::env::var_os("NODEX_DEV_DATA_DIR").is_some() {
+        let key = if save {
+            "NODEX_DEV_BACKUP_FILE"
+        } else {
+            "NODEX_DEV_RESTORE_FILE"
+        };
+        if let Some(path) = std::env::var_os(key) {
+            let path = std::path::PathBuf::from(path);
+            if !path.is_absolute() {
+                return Err(format!("{key} deve essere assoluta."));
+            }
+            return Ok(Some(path));
+        }
+    }
+    use tauri_plugin_dialog::DialogExt;
+    let dialog = app.dialog().file().add_filter("Archivio Nodex", &["nodex"]);
+    let file = if save {
+        dialog
+            .set_title("Salva backup Nodex — scegli un nuovo nome")
+            .set_file_name(format!("nodex-{}.nodex", uuid::Uuid::new_v4()))
+            .blocking_save_file()
+    } else {
+        dialog
+            .set_title("Seleziona un backup Nodex da verificare")
+            .blocking_pick_file()
+    };
+    file.map(|f| {
+        f.into_path()
+            .map_err(|_| "Scegli un file locale o su un disco montato.".to_string())
+    })
+    .transpose()
+}
 #[tauri::command]
 async fn create_backup(app: tauri::AppHandle) -> AppResult<Option<backup::BackupReceipt>> {
     tauri::async_runtime::spawn_blocking(move || {
-        use tauri_plugin_dialog::DialogExt;
-        let file = app
-            .dialog()
-            .file()
-            .set_title("Salva backup Nodex — scegli un nuovo nome")
-            .add_filter("Archivio Nodex", &["nodex"])
-            .set_file_name(format!("nodex-{}.nodex", uuid::Uuid::new_v4()))
-            .blocking_save_file();
-        let Some(file) = file else {
+        let Some(path) = choose_backup_file(&app, true)? else {
             return Ok(None);
         };
-        let path = file
-            .into_path()
-            .map_err(|_| "Scegli una cartella locale o un disco montato.".to_string())?;
         app.state::<Database>().with_store(|store| {
             backup::write_backup(&store.connection, &store.directory, &path).map(Some)
         })
@@ -194,23 +220,13 @@ async fn create_backup(app: tauri::AppHandle) -> AppResult<Option<backup::Backup
 #[tauri::command]
 async fn inspect_backup(app: tauri::AppHandle) -> AppResult<Option<backup::Preview>> {
     tauri::async_runtime::spawn_blocking(move || {
-        use tauri_plugin_dialog::DialogExt;
         app.state::<Database>().with_store(|store| {
             store.pending = None;
             Ok(())
         })?;
-        let file = app
-            .dialog()
-            .file()
-            .set_title("Seleziona un backup Nodex da verificare")
-            .add_filter("Archivio Nodex", &["nodex"])
-            .blocking_pick_file();
-        let Some(file) = file else {
+        let Some(path) = choose_backup_file(&app, false)? else {
             return Ok(None);
         };
-        let path = file
-            .into_path()
-            .map_err(|_| "Scegli un file locale o su un disco montato.".to_string())?;
         app.state::<Database>()
             .with_store(|store| store.prepare(&path).map(Some))
     })

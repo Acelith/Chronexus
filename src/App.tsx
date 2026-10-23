@@ -31,6 +31,7 @@ const CodexWorkspace = lazy(
   () => import("./features/knowledge/CodexWorkspace"),
 );
 const GraphWorkspace = lazy(() => import("./features/graph/GraphWorkspace"));
+const BackupWorkspace = lazy(() => import("./features/backup/BackupWorkspace"));
 
 export function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -47,6 +48,7 @@ export function App() {
   );
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [backupOpen, setBackupOpen] = useState(false);
   const [error, setError] = useState("");
   const guard = useRef<SaveGuard | null>(null);
   const operation = useRef(false);
@@ -155,13 +157,14 @@ export function App() {
   }, [run]);
 
   function selectCampaign(id: string) {
-    if (id === campaignId) return;
+    if (id === campaignId && !backupOpen) return;
     void run(async () => {
       const [items, knowledge] = await Promise.all([
         api.sessions(id),
         knowledgeApi.pages(id),
       ]);
       setCampaignId(id);
+      setBackupOpen(false);
       setSessions(items);
       setSessionId(items[0]?.id ?? null);
       setPages(knowledge);
@@ -322,11 +325,28 @@ export function App() {
             <button
               className="quiet"
               disabled={busy || loading}
-              onClick={() => setForm("campaign")}
+              onClick={() => {
+                void run(async () => {
+                  setBackupOpen(false);
+                  setForm("campaign");
+                });
+              }}
             >
               + {it.newCampaign}
             </button>
           </nav>
+          <button
+            disabled={busy || loading}
+            aria-current={backupOpen ? "page" : undefined}
+            onClick={() => {
+              void run(async () => {
+                setForm(null);
+                setBackupOpen(true);
+              });
+            }}
+          >
+            Backup e ripristino
+          </button>
           <div className="local-mark">
             <span aria-hidden="true">◇</span>
             <footer>{it.local}</footer>
@@ -355,7 +375,17 @@ export function App() {
               ) : null}
             </div>
           ) : null}
-          {loading ? (
+          {backupOpen ? (
+            <Suspense fallback={<p role="status">Apertura backup…</p>}>
+              <BackupWorkspace
+                register={register}
+                onRestored={async () => {
+                  setError("");
+                  await load();
+                }}
+              />
+            </Suspense>
+          ) : loading ? (
             <p role="status">{it.loading}</p>
           ) : (
             <>
