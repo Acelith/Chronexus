@@ -35,6 +35,11 @@ fn retrieval_is_scoped_and_snapshots_survive_edits_and_deletion() {
     assert!(!settings(&c).unwrap().enabled);
     let sources = retrieve(&c, &a.id, "Quale chiave ha Mirna?", "campaign", None, &[]).unwrap();
     assert!(!sources.is_empty());
+    assert_eq!(
+        sources.len(),
+        1,
+        "The summary and its block must not look like independent evidence"
+    );
     assert!(sources.iter().all(|s| !s.text.contains("segreto")));
     let source = sources
         .iter()
@@ -114,6 +119,38 @@ fn rules_require_explicit_cached_sources_and_one_edition() {
         &[]
     )
     .is_err());
+}
+#[test]
+fn party_roles_are_available_even_when_a_name_matches_a_note_block() {
+    let c = connection();
+    let campaign = journal::create_campaign(&c, "Compagnia").unwrap();
+    let (id, _) = page(&c, &campaign.id, "Mirna", "Mirna conserva una chiave.");
+    crate::party::save(
+        &c,
+        &campaign.id,
+        &crate::party::MemberInput {
+            page_id: Some(id),
+            name: "Mirna".into(),
+            player_name: "Giocatore test".into(),
+            role: "Cartografa".into(),
+            status: "active".into(),
+            revision: None,
+        },
+    )
+    .unwrap();
+    let sources = retrieve(
+        &c,
+        &campaign.id,
+        "Quale ruolo ha Mirna?",
+        "campaign",
+        None,
+        &[],
+    )
+    .unwrap();
+    assert!(!sources.is_empty());
+    assert!(sources
+        .iter()
+        .any(|s| s.text.contains("Cartografa") && s.block_id.is_some()));
 }
 #[test]
 fn persistence_reopen_recovery_and_archive_integrity() {

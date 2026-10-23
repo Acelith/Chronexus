@@ -202,15 +202,13 @@ pub fn canonical(
             text.push('\n');
             text.push_str(&row.map_err(storage)?)
         }
-        if kind == "page" {
-            for m in party::list(c, campaign)? {
-                if m.page.id == id {
-                    text.push_str(&format!(
-                        "\nMembro del party. Giocatore: {}. Ruolo: {}. Presenza: {}.",
-                        m.player_name, m.role, m.status
-                    ));
-                }
-            }
+    }
+    if kind == "page" {
+        let member:Option<(String,String,String)>=c.query_row("SELECT player_name,role,status FROM party_members WHERE campaign_id=?1 AND page_id=?2",params![campaign,id],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?))).optional().map_err(storage)?;
+        if let Some((player, role, status)) = member {
+            text = format!(
+                "Membro del party. Giocatore: {player}. Ruolo: {role}. Presenza: {status}.\n{text}"
+            );
         }
     }
     let text = crop(&text);
@@ -278,14 +276,24 @@ pub fn retrieve(
                 .map_err(storage)?
                 .collect::<rusqlite::Result<Vec<_>>>()
                 .map_err(storage)?;
-            for (kind, id, block) in hits {
+            // A title/summary row and its block are the same underlying evidence.
+            // Prefer the block so it can be reopened, without duplicating it as
+            // apparent independent corroboration in the model's context.
+            for (kind, id, block) in &hits {
                 if out.len() >= 8 {
                     break;
                 }
-                if out.iter().filter(|s| s.source_id == id).count() >= 2 {
+                if out.iter().filter(|s| s.source_id == *id).count() >= 2 {
                     continue;
                 }
-                if let Some(s) = canonical(c, campaign, &kind, &id, block.as_deref())? {
+                if block.is_none()
+                    && hits
+                        .iter()
+                        .any(|(k, i, b)| k == kind && i == id && b.is_some())
+                {
+                    continue;
+                }
+                if let Some(s) = canonical(c, campaign, kind, id, block.as_deref())? {
                     if !s.text.trim().is_empty() {
                         out.push(s)
                     }

@@ -31,10 +31,12 @@ locali. UI e valutazione completa in verifica; non dichiarare ancora M7 conclusa
 
 ## Verifiche effettive
 
-Checkpoint M7 backend: 59 test Rust superati, Clippy con warning negati e build
+Checkpoint M7 backend: 60 test Rust superati, Clippy con warning negati e build
 debug superati; 55 test React, lint, typecheck superati nella stessa esecuzione.
 La valutazione nativa iniziale di 40 domande ha richiesto miglioramenti a
 concisione/gestione istruzioni malevole; ripetizione e prove UI ancora in corso.
+Corretto retrieval: riepilogo e blocco dello stesso appunto non diventano prove
+indipendenti; metadati Party inclusi anche quando la ricerca trova un blocco.
 I risultati M6 sottostanti restano riferiti al checkpoint precedente.
 
 - pnpm lint / typecheck / format:check: PASS.
