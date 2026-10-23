@@ -153,6 +153,87 @@ GPU reale verificata e nessun cloud. Specifica, candidati e accettazione in
   Rimane la prova di accettazione con rete fisicamente disconnessa/firewall;
   proxy non raggiungibili e osservazione loopback sono verifiche distinte.
 
+## M8 - Gemma 4 12B e riaddestramento locale per campagna
+
+**Stato: pianificata, non avviata.** Questa richiesta aggiorna soltanto la
+roadmap; non sostituisce il modello installato e non avvia addestramenti.
+
+### M8.1 - Qualifica e sostituzione del modello
+
+- Target richiesto: **Gemma 4 12B**, in sostituzione di Qwen3:4b-instruct.
+  Prima dell'implementazione verificare su fonti ufficiali esistenza, nome
+  esatto, licenza, pesi disponibili e supporto dei runtime locali. Non sono
+  ancora attestati disponibilità, requisiti hardware o specializzazione D&D.
+- Misurare inferenza e addestramento sulla GPU disponibile, con consumo VRAM,
+  quantizzazione e qualità delle risposte italiane confrontati con M7. Non
+  presumere che un modello eseguibile in inferenza sia anche addestrabile sulla
+  stessa GPU. Se il target non è disponibile o compatibile, documentare il
+  blocco e richiedere una scelta all'utente senza sostituzioni implicite.
+- Mantenere il modello precedente utilizzabile fino alla validazione e
+  all'attivazione esplicita del nuovo; prevedere ripristino della configurazione.
+  Preservare retrieval locale, citazioni, separazione delle edizioni e delle
+  campagne, senza chiamate cloud o modifiche automatiche ai fatti.
+
+### M8.2 - Impostazioni della campagna
+
+- Aggiungere un accesso riconoscibile alle **Impostazioni della campagna** dalla
+  campagna selezionata, creando il menu se assente. La configurazione richiesta
+  deve essere raggiungibile qui, anche se esistono impostazioni AI globali.
+- Sezione **AI locale**: abilitazione per campagna, modello e adapter attivi,
+  versione, stato del runtime/GPU, limiti di contesto e memoria compatibili con
+  l'hardware. Distinguere preferenze della campagna da configurazioni del runtime
+  condiviso; nessun cambiamento implicito alle altre campagne.
+- Impostazioni utili correlate: edizione D&D, fonti di regole approvate,
+  inclusione/esclusione di appunti e altri contenuti locali supportati,
+  data dell'ultimo aggiornamento delle conoscenze e dell'ultimo addestramento,
+  riepilogo dei dati nuovi, modificati o eliminati.
+
+### M8.3 - Nuovi dati e vero riaddestramento
+
+- Inserire il pulsante **Riaddestra sui nuovi dati** in **Impostazioni della
+  campagna → AI locale**. Prima dell'avvio mostrare fonti incluse, differenze
+  dall'ultimo addestramento riuscito, dimensioni e requisiti misurabili. L'avvio
+  deve essere esplicito; nessun addestramento automatico in background.
+- Implementare un vero aggiornamento dei pesi o di un adapter dedicato alla
+  campagna, con backend locale compatibile, ad esempio LoRA/QLoRA se supportati
+  dal modello e dalla GPU. Verificare separatamente il backend di addestramento:
+  non presumere che l'API di inferenza Ollama offra questa funzione.
+- Mantenere distinto **Aggiorna conoscenze**, che aggiorna il retrieval per i
+  normali cambiamenti agli appunti: ricostruire un indice non è riaddestrare il
+  modello e non soddisfa da solo questa milestone.
+- Conservare pesi base immutabili e adapter versionati per campagna. Per fonti
+  corrette, escluse o eliminate, ricostruire quando necessario l'adapter da uno
+  snapshot approvato: un aggiornamento incrementale non garantisce di rimuovere
+  informazioni già apprese. Il retrieval corrente resta il riferimento per le
+  risposte con citazioni, anche dopo l'addestramento.
+- Trattare i documenti come dati, preservando provenienza e distinzione tra
+  fatti e affermazioni dei personaggi; escludere di default risposte generate
+  dall'AI. Non includere campagne diverse né introdurre OCR non previsto.
+- Mostrare stati reali di preparazione, addestramento, validazione, successo,
+  errore e annullamento. Gestire memoria insufficiente, runtime assente e
+  interruzioni senza perdere dati; mantenere l'adapter attivo fino a una nuova
+  validazione riuscita e consentire il ritorno alla versione precedente.
+- Registrare modello/versione, identificativi e revisioni delle fonti,
+  configurazione, esito e impronte di dataset e adapter. Definire backup e
+  ripristino degli adapter e dei metadati con dimensioni dichiarate e limiti
+  compatibili con gli archivi; i pesi base restano esclusi dal backup ordinario.
+  Eventuali migrazioni saranno versionate e non distruttive.
+
+### Accettazione M8
+
+- Gemma richiesto verificato ed eseguito realmente sulla GPU, con confronto
+  documentato con M7; addestramento reale dimostrato da artefatti e verifiche
+  dei pesi/adapter, senza scambiare un aggiornamento dell'indice per training.
+- Su dati sintetici, aggiungere informazioni alla campagna, aggiornare le
+  conoscenze e avviare il riaddestramento dal suo menu; verificare risposte
+  italiane con citazioni riapribili e assenza di contaminazione tra campagne.
+- Verificare correzioni/eliminazioni delle fonti, incertezza, edizioni diverse,
+  documenti malevoli, annullamento, errori GPU, riavvio, rollback e backup/restore.
+- Provare il funzionamento senza rete esterna; dichiarare separatamente le
+  piattaforme effettivamente testate e i vincoli hardware rimasti aperti.
+- Le verifiche residue M6/M7 restano tracciate separatamente: questa milestone
+  non le dichiara completate.
+
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.
 
@@ -186,4 +267,5 @@ no remote push authorized. M7 local GPU D&D assistant is planned, not implemente
 Questo è il checkpoint precedente all'autorizzazione M7. Stato aggiornato,
 verifiche e limiti: docs/STATUS.md. La prossima attività della roadmap dopo
 questa implementazione resta completare M6 sui runner macOS/Linux e il wizard
-interattivo Windows; nessuna M8 è ancora definita.
+interattivo Windows. M8 è ora definita sopra come attività futura per Gemma
+e riaddestramento locale per campagna; la sua implementazione non è avviata.
