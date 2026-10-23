@@ -234,6 +234,71 @@ roadmap; non sostituisce il modello installato e non avvia addestramenti.
 - Le verifiche residue M6/M7 restano tracciate separatamente: questa milestone
   non le dichiara completate.
 
+## M9 - Tiradadi interno e cerchio dei draghi
+
+**Stato: pianificata, non avviata.** Questa richiesta aggiunge soltanto la
+milestone; il tiradadi e le sue animazioni non sono ancora implementati.
+
+### M9.1 - Composizione e risultato del tiro
+
+- Tiradadi utilizzabile interamente offline, con d4, d6, d8, d10, d12, d20
+  e d100. Il d100 produce valori da 1 a 100, senza ambiguità sullo zero.
+- Selezionare separatamente la quantità di ogni tipo di dado nello stesso
+  tiro: per esempio 3d6 oppure 2d20 + 3d6 + 1d100. Mostrare la composizione
+  prima della conferma, con controlli accessibili anche da tastiera.
+- Validare quantità intere non negative, richiedere almeno un dado e definire
+  un limite ragionevole documentato per evitare blocchi con tiri molto grandi.
+- Ogni tiro confermato riparte con tutte le quantità azzerate per il successivo:
+  non mantenere selezioni implicite e non ripetere automaticamente il tiro.
+  In caso di errore prima della registrazione, conservare la selezione per
+  consentire un nuovo tentativo senza perdere la composizione.
+- Generare risultati casuali uniformi nel backend locale e registrarli una sola
+  volta; l'animazione rappresenta quei risultati senza modificarli. Mostrare
+  il valore di ciascun dado, i subtotali per tipo e il totale complessivo.
+
+### M9.2 - Storico persistente
+
+- Conservare lo storico per campagna in SQLite, con ID stabile, data e ora,
+  composizione, risultati individuali, subtotali e totale. Deve rimanere
+  consultabile dopo chiusura e riavvio, senza dipendere dal modello AI.
+- Mostrare gli ultimi tiri con dettaglio espandibile e uno stato vuoto chiaro.
+  Includere lo storico nel backup/ripristino della campagna tramite una
+  migrazione versionata non distruttiva, preservando i backup precedenti.
+- Registrare il tiro prima dell'animazione; se questa viene interrotta, il
+  risultato resta recuperabile. Segnalare gli errori di salvataggio senza
+  presentare come conservato un tiro che non lo è.
+
+### M9.3 - Animazione medievale: cerchio dei draghi
+
+- Far rotolare i dadi dentro un cerchio delimitato da draghi, coerente con il
+  tema medievale dell'app. All'atterraggio i draghi sprigionano fiamme che
+  avvolgono e consumano visivamente i dadi, rivelandone i risultati.
+- Presentare i numeri con un rapido scorrimento da slot machine, quindi
+  fermarli sui valori effettivi e completare il conteggio del totale. Mantenere
+  i risultati finali leggibili finché l'utente avvia un altro tiro.
+- Ritmo vivace ma leggibile: obiettivo iniziale di circa 2–3 secondi per tutta
+  la sequenza, da verificare nell'app. Per molti dadi raggruppare animazioni e
+  conteggi, senza allungare la durata in proporzione al numero di dadi.
+- Impedire invii duplicati durante il tiro; distinguere selezione azzerata,
+  animazione in corso e risultato precedente. Consentire di saltare l'animazione
+  senza generare nuovi valori e rispettare la preferenza di movimento ridotto
+  con una rivelazione breve, senza rotolamento o lampeggiamenti intensi.
+
+### Accettazione M9
+
+- Verificare tiri singoli e multipli di ogni tipo, incluso d100, e composizioni
+  miste con quantità differenti; controllare intervalli, subtotali e totale.
+- Testare azzeramento dopo ogni tiro confermato, quantità non valide, tiro
+  vuoto, limiti, doppi invii ed errori di persistenza senza duplicazioni.
+- Verificare storico dopo riavvio, isolamento tra campagne e backup/restore,
+  inclusa compatibilità con archivi precedenti privi di storico.
+- Verificare corrispondenza tra risultati salvati e animati, interruzione o
+  salto della sequenza, movimento ridotto e uso da tastiera. Valutare realmente
+  ritmo, leggibilità e fluidità con pochi e molti dadi sulle piattaforme provate.
+- Usare test deterministici con generatore sostituibile per la logica dei tiri;
+  documentare la sorgente casuale usata in produzione. Non dichiarare equità
+  statistica dimostrata soltanto da pochi tiri manuali.
+
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.
 
