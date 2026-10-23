@@ -58,7 +58,7 @@ in M4; questa prima versione non offre ancora tale protezione.
 
 Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
 
-## Funzioni attuali (M0, M1 e M2)
+## Funzioni attuali (M0–M3)
 
 - Creazione, selezione e rinomina di campagne indipendenti.
 - Sessioni ordinate per numero, con titolo e data reale facoltativa.
@@ -75,8 +75,20 @@ Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
   del blocco di origine. Il vecchio titolo rimane un alias dopo una rinomina.
 - Alias ambigui presentati come risultati distinti; riferimenti mancanti
   recuperabili esplicitamente come bozze con lo stesso ID.
-- Non sono ancora presenti cancellazione, archiviazione, grafo o backup.
-  Nessuna eliminazione dei dati è esposta nell'interfaccia.
+- Grafo Cytoscape con nodi pagina/sessione, menzioni tratteggiate e relazioni
+  dichiarate continue. Frecce, etichetta e certezza ne esplicitano il significato.
+- Creazione/modifica di relazioni direzionali con certezza confermata, sospetta,
+  smentita o sconosciuta; fonte facoltativa sessione/pagina/blocco, evidenza e note.
+  Le relazioni richiedono «Salva relazione»; un form aperto blocca la navigazione
+  finché non viene salvato o annullato.
+- Filtri per tipo di nodo, menzioni/relazioni, certezza, titolo/alias, sessione
+  fonte e vicinato a 1–2 passaggi. Vista limitata a 150 nodi e 400 collegamenti,
+  con avviso e conteggi quando occorre restringere i filtri.
+- Clic sui nodi per aprire il documento, sui collegamenti per vedere fonte/evidenza;
+  elenco accessibile equivalente per l'uso da tastiera.
+- Le relazioni possono essere eliminate solo dopo conferma; pagine, appunti e
+  menzioni rimangono conservati. Cancellazione/archiviazione delle pagine e backup
+  non sono ancora presenti.
 
 La chiusura forzata del processo o un'interruzione elettrica possono perdere
 le modifiche che non hanno ancora raggiunto SQLite. Attendere «Salvato sul computer».
@@ -84,15 +96,15 @@ In caso di conflitto tra due istanze, copiare gli appunti prima di riaprire:
 la versione meno recente non viene sovrascritta automaticamente.
 
 Una menzione indica soltanto che una pagina è citata negli appunti: non crea
-alleanze, accuse o altre relazioni fattuali. Queste arriveranno in M3 con certezza
-e fonte esplicite. La ricerca del Codex riguarda titoli e alias; la ricerca globale
+alleanze, accuse o altre relazioni fattuali: queste vengono dichiarate manualmente
+nel grafo, con certezza e fonte esplicite. La ricerca del Codex riguarda titoli e alias; la ricerca globale
 nel testo è prevista in M6.
 
 Prove desktop ripetibili e matrice delle verifiche: [docs/QA.md](docs/QA.md).
 
 ## Dipendenze principali e licenze
 
-React, Vite, Mantine, rusqlite, uuid: MIT (uuid anche Apache-2.0).
+React, Vite, Mantine, Cytoscape.js, rusqlite, uuid: MIT (uuid anche Apache-2.0).
 Tauri: MIT/Apache-2.0. BlockNote core/react/mantine: MPL-2.0, utilizzati senza
 modificare i sorgenti e senza funzionalità commerciali XL. TypeScript: Apache-2.0.
 Le distribuzioni future dovranno includere gli avvisi delle licenze applicabili.

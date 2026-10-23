@@ -24,11 +24,13 @@ import {
   type Backlink,
 } from "./features/knowledge/api";
 import { KnowledgeContext } from "./features/knowledge/context";
+import type { GraphNode, SourceRef } from "./features/graph/api";
 
 const Editor = lazy(() => import("./features/journal/Editor"));
 const CodexWorkspace = lazy(
   () => import("./features/knowledge/CodexWorkspace"),
 );
+const GraphWorkspace = lazy(() => import("./features/graph/GraphWorkspace"));
 
 export function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -38,7 +40,7 @@ export function App() {
   const [pages, setPages] = useState<KnowledgePage[]>([]);
   const [pageId, setPageId] = useState<string | null>(null);
   const [fallback, setFallback] = useState("");
-  const [view, setView] = useState<"journal" | "codex">("journal");
+  const [view, setView] = useState<"journal" | "codex" | "graph">("journal");
   const [focusBlock, setFocusBlock] = useState<string | undefined>();
   const [form, setForm] = useState<"campaign" | "rename" | "session" | null>(
     null,
@@ -235,6 +237,26 @@ export function App() {
       setForm(null);
     });
   }
+  function openGraphSource(source: SourceRef) {
+    openSource({
+      sourceKind: source.kind,
+      sourceId: source.id,
+      sourceTitle: source.title,
+      sequence: null,
+      blockId: source.blockId ?? "",
+      preview: "",
+    });
+  }
+  function openGraphNode(node: GraphNode) {
+    if (node.kind === "session")
+      openGraphSource({
+        kind: "session",
+        id: node.entityId,
+        title: node.title,
+        blockId: null,
+      });
+    else openPage(node.entityId, node.title);
+  }
   const createLinkedPage = useCallback(
     async (title: string) => {
       if (!campaignId) throw Error("Seleziona una campagna.");
@@ -314,6 +336,11 @@ export function App() {
           {error ? (
             <div className="error" role="alert">
               <p>{error}</p>
+              {campaigns.length ? (
+                <button type="button" onClick={() => setError("")}>
+                  Chiudi messaggio
+                </button>
+              ) : null}
               {!campaigns.length ? (
                 <button
                   disabled={loading}
@@ -381,6 +408,19 @@ export function App() {
                   >
                     Codex
                   </button>
+                  <button
+                    aria-current={view === "graph" ? "page" : undefined}
+                    disabled={busy}
+                    onClick={() => {
+                      void run(async () => {
+                        setView("graph");
+                        setForm(null);
+                        setFocusBlock(undefined);
+                      });
+                    }}
+                  >
+                    Grafo
+                  </button>
                 </nav>
               ) : null}
               {form === "campaign" || form === "rename" ? (
@@ -437,6 +477,20 @@ export function App() {
                     onCreate={createPage}
                     onUpdate={updatePage}
                     onRecover={recoverPage}
+                  />
+                </Suspense>
+              ) : null}
+              {campaign && view === "graph" ? (
+                <Suspense fallback={<p role="status">Apertura grafo…</p>}>
+                  <GraphWorkspace
+                    key={campaign.id}
+                    campaignId={campaign.id}
+                    pages={pages}
+                    sessions={sessions}
+                    busy={busy}
+                    register={register}
+                    onNode={openGraphNode}
+                    onSource={openGraphSource}
                   />
                 </Suspense>
               ) : null}

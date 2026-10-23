@@ -1,4 +1,4 @@
-# Verifiche M0, M1 e M2
+# Verifiche M0–M3
 
 ## Suite automatizzate
 
@@ -96,6 +96,44 @@ personali per ripetere i test: scegliere un'altra cartella di prova vuota.
 
 Le suite isolate coprono inoltre validazione, upgrade M1→M2, ricorsione dei
 blocchi, rimozione menzioni, conflitti e rollback dei collegamenti cross-campagna.
+
+## Smoke M3 — grafo e relazioni esplicite
+
+Usare un profilo debug **nuovo e vuoto**, con server Vite e WebView2 come negli
+smoke precedenti. Non avviare altre istanze di prova sulla stessa porta.
+
+```powershell
+$env:NODEX_DEV_DATA_DIR="$PWD/.tools/m3-nuova-prova"
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
+Start-Process "$PWD/src-tauri/target/debug/nodex.exe"
+node scripts/graph-smoke.mjs prepare
+```
+
+`prepare` crea campagna/Sessione 12 e due menzioni nella stessa nota, poi prova:
+
+- Query reale con soli archi sessione→pagina, senza relazione Varek→Gilda inferita.
+- Creazione manuale «Varek accusa Gilda», certezza sospetta, evidenza/note e blocco fonte.
+- Stile Cytoscape reale (tratteggio/continuo, testo di certezza) e clic mouse su
+  nodi e archi alle coordinate renderizzate. Il test legge il registro locale
+  del canvas solo per individuare i punti di clic: nessun mock di dati o eventi.
+- Apertura della fonte sul blocco originale, modifica della certezza, filtri di
+  relazione/sessione/centro/profondità e ritorno alla vista completa.
+- Form non salvato che impedisce la navigazione, eliminazione annullata con Escape,
+  eliminazione confermata che conserva le menzioni e nuova relazione per il riavvio.
+
+La finestra si chiude. Riaprirla sullo stesso profilo ed eseguire:
+
+```powershell
+Start-Process "$PWD/src-tauri/target/debug/nodex.exe"
+node scripts/graph-smoke.mjs verify
+```
+
+`verify` confronta grafo, UUID, relazione, certezza, fonte/evidenza e documento
+con i dati precedenti; verifica dettaglio e stile nel canvas reale dopo il riavvio.
+Le suite Rust coprono inoltre fonti rimosse, confini di campagna, revisioni obsolete,
+upgrade M2→M3, vicinato 1/2 e limiti di 150 nodi/400 archi senza estremi mancanti.
+Le suite UI isolate coprono form, errori, conferma e filtri usando un canvas mock;
+il test desktop usa invece Cytoscape, Tauri e SQLite reali.
 
 ## Piattaforme
 

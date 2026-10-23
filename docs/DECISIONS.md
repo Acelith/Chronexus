@@ -14,6 +14,20 @@
 - Profondità 1/2 sul vicinato non direzionale; frecce conservano la direzione.
   Filtri tipo/ricerca rimuovono i nodi e i relativi archi; certezza riguarda solo
   le relazioni dichiarate. Filtro sessione usa la fonte delle menzioni/relazioni.
+- Cytoscape.js 3.34.4, MIT, con tipi TypeScript inclusi, caricato solo nella vista
+  grafo. Nessuna estensione o servizio remoto. [API e stile](https://js.cytoscape.org/).
+- Disposizione iniziale circolare deterministica, senza animazioni, nodi spostabili
+  e controlli zoom/adatta. La disposizione è una vista temporanea, non una relazione
+  semantica né un dato canonico. Legenda, forme e testo evitano significati affidati
+  soltanto al colore; elenco accessibile alternativo con gli stessi nodi/archi.
+- Conferma esplicita e revisione corrente per eliminare una relazione; la conferma
+  gestisce Tab/Escape. Un form di relazione aperto blocca navigazione/chiusura,
+  senza simulare autosave su un'affermazione incompleta.
+- La CSP di sviluppo consente HTTP/WebSocket solo sul server locale Vite alla
+  porta 1420 per il refresh. La CSP release mantiene i collegamenti runtime locali
+  di Tauri e nessun accesso a servizi remoti.
+- Skill riutilizzate: frontend-design (layout, leggibilità e revisione screenshot),
+  vercel-react-best-practices (caricamento differito e ciclo di vita del canvas).
 
 ## M2 — Pagine e menzioni esplicite
 
