@@ -201,7 +201,9 @@ fn schema(connection: &Connection) -> AppResult<Vec<(String, String, String)>> {
 
 fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if !(1..=4).contains(&expected_version) {
-        return Err(invalid("versione database non supportata; aggiorna Nodex"));
+        return Err(invalid(
+            "versione database non supportata; aggiorna Chronexus",
+        ));
     }
     let connection = Connection::open_with_flags(
         path,
@@ -542,7 +544,7 @@ impl Store {
             .truncate(false)
             .open(root.join("archive.lock"))
             .map_err(io)?;
-        lock.try_lock().map_err(|_|"Questo archivio è già aperto in un'altra finestra Nodex. Chiudila prima di continuare.".to_string())?;
+        lock.try_lock().map_err(|_|"Questo archivio è già aperto in un'altra finestra Chronexus. Chiudila prima di continuare.".to_string())?;
         let pointer = root.join("active-profile.json");
         let directory = if pointer.exists() {
             let value: String =

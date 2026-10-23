@@ -25,7 +25,7 @@ export async function command<T>(
 ): Promise<T> {
   if (!isTauri())
     throw new Error(
-      "Avvia Nodex come applicazione desktop per accedere al tuo archivio locale.",
+      "Avvia Chronexus come applicazione desktop per accedere al tuo archivio locale.",
     );
   try {
     return await invoke<T>(name, payload);

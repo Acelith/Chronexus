@@ -1,8 +1,15 @@
-# Stato Nodex — 23 ottobre 2026
+# Stato Chronexus — 23 ottobre 2026
 
 ## Milestone
 
-**M0–M4 completate. M5 non iniziata.**
+**M0–M4 completate. M5 in corso.**
+
+Rinomina in Chronexus applicata a interfaccia, finestra, pacchetti ed eseguibile.
+Identificatore dati `it.nodex.desktop`, file SQLite, `.nodex` e variabili debug
+legacy conservati. Prossimo lavoro: migrazione 005 e modello generico del personaggio.
+Verifica rinomina: 23 test frontend e 29 Rust superati, lint/typecheck/format,
+Clippy e build frontend/debug riusciti. Chronexus ha riaperto il profilo M4:
+documenti, grafo, relazioni/fonti e hash PNG identici allo smoke precedente.
 
 Ultimo scenario: esportazione `.nodex` reale di due campagne, una sessione,
 due pagine/alias, quattro menzioni, una relazione sospetta con fonte/blocco e

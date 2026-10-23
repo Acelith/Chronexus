@@ -1,9 +1,12 @@
-# Nodex
+# Chronexus
 
 Diario personale per il giocatore di una campagna GDR. Desktop, dati locali,
 nessun account o servizio remoto a runtime. Nome e branding sono centralizzati
 in `src/strings.ts`, `package.json` e `src-tauri/tauri.conf.json`.
 L'identificatore Tauri determina la cartella dati: non cambiarlo senza migrare i dati.
+Chronexus è il nuovo nome di Nodex: l'identificatore `it.nodex.desktop`, i nomi
+tecnici dei database e l'estensione `.nodex` restano invariati per riaprire gli
+archivi e i backup esistenti. L'eseguibile si chiama ora `chronexus.exe` su Windows.
 
 ## Prerequisiti e avvio
 
@@ -101,7 +104,7 @@ obsolete, senza fusione automatica degli appunti.
 
 ## Backup e recupero
 
-1. Apri **Backup e ripristino** nella barra laterale. Nodex attende il salvataggio
+1. Apri **Backup e ripristino** nella barra laterale. Chronexus attende il salvataggio
    degli appunti; se fallisce, rimane nell'editor e segnala l'errore.
 2. **Crea backup** apre il selettore del sistema. Scegli un nuovo nome con
    estensione `.nodex`, anche su disco esterno o unità di rete montata. Un file
@@ -113,7 +116,7 @@ obsolete, senza fusione automatica degli appunti.
    controlla data e conteggi, poi **Sostituisci archivio**. Tutte le campagne correnti
    sono sostituite; non è un'importazione o fusione. **Annulla ripristino** o Escape
    conservano l'archivio corrente.
-5. Prima di applicare il ripristino, Nodex salva un backup in `backups/` nella
+5. Prima di applicare il ripristino, Chronexus salva un backup in `backups/` nella
    cartella dati. Il percorso completo compare nella ricevuta. Per tornare indietro,
    seleziona quel `.nodex` nello stesso flusso. Se la copia preventiva fallisce,
    il ripristino viene interrotto.
@@ -132,7 +135,7 @@ Conserva spazio per ZIP, estrazione e nuova copia dei dati. Vecchie generazioni 
 copie preventive non vengono eliminate automaticamente. Dopo un ripristino usa
 M4 o versioni successive: eseguibili M0–M3 ignorano il nuovo selettore di profilo.
 Se il database corrente è talmente danneggiato da impedire l'apertura, il ripristino
-in quella cartella è bloccato: a Nodex chiuso conserva **l'intera cartella dati**
+in quella cartella è bloccato: a Chronexus chiuso conserva **l'intera cartella dati**
 separatamente, poi avvia su una cartella dati vuota e seleziona un backup valido.
 
 Una menzione indica soltanto che una pagina è citata negli appunti: non crea

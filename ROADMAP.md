@@ -1,4 +1,4 @@
-# ROADMAP.md - Nodex incremental execution plan
+# ROADMAP.md - Chronexus incremental execution plan
 
 ## Working method
 - Execute one milestone or bounded related slice at a time. Avoid an everything-at-once generation attempt.

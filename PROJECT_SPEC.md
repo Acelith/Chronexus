@@ -1,7 +1,7 @@
-# PROJECT_SPEC.md - Nodex product specification v0.1
+# PROJECT_SPEC.md - Chronexus product specification v0.1
 
 ## 1. Product and audience
-**Nodex** is a **single-player desktop companion** for recording an RPG character and the information that player learns during a campaign. This is NOT a GM campaign-planning or encounter-management product. Players should be able to review facts, suspicions, quests and character gear without needing a cloud service.
+**Chronexus** is a **single-player desktop companion** for recording an RPG character and the information that player learns during a campaign. This is NOT a GM campaign-planning or encounter-management product. Players should be able to review facts, suspicions, quests and character gear without needing a cloud service.
 
 Core promise: "From an item in my inventory, find the session in which I acquired it, the person who gave it to me, and the faction related to that event."
 

@@ -1,5 +1,5 @@
 export const it = {
-  appName: "Nodex",
+  appName: "Chronexus",
   tagline: "Il tuo diario di campagna",
   local: "Archivio personale · offline",
   campaigns: "Campagne",

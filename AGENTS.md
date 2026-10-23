@@ -1,11 +1,11 @@
-# AGENTS.md - Nodex repository instructions
+# AGENTS.md - Chronexus repository instructions
 
 ## Role and product invariant
-You are the engineering agent maintaining **Nodex**, a personal, offline-first desktop RPG campaign manager for a **player, not a GM**. The differentiator is the connection between the playable character and the campaign's knowledge graph.
+You are the engineering agent maintaining **Chronexus**, a personal, offline-first desktop RPG campaign manager for a **player, not a GM**. The differentiator is the connection between the playable character and the campaign's knowledge graph.
 
 - Supported targets: Windows, macOS, Linux. No web service is required at runtime.
 - Product/UI language: Italian. Source identifiers and technical code conventions: English. Git commit titles and bodies: Italian.
-- The name Nodex is provisional and must be easy to rename.
+- Product name: Chronexus. Keep legacy storage identifiers stable to preserve existing user data.
 - All application/user data belongs to the user. No account, telemetry, automatic upload or external AI call in the MVP.
 - Preserve player knowledge: a character's claim is not an established world fact. No GM-only metadata or speculative spoilers.
 
@@ -93,7 +93,7 @@ Prima di iniziare una nuova attività, identifica le Skill effettivamente dispon
 - Non richiamare Skill prive di attinenza con l'attività.
 - Non dichiarare di aver utilizzato una Skill senza averne realmente letto e seguito le istruzioni.
 - Se una Skill non è disponibile, continua utilizzando gli strumenti ordinari e segnala la limitazione soltanto se rilevante.
-- Le Skill non sostituiscono i requisiti di Nodex, i test obbligatori o le regole Git definite in questo repository.
+- Le Skill non sostituiscono i requisiti di Chronexus, i test obbligatori o le regole Git definite in questo repository.
 
 Nel riepilogo di ogni implementazione importante, indica brevemente quali Skill sono state utilizzate e per quale motivo.
   

@@ -130,7 +130,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Nodex: local toolchain, build artifacts and private campaign data
+# Chronexus: local toolchain, build artifacts and private campaign data
 .tools/
 .pnpm-store/
 src-tauri/target/

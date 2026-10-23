@@ -1,5 +1,13 @@
 # Decisioni
 
+## Chronexus — rinomina compatibile
+
+Nome pubblico, titolo finestra e pacchetti diventano Chronexus/chronexus.
+`it.nodex.desktop`, `nodex.sqlite3`, percorso interno del bundle `.nodex` e
+variabili debug `NODEX_*` restano stabili: cambiare questi identificatori
+separerebbe gli utenti dai dati esistenti. Nessuna migrazione necessaria per il
+solo cambio di nome. I backup M4 sono ancora leggibili.
+
 ## M3 — Relazioni dichiarate e grafo
 
 - Migrazione 004 additiva: relazioni direzionali separate dalle menzioni,

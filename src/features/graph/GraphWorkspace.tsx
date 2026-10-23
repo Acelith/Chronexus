@@ -57,7 +57,7 @@ export default function GraphWorkspace({
       flush: async () => {
         if (dirty.current)
           throw Error(
-            "Salva o annulla la relazione aperta prima di cambiare vista o chiudere Nodex.",
+            "Salva o annulla la relazione aperta prima di cambiare vista o chiudere Chronexus.",
           );
       },
       dirty: () => dirty.current,

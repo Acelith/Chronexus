@@ -81,6 +81,9 @@ test("crea una campagna dallo stato vuoto e ne modifica il nome", async () => {
     name: "Le stelle",
   });
   render(<App />);
+  expect(
+    screen.getByRole("heading", { name: "Chronexus" }),
+  ).toBeInTheDocument();
   await user.click(
     await screen.findByRole("button", { name: "Crea campagna" }),
   );

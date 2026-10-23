@@ -16,7 +16,7 @@
 
 ## Prova desktop reale su Windows
 
-Eseguita tramite Playwright collegato alla WebView2 di Nodex: nessun mock di
+Eseguita tramite Playwright collegato alla WebView2 di Chronexus: nessun mock di
 comandi o database. Il profilo di prova rimane in `.tools/`, escluso da Git.
 La variabile di profilo è disponibile **solo nelle build debug**, viene ignorata
 nelle release. La porta d'ispezione è una configurazione esplicita di test;
@@ -30,7 +30,7 @@ non impostarla nell'uso quotidiano.
 cargo build --manifest-path src-tauri/Cargo.toml
 $env:NODEX_DEV_DATA_DIR="$PWD/.tools/smoke-profile"
 $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
-Start-Process "$PWD/src-tauri/target/debug/nodex.exe"
+Start-Process "$PWD/src-tauri/target/debug/chronexus.exe"
 node scripts/desktop-smoke.mjs prepare
 ```
 
@@ -67,7 +67,7 @@ Usare un **nuovo** profilo vuoto, ad esempio:
 ```powershell
 $env:NODEX_DEV_DATA_DIR="$PWD/.tools/m2-nuova-prova"
 $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
-Start-Process "$PWD/src-tauri/target/debug/nodex.exe"
+Start-Process "$PWD/src-tauri/target/debug/chronexus.exe"
 node scripts/knowledge-smoke.mjs prepare
 ```
 
@@ -86,7 +86,7 @@ La fase `prepare` usa UI e comandi reali per verificare:
 La finestra si chiude. Riaprirla con lo stesso profilo ed eseguire:
 
 ```powershell
-Start-Process "$PWD/src-tauri/target/debug/nodex.exe"
+Start-Process "$PWD/src-tauri/target/debug/chronexus.exe"
 node scripts/knowledge-smoke.mjs verify
 ```
 
@@ -106,7 +106,7 @@ smoke precedenti. Non avviare altre istanze di prova sulla stessa porta.
 ```powershell
 $env:NODEX_DEV_DATA_DIR="$PWD/.tools/m3-nuova-prova"
 $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
-Start-Process "$PWD/src-tauri/target/debug/nodex.exe"
+Start-Process "$PWD/src-tauri/target/debug/chronexus.exe"
 node scripts/graph-smoke.mjs prepare
 ```
 
@@ -125,7 +125,7 @@ node scripts/graph-smoke.mjs prepare
 La finestra si chiude. Riaprirla sullo stesso profilo ed eseguire:
 
 ```powershell
-Start-Process "$PWD/src-tauri/target/debug/nodex.exe"
+Start-Process "$PWD/src-tauri/target/debug/chronexus.exe"
 node scripts/graph-smoke.mjs verify
 ```
 
@@ -155,20 +155,20 @@ cargo build --offline --manifest-path src-tauri/Cargo.toml
 $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
 $env:NODEX_DEV_DATA_DIR="$PWD/.tools/m4-source"
 $env:NODEX_DEV_BACKUP_FILE="$PWD/.tools/m4-portable.nodex"
-Start-Process -FilePath "$PWD/src-tauri/target/debug/nodex.exe" -WindowStyle Hidden
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
 node scripts/backup-smoke.mjs seed
 node scripts/backup-smoke.mjs create
 node scripts/backup-smoke.mjs created
 # created chiude normalmente la finestra dopo la ricevuta.
 $env:NODEX_DEV_DATA_DIR="$PWD/.tools/m4-target"
 $env:NODEX_DEV_RESTORE_FILE="$PWD/.tools/m4-portable.nodex"
-Start-Process -FilePath "$PWD/src-tauri/target/debug/nodex.exe" -WindowStyle Hidden
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
 node scripts/backup-smoke.mjs select
 node scripts/backup-smoke.mjs cancel
 node scripts/backup-smoke.mjs select
 node scripts/backup-smoke.mjs restore
 # restore chiude normalmente dopo confronto e verifica della copia preventiva.
-Start-Process -FilePath "$PWD/src-tauri/target/debug/nodex.exe" -WindowStyle Hidden
+Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
 node scripts/backup-smoke.mjs verify
 ```
 

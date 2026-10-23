@@ -19,7 +19,8 @@ struct Database(Result<Mutex<backup::Store>, String>);
 impl Database {
     fn with<T>(&self, action: impl FnOnce(&rusqlite::Connection) -> AppResult<T>) -> AppResult<T> {
         let connection = self.0.as_ref().map_err(Clone::clone)?.lock().map_err(|_| {
-            "Archivio occupato. Riavvia Nodex senza chiudere gli appunti non salvati.".to_string()
+            "Archivio occupato. Riavvia Chronexus senza chiudere gli appunti non salvati."
+                .to_string()
         })?;
         action(&connection.connection)
     }
@@ -32,7 +33,7 @@ impl Database {
             .as_ref()
             .map_err(Clone::clone)?
             .lock()
-            .map_err(|_| "Archivio occupato. Riavvia Nodex.".to_string())?;
+            .map_err(|_| "Archivio occupato. Riavvia Chronexus.".to_string())?;
         action(&mut store)
     }
 }
@@ -187,15 +188,18 @@ fn choose_backup_file(app: &tauri::AppHandle, save: bool) -> AppResult<Option<st
         }
     }
     use tauri_plugin_dialog::DialogExt;
-    let dialog = app.dialog().file().add_filter("Archivio Nodex", &["nodex"]);
+    let dialog = app
+        .dialog()
+        .file()
+        .add_filter("Archivio Chronexus", &["nodex"]);
     let file = if save {
         dialog
-            .set_title("Salva backup Nodex — scegli un nuovo nome")
+            .set_title("Salva backup Chronexus — scegli un nuovo nome")
             .set_file_name(format!("nodex-{}.nodex", uuid::Uuid::new_v4()))
             .blocking_save_file()
     } else {
         dialog
-            .set_title("Seleziona un backup Nodex da verificare")
+            .set_title("Seleziona un backup Chronexus da verificare")
             .blocking_pick_file()
     };
     file.map(|f| {
@@ -241,7 +245,7 @@ async fn restore_backup(app: tauri::AppHandle, token: String) -> AppResult<backu
     })
     .await
     .map_err(|_| {
-        "Ripristino interrotto. Riavvia Nodex e controlla l'archivio attivo prima di riprovare."
+        "Ripristino interrotto. Riavvia Chronexus e controlla l'archivio attivo prima di riprovare."
             .to_string()
     })?
 }
@@ -272,11 +276,11 @@ pub fn run() {
                 std::fs::create_dir_all(&directory)?;
                 let store = backup::Store::open(&directory).map_err(std::io::Error::other)?;
                 Ok(Mutex::new(store))
-            })().map_err(|error| format!("Archivio non disponibile: {error}. Verifica spazio e permessi della cartella dati e riavvia Nodex. Se usi una versione precedente, torna a quella più recente."));
+            })().map_err(|error| format!("Archivio non disponibile: {error}. Verifica spazio e permessi della cartella dati e riavvia Chronexus. Se usi una versione precedente, torna a quella più recente."));
             app.manage(Database(connection));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore])
         .run(tauri::generate_context!())
-        .expect("Impossibile avviare la finestra Nodex.");
+        .expect("Impossibile avviare la finestra Chronexus.");
 }

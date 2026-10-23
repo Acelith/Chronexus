@@ -37,7 +37,7 @@ export default function BackupWorkspace({
           );
         if (preview)
           throw new Error(
-            "Conferma o annulla il ripristino prima di cambiare vista o chiudere Nodex.",
+            "Conferma o annulla il ripristino prima di cambiare vista o chiudere Chronexus.",
           );
       },
     });
@@ -110,7 +110,7 @@ export default function BackupWorkspace({
         <h2 id="backup-title">Backup e ripristino</h2>
         <p>
           Porta con te tutte le campagne, gli appunti, i collegamenti e gli
-          allegati gestiti da Nodex.
+          allegati gestiti da Chronexus.
         </p>
       </header>
       {error ? (
@@ -183,7 +183,7 @@ export default function BackupWorkspace({
                     choose.current?.focus();
                     throw reason;
                   }
-                }, "Creazione della copia preventiva e ripristino in corso. Attendi prima di chiudere Nodex…");
+                }, "Creazione della copia preventiva e ripristino in corso. Attendi prima di chiudere Chronexus…");
               }}
             >
               Sostituisci archivio
@@ -240,7 +240,7 @@ export default function BackupWorkspace({
             <div>
               <h3 id="choose-backup-title">Recupera un archivio</h3>
               <p>
-                Seleziona un file .nodex. Nodex lo controlla e ti mostra il
+                Seleziona un file .nodex. Chronexus lo controlla e ti mostra il
                 contenuto prima di chiederti conferma.
               </p>
             </div>

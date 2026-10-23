@@ -1,12 +1,12 @@
 [package]
-name = "nodex"
+name = "chronexus"
 version = "0.1.0"
 description = "Diario personale di campagne GDR, offline"
 edition = "2021"
 license = "MIT"
 
 [lib]
-name = "nodex_lib"
+name = "chronexus_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Nodex",
+  "productName": "Chronexus",
   "version": "0.1.0",
   "identifier": "it.nodex.desktop",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Nodex",
+        "title": "Chronexus",
         "width": 1200,
         "height": 800,
         "minWidth": 760,
