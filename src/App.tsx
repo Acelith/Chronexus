@@ -37,6 +37,7 @@ const CodexWorkspace = lazy(
 const GraphWorkspace = lazy(() => import("./features/graph/GraphWorkspace"));
 const BackupWorkspace = lazy(() => import("./features/backup/BackupWorkspace"));
 const PlayerWorkspace = lazy(() => import("./features/player/PlayerWorkspace"));
+const ExportButton = lazy(() => import("./features/export/ExportButton"));
 
 export function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -499,6 +500,13 @@ export function App() {
                       >
                         Cerca nella campagna
                       </button>
+                      <Suspense fallback={null}>
+                        <ExportButton
+                          key={campaign.id}
+                          campaignId={campaign.id}
+                          busy={busy}
+                        />
+                      </Suspense>
                       <button
                         disabled={busy}
                         onClick={() => {

@@ -3,6 +3,9 @@ mod backup;
 mod backup_tests;
 mod catalog;
 mod db;
+mod export;
+#[cfg(test)]
+mod export_tests;
 mod graph;
 #[cfg(test)]
 mod graph_tests;
@@ -421,6 +424,48 @@ async fn read_image(
 fn detach_image(db: tauri::State<Database>, campaign_id: String, id: String) -> AppResult<()> {
     db.with(|c| images::detach(c, &campaign_id, &id))
 }
+#[tauri::command]
+async fn export_campaign(
+    app: tauri::AppHandle,
+    campaign_id: String,
+) -> AppResult<Option<export::ExportReceipt>> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let path = {
+            #[cfg(debug_assertions)]
+            let predefined = if std::env::var_os("NODEX_DEV_DATA_DIR").is_some() {
+                std::env::var_os("NODEX_DEV_EXPORT_FILE").map(std::path::PathBuf::from)
+            } else {
+                None
+            };
+            #[cfg(not(debug_assertions))]
+            let predefined: Option<std::path::PathBuf> = None;
+            if let Some(path) = predefined {
+                Some(path)
+            } else {
+                use tauri_plugin_dialog::DialogExt;
+                app.dialog()
+                    .file()
+                    .add_filter("Campagna Markdown e JSON", &["zip"])
+                    .set_title("Esporta campagna — scegli un nome nuovo")
+                    .set_file_name(format!("chronexus-export-{}.zip", uuid::Uuid::new_v4()))
+                    .blocking_save_file()
+                    .map(|f| {
+                        f.into_path()
+                            .map_err(|_| "Scegli un file su un disco locale o montato.")
+                    })
+                    .transpose()?
+            }
+        };
+        let Some(path) = path else {
+            return Ok(None);
+        };
+        app.state::<Database>().with_store(|s| {
+            export::write_export(&s.connection, &s.directory, &campaign_id, &path).map(Some)
+        })
+    })
+    .await
+    .map_err(|_| "Esportazione interrotta. Riprova con un nuovo file.".to_string())?
+}
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -444,7 +489,7 @@ pub fn run() {
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
+        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
 }

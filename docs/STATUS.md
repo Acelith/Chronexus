@@ -10,7 +10,8 @@ gli archivi precedenti. Ricerca da pulsante o Ctrl/⌘K, nuova sessione Ctrl/⌘
 Immagini: copie reali PNG/JPEG/WebP per pagine, personaggio e asset con didascalia,
 ruolo e visualizzatore con zoom; file originali conservati byte per byte, verifica
 SHA-256 e backup/ripristino. Migrazione 008 additiva. Rimozione dalla voce mantiene
-il file recuperabile. Export, pacchetti e campagna Speratia ancora da completare.
+il file recuperabile. Export ZIP Markdown/JSON con immagini collegate e manifest
+aggiunto; pacchetti e campagna Speratia ancora da completare.
 Le verifiche storiche sotto saranno sostituite al termine della milestone.
 
 Ultimo scenario reale Windows: scheda Neme compilata nelle sezioni del PDF,

@@ -12,6 +12,13 @@
 body {
   margin: 0;
 }
+.export-control {
+  max-width: 380px;
+}
+.export-control p {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
 .image-gallery {
   margin: 24px 0;
   border-top: 1px solid #465268;
