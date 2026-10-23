@@ -393,7 +393,8 @@ export default function GraphWorkspace({
           Relazione dichiarata: continua, etichetta e certezza
         </span>
         <span>
-          Rettangolo: sessione · Cerchio: pagina · Rombo: pagina mancante
+          Cerchio: personaggi e pagine · Esagono: luogo · Rombo: oggetto o
+          pagina mancante · Rettangolo: sessione
         </span>
       </div>
       {loading ? (

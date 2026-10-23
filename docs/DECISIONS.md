@@ -295,3 +295,10 @@ fallito mantiene la copia locale con avviso. CSP limitata al nuovo host approvat
 Prove native: voce SRD reale, cache offline dopo riavvio, backup/restore e
 secondo riavvio con membro Party, appunti e immagine identici. Skill e fonti
 verificate in docs/RESEARCH_DND.md; nessuna dipendenza runtime aggiunta.
+
+
+Controllo visuale finale M6: il layout organico può comprimere i nomi nelle
+zone dense di Speratia. La vista iniziale usa quindi una mappa ordinata con
+spazio calcolato anche per le etichette; il layout COSE rimane selezionabile.
+Nessuna relazione è dedotta dalla posizione spaziale. Riordinate solo le
+coordinate del canvas, non i dati o la membership.

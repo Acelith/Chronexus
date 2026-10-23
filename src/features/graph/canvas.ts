@@ -24,6 +24,9 @@ export const graphStyle: StylesheetJson = [
       "font-size": 15,
       "text-valign": "bottom",
       "text-margin-y": 9,
+      "text-background-color": "#eadcba",
+      "text-background-opacity": 0.85,
+      "text-background-padding": "2px",
       "text-wrap": "wrap",
       "text-max-width": "140px",
       width: 38,
@@ -45,6 +48,7 @@ export const graphStyle: StylesheetJson = [
     style: {
       width: 1.3,
       "curve-style": "bezier",
+      opacity: 0.22,
       "target-arrow-shape": "triangle",
       "arrow-scale": 0.8,
       label: "",
@@ -71,6 +75,7 @@ export const graphStyle: StylesheetJson = [
     style: {
       width: 3,
       "line-style": "solid",
+      opacity: 0.85,
       "line-color": "#8d713a",
       "target-arrow-color": "#8d713a",
     },
@@ -147,8 +152,14 @@ graphStyle.push(
     style: {
       label: "data(displayLabel)",
       "font-size": 11,
+      opacity: 1,
       width: 2.5,
       "z-index": 10,
     },
   },
 );
+
+graphStyle.push({
+  selector: 'edge.emphasized[kind="mention"]',
+  style: { label: "" },
+});

@@ -14,6 +14,7 @@ export default function GraphCanvas({
   onEdge: (edge: GraphEdge) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<"grid" | "cose">("grid");
   const visible = useMemo(
     () => readableGraph(data, focusId, expanded),
     [data, focusId, expanded],
@@ -26,21 +27,40 @@ export default function GraphCanvas({
   }, [onNode, onEdge]);
   useEffect(() => {
     if (!container.current) return;
+    const elements = graphElements(visible);
+    elements.slice(0, visible.nodes.length).forEach((node, index) => {
+      node.position = { x: (index % 5) * 220, y: Math.floor(index / 5) * 180 };
+    });
     const instance = cytoscape({
       container: container.current,
-      elements: graphElements(visible),
+      elements,
       style: graphStyle,
-      layout: {
-        name: "cose",
-        randomize: false,
-        nodeRepulsion: () => 140000,
-        idealEdgeLength: () => 160,
-        nodeOverlap: 30,
-        componentSpacing: 120,
-        numIter: 700,
-        animate: false,
-        padding: 65,
-      },
+      layout:
+        layoutMode === "grid"
+          ? {
+              name: "grid",
+              avoidOverlap: true,
+              nodeDimensionsIncludeLabels: true,
+              spacingFactor: 1.3,
+              rows: Math.max(
+                1,
+                Math.ceil(Math.sqrt(visible.nodes.length / 1.5)),
+              ),
+              animate: false,
+              padding: 45,
+            }
+          : {
+              name: "cose",
+              randomize: false,
+              nodeDimensionsIncludeLabels: true,
+              nodeRepulsion: () => 140000,
+              idealEdgeLength: () => 160,
+              nodeOverlap: 80,
+              componentSpacing: 120,
+              numIter: 700,
+              animate: false,
+              padding: 65,
+            },
       minZoom: 0.02,
       maxZoom: 2.5,
       wheelSensitivity: 0.2,
@@ -69,10 +89,20 @@ export default function GraphCanvas({
       instance.destroy();
       cy.current = null;
     };
-  }, [visible]);
+  }, [visible, layoutMode]);
   return (
     <div className="graph-visual">
       <div className="graph-view-toolbar">
+        <label className="graph-arrangement">
+          Disposizione
+          <select
+            value={layoutMode}
+            onChange={(e) => setLayoutMode(e.target.value as "grid" | "cose")}
+          >
+            <option value="grid">Mappa leggibile</option>
+            <option value="cose">Organica</option>
+          </select>
+        </label>
         <span>
           {visible.nodes.length} di {data.nodes.length} nodi disponibili ·
           trascina per spostarti, seleziona per leggere
