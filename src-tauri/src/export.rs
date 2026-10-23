@@ -124,6 +124,7 @@ pub fn write_export(
     };
     let pictures = images::all(c, campaign_id)?;
     let sources = crate::import_sources::all(c, campaign_id)?;
+    let party = crate::party::list(c, campaign_id)?;
     let mut q = c
         .prepare("SELECT id FROM relationships WHERE campaign_id=?1 ORDER BY id")
         .map_err(storage)?;
@@ -137,12 +138,22 @@ pub fn write_export(
         .into_iter()
         .map(|id| graph::get_relationship(c, campaign_id, &id))
         .collect::<AppResult<Vec<_>>>()?;
-    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"importSources":sources});
+    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"importSources":sources,"party":party});
     let mut files: Vec<(String, Vec<u8>)> = vec![(
         "campaign.json".into(),
         serde_json::to_vec_pretty(&data).map_err(|_| "Esportazione JSON non riuscita.")?,
     )];
     let mut index=format!("# {}\n\nEsportazione Chronexus. Le immagini collegate sono incluse; il ripristino completo usa il backup .nodex.\n\n## Pagine\n\n",campaign.name);
+    if !party.is_empty() {
+        index.push_str("## Party\n\n");
+        for member in &party {
+            index.push_str(&format!(
+                "- [{}](pages/{}.md) — {} — {}\n",
+                member.page.title, member.page.id, member.role, member.status
+            ));
+        }
+        index.push_str("\n## Pagine\n\n");
+    }
     for page in &pages {
         let mut text = format!(
             "# {}\n\nTipo: {}\n\nAlias: {}\n\n{}",

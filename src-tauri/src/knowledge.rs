@@ -154,18 +154,30 @@ pub fn create_page(
     status: &str,
     alias_values: &[String],
 ) -> AppResult<Page> {
+    let tx = connection.unchecked_transaction().map_err(storage)?;
+    let page = create_page_in_transaction(&tx, campaign_id, name, kind, status, alias_values)?;
+    tx.commit().map_err(storage)?;
+    Ok(page)
+}
+pub(crate) fn create_page_in_transaction(
+    connection: &Connection,
+    campaign_id: &str,
+    name: &str,
+    kind: &str,
+    status: &str,
+    alias_values: &[String],
+) -> AppResult<Page> {
     require_campaign(connection, campaign_id)?;
     let name = title(name)?;
     validate_kind(kind, status)?;
     let id = Uuid::new_v4().to_string();
-    let transaction = connection.unchecked_transaction().map_err(storage)?;
-    ensure_available(&transaction, campaign_id, name, "")?;
-    transaction.execute("INSERT INTO pages(id,campaign_id,title,title_key,kind,status,document) VALUES (?1,?2,?3,?4,?5,?6,?7)",params![id,campaign_id,name,key(name),kind,status,empty_document().to_string()]).map_err(storage)?;
-    write_aliases(&transaction, &id, alias_values, name)?;
-    crate::search::page(&transaction, campaign_id, &id)?;
-    transaction.commit().map_err(storage)?;
+    ensure_available(connection, campaign_id, name, "")?;
+    connection.execute("INSERT INTO pages(id,campaign_id,title,title_key,kind,status,document) VALUES (?1,?2,?3,?4,?5,?6,?7)",params![id,campaign_id,name,key(name),kind,status,empty_document().to_string()]).map_err(storage)?;
+    write_aliases(connection, &id, alias_values, name)?;
+    crate::search::page(connection, campaign_id, &id)?;
     get_page(connection, campaign_id, &id)
 }
+
 pub fn update_page(
     connection: &Connection,
     campaign_id: &str,

@@ -39,6 +39,7 @@ const BackupWorkspace = lazy(() => import("./features/backup/BackupWorkspace"));
 const PlayerWorkspace = lazy(() => import("./features/player/PlayerWorkspace"));
 const ExportButton = lazy(() => import("./features/export/ExportButton"));
 const Dashboard = lazy(() => import("./features/dashboard/Dashboard"));
+const PartyWorkspace = lazy(() => import("./features/party/PartyWorkspace"));
 const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
 
 export function App() {
@@ -50,7 +51,7 @@ export function App() {
   const [pageId, setPageId] = useState<string | null>(null);
   const [fallback, setFallback] = useState("");
   const [view, setView] = useState<
-    "overview" | "journal" | "codex" | "graph" | PlayerView
+    "overview" | "journal" | "codex" | "graph" | "party" | PlayerView
   >("journal");
   const [playerReturn, setPlayerReturn] = useState<{
     view: PlayerView;
@@ -583,6 +584,18 @@ export function App() {
                     >
                       Grafo
                     </button>
+                    <button
+                      aria-current={view === "party" ? "page" : undefined}
+                      disabled={busy}
+                      onClick={() =>
+                        void run(async () => {
+                          setView("party");
+                          setForm(null);
+                        })
+                      }
+                    >
+                      Party
+                    </button>
                     {(
                       [
                         ["character", "Personaggio"],
@@ -678,6 +691,19 @@ export function App() {
                       onCreate={createPage}
                       onUpdate={updatePage}
                       onRecover={recoverPage}
+                    />
+                  </Suspense>
+                ) : null}
+                {campaign && view === "party" ? (
+                  <Suspense fallback={<p role="status">Apertura party…</p>}>
+                    <PartyWorkspace
+                      key={campaign.id}
+                      campaignId={campaign.id}
+                      pages={pages}
+                      register={register}
+                      onSaved={onPageSaved}
+                      onOpen={(p) => openPage(p.id, p.title)}
+                      busy={busy}
                     />
                   </Suspense>
                 ) : null}

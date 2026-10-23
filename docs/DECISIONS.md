@@ -270,3 +270,17 @@ Skill: find-skills per ricerca CLI/catalogo, frontend-design e ui-taste per
 materiali/gerarchia e confronto visuale; imagegen per il solo riferimento fittizio.
 webapp-testing Anthropic consultata e valutata; automazione Tauri resta quella
 Playwright JS già in uso nel repository, senza installazioni globali.
+
+## Party — estensione M6
+
+Migrazione 010 additiva: elenco membri per UUID pagina, giocatore/ruolo liberi,
+stato e revisione per conflitti. Le conoscenze restano nel documento Codex,
+con menzioni, ricerca, immagini e autosave esistenti; nessuna scheda completa
+duplicata e nessuna relazione fattuale creata dall'appartenenza al party.
+La creazione del nuovo personaggio e della membership è atomica. Rimozione
+confermata scollega soltanto la membership, conservando pagina e immagini.
+Backup/ripristino include il party; export JSON e indice Markdown lo espongono.
+Il cambiamento del tipo pagina conserva la membership storica.
+Skill frontend-design per registro della compagnia e vercel-react-best-practices
+per vista/editor caricati su richiesta; test Rust e frontend per persistenza,
+conflitti, guardie e recupero degli errori.
