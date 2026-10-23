@@ -422,3 +422,39 @@ fn old_schema_snapshot_is_validated_then_migrated_in_new_generation() {
         .is_empty());
     assert!(db::open(&store.directory.join("nodex.sqlite3")).is_ok());
 }
+
+#[cfg(windows)]
+#[test]
+fn restore_with_directory_handle_without_delete_sharing_keeps_attachment_copy_working() {
+    use std::os::windows::fs::OpenOptionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let mut store = Store::open(&temp.path().join("profile")).unwrap();
+    let (campaign, _, _, _) = seed(&store);
+    let bundle = temp.path().join("bundle.nodex");
+    write_backup(&store.connection, &store.directory, &bundle).unwrap();
+    let preview = store.prepare(&bundle).unwrap();
+    let source = store
+        .pending
+        .as_ref()
+        .unwrap()
+        .directory
+        .path()
+        .join("attachments");
+    // Emulates an indexer or other reader retaining a directory handle.
+    let handle = File::options()
+        .read(true)
+        .share_mode(0x1 | 0x2)
+        .custom_flags(0x02000000)
+        .open(&source)
+        .unwrap();
+    assert!(fs::rename(&source, source.with_file_name("moved-attachments")).is_err());
+    let receipt = store.restore(&preview.token).unwrap();
+    assert_eq!(receipt.counts.attachments, 1);
+    assert_eq!(
+        fs::read_dir(store.directory.join("attachments").join(campaign))
+            .unwrap()
+            .count(),
+        1
+    );
+    drop(handle);
+}

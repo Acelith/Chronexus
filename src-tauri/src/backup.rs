@@ -595,17 +595,33 @@ impl Store {
         let next = profiles.join(&id);
         fs::create_dir(&next).map_err(io)?;
         // Keep failed/orphan generations for inspection; never delete user data here.
-        fs::rename(
-            prepared.directory.path().join(DB_ENTRY),
-            next.join("nodex.sqlite3"),
-        )
-        .map_err(io)?;
-        if prepared.directory.path().join("attachments").exists() {
-            fs::rename(
-                prepared.directory.path().join("attachments"),
-                next.join("attachments"),
+        // Copy only validated, inactive payloads. Moving a directory can fail on
+        // Windows when an indexer holds a directory handle without delete sharing.
+        // The live SQLite file is still never copied, replaced or removed.
+        for entry in &prepared.manifest.files {
+            let target = next.join(if entry.path == DB_ENTRY {
+                "nodex.sqlite3"
+            } else {
+                &entry.path
+            });
+            let parent = target
+                .parent()
+                .ok_or_else(|| invalid("destinazione mancante"))?;
+            fs::create_dir_all(parent).map_err(io)?;
+            let mut output = File::create_new(&target).map_err(io)?;
+            std::io::copy(
+                &mut File::open(prepared.directory.path().join(&entry.path)).map_err(io)?,
+                &mut output,
             )
             .map_err(io)?;
+            output.sync_all().map_err(io)?;
+            if checksum(&target)? != (entry.size, entry.sha256.clone()) {
+                return Err(invalid("copia del payload non integra"));
+            }
+            sync_dir(parent)?;
+        }
+        if next.join("attachments").exists() {
+            sync_dir(&next.join("attachments"))?;
         }
         let connection = db::open(&next.join("nodex.sqlite3")).map_err(journal::storage)?;
         File::options()

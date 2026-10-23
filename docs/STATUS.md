@@ -5,8 +5,12 @@
 **M0–M3 completate. M4 in corso: backend backup/ripristino implementato.**
 
 Checkpoint M4: snapshot SQLite, bundle ZIP con SHA-256, validazione e ripristino
-su generazioni con copia preventiva. 27 test Rust superati (7 backup), Clippy
-senza avvisi. Interfaccia, prova desktop M4 e documentazione utente da completare.
+su generazioni con copia preventiva. Il desktop ha rilevato un blocco Windows
+nello spostamento della cartella allegati: ora copia i soli payload verificati
+e ne ricontrolla gli hash; test dedicato con handle senza condivisione DELETE.
+Interfaccia M4 in completamento; esportazione, ripristino e riavvio desktop reali
+riusciti, compreso confronto dell'hash immagine. 21 test frontend e 8 test Rust
+backup superati; suite Rust completa precedente: 27 superati. Clippy superato.
 Nessuna migrazione aggiunta; schema corrente 004.
 
 Scenario M3 verificato nel desktop reale: Varek e Gilda citati nella Sessione 12
