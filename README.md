@@ -323,4 +323,3 @@ Ricerca API/Skill: [docs/RESEARCH_DND.md](docs/RESEARCH_DND.md).
 **M7 è pianificata**, non attiva: assistente D&D con modello locale e GPU,
 retrieval citato e separazione delle edizioni. Candidati, limiti e accettazione:
 [docs/AI_LOCAL.md](docs/AI_LOCAL.md). Nessun runtime o modello AI installato.
-
