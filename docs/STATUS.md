@@ -31,10 +31,13 @@ locali. UI e valutazione completa in verifica; non dichiarare ancora M7 conclusa
 
 ## Verifiche effettive
 
-Checkpoint M7 backend: 61 test Rust superati, Clippy con warning negati e build
+Checkpoint M7 backend: 63 test Rust superati, Clippy con warning negati e build
 debug superati; 55 test React, lint, typecheck superati nella stessa esecuzione.
-La valutazione nativa iniziale di 40 domande ha richiesto miglioramenti a
-concisione/gestione istruzioni malevole; ripetizione e prove UI ancora in corso.
+Valutazione finale: 40/40 scenari con esito atteso (20 campagna, 10 regole, 5
+senza risposta su GPU reale; 5 attacchi fermati prima del modello). Non è una
+misura universale di accuratezza: le prime prove hanno mostrato che il modello
+da solo ripete istruzioni malevole e produce citazioni non valide. Il gate
+prudente esclude solo estratti sospetti; se tutti sono sospetti ferma la domanda.
 Corretto retrieval: riepilogo e blocco dello stesso appunto non diventano prove
 indipendenti; metadati Party inclusi anche quando la ricerca trova un blocco.
 Nomi/alias riconosciuti nella domanda restringono le evidenze pertinenti anche
@@ -42,6 +45,9 @@ in altre pagine/sessioni, riducendo i falsi risultati su termini generici.
 Prova con proxy esterni non raggiungibili e cloud disabilitato: inferenza reale
 riuscita, 80 campioni/173 connessioni del runtime osservati soltanto su loopback.
 Non equivale a prova con rete fisicamente scollegata o firewall.
+UI nativa: streaming, annullamento anche dopo token GPU, fonti/rename/edizioni,
+delete, backup/export verificati. Ripristino e riavvio senza Ollama preservano
+90 conversazioni/fonti, 25 pagine, un membro Party e configurazione.
 I risultati M6 sottostanti restano riferiti al checkpoint precedente.
 
 - pnpm lint / typecheck / format:check: PASS.
