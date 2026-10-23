@@ -10,6 +10,7 @@ import {
 } from "./api";
 import { matchingPages } from "./links";
 const Editor = lazy(() => import("../journal/Editor"));
+const ImageGallery = lazy(() => import("../images/ImageGallery"));
 
 interface Props {
   campaignId: string;
@@ -129,6 +130,14 @@ export default function CodexWorkspace(props: Props) {
                   onSaved={props.onSaved}
                   focusBlock={props.focusBlock}
                   disabled={props.busy}
+                />
+              </Suspense>
+              <Suspense fallback={<p role="status">Apertura immagini…</p>}>
+                <ImageGallery
+                  key={page.id}
+                  campaignId={props.campaignId}
+                  target={{ kind: "page", id: page.id }}
+                  busy={props.busy}
                 />
               </Suspense>
               <Backlinks

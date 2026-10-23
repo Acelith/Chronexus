@@ -6,6 +6,9 @@ mod db;
 mod graph;
 #[cfg(test)]
 mod graph_tests;
+mod images;
+#[cfg(test)]
+mod images_tests;
 mod journal;
 #[cfg(test)]
 mod journal_tests;
@@ -360,6 +363,64 @@ fn search_campaign(
 fn rebuild_search_index(db: tauri::State<Database>) -> AppResult<i64> {
     db.with(search::rebuild)
 }
+#[tauri::command]
+fn list_images(
+    db: tauri::State<Database>,
+    campaign_id: String,
+    target: images::ImageTarget,
+) -> AppResult<Vec<images::Attachment>> {
+    db.with(|c| images::list(c, &campaign_id, &target))
+}
+#[tauri::command]
+async fn add_image(
+    app: tauri::AppHandle,
+    campaign_id: String,
+    target: images::ImageTarget,
+    caption: String,
+    role: String,
+    data_base64: String,
+) -> AppResult<images::Attachment> {
+    tauri::async_runtime::spawn_blocking(move || {
+        use base64::Engine;
+        if data_base64.len() > 28 * 1024 * 1024 {
+            return Err("Immagine troppo grande: massimo 20 MiB.".into());
+        }
+        let bytes = base64::engine::general_purpose::STANDARD
+            .decode(data_base64)
+            .map_err(|_| "Dati immagine non validi.")?;
+        app.state::<Database>().with_store(|s| {
+            images::add(
+                &s.connection,
+                &s.directory,
+                &campaign_id,
+                &target,
+                &caption,
+                &role,
+                bytes,
+            )
+        })
+    })
+    .await
+    .map_err(|_| "Importazione immagine interrotta.".to_string())?
+}
+#[tauri::command]
+async fn read_image(
+    app: tauri::AppHandle,
+    campaign_id: String,
+    id: String,
+    thumbnail: bool,
+) -> AppResult<String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        app.state::<Database>()
+            .with_store(|s| images::read(&s.connection, &s.directory, &campaign_id, &id, thumbnail))
+    })
+    .await
+    .map_err(|_| "Lettura immagine interrotta.".to_string())?
+}
+#[tauri::command]
+fn detach_image(db: tauri::State<Database>, campaign_id: String, id: String) -> AppResult<()> {
+    db.with(|c| images::detach(c, &campaign_id, &id))
+}
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -383,7 +444,7 @@ pub fn run() {
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
+        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
 }

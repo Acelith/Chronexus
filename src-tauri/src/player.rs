@@ -641,6 +641,7 @@ pub fn delete_asset(
     let c = &tx;
     require_character(c, campaign, character)?;
     identifier(id)?;
+    crate::images::detach_asset(c, campaign, id)?;
     let changed=c.execute("DELETE FROM player_assets WHERE campaign_id=?1 AND character_id=?2 AND id=?3 AND revision=?4",params![campaign,character,id,revision]).map_err(storage)?;
     if changed != 1 {
         return Err("Voce modificata altrove o non trovata. Riaprila prima di eliminarla.".into());

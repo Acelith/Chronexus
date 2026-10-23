@@ -300,6 +300,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
 }
 
 fn attachments(directory: &Path, connection: &Connection) -> AppResult<Vec<(String, PathBuf)>> {
+    if version(connection)? >= 8 {
+        crate::images::validate_files(connection, directory)?;
+    }
     let root = directory.join("attachments");
     if !root.exists() {
         return Ok(vec![]);

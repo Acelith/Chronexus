@@ -137,6 +137,14 @@ Domain rules:
 - Mention records and full-text/search content may be denormalized as derived indexes, reconstructed if needed; clarify the canonical source of truth.
 - Avoid storing synchronized copies of the same editable data in Markdown and SQLite. SQLite is canonical; Markdown/JSON are export formats.
 - Attachments must use safe relative logical IDs, not arbitrary absolute paths stored from user input.
+- Images attach to Codex pages (NPCs/places/maps/items), the player character or
+  inventory/ability entries. Preserve original bytes in managed campaign storage;
+  UUID names, caption, role (portrait/map/image/reference), dimensions, SHA-256 and
+  owner are persisted. Accept PNG/JPEG/WebP, at most 20 MiB, 8192 px/side and
+  32 million pixels. Preview decoding honors orientation and limits; full view
+  supports zoom. Missing/corrupted files are visible errors and block successful
+  backup. Backup/restore must preserve image bytes and ownership. Removing a link
+  keeps the recoverable file until a separately designed cleanup policy exists.
 - Time fields use UTC internally; display local timezone in UI.
 
 ## 5. Backup, restore, export and portability

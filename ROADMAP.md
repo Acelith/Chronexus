@@ -115,6 +115,11 @@ Deliverables:
 - FTS5 search and tested index rebuild across notes, page titles and supported character assets.
 - Keyboard shortcuts, refined dashboard, visual usability/accessibility, performance tuning.
 - Markdown/JSON export completion and attachment handling.
+- User-requested images for PC/NPCs, maps and items: managed local copies,
+  previews/zoom, ownership, safe decoding and tested image-inclusive backup.
+- After implementation, prepare a separate test campaign from the supplied
+  Logseq archive and Oran photos; keep originals/private fixtures out of Git,
+  preserve uncertainty, verify restore and save its `.nodex` backup in Downloads.
 - CI pipeline to run tests; actual Windows/macOS/Linux build matrix if runners available.
 - Package installers (.exe/.msi, .dmg/.app, .deb/.AppImage as supported by tools), verify names and packaging constraints.
 - README with real local install/backup/restore instructions, limitations and manual QA checklist.

@@ -212,3 +212,27 @@ solo cambio di nome. I backup M4 sono ancora leggibili.
   API di sola lettura: gli incantesimi personalizzati non vengono pubblicati.
 - Skill: PDF per estrazione e lettura visiva delle quattro pagine; frontend-design
   e vercel-react-best-practices per interfaccia e caricamento del catalogo.
+
+## Ricerca e immagini M6
+
+- Migrazione 007: righe di ricerca derivate dai documenti canonici e FTS5
+  external-content con trigger. Aggiornamenti nella transazione della nota/asset;
+  ricostruzione su migrazione e nella copia ripristinata, prima dell'attivazione.
+  Testo utente quotato, niente sintassi FTS/SQL arbitraria; risultati della sola
+  campagna selezionata con UUID e blocco fonte. Nessun servizio remoto.
+- Migrazione 008: proprietà immagini con FK composite per campagna/voce e file
+  UUID nel layout allegati M4. PNG/JPEG/WebP validati con image 0.25.10
+  (MIT/Apache-2.0, Rust >=1.88; toolchain locale 1.99) e base64 0.22.1
+  (MIT/Apache-2.0). Originali copiati senza ricompressione o perdita EXIF.
+- Limiti 20 MiB, 8192 px/lato, 32 milioni di pixel e memoria decoder limitata;
+  orientamento applicato solo alle anteprime. Lettura via IPC con ID, nessun
+  percorso esterno/HTML/SVG eseguibile o permesso filesystem generale al frontend.
+- Anteprime differite quando visibili; zoom dell'originale nel visualizzatore.
+  OperationContext riusa il flush editor e la guardia app per le mutazioni immagini.
+- File temporanei fuori dalla cartella allegati per non compromettere un backup
+  dopo un arresto improvviso. Pubblicazione con nuovo UUID senza sovrascritture;
+  metadati e SHA-256 verificati in backup/ripristino. Rimozione dalla voce o
+  eliminazione dell'asset scollega i metadati e conserva il file per recupero.
+  Pulizia fisica degli orfani rinviata e dichiarata nell'interfaccia.
+- Skill frontend-design e vercel-react-best-practices per gerarchia, tastiera,
+  caricamento differito e lettura visiva; nessuna Skill DB/testing disponibile.

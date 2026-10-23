@@ -14,6 +14,13 @@ import type { SaveGuard } from "../journal/Editor";
 import type { KnowledgePage } from "../knowledge/api";
 import type { Session } from "../journal/api";
 import { adapterFor } from "./rulesets";
+vi.mock("../journal/api", async (original) => ({
+  ...(await original<typeof import("../journal/api")>()),
+  command: vi.fn(async (name: string) => {
+    if (name === "list_images") return [];
+    throw Error(`Comando non previsto nel test player: ${name}`);
+  }),
+}));
 vi.mock("./api", async (original) => ({
   ...(await original<typeof import("./api")>()),
   playerApi: {

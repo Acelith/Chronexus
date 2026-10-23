@@ -7,7 +7,10 @@
 Prima parte M6: ricerca FTS5 locale su blocchi/titoli/alias/personaggio/asset,
 aggiornata nelle transazioni dei dati e ricostruibile. Migrazione 007 indicizza
 gli archivi precedenti. Ricerca da pulsante o Ctrl/⌘K, nuova sessione Ctrl/⌘ShiftN.
-Immagini, export, pacchetti e campagna Speratia sono le parti ancora da completare.
+Immagini: copie reali PNG/JPEG/WebP per pagine, personaggio e asset con didascalia,
+ruolo e visualizzatore con zoom; file originali conservati byte per byte, verifica
+SHA-256 e backup/ripristino. Migrazione 008 additiva. Rimozione dalla voce mantiene
+il file recuperabile. Export, pacchetti e campagna Speratia ancora da completare.
 Le verifiche storiche sotto saranno sostituite al termine della milestone.
 
 Ultimo scenario reale Windows: scheda Neme compilata nelle sezioni del PDF,

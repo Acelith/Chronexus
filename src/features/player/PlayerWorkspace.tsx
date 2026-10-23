@@ -28,6 +28,7 @@ import { emptySheet, trainingLabels } from "./sheet";
 import { SheetSummary } from "./SheetSections";
 import { catalogBase, srdAttribution } from "./catalog";
 const DndCatalog = lazy(() => import("./DndCatalog"));
+const ImageGallery = lazy(() => import("../images/ImageGallery"));
 
 type EditState =
   | { type: "character" }
@@ -478,6 +479,14 @@ export default function PlayerWorkspace({
             </p>
           )}
           <SheetSummary value={character.data.sheet ?? emptySheet()} />
+          <Suspense fallback={<p role="status">Apertura immagini…</p>}>
+            <ImageGallery
+              key={character.id}
+              campaignId={campaignId}
+              target={{ kind: "character", id: character.id }}
+              busy={disabled}
+            />
+          </Suspense>
           <h4>Condizioni</h4>
           <p className="player-text">
             {character.data.conditions || "Nessuna condizione annotata."}
@@ -574,6 +583,14 @@ export default function PlayerWorkspace({
                   aria-label="Dettaglio voce"
                 >
                   <h4>{selected.input.details.name}</h4>
+                  <Suspense fallback={<p role="status">Apertura immagini…</p>}>
+                    <ImageGallery
+                      key={selected.id}
+                      campaignId={campaignId}
+                      target={{ kind: "asset", id: selected.id }}
+                      busy={disabled}
+                    />
+                  </Suspense>
                   {selected.input.details.kind === "item" ? (
                     <>
                       <Counter

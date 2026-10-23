@@ -12,6 +12,79 @@
 body {
   margin: 0;
 }
+.image-gallery {
+  margin: 24px 0;
+  border-top: 1px solid #465268;
+  padding-top: 12px;
+}
+.image-gallery summary {
+  cursor: pointer;
+  color: #d7b978;
+  padding: 8px 0;
+}
+.image-file {
+  margin: 16px 0;
+}
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+}
+.image-grid figure {
+  margin: 0;
+  min-width: 0;
+  max-width: 400px;
+}
+.image-grid figure > button:first-child {
+  padding: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 140px;
+  background: #101623;
+}
+.image-grid img {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+}
+.image-grid figcaption {
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.image-grid small {
+  display: block;
+  color: #a9b4c7;
+}
+.image-overlay {
+  position: fixed;
+  inset: 0;
+  background: #080d18eb;
+  z-index: 55;
+  padding: 3vh 24px;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+}
+.image-viewer {
+  background: #161c28;
+  padding: 20px;
+  width: min(1400px, 100%);
+  max-height: 94vh;
+  overflow: auto;
+}
+.image-full {
+  overflow: auto;
+  max-height: 70vh;
+}
+.image-full img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.image-viewer h3 {
+  margin: 18px 0;
+}
 .search-overlay {
   position: fixed;
   inset: 0;
