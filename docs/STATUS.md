@@ -82,6 +82,12 @@ Archivi/foto/DB/profili/modelli restano fuori Git; nessun dato privato pubblicat
 
 ## Avvio, Skill e limiti
 
+Distribuzione richiesta: `installers/Chronexus-0.1.0-Windows-x64/` nella root,
+con installer app e AI, runtime Ollama e solo Qwen3:4b-instruct, licenze e SHA-256.
+Output escluso da Git. Script di build/installer e sei test di sicurezza aggiunti;
+installazione silenziosa AI e inferenza GPU dalla copia installata verificate.
+Nessun dato delle campagne incluso. Dettagli: [INSTALLERS.md](INSTALLERS.md).
+
 `powershell -File scripts/Start-LocalAI.ps1`, poi `pnpm desktop` nell'ambiente Rust
 configurato. In app: campagna → Assistente locale → Controlla Ollama → scegli
 qwen3:4b-instruct → consenso multilingue → Attiva modello locale.

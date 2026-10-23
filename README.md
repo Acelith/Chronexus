@@ -83,6 +83,10 @@ Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
 
 ## Pacchetti desktop
 
+Pacchetto Windows completo con installer app e AI offline nella root:
+`installers/Chronexus-0.1.0-Windows-x64/`. Mantieni la cartella `AI` accanto
+al suo installer. Istruzioni e rigenerazione: [docs/INSTALLERS.md](docs/INSTALLERS.md).
+
 `pnpm icons` genera le icone dalla sorgente SVG; eseguilo prima di comandi Cargo
 su un checkout nuovo. `pnpm desktop` e `pnpm build:desktop` lo fanno automaticamente.
 `pnpm package:desktop` crea i pacchetti nativi della piattaforma corrente:

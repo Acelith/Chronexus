@@ -35,6 +35,12 @@ nessun peso redistribuito nel repository o nell'installer.
 
 ## Avvio Windows
 
+E' disponibile anche un pacchetto con i due installer e tutti i file AI nella
+cartella root `installers/Chronexus-0.1.0-Windows-x64/`; vedere [INSTALLERS.md](INSTALLERS.md).
+Contiene il wrapper manifest aggiornato da Ollama, con gli stessi pesi verificati.
+Su un archivio gia' configurato puo' essere necessario controllare e riattivare
+il modello, come previsto dalla verifica del digest; nessun cambio automatico.
+
 Il runtime e i pesi scaricati per questa sessione sono isolati in
 `.tools/m7-runtime`, esclusa da Git. Nessuna installazione globale, account o
 servizio cloud. Non spostare quella cartella se vuoi riutilizzarli.

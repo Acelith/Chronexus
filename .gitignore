@@ -142,6 +142,7 @@ scripts/__pycache__/
 *.sqlite*
 *.nodex
 backups/
+/installers/
 *.png
 *.ico
 
