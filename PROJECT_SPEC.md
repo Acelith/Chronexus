@@ -215,3 +215,13 @@ IDs only; no user campaign upload, startup requests or automatic knowledge graph
 writes. Consulted entries persist in bounded SQLite cache (schema 011) and
 backups; failure retains the cached copy visibly. Existing SRD spell imports
 and custom editing remain unchanged. Details and sources: docs/RESEARCH_DND.md.
+
+
+## M7 approved planning: local D&D assistant
+
+The user explicitly requested a new milestone for local GPU inference with
+Ollama or an equivalent runtime, specialized in D&D where such a model exists.
+See docs/AI_LOCAL.md and ROADMAP M7. This is planning only: no AI implementation,
+model download, runtime installation or campaign upload is authorized by the
+milestone document itself. Preserve player knowledge, source citations and
+edition separation; no implicit mutations. Current M6 remains independently usable.

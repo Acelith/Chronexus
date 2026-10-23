@@ -127,6 +127,23 @@ Deliverables:
 Acceptance:
 - Search source note, restart, run backup/restore, navigate graph, validate on supported OS build environments without presenting untested builds as verified.
 
+## M7 - Assistente D&D locale con GPU (pianificata, non implementata)
+
+Richiesta esplicita: domande e analisi della propria campagna con inferenza
+locale Ollama/adapter equivalente, modello specifico D&D quando disponibile,
+GPU reale verificata e nessun cloud. Specifica, candidati e accettazione in
+[docs/AI_LOCAL.md](docs/AI_LOCAL.md).
+
+- M7.1: valutare modello D&D/licenze e compatibilità GPU/VRAM con benchmark reale.
+- M7.2: retrieval locale per campagna e regole separate per edizione, risposte
+  italiane con citazioni riapribili, incertezza e rifiuto di fatti inventati.
+- M7.3: streaming/cancellazione/errori, configurazione esplicita, privacy,
+  conversazioni eventualmente persistenti e backup senza pesi dei modelli.
+- Accettazione: inferenza reale sulla GPU e offline, domande con fonti e senza
+  risposta, isolamento campagne/edizioni, fonti rinominate e documenti malevoli.
+- Nessun fatto, relazione, contatore o appunto modificato senza revisione utente.
+- Prima completare le verifiche disponibili di M6; M7 non è avviata in questo giro.
+
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.
 
@@ -145,5 +162,5 @@ Do not turn status into a transcript or paste build logs into it.
 Windows features and private Logseq campaign/backup acceptance delivered.
 Schema 009, 47 frontend tests and 47 Rust tests verified; NSIS package built.
 Remaining M6 release validation: interactive installation/uninstallation and
-actual macOS/Linux CI/package checks. No M7 is defined; do not start future
-features without a new user request. See docs/STATUS.md for evidence.
+actual macOS/Linux CI/package checks. M7 is now explicitly planned in docs/AI_LOCAL.md; implementation starts only
+after the requested M6 continuation and a subsequent user instruction. See docs/STATUS.md for evidence.

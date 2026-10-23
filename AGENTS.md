@@ -111,3 +111,14 @@ Nel riepilogo di ogni implementazione importante, indica brevemente quali Skill 
   Menzioni e alias ambigui non autorizzano fusione di pagine o relazioni fattuali.
 - Fixture, fotografie, appunti, report e backup privati non entrano nei commit.
   M6 Windows verificato non significa macOS/Linux o installazione verificati.
+
+
+## M7 planning boundary
+
+M7 is explicitly planned for a local GPU-backed D&D assistant; see
+`docs/AI_LOCAL.md`. No AI runtime has been integrated yet. Prefer a verified
+D&D-specific local model when available; do not substitute a generic model
+silently or equate roleplay tuning with rules accuracy. Only loopback inference
+with verified local weights and cloud disabled, scoped retrieval, stable
+citations, edition separation and no implicit campaign mutations. Do not
+install/download models or claim GPU verification during documentation work.
