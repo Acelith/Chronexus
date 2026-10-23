@@ -1,8 +1,478 @@
-import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import { isTauri } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import {
+  api,
+  errorMessage,
+  type Campaign,
+  type Session,
+} from "./features/journal/api";
+import type { SaveGuard } from "./features/journal/Editor";
+import { it } from "./strings";
+
+const Editor = lazy(() => import("./features/journal/Editor"));
 
 export function App() {
-  const [status, setStatus] = useState('Apertura archivio locale…');
-  useEffect(() => { invoke<string>('database_status').then(setStatus).catch(() => setStatus('Archivio non disponibile. Avvia Nodex come applicazione desktop.')); }, []);
-  return <div className="shell"><aside><h1>Nodex</h1><p>Il tuo diario di campagna</p><nav aria-label="Navigazione"><strong>Diario</strong></nav><footer>Archivio personale · offline</footer></aside><main><header><p>Le tue campagne</p><h2>Ogni avventura comincia<br />da una prima pagina.</h2></header><section><p>Non hai ancora creato una campagna.</p><p role="status">{status}</p></section></main></div>;
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [campaignId, setCampaignId] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [form, setForm] = useState<"campaign" | "rename" | "session" | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const guard = useRef<SaveGuard | null>(null);
+  const operation = useRef(false);
+  const loadVersion = useRef(0);
+  const campaign = campaigns.find((item) => item.id === campaignId);
+  const session = sessions.find((item) => item.id === sessionId);
+  const register = useCallback((value: SaveGuard | null) => {
+    guard.current = value;
+  }, []);
+  const onSaved = useCallback(
+    (saved: Session) =>
+      setSessions((items) =>
+        items.map((item) => (item.id === saved.id ? saved : item)),
+      ),
+    [],
+  );
+
+  const load = useCallback(async () => {
+    const version = ++loadVersion.current;
+    try {
+      const items = await api.campaigns();
+      const first = items[0];
+      const notes = first ? await api.sessions(first.id) : [];
+      if (version !== loadVersion.current) return;
+      setCampaigns(items);
+      setCampaignId(first?.id ?? null);
+      setSessions(notes);
+      setSessionId(notes[0]?.id ?? null);
+    } catch (reason) {
+      if (version === loadVersion.current) setError(errorMessage(reason));
+    } finally {
+      if (version === loadVersion.current) setLoading(false);
+    }
+  }, []);
+  // Initial synchronization with Rust; all state updates follow asynchronous I/O.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+  }, [load]);
+
+  const run = useCallback(async (action: () => Promise<void>) => {
+    if (operation.current) return;
+    operation.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      await guard.current?.flush();
+      await action();
+    } catch (reason) {
+      setError(errorMessage(reason));
+    } finally {
+      operation.current = false;
+      setBusy(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if (guard.current?.dirty()) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", warn);
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    if (isTauri()) {
+      void getCurrentWindow()
+        .onCloseRequested((event) => {
+          event.preventDefault();
+          void run(async () => {
+            await getCurrentWindow().destroy();
+          });
+        })
+        .then((stop) => {
+          if (disposed) stop();
+          else unlisten = stop;
+        })
+        .catch((reason) => setError(errorMessage(reason)));
+    }
+    return () => {
+      disposed = true;
+      unlisten?.();
+      window.removeEventListener("beforeunload", warn);
+    };
+  }, [run]);
+
+  function selectCampaign(id: string) {
+    if (id === campaignId) return;
+    void run(async () => {
+      const items = await api.sessions(id);
+      setCampaignId(id);
+      setSessions(items);
+      setSessionId(items[0]?.id ?? null);
+      setForm(null);
+    });
+  }
+
+  async function saveCampaign(name: string) {
+    await run(async () => {
+      if (form === "rename" && campaign) {
+        const saved = await api.renameCampaign(campaign.id, name);
+        setCampaigns((items) =>
+          items.map((item) => (item.id === saved.id ? saved : item)),
+        );
+      } else {
+        const saved = await api.createCampaign(name);
+        setCampaigns((items) => [...items, saved]);
+        setCampaignId(saved.id);
+        setSessions([]);
+        setSessionId(null);
+      }
+      setForm(null);
+    });
+  }
+
+  async function saveSession(
+    sequence: number,
+    title: string,
+    date: string | null,
+  ) {
+    if (!campaign) return;
+    await run(async () => {
+      const saved = await api.createSession(campaign.id, sequence, title, date);
+      setSessions((items) =>
+        [...items, saved].sort((a, b) => a.sequence - b.sequence),
+      );
+      setSessionId(saved.id);
+      setForm(null);
+    });
+  }
+
+  return (
+    <div className="shell" aria-busy={busy || loading}>
+      <aside>
+        <div className="brand">
+          <h1>{it.appName}</h1>
+          <p>{it.tagline}</p>
+        </div>
+        <nav aria-label={it.campaigns}>
+          <h2>{it.campaigns}</h2>
+          {campaigns.map((item) => (
+            <button
+              className="campaign-link"
+              key={item.id}
+              aria-current={item.id === campaignId ? "page" : undefined}
+              disabled={busy}
+              onClick={() => selectCampaign(item.id)}
+            >
+              {item.name}
+            </button>
+          ))}
+          <button
+            className="quiet"
+            disabled={busy || loading}
+            onClick={() => setForm("campaign")}
+          >
+            + {it.newCampaign}
+          </button>
+        </nav>
+        <div className="local-mark">
+          <span aria-hidden="true">◇</span>
+          <footer>{it.local}</footer>
+        </div>
+      </aside>
+      <main>
+        {error ? (
+          <div className="error" role="alert">
+            <p>{error}</p>
+            {!campaigns.length ? (
+              <button
+                disabled={loading}
+                onClick={() => {
+                  setLoading(true);
+                  setError("");
+                  void load();
+                }}
+              >
+                {it.retry}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+        {loading ? (
+          <p role="status">{it.loading}</p>
+        ) : (
+          <>
+            <header className="campaign-header">
+              <div>
+                <p>{it.journal}</p>
+                <h2>{campaign?.name ?? it.emptyCampaigns}</h2>
+              </div>
+              {campaign ? (
+                <div className="actions">
+                  <button disabled={busy} onClick={() => setForm("rename")}>
+                    {it.rename}
+                  </button>
+                  <button
+                    className="primary"
+                    disabled={busy}
+                    onClick={() => setForm("session")}
+                  >
+                    + {it.newSession}
+                  </button>
+                </div>
+              ) : null}
+            </header>
+            {form === "campaign" || form === "rename" ? (
+              <CampaignForm
+                key={`${form}-${campaignId}`}
+                initialName={form === "rename" ? (campaign?.name ?? "") : ""}
+                rename={form === "rename"}
+                busy={busy}
+                onSave={saveCampaign}
+                onCancel={() => setForm(null)}
+              />
+            ) : null}
+            {form === "session" ? (
+              <SessionForm
+                initialSequence={Math.min(
+                  999999,
+                  Math.max(0, ...sessions.map((item) => item.sequence)) + 1,
+                )}
+                busy={busy}
+                onSave={saveSession}
+                onCancel={() => setForm(null)}
+              />
+            ) : null}
+            {!campaign && !error ? (
+              <section className="empty">
+                <span className="book-mark" aria-hidden="true">
+                  ◇
+                </span>
+                <p>{it.emptyCampaignHint}</p>
+                {form !== "campaign" ? (
+                  <button
+                    className="primary"
+                    onClick={() => setForm("campaign")}
+                  >
+                    {it.createCampaign}
+                  </button>
+                ) : null}
+              </section>
+            ) : null}
+            {campaign && !sessions.length && form !== "session" ? (
+              <section className="empty">
+                <h3>{it.emptySessions}</h3>
+                <p>{it.emptySessionsHint}</p>
+                <button
+                  className="primary"
+                  disabled={busy}
+                  onClick={() => setForm("session")}
+                >
+                  {it.newSession}
+                </button>
+              </section>
+            ) : null}
+            {sessions.length ? (
+              <div className="journal-layout">
+                <nav className="session-list" aria-label={it.journal}>
+                  {sessions.map((item) => (
+                    <button
+                      key={item.id}
+                      disabled={busy}
+                      aria-current={item.id === sessionId ? "page" : undefined}
+                      onClick={() => {
+                        if (item.id !== sessionId)
+                          void run(async () => {
+                            setSessionId(item.id);
+                            setForm(null);
+                          });
+                      }}
+                    >
+                      <span className="session-number">
+                        Sessione {item.sequence}
+                      </span>
+                      <strong>{item.title}</strong>
+                      <span>{formatDate(item.playedOn)}</span>
+                    </button>
+                  ))}
+                </nav>
+                <article className="journal-page">
+                  {session ? (
+                    <>
+                      <header className="note-header">
+                        <p>
+                          Sessione {session.sequence}{" "}
+                          <span aria-hidden="true">/</span>{" "}
+                          {formatDate(session.playedOn)}
+                        </p>
+                        <h3>{session.title}</h3>
+                      </header>
+                      <Suspense
+                        fallback={<p role="status">{it.editorLoading}</p>}
+                      >
+                        <Editor
+                          key={session.id}
+                          session={session}
+                          register={register}
+                          onSaved={onSaved}
+                        />
+                      </Suspense>
+                    </>
+                  ) : (
+                    <p>{it.chooseSession}</p>
+                  )}
+                </article>
+              </div>
+            ) : null}
+          </>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function formatDate(date: string | null) {
+  if (!date) return it.dateMissing;
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${date}T12:00:00`));
+}
+
+function CampaignForm({
+  initialName,
+  rename,
+  busy,
+  onSave,
+  onCancel,
+}: {
+  initialName: string;
+  rename: boolean;
+  busy: boolean;
+  onSave: (name: string) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [name, setName] = useState(initialName);
+  return (
+    <form
+      className="entry-form"
+      aria-label={rename ? it.rename : it.newCampaign}
+      onSubmit={(event: FormEvent) => {
+        event.preventDefault();
+        void onSave(name);
+      }}
+    >
+      <label>
+        {it.campaignName}
+        <input
+          autoFocus
+          required
+          maxLength={200}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          disabled={busy}
+        />
+      </label>
+      <div className="actions">
+        <button className="primary" disabled={busy || !name.trim()}>
+          {rename ? it.saveName : it.createCampaign}
+        </button>
+        <button type="button" disabled={busy} onClick={onCancel}>
+          {it.cancel}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function SessionForm({
+  initialSequence,
+  busy,
+  onSave,
+  onCancel,
+}: {
+  initialSequence: number;
+  busy: boolean;
+  onSave: (
+    sequence: number,
+    title: string,
+    date: string | null,
+  ) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [sequence, setSequence] = useState(initialSequence);
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
+  return (
+    <form
+      className="entry-form"
+      aria-label={it.newSession}
+      onSubmit={(event: FormEvent) => {
+        event.preventDefault();
+        void onSave(sequence, title, date || null);
+      }}
+    >
+      <div className="form-fields">
+        <label className="number-field">
+          {it.sessionNumber}
+          <input
+            type="number"
+            required
+            min={1}
+            max={999999}
+            step={1}
+            value={sequence}
+            onChange={(event) => setSequence(event.target.valueAsNumber)}
+            disabled={busy}
+          />
+        </label>
+        <label>
+          {it.sessionTitle}
+          <input
+            autoFocus
+            required
+            maxLength={200}
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            disabled={busy}
+          />
+        </label>
+        <label>
+          {it.sessionDate}
+          <input
+            type="date"
+            min="0001-01-01"
+            max="9999-12-31"
+            value={date}
+            onChange={(event) => setDate(event.target.value)}
+            disabled={busy}
+          />
+        </label>
+      </div>
+      <div className="actions">
+        <button className="primary" disabled={busy || !title.trim()}>
+          {it.createSession}
+        </button>
+        <button type="button" disabled={busy} onClick={onCancel}>
+          {it.cancel}
+        </button>
+      </div>
+    </form>
+  );
 }

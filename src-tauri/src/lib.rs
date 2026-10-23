@@ -59,6 +59,15 @@ pub fn run() {
             // Keep the window usable when initialization fails so the UI can explain recovery.
             let connection = (|| -> Result<_, Box<dyn std::error::Error>> {
                 let directory = app.path().app_data_dir()?;
+                #[cfg(debug_assertions)]
+                let directory = match std::env::var_os("NODEX_DEV_DATA_DIR") {
+                    Some(path) => {
+                        let path = std::path::PathBuf::from(path);
+                        if !path.is_absolute() { return Err("NODEX_DEV_DATA_DIR deve essere assoluta".into()); }
+                        path
+                    },
+                    None => directory,
+                };
                 std::fs::create_dir_all(&directory)?;
                 Ok(Mutex::new(db::open(&directory.join("nodex.sqlite3"))?))
             })().map_err(|error| format!("Archivio non disponibile: {error}. Verifica spazio e permessi della cartella dati e riavvia Nodex. Se usi una versione precedente, torna a quella più recente."));

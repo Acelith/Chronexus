@@ -129,3 +129,63 @@ fn migration_upgrades_existing_m0_without_losing_data() {
     );
     assert!(list_campaigns(&connection).unwrap().is_empty());
 }
+
+#[test]
+fn future_schema_is_rejected_without_modifying_user_data() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("future.sqlite3");
+    {
+        let connection = db::open(&path).unwrap();
+        connection
+            .execute("INSERT INTO schema_migrations(version) VALUES (99)", [])
+            .unwrap();
+        connection
+            .execute("INSERT INTO app_metadata VALUES ('future','keep')", [])
+            .unwrap();
+    }
+    assert!(db::open(&path).is_err());
+    let connection = rusqlite::Connection::open(&path).unwrap();
+    assert_eq!(
+        connection
+            .query_row(
+                "SELECT value FROM app_metadata WHERE key='future'",
+                [],
+                |r| r.get::<_, String>(0)
+            )
+            .unwrap(),
+        "keep"
+    );
+}
+
+#[test]
+fn failed_migration_rolls_back_without_erasing_existing_tables() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("conflict.sqlite3");
+    {
+        let connection = rusqlite::Connection::open(&path).unwrap();
+        connection
+            .execute_batch(include_str!("../migrations/001_foundation.sql"))
+            .unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE campaigns (content TEXT); INSERT INTO campaigns VALUES ('keep');",
+            )
+            .unwrap();
+    }
+    assert!(db::open(&path).is_err());
+    let connection = rusqlite::Connection::open(&path).unwrap();
+    assert_eq!(
+        connection
+            .query_row("SELECT content FROM campaigns", [], |r| r
+                .get::<_, String>(0))
+            .unwrap(),
+        "keep"
+    );
+    assert_eq!(
+        connection
+            .query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
+                .get::<_, i64>(0))
+            .unwrap(),
+        1
+    );
+}

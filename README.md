@@ -2,7 +2,7 @@
 
 Diario personale per il giocatore di una campagna GDR. Desktop, dati locali,
 nessun account o servizio remoto a runtime. Nome e branding sono centralizzati
-in `src/strings.ts` (dalla M1), `package.json` e `src-tauri/tauri.conf.json`.
+in `src/strings.ts`, `package.json` e `src-tauri/tauri.conf.json`.
 L'identificatore Tauri determina la cartella dati: non cambiarlo senza migrare i dati.
 
 ## Prerequisiti e avvio
@@ -36,6 +36,7 @@ pnpm desktop
 
 ```sh
 pnpm lint
+pnpm format:check
 pnpm typecheck
 pnpm test
 pnpm test:rust
@@ -56,4 +57,31 @@ con servizi di file sharing. Backup e ripristino applicativi saranno introdotti
 in M4; questa prima versione non offre ancora tale protezione.
 
 Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
+
+## Funzioni attuali (M0 e M1)
+
+- Creazione, selezione e rinomina di campagne indipendenti.
+- Sessioni ordinate per numero, con titolo e data reale facoltativa.
+- Editor BlockNote italiano: paragrafi, titoli, elenchi, checklist, citazioni,
+  grassetto/corsivo. Il menu `/` elenca i blocchi disponibili.
+- Salvataggio automatico dopo 500 ms, stato visibile, pulsante «Salva ora» e
+  riprova. Cambio nota/campagna e chiusura normale attendono la persistenza.
+  Un errore impedisce la navigazione e conserva gli appunti nell'editor.
+- Non sono ancora presenti cancellazione, archiviazione, backup o collegamenti
+  Codex. Nessuna eliminazione dei dati è esposta nell'interfaccia.
+
+La chiusura forzata del processo o un'interruzione elettrica possono perdere
+le modifiche che non hanno ancora raggiunto SQLite. Attendere «Salvato sul computer».
+In caso di conflitto tra due istanze, copiare gli appunti prima di riaprire:
+la versione meno recente non viene sovrascritta automaticamente.
+
+Prova desktop ripetibile e matrice delle verifiche: [docs/QA.md](docs/QA.md).
+
+## Dipendenze principali e licenze
+
+React, Vite, Mantine, rusqlite, uuid: MIT (uuid anche Apache-2.0).
+Tauri: MIT/Apache-2.0. BlockNote core/react/mantine: MPL-2.0, utilizzati senza
+modificare i sorgenti e senza funzionalità commerciali XL. TypeScript: Apache-2.0.
+Le distribuzioni future dovranno includere gli avvisi delle licenze applicabili.
+Le versioni risolte e le dipendenze transitive sono nei due lockfile.
 
