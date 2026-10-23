@@ -135,6 +135,8 @@ dist
 .pnpm-store/
 src-tauri/target/
 src-tauri/gen/
+src-tauri/icons/
+scripts/__pycache__/
 *.db
 *.db-*
 *.sqlite*

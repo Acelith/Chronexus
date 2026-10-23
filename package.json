@@ -14,8 +14,10 @@
     "test": "vitest run",
     "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
     "tauri": "tauri",
-    "desktop": "tauri dev",
-    "build:desktop": "tauri build --no-bundle"
+    "desktop": "pnpm icons && tauri dev",
+    "build:desktop": "pnpm icons && tauri build --no-bundle",
+    "icons": "tauri icon assets/chronexus.svg --output src-tauri/icons",
+    "package:desktop": "pnpm icons && tauri build"
   },
   "dependencies": {
     "@blocknote/core": "^0.56.0",

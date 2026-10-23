@@ -25,6 +25,8 @@ fn main() {
     }
     icon.resize(icon.len() + mask as usize, 0);
     std::fs::create_dir_all("icons").expect("Creazione cartella icona");
-    std::fs::write("icons/icon.ico", icon).expect("Generazione icona");
+    if !std::path::Path::new("icons/icon.ico").exists() {
+        std::fs::write("icons/icon.ico", icon).expect("Generazione icona");
+    }
     tauri_build::build()
 }

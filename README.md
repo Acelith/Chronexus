@@ -62,7 +62,40 @@ database resta `nodex.sqlite3` nella cartella base. Non spostare il solo databas
 
 Decisioni e limiti verificati: `docs/DECISIONS.md` e `docs/STATUS.md`.
 
-## Funzioni attuali (M0–M5)
+## Novità M6
+
+- **Cerca nella campagna**, anche con Ctrl/⌘ + K: ricerca FTS5 nel contenuto dei
+  blocchi, titoli, alias, scheda e asset; filtri e apertura del blocco trovato.
+  “Manutenzione ricerca” permette di ricostruire l'indice locale.
+- **Riepilogo**: ultima sessione, conteggi effettivi, scheda e pagine recenti.
+  Ctrl/⌘ + Shift + N apre la nuova sessione.
+- **Immagini** nelle pagine Codex, scheda e voci dell'inventario/capacità. Aggiungi
+  ritratti, mappe e riferimenti PNG/JPEG/WebP (20 MiB, 8192 px/lato, 32 MP).
+  L'app conserva una copia originale nell'archivio; anteprime e zoom funzionano
+  offline. Per una mappa usa una pagina Luogo e il tipo immagine Mappa.
+- Le immagini e la loro associazione sono incluse nei backup `.nodex` e verificate
+  con SHA-256. “Rimuovi dalla voce” scollega l'immagine ma conserva il file per
+  recupero: resta incluso nei backup finché non esiste una pulizia dedicata.
+- **Esporta campagna** crea uno ZIP con Markdown, JSON completo, immagini collegate
+  e manifest. I link Markdown usano UUID stabili. Per il recupero dell'app usa
+  `.nodex`: l'export leggibile non è un formato di reimportazione.
+
+## Pacchetti desktop
+
+`pnpm icons` genera le icone dalla sorgente SVG; eseguilo prima di comandi Cargo
+su un checkout nuovo. `pnpm desktop` e `pnpm build:desktop` lo fanno automaticamente.
+`pnpm package:desktop` crea i pacchetti nativi della piattaforma corrente:
+Windows NSIS `.exe` (italiano, utente corrente), macOS `.app`/`.dmg`, Linux
+`.deb`/`.AppImage`. Gli output sono in `src-tauri/target/release/bundle/`.
+
+Verificato localmente Windows x64: installer `Chronexus_0.1.0_x64-setup.exe`
+generato, release avviata, accesso SQLite e API reale da `tauri.localhost` riusciti.
+L'installer non è firmato e non è stato installato automaticamente sul sistema.
+La pipeline `.github/workflows/desktop.yml` prepara controlli e pacchetti sui tre
+OS; non è stata eseguita su GitHub in questa sessione e non è stato fatto push.
+macOS/Linux restano da verificare sui rispettivi runner.
+
+## Funzioni M0–M5
 
 La scheda è stata ampliata sul riferimento PDF dell'utente: sezioni manuali per
 combattimento/sensi, identità e competenze, storia/aspetto, armi/munizioni,
