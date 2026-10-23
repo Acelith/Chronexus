@@ -103,3 +103,29 @@
 - Skill applicate: frontend-design (revisione visiva, palette e gerarchia),
   vercel-react-best-practices (lazy loading e stato derivato). computer-use letta
   per QA nativa; accesso finestra scaduto, prova effettiva tramite WebView locale.
+# M4 — backup portabile e attivazione del ripristino
+
+- Il bundle `.nodex` v1 salva **tutte le campagne**: snapshot tramite API backup
+  SQLite, `manifest.json`, SHA-256 di ogni payload e allegati gestiti. Nessuna
+  copia del DB aperto. ZIP/Deflate non cifrato; checksum per integrità, non firma.
+- Percorsi ammessi: `data/nodex.sqlite3` e
+  `attachments/<UUID campagna>/<UUID file>[.<estensione minuscola>]`. Nessuna
+  directory ZIP, duplicato, link simbolico o file extra. Limiti: 9998 allegati,
+  256 MiB/file, 512 MiB totali/ZIP e 2 MiB manifest. File mai sovrascritti.
+- Il ripristino verifica checksum, schema esatto delle migrazioni supportate,
+  integrity_check, foreign_key_check, documenti e confini delle campagne. Le
+  versioni DB 1–4 sono ammesse e migrate solo nella nuova copia; future respinte.
+- Prima dell'attivazione crea un `.nodex` preventivo in `backups/`; un errore
+  interrompe l'operazione. La nuova generazione è in `profiles/<UUID>/` e diventa
+  attiva tramite sostituzione atomica di `active-profile.json`. Il vecchio DB
+  resta intatto; senza puntatore gli archivi M0–M3 continuano nella cartella base.
+  Un lock OS esclusivo impedisce due processi sullo stesso archivio. I file sono
+  sincronizzati prima dell'attivazione, le directory anche su Unix. Un errore
+  di sincronizzazione successivo al commit è restituito come avviso esplicito.
+- Il backend sceglie i percorsi con tauri-plugin-dialog 2.8.3 (MIT/Apache-2.0,
+  Rust minimo 1.90); ZIP 9.0.5 (MIT), SHA2 0.10.9 e tempfile 3 (MIT/Apache-2.0).
+  Nessuna autorizzazione filesystem generale al frontend. Le operazioni pesanti
+  e i dialoghi bloccanti sono eseguiti fuori dal thread UI.
+- Non si aggiunge ancora un gestore allegati: M4 conserva i file già presenti
+  nel layout gestito, verificato con fixture nei test. Esportazione Markdown/JSON
+  e backup pianificati sono rinviati: M4 dà priorità al recupero manuale.

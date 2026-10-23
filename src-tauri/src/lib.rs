@@ -1,3 +1,6 @@
+mod backup;
+#[cfg(test)]
+mod backup_tests;
 mod db;
 mod graph;
 #[cfg(test)]
@@ -12,13 +15,25 @@ use journal::{AppResult, Campaign, Session};
 use std::sync::Mutex;
 use tauri::Manager;
 
-struct Database(Result<Mutex<rusqlite::Connection>, String>);
+struct Database(Result<Mutex<backup::Store>, String>);
 impl Database {
     fn with<T>(&self, action: impl FnOnce(&rusqlite::Connection) -> AppResult<T>) -> AppResult<T> {
         let connection = self.0.as_ref().map_err(Clone::clone)?.lock().map_err(|_| {
             "Archivio occupato. Riavvia Nodex senza chiudere gli appunti non salvati.".to_string()
         })?;
-        action(&connection)
+        action(&connection.connection)
+    }
+    fn with_store<T>(
+        &self,
+        action: impl FnOnce(&mut backup::Store) -> AppResult<T>,
+    ) -> AppResult<T> {
+        let mut store = self
+            .0
+            .as_ref()
+            .map_err(Clone::clone)?
+            .lock()
+            .map_err(|_| "Archivio occupato. Riavvia Nodex.".to_string())?;
+        action(&mut store)
     }
 }
 
@@ -150,8 +165,81 @@ fn delete_relationship(
     db.with(|c| graph::delete_relationship(c, &campaign_id, &id, revision))
 }
 
+// Native choosers and archive work run outside the UI thread. Paths are never
+// supplied by React: only the native chooser may select an external location.
+#[tauri::command]
+async fn create_backup(app: tauri::AppHandle) -> AppResult<Option<backup::BackupReceipt>> {
+    tauri::async_runtime::spawn_blocking(move || {
+        use tauri_plugin_dialog::DialogExt;
+        let file = app
+            .dialog()
+            .file()
+            .set_title("Salva backup Nodex — scegli un nuovo nome")
+            .add_filter("Archivio Nodex", &["nodex"])
+            .set_file_name(format!("nodex-{}.nodex", uuid::Uuid::new_v4()))
+            .blocking_save_file();
+        let Some(file) = file else {
+            return Ok(None);
+        };
+        let path = file
+            .into_path()
+            .map_err(|_| "Scegli una cartella locale o un disco montato.".to_string())?;
+        app.state::<Database>().with_store(|store| {
+            backup::write_backup(&store.connection, &store.directory, &path).map(Some)
+        })
+    })
+    .await
+    .map_err(|_| "Operazione interrotta. Riprova il backup.".to_string())?
+}
+#[tauri::command]
+async fn inspect_backup(app: tauri::AppHandle) -> AppResult<Option<backup::Preview>> {
+    tauri::async_runtime::spawn_blocking(move || {
+        use tauri_plugin_dialog::DialogExt;
+        app.state::<Database>().with_store(|store| {
+            store.pending = None;
+            Ok(())
+        })?;
+        let file = app
+            .dialog()
+            .file()
+            .set_title("Seleziona un backup Nodex da verificare")
+            .add_filter("Archivio Nodex", &["nodex"])
+            .blocking_pick_file();
+        let Some(file) = file else {
+            return Ok(None);
+        };
+        let path = file
+            .into_path()
+            .map_err(|_| "Scegli un file locale o su un disco montato.".to_string())?;
+        app.state::<Database>()
+            .with_store(|store| store.prepare(&path).map(Some))
+    })
+    .await
+    .map_err(|_| "Verifica interrotta. Seleziona nuovamente il backup.".to_string())?
+}
+#[tauri::command]
+async fn restore_backup(app: tauri::AppHandle, token: String) -> AppResult<backup::RestoreReceipt> {
+    tauri::async_runtime::spawn_blocking(move || {
+        app.state::<Database>()
+            .with_store(|store| store.restore(&token))
+    })
+    .await
+    .map_err(|_| {
+        "Ripristino interrotto. Riavvia Nodex e controlla l'archivio attivo prima di riprovare."
+            .to_string()
+    })?
+}
+#[tauri::command]
+fn cancel_restore(db: tauri::State<Database>) -> AppResult<()> {
+    db.with_store(|store| {
+        store.pending = None;
+        Ok(())
+    })
+}
+
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             // Keep the window usable when initialization fails so the UI can explain recovery.
             let connection = (|| -> Result<_, Box<dyn std::error::Error>> {
@@ -166,12 +254,13 @@ pub fn run() {
                     None => directory,
                 };
                 std::fs::create_dir_all(&directory)?;
-                Ok(Mutex::new(db::open(&directory.join("nodex.sqlite3"))?))
+                let store = backup::Store::open(&directory).map_err(std::io::Error::other)?;
+                Ok(Mutex::new(store))
             })().map_err(|error| format!("Archivio non disponibile: {error}. Verifica spazio e permessi della cartella dati e riavvia Nodex. Se usi una versione precedente, torna a quella più recente."));
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship])
+        .invoke_handler(tauri::generate_handler![list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Nodex.");
 }

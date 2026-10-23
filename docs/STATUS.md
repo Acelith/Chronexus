@@ -2,7 +2,12 @@
 
 ## Milestone
 
-**M0–M3 completate.** Nessun lavoro iniziato su M4.
+**M0–M3 completate. M4 in corso: backend backup/ripristino implementato.**
+
+Checkpoint M4: snapshot SQLite, bundle ZIP con SHA-256, validazione e ripristino
+su generazioni con copia preventiva. 27 test Rust superati (7 backup), Clippy
+senza avvisi. Interfaccia, prova desktop M4 e documentazione utente da completare.
+Nessuna migrazione aggiunta; schema corrente 004.
 
 Scenario M3 verificato nel desktop reale: Varek e Gilda citati nella Sessione 12
 producono due menzioni dalla sessione, nessuna alleanza. Una relazione manuale
