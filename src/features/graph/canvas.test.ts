@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { readableGraph } from "./canvas";
+import { readableGraph, mapPositions } from "./canvas";
 import type { GraphData } from "./api";
 test("compact view keeps the requested center, bounded neighbors and no dangling or invented edges", () => {
   const nodes = Array.from({ length: 75 }, (_, i) => ({
@@ -41,4 +41,27 @@ test("compact view keeps the requested center, bounded neighbors and no dangling
   ).toBe(true);
   expect(readableGraph(data, null, true)).toBe(data);
   expect(data.nodes).toHaveLength(75);
+});
+
+test("disposizione deterministica non modifica dati e mantiene il centro richiesto", () => {
+  const data: GraphData = {
+    nodes: ["a", "b", "c"].map((id) => ({
+      id,
+      entityId: id,
+      title: id,
+      kind: "npc",
+      missing: false,
+    })),
+    edges: [],
+    truncated: false,
+    totalNodes: 3,
+    totalEdges: 0,
+  };
+  const before = JSON.stringify(data);
+  const a = mapPositions(data, "b");
+  expect(a.get("b")).toEqual({ x: 0, y: 0 });
+  expect([...a.keys()].sort()).toEqual(["a", "b", "c"]);
+  expect(mapPositions(data, "b")).toEqual(a);
+  expect(JSON.stringify(data)).toBe(before);
+  expect(mapPositions({ ...data, nodes: [] }, null).size).toBe(0);
 });

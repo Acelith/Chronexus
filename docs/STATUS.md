@@ -11,9 +11,10 @@
   selettore campagne e ultima modifica derivata dai documenti disponibili.
 - Diario e Codex: elenco e documento scorrono indipendentemente dalla cornice;
   vecchia regola mobile orizzontale rimossa anche alla dimensione minima.
-- Grafo con nodi a medaglione, etichette visibili, disposizione stabile, zoom,
+- Grafo con nodi a medaglione, etichette visibili, disposizione stabile con
+  riduzione degli incroci su piccoli grafi (coppie duplicate escluse), zoom,
   filtri avanzati e fonti/certezze mantenuti. Ritratto reale nel dettaglio, se allegato.
-- Verifiche: 13 test mirati App/grafo PASS; typecheck e lint PASS; build frontend
+- Verifiche: 14 test mirati App/grafo PASS; typecheck e lint PASS; build frontend
   PASS (warning preesistente sul peso dell’editor). Prove native con fixture isolate
   a 1586×992, 900×700 e 760×540: nessun overflow della finestra, liste verticali
   indipendenti e font locali caricati. Screenshot e rapporti in .tools/ui-refresh/.

@@ -214,6 +214,10 @@ export function mapPositions(
   positions.set(center.id, { x: 0, y: 0 });
   const outer = sorted.filter((n) => n.id !== center.id);
   if (outer.length <= 12) {
+    const pairs = new Map<string, (typeof data.edges)[number]>();
+    for (const e of data.edges)
+      pairs.set([e.source, e.target].sort().join("|"), e);
+    const arcs = [...pairs.values()];
     const crossings = () => {
       const pos = new Map([
         [center.id, { x: 0, y: 0 }],
@@ -234,10 +238,10 @@ export function mapPositions(
         c: { x: number; y: number },
       ) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
       let score = 0;
-      for (let i = 0; i < data.edges.length; i++)
-        for (let j = i + 1; j < data.edges.length; j++) {
-          const e = data.edges[i],
-            f = data.edges[j];
+      for (let i = 0; i < arcs.length; i++)
+        for (let j = i + 1; j < arcs.length; j++) {
+          const e = arcs[i],
+            f = arcs[j];
           if (new Set([e.source, e.target, f.source, f.target]).size < 4)
             continue;
           const a = pos.get(e.source),
