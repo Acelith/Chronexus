@@ -1,3 +1,4 @@
+import { usePreferences, tr } from "./i18n/store";
 import { Icon, Compass } from "./components/Ornaments";
 import {
   lazy,
@@ -46,6 +47,9 @@ const AssistantWorkspace = lazy(
   () => import("./features/assistant/AssistantWorkspace"),
 );
 const DiceWorkspace = lazy(() => import("./features/dice/DiceWorkspace"));
+const LanguageSettings = lazy(
+  () => import("./features/preferences/LanguageSettings"),
+);
 const CampaignSettings = lazy(
   () => import("./features/assistant/CampaignSettings"),
 );
@@ -60,6 +64,7 @@ const modifiedDateFormat = new Intl.DateTimeFormat("it-CH", {
 });
 
 export function App() {
+  usePreferences();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -77,6 +82,7 @@ export function App() {
     | "assistant"
     | "settings"
     | "dice"
+    | "preferences"
     | PlayerView
   >("journal");
   const [playerReturn, setPlayerReturn] = useState<{
@@ -516,6 +522,22 @@ export function App() {
                   Tiradadi
                 </button>
               ) : null}
+              <button
+                disabled={busy || loading}
+                aria-current={
+                  !backupOpen && view === "preferences" ? "page" : undefined
+                }
+                onClick={() => {
+                  void run(async () => {
+                    setBackupOpen(false);
+                    setForm(null);
+                    setView("preferences");
+                  });
+                }}
+              >
+                <Icon name="settings" />
+                {tr("Impostazioni dell’app")}
+              </button>
             </nav>
             <div className="local-mark">
               <img
@@ -800,7 +822,7 @@ export function App() {
                       onCancel={() => setForm(null)}
                     />
                   ) : null}
-                  {!campaign && !error ? (
+                  {!campaign && !error && view !== "preferences" ? (
                     <section className="empty">
                       <span className="book-mark" aria-hidden="true">
                         ◇
@@ -834,6 +856,15 @@ export function App() {
                         onUpdate={updatePage}
                         onRecover={recoverPage}
                       />
+                    </Suspense>
+                  ) : null}
+                  {view === "preferences" ? (
+                    <Suspense
+                      fallback={
+                        <p role="status">{tr("Apertura impostazioni…")}</p>
+                      }
+                    >
+                      <LanguageSettings />
                     </Suspense>
                   ) : null}
                   {campaign && view === "dice" ? (

@@ -29,6 +29,7 @@ mod party_tests;
 mod player;
 #[cfg(test)]
 mod player_tests;
+mod preferences;
 mod search;
 #[cfg(test)]
 mod search_tests;
@@ -60,6 +61,17 @@ impl Database {
     }
 }
 
+#[tauri::command]
+fn get_interface_preferences(db: tauri::State<Database>) -> AppResult<preferences::Preferences> {
+    db.with_store(|store| preferences::read(&store.root))
+}
+#[tauri::command]
+fn save_interface_preferences(
+    db: tauri::State<Database>,
+    preferences: preferences::Preferences,
+) -> AppResult<preferences::Preferences> {
+    db.with_store(|store| preferences::save(&store.root, preferences))
+}
 #[tauri::command]
 fn roll_dice(
     db: tauri::State<Database>,
@@ -748,7 +760,7 @@ pub fn run() {
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![roll_dice,list_dice_rolls,get_training_overview,start_campaign_training,activate_campaign_training,get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
+        .invoke_handler(tauri::generate_handler![get_interface_preferences,save_interface_preferences,roll_dice,list_dice_rolls,get_training_overview,start_campaign_training,activate_campaign_training,get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
 }

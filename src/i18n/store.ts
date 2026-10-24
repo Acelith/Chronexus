@@ -1,0 +1,152 @@
+import { useSyncExternalStore } from "react";
+import {
+  defaultPreferences,
+  localeInfo,
+  validPreferences,
+  type Preferences,
+  type Locale,
+} from "./locales";
+import italian from "./catalogs/it.json";
+type Catalog = Record<string, string>;
+const catalogs: Partial<Record<Locale, Catalog>> = { it: italian };
+const loaders = import.meta.glob<{ default: Catalog }>("./catalogs/*.json");
+const reverse = new Map(
+  Object.entries(italian).map(([id, text]) => [text.trim(), id]),
+);
+let current: Preferences = { ...defaultPreferences };
+const listeners = new Set<() => void>();
+export function getPreferences() {
+  return current;
+}
+export function usePreferences() {
+  return useSyncExternalStore(subscribe, getPreferences, getPreferences);
+}
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+export async function loadLocale(locale: Locale) {
+  if (catalogs[locale]) return;
+  const loader = loaders[`./catalogs/${locale}.json`];
+  if (loader) catalogs[locale] = (await loader()).default;
+  else catalogs[locale] = {};
+}
+export function applyPreferences(preferences: Preferences) {
+  if (!validPreferences(preferences))
+    throw Error("Preferenze linguistiche non valide.");
+  current = { ...preferences };
+  const info = localeInfo(current.locale);
+  if (typeof document !== "undefined") {
+    document.documentElement.lang = info.id;
+    document.documentElement.dir = info.dir;
+    document.documentElement.dataset.script = current.script;
+  }
+  listeners.forEach((listener) => listener());
+}
+export function catalogFor(locale: Locale): Catalog {
+  return catalogs[locale] ?? {};
+}
+export function translationCoverage(locale = current.locale) {
+  const catalog = catalogFor(locale);
+  const ids = Object.keys(italian);
+  return {
+    translated:
+      locale === "it"
+        ? ids.length
+        : ids.filter(
+            (id) => typeof catalog[id] === "string" && catalog[id].length > 0,
+          ).length,
+    total: ids.length,
+  };
+}
+export function translate(source: string, values: unknown[] = []): string {
+  const leading = source.match(/^\s*/)?.[0] ?? "",
+    trailing = source.match(/\s*$/)?.[0] ?? "";
+  const raw = source.trim();
+  const id = reverse.get(raw);
+  const catalog = catalogFor(current.locale);
+  let message = id ? (catalog[id] ?? raw) : raw;
+  message = message.replace(/\{(\d+)\}/g, (token, index) => {
+    if (Number(index) >= values.length) return token;
+    const value = values[Number(index)];
+    const rendered =
+      typeof value === "number" && !raw.includes(`d{${index}}`)
+        ? number(value)
+        : String(value ?? "");
+    return localeInfo(current.locale).dir === "rtl"
+      ? `\u2068${rendered}\u2069`
+      : rendered;
+  });
+  return leading + message + trailing;
+}
+export const tr = translate;
+export function number(value: number, options: Intl.NumberFormatOptions = {}) {
+  return new Intl.NumberFormat(localeInfo(current.locale).intl, options).format(
+    value,
+  );
+}
+export function date(
+  value: Date | string | number,
+  options: Intl.DateTimeFormatOptions = { dateStyle: "medium" },
+) {
+  const parsed =
+    typeof value === "string" || typeof value === "number"
+      ? new Date(value)
+      : value;
+  if (!Number.isFinite(parsed.getTime())) return tr("Data non indicata");
+  return new Intl.DateTimeFormat(
+    localeInfo(current.locale).intl,
+    options,
+  ).format(parsed);
+}
+export function plural(
+  count: number,
+  forms: Partial<Record<Intl.LDMLPluralRule, string>> & { other: string },
+) {
+  const category = new Intl.PluralRules(localeInfo(current.locale).intl).select(
+    count,
+  );
+  return tr(forms[category] ?? forms.other, [count]);
+}
+export function localizeLabels<T extends object>(source: T): T {
+  return new Proxy(source, {
+    get(target, key, receiver) {
+      const value = Reflect.get(target, key, receiver) as unknown;
+      if (typeof value === "string") return tr(value);
+      if (value && typeof value === "object") return localizeLabels(value);
+      return value;
+    },
+  });
+}
+const patterns = Object.entries(italian)
+  .filter(([, text]) => /\{\d+\}/.test(text))
+  .map(([, text]) => {
+    const indices: number[] = [];
+    const escaped = text
+      .split(/(\{\d+\})/)
+      .map((part) => {
+        if (/^\{\d+\}$/.test(part)) {
+          indices.push(Number(part.slice(1, -1)));
+          return "([\\s\\S]*?)";
+        }
+        return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      })
+      .join("");
+    return { source: text, indices, pattern: new RegExp("^" + escaped + "$") };
+  });
+export function translateError(message: string) {
+  if (reverse.has(message.trim())) return tr(message);
+  for (const item of patterns) {
+    const match = message.match(item.pattern);
+    if (match) {
+      const values: unknown[] = [];
+      item.indices.forEach((index, i) => {
+        values[index] = match[i + 1];
+      });
+      return tr(item.source, values);
+    }
+  }
+  return message;
+}

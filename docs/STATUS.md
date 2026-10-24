@@ -243,3 +243,19 @@ positivi/attacchi nuovi. Retrieval a estratti, non intera campagna o embeddings.
 Wiki principalmente inglese/cache espellibile; un solo PG giocabile, Party in Codex;
 bundle editor grande, backup manuali. Prossime verifiche: offline fisico M7 e
 attività residue M6 macOS/Linux/CI e wizard Windows. Vedere ROADMAP.md.
+## M10 in corso — fondazioni linguistiche
+
+Preferenze globali versionate in `interface-preferences.json`, indipendenti dal
+backup delle campagne e senza migrazione SQLite (015 invariata). Menù globale
+Lingua e scrittura disponibile anche senza campagna; cambio senza riavvio,
+ripristino italiano, fallback e isolamento bidirezionale. Cataloghi in preparazione:
+le traduzioni automatiche non sono revisioni linguistiche. Nessun dato di campagna
+viene inviato al modello: la preparazione locale legge soltanto stringhe UI.
+
+Verifiche fondazioni: 3 test frontend e 4 test Rust selezionati superati;
+TypeScript e lint superati dopo correzione del pattern degli errori.
+React Doctor: 84, nessuna regressione rispetto al riferimento 74 della M9.
+Skill: accessibility, react-testing, impeccable per impostazioni e testo semantico;
+Rust/SQLite/Tauri per preferenze locali atomiche, senza cambiare i dati salvati.
+Restano da completare integrazione di tutte le viste, trascrizioni, cataloghi,
+collaudo desktop e documentazione definitiva.
