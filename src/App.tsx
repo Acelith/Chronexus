@@ -1,3 +1,4 @@
+import { Icon, Compass } from "./components/Ornaments";
 import {
   lazy,
   Suspense,
@@ -48,6 +49,14 @@ const CampaignSettings = lazy(
   () => import("./features/assistant/CampaignSettings"),
 );
 const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
+
+const modifiedDateFormat = new Intl.DateTimeFormat("it-CH", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 export function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -400,24 +409,33 @@ export function App() {
         <div className="shell" aria-busy={busy || loading}>
           <aside>
             <div className="brand">
+              <Compass />
               <h1>{it.appName}</h1>
-              <p>{it.tagline}</p>
+              <p>Le tue storie vivono</p>
             </div>
-            <nav aria-label={it.campaigns}>
-              <h2>{it.campaigns}</h2>
-              {campaigns.map((item) => (
-                <button
-                  className="campaign-link"
-                  key={item.id}
-                  aria-current={item.id === campaignId ? "page" : undefined}
-                  disabled={busy}
-                  onClick={() => selectCampaign(item.id)}
+            <nav className="sidebar-menu" aria-label={it.campaigns}>
+              <label className="campaign-picker">
+                Campagna attuale
+                <select
+                  aria-label="Campagna attuale"
+                  value={backupOpen ? "" : (campaignId ?? "")}
+                  disabled={busy || loading}
+                  onChange={(e) => selectCampaign(e.target.value)}
                 >
-                  {item.name}
-                </button>
-              ))}
+                  {backupOpen ? (
+                    <option value="">Seleziona campagna</option>
+                  ) : null}
+                  {!campaigns.length ? (
+                    <option value="">Nessuna campagna</option>
+                  ) : null}
+                  {campaigns.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <button
-                className="quiet"
                 disabled={busy || loading}
                 onClick={() => {
                   void run(async () => {
@@ -426,24 +444,70 @@ export function App() {
                   });
                 }}
               >
-                + {it.newCampaign}
+                <Icon name="plus" />
+                {it.newCampaign}
               </button>
+              <button
+                disabled={busy || loading}
+                aria-current={backupOpen ? "page" : undefined}
+                onClick={() => {
+                  void run(async () => {
+                    setForm(null);
+                    setBackupOpen(true);
+                  });
+                }}
+              >
+                <Icon name="backup" />
+                Backup e ripristino
+              </button>
+              {campaign ? (
+                <>
+                  <button
+                    disabled={busy}
+                    aria-current={
+                      !backupOpen && view === "settings" ? "page" : undefined
+                    }
+                    onClick={() => {
+                      void run(async () => {
+                        setBackupOpen(false);
+                        setView("settings");
+                        setForm(null);
+                      });
+                    }}
+                  >
+                    <Icon name="settings" />
+                    Impostazioni della campagna
+                  </button>
+                  <button
+                    disabled={busy}
+                    aria-current={
+                      !backupOpen && view === "assistant" ? "page" : undefined
+                    }
+                    onClick={() => {
+                      void run(async () => {
+                        setBackupOpen(false);
+                        setView("assistant");
+                        setForm(null);
+                      });
+                    }}
+                  >
+                    <Icon name="star" />
+                    Assistente locale
+                  </button>
+                </>
+              ) : null}
             </nav>
-            <button
-              disabled={busy || loading}
-              aria-current={backupOpen ? "page" : undefined}
-              onClick={() => {
-                void run(async () => {
-                  setForm(null);
-                  setBackupOpen(true);
-                });
-              }}
-            >
-              Backup e ripristino
-            </button>
             <div className="local-mark">
-              <span aria-hidden="true">◇</span>
-              <footer>{it.local}</footer>
+              <img
+                src={new URL("../assets/gui/castle.png", import.meta.url).href}
+                alt=""
+              />
+              <p>
+                Persone, luoghi, idee.
+                <br />
+                Tutto è connesso.
+              </p>
+              <span aria-hidden="true">— ◈ —</span>
             </div>
           </aside>
           <main>
@@ -497,52 +561,66 @@ export function App() {
               <>
                 <header className="campaign-header">
                   <div>
-                    <p>
-                      {view === "character"
-                        ? "Scheda del giocatore"
-                        : view === "inventory"
-                          ? "Equipaggiamento e provenienza"
-                          : view === "abilities"
-                            ? "Incantesimi e capacità"
-                            : it.journal}
-                    </p>
                     <h2>{campaign?.name ?? it.emptyCampaigns}</h2>
                   </div>
+                  <span className="last-modified">
+                    {[...sessions, ...pages].some((item) =>
+                      Number.isFinite(Date.parse(item.updatedAt)),
+                    ) ? (
+                      <>
+                        Ultima modifica:{" "}
+                        <time>
+                          {modifiedDateFormat.format(
+                            new Date(
+                              Math.max(
+                                ...[...sessions, ...pages]
+                                  .map((item) => Date.parse(item.updatedAt))
+                                  .filter(Number.isFinite),
+                              ),
+                            ),
+                          )}
+                        </time>
+                      </>
+                    ) : null}
+                  </span>
                   {campaign ? (
-                    <div className="actions">
-                      <button
-                        ref={searchButton}
-                        disabled={busy}
-                        onClick={openSearch}
-                        title="Ctrl+K / ⌘K"
-                      >
-                        Cerca nella campagna
-                      </button>
-                      <Suspense fallback={null}>
-                        <ExportButton
-                          key={campaign.id}
-                          campaignId={campaign.id}
-                          busy={busy}
-                        />
-                      </Suspense>
-                      <button
-                        disabled={busy}
-                        onClick={() => {
-                          void run(async () => setForm("rename"));
-                        }}
-                      >
-                        {it.rename}
-                      </button>
-                      <button
-                        className="primary"
-                        disabled={busy}
-                        onClick={() => {
-                          void run(async () => setForm("session"));
-                        }}
-                      >
-                        + {it.newSession}
-                      </button>
-                    </div>
+                    <details className="campaign-actions">
+                      <summary aria-label="Azioni della campagna">•••</summary>
+                      <div className="actions">
+                        <button
+                          ref={searchButton}
+                          disabled={busy}
+                          onClick={openSearch}
+                          title="Ctrl+K / ⌘K"
+                        >
+                          Cerca nella campagna
+                        </button>
+                        <Suspense fallback={null}>
+                          <ExportButton
+                            key={campaign.id}
+                            campaignId={campaign.id}
+                            busy={busy}
+                          />
+                        </Suspense>
+                        <button
+                          disabled={busy}
+                          onClick={() => {
+                            void run(async () => setForm("rename"));
+                          }}
+                        >
+                          {it.rename}
+                        </button>
+                        <button
+                          className="primary"
+                          disabled={busy}
+                          onClick={() => {
+                            void run(async () => setForm("session"));
+                          }}
+                        >
+                          + {it.newSession}
+                        </button>
+                      </div>
+                    </details>
                   ) : null}
                 </header>
                 {campaign ? (
@@ -557,6 +635,7 @@ export function App() {
                         })
                       }
                     >
+                      <Icon name="document" />
                       Riepilogo
                     </button>
                     <button
@@ -570,6 +649,7 @@ export function App() {
                         });
                       }}
                     >
+                      <Icon name="book" />
                       Diario
                     </button>
                     <button
@@ -584,6 +664,7 @@ export function App() {
                         });
                       }}
                     >
+                      <Icon name="books" />
                       Codex
                     </button>
                     <button
@@ -597,6 +678,7 @@ export function App() {
                         });
                       }}
                     >
+                      <Icon name="graph" />
                       Grafo
                     </button>
                     <button
@@ -609,37 +691,14 @@ export function App() {
                         })
                       }
                     >
+                      <Icon name="party" />
                       Party
-                    </button>
-                    <button
-                      aria-current={view === "assistant" ? "page" : undefined}
-                      disabled={busy}
-                      onClick={() =>
-                        void run(async () => {
-                          setView("assistant");
-                          setForm(null);
-                        })
-                      }
-                    >
-                      Assistente locale
-                    </button>
-                    <button
-                      aria-current={view === "settings" ? "page" : undefined}
-                      disabled={busy}
-                      onClick={() =>
-                        void run(async () => {
-                          setView("settings");
-                          setForm(null);
-                        })
-                      }
-                    >
-                      Impostazioni della campagna
                     </button>
                     {(
                       [
                         ["character", "Personaggio"],
                         ["inventory", "Inventario"],
-                        ["abilities", "Capacità"],
+                        ["abilities", "Incantesimi"],
                       ] as const
                     ).map(([id, label]) => (
                       <button
@@ -654,6 +713,15 @@ export function App() {
                           });
                         }}
                       >
+                        <Icon
+                          name={
+                            id === "character"
+                              ? "helmet"
+                              : id === "inventory"
+                                ? "bag"
+                                : "star"
+                          }
+                        />
                         {label}
                       </button>
                     ))}
@@ -667,281 +735,287 @@ export function App() {
                         })
                       }
                     >
+                      <Icon name="wiki" />
                       Wiki D&amp;D
                     </button>
                   </nav>
                 ) : null}
-                {playerReturn && (view === "journal" || view === "codex") ? (
-                  <button
-                    className="player-return"
-                    disabled={busy}
-                    onClick={() => {
-                      void run(async () => {
-                        setView(playerReturn.view);
-                        setForm(null);
-                        setFocusBlock(undefined);
-                      });
-                    }}
-                  >
-                    Torna alla voce del personaggio
-                  </button>
-                ) : null}
-                {form === "campaign" || form === "rename" ? (
-                  <CampaignForm
-                    key={`${form}-${campaignId}`}
-                    initialName={
-                      form === "rename" ? (campaign?.name ?? "") : ""
-                    }
-                    rename={form === "rename"}
-                    busy={busy}
-                    onSave={saveCampaign}
-                    onCancel={() => setForm(null)}
-                  />
-                ) : null}
-                {form === "session" ? (
-                  <SessionForm
-                    initialSequence={Math.min(
-                      999999,
-                      Math.max(0, ...sessions.map((item) => item.sequence)) + 1,
-                    )}
-                    busy={busy}
-                    onSave={saveSession}
-                    onCancel={() => setForm(null)}
-                  />
-                ) : null}
-                {!campaign && !error ? (
-                  <section className="empty">
-                    <span className="book-mark" aria-hidden="true">
-                      ◇
-                    </span>
-                    <p>{it.emptyCampaignHint}</p>
-                    {form !== "campaign" ? (
+                <div className={`workspace-content view-${view}`}>
+                  {playerReturn && (view === "journal" || view === "codex") ? (
+                    <button
+                      className="player-return"
+                      disabled={busy}
+                      onClick={() => {
+                        void run(async () => {
+                          setView(playerReturn.view);
+                          setForm(null);
+                          setFocusBlock(undefined);
+                        });
+                      }}
+                    >
+                      Torna alla voce del personaggio
+                    </button>
+                  ) : null}
+                  {form === "campaign" || form === "rename" ? (
+                    <CampaignForm
+                      key={`${form}-${campaignId}`}
+                      initialName={
+                        form === "rename" ? (campaign?.name ?? "") : ""
+                      }
+                      rename={form === "rename"}
+                      busy={busy}
+                      onSave={saveCampaign}
+                      onCancel={() => setForm(null)}
+                    />
+                  ) : null}
+                  {form === "session" ? (
+                    <SessionForm
+                      initialSequence={Math.min(
+                        999999,
+                        Math.max(0, ...sessions.map((item) => item.sequence)) +
+                          1,
+                      )}
+                      busy={busy}
+                      onSave={saveSession}
+                      onCancel={() => setForm(null)}
+                    />
+                  ) : null}
+                  {!campaign && !error ? (
+                    <section className="empty">
+                      <span className="book-mark" aria-hidden="true">
+                        ◇
+                      </span>
+                      <p>{it.emptyCampaignHint}</p>
+                      {form !== "campaign" ? (
+                        <button
+                          className="primary"
+                          onClick={() => setForm("campaign")}
+                        >
+                          {it.createCampaign}
+                        </button>
+                      ) : null}
+                    </section>
+                  ) : null}
+                  {campaign && view === "codex" ? (
+                    <Suspense fallback={<p role="status">Apertura Codex…</p>}>
+                      <CodexWorkspace
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        pages={pages}
+                        selectedId={pageId}
+                        fallback={fallback}
+                        busy={busy}
+                        focusBlock={focusBlock}
+                        register={register}
+                        onSaved={onPageSaved}
+                        onSelect={openPage}
+                        onSource={openSource}
+                        onCreate={createPage}
+                        onUpdate={updatePage}
+                        onRecover={recoverPage}
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign && view === "settings" ? (
+                    <Suspense
+                      fallback={<p role="status">Apertura impostazioni…</p>}
+                    >
+                      <CampaignSettings
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        name={campaign.name}
+                        register={register}
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign && view === "assistant" ? (
+                    <Suspense
+                      fallback={<p role="status">Apertura assistente…</p>}
+                    >
+                      <AssistantWorkspace
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        register={register}
+                        onSource={selectSearch}
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign && view === "wiki" ? (
+                    <Suspense fallback={<p role="status">Apertura wiki…</p>}>
+                      <WikiWorkspace />
+                    </Suspense>
+                  ) : null}
+                  {campaign && view === "party" ? (
+                    <Suspense fallback={<p role="status">Apertura party…</p>}>
+                      <PartyWorkspace
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        pages={pages}
+                        register={register}
+                        onSaved={onPageSaved}
+                        onOpen={(p) => openPage(p.id, p.title)}
+                        busy={busy}
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign && view === "overview" ? (
+                    <Suspense
+                      fallback={<p role="status">Apertura riepilogo…</p>}
+                    >
+                      <Dashboard
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        sessions={sessions}
+                        pages={pages}
+                        onSession={(s) =>
+                          openSource({
+                            sourceKind: "session",
+                            sourceId: s.id,
+                            sourceTitle: s.title,
+                            sequence: s.sequence,
+                            blockId: "",
+                            preview: "",
+                          })
+                        }
+                        onPage={(p) => openPage(p.id, p.title)}
+                        onCharacter={() =>
+                          void run(async () => setView("character"))
+                        }
+                        onNewSession={() =>
+                          void run(async () => setForm("session"))
+                        }
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign && view === "graph" ? (
+                    <Suspense fallback={<p role="status">Apertura grafo…</p>}>
+                      <GraphWorkspace
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        pages={pages}
+                        sessions={sessions}
+                        busy={busy}
+                        register={register}
+                        onNode={openGraphNode}
+                        onSource={openGraphSource}
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign &&
+                  (view === "character" ||
+                    view === "inventory" ||
+                    view === "abilities") ? (
+                    <Suspense
+                      fallback={<p role="status">Apertura personaggio…</p>}
+                    >
+                      <PlayerWorkspace
+                        key={`${campaign.id}-${view}`}
+                        campaignId={campaign.id}
+                        view={view}
+                        pages={pages}
+                        sessions={sessions}
+                        busy={busy}
+                        register={register}
+                        initialSelection={
+                          playerReturn?.view === view
+                            ? playerReturn.assetId
+                            : undefined
+                        }
+                        onPage={(id, title, assetId, view) => {
+                          setPlayerReturn({ view, assetId });
+                          openPage(id, title);
+                        }}
+                        onSource={(source, assetId, view) => {
+                          setPlayerReturn({ view, assetId });
+                          openGraphSource(source);
+                        }}
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign &&
+                  view === "journal" &&
+                  !sessions.length &&
+                  form !== "session" ? (
+                    <section className="empty">
+                      <h3>{it.emptySessions}</h3>
+                      <p>{it.emptySessionsHint}</p>
                       <button
                         className="primary"
-                        onClick={() => setForm("campaign")}
+                        disabled={busy}
+                        onClick={() => setForm("session")}
                       >
-                        {it.createCampaign}
+                        {it.newSession}
                       </button>
-                    ) : null}
-                  </section>
-                ) : null}
-                {campaign && view === "codex" ? (
-                  <Suspense fallback={<p role="status">Apertura Codex…</p>}>
-                    <CodexWorkspace
-                      key={campaign.id}
-                      campaignId={campaign.id}
-                      pages={pages}
-                      selectedId={pageId}
-                      fallback={fallback}
-                      busy={busy}
-                      focusBlock={focusBlock}
-                      register={register}
-                      onSaved={onPageSaved}
-                      onSelect={openPage}
-                      onSource={openSource}
-                      onCreate={createPage}
-                      onUpdate={updatePage}
-                      onRecover={recoverPage}
-                    />
-                  </Suspense>
-                ) : null}
-                {campaign && view === "settings" ? (
-                  <Suspense
-                    fallback={<p role="status">Apertura impostazioni…</p>}
-                  >
-                    <CampaignSettings
-                      key={campaign.id}
-                      campaignId={campaign.id}
-                      name={campaign.name}
-                      register={register}
-                    />
-                  </Suspense>
-                ) : null}
-                {campaign && view === "assistant" ? (
-                  <Suspense
-                    fallback={<p role="status">Apertura assistente…</p>}
-                  >
-                    <AssistantWorkspace
-                      key={campaign.id}
-                      campaignId={campaign.id}
-                      register={register}
-                      onSource={selectSearch}
-                    />
-                  </Suspense>
-                ) : null}
-                {campaign && view === "wiki" ? (
-                  <Suspense fallback={<p role="status">Apertura wiki…</p>}>
-                    <WikiWorkspace />
-                  </Suspense>
-                ) : null}
-                {campaign && view === "party" ? (
-                  <Suspense fallback={<p role="status">Apertura party…</p>}>
-                    <PartyWorkspace
-                      key={campaign.id}
-                      campaignId={campaign.id}
-                      pages={pages}
-                      register={register}
-                      onSaved={onPageSaved}
-                      onOpen={(p) => openPage(p.id, p.title)}
-                      busy={busy}
-                    />
-                  </Suspense>
-                ) : null}
-                {campaign && view === "overview" ? (
-                  <Suspense fallback={<p role="status">Apertura riepilogo…</p>}>
-                    <Dashboard
-                      key={campaign.id}
-                      campaignId={campaign.id}
-                      sessions={sessions}
-                      pages={pages}
-                      onSession={(s) =>
-                        openSource({
-                          sourceKind: "session",
-                          sourceId: s.id,
-                          sourceTitle: s.title,
-                          sequence: s.sequence,
-                          blockId: "",
-                          preview: "",
-                        })
-                      }
-                      onPage={(p) => openPage(p.id, p.title)}
-                      onCharacter={() =>
-                        void run(async () => setView("character"))
-                      }
-                      onNewSession={() =>
-                        void run(async () => setForm("session"))
-                      }
-                    />
-                  </Suspense>
-                ) : null}
-                {campaign && view === "graph" ? (
-                  <Suspense fallback={<p role="status">Apertura grafo…</p>}>
-                    <GraphWorkspace
-                      key={campaign.id}
-                      campaignId={campaign.id}
-                      pages={pages}
-                      sessions={sessions}
-                      busy={busy}
-                      register={register}
-                      onNode={openGraphNode}
-                      onSource={openGraphSource}
-                    />
-                  </Suspense>
-                ) : null}
-                {campaign &&
-                (view === "character" ||
-                  view === "inventory" ||
-                  view === "abilities") ? (
-                  <Suspense
-                    fallback={<p role="status">Apertura personaggio…</p>}
-                  >
-                    <PlayerWorkspace
-                      key={`${campaign.id}-${view}`}
-                      campaignId={campaign.id}
-                      view={view}
-                      pages={pages}
-                      sessions={sessions}
-                      busy={busy}
-                      register={register}
-                      initialSelection={
-                        playerReturn?.view === view
-                          ? playerReturn.assetId
-                          : undefined
-                      }
-                      onPage={(id, title, assetId, view) => {
-                        setPlayerReturn({ view, assetId });
-                        openPage(id, title);
-                      }}
-                      onSource={(source, assetId, view) => {
-                        setPlayerReturn({ view, assetId });
-                        openGraphSource(source);
-                      }}
-                    />
-                  </Suspense>
-                ) : null}
-                {campaign &&
-                view === "journal" &&
-                !sessions.length &&
-                form !== "session" ? (
-                  <section className="empty">
-                    <h3>{it.emptySessions}</h3>
-                    <p>{it.emptySessionsHint}</p>
-                    <button
-                      className="primary"
-                      disabled={busy}
-                      onClick={() => setForm("session")}
-                    >
-                      {it.newSession}
-                    </button>
-                  </section>
-                ) : null}
-                {view === "journal" && sessions.length ? (
-                  <div className="journal-layout">
-                    <nav className="session-list" aria-label={it.journal}>
-                      {sessions.map((item) => (
-                        <button
-                          key={item.id}
-                          disabled={busy}
-                          aria-current={
-                            item.id === sessionId ? "page" : undefined
-                          }
-                          onClick={() => {
-                            if (item.id !== sessionId)
-                              void run(async () => {
-                                setSessionId(item.id);
-                                setFocusBlock(undefined);
-                                setForm(null);
-                              });
-                          }}
-                        >
-                          <span className="session-number">
-                            Sessione {item.sequence}
-                          </span>
-                          <strong>{item.title}</strong>
-                          <span>{formatDate(item.playedOn)}</span>
-                        </button>
-                      ))}
-                    </nav>
-                    <article className="journal-page">
-                      {session ? (
-                        <>
-                          <header className="note-header">
-                            <p>
-                              Sessione {session.sequence}{" "}
-                              <span aria-hidden="true">/</span>{" "}
-                              {formatDate(session.playedOn)}
-                            </p>
-                            <h3>{session.title}</h3>
-                          </header>
-                          <Suspense
-                            fallback={<p role="status">{it.editorLoading}</p>}
+                    </section>
+                  ) : null}
+                  {view === "journal" && sessions.length ? (
+                    <div className="journal-layout">
+                      <nav className="session-list" aria-label={it.journal}>
+                        {sessions.map((item) => (
+                          <button
+                            key={item.id}
+                            disabled={busy}
+                            aria-current={
+                              item.id === sessionId ? "page" : undefined
+                            }
+                            onClick={() => {
+                              if (item.id !== sessionId)
+                                void run(async () => {
+                                  setSessionId(item.id);
+                                  setFocusBlock(undefined);
+                                  setForm(null);
+                                });
+                            }}
                           >
-                            <Editor
-                              key={session.id}
-                              session={session}
-                              register={register}
-                              onSaved={onSaved}
-                              focusBlock={focusBlock}
-                              disabled={busy}
-                            />
-                          </Suspense>
-                          {session.document.importedFrom === "logseq" ? (
-                            <Suspense fallback={null}>
-                              <ImportSource
+                            <span className="session-number">
+                              Sessione {item.sequence}
+                            </span>
+                            <strong>{item.title}</strong>
+                            <span>{formatDate(item.playedOn)}</span>
+                          </button>
+                        ))}
+                      </nav>
+                      <article className="journal-page">
+                        {session ? (
+                          <>
+                            <header className="note-header">
+                              <p>
+                                Sessione {session.sequence}{" "}
+                                <span aria-hidden="true">/</span>{" "}
+                                {formatDate(session.playedOn)}
+                              </p>
+                              <h3>{session.title}</h3>
+                            </header>
+                            <Suspense
+                              fallback={<p role="status">{it.editorLoading}</p>}
+                            >
+                              <Editor
                                 key={session.id}
-                                campaignId={session.campaignId}
-                                kind="session"
-                                id={session.id}
+                                session={session}
+                                register={register}
+                                onSaved={onSaved}
+                                focusBlock={focusBlock}
+                                disabled={busy}
                               />
                             </Suspense>
-                          ) : null}
-                        </>
-                      ) : (
-                        <p>{it.chooseSession}</p>
-                      )}
-                    </article>
-                  </div>
-                ) : null}
+                            {session.document.importedFrom === "logseq" ? (
+                              <Suspense fallback={null}>
+                                <ImportSource
+                                  key={session.id}
+                                  campaignId={session.campaignId}
+                                  kind="session"
+                                  id={session.id}
+                                />
+                              </Suspense>
+                            ) : null}
+                          </>
+                        ) : (
+                          <p>{it.chooseSession}</p>
+                        )}
+                      </article>
+                    </div>
+                  ) : null}
+                </div>
               </>
             )}
           </main>

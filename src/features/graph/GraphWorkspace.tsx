@@ -1,3 +1,4 @@
+import NodePortrait from "./NodePortrait";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { errorMessage, type Session } from "../journal/api";
 import type { SaveGuard } from "../journal/Editor";
@@ -72,6 +73,13 @@ export default function GraphWorkspace({
       .then((result) => {
         if (active) {
           setData(result);
+          const degree = (id: string) =>
+            result.edges.filter((e) => e.source === id || e.target === id)
+              .length;
+          const suggested = [...result.nodes]
+            .filter((n) => n.kind === "npc")
+            .sort((a, b) => degree(b.id) - degree(a.id))[0];
+          setSelectedNode((current) => current ?? suggested ?? null);
           setLoading(false);
         }
       })
@@ -186,10 +194,10 @@ export default function GraphWorkspace({
     <section className="graph-workspace" aria-label="Grafo della campagna">
       <div className="graph-heading">
         <div>
-          <h3>Connessioni e prove</h3>
+          <h3>Connessioni della campagna</h3>
           <p className="editor-hint">
-            Le menzioni mostrano dove hai scritto un nome. Le relazioni
-            dichiarate registrano ciò che ritieni vero, sospetti o hai smentito.
+            Esplora come persone, luoghi, oggetti ed eventi si intrecciano nella
+            storia.
           </p>
         </div>
         <button
@@ -204,8 +212,7 @@ export default function GraphWorkspace({
           Nuova relazione
         </button>
       </div>
-      <details className="graph-filter-details">
-        <summary>Filtri e nodo centrale</summary>
+      <div className="graph-filter-details">
         <form
           className="graph-filters"
           aria-label="Filtri del grafo"
@@ -265,83 +272,95 @@ export default function GraphWorkspace({
                 <option value="assertions">Solo relazioni dichiarate</option>
               </select>
             </label>
-            <label>
-              Certezza delle relazioni
-              <select
-                aria-label="Certezza delle relazioni"
-                value={draft.certainty ?? ""}
-                onChange={(event) =>
-                  setDraft({
-                    ...draft,
-                    certainty:
-                      (event.target.value as GraphQuery["certainty"]) || null,
-                  })
-                }
-              >
-                <option value="">Tutte le certezze</option>
-                {Object.entries(certainties).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Fonte sessione
-              <select
-                aria-label="Fonte sessione"
-                value={draft.sessionId ?? ""}
-                onChange={(event) =>
-                  setDraft({ ...draft, sessionId: event.target.value || null })
-                }
-              >
-                <option value="">Tutte le sessioni</option>
-                {sessions.map((session) => (
-                  <option key={session.id} value={session.id}>
-                    Sessione {session.sequence}: {session.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Nodo centrale
-              <select
-                aria-label="Nodo centrale"
-                value={draft.focusId ?? ""}
-                onChange={(event) =>
-                  setDraft({ ...draft, focusId: event.target.value || null })
-                }
-              >
-                <option value="">Nessun centro</option>
-                {pages.map((page) => (
-                  <option key={page.id} value={`page:${page.id}`}>
-                    {page.title}
-                  </option>
-                ))}
-                {sessions.map((session) => (
-                  <option key={session.id} value={`session:${session.id}`}>
-                    Sessione {session.sequence}: {session.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Profondità
-              <select
-                aria-label="Profondità"
-                value={draft.depth}
-                disabled={!draft.focusId || disabled}
-                onChange={(event) =>
-                  setDraft({
-                    ...draft,
-                    depth: Number(event.target.value) as 1 | 2,
-                  })
-                }
-              >
-                <option value={1}>1 passaggio</option>
-                <option value={2}>2 passaggi</option>
-              </select>
-            </label>
+            <details className="graph-advanced">
+              <summary>Altri filtri</summary>
+              <div>
+                <label>
+                  Certezza delle relazioni
+                  <select
+                    aria-label="Certezza delle relazioni"
+                    value={draft.certainty ?? ""}
+                    onChange={(event) =>
+                      setDraft({
+                        ...draft,
+                        certainty:
+                          (event.target.value as GraphQuery["certainty"]) ||
+                          null,
+                      })
+                    }
+                  >
+                    <option value="">Tutte le certezze</option>
+                    {Object.entries(certainties).map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Fonte sessione
+                  <select
+                    aria-label="Fonte sessione"
+                    value={draft.sessionId ?? ""}
+                    onChange={(event) =>
+                      setDraft({
+                        ...draft,
+                        sessionId: event.target.value || null,
+                      })
+                    }
+                  >
+                    <option value="">Tutte le sessioni</option>
+                    {sessions.map((session) => (
+                      <option key={session.id} value={session.id}>
+                        Sessione {session.sequence}: {session.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Nodo centrale
+                  <select
+                    aria-label="Nodo centrale"
+                    value={draft.focusId ?? ""}
+                    onChange={(event) =>
+                      setDraft({
+                        ...draft,
+                        focusId: event.target.value || null,
+                      })
+                    }
+                  >
+                    <option value="">Nessun centro</option>
+                    {pages.map((page) => (
+                      <option key={page.id} value={`page:${page.id}`}>
+                        {page.title}
+                      </option>
+                    ))}
+                    {sessions.map((session) => (
+                      <option key={session.id} value={`session:${session.id}`}>
+                        Sessione {session.sequence}: {session.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Profondità
+                  <select
+                    aria-label="Profondità"
+                    value={draft.depth}
+                    disabled={!draft.focusId || disabled}
+                    onChange={(event) =>
+                      setDraft({
+                        ...draft,
+                        depth: Number(event.target.value) as 1 | 2,
+                      })
+                    }
+                  >
+                    <option value={1}>1 passaggio</option>
+                    <option value={2}>2 passaggi</option>
+                  </select>
+                </label>
+              </div>
+            </details>
             <div className="actions">
               <button className="primary">Applica filtri</button>
               <button type="button" onClick={() => apply(defaultQuery)}>
@@ -350,7 +369,7 @@ export default function GraphWorkspace({
             </div>
           </fieldset>
         </form>
-      </details>
+      </div>
       {error ? (
         <div className="error" role="alert">
           {error}
@@ -448,20 +467,62 @@ export default function GraphWorkspace({
               ) : null}
             </div>
             <aside className="graph-detail" aria-label="Dettaglio collegamento">
+              <h4>Dettagli della voce</h4>
               {selectedNode ? (
                 <div className="graph-node-detail">
-                  <p className="muted">
+                  <NodePortrait
+                    key={selectedNode.id}
+                    campaignId={campaignId}
+                    pageId={selectedNode.entityId}
+                    kind={selectedNode.kind}
+                  />
+                  <h4>{selectedNode.title}</h4>
+                  <span className="node-kind">
                     {selectedNode.kind === "session"
                       ? "Sessione"
                       : selectedNode.kind === "missing"
                         ? "Pagina mancante"
                         : pageKinds[selectedNode.kind]}
-                  </p>
-                  <h4>{selectedNode.title}</h4>
+                  </span>
                   <p>
-                    Seleziona un collegamento per leggerne la fonte e la
-                    certezza.
+                    {pagePreview(
+                      pages.find((p) => p.id === selectedNode.entityId),
+                    ) ||
+                      "Apri la voce per leggere gli appunti. Seleziona un collegamento per consultarne fonte e certezza."}
                   </p>
+                  <div className="node-connections">
+                    <h5>Collegamenti principali</h5>
+                    {data.edges
+                      .filter(
+                        (e) =>
+                          e.source === selectedNode.id ||
+                          e.target === selectedNode.id,
+                      )
+                      .slice(0, 8)
+                      .map((e) => (
+                        <button
+                          key={e.id}
+                          disabled={disabled || relationLoading}
+                          onClick={() => void selectEdge(e)}
+                        >
+                          <span>
+                            {nodeTitle(
+                              e.source === selectedNode.id
+                                ? e.target
+                                : e.source,
+                            )}
+                          </span>
+                          <em>{e.kind === "mention" ? "menzione" : e.label}</em>
+                        </button>
+                      ))}
+                    {!data.edges.some(
+                      (e) =>
+                        e.source === selectedNode.id ||
+                        e.target === selectedNode.id,
+                    ) ? (
+                      <p>Nessun collegamento in questa vista.</p>
+                    ) : null}
+                  </div>
                   <div className="actions">
                     <button
                       disabled={disabled}
@@ -708,4 +769,27 @@ function DeleteConfirmation({
       </div>
     </div>
   );
+}
+
+function pagePreview(page: KnowledgePage | undefined): string {
+  if (!page) return "";
+  const texts: string[] = [];
+  function visit(value: unknown) {
+    if (!value || typeof value !== "object") return;
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    const node = value as Record<string, unknown>;
+    if (node.type === "text" && typeof node.text === "string")
+      texts.push(node.text);
+    if (node.type === "pageMention") {
+      const props = node.props as { label?: string };
+      if (props.label) texts.push(props.label);
+    }
+    if (node.content) visit(node.content);
+    if (node.children) visit(node.children);
+  }
+  visit(page.document.blocks);
+  return texts.join(" ").slice(0, 340);
 }

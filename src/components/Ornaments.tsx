@@ -1,0 +1,63 @@
+import type { CSSProperties } from "react";
+export const iconPaths: Record<string, string> = {
+  document: "M6 2h9l4 4v16H6z M14 2v6h5 M9 12h7 M9 16h7",
+  book: "M12 5C8 2 4 2 2 3v16c4-1 7 0 10 2 3-2 6-3 10-2V3c-3-1-7-1-10 2z M12 5v16",
+  books: "M3 3h4v18H3z M10 2h4v19h-4z M17 4l3-1 4 17-4 1z",
+  graph:
+    "M8 8l8 8 M8 17l8-9 M6 8v8 M9 5h6 M9 19h6 M9 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0 M21 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0 M9 19a3 3 0 1 1-6 0 3 3 0 0 1 6 0 M21 19a3 3 0 1 1-6 0 3 3 0 0 1 6 0",
+  party:
+    "M12 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6 M6 10h12l1 11H5z M3 4a2 2 0 1 0 0 4 M21 4a2 2 0 1 1 0 4 M1 11h2v9H1 M21 11h2v9h-2",
+  helmet:
+    "M5 21V10a7 7 0 0 1 14 0v11h-5v-7h-4v7z M12 1v10 M5 11l5 3 M19 11l-5 3",
+  bag: "M8 3h8l-2 4c5 4 7 8 5 13-5 2-9 2-14 0-2-5 0-9 5-13z M8 7h8",
+  star: "M12 1l2 8 8-5-5 8 6 2-8 1 5 8-8-6-4 6 1-9-8-2 8-3z",
+  wiki: "M12 5C8 2 4 2 2 3v16c4-1 7 0 10 2 3-2 6-3 10-2V3c-3-1-7-1-10 2z M12 5v16 M5 7h3 M5 11h3 M16 7h3 M16 11h3",
+  plus: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20 M12 6v12 M6 12h12",
+  backup:
+    "M3 6a9 4 0 1 0 18 0 9 4 0 1 0-18 0 M3 6v12c0 5 18 5 18 0V6 M3 12c0 5 18 5 18 0",
+  settings:
+    "M9 2h6l1 4 4 1 2 5-3 3 1 4-5 3-3-3-4 1-3-5 3-3-1-4z M15 12a3 3 0 1 0-6 0 3 3 0 0 0 6 0",
+  castle: "M2 21V8h4v3h3V8h6v3h3V8h4v13z M9 21v-6h6v6 M9 8V2h6v6",
+  scroll:
+    "M6 3h13v13H8v5H4a3 3 0 0 1-1-6V6a3 3 0 0 1 6 0 M6 7h9 M8 11h7 M8 16v3a2 2 0 0 0 4 0",
+};
+export function Icon({ name, style }: { name: string; style?: CSSProperties }) {
+  return (
+    <svg
+      className="ink-icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      style={style}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={iconPaths[name] ?? iconPaths.document} />
+    </svg>
+  );
+}
+export function Compass() {
+  return (
+    <svg
+      className="brand-compass"
+      viewBox="0 0 100 100"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+    >
+      <circle cx="50" cy="50" r="31" />
+      <circle cx="50" cy="50" r="5" />
+      {Array.from({ length: 8 }, (_, i) => (
+        <path
+          key={i}
+          transform={`rotate(${i * 45} 50 50)`}
+          d="M50 4L57 43 50 50 43 43z"
+          fill={i % 2 === 0 ? "currentColor" : "none"}
+        />
+      ))}
+      <path d="M50 1v98 M1 50h98" />
+    </svg>
+  );
+}

@@ -1,5 +1,26 @@
 # Stato Chronexus — 24 ottobre 2026
 
+## GUI di riferimento e navigazione — 24 ottobre 2026
+
+- Ripresa la composizione allegata: cuoio scuro, pergamena, font locali OFL,
+  rosa dei venti, incisione originale, tab con icone e dettaglio laterale del grafo.
+  Le illustrazioni dei personaggi dipendono dagli allegati reali; nessun dato
+  dell’esempio inserito negli archivi personali. La corrispondenza pixel per pixel
+  con l’immagine non è certificata: icone, incisione e geometria dei dati sono originali.
+- Impostazioni della campagna e assistente nel menu sinistro. Menu azioni compatto,
+  selettore campagne e ultima modifica derivata dai documenti disponibili.
+- Diario e Codex: elenco e documento scorrono indipendentemente dalla cornice;
+  vecchia regola mobile orizzontale rimossa anche alla dimensione minima.
+- Grafo con nodi a medaglione, etichette visibili, disposizione stabile, zoom,
+  filtri avanzati e fonti/certezze mantenuti. Ritratto reale nel dettaglio, se allegato.
+- Verifiche: 13 test mirati App/grafo PASS; typecheck e lint PASS; build frontend
+  PASS (warning preesistente sul peso dell’editor). Prove native con fixture isolate
+  a 1586×992, 900×700 e 760×540: nessun overflow della finestra, liste verticali
+  indipendenti e font locali caricati. Screenshot e rapporti in .tools/ui-refresh/.
+- Skill: impeccable per confronto e rilevamento finale; imagegen per materiali e
+  incisione offline; react-testing per regressioni; react-doctor per diagnosi React.
+  Refactoring dell’editor e milestone multilingua ancora in consolidamento.
+
 ## Riparazione dopo spostamento su D — 24 ottobre 2026
 
 - Collegamenti node_modules ricreati con lockfile invariato: i precedenti

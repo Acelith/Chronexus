@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import cytoscape, { type Core } from "cytoscape";
 import type { GraphData, GraphEdge, GraphNode } from "./api";
-import { graphElements, graphStyle, readableGraph } from "./canvas";
+import {
+  graphElements,
+  graphStyle,
+  readableGraph,
+  mapPositions,
+} from "./canvas";
 export default function GraphCanvas({
   data,
   onNode,
@@ -28,8 +33,9 @@ export default function GraphCanvas({
   useEffect(() => {
     if (!container.current) return;
     const elements = graphElements(visible);
-    elements.slice(0, visible.nodes.length).forEach((node, index) => {
-      node.position = { x: (index % 5) * 220, y: Math.floor(index / 5) * 180 };
+    const positions = mapPositions(visible, focusId);
+    elements.slice(0, visible.nodes.length).forEach((node) => {
+      node.position = positions.get(String(node.data.id));
     });
     const instance = cytoscape({
       container: container.current,
@@ -37,18 +43,7 @@ export default function GraphCanvas({
       style: graphStyle,
       layout:
         layoutMode === "grid"
-          ? {
-              name: "grid",
-              avoidOverlap: true,
-              nodeDimensionsIncludeLabels: true,
-              spacingFactor: 1.3,
-              rows: Math.max(
-                1,
-                Math.ceil(Math.sqrt(visible.nodes.length / 1.5)),
-              ),
-              animate: false,
-              padding: 45,
-            }
+          ? { name: "preset", fit: true, padding: 30 }
           : {
               name: "cose",
               randomize: false,
@@ -82,6 +77,7 @@ export default function GraphCanvas({
     });
     const observer = new ResizeObserver(() => {
       instance.resize();
+      instance.fit(undefined, 30);
     });
     observer.observe(container.current);
     return () => {
@@ -89,43 +85,14 @@ export default function GraphCanvas({
       instance.destroy();
       cy.current = null;
     };
-  }, [visible, layoutMode]);
+  }, [visible, layoutMode, focusId]);
   return (
     <div className="graph-visual">
-      <div className="graph-view-toolbar">
-        <label className="graph-arrangement">
-          Disposizione
-          <select
-            value={layoutMode}
-            onChange={(e) => setLayoutMode(e.target.value as "grid" | "cose")}
-          >
-            <option value="grid">Mappa leggibile</option>
-            <option value="cose">Organica</option>
-          </select>
-        </label>
-        <span>
-          {visible.nodes.length} di {data.nodes.length} nodi disponibili ·
-          trascina per spostarti, seleziona per leggere
-        </span>
-        {data.nodes.length > 18 ? (
-          <button onClick={() => setExpanded((v) => !v)}>
-            {expanded ? "Vista compatta" : "Mostra tutti i nodi"}
-          </button>
-        ) : null}
-        <button
-          onClick={() => {
-            cy.current?.elements().removeClass("dimmed emphasized");
-            cy.current?.elements().unselect();
-          }}
-        >
-          Togli evidenza
-        </button>
-      </div>
       <div
         className="graph-canvas"
         ref={container}
         role="img"
-        aria-label="Grafo della campagna. Le stesse informazioni sono disponibili nell'elenco accessibile."
+        aria-label="Grafo della campagna. Le stesse informazioni sono disponibili nell’elenco accessibile."
         data-node-count={visible.nodes.length}
         data-edge-count={visible.edges.length}
       />
@@ -135,19 +102,67 @@ export default function GraphCanvas({
           onClick={() => cy.current?.zoom((cy.current?.zoom() ?? 1) * 1.2)}
           aria-label="Ingrandisci grafo"
         >
-          +
+          ⌕ Ingrandisci
         </button>
         <button
           type="button"
           onClick={() => cy.current?.zoom((cy.current?.zoom() ?? 1) / 1.2)}
           aria-label="Riduci grafo"
         >
-          −
+          ⌕ Riduci
         </button>
-        <button type="button" onClick={() => cy.current?.fit(undefined, 45)}>
-          Adatta vista
+        <button type="button" onClick={() => cy.current?.fit(undefined, 30)}>
+          ⛶ Adatta vista
         </button>
+        <span className="graph-legend-inline">
+          <span>
+            <i className="person" />
+            Personaggi
+          </span>
+          <span>
+            <i />
+            Luoghi
+          </span>
+          <span>
+            <i className="item" />
+            Oggetti
+          </span>
+          <span>→ Relazioni</span>
+        </span>
       </div>
+      <details className="graph-view-options">
+        <summary>Opzioni di disposizione</summary>
+        <div className="graph-view-toolbar">
+          <label className="graph-arrangement">
+            Disposizione
+            <select
+              value={layoutMode}
+              onChange={(e) => setLayoutMode(e.target.value as "grid" | "cose")}
+            >
+              <option value="grid">Mappa leggibile</option>
+              <option value="cose">Organica</option>
+            </select>
+          </label>
+          <span>
+            {visible.nodes.length} di {data.nodes.length} nodi · trascina per
+            spostarti
+          </span>
+          {data.nodes.length > 18 ? (
+            <button type="button" onClick={() => setExpanded((v) => !v)}>
+              {expanded ? "Vista compatta" : "Mostra tutti i nodi"}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              cy.current?.elements().removeClass("dimmed emphasized");
+              cy.current?.elements().unselect();
+            }}
+          >
+            Togli evidenza
+          </button>
+        </div>
+      </details>
     </div>
   );
 }

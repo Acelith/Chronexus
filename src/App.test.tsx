@@ -174,7 +174,7 @@ test("ripristino da archivio vuoto aggiorna la barra campagne e apre i documenti
     }),
   );
   await screen.findByRole("alertdialog");
-  await user.click(screen.getByRole("button", { name: "+ Nuova campagna" }));
+  await user.click(screen.getByRole("button", { name: "Nuova campagna" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Conferma o annulla",
   );
@@ -185,10 +185,9 @@ test("ripristino da archivio vuoto aggiorna la barra campagne e apre i documenti
   );
   await screen.findByRole("region", { name: "Ripristino completato" });
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-  await user.click(
-    await screen.findByRole("button", {
-      name: "Campagna recuperata",
-    }),
+  await user.selectOptions(
+    screen.getByRole("combobox", { name: "Campagna attuale" }),
+    "a",
   );
   expect(await screen.findByText("Editor di test")).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "Il ponte" })).toBeInTheDocument();
@@ -289,7 +288,10 @@ test("un errore di scrittura impedisce il cambio campagna e preserva la nota ape
   render(<App />);
   await screen.findByText("Editor di test");
   flush.mockRejectedValue(new Error("Disco pieno: riprova."));
-  await user.click(screen.getByRole("button", { name: "Campagna B" }));
+  await user.selectOptions(
+    screen.getByRole("combobox", { name: "Campagna attuale" }),
+    "b",
+  );
   expect(await screen.findByRole("alert")).toHaveTextContent("Disco pieno");
   expect(
     screen.getByRole("heading", { name: "Campagna A" }),
