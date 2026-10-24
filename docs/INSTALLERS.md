@@ -155,3 +155,23 @@ ai soli strumenti/documenti possono avanzare main senza riscrivere quel tag:
 il piano locale registra `commit` compilato e `publicationCommit`. Il validatore
 rifiuta qualunque modifica applicativa successiva al tag; in quel caso servono
 nuova build e nuova versione. Nessun tag o allegato esistente viene sovrascritto.
+
+
+### Ripresa LAN esplicitamente autorizzata
+
+L’utente ha indicato `http://192.168.162.26:3000` per questa ripresa. È il solo
+endpoint alternativo ammesso e deve essere selezionato esplicitamente mediante
+`publish(authorization, base_url=LOCAL_BASE, finalize=False)`. Confrontare repository
+(id/nome/permessi) e bozza con il sito canonico prima di qualsiasi scrittura.
+L’origin Git resta HTTPS pubblico; nessuna sostituzione del tag del sorgente compilato.
+
+Il client non segue redirect e non invia l’autorizzazione ad altri host. Gli URL
+canonici `/attachments/<id>` sono riscritti soltanto verso il preciso endpoint
+locale selezionato, per il download SHA-256 dei medesimi allegati. Le verifiche
+completate vengono registrate con ID/dimensione/hash/trasporto nella ricevuta locale;
+un asset già presente ma non riconosciuto dalla ricevuta non viene sovrascritto.
+
+Usare prima `finalize=False` per completare upload e download mantenendo la bozza;
+aggiornare le note con le prove effettive e poi finalizzare. Controllare l’insieme
+esatto degli allegati prima di rendere pubblica la release. I test della ripresa
+sono 18; nessuna modifica al binario o ai dati dell’app richiede una nuova build.

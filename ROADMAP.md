@@ -369,7 +369,7 @@ restano revisione linguistica/dialettale, lingue di fantasia complete dove
 verificabili, prova assistiva fisica/IME reale e verifiche macOS/Linux.
 Non viene avviata una nuova milestone senza richiesta dell’utente.
 
-## M11 — Release versionate e pacchetti su Forgegit (bloccata dal gateway remoto)
+## M11 — Release versionate e pacchetti su Forgegit (ripresa LAN in corso)
 
 Repository dell’utente verificato nell’attuale `origin`:
 `https://github.com/Acelith/Chronexus.git`. Non presumere API o funzionalità del
