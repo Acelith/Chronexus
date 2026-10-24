@@ -270,6 +270,22 @@ milestone; il tiradadi e le sue animazioni non sono ancora implementati.
 
 ### M9.3 - Animazione medievale: cerchio dei draghi
 
+- Progettare un set coerente di dadi medievali di forte impatto visivo: forme
+  riconoscibili per tipo, materiali come pietra, metallo e incisioni draconiche,
+  dettagli controllati e numeri grandi e contrastati. Ornamenti, riflessi e
+  fiamme non devono coprire i valori; distinguere chiaramente 6 e 9 e rendere
+  espliciti tipo di dado e valore del d100, senza affidarsi al solo colore.
+- Prevedere la generazione di illustrazioni originali per draghi, cornice,
+  texture dei dadi ed effetti con la skill imagegen quando servono asset raster;
+  usare geometrie e numeri renderizzati dall'app per facce e risultati esatti,
+  senza dipendere da cifre disegnate dal generatore. Preparare asset separati,
+  con trasparenza dove necessaria, dimensioni e peso contenuti, inclusi nel
+  pacchetto locale. La generazione avviene durante lo sviluppo, mai a runtime:
+  nessun invio di dati di campagna, download o servizio esterno richiesto al tiro.
+- Usare impeccable per direzione visiva e ritmo, accessibility per tastiera,
+  contrasto e movimento ridotto, e react-testing per gli stati interattivi.
+  Il risultato finale deve essere disponibile anche come testo stabile separato
+  dalla scena, leggibile con screen reader e indipendente dagli effetti grafici.
 - Far rotolare i dadi dentro un cerchio delimitato da draghi, coerente con il
   tema medievale dell'app. All'atterraggio i draghi sprigionano fiamme che
   avvolgono e consumano visivamente i dadi, rivelandone i risultati.
@@ -298,6 +314,13 @@ milestone; il tiradadi e le sue animazioni non sono ancora implementati.
 - Usare test deterministici con generatore sostituibile per la logica dei tiri;
   documentare la sorgente casuale usata in produzione. Non dichiarare equità
   statistica dimostrata soltanto da pochi tiri manuali.
+- Verificare visivamente tutti i tipi di dado alle dimensioni effettive dell'app,
+  con pochi e molti dadi: numeri, 6/9 e d100 devono restare distinguibili senza
+  zoom, anche durante la rivelazione e su materiali decorati. Controllare il
+  contrasto dei valori finali e la resa con movimento ridotto; draghi e fiamme
+  non devono ostacolare lettura, controlli o dettaglio testuale del tiro.
+- Verificare che gli asset generati siano presenti nel pacchetto e che l'intera
+  scena funzioni offline, senza richieste di rete o generazione durante il tiro.
 
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.

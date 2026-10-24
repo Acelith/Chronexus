@@ -13,6 +13,9 @@ Impostazioni della campagna; nessun contatto runtime al caricamento della pagina
 Verifiche della prima parte: 66 test Rust e 57 frontend PASS, build frontend,
 lint e format PASS. Qualifica reale Gemma 4 12B e riaddestramento ancora in corso;
 nessuna inferenza/training Gemma dichiarata superata. M9 tiradadi pianificata.
+M9 specifica ora asset grafici originali generati in sviluppo, dadi medievali
+decorati ma leggibili, numeri renderizzati dall'app e verifica visiva/accessibile;
+nessun asset generato o tiradadi implementato in questo aggiornamento.
 Nessun push autorizzato o eseguito.
 
 Il modello specifico D&D 1.5B è stato provato su GPU e scartato per qualità.
