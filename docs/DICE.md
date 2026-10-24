@@ -104,3 +104,14 @@ Skill applicate: impeccable/imagegen per l’identità visiva e gli asset offlin
 accessibility/react-testing per interazioni e stati; rust-best-practices,
 sqlite-expert e tauri-v2 per persistenza/IPC; systematic-debugging/react-doctor
 per la correzione delle etichette, dei timer e del totale anticipato.
+
+
+## Estensione pianificata M12 — non implementata
+
+Per un solo dado complessivo: massimo d4/d6/d8/d10/d12/d20 celebra con entrambi i
+draghi vivi e fiamme intorno; minimo 1 fa girare entrambi verso lo schermo e volare
+minacciosi verso il giocatore sputando fuoco. D100 invertito: 1 celebra, 100 minaccia.
+Valori intermedi e tiri multipli/misti non attivano questi effetti speciali.
+Risultati salvati, storico e retry restano invariati; skip e movimento ridotto
+obbligatori. Requisiti e matrice di verifica in ROADMAP.md. Nessuna animazione
+nuova realizzata in questa modifica documentale.

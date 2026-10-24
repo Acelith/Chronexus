@@ -43,10 +43,23 @@ IME OS e assistive fisiche non provati; macOS/Linux e distribuzione ancora da
 validare; font aggiuntivi circa 40 MB e avviso dimensione editor; debito React
 preesistente su complessità/componenti grandi, senza nuovi rilievi nei cambiamenti.
 
-**Prossimo passo**: completare l’accettazione M10 con revisore linguistico e
-collaudo assistivo/IME reale. Target verificabile: campagna → sessione → editor →
-backup nelle lingue scelte, conservando contenuti e accessibilità. Non è stata
-aggiunta né avviata una milestone successiva.
+**Nuova pianificazione — 24 ottobre 2026**: M11 alfabeti Elfico/Dethek;
+M12 draghi animati per esiti estremi di un solo dado (d100 invertito);
+M13 release versionate e pacchetti app/AI su Forgegit. Nessuna delle tre è
+implementata in questa richiesta; restano aperte le revisioni M10 già indicate.
+
+**Prossimo passo funzionale pianificato**: M11, identificando variante elfica,
+font/mapping e licenze prima di modificare le opzioni. L’utente ha richiesto
+solo di scrivere le milestone; non avviare ora l’implementazione.
+
+**Pubblicazione**: origin verificato `https://github.com/Acelith/Chronexus.git`.
+Registrata istruzione permanente per pubblicare future consegne di milestone
+verificate con release/pacchetti versionati, salvo divieto successivo. **Nessuna
+pubblicazione in questa esecuzione**, inclusi push, tag remoti, release e upload.
+Modificate soltanto roadmap/specifiche/guide. Skill disponibili valutate: nessuna
+specializzazione richiede applicazione per questa modifica documentale.
+Verifiche di questa richiesta: diff e coerenza requisiti; nessun test applicativo,
+nessuna build e nessuna verifica di nuove funzionalità dichiarata.
 
 Le sezioni seguenti conservano i checkpoint precedenti e il percorso di verifica.
 

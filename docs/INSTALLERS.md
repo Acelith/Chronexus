@@ -1,5 +1,24 @@
 # Installer Windows con AI locale
 
+## Politica Forgegit — pianificata con M13
+
+Destinazione verificata di `origin`: `https://github.com/Acelith/Chronexus.git`,
+repository dell’utente. Per le future milestone implementate e verificate,
+l’utente autorizza come procedura standard la pubblicazione del codice e delle
+release versionate con pacchetti app e, quando previsto, AI locale. Non serve
+richiedere nuovamente questa autorizzazione ordinaria, salvo istruzioni contrarie.
+
+Prima di pubblicare: verificare capacità/API/autenticazione del server, limiti
+per runtime/pesi AI, licenze, versione/tag coerenti, build/test reali, checksum e
+note di rilascio. Escludere dati privati e segreti; non sostituire release/tag/asset
+esistenti e non usare force-push. Verificare download/checksum dopo l’upload e
+riportare errori o pubblicazioni parziali con precisione. Non inventare pacchetti
+per piattaforme non collaudate né usare una destinazione alternativa non autorizzata.
+
+**Questa richiesta è solo pianificazione: NON pubblicare ancora su Forgegit.**
+Nessun push, tag remoto, release o upload nella presente esecuzione; nessun nuovo
+installer o pacchetto AI viene costruito qui. M13 è pianificata, non implementata.
+
 ## Aggiornamento M8 — 24 ottobre 2026
 
 Il nuovo installer **dell'app** è in `installers/Chronexus-M8-Windows-x64/`.

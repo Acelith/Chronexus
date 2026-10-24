@@ -369,6 +369,96 @@ restano revisione linguistica/dialettale, lingue di fantasia complete dove
 verificabili, prova assistiva fisica/IME reale e verifiche macOS/Linux.
 Non viene avviata una nuova milestone senza richiesta dell’utente.
 
+## M11 — Alfabeti Elfico e Dethek (pianificata; solo requisiti)
+
+Aggiungere Elfico e Dethek alle opzioni di lingua/scrittura delle impostazioni
+globali, mantenendo tutte le opzioni M10 esistenti. Sono alfabeti: non presentarli
+come traduzioni automatiche complete delle lingue elfiche o naniche.
+
+- Prima dell’implementazione identificare la variante esatta di «Elfico» e la
+  fonte del mapping Dethek; documentare repertorio, direzione, maiuscole, numeri
+  e punteggiatura, senza inventare simboli mancanti. La variante elfica non è
+  ancora stata indicata dall’utente e non va scelta implicitamente.
+- Verificare font e licenze; includere asset locali per uso offline. Caratteri
+  non rappresentabili e font assente devono conservare una resa leggibile.
+- Integrare selezione persistente, anteprima/laboratorio e pacchetto reversibile
+  M10. Definire esplicitamente la compatibilità/versione dei pacchetti e delle
+  preferenze prima di estendere le whitelist; mantenere il recupero italiano.
+- Testo semantico ordinario per tecnologie assistive; nessuna riscrittura di
+  appunti, nomi, UUID, fonti, dati salvati o backup. Nessuna grammatica o lessico
+  inventato per simulare una traduzione.
+- Accettazione: mapping documentato e testato, cambio immediato e riavvio,
+  round trip esatto dell’originale, caratteri non supportati, assenza del font,
+  tastiera/accessibilità e compatibilità con preferenze/archivi precedenti.
+
+## M12 — Draghi animati per esiti estremi del singolo dado (pianificata; solo requisiti)
+
+Rinnovare la schermata del tiradadi con animazioni dei due draghi per gli esiti
+migliori/peggiori. Il trigger si applica solo quando il tiro contiene **un solo
+dado complessivo**, non un dado estremo all’interno di un tiro multiplo o misto.
+
+| Dado singolo | Esito celebrato | Esito minaccioso |
+| --- | --- | --- |
+| d4 | 4 | 1 |
+| d6 | 6 | 1 |
+| d8 | 8 | 1 |
+| d10 | 10 | 1 |
+| d12 | 12 | 1 |
+| d20 | 20 | 1 |
+| d100 | **1** | **100** |
+
+- Celebrazione: entrambi i draghi prendono vita e sputano fiamme intorno al
+  cerchio per festeggiare il risultato migliore.
+- Minaccia: entrambi si girano verso lo schermo, volano verso il giocatore e
+  sputano fiamme, come se volessero incendiarlo. Il risultato resta leggibile.
+- Valori intermedi, tiri multipli e misti mantengono un’animazione ordinaria.
+  L’inversione del d100 è una preferenza di presentazione richiesta dall’utente,
+  non una nuova regola D&D né una modifica dei valori numerici registrati.
+- Gli effetti partono soltanto dal risultato reale già salvato; non modificare
+  casualità, storico, quantità, subtotali, totale o gestione del retry M9.
+  Il replay usa lo stesso risultato e non genera un altro tiro.
+- Animazioni brevi e fluide, asset locali con provenienza/licenze documentate,
+  nessuna generazione o richiesta remota durante il tiro. Evitare lampeggiamenti
+  intensi; offrire skip e movimento ridotto con indicazione statica dell’esito.
+- Accettazione: verificare entrambi gli estremi di tutti i sette dadi, valori
+  intermedi, d100 invertito, tiri multipli/misti senza trigger speciale, replay,
+  retry/errore salvataggio, skip/movimento ridotto, cambio vista e riavvio. Storico
+  e backup devono conservare esattamente il tiro originale.
+
+## M13 — Release versionate e pacchetti su Forgegit (pianificata; solo requisiti)
+
+Repository dell’utente verificato nell’attuale `origin`:
+`https://github.com/Acelith/Chronexus.git`. Non presumere API o funzionalità del
+server: verificarle prima di realizzare la procedura di pubblicazione.
+
+- Preparare un flusso ripetibile di versionamento coerente fra app, Cargo,
+  configurazione Tauri, tag e pacchetti, partendo dalle versioni/tag realmente
+  presenti. Non assegnare ora una versione a una funzionalità non implementata.
+- A ogni futura consegna di milestone implementata e verificata, pubblicare sul
+  repository dell’utente il codice della consegna e una release versionata con
+  i pacchetti prodotti, salvo istruzione successiva di non pubblicare. Questa è
+  l’autorizzazione permanente richiesta dall’utente, non un’autorizzazione a
+  pubblicare la presente modifica documentale.
+- Allegare installer/pacchetti dell’app e, quando previsto, il pacchetto AI locale
+  con runtime, pesi redistribuibili e licenze; verificare limiti di dimensione,
+  autenticazione disponibile e supporto del server. Non usare altri servizi o
+  repository come destinazione alternativa senza autorizzazione.
+- Accompagnare gli asset con checksum, istruzioni, note di rilascio in italiano,
+  prove realmente eseguite, compatibilità/migrazioni e limiti. Pubblicare soltanto
+  piattaforme e pacchetti effettivamente costruiti/verificati; distinguere firma
+  e prove mancanti. Mai includere campagne, backup, profili, segreti o dati privati.
+- Non fare force-push, riscrivere storia o sovrascrivere tag/release/asset
+  esistenti. Su errore interrompere la pubblicazione, conservare i pacchetti
+  locali e riportare quanto effettivamente caricato, senza dichiarare successo.
+- Accettazione: verificare corrispondenza tag/commit/versione, download e checksum
+  degli allegati pubblicati, installazione/avvio su piattaforme provate e accesso
+  reale alla release. Non creare pubblicazioni finte per segnare la milestone fatta.
+
+**Vincolo della richiesta del 24 ottobre 2026:** questa esecuzione aggiorna solo
+milestone e istruzioni. Nessun push, tag remoto, release, upload o implementazione
+M11–M13 adesso. La procedura Forgegit sarà lo standard per le future consegne,
+rispettando sempre un eventuale divieto esplicito successivo dell’utente.
+
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.
 

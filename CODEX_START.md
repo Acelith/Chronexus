@@ -48,7 +48,7 @@ If the environment prevents a desktop build, still create the correct project, r
 8. At the end, stop at the end of M1 and report in **Italian**: what I can actually use, exact checks run and results, commit hashes and complete subjects, any limitations/blockers, instructions to launch the app locally, and the next planned milestone (M2).
 
 ## Important-change Git policy (non-negotiable)
-Read and follow the complete commit protocol in `AGENTS.md`. Every important implementation or change requires a real Git commit with a clear conventional subject **and an exhaustive multi-paragraph description**. The body must explain reason, changes, tests actually run, migrations/compatibility and limitations. Do not squash unrelated features into one generic commit. Do not falsely state that a commit exists. Do not push, force reset, overwrite external edits or invent a Git author identity.
+Read and follow the complete commit protocol in `AGENTS.md`. Every important implementation or change requires a real Git commit with a clear conventional subject **and an exhaustive multi-paragraph description**. The body must explain reason, changes, tests actually run, migrations/compatibility and limitations. Do not squash unrelated features into one generic commit. Do not falsely state that a commit exists. For future validated milestone deliveries, publish code and versioned releases/packages only to the user’s Forgegit origin, following docs/INSTALLERS.md and ROADMAP M13. This standing authorization never overrides an explicit no-publication instruction. The 24 October 2026 M11–M13 planning request explicitly forbids any publication now. Never force-push, force reset, overwrite external edits or invent a Git author identity.
 
 ## Token and interaction policy
 I have limited Codex allowance. Be precise and economical with context: inspect relevant files selectively, don't print file contents or long command output unless diagnosing a failure, avoid unnecessary dependencies/scaffolding, reuse `AGENTS.md` and the short `docs/STATUS.md` for future sessions. No unnecessary approval questions for ordinary implementation decisions: choose conservative defaults and record them. Stop to ask only for truly blocking decisions or potentially destructive actions. Complete actual milestone validation before ending, not just the first compile.
@@ -70,3 +70,15 @@ SQLite 015 and .nodex archives. Never pass selectors, IPC keys, URIs or stored
 content to translation functions. Follow i18n scan/normalize/check and actual
 native QA, and never report native-reader, physical Braille/IME or platform
 validation that was not run. No new milestone or installer was requested by M10.
+
+
+## Planned M11–M13 and standing Forgegit release instruction
+
+M11 adds Elfico/Dethek writing modes (Elfico variant still to identify); M12 adds
+single-die best/worst dragon animations, with d100 inverted (1 best, 100 worst).
+M13 defines versioned releases and app/AI packages on the user’s Forgegit origin
+https://github.com/Acelith/Chronexus.git. See ROADMAP for exact triggers and tests.
+Future implemented/tested milestone deliveries include publication there, unless
+the user says otherwise. Do not publish for a documentation-only planning task.
+For this request: update instructions/milestones only; no implementation, push,
+remote tags, release creation or uploads. Do not treat planned work as delivered.
