@@ -1,10 +1,11 @@
+import { diceText as t } from "./strings";
+import DiceSceneFeedback from "./DiceSceneFeedback";
 import { dragonOutcome } from "./outcome";
 import LivingDragons from "./LivingDragons";
 import "./dragons.css";
 import { useDiceTimeline } from "./useDiceTimeline";
 import type { Roll } from "./api";
 import { sceneDice } from "./model";
-import { diceText as t } from "./strings";
 import { useReducedMotion } from "./useReducedMotion";
 import DiceCast from "./DiceCast";
 import SlotNumber from "./SlotNumber";
@@ -73,24 +74,16 @@ export default function DiceScene({
           </div>
         ) : null}
       </div>
-      <div className="dice-scene-status">
-        <p role="status">
-          {phase === "finished" ? (reduced ? t.reduced : t.saved) : t[phase]}
-        </p>
-        {animate && phase !== "finished" ? (
-          <button type="button" onClick={finish}>
-            {t.skip}
-          </button>
-        ) : null}
-      </div>
-      {revealed && outcome !== "ordinary" ? (
-        <p className={`dice-outcome outcome-${outcome}`} role="status">
-          {outcome === "celebration" ? t.best : t.worst}
-        </p>
-      ) : null}
-      {count > dice.length ? (
-        <p className="editor-hint">{t.compact(dice.length, count)}</p>
-      ) : null}
+      <DiceSceneFeedback
+        phase={phase}
+        reduced={reduced}
+        animate={animate}
+        finish={finish}
+        revealed={revealed}
+        outcome={outcome}
+        count={count}
+        shown={dice.length}
+      />
     </div>
   );
 }

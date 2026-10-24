@@ -88,6 +88,8 @@ export default function LanguageSettings() {
             <option value="galactic">
               {tr("Alfabeto Galattico Standard · Minecraft")}
             </option>
+            <option value="espruar">{tr("Elfico D&D · Espruar")}</option>
+            <option value="dethek">{tr("Nanico D&D · Dethek")}</option>
           </select>
         </label>
         <label className="language-checkbox">

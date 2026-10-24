@@ -253,3 +253,37 @@
   white-space: nowrap;
   border: 0;
 }
+@font-face {
+  font-family: "Chronexus Espruar";
+  src: url("../../assets/fonts/forgotten-realms/Espruar.otf") format("opentype");
+  font-display: swap;
+  unicode-range: U+0041-005A, U+0061-007A;
+}
+@font-face {
+  font-family: "Chronexus Dethek";
+  src: url("../../assets/fonts/forgotten-realms/Dethek.otf") format("opentype");
+  font-display: swap;
+  unicode-range: U+0041-005A, U+0061-007A;
+}
+.script-espruar .script-glyphs,
+.transcription-preview .espruar-output {
+  font-family:
+    "Chronexus Espruar", "Chronexus Text", "Chronexus Arabic",
+    "Chronexus Japanese", "Chronexus Korean", "Chronexus Chinese", serif;
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "clig" 0,
+    "calt" 0;
+}
+.script-dethek .script-glyphs,
+.transcription-preview .dethek-output {
+  font-family:
+    "Chronexus Dethek", "Chronexus Text", "Chronexus Arabic",
+    "Chronexus Japanese", "Chronexus Korean", "Chronexus Chinese", serif;
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "clig" 0,
+    "calt" 0;
+}

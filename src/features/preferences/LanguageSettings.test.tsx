@@ -75,3 +75,31 @@ it("Galattico senza font disponibile mantiene il testo ordinario visibile", () =
   );
   expect(document.querySelector(".script-original")).toHaveTextContent("Salva");
 });
+
+it.each(["espruar", "dethek"] as const)(
+  "seleziona %s e salva preferenze v2 senza alterare il testo",
+  async (script) => {
+    const user = userEvent.setup();
+    vi.mocked(preferencesApi.save).mockImplementation(async (p) => p);
+    render(<LanguageSettings />);
+    const field = screen.getByLabelText("Testo da trascrivere");
+    await user.clear(field);
+    await user.type(field, "Oran 100 日本語");
+    await user.selectOptions(
+      screen.getByLabelText("Modalità di scrittura"),
+      script,
+    );
+    await waitFor(() => expect(getPreferences().script).toBe(script));
+    expect(getPreferences().version).toBe(2);
+    expect(field).toHaveValue("Oran 100 日本語");
+    expect(preferencesApi.save).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 2, script }),
+    );
+    await user.click(
+      screen.getByRole("button", {
+        name: "Italiano · Ripristina lingua e scrittura",
+      }),
+    );
+    await waitFor(() => expect(getPreferences()).toEqual(defaultPreferences));
+  },
+);

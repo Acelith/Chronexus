@@ -376,3 +376,10 @@ Cinque font locali e Monocraft assente, Unicode Markdown/visuale, composizione
 simulata, ricerca CJK e UUID del primo blocco PASS. IME OS reale non provato.
 Nessuna campagna reale aperta e nessun host remoto contattato nei percorsi QA.
 Dettagli, script e limiti: docs/I18N.md. Revisione linguistica/assistiva aperta.
+
+M13 implementata: Espruar/Dethek con font originali OFL, fallback semantico,
+preferenze v2 compatibili in lettura v1 e pacchetti reversibili versionati.
+37 test mirati frontend + 2 Node font/licenze + 6 Rust preferenze PASS;
+typecheck/lint PASS; React Doctor changed 100/100. QA nativo/distribuzione pendenti.
+Il refactor aggiuntivo DiceSceneFeedback risolve il rilievo rimasto nel commit M12:
+la prima estrazione DiceCast, da sola, non era stata sufficiente.

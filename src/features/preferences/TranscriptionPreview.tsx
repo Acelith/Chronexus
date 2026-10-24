@@ -36,13 +36,26 @@ export default function TranscriptionPreview() {
           }}
         />
       </label>
+      {p.script === "espruar" || p.script === "dethek" ? (
+        <p>
+          {tr(
+            "Espruar e Dethek usano i glifi dei font originali per A–Z e a–z. Cifre e punteggiatura restano ordinarie. La resa dipende dal font, non è una traduzione della lingua. Il pacchetto v2 conserva l’originale e la revisione dell’alfabeto.",
+          )}
+        </p>
+      ) : null}
       <div className="transcription-sample">
         <Label value={source} />
       </div>
       <label>
         <Text source="Trascrizione" />
         <textarea
-          className={p.script === "galactic" ? "galactic-output" : ""}
+          className={
+            p.script === "galactic"
+              ? "galactic-output"
+              : p.script === "espruar" || p.script === "dethek"
+                ? `alphabet-output ${p.script}-output`
+                : ""
+          }
           dir="ltr"
           readOnly
           value={result.text}

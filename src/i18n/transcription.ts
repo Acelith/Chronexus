@@ -97,6 +97,10 @@ export function transcribe(source: string, script: Script): Transcription {
       numeric = false;
       return script === "morse" ? (c === "\n" ? "\n" : "/") : c;
     }
+    if (script === "espruar" || script === "dethek") {
+      if (!/^[A-Za-z0-9\p{P}\p{S}\s]$/u.test(c)) unsupported.add(c);
+      return c; // ASCII character-to-glyph mapping in the unmodified OFL font.
+    }
     if (script === "galactic") {
       if (/^[a-z]$/i.test(c))
         return String.fromCodePoint(
@@ -140,7 +144,10 @@ export function transcriptionPacket(source: string, script: Script) {
   return JSON.stringify(
     {
       format: "chronexus-transcription",
-      version: 1,
+      version: script === "espruar" || script === "dethek" ? 2 : 1,
+      ...(script === "espruar" || script === "dethek"
+        ? { alphabetRevision: 1 }
+        : {}),
       script,
       original: source,
       encoded: transcribe(source, script).text,
@@ -158,8 +165,15 @@ export function restoreTranscription(packet: string): string {
   const v = p as Record<string, unknown>;
   if (
     v.format !== "chronexus-transcription" ||
-    v.version !== 1 ||
-    !["standard", "braille", "morse", "galactic"].includes(String(v.script)) ||
+    !(
+      (v.version === 1 &&
+        ["standard", "braille", "morse", "galactic"].includes(
+          String(v.script),
+        )) ||
+      (v.version === 2 &&
+        v.alphabetRevision === 1 &&
+        ["espruar", "dethek"].includes(String(v.script)))
+    ) ||
     typeof v.original !== "string" ||
     typeof v.encoded !== "string" ||
     transcribe(v.original, v.script as Script).text !== v.encoded

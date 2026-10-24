@@ -34,7 +34,7 @@ const call = (name, args = {}) =>
     { name, args },
   );
 const defaults = {
-  version: 1,
+  version: 2,
   locale: "it",
   script: "standard",
   showOriginal: true,

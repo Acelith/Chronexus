@@ -29,7 +29,7 @@ pub struct Preferences {
 impl Default for Preferences {
     fn default() -> Self {
         Self {
-            version: 1,
+            version: 2,
             locale: "it".into(),
             script: "standard".into(),
             show_original: true,
@@ -37,15 +37,27 @@ impl Default for Preferences {
     }
 }
 fn validate(p: &Preferences) -> AppResult<()> {
-    if p.version != 1
+    if p.version != 2
         || !LOCALES.contains(&p.locale.as_str())
-        || !["standard", "braille", "morse", "galactic"].contains(&p.script.as_str())
+        || ![
+            "standard", "braille", "morse", "galactic", "espruar", "dethek",
+        ]
+        .contains(&p.script.as_str())
     {
         return Err(
             "Preferenze linguistiche non supportate. Scegli una lingua disponibile.".into(),
         );
     }
     Ok(())
+}
+fn upgrade(mut value: Preferences) -> AppResult<Preferences> {
+    if value.version == 1
+        && ["standard", "braille", "morse", "galactic"].contains(&value.script.as_str())
+    {
+        value.version = 2;
+    }
+    validate(&value)?;
+    Ok(value)
 }
 pub fn read(root: &Path) -> AppResult<Preferences> {
     let path = root.join(FILE);
@@ -61,11 +73,10 @@ pub fn read(root: &Path) -> AppResult<Preferences> {
         return Err("Preferenze dell’interfaccia danneggiate. Puoi ripristinare l’italiano dalle impostazioni.".into());
     }
     let value:Preferences=serde_json::from_slice(&bytes).map_err(|_|"Preferenze dell’interfaccia danneggiate. Puoi ripristinare l’italiano dalle impostazioni.".to_string())?;
-    validate(&value)?;
-    Ok(value)
+    upgrade(value)
 }
 pub fn save(root: &Path, value: Preferences) -> AppResult<Preferences> {
-    validate(&value)?;
+    let value = upgrade(value)?;
     let mut next = NamedTempFile::new_in(root)
         .map_err(|_| "Impossibile salvare la lingua. Verifica spazio e permessi.".to_string())?;
     let bytes = serde_json::to_vec_pretty(&value)
@@ -86,9 +97,11 @@ mod tests {
         let d = tempfile::tempdir().unwrap();
         assert_eq!(read(d.path()).unwrap(), Preferences::default());
         for locale in LOCALES {
-            for script in ["standard", "braille", "morse", "galactic"] {
+            for script in [
+                "standard", "braille", "morse", "galactic", "espruar", "dethek",
+            ] {
                 let p = Preferences {
-                    version: 1,
+                    version: 2,
                     locale: locale.into(),
                     script: script.into(),
                     show_original: false,
@@ -112,5 +125,33 @@ mod tests {
         assert!(save(d.path(), bad).is_err());
         assert_eq!(read(d.path()).unwrap(), prior);
         assert!(serde_json::from_str::<Preferences>(r#"{"version":1,"locale":"it","script":"standard","showOriginal":true,"path":"elsewhere"}"#).is_err());
+    }
+    #[test]
+    fn upgrades_legacy_preferences_without_rewriting_on_read() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join(FILE);
+        let original = br#"{"version":1,"locale":"de","script":"morse","showOriginal":false}"#;
+        fs::write(&path, original).unwrap();
+        let current = read(root.path()).unwrap();
+        assert_eq!(current.version, 2);
+        assert_eq!(current.locale, "de");
+        assert_eq!(current.script, "morse");
+        assert!(!current.show_original);
+        assert_eq!(fs::read(&path).unwrap(), original);
+        save(root.path(), current).unwrap();
+        let saved: Preferences = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+        assert_eq!(saved.version, 2);
+    }
+    #[test]
+    fn rejects_new_alphabets_mislabeled_as_v1_and_unknown_future_versions() {
+        let root = tempfile::tempdir().unwrap();
+        for text in [
+            r#"{"version":1,"locale":"it","script":"espruar","showOriginal":true}"#,
+            r#"{"version":3,"locale":"it","script":"dethek","showOriginal":true}"#,
+        ] {
+            fs::write(root.path().join(FILE), text).unwrap();
+            assert!(read(root.path()).is_err());
+            assert_eq!(fs::read_to_string(root.path().join(FILE)).unwrap(), text);
+        }
     }
 }

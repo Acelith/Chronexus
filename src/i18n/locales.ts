@@ -19,15 +19,16 @@ export const locales = [
   { id: "art-x-rihan", name: "Rihannsu · Romulano", intl: "en-GB", dir: "ltr" },
 ] as const;
 export type Locale = (typeof locales)[number]["id"];
-export type Script = "standard" | "braille" | "morse" | "galactic";
+export type Script =
+  "standard" | "braille" | "morse" | "galactic" | "espruar" | "dethek";
 export interface Preferences {
-  version: 1;
+  version: 2;
   locale: Locale;
   script: Script;
   showOriginal: boolean;
 }
 export const defaultPreferences: Preferences = {
-  version: 1,
+  version: 2,
   locale: "it",
   script: "standard",
   showOriginal: true,
@@ -38,9 +39,11 @@ export function validPreferences(value: unknown): value is Preferences {
   if (!value || typeof value !== "object") return false;
   const p = value as Preferences;
   return (
-    p.version === 1 &&
+    p.version === 2 &&
     locales.some((l) => l.id === p.locale) &&
-    ["standard", "braille", "morse", "galactic"].includes(p.script) &&
+    ["standard", "braille", "morse", "galactic", "espruar", "dethek"].includes(
+      p.script,
+    ) &&
     typeof p.showOriginal === "boolean"
   );
 }

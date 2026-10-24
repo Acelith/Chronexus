@@ -38,3 +38,25 @@ describe("trascrizione senza perdita degli originali", () => {
     },
   );
 });
+
+it.each(["espruar", "dethek"] as const)(
+  "%s: mapping font originale e pacchetto v2 reversibile",
+  (script) => {
+    const source = "AaZz 100 è 日本語 العربية ſ";
+    const rendered = transcribe(source, script);
+    expect(rendered.text).toBe(source);
+    expect(rendered.unsupported).toContain("è");
+    expect(rendered.unsupported).toContain("日");
+    expect(rendered.unsupported).toContain("ſ");
+    const packet = transcriptionPacket(source, script),
+      parsed = JSON.parse(packet);
+    expect(parsed.version).toBe(2);
+    expect(parsed.alphabetRevision).toBe(1);
+    expect(restoreTranscription(packet)).toBe(source);
+    parsed.version = 1;
+    expect(() => restoreTranscription(JSON.stringify(parsed))).toThrow();
+    parsed.version = 2;
+    parsed.alphabetRevision = 2;
+    expect(() => restoreTranscription(JSON.stringify(parsed))).toThrow();
+  },
+);
