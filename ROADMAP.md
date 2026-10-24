@@ -369,7 +369,7 @@ restano revisione linguistica/dialettale, lingue di fantasia complete dove
 verificabili, prova assistiva fisica/IME reale e verifiche macOS/Linux.
 Non viene avviata una nuova milestone senza richiesta dell’utente.
 
-## M11 — Release versionate e pacchetti su Forgegit (pianificata; solo requisiti)
+## M11 — Release versionate e pacchetti su Forgegit (distribuzione in corso)
 
 Repository dell’utente verificato nell’attuale `origin`:
 `https://github.com/Acelith/Chronexus.git`. Non presumere API o funzionalità del
@@ -398,7 +398,7 @@ server: verificarle prima di realizzare la procedura di pubblicazione.
   degli allegati pubblicati, installazione/avvio su piattaforme provate e accesso
   reale alla release. Non creare pubblicazioni finte per segnare la milestone fatta.
 
-## M12 — Draghi animati per esiti estremi del singolo dado (pianificata; solo requisiti)
+## M12 — Draghi animati per esiti estremi del singolo dado (implementata Windows)
 
 Rinnovare la schermata del tiradadi con animazioni dei due draghi per gli esiti
 migliori/peggiori. Il trigger si applica solo quando il tiro contiene **un solo
@@ -432,7 +432,7 @@ dado complessivo**, non un dado estremo all’interno di un tiro multiplo o mist
   retry/errore salvataggio, skip/movimento ridotto, cambio vista e riavvio. Storico
   e backup devono conservare esattamente il tiro originale.
 
-## M13 — Alfabeti Elfico e Dethek (pianificata; solo requisiti)
+## M13 — Alfabeti Elfico e Dethek (implementata Windows)
 
 Aggiungere Elfico e Dethek alle opzioni di lingua/scrittura delle impostazioni
 globali, mantenendo tutte le opzioni M10 esistenti. Sono alfabeti: non presentarli
@@ -457,6 +457,10 @@ come traduzioni automatiche complete delle lingue elfiche o naniche.
 **Istruzione di esecuzione successiva:** implementare M12 e M13; completarle e
 verificarle prima di compilare i pacchetti e pubblicare M11. La pubblicazione
 finale su Forgegit è ora esplicitamente autorizzata. Nessuna consegna intermedia.
+
+M12/M13 verificate il 24 ottobre 2026 nel desktop isolato Windows; dettagli e
+limiti in docs/releases/v0.2.0.md. M11 non è conclusa finché download e checksum
+degli asset pubblicati non sono confermati. Le revisioni M10 rimangono aperte.
 
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.

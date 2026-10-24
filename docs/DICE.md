@@ -131,3 +131,9 @@ selezione. Geometria fisica LTR indipendente dalla lingua della navigazione.
 pacchetti attesi dopo M13, come richiesto dall’utente. Nessuna pubblicazione.
 Skill: frontend-design/impeccable per feedback e attori coerenti con il tema,
 accessibility per skip/movimento ridotto, react-testing/react-doctor per verifiche.
+
+Collaudo M12 concluso su Windows nella build debug isolata 0.2.0: quattordici
+estremi ottenuti dal RNG reale, due attori visibili, replay senza nuovi tiri,
+misto ordinario, skip/ridotto, riavvio e backup/ripristino byte-esatti dei dati.
+La rotazione del drago destro usa ora il proprio centro per restare nel riquadro.
+Screenshot e report sintetici restano in .tools; nessun dato personale in Git.

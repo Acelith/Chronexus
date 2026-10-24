@@ -105,3 +105,36 @@ nell'ambiente Rust configurato descritto nel README.
   PowerShell avviato da NSIS. Installer richiede Windows x64 e usa PowerShell 64 bit.
 - Nessun nuovo test delle funzioni React/Rust: non sono state modificate.
   Wizard/collegamento interattivi e piattaforme diverse non verificati qui.
+
+## M11 — procedura 0.2.0 Windows x64
+
+La procedura corrente è `scripts/release/package.py`, non lo script M7/Qwen
+storico. Versioni package.json, Cargo.toml/lock e tauri.conf.json coerenti;
+identificativo storage invariato. Costruire con toolchain relativa tramite Dev.ps1
+oppure configurare CARGO_HOME/RUSTUP_HOME del progetto e usare:
+
+```powershell
+pnpm exec tauri build --bundles nsis
+C:/Python315/python.exe scripts/release/package.py installers/Chronexus-0.2.0-Windows-x64-final
+C:/Python315/python.exe -m unittest discover -s scripts/release -p 'test_*.py'
+```
+
+Lo script richiede una directory nuova, verifica i blob ufficiali GGUF Gemma 4 e
+produce cinque ZIP validi sotto 2048 MiB: core app/runtime/componenti e quattro
+volumi del peso principale (il quarto include anche il proiettore). Ogni file ha
+SHA-256 e dimensione; `AI/bundle.json` guida l'installatore PowerShell offline.
+Non estrarre i volumi manualmente. Licenze app/font e runtime/modello incluse;
+nessuna scansione delle cartelle campagne o dei profili di addestramento.
+
+`forgejo_release.py` riceve l'autorizzazione soltanto in RAM da una sessione
+interattiva; non cerca credenziali nel sistema e non le scrive. Destinazione fissa
+origin dell'utente. Richiede albero pulito, tag annotato/versione/commit remoto
+coerenti e report checksum. Crea bozza, carica cinque allegati, scarica/verifica
+ciascuno, poi pubblica. Non sovrascrive tag/release/allegati altrui. Una ricevuta
+locale ignorata permette di riconoscere una bozza della stessa esecuzione; su
+errore interrompere, non cancellare o presentare una release parziale come conclusa.
+
+Le prove effettive e i limiti della versione sono in `docs/releases/v0.2.0.md`.
+SHA256SUMS.txt e package-report.json rimangono con i pacchetti locali; i cinque
+checksum sono riportati anche nel corpo della release. Token/password non devono
+mai entrare in file di piano, ricevute, log, argomenti di processo o Git.

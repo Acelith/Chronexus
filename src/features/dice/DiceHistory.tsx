@@ -38,7 +38,7 @@ export default function DiceHistory({
       ) : null}
       <ol className="dice-history-list">
         {history.rows.map((roll) => (
-          <li key={roll.id}>
+          <li key={roll.id} data-roll-id={roll.id}>
             {roll.id === pendingRevealId ? (
               <div className="dice-awaiting-reveal" role="status">
                 <time dateTime={roll.createdAt}>

@@ -20,6 +20,7 @@
 }
 .dragon-right {
   inset-inline-end: 0;
+  transform-origin: 50% 50%;
   transform: scaleX(-1);
 }
 .dragon-approach {

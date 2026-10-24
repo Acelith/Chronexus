@@ -1,13 +1,32 @@
 # Stato Chronexus — 24 ottobre 2026
 
-## M12/M13 in corso → M11 alla fine
+## M12/M13 operative Windows → M11 distribuzione in corso
 
-Ultima istruzione: realizzare tutte e tre le milestone, poi compilare e pubblicare
-su Forgegit soltanto alla fine. Il precedente divieto della pianificazione è
-superato. Ordine operativo: M12 animazioni, M13 alfabeti, M11 distribuzione.
-Elfico confermato come Espruar. Lavoro iniziale pulito; skill pertinenti lette.
-M12: logica/attori/replay implementati; 22 test React/dominio PASS, typecheck/lint
-PASS. Collaudo visivo/build finale dopo M13. Nessuna pubblicazione effettuata.
+M12: due draghi SVG, estremi del singolo dado (d100 invertito), replay senza RNG,
+skip/movimento ridotto. M13: Espruar/Dethek OFL locali, preferenze v2 compatibili
+in lettura v1, pacchetti reversibili versionati e fallback. SQLite 015 invariato.
+
+Verifiche: 127 test frontend, 81 Rust, 2 Node font/licenze e 11 distribuzione PASS;
+lint/typecheck/format/clippy/i18n PASS; React Doctor changed 100, detector impeccable
+senza rilievi. Desktop isolato: 14 estremi reali, replay, tiri misti, font/fallback,
+axe 0; 173 tiri identici dopo chiusura/riavvio e backup/ripristino reale.
+Installer Windows 0.2.0 costruito/installato e disinstallato in cartella QA; byte
+identici alla build salvo il marcatore ufficiale NSIS. Avvio release sul profilo
+personale evitato; avvio/IPC testati nella build debug isolata dello stesso sorgente.
+
+M11: accesso Forgegit verificato; cinque ZIP offline con Ollama 0.40.10 e Gemma 4
+12B base, licenze e checksum in preparazione. Nessun push/release/upload ancora.
+Pacchetto iniziale core oltre il limite server bloccato localmente, non pubblicato;
+nuovo layout sposta il proiettore nel quarto volume. Installer AI: verifiche
+integrità, staging e rifiuto destinazioni estranee, senza download. Prova reale
+AI installata PASS: cloud disabilitato, risposta italiana, 49/49 layer principali
+e 5/5 draft GPU. Download remoto ancora pendente. Limiti: firma assente,
+macOS/Linux, upgrade personale, revisioni linguistiche/assistive M10 non provati.
+
+Skill: find-skills per ricerca strumenti (nessuna installazione necessaria),
+frontend-design/impeccable/accessibility per resa e movimento, react-testing e
+react-doctor per regressioni, Rust/Tauri e systematic-debugging per persistenza
+e distribuzione. Dettagli in I18N.md, DICE.md e releases/v0.2.0.md.
 Le sezioni seguenti sono checkpoint precedenti.
 
 ## M10 — operativa su Windows; accettazione linguistica e assistiva aperta
@@ -383,3 +402,9 @@ preferenze v2 compatibili in lettura v1 e pacchetti reversibili versionati.
 typecheck/lint PASS; React Doctor changed 100/100. QA nativo/distribuzione pendenti.
 Il refactor aggiuntivo DiceSceneFeedback risolve il rilievo rimasto nel commit M12:
 la prima estrazione DiceCast, da sola, non era stata sufficiente.
+
+M11 finale: i cinque ZIP validi sono in installers/Chronexus-0.2.0-Windows-x64-final;
+core 1972,7 MiB, volumi 1800/1800/1800/1806,4 MiB, tutti sotto il limite 2048.
+Installazione AI reale e ripetuta PASS, nessuna sovrascrittura. La vecchia prova
+fuori limite è archiviata sotto .tools, esclusa dalla consegna. Pubblicazione
+remota ancora da eseguire e verificare; non dichiarata conclusa in questo commit.

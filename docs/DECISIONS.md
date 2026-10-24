@@ -361,3 +361,20 @@ lingua. Nomi/preset salvati, UUID, Markdown e fonti non passano al traduttore.
 Le lingue di fantasia rimangono lessici parziali dichiarati: non inventare una
 traduzione integrale. Braille/Morse/SGA separati dalla lingua, originali semantici
 e pacchetto reversibile. Varianti/font/fonti/limiti e prove: I18N.md.
+
+## M11–M13 — scritture versionate e pacchetti offline
+
+Le nuove scritture usano font originali OFL e codici ASCII legati alla revisione
+esplicita del font, non un alfabeto Unicode inventato. Preferenze v2 con upgrade
+conservativo v1 e pacchetti reversibili v2 per Espruar/Dethek; SQLite invariato.
+
+Gli estremi dei dadi sono una classificazione pura del risultato già persistito.
+Il replay rimonta la sola scena; non richiama RNG o salvataggio. Due attori SVG
+locali mantengono controllo su direzione, fiamme e movimento ridotto.
+
+Forgejo 12.0.4 dell'origin consente ZIP fino a 2048 MiB: cinque archivi validi,
+non estensioni ZIP applicate a dati grezzi. Distribuire soltanto la closure GGUF
+ufficiale Windows del modello base Gemma 4 12B; escludere la variante opzionale
+MLX e qualsiasi dato/adattatore privato. Installazione in staging nuovo, verifica
+completa e spostamento finale; nessuna sovrascrittura di destinazioni diverse.
+Pubblicazione in bozza e checksum verificati via download prima di renderla finale.

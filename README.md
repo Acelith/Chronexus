@@ -12,8 +12,8 @@ archivi e i backup esistenti. L'eseguibile si chiama ora `chronexus.exe` su Wind
 ## Lingue e scritture
 
 Nel menu sinistro, **Impostazioni dell’app → Lingua e scrittura**: 11 lingue
-naturali, Klingon/Rihannsu sperimentali e tre rese visuali (Braille, Morse,
-Galattico di Minecraft). Cambio immediato, scelta persistente, font e cataloghi
+naturali, Klingon/Rihannsu sperimentali e cinque rese visuali (Braille, Morse,
+Galattico di Minecraft, Espruar e Dethek). Cambio immediato, scelta persistente, font e cataloghi
 locali. Appunti, schede, citazioni e backup mantengono i dati originali.
 Le traduzioni sono bozze da revisionare; le lingue inventate hanno fallback
 italiano. Il pulsante **Italiano · Ripristina lingua e scrittura** resta leggibile.
@@ -405,3 +405,13 @@ Guida, compatibilità schema 015 e prove: [docs/DICE.md](docs/DICE.md).
 Per avviare su Windows dalla cartella corrente: `./scripts/Dev.ps1`;
 eseguibile aggiornato in `src-tauri/target/release/chronexus.exe`.
 L’installer precedente non è stato rigenerato in questa milestone.
+
+
+## Versione 0.2.0 — distribuzione Windows
+
+Le novità includono draghi animati sugli estremi del singolo dado e alfabeti
+Espruar/Dethek con font locali. Il replay conserva il tiro originale.
+I pacchetti Windows app + Gemma 4 12B offline sono documentati in
+[INSTALLERS.md](docs/INSTALLERS.md) e nelle [note 0.2.0](docs/releases/v0.2.0.md).
+Scaricare tutti e cinque gli ZIP; estrarre soltanto quello Windows-x64 e usare
+Installa-AI.cmd per gli altri quattro. Non sono inclusi dati personali o training.
