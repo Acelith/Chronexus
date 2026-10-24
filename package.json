@@ -19,8 +19,8 @@
     "icons": "tauri icon assets/chronexus.svg --output src-tauri/icons",
     "package:desktop": "pnpm icons && tauri build",
     "i18n:scan": "node scripts/i18n/scan.mjs",
-    "i18n:normalize": "node scripts/i18n/normalize-chinese.mjs",
-    "i18n:check": "node scripts/i18n/normalize-chinese.mjs --check && vitest run src/i18n/catalogs.test.ts"
+    "i18n:normalize": "node scripts/i18n/prepare-catalogs.mjs",
+    "i18n:check": "node scripts/i18n/prepare-catalogs.mjs --check && vitest run src/i18n/catalogs.test.ts"
   },
   "dependencies": {
     "@blocknote/core": "^0.56.0",

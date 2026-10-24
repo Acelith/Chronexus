@@ -1,3 +1,4 @@
+import { systemMessage } from "../../i18n/store";
 import { tr } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
 import { EditorSaveBar, EditorModeBar } from "./EditorChrome";
@@ -258,7 +259,7 @@ function NoteEditor(props: Props) {
       />
       {state.kind === "error" ? (
         <p className="error" role="alert">
-          {state.message}
+          {systemMessage(state.message)}
         </p>
       ) : null}
       {linkError ? (

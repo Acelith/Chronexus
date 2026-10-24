@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
 import { useContext, useState } from "react";
 import { command, errorMessage } from "../journal/api";
@@ -26,15 +27,23 @@ export default function ExportButton({
         onClick={() =>
           void run(async () => {
             setError("");
-            setStatus("Esportazione…");
+            setStatus(tr("Esportazione…"));
             try {
               const receipt = await command<Receipt | null>("export_campaign", {
                 campaignId,
               });
               setStatus(
                 receipt
-                  ? `Esportazione creata: ${receipt.pages} pagine, ${receipt.sessions} sessioni, ${receipt.images} immagini. ${receipt.path}`
-                  : "Esportazione annullata.",
+                  ? tr(
+                      "Esportazione creata: {0} pagine, {1} sessioni, {2} immagini. {3}",
+                      [
+                        receipt.pages,
+                        receipt.sessions,
+                        receipt.images,
+                        receipt.path,
+                      ],
+                    )
+                  : tr("Esportazione annullata."),
               );
             } catch (reason) {
               setError(errorMessage(reason));

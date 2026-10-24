@@ -1,3 +1,4 @@
+import { systemMessage } from "../../i18n/store";
 import { localeInfo } from "../../i18n/locales";
 import { getPreferences } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
@@ -274,7 +275,10 @@ export default function TrainingPanel({
           )}
           {running && (
             <div role="status">
-              <p>{progress?.message || tr("Operazione locale in corso…")}</p>
+              <p>
+                {systemMessage(progress?.message) ||
+                  tr("Operazione locale in corso…")}
+              </p>
               {progress?.step != null && progress.steps != null && (
                 <>
                   <progress value={progress.step} max={progress.steps} />
@@ -333,7 +337,7 @@ function TrainingJob({
         )}{" "}
         · {j.manifest.length} <Text source={" estratti"} />
       </p>
-      {j.error && <p className="error">{j.error}</p>}
+      {j.error && <p className="error">{systemMessage(j.error)}</p>}
       {j.status === "ready" && (
         <>
           <p>

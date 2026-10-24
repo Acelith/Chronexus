@@ -176,3 +176,7 @@ export function translateError(message: string) {
   }
   return message;
 }
+/** Only diagnostics/status supplied by the app; never use for canonical notes or AI answers. */
+export function systemMessage(message: string | null | undefined) {
+  return message ? translateError(message) : message;
+}

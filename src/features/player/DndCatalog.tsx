@@ -1,3 +1,4 @@
+import { systemMessage } from "../../i18n/store";
 import { localeInfo } from "../../i18n/locales";
 import { getPreferences } from "../../i18n/store";
 import { tr, localizeLabels } from "../../i18n/store";
@@ -197,7 +198,9 @@ export default function DndCatalog({
                 "Premi Cerca nell’API per caricare l’indice. Non vengono effettuate richieste all’apertura.",
               )}
       </p>
-      {receipt?.warning ? <p role="status">{receipt.warning}</p> : null}
+      {receipt?.warning ? (
+        <p role="status">{systemMessage(receipt.warning)}</p>
+      ) : null}
       {rows ? (
         <div className="catalog-layout">
           <nav className="player-asset-list" aria-label={tr("Risultati D&D")}>
@@ -257,7 +260,7 @@ export default function DndCatalog({
                   )}
                 </p>
                 {document.receipt.warning ? (
-                  <p role="status">{document.receipt.warning}</p>
+                  <p role="status">{systemMessage(document.receipt.warning)}</p>
                 ) : null}
                 {textContent(document.data.desc) ? (
                   <p className="player-text">

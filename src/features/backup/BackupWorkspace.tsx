@@ -1,5 +1,5 @@
-import { localeInfo } from "../../i18n/locales";
-import { getPreferences } from "../../i18n/store";
+import { systemMessage } from "../../i18n/store";
+import { date as formatDateTime } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
 import { tr } from "../../i18n/store";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
@@ -117,13 +117,13 @@ export default function BackupWorkspace({
         setBackup(null);
         setPreview(null);
         await onRestored();
-        setStatus("Ripristino completato. Copia preventiva conservata.");
+        setStatus(tr("Ripristino completato. Copia preventiva conservata."));
       } catch (reason) {
         setPreview(null);
         choose.current?.focus();
         throw reason;
       }
-    }, "Creazione della copia preventiva e ripristino in corso. Attendi prima di chiudere Chronexus…");
+    }, tr("Creazione della copia preventiva e ripristino in corso. Attendi prima di chiudere Chronexus…"));
   }
   return (
     <section
@@ -175,7 +175,9 @@ export default function BackupWorkspace({
             />
           </p>
           <p className="archive-path">{restored.safetyPath}</p>
-          {restored.warning ? <p role="alert">{restored.warning}</p> : null}
+          {systemMessage(restored.warning) ? (
+            <p role="alert">{systemMessage(restored.warning)}</p>
+          ) : null}
         </section>
       ) : null}
       {preview ? (
@@ -222,10 +224,10 @@ export default function BackupWorkspace({
                   setBackup(result);
                   setStatus(
                     result
-                      ? "Backup creato e verificato."
-                      : "Backup annullato. Nessun file creato.",
+                      ? tr("Backup creato e verificato.")
+                      : tr("Backup annullato. Nessun file creato."),
                   );
-                }, "Scelta della destinazione e creazione del backup…");
+                }, tr("Scelta della destinazione e creazione del backup…"));
               }}
             >
               <Text source={"Crea backup"} />
@@ -268,10 +270,12 @@ export default function BackupWorkspace({
                   setPreview(result);
                   setStatus(
                     result
-                      ? "Backup verificato. Conferma o annulla il ripristino."
-                      : "Selezione annullata. Archivio invariato.",
+                      ? tr(
+                          "Backup verificato. Conferma o annulla il ripristino.",
+                        )
+                      : tr("Selezione annullata. Archivio invariato."),
                   );
-                }, "Selezione e verifica del backup…");
+                }, tr("Selezione e verifica del backup…"));
               }}
             >
               <Text source={"Seleziona backup"} />
@@ -358,23 +362,18 @@ function RestoreConfirmation({
         <Text source={"Sostituire l’intero archivio?"} />
       </h3>
       <p id="restore-warning">
-        <Text
-          source={"Tutte le campagne attuali saranno sostituite da quelle di"}
-        />{" "}
-        <strong>{preview.fileName}</strong>
-        <Text
-          source={
-            ". Prima verrà salvata una copia di sicurezza dell’archivio corrente. Non verrà effettuata una fusione."
-          }
-        />
+        {tr(
+          "Tutte le campagne attuali saranno sostituite da quelle di {0}. Prima verrà salvata una copia di sicurezza dell’archivio corrente. Non verrà effettuata una fusione.",
+          [preview.fileName],
+        )}
       </p>
       <p>
-        <Text source={"Backup del"} />{" "}
-        {new Intl.DateTimeFormat(localeInfo(getPreferences().locale).intl, {
-          dateStyle: "long",
-          timeStyle: "short",
-        }).format(new Date(preview.manifest.created_at))}
-        <Text source={". Integrità dei file e del database verificata."} />
+        {tr("Backup del {0}. Integrità dei file e del database verificata.", [
+          formatDateTime(preview.manifest.created_at, {
+            dateStyle: "long",
+            timeStyle: "short",
+          }),
+        ])}
       </p>
       <ArchiveSummary counts={preview.manifest.counts} />
       <div className="actions">

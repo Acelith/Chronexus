@@ -1,3 +1,4 @@
+import { systemMessage } from "../../i18n/store";
 import { localeInfo } from "../../i18n/locales";
 import { getPreferences } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
@@ -155,7 +156,9 @@ export default function WikiWorkspace() {
           />
         </p>
       ) : null}
-      {results?.warning ? <p role="status">{results.warning}</p> : null}
+      {results?.warning ? (
+        <p role="status">{systemMessage(results.warning)}</p>
+      ) : null}
       {results ? (
         <>
           <div className="wiki-results-heading">
@@ -245,7 +248,9 @@ export default function WikiWorkspace() {
                       localeInfo(getPreferences().locale).intl,
                     )}
                   </p>
-                  {entry.warning ? <p role="status">{entry.warning}</p> : null}
+                  {entry.warning ? (
+                    <p role="status">{systemMessage(entry.warning)}</p>
+                  ) : null}
                   <p className="wiki-prose">{entry.payload.entry.desc}</p>
                   <dl>
                     {Object.entries(entry.payload.entry)

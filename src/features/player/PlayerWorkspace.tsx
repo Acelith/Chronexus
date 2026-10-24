@@ -939,7 +939,7 @@ export default function PlayerWorkspace({
               await playerApi.deleteAsset(confirm);
               setAssets((items) => items.filter((a) => a.id !== confirm.id));
               askDelete(null);
-            }, "Voce eliminata. Pagine e appunti conservati.")
+            }, tr("Voce eliminata. Pagine e appunti conservati."))
           }
         />
       ) : null}

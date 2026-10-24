@@ -281,3 +281,25 @@ Da terminare: trascrizioni native, riavvio, ripristino, font/IME e build finale.
 Skill aggiunte alla verifica: systematic-debugging e react-doctor per regressioni;
 webapp-testing per ricognizione e prove browser, usando il runner Playwright JS
 esistente nel progetto. Revisione linguistica e prova assistiva reale non eseguite.
+### M10 — correzioni di accettazione e prove finali
+
+Corrette etichette principali e conteggi (fra cui Oggetti in tedesco), aggiunto
+lessico editoriale ripetibile in core-labels.json, normalizzazione/pruning
+cataloghi, frasi intere nella conferma restore e traduzione di stati backup/export
+e diagnostici pubblici conosciuti. Corretto il CSS del testo semantico nascosto:
+la scelta «solo trascrizione» funziona, conservando il nome accessibile.
+Dialogo restore centrato, scorrevole e leggibile nella finestra minima.
+
+Prove: 113 frontend e 79 Rust PASS; typecheck/lint/format e clippy PASS;
+cataloghi 1427 chiavi naturali con parametri integri; React Doctor ultimo 68,
+nessun nuovo rilievo sulle modifiche (baseline M9 ripetuta: 61).
+Detector impeccable eseguito: nessun rilievo. Build desktop release PASS.
+Native su frontend compilato: matrice 13×13 PASS, tre trascrizioni e testo
+semantico nascosto PASS; axe impostazioni EN/AR/JA senza violazioni. Riavvio,
+backup/restore 015, Escape/focus del dialogo, preferenze corrotte recuperabili
+PASS. Backup creato in DE e ripristinato mantenendo EN: preferenza realmente
+esterna al backup; verificata anche l’assenza del JSON nell’archivio ZIP.
+Cinque font locali e Monocraft assente, Unicode Markdown/visuale, composizione
+simulata, ricerca CJK e UUID del primo blocco PASS. IME OS reale non provato.
+Nessuna campagna reale aperta e nessun host remoto contattato nei percorsi QA.
+Dettagli, script e limiti: docs/I18N.md. Revisione linguistica/assistiva aperta.
