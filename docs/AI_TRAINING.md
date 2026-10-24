@@ -77,6 +77,13 @@ Lo script non va eseguito da un allegato della campagna.
 
 Versioni: PyTorch 2.14.1+cu130, Transformers 5.20.2, PEFT 0.21.2,
 bitsandbytes 0.50.2; dipendenze in `scripts/ai/requirements.txt`.
+Licenze verificate sui metadati e file LICENSE delle versioni installate:
+Transformers/PEFT/Accelerate e safetensors Apache 2.0, bitsandbytes e gguf MIT,
+psutil BSD-3-Clause; PyTorch include più licenze permissive elencate nel suo
+pacchetto. Il [checkpoint Google](https://huggingface.co/google/gemma-4-12B-it)
+è Apache 2.0. Le licenze rimangono nell'ambiente isolato; il nuovo installer
+app non ridistribuisce queste librerie o i pesi.
+
 Il worker distribuito con l'app usa solo file locali, `trust_remote_code=False`,
 cache Hugging Face offline e telemetria disabilitata. Non esegue istruzioni
 contenute negli appunti. Il worker termina anche se scompare il processo
@@ -156,3 +163,31 @@ Ulteriore prova reale: 74 estratti sintetici, 74 esempi e 74 passaggi GPU, con
 controllo di copertura, attivazione e domanda sull'ultima fonte riusciti. Il
 profilo originale di collaudo è stato poi ripristinato. Il limite precedente
 di 64 passaggi, scoperto in revisione, è stato corretto e coperto da regressione.
+
+
+## Ripetere i controlli nativi
+
+Solo su un profilo debug isolato e inizialmente vuoto sotto `.tools/`, con
+Ollama cloud-off, Qwen/Gemma installati e backend preparato. Avviare Vite e
+Chronexus debug con `NODEX_DEV_DATA_DIR` assoluta, WebView separata e porta
+debug 9223; il worker può usare `CHRONEXUS_TRAINING_HOME` in debug. Impostare
+`NODEX_DEV_BACKUP_FILE` e `NODEX_DEV_RESTORE_FILE` sullo stesso nuovo file
+`.tools/m8/native-trained.nodex`, mai su backup personali.
+
+Impostare `CHRONEXUS_AI_QA=isolated`, poi eseguire separatamente:
+
+```sh
+node scripts/qa/m8-local-ai.mjs seed
+node scripts/qa/m8-local-ai.mjs train
+node scripts/qa/m8-local-ai.mjs recover
+node scripts/qa/m8-local-ai.mjs boundaries
+node scripts/qa/m8-local-ai.mjs coverage
+```
+
+Avviare nuovamente la stessa app isolata prima di ogni fase; `recover` verifica
+anche il riavvio. `seed` richiede un archivio vuoto; le fasi seguenti controllano
+i nomi della fixture. `recover` e `coverage` rimuovono soltanto modelli derivati
+della fixture per provare ricostruzione e pulizia; non usare su dati personali.
+I rapporti e le schermate restano in `.tools/m8`, non in Git. L'installer M8
+contiene il worker aggiornato ma non i pesi o il backend CUDA; l'installazione
+M8 non è stata ripetuta.

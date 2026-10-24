@@ -1,5 +1,24 @@
 # Installer Windows con AI locale
 
+## Aggiornamento M8 — 24 ottobre 2026
+
+Il nuovo installer **dell'app** è in `installers/Chronexus-M8-Windows-x64/`.
+Generazione NSIS verificata; installazione M8 non ripetuta.
+Dimensione installer M8: 4.664.266 byte; SHA-256
+`e59a7cae39c01d0875f74e19c4c651030fe5733ee778e98126c056a8c5061bcf`.
+Copia nella root e worker di rilascio confrontati con gli artefatti finali.
+ Include il worker
+aggiornato, non i checkpoint o l'ambiente Python/CUDA. Il backend su questo
+computer è stato preparato e verificato separatamente. Per un altro computer
+seguire [AI_TRAINING.md](AI_TRAINING.md), senza presumere che il pacchetto Qwen
+M7 contenga Gemma o il training.
+
+Il pacchetto completo descritto di seguito resta la distribuzione **M7** e
+non è stato sovrascritto. Conservare un backup prima di migrare: le vecchie
+build non leggono uno schema SQLite più recente.
+
+## Distribuzione M7 precedente
+
 Output nella root: `installers/Chronexus-0.1.0-Windows-x64/`.
 La cartella generata e' esclusa da Git: contiene circa 4,5 GiB di runtime e pesi,
 nessun database, backup, campagna o modello sperimentale.

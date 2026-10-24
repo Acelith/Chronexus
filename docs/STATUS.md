@@ -6,20 +6,46 @@ M7 operativa e collaudata su Windows: assistente locale con fonti, GPU e cronolo
 **Accettazione completa ancora parziale**: manca la prova con rete fisicamente
 scollegata/blocco firewall. La prova proxy e le connessioni loopback sono distinte.
 Restano inoltre M6 macOS/Linux/CI reali e revisione del wizard Windows interattivo.
-M8 implementata su Windows, accettazione finale in corso: impostazioni per
-campagna (013), training QLoRA e adapter con backup (014). Gemma 4 12B e Qwen
-confrontati nell'app su quattro casi ciascuno, tutti con esito atteso. Training
-reale dal menu su quattro estratti sintetici: otto passaggi, pesi cambiati,
-11.705.906.688 byte di picco CUDA; merge/import, tre verifiche GPU/citazioni e
-attivazione esplicita riusciti. Nuovo appunto recuperato con citazione.
-Verifiche: 69 test Rust, 59 frontend e tre worker Python PASS; build frontend,
-lint/typecheck/format e clippy PASS. Annullamento nativo, riavvio e ricostruzione
-dell'adapter dal backup in verifica. M9 tiradadi resta pianificata.
+M8 operativa e collaudata su Windows: Gemma 4 12B locale, impostazioni per
+campagna (013), QLoRA reale e adapter con backup/ripristino (014). Accettazione
+sulle altre piattaforme e prova fisica offline/firewall ancora pendenti.
+**Prossima milestone funzionale: M9 — Tiradadi interno e cerchio dei draghi.**
 Nessun push autorizzato o eseguito.
 
 Il modello specifico D&D 1.5B è stato provato su GPU e scartato per qualità.
 L'utente ha approvato esplicitamente Qwen3:4b-instruct multilingue con fonti locali,
 **non fine-tuned D&D**. Setup e identità verificabili: [AI_LOCAL.md](AI_LOCAL.md).
+
+## Verifiche effettive M8
+
+- 69 test Rust e clippy offline con `-D warnings`: PASS. 59 test frontend:
+  PASS; ultimi ritocchi coperti anche da 7 test mirati dell'assistente.
+  Lint, typecheck, format e build frontend: PASS. Worker Python: 5 PASS.
+- `pnpm build:desktop` e `pnpm package:desktop`: PASS; installer NSIS Windows
+  non firmato generato. Installazione M8 non ripetuta, non confonderla con M6.
+- GPU RTX 4080 SUPER 16 GB: 4 casi Qwen e 4 Gemma con esito atteso nell'app.
+  Training dal menu su 4 estratti/8 passaggi e successiva prova su 74 estratti,
+  74 esempi/74 passaggi: pesi modificati, copertura completa, tre controlli di
+  citazioni/assenze/GPU, attivazione e domanda sull'ultima fonte PASS.
+  Picco PyTorch: 11.705.906.688 byte (circa 10,9 GiB).
+- Annullamento reale dopo il primo passaggio GPU: PASS, modello attivo invariato.
+  Riavvio, backup/restore nativo, rimozione del solo modello sintetico e sua
+  ricostruzione dall'adapter senza nuovo training: PASS; citazioni ancora valide.
+- Regole sintetiche 2014/2024 separate, edizione errata respinta, fonte malevola
+  esclusa dalle risposte e bloccante per training, esclusione esplicita: PASS.
+  Ollama realmente spento: errore utile e `sentToModel=false`; runtime riavviato.
+- Backend Python/CUDA e checkpoint verificati anche nel percorso standard
+  `%APPDATA%/it.nodex.desktop/ai-training`. Campagne personali non modificate.
+  Runtime e checkpoint fuori dagli archivi; adapter compatti inclusi e verificati.
+- Script ripetibile con fixture sintetiche: `scripts/qa/m8-local-ai.mjs`;
+  originali dei rapporti in `.tools/m8/`, ignorati. La fase boundaries del
+  nuovo harness è stata rieseguita; seed/train/recover/coverage derivano dagli
+  stessi scenari nativi eseguiti prima del consolidamento, senza un secondo
+  giro completo del nuovo harness. Modelli derivati temporanei rimossi dopo
+  importazione/collaudo; nessun test fisico offline o guasto hardware simulato
+  presentato come verifica reale. CUDA assente coperta da test controllato.
+- Commit: a99355e impostazioni; 1fde390 training; 4d007f1 copertura completa.
+  Guide e collaudo consolidato nel commit successivo. Nessun push.
 
 ## Funziona
 
@@ -91,16 +117,21 @@ Archivi/foto/DB/profili/modelli restano fuori Git; nessun dato privato pubblicat
 
 ## Avvio, Skill e limiti
 
-Distribuzione richiesta: `installers/Chronexus-0.1.0-Windows-x64/` nella root,
-con installer app e AI, runtime Ollama e solo Qwen3:4b-instruct, licenze e SHA-256.
-Output escluso da Git. Script di build/installer e sei test di sicurezza aggiunti;
-installazione silenziosa AI e inferenza GPU dalla copia installata verificate.
-Nessun dato delle campagne incluso. Dettagli: [INSTALLERS.md](INSTALLERS.md).
+Installer app M8 nella root: `installers/Chronexus-M8-Windows-x64/`.
+Il precedente `Chronexus-0.1.0-Windows-x64/` contiene la distribuzione M7 e il
+suo runtime Qwen; non è stato sovrascritto. Il nuovo installer app non incorpora
+il checkpoint Google da 24 GB o l'ambiente QLoRA. Su questa macchina il backend
+è già preparato; per altri computer seguire [AI_TRAINING.md](AI_TRAINING.md).
 
-`powershell -File scripts/Start-LocalAI.ps1`, poi `pnpm desktop` nell'ambiente Rust
-configurato. In app: campagna → Assistente locale → Controlla Ollama → scegli
-qwen3:4b-instruct → consenso multilingue → Attiva modello locale.
-Installer: src-tauri/target/release/bundle/nsis/Chronexus_0.1.0_x64-setup.exe.
+Avvio: `powershell -File scripts/Start-LocalAI.ps1`, poi il nuovo Chronexus
+oppure `pnpm desktop` nell'ambiente Rust configurato. Campagna → Impostazioni
+della campagna → Controlla Ollama → gemma4:12b → conferma multilingue → Attiva.
+Riaddestra sui nuovi dati e Attiva adapter sono due azioni distinte.
+Dettagli installer e limiti: [INSTALLERS.md](INSTALLERS.md).
+
+Skill M8 letta/applicata: **vercel-react-best-practices**, per caricamento
+condizionale, richieste locali indipendenti, progresso e recupero degli errori.
+Non sono state applicate Skill AI/database assenti dal catalogo.
 
 Skill M7 effettivamente letta/applicata: **vercel-react-best-practices**, per
 caricamento differito, richieste indipendenti e aggiornamenti dello streaming.

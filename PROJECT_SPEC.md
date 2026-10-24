@@ -235,3 +235,25 @@ are not independent evidence. Persist streaming drafts/answers/source snapshots
 in additive schema 012; delete/export/backup defined, model weights excluded.
 All earlier restrictions on external AI remain in force. Chronexus remains
 independently usable with the local assistant disabled or Ollama unavailable.
+
+
+## M8 approved implementation: campaign settings and local QLoRA
+
+The user authorized Gemma 4 12B and actual local retraining. Per-campaign AI
+settings, edition and explicit source approvals replace global-only choices
+(schema 013); existing M7 consent is preserved, new campaigns default disabled.
+Refresh of retrieval knowledge is distinct from actual weight/adapter training.
+
+Training uses the pinned local Google checkpoint with a fixed QLoRA profile,
+source snapshots, bounded token windows and explicit start/cancellation. Every
+approved fragment is covered or the job is rejected for exceeding the limits;
+no silent subset training. Historical AI answers and document instructions are
+never training authority. Source/policy changes invalidate stale adapters.
+
+Ollama 0.40 no longer accepts direct adapters: compact safetensors adapters and
+configuration belong to the campaign and are backed up with provenance/hashes
+(schema 014). Immutable base weights, Python runtime, job datasets/logs and
+reconstructible derived GGUF copies remain outside ordinary backups and Git.
+Explicit activation follows local GPU/citation checks and never changes notes,
+character resources or asserted facts. Gemma is multilingual, not D&D fine-tuned.
+Verified Windows behavior, setup and platform limits: docs/AI_TRAINING.md.

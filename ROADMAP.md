@@ -155,8 +155,8 @@ GPU reale verificata e nessun cloud. Specifica, candidati e accettazione in
 
 ## M8 - Gemma 4 12B e riaddestramento locale per campagna
 
-**Stato: implementazione Windows in verifica finale, autorizzata il 24 ottobre
-2026.** Impostazioni per campagna, inferenza Gemma e QLoRA reale con adapter
+**Stato: operativa e collaudata su Windows, autorizzata il 24 ottobre 2026.**
+Restano pendenti prova fisica offline/firewall e verifica macOS/Linux. Impostazioni per campagna, inferenza Gemma e QLoRA reale con adapter
 sono implementati e provati su dati sintetici; verifiche e limiti aggiornati in
 [docs/STATUS.md](docs/STATUS.md) e [docs/AI_TRAINING.md](docs/AI_TRAINING.md).
 
@@ -358,5 +358,5 @@ no remote push authorized. M7 local GPU D&D assistant is planned, not implemente
 Questo è il checkpoint precedente all'autorizzazione M7. Stato aggiornato,
 verifiche e limiti: docs/STATUS.md. La prossima attività della roadmap dopo
 questa implementazione resta completare M6 sui runner macOS/Linux e il wizard
-interattivo Windows. M8 è ora definita sopra come attività futura per Gemma
-e riaddestramento locale per campagna; il suo stato corrente è riportato sopra.
+interattivo Windows. M8 per Gemma e riaddestramento locale è ora operativa su
+Windows, con i limiti riportati sopra; la prossima funzione pianificata è M9.

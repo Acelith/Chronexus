@@ -348,3 +348,24 @@ bloccata prima di inviare gli appunti. Nessun ripiego su cloud.
 Setup su nuove macchine, identità del modello, collaudi e limiti:
 [docs/AI_LOCAL.md](docs/AI_LOCAL.md). La ricerca è lessicale e usa estratti
 limitati: nomi/alias precisi aiutano. Una citazione valida non garantisce verità.
+
+
+## M8 — Gemma e riaddestramento della campagna
+
+Dal menu **Impostazioni della campagna → AI locale** si scelgono Gemma 4 12B,
+edizione e fonti locali. **Riaddestra sui nuovi dati** esegue QLoRA sulla GPU
+e prepara un adapter; **Attiva adapter** lo applica soltanto dopo le verifiche
+e una scelta esplicita. **Aggiorna conoscenze** aggiorna invece la ricerca,
+senza modificare i pesi. Adapter e provenienza sono inclusi nei backup, pesi
+base e copie GGUF derivate restano fuori. Nessuna modifica automatica ai fatti.
+
+Su questo computer il backend è preparato. Per avviare Ollama usare
+`powershell -File scripts/Start-LocalAI.ps1`, poi aprire Chronexus aggiornato
+o eseguire `pnpm desktop` con l'ambiente Rust configurato sopra. Per il setup
+su un altro computer, requisiti e limiti: [docs/AI_TRAINING.md](docs/AI_TRAINING.md).
+Installer app M8: `installers/Chronexus-M8-Windows-x64/` (non firmato, generazione
+verificata; installazione M8 non ripetuta). Il pacchetto completo M7 resta distinto.
+
+Verifiche M8: 69 test Rust, 59 frontend e 5 worker Python, build desktop/NSIS e
+training reale RTX 4080 SUPER con 74 estratti/74 passaggi. Restano offline fisico
+e altre piattaforme. La prossima milestone funzionale è M9, il tiradadi.
