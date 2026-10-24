@@ -100,6 +100,8 @@ pub struct Counts {
     pub items: u64,
     #[serde(default, skip_serializing_if = "is_zero")]
     pub spells: u64,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub dice_rolls: u64,
 }
 fn is_zero(value: &u64) -> bool {
     *value == 0
@@ -194,6 +196,11 @@ fn counts(connection: &Connection, attachments: u64, schema: i64) -> AppResult<C
             0
         },
         attachments,
+        dice_rolls: if schema >= 15 {
+            count(connection, "dice_rolls")?
+        } else {
+            0
+        },
         characters: if schema >= 5 {
             count(connection, "characters")?
         } else {
@@ -282,6 +289,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     }
     if expected_version >= 13 {
         crate::assistant::campaign::validate_archive(&connection)?;
+    }
+    if expected_version >= 15 {
+        crate::dice::validate_archive(&connection)?;
     }
     if expected_version >= 14 {
         crate::assistant::training::validate_archive(&connection)?;

@@ -10,6 +10,7 @@ export interface ArchiveCounts {
   characters?: number;
   items?: number;
   spells?: number;
+  diceRolls?: number;
 }
 export interface BackupPreview {
   token: string;

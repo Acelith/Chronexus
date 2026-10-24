@@ -1,5 +1,20 @@
 # Stato Chronexus — 24 ottobre 2026
 
+## M9 — in corso: backend persistente
+
+- Migrazione additiva 015: storico dadi per campagna, ID richiesta idempotente,
+  risultati individuali/subtotali/totale e data. Casualità dal sistema operativo
+  con rejection sampling; nessuna estrazione nel frontend.
+- d4/d6/d8/d10/d12/d20/d100, 0–50 per tipo, 1–100 dadi per tiro. Retry dello
+  stesso ID e composizione restituisce il tiro precedente senza nuovi valori.
+- Backup con conteggio opzionale e validazione dei risultati; archivi fino a 014
+  ripristinati e migrati senza storico. JSON export include diceRolls.
+- 77 test Rust PASS, di cui 8 nuovi su dadi, errori, paginazione, riavvio e backup;
+  typecheck PASS; 5 test UI backup PASS. Clippy: correzione del solo clone nel test,
+  rieseguito prima del commit. Interfaccia/animazione M9 ancora da implementare.
+- Skill: rust-best-practices per ownership/errori; sqlite-expert per transazione,
+  migrazione e indice verificato con EXPLAIN QUERY PLAN; react-testing per backup.
+
 ## Editor visuale/Markdown e collaudo finale — 24 ottobre 2026
 
 - Barra persistente con stili, titoli, citazioni, elenchi/attività, evidenziazione,
