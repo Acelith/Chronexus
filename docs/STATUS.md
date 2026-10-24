@@ -1,5 +1,14 @@
 # Stato Chronexus — 24 ottobre 2026
 
+## M12/M13 in corso → M11 alla fine
+
+Ultima istruzione: realizzare tutte e tre le milestone, poi compilare e pubblicare
+su Forgegit soltanto alla fine. Il precedente divieto della pianificazione è
+superato. Ordine operativo: M12 animazioni, M13 alfabeti, M11 distribuzione.
+Elfico confermato come Espruar. Lavoro iniziale pulito; skill pertinenti lette.
+Nessun nuovo test o build ancora eseguito, nessuna pubblicazione effettuata.
+Le sezioni seguenti sono checkpoint precedenti.
+
 ## M10 — operativa su Windows; accettazione linguistica e assistiva aperta
 
 - **Impostazioni dell’app → Lingua e scrittura** nel menu sinistro, anche senza

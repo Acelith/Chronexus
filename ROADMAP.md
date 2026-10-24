@@ -440,8 +440,8 @@ come traduzioni automatiche complete delle lingue elfiche o naniche.
 
 - Prima dell’implementazione identificare la variante esatta di «Elfico» e la
   fonte del mapping Dethek; documentare repertorio, direzione, maiuscole, numeri
-  e punteggiatura, senza inventare simboli mancanti. La variante elfica non è
-  ancora stata indicata dall’utente e non va scelta implicitamente.
+  e punteggiatura, senza inventare simboli mancanti. La variante elfica è
+  stata confermata dall’utente: Espruar di D&D / Forgotten Realms.
 - Verificare font e licenze; includere asset locali per uso offline. Caratteri
   non rappresentabili e font assente devono conservare una resa leggibile.
 - Integrare selezione persistente, anteprima/laboratorio e pacchetto reversibile
@@ -454,10 +454,9 @@ come traduzioni automatiche complete delle lingue elfiche o naniche.
   round trip esatto dell’originale, caratteri non supportati, assenza del font,
   tastiera/accessibilità e compatibilità con preferenze/archivi precedenti.
 
-**Vincolo della richiesta del 24 ottobre 2026:** questa esecuzione aggiorna solo
-milestone e istruzioni. Nessun push, tag remoto, release, upload o implementazione
-M11–M13 adesso. La procedura Forgegit sarà lo standard per le future consegne,
-rispettando sempre un eventuale divieto esplicito successivo dell’utente.
+**Istruzione di esecuzione successiva:** implementare M12 e M13; completarle e
+verificarle prima di compilare i pacchetti e pubblicare M11. La pubblicazione
+finale su Forgegit è ora esplicitamente autorizzata. Nessuna consegna intermedia.
 
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.

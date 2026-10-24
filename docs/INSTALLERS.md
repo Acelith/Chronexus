@@ -15,9 +15,10 @@ esistenti e non usare force-push. Verificare download/checksum dopo l’upload e
 riportare errori o pubblicazioni parziali con precisione. Non inventare pacchetti
 per piattaforme non collaudate né usare una destinazione alternativa non autorizzata.
 
-**Questa richiesta è solo pianificazione: NON pubblicare ancora su Forgegit.**
-Nessun push, tag remoto, release o upload nella presente esecuzione; nessun nuovo
-installer o pacchetto AI viene costruito qui. M11 è pianificata, non implementata.
+**Autorizzazione successiva dell’utente:** implementare tutte e tre le milestone;
+completare prima M12 e M13, quindi compilare e pubblicare con M11 alla fine.
+Il precedente divieto riguardava la sola pianificazione ed è superato da questa
+istruzione. Non pubblicare artefatti intermedi o dichiarare riusciti upload non verificati.
 
 ## Aggiornamento M8 — 24 ottobre 2026
 
