@@ -1,6 +1,6 @@
 # Installer Windows con AI locale
 
-## Politica Forgegit — pianificata con M13
+## Politica Forgegit — pianificata con M11
 
 Destinazione verificata di `origin`: `https://github.com/Acelith/Chronexus.git`,
 repository dell’utente. Per le future milestone implementate e verificate,
@@ -17,7 +17,7 @@ per piattaforme non collaudate né usare una destinazione alternativa non autori
 
 **Questa richiesta è solo pianificazione: NON pubblicare ancora su Forgegit.**
 Nessun push, tag remoto, release o upload nella presente esecuzione; nessun nuovo
-installer o pacchetto AI viene costruito qui. M13 è pianificata, non implementata.
+installer o pacchetto AI viene costruito qui. M11 è pianificata, non implementata.
 
 ## Aggiornamento M8 — 24 ottobre 2026
 

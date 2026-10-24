@@ -295,12 +295,12 @@ physical assistive testing, OS IME and macOS/Linux validation remain open.
 
 ## Planned extensions M11–M13 (requirements only)
 
-M11 adds Elfico and Dethek as writing modes, with exact variant/mapping and font
-licenses checked before implementation, semantic original text and reversible
-packets; no implicit campaign conversion. M12 adds two-dragon celebration/threat
-animations only for exactly one die: d4/6/8/10/12/20 max is best, 1 worst; d100
-1 is best and 100 worst. Persisted results and D&D rules remain unchanged.
-M13 adds versioned Forgegit releases and app/AI packages to the user’s origin.
+M11 adds versioned Forgegit releases and app/AI packages to the user’s origin.
+M12 adds two-dragon celebration/threat animations only for exactly one die:
+d4/6/8/10/12/20 max is best, 1 worst; d100 1 is best and 100 worst. Persisted results
+and D&D rules remain unchanged. M13 adds Elfico and Dethek as writing modes, with
+exact variant/mapping and font licenses checked before implementation, semantic
+original text and reversible packets; no implicit campaign conversion.
 Future validated milestone deliveries follow this standing publication instruction,
 unless explicitly forbidden; the present planning task forbids all publication.
 Exact criteria and remaining decisions are in ROADMAP.md. None is implemented now.
