@@ -29,8 +29,8 @@
 - Rapporti/screenshot e archivi sintetici: .tools/m9 (ignorati). Campagne personali
   non modificate. macOS/Linux, installer aggiornati e prova fisica offline non
   eseguiti; warning Vite preesistente sul peso del chunk editor. Nessun push.
-- Commit: 3b0e2ac backend/migrazione; 7aed999 UI/scena; correzione della rivelazione
-  e consolidamento del checkpoint nei commit successivi.
+- Commit: 3b0e2ac backend/migrazione; 7aed999 UI/scena; 5fba9fc rivelazione e
+  fixture grafica. Checkpoint finale nel successivo commit documentale.
 - Skill: rust-best-practices/sqlite-expert/tauri-v2 per dati e IPC;
   impeccable/imagegen per grafica; react-testing/accessibility per collaudi;
   systematic-debugging/react-doctor per correzioni. Prossima funzione: M10.
@@ -105,7 +105,7 @@ Restano inoltre M6 macOS/Linux/CI reali e revisione del wizard Windows interatti
 M8 operativa e collaudata su Windows: Gemma 4 12B locale, impostazioni per
 campagna (013), QLoRA reale e adapter con backup/ripristino (014). Accettazione
 sulle altre piattaforme e prova fisica offline/firewall ancora pendenti.
-**Prossima milestone funzionale: M9 — Tiradadi interno e cerchio dei draghi.**
+**M9 consegnata su Windows. Prossima milestone funzionale: M10 — Multilingua.**
 M10 aggiunta alla roadmap: tutte le 16 lingue/modalità richieste, RTL, CJK,
 accessibilità Braille, Morse e alfabeti di fantasia; solo pianificazione,
 nessuna localizzazione implementata in questo intervento.

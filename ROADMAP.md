@@ -239,8 +239,10 @@ sono implementati e provati su dati sintetici; verifiche e limiti aggiornati in
 
 ## M9 - Tiradadi interno e cerchio dei draghi
 
-**Stato: pianificata, non avviata.** Questa richiesta aggiunge soltanto la
-milestone; il tiradadi e le sue animazioni non sono ancora implementati.
+**Stato: implementata e collaudata su Windows il 24 ottobre 2026.** Schema 015,
+85 test frontend e 77 Rust PASS, backup/restore e riavvio reali verificati.
+Guida, limiti e collaudi: [docs/DICE.md](docs/DICE.md). Restano le verifiche su
+macOS/Linux e della distribuzione, senza dichiararle eseguite.
 
 ### M9.1 - Composizione e risultato del tiro
 
@@ -358,8 +360,8 @@ i nomi propri, gli UUID, le citazioni, i backup e le fonti della campagna.
   alla lingua ordinaria. Verificare round trip dei dati e archivi precedenti.
 
 Questa richiesta aggiunge la milestone: la localizzazione non è implementata
-nel rifacimento grafico/editor del 24 ottobre 2026. M9 resta il prossimo sviluppo
-funzionale pianificato.
+nel rifacimento grafico/editor del 24 ottobre 2026. Dopo la consegna Windows di
+M9, M10 è il prossimo sviluppo funzionale pianificato.
 
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.
@@ -395,4 +397,5 @@ Questo è il checkpoint precedente all'autorizzazione M7. Stato aggiornato,
 verifiche e limiti: docs/STATUS.md. La prossima attività della roadmap dopo
 questa implementazione resta completare M6 sui runner macOS/Linux e il wizard
 interattivo Windows. M8 per Gemma e riaddestramento locale è ora operativa su
-Windows, con i limiti riportati sopra; la prossima funzione pianificata è M9.
+Windows, con i limiti riportati sopra. M9 è ora operativa su Windows; la prossima
+funzione pianificata è M10.

@@ -35,7 +35,8 @@ export const diceText = {
   retry: "Riprova a caricare lo storico",
   skip: "Salta animazione",
   review: "Mostra nel cerchio",
-  selectionReset: "Selezione azzerata: scegli i dadi per il prossimo tiro.",
+  selectionReset:
+    "Scegli i dadi nel compositore per preparare il prossimo tiro.",
   notConfirmed:
     "Non è stato possibile confermare il tiro. La selezione è conservata: riprova con la stessa composizione per evitare duplicati.",
   compact: (shown: number, total: number) =>

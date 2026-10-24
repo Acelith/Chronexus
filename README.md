@@ -381,4 +381,17 @@ verificata; installazione M8 non ripetuta). Il pacchetto completo M7 resta disti
 
 Verifiche M8: 69 test Rust, 59 frontend e 5 worker Python, build desktop/NSIS e
 training reale RTX 4080 SUPER con 74 estratti/74 passaggi. Restano offline fisico
-e altre piattaforme. La prossima milestone funzionale è M9, il tiradadi.
+e altre piattaforme. M9, il tiradadi, è ora operativa su Windows. La prossima milestone funzionale è M10, il multilingua.
+
+## Tiradadi — M9
+
+Dal menu sinistro della campagna apri **Tiradadi**: d4, d6, d8, d10, d12, d20 e
+d100, quantità indipendenti e tiri misti. Fino a 50 per tipo/100 dadi per tiro;
+selezione azzerata dopo la conferma, storico SQLite per campagna incluso nei backup.
+Cerchio dei draghi e rivelazione slot rapida, saltabile e con movimento ridotto.
+La scena mostra fino a 14 dadi; tutti i valori restano nel dettaglio.
+
+Guida, compatibilità schema 015 e prove: [docs/DICE.md](docs/DICE.md).
+Per avviare su Windows dalla cartella corrente: `./scripts/Dev.ps1`;
+eseguibile aggiornato in `src-tauri/target/release/chronexus.exe`.
+L’installer precedente non è stato rigenerato in questa milestone.

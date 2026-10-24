@@ -115,6 +115,20 @@ never claim a complete commercial catalog or mix 2014/2024 editions. See RULESET
 - Filters by type/campaign and sort by relevance/date. Search result links open the corresponding entity or source session.
 - Prefer quick, local search rather than AI; no network requirement.
 
+### 3.9 Offline dice roller — M9
+
+Campaign-scoped d4/d6/d8/d10/d12/d20/d100 rolls, independently chosen integer
+quantities, mixed pools and reset after successful persistence. Maximum 50 per
+type and 100 overall; d100 is a single integer in 1–100. OS-generated Rust values
+are saved exactly once before presentation. History includes IDs, timestamps,
+individual results, subtotals and total, with pagination and backup/export.
+The dragon-circle scene uses bundled assets and exact code-rendered numerals,
+lasts about 2.5 seconds, supports skipping/reduced motion and never changes the
+stored outcome. Display at most 14 representative dice, with all values readable
+in a stable semantic detail. Keep the active result hidden in history until the
+reveal completes; interruption/restart must leave the persisted roll accessible.
+Implementation, migration 015 and evidence: [docs/DICE.md](docs/DICE.md).
+
 ## 4. Local persistence and file structure
 Preferred stack: Tauri 2 + Rust + TypeScript/React/Vite; SQLite under an OS-appropriate user data directory; attachments stored under managed campaign-specific folders. UI never contains SQL queries or direct OS-path logic. Rust data layer owns database access, queries, migration and file operations. Use transactions and explicit FK/indexes. Migrations MUST have tests, and schema evolution must not silently destroy user data.
 
