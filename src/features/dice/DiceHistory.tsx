@@ -8,10 +8,12 @@ export default function DiceHistory({
   history,
   disabled,
   onReview,
+  pendingRevealId,
 }: {
   history: ReturnType<typeof useDiceHistory>;
   disabled: boolean;
   onReview: (roll: Roll) => void;
+  pendingRevealId: string | null;
 }) {
   return (
     <aside className="dice-history" aria-label={t.history}>
@@ -37,29 +39,39 @@ export default function DiceHistory({
       <ol className="dice-history-list">
         {history.rows.map((roll) => (
           <li key={roll.id}>
-            <details>
-              <summary
-                aria-label={t.historyLabel(
-                  rollDate(roll.createdAt),
-                  composition(roll.groups),
-                  roll.total,
-                )}
-              >
+            {roll.id === pendingRevealId ? (
+              <div className="dice-awaiting-reveal" role="status">
                 <time dateTime={roll.createdAt}>
                   {rollDate(roll.createdAt)}
                 </time>
-                <span>{composition(roll.groups)}</span>
-                <b>{roll.total}</b>
-              </summary>
-              <RollDetails roll={roll} />
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => onReview(roll)}
-              >
-                {t.review}
-              </button>
-            </details>
+                <strong>{composition(roll.groups)}</strong>
+                <p>{t.awaitingReveal}</p>
+              </div>
+            ) : (
+              <details>
+                <summary
+                  aria-label={t.historyLabel(
+                    rollDate(roll.createdAt),
+                    composition(roll.groups),
+                    roll.total,
+                  )}
+                >
+                  <time dateTime={roll.createdAt}>
+                    {rollDate(roll.createdAt)}
+                  </time>
+                  <span>{composition(roll.groups)}</span>
+                  <b>{roll.total}</b>
+                </summary>
+                <RollDetails roll={roll} />
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => onReview(roll)}
+                >
+                  {t.review}
+                </button>
+              </details>
+            )}
           </li>
         ))}
       </ol>

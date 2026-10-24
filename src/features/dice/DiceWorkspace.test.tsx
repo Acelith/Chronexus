@@ -237,3 +237,28 @@ test("salto annulla i timer e movimento ridotto evita la sequenza", async () => 
   act(() => vi.advanceTimersByTime(0));
   expect(done).toHaveBeenCalledTimes(2);
 });
+
+test("il tiro è registrato ma lo storico non anticipa il risultato prima della rivelazione", async () => {
+  motion(false);
+  vi.useFakeTimers();
+  render(<DiceWorkspace campaignId="campaign" register={vi.fn()} />);
+  await act(async () => {});
+  fireEvent.change(screen.getByLabelText(t.quantity(6)), {
+    target: { value: "3" },
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: t.roll }));
+  });
+  expect(diceApi.roll).toHaveBeenCalledTimes(1);
+  expect(screen.getByText(t.awaitingReveal)).toBeInTheDocument();
+  const history = screen.getByRole("complementary", { name: t.history });
+  expect(within(history).queryByLabelText(/^Tiro del/)).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(t.saved + " · " + t.details),
+  ).not.toBeInTheDocument();
+  act(() => vi.advanceTimersByTime(2500));
+  expect(screen.queryByText(t.awaitingReveal)).not.toBeInTheDocument();
+  expect(within(history).getByLabelText(/^Tiro del/)).toHaveAccessibleName(
+    /Totale 136/,
+  );
+});

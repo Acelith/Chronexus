@@ -847,3 +847,23 @@
     font-size: 19px;
   }
 }
+
+.dice-awaiting-reveal {
+  display: grid;
+  gap: 5px;
+  font-size: 17px;
+}
+.dice-awaiting-reveal time {
+  font-size: 14px;
+  color: #684d32;
+}
+.dice-awaiting-reveal strong {
+  font-weight: 600;
+}
+.dice-awaiting-reveal p {
+  font-size: 15px;
+  line-height: 1.3;
+  margin: 0;
+  font-style: italic;
+  color: #63492e;
+}

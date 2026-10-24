@@ -74,12 +74,14 @@ export default function DiceWorkspace({
               <p className="editor-hint">
                 {t.selectionReset} {t.animationHint}
               </p>
-              <details className="dice-current-detail">
-                <summary>
-                  {t.saved} · {t.details}
-                </summary>
-                <RollDetails roll={current} />
-              </details>
+              {!animating ? (
+                <details className="dice-current-detail">
+                  <summary>
+                    {t.saved} · {t.details}
+                  </summary>
+                  <RollDetails roll={current} />
+                </details>
+              ) : null}
             </>
           ) : (
             <EmptyScene />
@@ -89,6 +91,7 @@ export default function DiceWorkspace({
           history={history}
           disabled={busy || pending || animating}
           onReview={review}
+          pendingRevealId={animating && current ? current.id : null}
         />
       </div>
     </section>

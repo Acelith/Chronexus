@@ -22,6 +22,7 @@ export const diceText = {
   totalError: "Puoi tirare al massimo 100 dadi alla volta.",
   emptyError: "Seleziona almeno un dado prima di tirare.",
   saved: "Risultato salvato",
+  awaitingReveal: "Tiro registrato. Rivelazione in corso…",
   total: "Totale",
   subtotal: "Subtotale",
   results: (s: number) => `Risultati d${s}`,

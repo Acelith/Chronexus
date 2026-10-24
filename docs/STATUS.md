@@ -1,43 +1,39 @@
 # Stato Chronexus — 24 ottobre 2026
 
-## M9 — interfaccia e scena implementate; collaudo finale in corso
+## M9 — operativa e collaudata su Windows
 
-- Menu Tiradadi, sette tipi geometrici decorati con texture locale, composizione
-  mista e quantità, azzeramento soltanto dopo conferma SQLite, retry idempotente.
-- Cerchio originale dei draghi, rotolamento/atterraggio/fuoco/rivelazione e cifre
-  slot in 2,5 secondi; skip e movimento ridotto. Al massimo 14 dadi rappresentativi
-  nella scena, tutti i valori sempre disponibili nei dettagli e nello storico.
-- 84 test frontend PASS (11 nuovi per dadi); lint, typecheck, format e build
-  frontend PASS. React Doctor dopo separazione controller/timeline: nessun
-  problema nei file cambiati, punteggio 74 invariato rispetto alla baseline.
-- Collaudo desktop reale: tutti i tipi, d100, quantità miste e 100 dadi, totali
-  e valori confrontati con SQLite; selezione azzerata, skip, vista interrotta,
-  riduzione movimento, isolamento e paginazione su 187 tiri sintetici PASS.
-  Timeline misurate: 2528/2520/2524 ms per 1/7/100 dadi.
-- Audit axe WCAG A/AA (2.0, 2.1, 2.2) su vuoto e risultato: 0 violazioni rilevate;
-  non è una certificazione completa. Finestre 1586×992/1200×800/900×700/760×540,
-  nessun overflow della finestra; richieste remote bloccate, nessuna richiesta
-  Internet al tiro. Il canale ipc.localhost è locale, non traffico remoto.
-- Backup/ripristino tramite UI e JSON export schema 015 verificati con 187 tiri
-  della campagna e uno della seconda. Prove riavvio, tastiera e fixture grafica
-  6/9/100 in completamento; nessuna campagna personale modificata.
-- Skill: impeccable/imagegen per scena e asset, accessibility e react-testing per
-  controlli, react-doctor e systematic-debugging per etichette/timer/regressioni.
-
-## M9 — in corso: backend persistente
-
-- Migrazione additiva 015: storico dadi per campagna, ID richiesta idempotente,
-  risultati individuali/subtotali/totale e data. Casualità dal sistema operativo
-  con rejection sampling; nessuna estrazione nel frontend.
-- d4/d6/d8/d10/d12/d20/d100, 0–50 per tipo, 1–100 dadi per tiro. Retry dello
-  stesso ID e composizione restituisce il tiro precedente senza nuovi valori.
-- Backup con conteggio opzionale e validazione dei risultati; archivi fino a 014
-  ripristinati e migrati senza storico. JSON export include diceRolls.
-- 77 test Rust PASS, di cui 8 nuovi su dadi, errori, paginazione, riavvio e backup;
-  typecheck PASS; 5 test UI backup PASS. Clippy: correzione del solo clone nel test,
-  rieseguito prima del commit. Interfaccia/animazione M9 ancora da implementare.
-- Skill: rust-best-practices per ownership/errori; sqlite-expert per transazione,
-  migrazione e indice verificato con EXPLAIN QUERY PLAN; react-testing per backup.
+- Tiradadi da menu sinistro: d4/d6/d8/d10/d12/d20/d100, composizioni miste,
+  quantità da 0 a 50 per tipo e 1–100 dadi per tiro. Azzeramento solo dopo
+  conferma; errori conservano selezione e ID per retry senza duplicazioni.
+- Storico per campagna in SQLite 015: valori, subtotali, totale, data, UUID e
+  paginazione a 30. CSPRNG del sistema operativo e rejection sampling nel Rust;
+  risultati salvati prima della scena e invariati dopo skip o cambio vista.
+- Draghi/texture/fuoco originali locali, geometrie e cifre renderizzate dal codice;
+  sequenza di 2,5 secondi, slot, skip e movimento ridotto. Al massimo 14 dadi
+  rappresentativi nella scena, tutti i valori nei dettagli e nello storico.
+  Il totale del nuovo tiro non viene anticipato nello storico durante la sequenza.
+- 85 test frontend PASS (12 nuovi), 77 Rust PASS (8 nuovi); clippy -D warnings,
+  lint, typecheck, format e build desktop Windows PASS. React Doctor: nessun
+  problema nei cambiamenti, 74/100 invariato; detector impeccable: nessun rilievo.
+- Native check: tutti i tipi, d100, tiri misti e 100 dadi, valori confrontati con
+  SQLite, retry, interruzione, skip/reduced, isolamento e storico su 187 tiri
+  sintetici PASS. Tempi misurati 2528/2520/2524 ms per 1/7/100 dadi. Nessuna
+  richiesta Internet al tiro con richieste remote bloccate; IPC locale ammesso.
+- Backup/ripristino UI ed export JSON 015 PASS; chiusura e riavvio dopo ripristino
+  PASS con risultati identici. Archivio 014 migrato senza perdita coperto da Rust.
+  Frecce/Tab/Shift+Tab/Enter/doppio Enter e dettagli da tastiera PASS; un solo
+  tiro per invio doppio. Screenshot separati con fixture esplicita per 6/9/100.
+- Axe WCAG A/AA su scena vuota e risultato: zero violazioni rilevate; verifica
+  visuale/tastiera completata, senza dichiarare certificazione o prova con NVDA.
+  Finestre 1586×992/1200×800/900×700/760×540 senza overflow della finestra.
+- Rapporti/screenshot e archivi sintetici: .tools/m9 (ignorati). Campagne personali
+  non modificate. macOS/Linux, installer aggiornati e prova fisica offline non
+  eseguiti; warning Vite preesistente sul peso del chunk editor. Nessun push.
+- Commit: 3b0e2ac backend/migrazione; 7aed999 UI/scena; correzione della rivelazione
+  e consolidamento del checkpoint nei commit successivi.
+- Skill: rust-best-practices/sqlite-expert/tauri-v2 per dati e IPC;
+  impeccable/imagegen per grafica; react-testing/accessibility per collaudi;
+  systematic-debugging/react-doctor per correzioni. Prossima funzione: M10.
 
 ## Editor visuale/Markdown e collaudo finale — 24 ottobre 2026
 
