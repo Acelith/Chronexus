@@ -1,0 +1,50 @@
+export const diceText = {
+  title: "Il cerchio dei draghi",
+  intro:
+    "Scegli i dadi. Ogni tiro viene custodito nello storico della campagna.",
+  menu: "Tiradadi",
+  composer: "Componi il tiro",
+  roll: "Tira i dadi",
+  saving: "Registrazione del tiro…",
+  rolling: "I dadi sono in movimento…",
+  landing: "I dadi atterrano nel cerchio…",
+  burn: "Il fuoco dei draghi rivela il destino…",
+  reveal: "Il cerchio rivela i risultati…",
+  empty: "Il cerchio attende il tuo tiro",
+  emptyHint: "Aggiungi uno o più dadi per cominciare.",
+  limits:
+    "Massimo 50 per tipo e 100 dadi per tiro. Dopo ogni tiro confermato, la selezione si azzera.",
+  quantity: (s: number) => `Quantità d${s}`,
+  add: (s: number) => `Aggiungi un d${s}`,
+  remove: (s: number) => `Rimuovi un d${s}`,
+  composition: "Composizione",
+  quantityError: "Inserisci quantità intere da 0 a 50 per ogni tipo di dado.",
+  totalError: "Puoi tirare al massimo 100 dadi alla volta.",
+  emptyError: "Seleziona almeno un dado prima di tirare.",
+  saved: "Risultato salvato",
+  total: "Totale",
+  subtotal: "Subtotale",
+  results: (s: number) => `Risultati d${s}`,
+  history: "Cronache dei tiri",
+  historyLabel: (date: string, formula: string, total: number) =>
+    `Tiro del ${date}: ${formula}. Totale ${total}.`,
+  noHistory: "Nessun tiro registrato in questa campagna.",
+  loading: "Apertura dello storico…",
+  more: "Carica tiri precedenti",
+  retry: "Riprova a caricare lo storico",
+  skip: "Salta animazione",
+  review: "Mostra nel cerchio",
+  selectionReset: "Selezione azzerata: scegli i dadi per il prossimo tiro.",
+  notConfirmed:
+    "Non è stato possibile confermare il tiro. La selezione è conservata: riprova con la stessa composizione per evitare duplicati.",
+  compact: (shown: number, total: number) =>
+    `La scena mostra ${shown} dadi su ${total}. Tutti i valori sono nel dettaglio del risultato.`,
+  reduced:
+    "Movimento ridotto: risultati mostrati senza rotolamento, fiamme o scorrimento dei numeri.",
+  readResult: (total: number) => `Tiro salvato. Totale: ${total}.`,
+  preview: "Seleziona i dadi",
+  animationHint:
+    "L’animazione mostra il tiro già salvato. Cambiare vista non elimina il risultato.",
+  details: "Dettaglio del risultato",
+  zero: "Azzera selezione",
+};

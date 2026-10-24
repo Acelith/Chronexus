@@ -12,3 +12,16 @@ EB Garamond per testo e titoli, Cinzel per il marchio; font locali con licenza O
 Finestra occupata al 100%, intestazione e menu fermi. Scroll indipendente per elenchi sessioni/pagine e per documento. Editor con barra permanente, dialoghi etichettati, modalità Markdown esplicita e recupero degli errori. Nessun cambio silenzioso dei collegamenti UUID.
 ## Asset e vincoli
 Icone SVG coerenti, rose dei venti e cornici geometriche; texture e incisione come asset separati. La grafica non incorpora nomi, pulsanti o risultati fittizi. Nessuna dipendenza remota a runtime.
+
+## Tiradadi M9 — Operate con momento scenico
+
+Pannello dedicato dal menu sinistro. Su desktop, compositore verticale con sette
+geometrie a sinistra, cerchio bronzeo dei draghi al centro e cronache a destra.
+Su finestre compatte lo storico passa sotto e il compositore diventa una griglia.
+Le illustrazioni originali dei draghi/fiamme sono separate dai dadi SVG e dai
+valori: numeri grandi avorio, pietra scura e tipo esplicito incluso d100.
+Un solo momento animato: rotolamento, atterraggio, fuoco, rivelazione e conteggio
+slot in 2,5 secondi indipendenti dal numero di dadi. Le fiamme precedono i numeri,
+non coprono i risultati finali; movimento ridotto mostra direttamente il risultato.
+Al massimo 14 dadi nella scena, distribuiti su tutti i tipi selezionati; il dettaglio
+semantico conserva e rende leggibili tutti i valori, anche su 100 dadi.

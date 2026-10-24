@@ -45,6 +45,7 @@ const PartyWorkspace = lazy(() => import("./features/party/PartyWorkspace"));
 const AssistantWorkspace = lazy(
   () => import("./features/assistant/AssistantWorkspace"),
 );
+const DiceWorkspace = lazy(() => import("./features/dice/DiceWorkspace"));
 const CampaignSettings = lazy(
   () => import("./features/assistant/CampaignSettings"),
 );
@@ -75,6 +76,7 @@ export function App() {
     | "party"
     | "assistant"
     | "settings"
+    | "dice"
     | PlayerView
   >("journal");
   const [playerReturn, setPlayerReturn] = useState<{
@@ -496,6 +498,24 @@ export function App() {
                   </button>
                 </>
               ) : null}
+              {campaign ? (
+                <button
+                  disabled={busy}
+                  aria-current={
+                    !backupOpen && view === "dice" ? "page" : undefined
+                  }
+                  onClick={() => {
+                    void run(async () => {
+                      setBackupOpen(false);
+                      setView("dice");
+                      setForm(null);
+                    });
+                  }}
+                >
+                  <Icon name="dice" />
+                  Tiradadi
+                </button>
+              ) : null}
             </nav>
             <div className="local-mark">
               <img
@@ -813,6 +833,18 @@ export function App() {
                         onCreate={createPage}
                         onUpdate={updatePage}
                         onRecover={recoverPage}
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign && view === "dice" ? (
+                    <Suspense
+                      fallback={<p role="status">Apertura tiradadi…</p>}
+                    >
+                      <DiceWorkspace
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        register={register}
+                        busy={busy}
                       />
                     </Suspense>
                   ) : null}

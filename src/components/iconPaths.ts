@@ -1,4 +1,5 @@
 export const iconPaths: Record<string, string> = {
+  dice: "M3 4h18v16H3z M7 8h.01 M17 8h.01 M12 12h.01 M7 16h.01 M17 16h.01",
   document: "M6 2h9l4 4v16H6z M14 2v6h5 M9 12h7 M9 16h7",
   book: "M12 5C8 2 4 2 2 3v16c4-1 7 0 10 2 3-2 6-3 10-2V3c-3-1-7-1-10 2z M12 5v16",
   books: "M3 3h4v18H3z M10 2h4v19h-4z M17 4l3-1 4 17-4 1z",

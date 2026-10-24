@@ -1,5 +1,29 @@
 # Stato Chronexus — 24 ottobre 2026
 
+## M9 — interfaccia e scena implementate; collaudo finale in corso
+
+- Menu Tiradadi, sette tipi geometrici decorati con texture locale, composizione
+  mista e quantità, azzeramento soltanto dopo conferma SQLite, retry idempotente.
+- Cerchio originale dei draghi, rotolamento/atterraggio/fuoco/rivelazione e cifre
+  slot in 2,5 secondi; skip e movimento ridotto. Al massimo 14 dadi rappresentativi
+  nella scena, tutti i valori sempre disponibili nei dettagli e nello storico.
+- 84 test frontend PASS (11 nuovi per dadi); lint, typecheck, format e build
+  frontend PASS. React Doctor dopo separazione controller/timeline: nessun
+  problema nei file cambiati, punteggio 74 invariato rispetto alla baseline.
+- Collaudo desktop reale: tutti i tipi, d100, quantità miste e 100 dadi, totali
+  e valori confrontati con SQLite; selezione azzerata, skip, vista interrotta,
+  riduzione movimento, isolamento e paginazione su 187 tiri sintetici PASS.
+  Timeline misurate: 2528/2520/2524 ms per 1/7/100 dadi.
+- Audit axe WCAG A/AA (2.0, 2.1, 2.2) su vuoto e risultato: 0 violazioni rilevate;
+  non è una certificazione completa. Finestre 1586×992/1200×800/900×700/760×540,
+  nessun overflow della finestra; richieste remote bloccate, nessuna richiesta
+  Internet al tiro. Il canale ipc.localhost è locale, non traffico remoto.
+- Backup/ripristino tramite UI e JSON export schema 015 verificati con 187 tiri
+  della campagna e uno della seconda. Prove riavvio, tastiera e fixture grafica
+  6/9/100 in completamento; nessuna campagna personale modificata.
+- Skill: impeccable/imagegen per scena e asset, accessibility e react-testing per
+  controlli, react-doctor e systematic-debugging per etichette/timer/regressioni.
+
 ## M9 — in corso: backend persistente
 
 - Migrazione additiva 015: storico dadi per campagna, ID richiesta idempotente,
