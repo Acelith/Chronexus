@@ -413,5 +413,9 @@ Le novità includono draghi animati sugli estremi del singolo dado e alfabeti
 Espruar/Dethek con font locali. Il replay conserva il tiro originale.
 I pacchetti Windows app + Gemma 4 12B offline sono documentati in
 [INSTALLERS.md](docs/INSTALLERS.md) e nelle [note 0.2.0](docs/releases/v0.2.0.md).
-Scaricare tutti e cinque gli ZIP; estrarre soltanto quello Windows-x64 e usare
+Per la sola app usare lo ZIP Installer-Windows-x64. Per app + AI scaricare i
+cinque ZIP rimanenti; estrarre soltanto quello Windows-x64 e usare
 Installa-AI.cmd per gli altri quattro. Non sono inclusi dati personali o training.
+
+La pubblicazione 0.2.0 è attualmente in bozza: gateway HTTP 502 sugli allegati AI
+grandi. Pacchetti completi disponibili localmente; stato reale in docs/STATUS.md.

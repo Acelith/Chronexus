@@ -120,7 +120,7 @@ C:/Python315/python.exe -m unittest discover -s scripts/release -p 'test_*.py'
 ```
 
 Lo script richiede una directory nuova, verifica i blob ufficiali GGUF Gemma 4 e
-produce cinque ZIP validi sotto 2048 MiB: core app/runtime/componenti e quattro
+produce cinque ZIP app/AI validi sotto 2048 MiB: core app/runtime/componenti e quattro
 volumi del peso principale (il quarto include anche il proiettore). Ogni file ha
 SHA-256 e dimensione; `AI/bundle.json` guida l'installatore PowerShell offline.
 Non estrarre i volumi manualmente. Licenze app/font e runtime/modello incluse;
@@ -129,12 +129,29 @@ nessuna scansione delle cartelle campagne o dei profili di addestramento.
 `forgejo_release.py` riceve l'autorizzazione soltanto in RAM da una sessione
 interattiva; non cerca credenziali nel sistema e non le scrive. Destinazione fissa
 origin dell'utente. Richiede albero pulito, tag annotato/versione/commit remoto
-coerenti e report checksum. Crea bozza, carica cinque allegati, scarica/verifica
+coerenti e report checksum. Crea bozza, carica sei allegati (incluso il pacchetto leggero solo app), scarica/verifica
 ciascuno, poi pubblica. Non sovrascrive tag/release/allegati altrui. Una ricevuta
 locale ignorata permette di riconoscere una bozza della stessa esecuzione; su
 errore interrompere, non cancellare o presentare una release parziale come conclusa.
 
 Le prove effettive e i limiti della versione sono in `docs/releases/v0.2.0.md`.
-SHA256SUMS.txt e package-report.json rimangono con i pacchetti locali; i cinque
+SHA256SUMS.txt e package-report.json rimangono con i pacchetti locali; i sei
 checksum sono riportati anche nel corpo della release. Token/password non devono
 mai entrare in file di piano, ricevute, log, argomenti di processo o Git.
+
+
+### Esito del primo rilascio remoto
+
+Tag v0.2.0 e codice pubblicati; bozza id 2 e pacchetto solo app caricato con
+download/checksum verificato. Upload grandi interrotti dal servizio (HTTP 502,
+297 MB/235 s nel secondo tentativo); non è un problema di credenziali. Non
+pubblicare la bozza incompleta. I cinque pacchetti AI locali sono integri.
+Attendere una verifica/correzione del gateway prima di un altro invio lungo.
+`MAX_FILES=5` indica gli allegati per singolo upload, non impone cinque asset per
+release; il sesto pacchetto rende l'app scaricabile senza i pesi AI.
+
+Il tag identifica il sorgente effettivamente compilato. Le successive correzioni
+ai soli strumenti/documenti possono avanzare main senza riscrivere quel tag:
+il piano locale registra `commit` compilato e `publicationCommit`. Il validatore
+rifiuta qualunque modifica applicativa successiva al tag; in quel caso servono
+nuova build e nuova versione. Nessun tag o allegato esistente viene sovrascritto.

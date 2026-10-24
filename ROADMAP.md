@@ -369,7 +369,7 @@ restano revisione linguistica/dialettale, lingue di fantasia complete dove
 verificabili, prova assistiva fisica/IME reale e verifiche macOS/Linux.
 Non viene avviata una nuova milestone senza richiesta dell’utente.
 
-## M11 — Release versionate e pacchetti su Forgegit (distribuzione in corso)
+## M11 — Release versionate e pacchetti su Forgegit (bloccata dal gateway remoto)
 
 Repository dell’utente verificato nell’attuale `origin`:
 `https://github.com/Acelith/Chronexus.git`. Non presumere API o funzionalità del
@@ -459,7 +459,8 @@ verificarle prima di compilare i pacchetti e pubblicare M11. La pubblicazione
 finale su Forgegit è ora esplicitamente autorizzata. Nessuna consegna intermedia.
 
 M12/M13 verificate il 24 ottobre 2026 nel desktop isolato Windows; dettagli e
-limiti in docs/releases/v0.2.0.md. M11 non è conclusa finché download e checksum
+limiti in docs/releases/v0.2.0.md. M11: codice/tag pubblicati e installer leggero verificato nella bozza; upload AI
+grandi interrotti da HTTP 502. Non è conclusa finché download e checksum
 degli asset pubblicati non sono confermati. Le revisioni M10 rimangono aperte.
 
 ## Future (not MVP)

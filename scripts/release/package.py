@@ -1,4 +1,4 @@
-"""Build five valid ZIP assets for Forgejo's 2 GiB attachment limit. No private data."""
+"""Build five AI ZIP assets and a lightweight app-only ZIP for Forgejo's 2 GiB attachment limit. No private data."""
 import argparse, hashlib, json, re, subprocess, zipfile
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
@@ -91,6 +91,13 @@ def build(output):
         if (ROOT/'LICENSE').is_file(): z.write(ROOT/'LICENSE','Licenze-app/LICENSE.txt')
         z.writestr('Installa-AI.cmd','@echo off\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0AI\\Install-AI.ps1" -Source "%~dp0AI" -Destination "%LOCALAPPDATA%\\Chronexus\\AI\\ollama-0.40.10-gemma4-12b"\r\npause\r\n')
     if core.stat().st_size >= LIMIT: raise ValueError('Core exceeds server limit; do not publish')
+    standalone=output/f'Chronexus-{version}-Installer-Windows-x64.zip'
+    with zipfile.ZipFile(standalone,'x',compression=zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+        z.write(installer,installer.name)
+        for notice in sorted((ROOT/'assets').rglob('*')):
+            if notice.is_file() and notice.suffix.lower() in ['.txt','.md','.json']:
+                z.write(notice,'Licenze-app/'+notice.relative_to(ROOT/'assets').as_posix())
+        z.writestr('LEGGIMI.txt',f'Chronexus {version} Windows x64: esegui il setup. Solo app, senza AI. Installer non firmato; WebView2 richiesto. Per Ollama/Gemma scarica separatamente i cinque ZIP AI della stessa release. Dati SQLite 015 e appID invariati.\n')
     assets=[{'name':p.name,'size':p.stat().st_size,'sha256':sha(p)} for p in sorted(output.glob('*.zip'))]
     (output/'SHA256SUMS.txt').write_text(''.join(f"{x['sha256']}  {x['name']}\n" for x in assets))
     receipt={'version':version,'assets':assets,'modelManifest':DIGEST,'weight':WEIGHT}

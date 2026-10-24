@@ -14,14 +14,22 @@ Installer Windows 0.2.0 costruito/installato e disinstallato in cartella QA; byt
 identici alla build salvo il marcatore ufficiale NSIS. Avvio release sul profilo
 personale evitato; avvio/IPC testati nella build debug isolata dello stesso sorgente.
 
-M11: accesso Forgegit verificato; cinque ZIP offline con Ollama 0.40.10 e Gemma 4
-12B base, licenze e checksum in preparazione. Nessun push/release/upload ancora.
-Pacchetto iniziale core oltre il limite server bloccato localmente, non pubblicato;
-nuovo layout sposta il proiettore nel quarto volume. Installer AI: verifiche
-integrità, staging e rifiuto destinazioni estranee, senza download. Prova reale
-AI installata PASS: cloud disabilitato, risposta italiana, 49/49 layer principali
-e 5/5 draft GPU. Download remoto ancora pendente. Limiti: firma assente,
-macOS/Linux, upgrade personale, revisioni linguistiche/assistive M10 non provati.
+M11: codice e tag v0.2.0 pubblicati (sorgente compilato 43467fb). Bozza release
+id 2, non pubblicata. Pacchetto leggero app (29 MiB) caricato, riscaricato e SHA-256
+verificato; cinque ZIP AI completi pronti in locale, upload grandi bloccati.
+Due tentativi indipendenti falliti: secondo HTTP 502 dopo 297.304.064 byte in
+235,52 s; API dichiarano limite 2048 MiB, curl proxy_used=0. Nessuna causa server
+inventata: richiesti dettagli/log del gateway all'utente. Accesso autenticato OK.
+Non ritentare grandi upload senza un cambiamento o una nuova verifica del servizio.
+
+Output: installers/Chronexus-0.2.0-Windows-x64-final, sei ZIP (uno solo app più
+cinque app/AI), SHA256SUMS.txt e package-report.json. Ollama 0.40.10 e Gemma 4 12B
+base pubblici, licenze e checksum; nessun dato privato. AI installata realmente
+ed esecuzione ripetuta PASS: cloud disabilitato, risposta italiana, 49/49 layer
+principali e 5/5 draft GPU. Pacchetto iniziale fuori limite archiviato in .tools.
+Gli strumenti riportano ora anche il codice HTTP del gateway; 13 test release PASS.
+M11 resta incompleta fino a upload/download dei cinque ZIP grandi e uscita dalla
+bozza. Limiti restanti: firma, macOS/Linux, upgrade personale e revisioni M10.
 
 Skill: find-skills per ricerca strumenti (nessuna installazione necessaria),
 frontend-design/impeccable/accessibility per resa e movimento, react-testing e
