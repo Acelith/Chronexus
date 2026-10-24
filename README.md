@@ -36,6 +36,19 @@ $env:PATH="$PWD/.tools/cargo/bin;$env:PATH"
 pnpm desktop
 ```
 
+## Spostare il progetto tra dischi (Windows)
+
+Lo store pnpm è relativo (`pnpm-workspace.yaml`). Dopo un taglia/incolla,
+ricrea i collegamenti locali con `pnpm install --frozen-lockfile --force`:
+non copiare i vecchi collegamenti di `node_modules`. Il lockfile resta invariato.
+Per la toolchain portatile usa `./scripts/Dev.ps1` (avvio desktop), oppure
+`./scripts/Dev.ps1 -Task test:rust` / `-Task build:desktop`: i percorsi sono
+ricavati dalla posizione corrente del repository, senza riferimenti a C: o D:.
+Ollama si avvia con `./scripts/Start-LocalAI.ps1`. I database personali restano
+nella cartella dati dell'app; non vanno copiati o cancellati durante la riparazione.
+L'ambiente Python locale deve poter importare `torch` e rilevare CUDA; se il
+Python di base è stato rimosso, ricreare l'ambiente seguendo `docs/AI_LOCAL.md`.
+
 ## Verifiche
 
 ```sh

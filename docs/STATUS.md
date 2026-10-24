@@ -1,5 +1,15 @@
 # Stato Chronexus — 24 ottobre 2026
 
+## Riparazione dopo spostamento su D — 24 ottobre 2026
+
+- Collegamenti node_modules ricreati con lockfile invariato: i precedenti
+  puntavano a C. Store relativo in pnpm-workspace.yaml e launcher Dev.ps1.
+- Baseline dalla nuova posizione: 59 test frontend e 69 Rust PASS;
+  typecheck e Vite 8.3.5 PASS. Python della venv su D importa PyTorch
+  2.14.1+cu130, CUDA disponibile. Nessuna campagna personale modificata.
+- Skill: systematic-debugging per la causa dei collegamenti rotti; tauri-v2
+  per la verifica della toolchain portatile. Rifacimento GUI/editor in corso.
+
 ## Milestone e prossimo passo
 
 M7 operativa e collaudata su Windows: assistente locale con fonti, GPU e cronologia.
