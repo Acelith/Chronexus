@@ -24,7 +24,7 @@
 - Skill: react-testing, systematic-debugging, react-doctor per controlli e correzioni;
   impeccable per il detector finale (nessun pattern segnalato dopo la correzione).
 - Commit GUI: d5b07a1; disposizione grafo: f8d6b68; spostamento: 313e056.
-  Editor e roadmap multilingua nei commit successivi. Nessun push.
+  Editor: 64d65c6; M10 nel successivo commit documentale. Nessun push.
 - React Doctor finale sui nuovi file inclusi: 74/100, invariato rispetto alla
   prima scansione; un avviso residuo di complessità nel componente editor.
   Nessun errore lint/types; detector impeccable finale: array vuoto.
@@ -71,6 +71,9 @@ M8 operativa e collaudata su Windows: Gemma 4 12B locale, impostazioni per
 campagna (013), QLoRA reale e adapter con backup/ripristino (014). Accettazione
 sulle altre piattaforme e prova fisica offline/firewall ancora pendenti.
 **Prossima milestone funzionale: M9 — Tiradadi interno e cerchio dei draghi.**
+M10 aggiunta alla roadmap: tutte le 16 lingue/modalità richieste, RTL, CJK,
+accessibilità Braille, Morse e alfabeti di fantasia; solo pianificazione,
+nessuna localizzazione implementata in questo intervento.
 Nessun push autorizzato o eseguito.
 
 Il modello specifico D&D 1.5B è stato provato su GPU e scartato per qualità.

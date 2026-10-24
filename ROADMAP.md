@@ -325,6 +325,42 @@ milestone; il tiradadi e le sue animazioni non sono ancora implementati.
 - Verificare che gli asset generati siano presenti nel pacchetto e che l'intera
   scena funzioni offline, senza richieste di rete o generazione durante il tiro.
 
+## M10 — Multilingua, accessibilità e alfabeti alternativi (pianificata)
+
+Obiettivo: cambiare lingua dalle impostazioni mantenendo inalterati gli appunti,
+i nomi propri, gli UUID, le citazioni, i backup e le fonti della campagna.
+
+- Localizzazione completa dell’interfaccia: italiano, inglese, tedesco, francese,
+  spagnolo, portoghese, giapponese, coreano, cinese, arabo e dialetto ticinese.
+  Concordare varianti regionali (portoghese, cinese) e revisione ticinese con
+  parlanti competenti; non presentare traduzioni automatiche come validate.
+- Lingue/alfabeti di fantasia: Klingon, Romulano e Galactic alphabet.
+  Definire prima la variante esatta dell’alfabeto galattico e del Romulano,
+  verificare disponibilità/licenze di font, mapping e lessico; distinguere
+  traduzione da traslitterazione e segnalare i termini senza equivalente.
+- Braille e Morse come modalità di resa/accessibilità, non semplici lingue.
+  Mantenere testo semantico per screen reader/display Braille; definire grado,
+  lingua e standard del Braille con collaudo assistivo. Per Morse offrire
+  trascrizione testuale reversibile e, se prevista, audio disattivato inizialmente.
+  Non convertire irreversibilmente il contenuto salvato né sostituire l’accessibilità
+  reale con soli glifi Unicode.
+- Separare stringhe UI dai dati, usare cataloghi con chiavi stabili, plurali,
+  date/numeri locali e fallback esplicito italiano. Lingua selezionabile senza
+  riavvio, preferenza persistente, funzionamento offline e font locali con licenze.
+- Supportare arabo RTL e contenuti misti con isolamento bidirezionale; CJK,
+  composizione IME, font fallback, ricerca e impaginazione senza troncamenti.
+  Le fonti D&D mantengono lingua/edizione/provenienza originali; traduzioni
+  assistite eventuali restano distinguibili, senza creare regole o fatti nuovi.
+- Accettazione: tutte le viste, errori, conferme, editor visuale/Markdown,
+  impostazioni, AI, backup e tiradadi; cataloghi completi e fallback, cambio lingua
+  e riavvio, RTL, tastiera/screen reader, testi lunghi, IME e finestre minime.
+  Verificare leggibilità degli alfabeti alternativi con font assente e ritorno
+  alla lingua ordinaria. Verificare round trip dei dati e archivi precedenti.
+
+Questa richiesta aggiunge la milestone: la localizzazione non è implementata
+nel rifacimento grafico/editor del 24 ottobre 2026. M9 resta il prossimo sviluppo
+funzionale pianificato.
+
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.
 
