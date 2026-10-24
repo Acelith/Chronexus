@@ -1,3 +1,7 @@
+import { localeInfo } from "../../i18n/locales";
+import { getPreferences } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
+import { tr } from "../../i18n/store";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { SaveGuard } from "../journal/Editor";
 import { errorMessage } from "../journal/api";
@@ -23,7 +27,7 @@ export default function BackupWorkspace({
   const [backup, setBackup] = useState<BackupReceipt | null>(null);
   const [restored, setRestored] = useState<RestoreReceipt | null>(null);
   const operation = useRef(false);
-  const confirmation = useRef<HTMLDivElement>(null);
+  const confirmation = useRef<HTMLDialogElement>(null);
   const cancel = useRef<HTMLButtonElement>(null);
   const choose = useRef<HTMLButtonElement>(null);
   const hadPreview = useRef(false);
@@ -33,11 +37,15 @@ export default function BackupWorkspace({
       flush: async () => {
         if (operation.current)
           throw new Error(
-            "Attendi il completamento dell'operazione di backup o ripristino.",
+            tr(
+              "Attendi il completamento dell'operazione di backup o ripristino.",
+            ),
           );
         if (preview)
           throw new Error(
-            "Conferma o annulla il ripristino prima di cambiare vista o chiudere Chronexus.",
+            tr(
+              "Conferma o annulla il ripristino prima di cambiare vista o chiudere Chronexus.",
+            ),
           );
       },
     });
@@ -73,11 +81,11 @@ export default function BackupWorkspace({
     void perform(async () => {
       await backupApi.cancel();
       setPreview(null);
-      setStatus("Ripristino annullato. L'archivio corrente è invariato.");
+      setStatus(tr("Ripristino annullato. L'archivio corrente è invariato."));
       choose.current?.focus();
-    }, "Annullamento…");
+    }, tr("Annullamento…"));
   }
-  function confirmationKeys(event: KeyboardEvent<HTMLDivElement>) {
+  function confirmationKeys(event: KeyboardEvent<HTMLDialogElement>) {
     if (event.key === "Escape" && !busy) {
       event.preventDefault();
       cancelRestore();
@@ -100,6 +108,23 @@ export default function BackupWorkspace({
       first.focus();
     }
   }
+  function confirmRestore() {
+    if (!preview) return;
+    void perform(async () => {
+      try {
+        const receipt = await backupApi.restore(preview.token);
+        setRestored(receipt);
+        setBackup(null);
+        setPreview(null);
+        await onRestored();
+        setStatus("Ripristino completato. Copia preventiva conservata.");
+      } catch (reason) {
+        setPreview(null);
+        choose.current?.focus();
+        throw reason;
+      }
+    }, "Creazione della copia preventiva e ripristino in corso. Attendi prima di chiudere Chronexus…");
+  }
   return (
     <section
       className="backup-workspace"
@@ -107,10 +132,15 @@ export default function BackupWorkspace({
       aria-busy={busy}
     >
       <header className="backup-heading">
-        <h2 id="backup-title">Backup e ripristino</h2>
+        <h2 id="backup-title">
+          <Text source={"Backup e ripristino"} />
+        </h2>
         <p>
-          Porta con te tutte le campagne, gli appunti, i collegamenti e gli
-          allegati gestiti da Chronexus.
+          <Text
+            source={
+              "Porta con te tutte le campagne, gli appunti, i collegamenti e gli allegati gestiti da Chronexus."
+            }
+          />
         </p>
       </header>
       {error ? (
@@ -122,74 +152,42 @@ export default function BackupWorkspace({
         {status}
       </p>
       {restored ? (
-        <section className="backup-receipt" aria-label="Ripristino completato">
-          <h3>Archivio ripristinato</h3>
-          <p>Le campagne ripristinate sono disponibili nella barra laterale.</p>
+        <section
+          className="backup-receipt"
+          aria-label={tr("Ripristino completato")}
+        >
+          <h3>
+            <Text source={"Archivio ripristinato"} />
+          </h3>
+          <p>
+            <Text
+              source={
+                "Le campagne ripristinate sono disponibili nella barra laterale."
+              }
+            />
+          </p>
           <ArchiveSummary counts={restored.counts} />
           <p>
-            La copia precedente può essere recuperata selezionando questo
-            backup:
+            <Text
+              source={
+                "La copia precedente può essere recuperata selezionando questo backup:"
+              }
+            />
           </p>
           <p className="archive-path">{restored.safetyPath}</p>
           {restored.warning ? <p role="alert">{restored.warning}</p> : null}
         </section>
       ) : null}
       {preview ? (
-        <div
-          className="restore-confirmation"
-          role="alertdialog"
-          aria-modal="true"
-          aria-labelledby="restore-title"
-          aria-describedby="restore-warning"
-          ref={confirmation}
-          onKeyDown={confirmationKeys}
-        >
-          <h3 id="restore-title">Sostituire l’intero archivio?</h3>
-          <p id="restore-warning">
-            Tutte le campagne attuali saranno sostituite da quelle di{" "}
-            <strong>{preview.fileName}</strong>. Prima verrà salvata una copia
-            di sicurezza dell’archivio corrente. Non verrà effettuata una
-            fusione.
-          </p>
-          <p>
-            Backup del{" "}
-            {new Intl.DateTimeFormat("it-IT", {
-              dateStyle: "long",
-              timeStyle: "short",
-            }).format(new Date(preview.manifest.created_at))}
-            . Integrità dei file e del database verificata.
-          </p>
-          <ArchiveSummary counts={preview.manifest.counts} />
-          <div className="actions">
-            <button ref={cancel} disabled={busy} onClick={cancelRestore}>
-              Annulla ripristino
-            </button>
-            <button
-              className="danger"
-              disabled={busy}
-              onClick={() => {
-                void perform(async () => {
-                  try {
-                    const receipt = await backupApi.restore(preview.token);
-                    setRestored(receipt);
-                    setBackup(null);
-                    setPreview(null);
-                    await onRestored();
-                    setStatus(
-                      "Ripristino completato. Copia preventiva conservata.",
-                    );
-                  } catch (reason) {
-                    setPreview(null);
-                    choose.current?.focus();
-                    throw reason;
-                  }
-                }, "Creazione della copia preventiva e ripristino in corso. Attendi prima di chiudere Chronexus…");
-              }}
-            >
-              Sostituisci archivio
-            </button>
-          </div>
-        </div>
+        <RestoreConfirmation
+          preview={preview}
+          busy={busy}
+          confirmation={confirmation}
+          cancel={cancel}
+          onKeys={confirmationKeys}
+          onCancel={cancelRestore}
+          onRestore={confirmRestore}
+        />
       ) : (
         <>
           <section
@@ -197,15 +195,22 @@ export default function BackupWorkspace({
             aria-labelledby="create-backup-title"
           >
             <div>
-              <h3 id="create-backup-title">Conserva una copia</h3>
+              <h3 id="create-backup-title">
+                <Text source={"Conserva una copia"} />
+              </h3>
               <p>
-                Un unico file .nodex contiene l’intero archivio. Scegli una
-                cartella sul computer, su un disco esterno o su un’unità di rete
-                montata.
+                <Text
+                  source={
+                    "Un unico file .nodex contiene l’intero archivio. Scegli una cartella sul computer, su un disco esterno o su un’unità di rete montata."
+                  }
+                />
               </p>
               <p>
-                I backup esistenti non vengono sovrascritti: scegli sempre un
-                nuovo nome.
+                <Text
+                  source={
+                    "I backup esistenti non vengono sovrascritti: scegli sempre un nuovo nome."
+                  }
+                />
               </p>
             </div>
             <button
@@ -223,12 +228,17 @@ export default function BackupWorkspace({
                 }, "Scelta della destinazione e creazione del backup…");
               }}
             >
-              Crea backup
+              <Text source={"Crea backup"} />
             </button>
           </section>
           {backup ? (
-            <section className="backup-receipt" aria-label="Backup creato">
-              <h3>Backup creato e verificato</h3>
+            <section
+              className="backup-receipt"
+              aria-label={tr("Backup creato")}
+            >
+              <h3>
+                <Text source={"Backup creato e verificato"} />
+              </h3>
               <p className="archive-path">{backup.path}</p>
               <ArchiveSummary counts={backup.counts} />
             </section>
@@ -238,10 +248,15 @@ export default function BackupWorkspace({
             aria-labelledby="choose-backup-title"
           >
             <div>
-              <h3 id="choose-backup-title">Recupera un archivio</h3>
+              <h3 id="choose-backup-title">
+                <Text source={"Recupera un archivio"} />
+              </h3>
               <p>
-                Seleziona un file .nodex. Chronexus lo controlla e ti mostra il
-                contenuto prima di chiederti conferma.
+                <Text
+                  source={
+                    "Seleziona un file .nodex. Chronexus lo controlla e ti mostra il contenuto prima di chiederti conferma."
+                  }
+                />
               </p>
             </div>
             <button
@@ -259,13 +274,15 @@ export default function BackupWorkspace({
                 }, "Selezione e verifica del backup…");
               }}
             >
-              Seleziona backup
+              <Text source={"Seleziona backup"} />
             </button>
           </section>
           <p className="backup-footnote">
-            Il file .nodex non è cifrato: conservalo in una posizione privata.
-            Sono inclusi gli allegati gestiti nella cartella dati; eventuali
-            file esterni citati negli appunti restano esterni.
+            <Text
+              source={
+                "Il file .nodex non è cifrato: conservalo in una posizione privata. Sono inclusi gli allegati gestiti nella cartella dati; eventuali file esterni citati negli appunti restano esterni."
+              }
+            />
           </p>
         </>
       )}
@@ -278,16 +295,16 @@ function ArchiveSummary({ counts }: { counts: ArchiveCounts }) {
     <dl className="archive-counts">
       {(
         [
-          ["Campagne", counts.campaigns],
-          ["Sessioni", counts.sessions],
-          ["Pagine", counts.pages],
-          ["Menzioni", counts.mentions],
-          ["Relazioni", counts.relationships],
-          ["Allegati", counts.attachments],
-          ["Personaggi", counts.characters ?? 0],
-          ["Oggetti", counts.items ?? 0],
-          ["Capacità e incantesimi", counts.spells ?? 0],
-          ["Tiri di dado", counts.diceRolls ?? 0],
+          [tr("Campagne"), counts.campaigns],
+          [tr("Sessioni"), counts.sessions],
+          [tr("Pagine"), counts.pages],
+          [tr("Menzioni"), counts.mentions],
+          [tr("Relazioni"), counts.relationships],
+          [tr("Allegati"), counts.attachments],
+          [tr("Personaggi"), counts.characters ?? 0],
+          [tr("Oggetti"), counts.items ?? 0],
+          [tr("Capacità e incantesimi"), counts.spells ?? 0],
+          [tr("Tiri di dado"), counts.diceRolls ?? 0],
         ] as const
       ).map(([label, count]) => (
         <div key={label}>
@@ -296,5 +313,78 @@ function ArchiveSummary({ counts }: { counts: ArchiveCounts }) {
         </div>
       ))}
     </dl>
+  );
+}
+
+function RestoreConfirmation({
+  preview,
+  busy,
+  confirmation,
+  cancel,
+  onKeys,
+  onCancel,
+  onRestore,
+}: {
+  preview: BackupPreview;
+  busy: boolean;
+  confirmation: React.RefObject<HTMLDialogElement | null>;
+  cancel: React.RefObject<HTMLButtonElement | null>;
+  onKeys: (event: KeyboardEvent<HTMLDialogElement>) => void;
+  onCancel: () => void;
+  onRestore: () => void;
+}) {
+  useEffect(() => {
+    const dialog = confirmation.current;
+    dialog?.showModal();
+    return () => {
+      dialog?.close();
+    };
+  }, [confirmation]);
+  return (
+    <dialog
+      className="restore-confirmation"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="restore-title"
+      aria-describedby="restore-warning"
+      ref={confirmation}
+      onKeyDown={onKeys}
+      onCancel={(event) => {
+        event.preventDefault();
+        if (!busy) onCancel();
+      }}
+    >
+      <h3 id="restore-title">
+        <Text source={"Sostituire l’intero archivio?"} />
+      </h3>
+      <p id="restore-warning">
+        <Text
+          source={"Tutte le campagne attuali saranno sostituite da quelle di"}
+        />{" "}
+        <strong>{preview.fileName}</strong>
+        <Text
+          source={
+            ". Prima verrà salvata una copia di sicurezza dell’archivio corrente. Non verrà effettuata una fusione."
+          }
+        />
+      </p>
+      <p>
+        <Text source={"Backup del"} />{" "}
+        {new Intl.DateTimeFormat(localeInfo(getPreferences().locale).intl, {
+          dateStyle: "long",
+          timeStyle: "short",
+        }).format(new Date(preview.manifest.created_at))}
+        <Text source={". Integrità dei file e del database verificata."} />
+      </p>
+      <ArchiveSummary counts={preview.manifest.counts} />
+      <div className="actions">
+        <button ref={cancel} disabled={busy} onClick={onCancel}>
+          <Text source={"Annulla ripristino"} />
+        </button>
+        <button className="danger" disabled={busy} onClick={onRestore}>
+          <Text source={"Sostituisci archivio"} />
+        </button>
+      </div>
+    </dialog>
   );
 }

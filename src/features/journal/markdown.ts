@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 /** Markdown editing bridge. Page UUIDs survive renames and unchanged blocks keep provenance IDs. */
 type Node = Record<string, unknown>;
 function record(value: unknown): value is Node {
@@ -28,17 +29,21 @@ export function validateMarkdown(source: string) {
     const href = match[1];
     if (href.startsWith("chronexus:") && !pageUrl.test(href))
       throw Error(
-        "Collegamento Chronexus non valido: conserva l’UUID completo della pagina.",
+        tr(
+          "Collegamento Chronexus non valido: conserva l’UUID completo della pagina.",
+        ),
       );
     if (href && !/^(https?:|mailto:|#|chronexus:)/i.test(href))
       throw Error(
-        "Usa link http, https, mailto o collegamenti Chronexus validi.",
+        tr("Usa link http, https, mailto o collegamenti Chronexus validi."),
       );
   }
   if (/<\/?[a-z][^>]*>/i.test(source))
-    throw Error("HTML non supportato: il testo originale è conservato.");
+    throw Error(tr("HTML non supportato: il testo originale è conservato."));
   if (new TextEncoder().encode(source).length > 1_900_000)
-    throw Error("Markdown troppo grande. Riduci il testo prima di applicarlo.");
+    throw Error(
+      tr("Markdown troppo grande. Riduci il testo prima di applicarlo."),
+    );
   // These block types are not in the persisted document schema. Never silently flatten them.
   if (
     /^\s*(```|~~~|<\/?[a-z!]|\|.*\||([-*_])(?:\s*\2){2,}\s*$)/im.test(source) ||
@@ -46,9 +51,12 @@ export function validateMarkdown(source: string) {
     /^\s*\[[^\]]+\]:/m.test(source)
   )
     throw Error(
-      "Tabelle, blocchi di codice, HTML, immagini e definizioni di link non sono supportati in questi appunti. Usa l’allegato immagini per le figure. Il testo originale è conservato: correggi il Markdown o annulla.",
+      tr(
+        "Tabelle, blocchi di codice, HTML, immagini e definizioni di link non sono supportati in questi appunti. Usa l’allegato immagini per le figure. Il testo originale è conservato: correggi il Markdown o annulla.",
+      ),
     );
-  if (/^#{4,6}\s/m.test(source)) throw Error("Usa titoli di livello 1, 2 o 3.");
+  if (/^#{4,6}\s/m.test(source))
+    throw Error(tr("Usa titoli di livello 1, 2 o 3."));
 }
 function signature(value: unknown): string {
   function clean(item: unknown): unknown {
@@ -98,12 +106,14 @@ export function restoreMarkdownBlocks(
           .map((t) => t.text)
           .join("");
         if (!label.trim() || label.length > 200)
-          throw Error("Etichetta del collegamento alla pagina non valida.");
+          throw Error(tr("Etichetta del collegamento alla pagina non valida."));
         return { type: "pageMention", props: { pageId: match[1], label } };
       }
       if (!/^(https?:|mailto:|#)/i.test(value.href))
         throw Error(
-          "Link non supportato. Usa https, http, mailto o un collegamento di pagina Chronexus con UUID valido.",
+          tr(
+            "Link non supportato. Usa https, http, mailto o un collegamento di pagina Chronexus con UUID valido.",
+          ),
         );
     }
     const result: Node = Object.fromEntries(

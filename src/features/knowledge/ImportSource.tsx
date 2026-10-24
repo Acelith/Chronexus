@@ -1,3 +1,5 @@
+import { tr } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
 import { useEffect, useState } from "react";
 import { command, errorMessage } from "../journal/api";
 interface Source {
@@ -32,24 +34,34 @@ export default function ImportSource({
   if (error)
     return (
       <p role="alert" className="error">
-        Sorgente importata: {error}
+        <Text source={"Sorgente importata: "} />
+        {error}
       </p>
     );
   if (!source) return null;
   return (
     <details className="import-source">
-      <summary>Sorgente Logseq originale</summary>
+      <summary>
+        <Text source={"Sorgente Logseq originale"} />
+      </summary>
       <p>
-        {source.name} · conservata nel backup e nell’export. Le modifiche negli
-        appunti non alterano questa copia.
+        {source.name}{" "}
+        <Text
+          source={
+            " · conservata nel backup e nell’export. Le modifiche negli appunti non alterano questa copia."
+          }
+        />
       </p>
       <textarea
-        aria-label="Markdown originale importato"
+        aria-label={tr("Markdown originale importato")}
         readOnly
         value={source.content}
         rows={12}
       />
-      <p className="muted">SHA-256: {source.sha256}</p>
+      <p className="muted">
+        <Text source={"SHA-256: "} />
+        {source.sha256}
+      </p>
     </details>
   );
 }

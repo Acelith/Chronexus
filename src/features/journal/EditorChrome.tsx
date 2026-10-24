@@ -1,3 +1,5 @@
+import { tr } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
 import type { ReactNode } from "react";
 import type { SaveState } from "./autosave";
 import { it } from "../../strings";
@@ -21,7 +23,7 @@ export function EditorSaveBar({
   return (
     <div className="save-bar">
       <span role="status" className={`save-state ${state.kind}`}>
-        {sourceDirty ? "Markdown da applicare e salvare" : status}
+        {sourceDirty ? tr("Markdown da applicare e salvare") : status}
       </span>
       <button
         type="button"
@@ -58,7 +60,7 @@ export function EditorModeBar({
     <div
       className="editor-command-bar"
       role="toolbar"
-      aria-label="Comandi degli appunti"
+      aria-label={tr("Comandi degli appunti")}
     >
       <div className="editor-mode">
         <button
@@ -67,7 +69,7 @@ export function EditorModeBar({
           disabled={disabled}
           onClick={onVisual}
         >
-          Visuale
+          <Text source={"Visuale"} />
         </button>
         <button
           type="button"
@@ -75,7 +77,7 @@ export function EditorModeBar({
           disabled={disabled || mode === "markdown"}
           onClick={onMarkdown}
         >
-          Markdown
+          <Text source={"Markdown"} />
         </button>
       </div>
       {mode === "visual" ? (
@@ -87,10 +89,10 @@ export function EditorModeBar({
             disabled={disabled || !dirty}
             onClick={onVisual}
           >
-            Applica e torna al visuale
+            <Text source={"Applica e torna al visuale"} />
           </button>
           <button type="button" disabled={disabled} onClick={onDiscard}>
-            Annulla modifiche Markdown
+            <Text source={"Annulla modifiche Markdown"} />
           </button>
         </>
       )}

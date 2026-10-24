@@ -1,3 +1,4 @@
+import { Text } from "../../i18n/Text";
 import { valuesFor } from "./model";
 import type { Roll } from "./api";
 import { composition } from "./model";
@@ -14,7 +15,9 @@ export default function RollDetails({ roll }: { roll: Roll }) {
         >
           <div>
             <strong>
-              {group.quantity}d{group.sides}
+              {group.quantity}
+              <Text source={"d"} />
+              {group.sides}
             </strong>
             <span>
               {t.subtotal}: <b>{group.subtotal}</b>

@@ -17,7 +17,10 @@
     "desktop": "pnpm icons && tauri dev",
     "build:desktop": "pnpm icons && tauri build --no-bundle",
     "icons": "tauri icon assets/chronexus.svg --output src-tauri/icons",
-    "package:desktop": "pnpm icons && tauri build"
+    "package:desktop": "pnpm icons && tauri build",
+    "i18n:scan": "node scripts/i18n/scan.mjs",
+    "i18n:normalize": "node scripts/i18n/normalize-chinese.mjs",
+    "i18n:check": "node scripts/i18n/normalize-chinese.mjs --check && vitest run src/i18n/catalogs.test.ts"
   },
   "dependencies": {
     "@blocknote/core": "^0.56.0",
@@ -44,6 +47,7 @@
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^30.1.3",
+    "opencc-js": "1.4.2",
     "prettier": "^3.9.10",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.0",

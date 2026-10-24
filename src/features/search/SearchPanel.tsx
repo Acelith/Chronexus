@@ -1,3 +1,7 @@
+import { resultCount } from "../../i18n/resultCount";
+import { localizeLabels } from "../../i18n/store";
+import { tr } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { command, errorMessage } from "../journal/api";
 export interface SearchResult {
@@ -8,14 +12,14 @@ export interface SearchResult {
   preview: string;
   updatedAt: string;
 }
-const kinds = {
+const kinds = localizeLabels({
   session: "Sessioni",
   page: "Pagine",
   character: "Personaggio",
   item: "Oggetti",
   spell: "Incantesimi",
   ability: "Capacità",
-};
+});
 export default function SearchPanel({
   campaignId,
   onSelect,
@@ -87,34 +91,38 @@ export default function SearchPanel({
         ref={dialog}
         role="dialog"
         aria-modal="true"
-        aria-label="Cerca nella campagna"
+        aria-label={tr("Cerca nella campagna")}
         className="search-panel"
         onKeyDown={keyboard}
       >
         <header className="player-heading">
-          <h2>Cerca nella campagna</h2>
-          <button onClick={onClose}>Chiudi ricerca</button>
+          <h2>
+            <Text source={"Cerca nella campagna"} />
+          </h2>
+          <button onClick={onClose}>
+            <Text source={"Chiudi ricerca"} />
+          </button>
         </header>
         <label>
-          Testo da cercare
+          <Text source={"Testo da cercare"} />
           <input
             autoFocus
             type="search"
             maxLength={200}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Un nome, una frase o una parte di parola"
+            placeholder={tr("Un nome, una frase o una parte di parola")}
           />
         </label>
         <div className="player-filters">
           <label>
-            Cerca in
+            <Text source={"Cerca in"} />
             <select
-              aria-label="Cerca in"
+              aria-label={tr("Cerca in")}
               value={kind}
               onChange={(e) => setKind(e.target.value)}
             >
-              <option value="">Tutti i contenuti</option>
+              <option value="">{tr("Tutti i contenuti")}</option>
               {Object.entries(kinds).map(([k, v]) => (
                 <option key={k} value={k}>
                   {v}
@@ -123,14 +131,14 @@ export default function SearchPanel({
             </select>
           </label>
           <label>
-            Ordine risultati
+            <Text source={"Ordine risultati"} />
             <select
-              aria-label="Ordine risultati"
+              aria-label={tr("Ordine risultati")}
               value={sort}
               onChange={(e) => setSort(e.target.value)}
             >
-              <option value="relevance">Più pertinenti</option>
-              <option value="recent">Modificati di recente</option>
+              <option value="relevance">{tr("Più pertinenti")}</option>
+              <option value="recent">{tr("Modificati di recente")}</option>
             </select>
           </label>
         </div>
@@ -141,14 +149,25 @@ export default function SearchPanel({
         ) : null}
         <p role="status">
           {loading
-            ? "Ricerca…"
+            ? tr("Ricerca…")
             : query.trim()
-              ? `${results.length} risultati${results.length === 100 ? " (limite raggiunto: restringi la ricerca)" : ""}`
-              : "Cerca negli appunti, nei titoli, negli alias e nei dati del personaggio. Tutto resta sul dispositivo."}
+              ? resultCount(results.length) +
+                (results.length === 100
+                  ? tr(" (limite raggiunto: restringi la ricerca)")
+                  : "")
+              : tr(
+                  "Cerca negli appunti, nei titoli, negli alias e nei dati del personaggio. Tutto resta sul dispositivo.",
+                )}
         </p>
         <div className="search-results">
           {!loading && query.trim() && !results.length && !error ? (
-            <p>Nessun risultato. Prova meno parole o un filtro diverso.</p>
+            <p>
+              <Text
+                source={
+                  "Nessun risultato. Prova meno parole o un filtro diverso."
+                }
+              />
+            </p>
           ) : null}
           {results.map((r, i) => (
             <button
@@ -157,12 +176,14 @@ export default function SearchPanel({
             >
               <span>{kinds[r.kind]}</span>
               <strong>{r.title}</strong>
-              <p>{r.preview || "Apri il contenuto"}</p>
+              <p>{r.preview || tr("Apri il contenuto")}</p>
             </button>
           ))}
         </div>
         <details>
-          <summary>Manutenzione ricerca</summary>
+          <summary>
+            <Text source={"Manutenzione ricerca"} />
+          </summary>
           <button
             disabled={loading}
             onClick={() => {
@@ -170,7 +191,10 @@ export default function SearchPanel({
               command<number>("rebuild_search_index")
                 .then((count) => {
                   setNotice(
-                    `Indice ricostruito: ${count} voci. Gli appunti sono conservati.`,
+                    tr(
+                      "Indice ricostruito: {0} voci. Gli appunti sono conservati.",
+                      [count],
+                    ),
                   );
                   setRefresh((v) => v + 1);
                 })
@@ -178,7 +202,7 @@ export default function SearchPanel({
                 .finally(() => setLoading(false));
             }}
           >
-            Ricostruisci indice locale
+            <Text source={"Ricostruisci indice locale"} />
           </button>
           <p role="status">{notice}</p>
         </details>

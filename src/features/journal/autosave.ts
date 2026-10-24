@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 export type SaveState = {
   kind: "saved" | "dirty" | "saving" | "error";
   message?: string;
@@ -57,7 +58,9 @@ export class Autosave<T> {
             message:
               error instanceof Error
                 ? error.message
-                : "Salvataggio non riuscito. Gli appunti restano qui: riprova.",
+                : tr(
+                    "Salvataggio non riuscito. Gli appunti restano qui: riprova.",
+                  ),
           });
         throw error;
       });

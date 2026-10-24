@@ -149,3 +149,88 @@
     font-size: 28px;
   }
 }
+.script-label {
+  display: inline;
+}
+.script-original + .script-glyphs {
+  margin-inline-start: 0.5em;
+}
+.script-glyphs {
+  overflow-wrap: anywhere;
+  font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;
+  font-size: 1em;
+}
+.script-morse .script-glyphs {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85em;
+}
+.script-galactic .script-glyphs,
+.galactic-output {
+  font-family: "Chronexus Galactic", sans-serif;
+}
+.transcription-preview {
+  border-block: 1px solid #b59968;
+  margin-block: 22px;
+  padding-block: 16px;
+}
+.transcription-preview h4 {
+  font-size: 24px;
+  margin-block: 0 12px;
+}
+.transcription-preview label {
+  display: grid;
+  gap: 6px;
+  margin-block: 14px;
+}
+.transcription-preview textarea {
+  min-height: 80px;
+  width: 100%;
+  resize: vertical;
+}
+.transcription-sample {
+  overflow-wrap: anywhere;
+  padding: 12px;
+  border: 1px solid #b59968;
+}
+:root:lang(ar)
+  :where(button, input, select, textarea, h1, h2, h3, h4, h5, .bn-editor) {
+  font-family: "Chronexus Arabic", sans-serif;
+}
+:root:lang(ja)
+  :where(button, input, select, textarea, h1, h2, h3, h4, h5, .bn-editor) {
+  font-family: "Chronexus Japanese", sans-serif;
+}
+:root:lang(ko)
+  :where(button, input, select, textarea, h1, h2, h3, h4, h5, .bn-editor) {
+  font-family: "Chronexus Korean", sans-serif;
+}
+:root:lang(zh-Hans)
+  :where(button, input, select, textarea, h1, h2, h3, h4, h5, .bn-editor) {
+  font-family: "Chronexus Chinese", sans-serif;
+}
+:where(input[type="text"], input:not([type]), textarea, .bn-editor) {
+  unicode-bidi: plaintext;
+}
+@media (prefers-reduced-motion: reduce) {
+  .script-glyphs {
+    animation: none;
+  }
+}
+.language-lexicon {
+  margin-block: 18px;
+}
+.language-lexicon dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.language-lexicon dt {
+  font-size: 0.9em;
+}
+.language-lexicon dd {
+  margin: 4px 0;
+  font-weight: bold;
+}
+.restore-confirmation::backdrop {
+  background: rgb(30 20 12 / 65%);
+}

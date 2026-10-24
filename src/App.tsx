@@ -1,3 +1,7 @@
+import { date as formatDateTime } from "./i18n/store";
+import { localeInfo } from "./i18n/locales";
+import { getPreferences } from "./i18n/store";
+import { Text } from "./i18n/Text";
 import { usePreferences, tr } from "./i18n/store";
 import { Icon, Compass } from "./components/Ornaments";
 import {
@@ -55,13 +59,16 @@ const CampaignSettings = lazy(
 );
 const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
 
-const modifiedDateFormat = new Intl.DateTimeFormat("it-CH", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+const modifiedDateFormat = {
+  format: (value: Date) =>
+    formatDateTime(value, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+};
 
 export function App() {
   usePreferences();
@@ -281,7 +288,7 @@ export function App() {
   function openSearch() {
     if (!campaignId || busy || backupOpen) return;
     if (form) {
-      setError("Completa o annulla il modulo aperto prima di cercare.");
+      setError(tr("Completa o annulla il modulo aperto prima di cercare."));
       return;
     }
     void run(async () => setSearchOpen(true));
@@ -372,7 +379,7 @@ export function App() {
   }
   const createLinkedPage = useCallback(
     async (title: string) => {
-      if (!campaignId) throw Error("Seleziona una campagna.");
+      if (!campaignId) throw Error(tr("Seleziona una campagna."));
       const saved = await knowledgeApi.create(campaignId, {
         title,
         kind: "note",
@@ -419,22 +426,24 @@ export function App() {
             <div className="brand">
               <Compass />
               <h1>{it.appName}</h1>
-              <p>Le tue storie vivono</p>
+              <p>
+                <Text source={"Le tue storie vivono"} />
+              </p>
             </div>
             <nav className="sidebar-menu" aria-label={it.campaigns}>
               <label className="campaign-picker">
-                Campagna attuale
+                <Text source={"Campagna attuale"} />
                 <select
-                  aria-label="Campagna attuale"
+                  aria-label={tr("Campagna attuale")}
                   value={backupOpen ? "" : (campaignId ?? "")}
                   disabled={busy || loading}
                   onChange={(e) => selectCampaign(e.target.value)}
                 >
                   {backupOpen ? (
-                    <option value="">Seleziona campagna</option>
+                    <option value="">{tr("Seleziona campagna")}</option>
                   ) : null}
                   {!campaigns.length ? (
-                    <option value="">Nessuna campagna</option>
+                    <option value="">{tr("Nessuna campagna")}</option>
                   ) : null}
                   {campaigns.map((item) => (
                     <option key={item.id} value={item.id}>
@@ -466,7 +475,7 @@ export function App() {
                 }}
               >
                 <Icon name="backup" />
-                Backup e ripristino
+                <Text source={"Backup e ripristino"} />
               </button>
               {campaign ? (
                 <>
@@ -484,7 +493,7 @@ export function App() {
                     }}
                   >
                     <Icon name="settings" />
-                    Impostazioni della campagna
+                    <Text source={"Impostazioni della campagna"} />
                   </button>
                   <button
                     disabled={busy}
@@ -500,7 +509,7 @@ export function App() {
                     }}
                   >
                     <Icon name="star" />
-                    Assistente locale
+                    <Text source={"Assistente locale"} />
                   </button>
                 </>
               ) : null}
@@ -519,7 +528,7 @@ export function App() {
                   }}
                 >
                   <Icon name="dice" />
-                  Tiradadi
+                  <Text source={"Tiradadi"} />
                 </button>
               ) : null}
               <button
@@ -545,16 +554,22 @@ export function App() {
                 alt=""
               />
               <p>
-                Persone, luoghi, idee.
+                <Text source={"Persone, luoghi, idee."} />
                 <br />
-                Tutto è connesso.
+                <Text source={"Tutto è connesso."} />
               </p>
               <span aria-hidden="true">— ◈ —</span>
             </div>
           </aside>
           <main>
             {searchOpen && campaignId ? (
-              <Suspense fallback={<p role="status">Apertura ricerca…</p>}>
+              <Suspense
+                fallback={
+                  <p role="status">
+                    <Text source={"Apertura ricerca…"} />
+                  </p>
+                }
+              >
                 <SearchPanel
                   campaignId={campaignId}
                   onSelect={selectSearch}
@@ -570,7 +585,7 @@ export function App() {
                 <p>{error}</p>
                 {campaigns.length ? (
                   <button type="button" onClick={() => setError("")}>
-                    Chiudi messaggio
+                    <Text source={"Chiudi messaggio"} />
                   </button>
                 ) : null}
                 {!campaigns.length ? (
@@ -588,7 +603,13 @@ export function App() {
               </div>
             ) : null}
             {backupOpen ? (
-              <Suspense fallback={<p role="status">Apertura backup…</p>}>
+              <Suspense
+                fallback={
+                  <p role="status">
+                    <Text source={"Apertura backup…"} />
+                  </p>
+                }
+              >
                 <BackupWorkspace
                   register={register}
                   onRestored={async () => {
@@ -603,14 +624,18 @@ export function App() {
               <>
                 <header className="campaign-header">
                   <div>
-                    <h2>{campaign?.name ?? it.emptyCampaigns}</h2>
+                    <h2>
+                      {view === "preferences"
+                        ? tr("Impostazioni dell’app")
+                        : (campaign?.name ?? it.emptyCampaigns)}
+                    </h2>
                   </div>
                   <span className="last-modified">
                     {[...sessions, ...pages].some((item) =>
                       Number.isFinite(Date.parse(item.updatedAt)),
                     ) ? (
                       <>
-                        Ultima modifica:{" "}
+                        <Text source={"Ultima modifica:"} />{" "}
                         <time>
                           {modifiedDateFormat.format(
                             new Date(
@@ -627,15 +652,17 @@ export function App() {
                   </span>
                   {campaign ? (
                     <details className="campaign-actions">
-                      <summary aria-label="Azioni della campagna">•••</summary>
+                      <summary aria-label={tr("Azioni della campagna")}>
+                        •••
+                      </summary>
                       <div className="actions">
                         <button
                           ref={searchButton}
                           disabled={busy}
                           onClick={openSearch}
-                          title="Ctrl+K / ⌘K"
+                          title={tr("Ctrl+K / ⌘K")}
                         >
-                          Cerca nella campagna
+                          <Text source={"Cerca nella campagna"} />
                         </button>
                         <Suspense fallback={null}>
                           <ExportButton
@@ -666,7 +693,10 @@ export function App() {
                   ) : null}
                 </header>
                 {campaign ? (
-                  <nav className="view-tabs" aria-label="Viste della campagna">
+                  <nav
+                    className="view-tabs"
+                    aria-label={tr("Viste della campagna")}
+                  >
                     <button
                       aria-current={view === "overview" ? "page" : undefined}
                       disabled={busy}
@@ -678,7 +708,7 @@ export function App() {
                       }
                     >
                       <Icon name="document" />
-                      Riepilogo
+                      <Text source={"Riepilogo"} />
                     </button>
                     <button
                       aria-current={view === "journal" ? "page" : undefined}
@@ -692,7 +722,7 @@ export function App() {
                       }}
                     >
                       <Icon name="book" />
-                      Diario
+                      <Text source={"Diario"} />
                     </button>
                     <button
                       aria-current={view === "codex" ? "page" : undefined}
@@ -707,7 +737,7 @@ export function App() {
                       }}
                     >
                       <Icon name="books" />
-                      Codex
+                      <Text source={"Codex"} />
                     </button>
                     <button
                       aria-current={view === "graph" ? "page" : undefined}
@@ -721,7 +751,7 @@ export function App() {
                       }}
                     >
                       <Icon name="graph" />
-                      Grafo
+                      <Text source={"Grafo"} />
                     </button>
                     <button
                       aria-current={view === "party" ? "page" : undefined}
@@ -734,13 +764,13 @@ export function App() {
                       }
                     >
                       <Icon name="party" />
-                      Party
+                      <Text source={"Party"} />
                     </button>
                     {(
                       [
-                        ["character", "Personaggio"],
-                        ["inventory", "Inventario"],
-                        ["abilities", "Incantesimi"],
+                        ["character", tr("Personaggio")],
+                        ["inventory", tr("Inventario")],
+                        ["abilities", tr("Incantesimi")],
                       ] as const
                     ).map(([id, label]) => (
                       <button
@@ -778,7 +808,7 @@ export function App() {
                       }
                     >
                       <Icon name="wiki" />
-                      Wiki D&amp;D
+                      <Text source={"Wiki D&D"} />
                     </button>
                   </nav>
                 ) : null}
@@ -795,7 +825,7 @@ export function App() {
                         });
                       }}
                     >
-                      Torna alla voce del personaggio
+                      <Text source={"Torna alla voce del personaggio"} />
                     </button>
                   ) : null}
                   {form === "campaign" || form === "rename" ? (
@@ -839,7 +869,13 @@ export function App() {
                     </section>
                   ) : null}
                   {campaign && view === "codex" ? (
-                    <Suspense fallback={<p role="status">Apertura Codex…</p>}>
+                    <Suspense
+                      fallback={
+                        <p role="status">
+                          <Text source={"Apertura Codex…"} />
+                        </p>
+                      }
+                    >
                       <CodexWorkspace
                         key={campaign.id}
                         campaignId={campaign.id}
@@ -869,7 +905,11 @@ export function App() {
                   ) : null}
                   {campaign && view === "dice" ? (
                     <Suspense
-                      fallback={<p role="status">Apertura tiradadi…</p>}
+                      fallback={
+                        <p role="status">
+                          <Text source={"Apertura tiradadi…"} />
+                        </p>
+                      }
                     >
                       <DiceWorkspace
                         key={campaign.id}
@@ -881,7 +921,11 @@ export function App() {
                   ) : null}
                   {campaign && view === "settings" ? (
                     <Suspense
-                      fallback={<p role="status">Apertura impostazioni…</p>}
+                      fallback={
+                        <p role="status">
+                          <Text source={"Apertura impostazioni…"} />
+                        </p>
+                      }
                     >
                       <CampaignSettings
                         key={campaign.id}
@@ -893,7 +937,11 @@ export function App() {
                   ) : null}
                   {campaign && view === "assistant" ? (
                     <Suspense
-                      fallback={<p role="status">Apertura assistente…</p>}
+                      fallback={
+                        <p role="status">
+                          <Text source={"Apertura assistente…"} />
+                        </p>
+                      }
                     >
                       <AssistantWorkspace
                         key={campaign.id}
@@ -904,12 +952,24 @@ export function App() {
                     </Suspense>
                   ) : null}
                   {campaign && view === "wiki" ? (
-                    <Suspense fallback={<p role="status">Apertura wiki…</p>}>
+                    <Suspense
+                      fallback={
+                        <p role="status">
+                          <Text source={"Apertura wiki…"} />
+                        </p>
+                      }
+                    >
                       <WikiWorkspace />
                     </Suspense>
                   ) : null}
                   {campaign && view === "party" ? (
-                    <Suspense fallback={<p role="status">Apertura party…</p>}>
+                    <Suspense
+                      fallback={
+                        <p role="status">
+                          <Text source={"Apertura party…"} />
+                        </p>
+                      }
+                    >
                       <PartyWorkspace
                         key={campaign.id}
                         campaignId={campaign.id}
@@ -923,7 +983,11 @@ export function App() {
                   ) : null}
                   {campaign && view === "overview" ? (
                     <Suspense
-                      fallback={<p role="status">Apertura riepilogo…</p>}
+                      fallback={
+                        <p role="status">
+                          <Text source={"Apertura riepilogo…"} />
+                        </p>
+                      }
                     >
                       <Dashboard
                         key={campaign.id}
@@ -951,7 +1015,13 @@ export function App() {
                     </Suspense>
                   ) : null}
                   {campaign && view === "graph" ? (
-                    <Suspense fallback={<p role="status">Apertura grafo…</p>}>
+                    <Suspense
+                      fallback={
+                        <p role="status">
+                          <Text source={"Apertura grafo…"} />
+                        </p>
+                      }
+                    >
                       <GraphWorkspace
                         key={campaign.id}
                         campaignId={campaign.id}
@@ -969,7 +1039,11 @@ export function App() {
                     view === "inventory" ||
                     view === "abilities") ? (
                     <Suspense
-                      fallback={<p role="status">Apertura personaggio…</p>}
+                      fallback={
+                        <p role="status">
+                          <Text source={"Apertura personaggio…"} />
+                        </p>
+                      }
                     >
                       <PlayerWorkspace
                         key={`${campaign.id}-${view}`}
@@ -1031,7 +1105,8 @@ export function App() {
                             }}
                           >
                             <span className="session-number">
-                              Sessione {item.sequence}
+                              <Text source={"Sessione "} />
+                              {item.sequence}
                             </span>
                             <strong>{item.title}</strong>
                             <span>{formatDate(item.playedOn)}</span>
@@ -1043,7 +1118,8 @@ export function App() {
                           <>
                             <header className="note-header">
                               <p>
-                                Sessione {session.sequence}{" "}
+                                <Text source={"Sessione "} />
+                                {session.sequence}{" "}
                                 <span aria-hidden="true">/</span>{" "}
                                 {formatDate(session.playedOn)}
                               </p>
@@ -1090,7 +1166,7 @@ export function App() {
 
 function formatDate(date: string | null) {
   if (!date) return it.dateMissing;
-  return new Intl.DateTimeFormat("it-IT", {
+  return new Intl.DateTimeFormat(localeInfo(getPreferences().locale).intl, {
     day: "numeric",
     month: "long",
     year: "numeric",

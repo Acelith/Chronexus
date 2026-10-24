@@ -1,3 +1,5 @@
+import { tr } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
 import { useEffect, useMemo, useRef, useState } from "react";
 import cytoscape, { type Core } from "cytoscape";
 import type { GraphData, GraphEdge, GraphNode } from "./api";
@@ -92,7 +94,9 @@ export default function GraphCanvas({
         className="graph-canvas"
         ref={container}
         role="img"
-        aria-label="Grafo della campagna. Le stesse informazioni sono disponibili nell’elenco accessibile."
+        aria-label={tr(
+          "Grafo della campagna. Le stesse informazioni sono disponibili nell’elenco accessibile.",
+        )}
         data-node-count={visible.nodes.length}
         data-edge-count={visible.edges.length}
       />
@@ -100,56 +104,61 @@ export default function GraphCanvas({
         <button
           type="button"
           onClick={() => cy.current?.zoom((cy.current?.zoom() ?? 1) * 1.2)}
-          aria-label="Ingrandisci grafo"
+          aria-label={tr("Ingrandisci grafo")}
         >
-          ⌕ Ingrandisci
+          <Text source={"⌕ Ingrandisci"} />
         </button>
         <button
           type="button"
           onClick={() => cy.current?.zoom((cy.current?.zoom() ?? 1) / 1.2)}
-          aria-label="Riduci grafo"
+          aria-label={tr("Riduci grafo")}
         >
-          ⌕ Riduci
+          <Text source={"⌕ Riduci"} />
         </button>
         <button type="button" onClick={() => cy.current?.fit(undefined, 30)}>
-          ⛶ Adatta vista
+          <Text source={"⛶ Adatta vista"} />
         </button>
         <span className="graph-legend-inline">
           <span>
             <i className="person" />
-            Personaggi
+            <Text source={"Personaggi"} />
           </span>
           <span>
             <i />
-            Luoghi
+            <Text source={"Luoghi"} />
           </span>
           <span>
             <i className="item" />
-            Oggetti
+            <Text source={"Oggetti"} />
           </span>
-          <span>→ Relazioni</span>
+          <span>
+            <Text source={"→ Relazioni"} />
+          </span>
         </span>
       </div>
       <details className="graph-view-options">
-        <summary>Opzioni di disposizione</summary>
+        <summary>
+          <Text source={"Opzioni di disposizione"} />
+        </summary>
         <div className="graph-view-toolbar">
           <label className="graph-arrangement">
-            Disposizione
+            <Text source={"Disposizione"} />
             <select
               value={layoutMode}
               onChange={(e) => setLayoutMode(e.target.value as "grid" | "cose")}
             >
-              <option value="grid">Mappa leggibile</option>
-              <option value="cose">Organica</option>
+              <option value="grid">{tr("Mappa leggibile")}</option>
+              <option value="cose">{tr("Organica")}</option>
             </select>
           </label>
           <span>
-            {visible.nodes.length} di {data.nodes.length} nodi · trascina per
-            spostarti
+            {visible.nodes.length} <Text source={" di "} />
+            {data.nodes.length}{" "}
+            <Text source={" nodi · trascina per spostarti"} />
           </span>
           {data.nodes.length > 18 ? (
             <button type="button" onClick={() => setExpanded((v) => !v)}>
-              {expanded ? "Vista compatta" : "Mostra tutti i nodi"}
+              {expanded ? tr("Vista compatta") : tr("Mostra tutti i nodi")}
             </button>
           ) : null}
           <button
@@ -159,7 +168,7 @@ export default function GraphCanvas({
               cy.current?.elements().unselect();
             }}
           >
-            Togli evidenza
+            <Text source={"Togli evidenza"} />
           </button>
         </div>
       </details>

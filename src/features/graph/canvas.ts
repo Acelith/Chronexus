@@ -1,3 +1,4 @@
+import { tr, translateError } from "../../i18n/store";
 import { iconPaths } from "../../components/iconPaths";
 import type { ElementDefinition, StylesheetJson } from "cytoscape";
 import { type GraphData } from "./api";
@@ -19,7 +20,9 @@ export function graphElements(data: GraphData): ElementDefinition[] {
         data: {
           ...node,
           label:
-            node.kind === "session" ? node.title.split(":")[0] : node.title,
+            node.kind === "session"
+              ? translateError(node.title.split(":")[0])
+              : node.title,
           size: node.kind === "faction" ? 110 : 85,
           icon: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
         },
@@ -28,7 +31,7 @@ export function graphElements(data: GraphData): ElementDefinition[] {
     ...data.edges.map((edge) => ({
       data: {
         ...edge,
-        displayLabel: edge.kind === "mention" ? "menziona" : edge.label,
+        displayLabel: edge.kind === "mention" ? tr("menziona") : edge.label,
       },
     })),
   ];
@@ -40,7 +43,8 @@ export const graphStyle: StylesheetJson = [
       label: "data(label)",
       "background-color": "#354b3e",
       color: "#30251d",
-      "font-family": "Chronexus Text, Georgia, serif",
+      "font-family":
+        "Chronexus Text, Chronexus Arabic, Chronexus Japanese, Chronexus Korean, Chronexus Chinese, Georgia, serif",
       "font-size": 21,
       "font-weight": 600,
       "text-valign": "bottom",
@@ -79,7 +83,8 @@ export const graphStyle: StylesheetJson = [
       "target-arrow-shape": "triangle",
       "arrow-scale": 0.8,
       label: "data(displayLabel)",
-      "font-family": "Chronexus Text, Georgia, serif",
+      "font-family":
+        "Chronexus Text, Chronexus Arabic, Chronexus Japanese, Chronexus Korean, Chronexus Chinese, Georgia, serif",
       "font-style": "italic",
       "font-size": 18,
       color: "#30251d",

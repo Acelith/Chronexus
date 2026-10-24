@@ -1,3 +1,6 @@
+import { localizeLabels } from "../../i18n/store";
+import { tr } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
 import {
   lazy,
   Suspense,
@@ -27,11 +30,11 @@ interface Draft {
   status: Member["status"];
   revision: number | null;
 }
-const states = {
+const states = localizeLabels({
   active: "Nel party",
   former: "Ex membro",
   unknown: "Da chiarire",
-};
+});
 const empty: Draft = {
   pageId: null,
   name: "",
@@ -85,7 +88,9 @@ export default function PartyWorkspace({
           state.current.confirm
         )
           throw Error(
-            "Salva o annulla la modifica del party prima di cambiare vista.",
+            tr(
+              "Salva o annulla la modifica del party prima di cambiare vista.",
+            ),
           );
         await editor.current?.flush();
       },
@@ -165,24 +170,35 @@ export default function PartyWorkspace({
     }
   }
   return (
-    <section className="party-workspace" aria-label="Party della campagna">
+    <section
+      className="party-workspace"
+      aria-label={tr("Party della campagna")}
+    >
       <header className="party-heading">
         <div>
-          <h3>La compagnia</h3>
-          <p>Compagni di viaggio, ricordi e ciò che sai di loro.</p>
+          <h3>
+            <Text source={"La compagnia"} />
+          </h3>
+          <p>
+            <Text
+              source={"Compagni di viaggio, ricordi e ciò che sai di loro."}
+            />
+          </p>
         </div>
         <button
           className="primary"
           disabled={busy || pending || !!draft || confirm}
           onClick={() => void move(() => setDraft({ ...empty }))}
         >
-          Aggiungi membro
+          <Text source={"Aggiungi membro"} />
         </button>
       </header>
       <p className="editor-hint">
-        Ogni membro usa la sua pagina del Codex: appunti, immagini e
-        collegamenti restano gli stessi. Una voce raccontata da un compagno
-        rimane una sua affermazione.
+        <Text
+          source={
+            "Ogni membro usa la sua pagina del Codex: appunti, immagini e collegamenti restano gli stessi. Una voce raccontata da un compagno rimane una sua affermazione."
+          }
+        />
       </p>
       {error ? (
         <div role="alert" className="error">
@@ -194,11 +210,15 @@ export default function PartyWorkspace({
               setAttempt((n) => n + 1);
             }}
           >
-            Ricarica party
+            <Text source={"Ricarica party"} />
           </button>
         </div>
       ) : null}
-      {loading ? <p role="status">Caricamento party…</p> : null}
+      {loading ? (
+        <p role="status">
+          <Text source={"Caricamento party…"} />
+        </p>
+      ) : null}
       {draft ? (
         <form
           className="party-form"
@@ -209,12 +229,12 @@ export default function PartyWorkspace({
         >
           <h4>
             {draft.revision === null
-              ? "Aggiungi un compagno"
-              : "Modifica membro"}
+              ? tr("Aggiungi un compagno")
+              : tr("Modifica membro")}
           </h4>
           {draft.revision === null ? (
             <label>
-              Pagina del personaggio
+              <Text source={"Pagina del personaggio"} />
               <select
                 value={draft.pageId ?? ""}
                 disabled={pending}
@@ -222,7 +242,7 @@ export default function PartyWorkspace({
                   setDraft({ ...draft, pageId: e.target.value || null })
                 }
               >
-                <option value="">Crea un nuovo personaggio</option>
+                <option value="">{tr("Crea un nuovo personaggio")}</option>
                 {pages
                   .filter(
                     (p) =>
@@ -239,7 +259,7 @@ export default function PartyWorkspace({
           ) : null}
           {!draft.pageId ? (
             <label>
-              Nome del personaggio
+              <Text source={"Nome del personaggio"} />
               <input
                 autoFocus
                 required
@@ -251,7 +271,7 @@ export default function PartyWorkspace({
             </label>
           ) : null}
           <label>
-            Giocatore (facoltativo)
+            <Text source={"Giocatore (facoltativo)"} />
             <input
               maxLength={200}
               value={draft.playerName}
@@ -262,7 +282,7 @@ export default function PartyWorkspace({
             />
           </label>
           <label>
-            Ruolo nella compagnia
+            <Text source={"Ruolo nella compagnia"} />
             <input
               maxLength={500}
               value={draft.role}
@@ -271,7 +291,7 @@ export default function PartyWorkspace({
             />
           </label>
           <label>
-            Presenza
+            <Text source={"Presenza"} />
             <select
               value={draft.status}
               disabled={pending}
@@ -291,28 +311,34 @@ export default function PartyWorkspace({
           </label>
           <div className="actions">
             <button className="primary" disabled={pending}>
-              Salva membro
+              <Text source={"Salva membro"} />
             </button>
             <button
               type="button"
               disabled={pending}
               onClick={() => setDraft(null)}
             >
-              Annulla
+              <Text source={"Annulla"} />
             </button>
           </div>
         </form>
       ) : null}
       {!loading && !members.length && !draft ? (
         <div className="empty">
-          <h4>Chi viaggia con te?</h4>
+          <h4>
+            <Text source={"Chi viaggia con te?"} />
+          </h4>
           <p>
-            Aggiungi un membro o collega un personaggio già presente nel Codex.
+            <Text
+              source={
+                "Aggiungi un membro o collega un personaggio già presente nel Codex."
+              }
+            />
           </p>
         </div>
       ) : null}
       <div className="party-layout">
-        <nav aria-label="Membri del party">
+        <nav aria-label={tr("Membri del party")}>
           {members.map((m) => (
             <button
               key={m.page.id}
@@ -321,10 +347,10 @@ export default function PartyWorkspace({
               onClick={() => void move(() => setSelectedId(m.page.id))}
             >
               <strong>{m.page.title}</strong>
-              <span>{m.role || "Ruolo da annotare"}</span>
+              <span>{m.role || tr("Ruolo da annotare")}</span>
               <small>
                 {states[m.status]}
-                {m.playerName ? ` · ${m.playerName}` : ""}
+                {m.playerName ? tr(" · {0}", [m.playerName]) : ""}
               </small>
             </button>
           ))}
@@ -335,14 +361,14 @@ export default function PartyWorkspace({
               <h4>{page.title}</h4>
               <p>
                 {selected.role}{" "}
-                {selected.playerName ? `· ${selected.playerName}` : ""}
+                {selected.playerName ? tr("· {0}", [selected.playerName]) : ""}
               </p>
               <div className="actions">
                 <button
                   disabled={busy || pending || confirm}
                   onClick={() => void move(() => onOpen(page))}
                 >
-                  Apri nel Codex
+                  <Text source={"Apri nel Codex"} />
                 </button>
                 <button
                   disabled={busy || pending || confirm}
@@ -359,13 +385,13 @@ export default function PartyWorkspace({
                     )
                   }
                 >
-                  Modifica membro
+                  <Text source={"Modifica membro"} />
                 </button>
                 <button
                   disabled={busy || pending || confirm}
                   onClick={() => void move(() => setConfirm(true))}
                 >
-                  Rimuovi dal party
+                  <Text source={"Rimuovi dal party"} />
                 </button>
               </div>
             </header>
@@ -373,7 +399,7 @@ export default function PartyWorkspace({
               <div
                 role="alertdialog"
                 aria-modal="true"
-                aria-label="Rimuovere il membro dal party?"
+                aria-label={tr("Rimuovere il membro dal party?")}
                 onKeyDown={(e) => {
                   if (e.key === "Escape" && !pending) setConfirm(false);
                   if (e.key === "Tab") {
@@ -398,23 +424,34 @@ export default function PartyWorkspace({
                 }}
               >
                 <p>
-                  La pagina del Codex, gli appunti, le immagini e i collegamenti
-                  saranno conservati.
+                  <Text
+                    source={
+                      "La pagina del Codex, gli appunti, le immagini e i collegamenti saranno conservati."
+                    }
+                  />
                 </p>
                 <button
                   autoFocus
                   disabled={pending}
                   onClick={() => setConfirm(false)}
                 >
-                  Annulla rimozione
+                  <Text source={"Annulla rimozione"} />
                 </button>
                 <button disabled={pending} onClick={() => void remove()}>
-                  Conferma rimozione
+                  <Text source={"Conferma rimozione"} />
                 </button>
               </div>
             ) : null}
-            <h4>Quello che so</h4>
-            <Suspense fallback={<p>Caricamento appunti…</p>}>
+            <h4>
+              <Text source={"Quello che so"} />
+            </h4>
+            <Suspense
+              fallback={
+                <p>
+                  <Text source={"Caricamento appunti…"} />
+                </p>
+              }
+            >
               <Editor
                 key={page.id}
                 page={page}

@@ -1,3 +1,5 @@
+import { tr } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
 import { blockOptions } from "../knowledge/blocks";
 import { useState } from "react";
 import type { Session } from "../journal/api";
@@ -46,7 +48,7 @@ export default function RelationshipForm({
   return (
     <form
       className="entry-form relationship-form"
-      aria-label={initial ? "Modifica relazione" : "Nuova relazione"}
+      aria-label={initial ? tr("Modifica relazione") : tr("Nuova relazione")}
       onSubmit={(event) => {
         event.preventDefault();
         void onSave({
@@ -62,16 +64,21 @@ export default function RelationshipForm({
         });
       }}
     >
-      <h3>{initial ? "Modifica relazione" : "Nuova relazione dichiarata"}</h3>
+      <h3>
+        {initial ? tr("Modifica relazione") : tr("Nuova relazione dichiarata")}
+      </h3>
       <p className="editor-hint">
-        Registra ciò che ritieni vero o sospetti. Questa relazione è distinta
-        dalle citazioni negli appunti.
+        <Text
+          source={
+            "Registra ciò che ritieni vero o sospetti. Questa relazione è distinta dalle citazioni negli appunti."
+          }
+        />
       </p>
       <div className="form-fields">
         <label>
-          Da pagina
+          <Text source={"Da pagina"} />
           <select
-            aria-label="Da pagina"
+            aria-label={tr("Da pagina")}
             required
             value={from}
             onChange={(event) => setFrom(event.target.value)}
@@ -85,9 +92,9 @@ export default function RelationshipForm({
           </select>
         </label>
         <label>
-          A pagina
+          <Text source={"A pagina"} />
           <select
-            aria-label="A pagina"
+            aria-label={tr("A pagina")}
             required
             value={to}
             onChange={(event) => setTo(event.target.value)}
@@ -102,7 +109,7 @@ export default function RelationshipForm({
         </label>
       </div>
       <label>
-        Etichetta della relazione
+        <Text source={"Etichetta della relazione"} />
         <input
           autoFocus
           required
@@ -110,13 +117,13 @@ export default function RelationshipForm({
           value={label}
           onChange={(event) => setLabel(event.target.value)}
           disabled={busy}
-          placeholder="es. accusa, appartiene a, cerca"
+          placeholder={tr("es. accusa, appartiene a, cerca")}
         />
       </label>
       <label>
-        Certezza
+        <Text source={"Certezza"} />
         <select
-          aria-label="Certezza"
+          aria-label={tr("Certezza")}
           value={certainty}
           onChange={(event) => setCertainty(event.target.value as Certainty)}
           disabled={busy}
@@ -129,9 +136,9 @@ export default function RelationshipForm({
         </select>
       </label>
       <label>
-        Fonte (facoltativa)
+        <Text source={"Fonte (facoltativa)"} />
         <select
-          aria-label="Fonte (facoltativa)"
+          aria-label={tr("Fonte (facoltativa)")}
           value={source}
           onChange={(event) => {
             setSource(event.target.value);
@@ -139,15 +146,16 @@ export default function RelationshipForm({
           }}
           disabled={busy}
         >
-          <option value="">Nessuna fonte selezionata</option>
-          <optgroup label="Sessioni">
+          <option value="">{tr("Nessuna fonte selezionata")}</option>
+          <optgroup label={tr("Sessioni")}>
             {sessions.map((session) => (
               <option key={session.id} value={`session:${session.id}`}>
-                Sessione {session.sequence}: {session.title}
+                {tr("Sessione ")}
+                {session.sequence}: {session.title}
               </option>
             ))}
           </optgroup>
-          <optgroup label="Pagine">
+          <optgroup label={tr("Pagine")}>
             {pages.map((page) => (
               <option key={page.id} value={`page:${page.id}`}>
                 {page.title}
@@ -157,16 +165,16 @@ export default function RelationshipForm({
         </select>
       </label>
       <label>
-        Blocco della fonte
+        <Text source={"Blocco della fonte"} />
         <select
-          aria-label="Blocco della fonte"
+          aria-label={tr("Blocco della fonte")}
           value={block}
           disabled={!source || busy}
           onChange={(event) => setBlock(event.target.value)}
         >
-          <option value="">Intero documento</option>
+          <option value="">{tr("Intero documento")}</option>
           {block && !blocks.some((item) => item.id === block) ? (
-            <option value={block}>Blocco non più disponibile</option>
+            <option value={block}>{tr("Blocco non più disponibile")}</option>
           ) : null}
           {blocks.map((item, index) => (
             <option key={item.id} value={item.id}>
@@ -176,7 +184,7 @@ export default function RelationshipForm({
         </select>
       </label>
       <label>
-        Evidenza o citazione
+        <Text source={"Evidenza o citazione"} />
         <textarea
           rows={3}
           maxLength={4000}
@@ -186,7 +194,7 @@ export default function RelationshipForm({
         />
       </label>
       <label>
-        Note sulla relazione
+        <Text source={"Note sulla relazione"} />
         <textarea
           rows={3}
           maxLength={4000}
@@ -200,10 +208,10 @@ export default function RelationshipForm({
           className="primary"
           disabled={busy || !from || !to || !label.trim()}
         >
-          Salva relazione
+          <Text source={"Salva relazione"} />
         </button>
         <button type="button" disabled={busy} onClick={onCancel}>
-          Annulla relazione
+          <Text source={"Annulla relazione"} />
         </button>
       </div>
     </form>

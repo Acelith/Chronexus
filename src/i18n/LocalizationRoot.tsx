@@ -1,11 +1,21 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { preferencesApi } from "./preferencesApi";
-import { applyPreferences, loadLocale, tr } from "./store";
+import {
+  applyPreferences,
+  loadLocale,
+  tr,
+  usePreferences,
+  getPreferences,
+} from "./store";
 export default function LocalizationRoot({
   children,
 }: {
   children: ReactNode;
 }) {
+  const preferences = usePreferences();
+  const [failedPreferences, setFailedPreferences] = useState<ReturnType<
+    typeof getPreferences
+  > | null>(null);
   const [ready, setReady] = useState(false),
     [error, setError] = useState("");
   useEffect(() => {
@@ -17,7 +27,8 @@ export default function LocalizationRoot({
         if (active) applyPreferences(prefs);
       })
       .catch((reason) => {
-        if (active)
+        if (active) {
+          setFailedPreferences(getPreferences());
           setError(
             typeof reason === "string"
               ? reason
@@ -25,6 +36,7 @@ export default function LocalizationRoot({
                 ? reason.message
                 : "Impossibile leggere le preferenze dell’interfaccia.",
           );
+        }
       })
       .finally(() => {
         if (active) setReady(true);
@@ -36,7 +48,7 @@ export default function LocalizationRoot({
   if (!ready) return <p role="status">{tr("Apertura archivio…")}</p>;
   return (
     <>
-      {error ? (
+      {error && failedPreferences === preferences ? (
         <p role="alert" className="error">
           {tr(error)}
         </p>

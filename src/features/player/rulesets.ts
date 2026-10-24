@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 import type { CharacterInput, Stat } from "./api";
 /** Boundary for future local adapters. Derived values never overwrite manual stats.
  * No rest, slot-consumption or commercial rules are implemented in M5. */
@@ -11,7 +12,9 @@ export interface RulesetAdapter {
 }
 export const manualAdapter: RulesetAdapter = {
   id: "generic",
-  label: "Valori manuali",
+  get label() {
+    return tr("Valori manuali");
+  },
   mode: "manual",
   derive: () => [],
 };

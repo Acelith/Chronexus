@@ -1,3 +1,7 @@
+import { localeInfo } from "../../i18n/locales";
+import { getPreferences } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
+import { localizeLabels, tr } from "../../i18n/store";
 import { useRef, useState } from "react";
 import { errorMessage } from "../journal/api";
 import {
@@ -10,7 +14,7 @@ import {
   type Results,
   type Answer,
 } from "./api";
-const labels: Record<string, string> = {
+const labels: Record<string, string> = localizeLabels({
   level: "Livello",
   school: "Scuola",
   casting_time: "Tempo di lancio",
@@ -34,7 +38,7 @@ const labels: Record<string, string> = {
   charisma: "Carisma",
   size: "Taglia",
   type: "Tipo",
-};
+});
 export default function WikiWorkspace() {
   const [query, setQuery] = useState(""),
     [results, setResults] = useState<Answer<Results> | null>(null),
@@ -84,15 +88,26 @@ export default function WikiWorkspace() {
     ...new Set(results?.payload.results.map((r) => r.object_model) ?? []),
   ];
   return (
-    <section className="wiki-workspace" aria-label="Wiki Dungeons & Dragons">
-      <h3>Biblioteca delle regole</h3>
-      <p>Open5e · regole, incantesimi, creature e oggetti da più fonti.</p>
+    <section
+      className="wiki-workspace"
+      aria-label={tr("Wiki Dungeons & Dragons")}
+    >
+      <h3>
+        <Text source={"Biblioteca delle regole"} />
+      </h3>
+      <p>
+        <Text
+          source={
+            "Open5e · regole, incantesimi, creature e oggetti da più fonti."
+          }
+        />
+      </p>
       <p className="editor-hint">
-        I contenuti sono prevalentemente in inglese. Cerca un termine di regole,
-        ad esempio “magic missile”. Solo quando premi Cerca o apri una voce, il
-        termine o l'identificativo viene inviato a Open5e. Le pagine consultate
-        rimangono disponibili offline; nessun appunto della campagna viene
-        inviato.
+        <Text
+          source={
+            "I contenuti sono prevalentemente in inglese. Cerca un termine di regole, ad esempio “magic missile”. Solo quando premi Cerca o apri una voce, il termine o l'identificativo viene inviato a Open5e. Le pagine consultate rimangono disponibili offline; nessun appunto della campagna viene inviato."
+          }
+        />
       </p>
       <form
         className="wiki-search"
@@ -102,7 +117,7 @@ export default function WikiWorkspace() {
         }}
       >
         <label>
-          Termine nella wiki
+          <Text source={"Termine nella wiki"} />
           <input
             type="search"
             minLength={2}
@@ -113,7 +128,7 @@ export default function WikiWorkspace() {
           />
         </label>
         <button className="primary" disabled={busy}>
-          Cerca nella wiki
+          <Text source={"Cerca nella wiki"} />
         </button>
         {results ? (
           <button
@@ -121,15 +136,23 @@ export default function WikiWorkspace() {
             disabled={busy}
             onClick={() => void find(1, true)}
           >
-            Aggiorna ricerca online
+            <Text source={"Aggiorna ricerca online"} />
           </button>
         ) : null}
       </form>
-      {busy ? <p role="status">Consultazione wiki…</p> : null}
+      {busy ? (
+        <p role="status">
+          <Text source={"Consultazione wiki…"} />
+        </p>
+      ) : null}
       {error ? (
         <p role="alert" className="error">
-          {error} Riprova con la stessa ricerca; le copie già consultate
-          rimangono locali.
+          {error}{" "}
+          <Text
+            source={
+              " Riprova con la stessa ricerca; le copie già consultate rimangono locali."
+            }
+          />
         </p>
       ) : null}
       {results?.warning ? <p role="status">{results.warning}</p> : null}
@@ -137,16 +160,17 @@ export default function WikiWorkspace() {
         <>
           <div className="wiki-results-heading">
             <p>
-              {results.payload.count} risultati per “{usedQuery}” · pagina{" "}
-              {page}
+              {results.payload.count} <Text source={" risultati per “"} />
+              {usedQuery}
+              <Text source={"” · pagina"} /> {page}
             </p>
             <label>
-              Tipo nella pagina
+              <Text source={"Tipo nella pagina"} />
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               >
-                <option value="">Tutti i tipi</option>
+                <option value="">{tr("Tutti i tipi")}</option>
                 {kinds.map((k) => (
                   <option key={k}>{k}</option>
                 ))}
@@ -175,8 +199,11 @@ export default function WikiWorkspace() {
                 ))}
               {!results.payload.results.length ? (
                 <p>
-                  Nessuna voce trovata. Prova il nome inglese o un termine più
-                  breve.
+                  <Text
+                    source={
+                      "Nessuna voce trovata. Prova il nome inglese o un termine più breve."
+                    }
+                  />
                 </p>
               ) : null}
               <div className="actions">
@@ -184,7 +211,7 @@ export default function WikiWorkspace() {
                   disabled={busy || page <= 1}
                   onClick={() => void find(page - 1)}
                 >
-                  Pagina precedente
+                  <Text source={"Pagina precedente"} />
                 </button>
                 <button
                   disabled={
@@ -192,11 +219,11 @@ export default function WikiWorkspace() {
                   }
                   onClick={() => void find(page + 1)}
                 >
-                  Pagina successiva
+                  <Text source={"Pagina successiva"} />
                 </button>
               </div>
             </div>
-            <article className="wiki-entry" aria-label="Voce wiki">
+            <article className="wiki-entry" aria-label={tr("Voce wiki")}>
               {entry ? (
                 <>
                   <h4>{entry.payload.entry.name}</h4>
@@ -205,15 +232,18 @@ export default function WikiWorkspace() {
                     {plain(entry.payload.document.gamesystem)}
                   </p>
                   <p className="wiki-license">
-                    Licenze dichiarate:{" "}
+                    <Text source={"Licenze dichiarate:"} />{" "}
                     {entry.payload.document.licenses
                       ?.map((l) => l.name)
-                      .join("; ") || "Non indicate dalla fonte"}
+                      .join("; ") || tr("Non indicate dalla fonte")}
                     <br />
-                    Fornitore: Open5e · {entry.payload.document.key}
+                    <Text source={"Fornitore: Open5e · "} />
+                    {entry.payload.document.key}
                     <br />
-                    Copia locale del{" "}
-                    {new Date(entry.fetchedAt).toLocaleString("it-IT")}
+                    <Text source={"Copia locale del"} />{" "}
+                    {new Date(entry.fetchedAt).toLocaleString(
+                      localeInfo(getPreferences().locale).intl,
+                    )}
                   </p>
                   {entry.warning ? <p role="status">{entry.warning}</p> : null}
                   <p className="wiki-prose">{entry.payload.entry.desc}</p>
@@ -243,14 +273,16 @@ export default function WikiWorkspace() {
                     disabled={busy || !selected}
                     onClick={() => selected && void open(selected, true)}
                   >
-                    Aggiorna voce online
+                    <Text source={"Aggiorna voce online"} />
                   </button>
                 </>
               ) : (
                 <p>
-                  Apri una voce per leggere il testo completo, la fonte e
-                  l’edizione. Le regole di editori o edizioni diverse restano
-                  separate.
+                  <Text
+                    source={
+                      "Apri una voce per leggere il testo completo, la fonte e l’edizione. Le regole di editori o edizioni diverse restano separate."
+                    }
+                  />
                 </p>
               )}
             </article>

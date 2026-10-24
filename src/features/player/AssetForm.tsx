@@ -1,3 +1,5 @@
+import { Text } from "../../i18n/Text";
+import { tr } from "../../i18n/store";
 import { lazy, Suspense, useState } from "react";
 import type { Session } from "../journal/api";
 import type { KnowledgePage } from "../knowledge/api";
@@ -61,7 +63,7 @@ export default function AssetForm({
           value={links[key] ?? ""}
           onChange={(e) => link(key, e.target.value || null)}
         >
-          <option value="">Nessun collegamento</option>
+          <option value="">{tr("Nessun collegamento")}</option>
           {options.map((p) => (
             <option key={p.id} value={p.id}>
               {p.title}
@@ -74,7 +76,13 @@ export default function AssetForm({
   return (
     <>
       {lookup && details.kind === "spell" ? (
-        <Suspense fallback={<p role="status">Apertura catalogo…</p>}>
+        <Suspense
+          fallback={
+            <p role="status">
+              <Text source={"Apertura catalogo…"} />
+            </p>
+          }
+        >
           <DndCatalog
             initialQuery={details.name}
             onClose={() => setLookup(false)}
@@ -93,7 +101,9 @@ export default function AssetForm({
       <form
         className="player-form"
         aria-label={
-          details.kind === "item" ? "Dettagli oggetto" : "Dettagli capacità"
+          details.kind === "item"
+            ? tr("Dettagli oggetto")
+            : tr("Dettagli capacità")
         }
         onSubmit={(e) => {
           e.preventDefault();
@@ -102,29 +112,30 @@ export default function AssetForm({
       >
         <fieldset disabled={busy || lookup}>
           <legend>
-            {initial ? "Modifica" : "Aggiungi"}{" "}
+            {initial ? tr("Modifica") : tr("Aggiungi")}{" "}
             {details.kind === "item"
               ? "oggetto"
               : details.kind === "spell"
                 ? "incantesimo"
-                : "capacità"}
+                : tr("capacità")}
           </legend>
           {details.kind === "spell" ? (
             <>
               <p className="muted">
-                Scrivi un incantesimo personalizzato o cerca un nome inglese nel
-                catalogo SRD 2014. “Usa questi dati nel modulo” sostituisce nome
-                e campi dell’incantesimo; conserva note, marcatori e
-                collegamenti. Il salvataggio resta esplicito.
+                <Text
+                  source={
+                    "Scrivi un incantesimo personalizzato o cerca un nome inglese nel catalogo SRD 2014. “Usa questi dati nel modulo” sostituisce nome e campi dell’incantesimo; conserva note, marcatori e collegamenti. Il salvataggio resta esplicito."
+                  }
+                />
               </p>
               <button type="button" onClick={() => setLookup((v) => !v)}>
-                Cerca questo nome in D&D
+                <Text source={"Cerca questo nome in D&D"} />
               </button>
             </>
           ) : null}
           <div className="player-fields">
             <TextField
-              label="Nome della voce"
+              label={tr("Nome della voce")}
               autoFocus
               value={details.name}
               required
@@ -133,43 +144,43 @@ export default function AssetForm({
             {details.kind === "item" ? (
               <>
                 <NumberField
-                  label="Quantità"
+                  label={tr("Quantità")}
                   value={details.quantity}
                   onChange={(quantity) =>
                     change({ ...details, quantity: quantity ?? 0 })
                   }
                 />
                 <TextField
-                  label="Collocazione (zaino, tasca, indossato…)"
+                  label={tr("Collocazione (zaino, tasca, indossato…)")}
                   value={details.location ?? ""}
                   onChange={(location) => change({ ...details, location })}
                 />
                 <TextField
-                  label="Categoria oggetto"
+                  label={tr("Categoria oggetto")}
                   value={details.category}
                   max={100}
                   onChange={(category) => change({ ...details, category })}
                 />
                 <NumberField
-                  label="Peso (unità personale, facoltativo)"
+                  label={tr("Peso (unità personale, facoltativo)")}
                   value={details.weight}
                   optional
                   decimal
                   onChange={(weight) => change({ ...details, weight })}
                 />
                 <TextField
-                  label="Valore o valuta (testo libero)"
+                  label={tr("Valore o valuta (testo libero)")}
                   value={details.value}
                   onChange={(value) => change({ ...details, value })}
                 />
                 <div className="player-flags">
                   <Flag
-                    label="Equipaggiato"
+                    label={tr("Equipaggiato")}
                     value={details.equipped}
                     onChange={(equipped) => change({ ...details, equipped })}
                   />
                   <Flag
-                    label="Consumabile"
+                    label={tr("Consumabile")}
                     value={details.consumable}
                     onChange={(consumable) =>
                       change({ ...details, consumable })
@@ -180,51 +191,51 @@ export default function AssetForm({
             ) : (
               <>
                 <TextField
-                  label="Regolamento della capacità"
+                  label={tr("Regolamento della capacità")}
                   value={details.systemId}
                   max={80}
                   required
                   onChange={(systemId) => change({ ...details, systemId })}
                 />
                 <TextField
-                  label="Livello o rango (testo libero)"
+                  label={tr("Livello o rango (testo libero)")}
                   value={details.rank}
                   onChange={(rank) => change({ ...details, rank })}
                 />
                 <TextField
-                  label="Scuola o tradizione"
+                  label={tr("Scuola o tradizione")}
                   value={details.school}
                   onChange={(school) => change({ ...details, school })}
                 />
                 <TextField
-                  label="Tempo di attivazione"
+                  label={tr("Tempo di attivazione")}
                   value={details.castingTime}
                   onChange={(castingTime) =>
                     change({ ...details, castingTime })
                   }
                 />
                 <TextField
-                  label="Durata"
+                  label={tr("Durata")}
                   value={details.duration}
                   onChange={(duration) => change({ ...details, duration })}
                 />
                 <TextField
-                  label="Portata"
+                  label={tr("Portata")}
                   value={details.range}
                   onChange={(range) => change({ ...details, range })}
                 />
                 <TextField
-                  label="Componenti"
+                  label={tr("Componenti")}
                   value={details.components}
                   onChange={(components) => change({ ...details, components })}
                 />
                 <Flag
-                  label="Rituale"
+                  label={tr("Rituale")}
                   value={details.ritual ?? false}
                   onChange={(ritual) => change({ ...details, ritual })}
                 />
                 <Flag
-                  label="Concentrazione"
+                  label={tr("Concentrazione")}
                   value={details.concentration ?? false}
                   onChange={(concentration) =>
                     change({ ...details, concentration })
@@ -232,12 +243,12 @@ export default function AssetForm({
                 />
                 <div className="player-flags">
                   <Flag
-                    label="Conosciuta"
+                    label={tr("Conosciuta")}
                     value={details.known}
                     onChange={(known) => change({ ...details, known })}
                   />
                   <Flag
-                    label="Preparata"
+                    label={tr("Preparata")}
                     value={details.prepared}
                     onChange={(prepared) => change({ ...details, prepared })}
                   />
@@ -246,30 +257,35 @@ export default function AssetForm({
             )}
           </div>
           <TextField
-            label="Descrizione"
+            label={tr("Descrizione")}
             value={details.description}
             max={16000}
             multiline
             onChange={(description) => change({ ...details, description })}
           />
           <TextField
-            label="Note della voce"
+            label={tr("Note della voce")}
             value={details.notes}
             max={16000}
             multiline
             onChange={(notes) => change({ ...details, notes })}
           />
-          <h4>Collegamenti e provenienza</h4>
+          <h4>
+            <Text source={"Collegamenti e provenienza"} />
+          </h4>
           <p className="muted">
-            Collega pagine e sessioni della campagna. Per aggiungere un PNG, un
-            luogo o una missione, crea prima la pagina nel Codex.
+            <Text
+              source={
+                "Collega pagine e sessioni della campagna. Per aggiungere un PNG, un luogo o una missione, crea prima la pagina nel Codex."
+              }
+            />
           </p>
           <div className="player-fields">
-            {pageSelector("Pagina della voce nel Codex", "pageId")}
+            {pageSelector(tr("Pagina della voce nel Codex"), "pageId")}
             <label>
-              Sessione fonte
+              <Text source={"Sessione fonte"} />
               <select
-                aria-label="Sessione fonte"
+                aria-label={tr("Sessione fonte")}
                 value={links.sourceSessionId ?? ""}
                 onChange={(e) =>
                   setInput({
@@ -282,27 +298,28 @@ export default function AssetForm({
                   })
                 }
               >
-                <option value="">Nessuna sessione</option>
+                <option value="">{tr("Nessuna sessione")}</option>
                 {sessions.map((s) => (
                   <option key={s.id} value={s.id}>
-                    Sessione {s.sequence}: {s.title}
+                    {tr("Sessione ")}
+                    {s.sequence}: {s.title}
                   </option>
                 ))}
               </select>
             </label>
             <label>
-              Blocco fonte
+              <Text source={"Blocco fonte"} />
               <select
-                aria-label="Blocco fonte"
+                aria-label={tr("Blocco fonte")}
                 disabled={!source}
                 value={links.sourceBlockId ?? ""}
                 onChange={(e) => link("sourceBlockId", e.target.value || null)}
               >
-                <option value="">Intera sessione</option>
+                <option value="">{tr("Intera sessione")}</option>
                 {links.sourceBlockId &&
                 !blocks.some((b) => b.id === links.sourceBlockId) ? (
                   <option value={links.sourceBlockId}>
-                    Blocco non più presente (riferimento conservato)
+                    {tr("Blocco non più presente (riferimento conservato)")}
                   </option>
                 ) : null}
                 {blocks.map((b) => (
@@ -314,14 +331,14 @@ export default function AssetForm({
             </label>
             {details.kind === "item" ? (
               <>
-                {pageSelector("PNG collegato", "npcId", "npc")}
-                {pageSelector("Luogo collegato", "placeId", "place")}
-                {pageSelector("Missione collegata", "questId", "quest")}
+                {pageSelector(tr("PNG collegato"), "npcId", "npc")}
+                {pageSelector(tr("Luogo collegato"), "placeId", "place")}
+                {pageSelector(tr("Missione collegata"), "questId", "quest")}
               </>
             ) : null}
           </div>
           <TextField
-            label="Note di provenienza"
+            label={tr("Note di provenienza")}
             value={links.provenanceNotes}
             max={4000}
             multiline
@@ -329,24 +346,27 @@ export default function AssetForm({
           />
           <div className="actions">
             <button className="primary" disabled={!details.name.trim()}>
-              Salva voce
+              <Text source={"Salva voce"} />
             </button>
             <button type="button" onClick={onCancel}>
-              Annulla modifiche
+              <Text source={"Annulla modifiche"} />
             </button>
           </div>
         </fieldset>
         {details.kind !== "item" && details.catalogSource ? (
           <aside className="catalog-license">
             <p>
-              Base: {details.catalogSource.name} ·{" "}
+              <Text source={"Base: "} />
+              {details.catalogSource.name} ·{" "}
               {catalogBase + details.catalogSource.path}
             </p>
             <p>{srdAttribution}</p>
             <p>
-              SRD 5.1:
-              https://dnd.wizards.com/resources/systems-reference-document · CC
-              BY 4.0: https://creativecommons.org/licenses/by/4.0/
+              <Text
+                source={
+                  "SRD 5.1: https://dnd.wizards.com/resources/systems-reference-document · CC BY 4.0: https://creativecommons.org/licenses/by/4.0/"
+                }
+              />
             </p>
           </aside>
         ) : null}

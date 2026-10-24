@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SaveGuard } from "../journal/Editor";
 import { errorMessage } from "../journal/api";
@@ -56,7 +57,7 @@ export function useDiceRoller(
         onSaved(saved);
       })
       .catch((reason) => {
-        setError(`${errorMessage(reason)} ${t.notConfirmed}`);
+        setError(tr("{0} {1}", [errorMessage(reason), t.notConfirmed]));
         throw reason;
       })
       .finally(() => {

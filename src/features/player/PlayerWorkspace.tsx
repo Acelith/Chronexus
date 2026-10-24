@@ -1,3 +1,5 @@
+import { Text } from "../../i18n/Text";
+import { tr } from "../../i18n/store";
 import {
   lazy,
   Suspense,
@@ -99,10 +101,12 @@ export default function PlayerWorkspace({
       dirty: () => dirty.current || operation.current,
       flush: async () => {
         if (operation.current)
-          throw Error("Attendi il salvataggio della scheda o della voce.");
+          throw Error(tr("Attendi il salvataggio della scheda o della voce."));
         if (dirty.current)
           throw Error(
-            "Salva o annulla le modifiche aperte prima di cambiare vista o chiudere Chronexus.",
+            tr(
+              "Salva o annulla le modifiche aperte prima di cambiare vista o chiudere Chronexus.",
+            ),
           );
       },
     });
@@ -136,7 +140,7 @@ export default function PlayerWorkspace({
   const disabled = busy || pending;
   async function perform(
     action: () => Promise<void>,
-    message = "Salvato sul computer.",
+    message = tr("Salvato sul computer."),
   ) {
     if (operation.current || busy) return;
     operation.current = true;
@@ -198,11 +202,16 @@ export default function PlayerWorkspace({
   const selected = visible.find((a) => a.id === selectedId) ?? visible[0];
   const title =
     view === "character"
-      ? "Personaggio"
+      ? tr("Personaggio")
       : view === "inventory"
-        ? "Inventario"
-        : "Incantesimi e capacità";
-  if (loading) return <p role="status">Apertura scheda e inventario…</p>;
+        ? tr("Inventario")
+        : tr("Incantesimi e capacità");
+  if (loading)
+    return (
+      <p role="status">
+        <Text source={"Apertura scheda e inventario…"} />
+      </p>
+    );
   if (error && !character && !editor)
     return (
       <section aria-label={title}>
@@ -215,7 +224,7 @@ export default function PlayerWorkspace({
               setRefresh((n) => n + 1);
             }}
           >
-            Ricarica scheda
+            <Text source={"Ricarica scheda"} />
           </button>
         </div>
       </section>
@@ -231,8 +240,13 @@ export default function PlayerWorkspace({
           <h3>{title}</h3>
           <p className="muted">
             {character
-              ? `${character.data.name} · ${adapterFor(character.data.systemId).label}`
-              : "Crea il personaggio per raccogliere risorse, oggetti e capacità."}
+              ? tr("{0} · {1}", [
+                  character.data.name,
+                  adapterFor(character.data.systemId).label,
+                ])
+              : tr(
+                  "Crea il personaggio per raccogliere risorse, oggetti e capacità.",
+                )}
           </p>
         </div>
         {!editor && character ? (
@@ -242,7 +256,7 @@ export default function PlayerWorkspace({
                 disabled={disabled}
                 onClick={() => edit({ type: "character" })}
               >
-                Modifica personaggio
+                <Text source={"Modifica personaggio"} />
               </button>
             ) : (
               <>
@@ -258,8 +272,8 @@ export default function PlayerWorkspace({
                   }
                 >
                   {view === "inventory"
-                    ? "Aggiungi oggetto"
-                    : "Aggiungi incantesimo"}
+                    ? tr("Aggiungi oggetto")
+                    : tr("Aggiungi incantesimo")}
                 </button>
                 {view === "abilities" ? (
                   <button
@@ -268,7 +282,7 @@ export default function PlayerWorkspace({
                       edit({ type: "asset", initial: null, kind: "ability" })
                     }
                   >
-                    Aggiungi capacità
+                    <Text source={"Aggiungi capacità"} />
                   </button>
                 ) : null}
               </>
@@ -278,11 +292,17 @@ export default function PlayerWorkspace({
       </header>
       {!editor ? (
         <button disabled={disabled} onClick={() => setCatalogOpen((v) => !v)}>
-          {catalogOpen ? "Nascondi ricerca D&D" : "Cerca in D&D"}
+          {catalogOpen ? tr("Nascondi ricerca D&D") : tr("Cerca in D&D")}
         </button>
       ) : null}
       {catalogOpen && !editor ? (
-        <Suspense fallback={<p role="status">Apertura catalogo…</p>}>
+        <Suspense
+          fallback={
+            <p role="status">
+              <Text source={"Apertura catalogo…"} />
+            </p>
+          }
+        >
           <DndCatalog
             onClose={() => setCatalogOpen(false)}
             onImport={
@@ -323,13 +343,13 @@ export default function PlayerWorkspace({
                 setRefresh((n) => n + 1);
               }}
             >
-              Ricarica scheda
+              <Text source={"Ricarica scheda"} />
             </button>
           ) : null}
         </div>
       ) : null}
       <p className="player-save-status" role="status">
-        {pending ? "Salvataggio…" : notice}
+        {pending ? tr("Salvataggio…") : notice}
       </p>
       {editor?.type === "character" ? (
         <CharacterForm
@@ -362,17 +382,22 @@ export default function PlayerWorkspace({
         />
       ) : !character ? (
         <div className="empty player-empty">
-          <h4>La scheda è ancora vuota</h4>
+          <h4>
+            <Text source={"La scheda è ancora vuota"} />
+          </h4>
           <p>
-            I valori saranno quelli che inserisci tu, indipendentemente dal
-            regolamento.
+            <Text
+              source={
+                "I valori saranno quelli che inserisci tu, indipendentemente dal regolamento."
+              }
+            />
           </p>
           <button
             className="primary"
             disabled={disabled}
             onClick={() => edit({ type: "character" })}
           >
-            Crea personaggio
+            <Text source={"Crea personaggio"} />
           </button>
         </div>
       ) : view === "character" ? (
@@ -381,22 +406,22 @@ export default function PlayerWorkspace({
             <h4>{character.data.name}</h4>
             <dl>
               {[
-                ["Regolamento", character.data.systemId],
-                ["Origine", character.data.ancestry],
-                ["Vocazione", character.data.vocation],
-                ["Livello", character.data.level],
-                ["Esperienza", character.data.experience],
+                [tr("Regolamento"), character.data.systemId],
+                [tr("Origine"), character.data.ancestry],
+                [tr("Vocazione"), character.data.vocation],
+                [tr("Livello"), character.data.level],
+                [tr("Esperienza"), character.data.experience],
               ].map(([label, value]) => (
                 <div key={label}>
                   <dt>{label}</dt>
-                  <dd>{value ?? "Non indicato"}</dd>
+                  <dd>{value ?? tr("Non indicato")}</dd>
                 </div>
               ))}
             </dl>
           </div>
           <div className="player-counters">
             <Counter
-              label="Punti vita"
+              label={tr("Punti vita")}
               value={character.data.hpCurrent}
               maximum={character.data.hpMaximum}
               disabled={disabled}
@@ -409,7 +434,7 @@ export default function PlayerWorkspace({
               }
             />
             <Counter
-              label="Punti vita temporanei"
+              label={tr("Punti vita temporanei")}
               value={character.data.hpTemporary}
               maximum={1000000}
               hideMaximum
@@ -458,9 +483,11 @@ export default function PlayerWorkspace({
             (r) => r.kind === "slot" && !r.maximum && !r.current,
           ) ? (
             <details className="unused-slots">
-              <summary>Slot non configurati</summary>
+              <summary>
+                <Text source={"Slot non configurati"} />
+              </summary>
               <p className="muted">
-                Imposta i massimi da Modifica personaggio.
+                <Text source={"Imposta i massimi da Modifica personaggio."} />
               </p>
               {character.data.resources
                 .filter((r) => r.kind === "slot" && !r.maximum && !r.current)
@@ -469,17 +496,28 @@ export default function PlayerWorkspace({
                 ))}
             </details>
           ) : null}
-          <h4>Statistiche</h4>
+          <h4>
+            <Text source={"Statistiche"} />
+          </h4>
           {character.data.stats.length ? (
             <Statistics stats={character.data.stats} />
           ) : (
             <p className="muted">
-              Nessuna statistica configurata. Aggiungila da “Modifica
-              personaggio”.
+              <Text
+                source={
+                  "Nessuna statistica configurata. Aggiungila da “Modifica personaggio”."
+                }
+              />
             </p>
           )}
           <SheetSummary value={character.data.sheet ?? emptySheet()} />
-          <Suspense fallback={<p role="status">Apertura immagini…</p>}>
+          <Suspense
+            fallback={
+              <p role="status">
+                <Text source={"Apertura immagini…"} />
+              </p>
+            }
+          >
             <ImageGallery
               key={character.id}
               campaignId={campaignId}
@@ -487,20 +525,24 @@ export default function PlayerWorkspace({
               busy={disabled}
             />
           </Suspense>
-          <h4>Condizioni</h4>
+          <h4>
+            <Text source={"Condizioni"} />
+          </h4>
           <p className="player-text">
-            {character.data.conditions || "Nessuna condizione annotata."}
+            {character.data.conditions || tr("Nessuna condizione annotata.")}
           </p>
-          <h4>Note</h4>
+          <h4>
+            <Text source={"Note"} />
+          </h4>
           <p className="player-text">
-            {character.data.notes || "Nessuna nota del personaggio."}
+            {character.data.notes || tr("Nessuna nota del personaggio.")}
           </p>
         </>
       ) : (
         <>
           <div className="player-filters">
             <label>
-              Cerca per nome
+              <Text source={"Cerca per nome"} />
               <input
                 type="search"
                 value={search}
@@ -511,7 +553,7 @@ export default function PlayerWorkspace({
             {view === "abilities" ? (
               <>
                 <label>
-                  Filtra per rango
+                  <Text source={"Filtra per rango"} />
                   <input
                     value={rank}
                     onChange={(e) => setRank(e.target.value)}
@@ -519,18 +561,18 @@ export default function PlayerWorkspace({
                   />
                 </label>
                 <label>
-                  Stato o tipo
+                  <Text source={"Stato o tipo"} />
                   <select
-                    aria-label="Stato o tipo"
+                    aria-label={tr("Stato o tipo")}
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
                     disabled={disabled}
                   >
-                    <option value="all">Tutte</option>
-                    <option value="known">Conosciute</option>
-                    <option value="prepared">Preparate</option>
-                    <option value="spell">Incantesimi</option>
-                    <option value="ability">Capacità</option>
+                    <option value="all">{tr("Tutte")}</option>
+                    <option value="known">{tr("Conosciute")}</option>
+                    <option value="prepared">{tr("Preparate")}</option>
+                    <option value="spell">{tr("Incantesimi")}</option>
+                    <option value="ability">{tr("Capacità")}</option>
                   </select>
                 </label>
               </>
@@ -538,25 +580,32 @@ export default function PlayerWorkspace({
           </div>
           {view === "abilities" ? (
             <p className="muted">
-              Crea voci personalizzate o usa il catalogo D&D come base. Per
-              consumare risorse o slot usa i contatori della scheda.
+              <Text
+                source={
+                  "Crea voci personalizzate o usa il catalogo D&D come base. Per consumare risorse o slot usa i contatori della scheda."
+                }
+              />
             </p>
           ) : null}
           {!visible.length ? (
             <div className="player-empty">
               <p>
                 {search || rank || status !== "all"
-                  ? "Nessuna voce corrisponde ai filtri."
+                  ? tr("Nessuna voce corrisponde ai filtri.")
                   : view === "inventory"
-                    ? "L’inventario è vuoto. Aggiungi il primo oggetto e annota da chi lo hai ricevuto."
-                    : "Nessuna capacità annotata. Aggiungi un incantesimo o una capacità con il tuo testo."}
+                    ? tr(
+                        "L’inventario è vuoto. Aggiungi il primo oggetto e annota da chi lo hai ricevuto.",
+                      )
+                    : tr(
+                        "Nessuna capacità annotata. Aggiungi un incantesimo o una capacità con il tuo testo.",
+                      )}
               </p>
             </div>
           ) : (
             <div className="player-assets-layout">
               <nav
                 className="player-asset-list"
-                aria-label="Voci del personaggio"
+                aria-label={tr("Voci del personaggio")}
               >
                 {visible.map((a) => (
                   <button
@@ -571,8 +620,18 @@ export default function PlayerWorkspace({
                     <strong>{a.input.details.name}</strong>
                     <span>
                       {a.input.details.kind === "item"
-                        ? `Quantità ${a.input.details.quantity}${a.input.details.equipped ? " · Equipaggiato" : ""}`
-                        : `${a.input.details.kind === "spell" ? "Incantesimo" : "Capacità"} · ${a.input.details.rank || "Senza rango"}`}
+                        ? tr("Quantità {0}{1}", [
+                            a.input.details.quantity,
+                            a.input.details.equipped
+                              ? tr(" · Equipaggiato")
+                              : "",
+                          ])
+                        : tr("{0} · {1}", [
+                            a.input.details.kind === "spell"
+                              ? tr("Incantesimo")
+                              : tr("Capacità"),
+                            a.input.details.rank || tr("Senza rango"),
+                          ])}
                     </span>
                   </button>
                 ))}
@@ -580,10 +639,16 @@ export default function PlayerWorkspace({
               {selected ? (
                 <article
                   className="player-asset-detail"
-                  aria-label="Dettaglio voce"
+                  aria-label={tr("Dettaglio voce")}
                 >
                   <h4>{selected.input.details.name}</h4>
-                  <Suspense fallback={<p role="status">Apertura immagini…</p>}>
+                  <Suspense
+                    fallback={
+                      <p role="status">
+                        <Text source={"Apertura immagini…"} />
+                      </p>
+                    }
+                  >
                     <ImageGallery
                       key={selected.id}
                       campaignId={campaignId}
@@ -594,7 +659,7 @@ export default function PlayerWorkspace({
                   {selected.input.details.kind === "item" ? (
                     <>
                       <Counter
-                        label="Quantità"
+                        label={tr("Quantità")}
                         value={selected.input.details.quantity}
                         maximum={1000000}
                         hideMaximum
@@ -615,22 +680,26 @@ export default function PlayerWorkspace({
                         }}
                       />
                       <p>
-                        {selected.input.details.category || "Senza categoria"} ·{" "}
+                        {selected.input.details.category ||
+                          tr("Senza categoria")}{" "}
+                        ·{" "}
                         {selected.input.details.equipped
-                          ? "Equipaggiato"
-                          : "Non equipaggiato"}
+                          ? tr("Equipaggiato")
+                          : tr("Non equipaggiato")}
                         {selected.input.details.consumable
-                          ? " · Consumabile"
+                          ? tr(" · Consumabile")
                           : ""}
                       </p>
                       <p>
-                        Peso: {selected.input.details.weight ?? "Non indicato"}{" "}
-                        · Valore:{" "}
-                        {selected.input.details.value || "Non indicato"}
+                        <Text source={"Peso: "} />
+                        {selected.input.details.weight ??
+                          tr("Non indicato")}{" "}
+                        <Text source={"· Valore:"} />{" "}
+                        {selected.input.details.value || tr("Non indicato")}
                       </p>
                       <p>
-                        Collocazione:{" "}
-                        {selected.input.details.location || "Non indicata"}
+                        <Text source={"Collocazione:"} />{" "}
+                        {selected.input.details.location || tr("Non indicata")}
                       </p>
                       <button
                         disabled={disabled}
@@ -649,29 +718,30 @@ export default function PlayerWorkspace({
                         }}
                       >
                         {selected.input.details.equipped
-                          ? "Togli equipaggiamento"
-                          : "Equipaggia"}
+                          ? tr("Togli equipaggiamento")
+                          : tr("Equipaggia")}
                       </button>
                     </>
                   ) : (
                     <>
                       <p>
                         {selected.input.details.systemId} ·{" "}
-                        {selected.input.details.rank || "Senza rango"} ·{" "}
-                        {selected.input.details.school || "Senza tradizione"}
+                        {selected.input.details.rank || tr("Senza rango")} ·{" "}
+                        {selected.input.details.school ||
+                          tr("Senza tradizione")}
                       </p>
                       <p>
-                        {selected.input.details.ritual ? "Rituale · " : ""}
+                        {selected.input.details.ritual ? tr("Rituale · ") : ""}
                         {selected.input.details.concentration
-                          ? "Richiede concentrazione"
+                          ? tr("Richiede concentrazione")
                           : ""}
                       </p>
                       {selected.input.details.catalogSource ? (
                         <aside className="catalog-license">
                           <p>
-                            Base SRD 2014:{" "}
-                            {selected.input.details.catalogSource.name} · copia
-                            personale modificabile.
+                            <Text source={"Base SRD 2014:"} />{" "}
+                            {selected.input.details.catalogSource.name}{" "}
+                            <Text source={" · copia personale modificabile."} />
                           </p>
                           <p>
                             {catalogBase +
@@ -682,25 +752,28 @@ export default function PlayerWorkspace({
                       ) : null}
                       <dl className="ability-metadata">
                         {[
-                          ["Attivazione", selected.input.details.castingTime],
-                          ["Durata", selected.input.details.duration],
-                          ["Portata", selected.input.details.range],
-                          ["Componenti", selected.input.details.components],
+                          [
+                            tr("Attivazione"),
+                            selected.input.details.castingTime,
+                          ],
+                          [tr("Durata"), selected.input.details.duration],
+                          [tr("Portata"), selected.input.details.range],
+                          [tr("Componenti"), selected.input.details.components],
                         ].map(([label, value]) => (
                           <div key={label}>
                             <dt>{label}</dt>
-                            <dd>{value || "Non indicato"}</dd>
+                            <dd>{value || tr("Non indicato")}</dd>
                           </div>
                         ))}
                       </dl>
                       <p>
                         {selected.input.details.known
-                          ? "Conosciuta"
-                          : "Non segnata come conosciuta"}{" "}
+                          ? tr("Conosciuta")
+                          : tr("Non segnata come conosciuta")}{" "}
                         ·{" "}
                         {selected.input.details.prepared
-                          ? "Preparata"
-                          : "Non preparata"}
+                          ? tr("Preparata")
+                          : tr("Non preparata")}
                       </p>
                       <div className="actions">
                         <button
@@ -719,7 +792,7 @@ export default function PlayerWorkspace({
                               );
                           }}
                         >
-                          Cambia conosciuta
+                          <Text source={"Cambia conosciuta"} />
                         </button>
                         <button
                           disabled={disabled}
@@ -737,28 +810,30 @@ export default function PlayerWorkspace({
                               );
                           }}
                         >
-                          Cambia preparata
+                          <Text source={"Cambia preparata"} />
                         </button>
                       </div>
                     </>
                   )}
                   <p className="player-text">
                     {selected.input.details.description ||
-                      "Nessuna descrizione."}
+                      tr("Nessuna descrizione.")}
                   </p>
                   {selected.input.details.notes ? (
                     <p className="player-text">
                       {selected.input.details.notes}
                     </p>
                   ) : null}
-                  <h5>Provenienza e collegamenti</h5>
+                  <h5>
+                    <Text source={"Provenienza e collegamenti"} />
+                  </h5>
                   <div className="player-provenance">
                     {(
                       [
-                        [selected.input.links.pageId, "Pagina Codex"],
+                        [selected.input.links.pageId, tr("Pagina Codex")],
                         [selected.input.links.npcId, "PNG"],
-                        [selected.input.links.placeId, "Luogo"],
-                        [selected.input.links.questId, "Missione"],
+                        [selected.input.links.placeId, tr("Luogo")],
+                        [selected.input.links.questId, tr("Missione")],
                       ] as const
                     ).map(([id, label]) => {
                       const page = pages.find((p) => p.id === id);
@@ -775,7 +850,7 @@ export default function PlayerWorkspace({
                             )
                           }
                         >
-                          {label}: {page?.title ?? "Apri pagina"}
+                          {label}: {page?.title ?? tr("Apri pagina")}
                         </button>
                       ) : null;
                     })}
@@ -802,23 +877,26 @@ export default function PlayerWorkspace({
                             );
                         }}
                       >
-                        Apri sessione fonte
+                        <Text source={"Apri sessione fonte"} />
                         {selected.input.links.sourceBlockId &&
                         selected.sourceAvailable
-                          ? " al blocco"
+                          ? tr(" al blocco")
                           : ""}
                       </button>
                     ) : null}
                   </div>
                   {!selected.sourceAvailable ? (
                     <p role="status">
-                      Il blocco fonte non è più presente. La provenienza è
-                      conservata; puoi aprire l’intera sessione.
+                      <Text
+                        source={
+                          "Il blocco fonte non è più presente. La provenienza è conservata; puoi aprire l’intera sessione."
+                        }
+                      />
                     </p>
                   ) : null}
                   <p className="player-text">
                     {selected.input.links.provenanceNotes ||
-                      "Nessuna nota di provenienza."}
+                      tr("Nessuna nota di provenienza.")}
                   </p>
                   <div className="actions">
                     <button
@@ -831,14 +909,14 @@ export default function PlayerWorkspace({
                         })
                       }
                     >
-                      Modifica voce
+                      <Text source={"Modifica voce"} />
                     </button>
                     <button
                       ref={deleteButton}
                       disabled={disabled}
                       onClick={() => askDelete(selected)}
                     >
-                      Elimina voce
+                      <Text source={"Elimina voce"} />
                     </button>
                   </div>
                 </article>
@@ -883,10 +961,10 @@ function Statistics({ stats }: { stats: Stat[] }) {
                 <div key={s.id}>
                   <dt>{s.label}</dt>
                   <dd>
-                    {s.value || "Non indicato"}
-                    {s.modifier ? ` · Mod. ${s.modifier}` : ""}
+                    {s.value || tr("Non indicato")}
+                    {s.modifier ? tr(" · Mod. {0}", [s.modifier]) : ""}
                     {s.training && s.training !== "none"
-                      ? ` · ${trainingLabels[s.training]}`
+                      ? tr(" · {0}", [trainingLabels[s.training]])
                       : ""}
                   </dd>
                 </div>
@@ -927,14 +1005,14 @@ function Counter({
       </div>
       <div className="actions">
         <button
-          aria-label={`Riduci ${label}`}
+          aria-label={tr("Riduci {0}", [label])}
           disabled={disabled || value <= 0}
           onClick={() => onChange(-1)}
         >
           −
         </button>
         <button
-          aria-label={`Aumenta ${label}`}
+          aria-label={tr("Aumenta {0}", [label])}
           disabled={disabled || value >= maximum}
           onClick={() => onChange(1)}
         >
@@ -996,18 +1074,24 @@ function DeleteConfirmation({
         aria-describedby="player-delete-description"
         onKeyDown={keys}
       >
-        <h4 id="player-delete-title">Eliminare {asset.input.details.name}?</h4>
+        <h4 id="player-delete-title">
+          <Text source={"Eliminare "} />
+          {asset.input.details.name}?
+        </h4>
         <p id="player-delete-description">
-          La voce sarà rimossa dal personaggio. Le pagine del Codex e gli
-          appunti fonte saranno conservati.
+          <Text
+            source={
+              "La voce sarà rimossa dal personaggio. Le pagine del Codex e gli appunti fonte saranno conservati."
+            }
+          />
         </p>
         {error ? <p role="alert">{error}</p> : null}
         <div className="actions">
           <button ref={cancel} disabled={busy} onClick={onCancel}>
-            Annulla eliminazione
+            <Text source={"Annulla eliminazione"} />
           </button>
           <button className="danger" disabled={busy} onClick={onDelete}>
-            Conferma eliminazione
+            <Text source={"Conferma eliminazione"} />
           </button>
         </div>
       </div>

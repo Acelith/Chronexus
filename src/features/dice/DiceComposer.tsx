@@ -1,3 +1,5 @@
+import { Text } from "../../i18n/Text";
+import { tr } from "../../i18n/store";
 import { useId } from "react";
 import { SIDES, type Sides } from "./api";
 import {
@@ -70,7 +72,10 @@ export default function DiceComposer({
                 onClick={() => step(sides, 1)}
               >
                 <DieFace sides={sides}>
-                  <span className="dice-kind-label">d{sides}</span>
+                  <span className="dice-kind-label">
+                    <Text source={"d"} />
+                    {sides}
+                  </span>
                 </DieFace>
               </button>
               <div className="dice-quantity">
@@ -99,7 +104,7 @@ export default function DiceComposer({
                   />
                   <button
                     type="button"
-                    aria-label={t.add(sides) + " alla quantità"}
+                    aria-label={t.add(sides) + tr(" alla quantità")}
                     onClick={() => step(sides, 1)}
                   >
                     +

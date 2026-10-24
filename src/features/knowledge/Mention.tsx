@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 import { useContext } from "react";
 import { createReactInlineContentSpec } from "@blocknote/react";
 import { KnowledgeContext } from "./context";
@@ -19,7 +20,10 @@ export const PageMention = createReactInlineContentSpec(
           contentEditable={false}
           className={`page-mention ${page ? "" : "missing"}`}
           data-page-id={pageId}
-          aria-label={`Apri ${page?.title ?? label}${page ? "" : " (pagina mancante)"}`}
+          aria-label={tr("Apri {0}{1}", [
+            page?.title ?? label,
+            page ? "" : tr(" (pagina mancante)"),
+          ])}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => context.open(pageId, label)}
         >

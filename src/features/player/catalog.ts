@@ -1,7 +1,9 @@
+import { tr } from "../../i18n/store";
+import { localizeLabels } from "../../i18n/store";
 import { command } from "../journal/api";
 import { emptyAsset, type AbilityDetails } from "./api";
 
-export const catalogCategories = {
+export const catalogCategories = localizeLabels({
   spells: "Incantesimi",
   classes: "Classi",
   races: "Specie e razze",
@@ -15,7 +17,7 @@ export const catalogCategories = {
   "rule-sections": "Sezioni delle regole",
   backgrounds: "Background",
   feats: "Talenti",
-} as const;
+} as const);
 export type CatalogCategory = keyof typeof catalogCategories;
 export const catalogBase = "https://www.dnd5eapi.co/api/2014/";
 export const srdAttribution =
@@ -57,7 +59,7 @@ export function parseIndex(value: unknown): CatalogIndexEntry[] {
     !Array.isArray(value.results) ||
     value.results.length > 5000
   )
-    throw Error("Indice del catalogo non valido.");
+    throw Error(tr("Indice del catalogo non valido."));
   return value.results.map((row) => {
     if (
       !isRecord(row) ||
@@ -67,7 +69,7 @@ export function parseIndex(value: unknown): CatalogIndexEntry[] {
       !row.name.trim() ||
       row.name.length > 200
     )
-      throw Error("Voce dell’indice non valida.");
+      throw Error(tr("Voce dell’indice non valida."));
     return {
       index: row.index,
       name: row.name,
@@ -83,7 +85,7 @@ export function parseDocument(path: string, value: unknown): CatalogDocument {
     !value.name.trim() ||
     value.name.length > 200
   )
-    throw Error("La risposta non corrisponde alla voce richiesta.");
+    throw Error(tr("La risposta non corrisponde alla voce richiesta."));
   return value as CatalogDocument;
 }
 async function fetchJson(path: string): Promise<unknown> {
@@ -100,10 +102,12 @@ async function fetchJson(path: string): Promise<unknown> {
     });
     if (!response.ok)
       throw Error(
-        `Il catalogo ha risposto con errore ${response.status}. Riprova più tardi.`,
+        tr("Il catalogo ha risposto con errore {0}. Riprova più tardi.", [
+          response.status,
+        ]),
       );
     const reader = response.body?.getReader();
-    if (!reader) throw Error("Risposta del catalogo vuota.");
+    if (!reader) throw Error(tr("Risposta del catalogo vuota."));
     let size = 0;
     const chunks: Uint8Array[] = [];
     try {
@@ -113,7 +117,7 @@ async function fetchJson(path: string): Promise<unknown> {
         size += value.byteLength;
         if (size > 2 * 1024 * 1024) {
           await reader.cancel();
-          throw Error("Risposta del catalogo troppo grande.");
+          throw Error(tr("Risposta del catalogo troppo grande."));
         }
         chunks.push(value);
       }
@@ -136,7 +140,7 @@ export async function loadCatalog(
   refresh = false,
 ): Promise<CatalogResult> {
   if (!validCatalogPath(path))
-    throw Error("Percorso del catalogo non ammesso.");
+    throw Error(tr("Percorso del catalogo non ammesso."));
   const validate = (value: unknown) =>
     path.includes("/") ? parseDocument(path, value) : parseIndex(value);
   const cached = await command<CacheEntry | null>("read_catalog_cache", {
@@ -158,7 +162,9 @@ export async function loadCatalog(
       };
     const detail = error instanceof Error ? error.message : "";
     throw Error(
-      `Catalogo non disponibile. Controlla la connessione e riprova. ${detail}`,
+      tr("Catalogo non disponibile. Controlla la connessione e riprova. {0}", [
+        detail,
+      ]),
       { cause: error },
     );
   }
@@ -213,7 +219,9 @@ export function spellFromCatalog(doc: CatalogDocument): AbilityDetails {
     description.length > 16000
   )
     throw Error(
-      "Voce troppo lunga per l’importazione. Puoi consultarla e creare una voce personalizzata.",
+      tr(
+        "Voce troppo lunga per l’importazione. Puoi consultarla e creare una voce personalizzata.",
+      ),
     );
   return fields;
 }

@@ -1,3 +1,5 @@
+import { lexicons } from "../../i18n/lexicons";
+import TranscriptionPreview from "./TranscriptionPreview";
 import { useState } from "react";
 import {
   defaultPreferences,
@@ -122,7 +124,7 @@ export default function LanguageSettings() {
           {tr(
             preferences.locale === "tlh" || preferences.locale === "art-x-rihan"
               ? "Vocabolario sperimentale: i termini senza equivalente verificato rimangono in italiano. Non è una traduzione integrale certificata."
-              : "Traduzione preparata automaticamente e da revisionare. Il ticinese usa forme generali, senza pretendere un’ortografia unica.",
+              : "Traduzione preparata automaticamente e da revisionare. Le stringhe mancanti rimangono in italiano. Il ticinese usa forme generali, senza pretendere un’ortografia unica.",
           )}
         </p>
       ) : null}
@@ -131,6 +133,25 @@ export default function LanguageSettings() {
           "Le modalità Braille, Morse e Galattico sono rese del testo, non lingue. Il testo semantico rimane disponibile alle tecnologie assistive.",
         )}
       </p>
+      {lexicons[preferences.locale] ? (
+        <details className="language-lexicon">
+          <summary>{tr("Lessico verificato · grafia romanizzata")}</summary>
+          <p>
+            {tr(
+              "Questi termini sono un riferimento lessicale, non frasi complete. Le azioni senza traduzione verificata restano in italiano.",
+            )}
+          </p>
+          <dl>
+            {lexicons[preferences.locale].map(([source, word]) => (
+              <div key={source}>
+                <dt lang="it">{source}</dt>
+                <dd lang={preferences.locale}>{word}</dd>
+              </div>
+            ))}
+          </dl>
+        </details>
+      ) : null}
+      <TranscriptionPreview />
       <button
         type="button"
         className="language-recovery"

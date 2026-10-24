@@ -1,14 +1,15 @@
+import { localizeLabels } from "../../i18n/store";
 import { command } from "../journal/api";
 import { emptySheet, type SheetDetails } from "./sheet";
 export type PlayerView = "character" | "inventory" | "abilities";
-export const statGroups = {
+export const statGroups = localizeLabels({
   ability: "Caratteristica",
   skill: "Abilità",
   save: "Tiro",
   defense: "Difesa",
   movement: "Movimento",
   other: "Altro",
-} as const;
+} as const);
 export interface Stat {
   modifier?: string;
   training?: "none" | "proficient" | "expert";

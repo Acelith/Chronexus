@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 import { useEffect, useState } from "react";
 import { command } from "../journal/api";
 import type { Attachment } from "../images/ImageGallery";
@@ -44,7 +45,7 @@ export default function NodePortrait({
   return (
     <div className="node-medallion">
       {portrait.pageId === pageId && portrait.url ? (
-        <img src={portrait.url} alt="Ritratto allegato alla voce" />
+        <img src={portrait.url} alt={tr("Ritratto allegato alla voce")} />
       ) : (
         <Icon name={kindIcons[kind] ?? "star"} />
       )}

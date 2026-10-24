@@ -20,6 +20,7 @@ export function TextField({
       {label}
       {multiline ? (
         <textarea
+          dir="auto"
           value={value}
           maxLength={max}
           rows={4}
@@ -27,6 +28,7 @@ export function TextField({
         />
       ) : (
         <input
+          dir="auto"
           autoFocus={autoFocus}
           value={value}
           required={required}

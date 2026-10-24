@@ -1,3 +1,4 @@
+import { Text } from "../../i18n/Text";
 import { useContext, useState } from "react";
 import { command, errorMessage } from "../journal/api";
 import { OperationContext } from "../../operations";
@@ -42,7 +43,7 @@ export default function ExportButton({
           })
         }
       >
-        Esporta campagna
+        <Text source={"Esporta campagna"} />
       </button>
       {status ? <p role="status">{status}</p> : null}
       {error ? (

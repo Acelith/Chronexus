@@ -1,3 +1,7 @@
+import { localeInfo } from "../../i18n/locales";
+import { getPreferences } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
+import { localizeLabels, tr } from "../../i18n/store";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   trainingApi,
@@ -7,13 +11,13 @@ import {
 import { assistantApi } from "./api";
 import { errorMessage } from "../journal/api";
 import type { SaveGuard } from "../journal/Editor";
-const labels: Record<string, string> = {
+const labels: Record<string, string> = localizeLabels({
   running: "In corso",
   ready: "Validato · disponibile per attivazione",
   cancelled: "Annullato",
   error: "Non riuscito",
   interrupted: "Interrotto",
-};
+});
 export default function TrainingPanel({
   campaignId,
   disabled,
@@ -80,7 +84,7 @@ export default function TrainingPanel({
     setNotice("");
     setProgress({
       phase: "preparing",
-      message: "Preparazione del dataset approvato…",
+      message: tr("Preparazione del dataset approvato…"),
     });
     const promise = trainingApi
       .start(campaignId, id, overview.datasetHash, (p) => {
@@ -90,7 +94,9 @@ export default function TrainingPanel({
         if (mounted.current) {
           setNotice(
             result.status === "ready"
-              ? "Addestramento e verifiche conclusi. Il modello precedente resta attivo finché scegli Attiva adapter."
+              ? tr(
+                  "Addestramento e verifiche conclusi. Il modello precedente resta attivo finché scegli Attiva adapter.",
+                )
               : result.error,
           );
           setOverview(await trainingApi.get(campaignId));
@@ -123,8 +129,9 @@ export default function TrainingPanel({
     onActive(true);
     setProgress({
       phase: "activating",
-      message:
+      message: tr(
         "Verifica e attivazione adapter; ricostruzione locale se necessaria…",
+      ),
     });
     const promise = trainingApi
       .activate(campaignId, id)
@@ -132,7 +139,9 @@ export default function TrainingPanel({
         await onActivated();
         if (mounted.current)
           setNotice(
-            "Adapter attivato soltanto per questa campagna. Per tornare indietro scegli il modello base o un adapter precedente ancora compatibile con le fonti.",
+            tr(
+              "Adapter attivato soltanto per questa campagna. Per tornare indietro scegli il modello base o un adapter precedente ancora compatibile con le fonti.",
+            ),
           );
       })
       .catch((e) => {
@@ -149,12 +158,15 @@ export default function TrainingPanel({
   }
   return (
     <fieldset className="training-panel">
-      <legend>Riaddestramento locale · Gemma 4 12B</legend>
+      <legend>
+        <Text source={"Riaddestramento locale · Gemma 4 12B"} />
+      </legend>
       <p>
-        L'aggiornamento delle conoscenze non cambia i pesi. Questo comando
-        esegue QLoRA sulla GPU: prepara un nuovo adapter da tutte le fonti
-        attualmente approvate, includendo le correzioni, senza accumulare vecchi
-        appunti esclusi.
+        <Text
+          source={
+            "L'aggiornamento delle conoscenze non cambia i pesi. Questo comando esegue QLoRA sulla GPU: prepara un nuovo adapter da tutte le fonti attualmente approvate, includendo le correzioni, senza accumulare vecchi appunti esclusi."
+          }
+        />
       </p>
       {error && (
         <p role="alert" className="error">
@@ -173,44 +185,60 @@ export default function TrainingPanel({
                 .catch((e) => setError(errorMessage(e)));
             }}
           >
-            Riprova stato addestramento
+            <Text source={"Riprova stato addestramento"} />
           </button>
         ) : (
-          <p role="status">Caricamento stato addestramento…</p>
+          <p role="status">
+            <Text source={"Caricamento stato addestramento…"} />
+          </p>
         )
       ) : (
         <>
           <p>
-            {overview.added} estratti nuovi · {overview.changed} modificati ·{" "}
-            {overview.removed} rimossi rispetto all'ultimo addestramento
-            riuscito. Totale: {overview.sources} estratti.
+            {overview.added} <Text source={" estratti nuovi · "} />
+            {overview.changed} <Text source={" modificati ·"} />{" "}
+            {overview.removed}{" "}
+            <Text
+              source={
+                " rimossi rispetto all'ultimo addestramento riuscito. Totale: "
+              }
+            />
+            {overview.sources} <Text source={" estratti."} />
           </p>
           <p>
-            Dimensione degli estratti: {Math.ceil(overview.datasetBytes / 1024)}{" "}
-            KiB. L'addestramento usa la GPU e include tutti gli estratti
-            approvati. Se la selezione supera i limiti viene richiesta una
-            riduzione, senza omettere dati automaticamente per abbreviare il
-            lavoro.
+            <Text source={"Dimensione degli estratti: "} />
+            {Math.ceil(overview.datasetBytes / 1024)}{" "}
+            <Text
+              source={
+                "KiB. L'addestramento usa la GPU e include tutti gli estratti approvati. Se la selezione supera i limiti viene richiesta una riduzione, senza omettere dati automaticamente per abbreviare il lavoro."
+              }
+            />
           </p>
           <p>
-            Ultimo addestramento riuscito:{" "}
+            <Text source={"Ultimo addestramento riuscito:"} />{" "}
             {overview.jobs.find((j) => j.status === "ready")?.createdAt
               ? new Date(
                   overview.jobs.find((j) => j.status === "ready")!.createdAt,
-                ).toLocaleString("it-IT")
-              : "Mai eseguito"}
+                ).toLocaleString(localeInfo(getPreferences().locale).intl)
+              : tr("Mai eseguito")}
           </p>
           {!overview.backendInstalled && (
             <p>
-              Ambiente QLoRA non installato. Occorre la preparazione locale
-              descritta in docs/AI_TRAINING.md; l'app non scarica dipendenze o
-              modelli automaticamente.
+              <Text
+                source={
+                  "Ambiente QLoRA non installato. Occorre la preparazione locale descritta in docs/AI_TRAINING.md; l'app non scarica dipendenze o modelli automaticamente."
+                }
+              />
             </p>
           )}
           {overview.blocked > 0 && (
             <p role="alert">
-              {overview.blocked} estratti contengono possibili istruzioni al
-              modello. Escludi o correggi queste fonti prima di addestrare.
+              {overview.blocked}{" "}
+              <Text
+                source={
+                  " estratti contengono possibili istruzioni al modello. Escludi o correggi queste fonti prima di addestrare."
+                }
+              />
             </p>
           )}
           <button
@@ -223,74 +251,102 @@ export default function TrainingPanel({
             }
             onClick={() => setConfirm(true)}
           >
-            Riaddestra sui nuovi dati
+            <Text source={"Riaddestra sui nuovi dati"} />
           </button>
           {confirm && (
-            <div role="group" aria-label="Conferma riaddestramento">
+            <div role="group" aria-label={tr("Conferma riaddestramento")}>
               <p>
-                Verranno usati {overview.sources} estratti della sola campagna
-                corrente. Nessun invio a servizi esterni. QLoRA modifica un
-                adapter separato; i pesi base restano immutabili. Il lavoro può
-                richiedere diversi minuti e molta VRAM. I pesi derivati per
-                Ollama restano fuori dal backup; adapter e metadati sono
-                inclusi. Il risultato dovrà superare le verifiche prima
-                dell'attivazione esplicita.
+                <Text source={"Verranno usati "} />
+                {overview.sources}{" "}
+                <Text
+                  source={
+                    " estratti della sola campagna corrente. Nessun invio a servizi esterni. QLoRA modifica un adapter separato; i pesi base restano immutabili. Il lavoro può richiedere diversi minuti e molta VRAM. I pesi derivati per Ollama restano fuori dal backup; adapter e metadati sono inclusi. Il risultato dovrà superare le verifiche prima dell'attivazione esplicita."
+                  }
+                />
               </p>
               <button disabled={disabled || running} onClick={start}>
-                Conferma riaddestramento locale
+                <Text source={"Conferma riaddestramento locale"} />
               </button>
               <button onClick={() => setConfirm(false)}>
-                Torna alle impostazioni
+                <Text source={"Torna alle impostazioni"} />
               </button>
             </div>
           )}
           {running && (
             <div role="status">
-              <p>{progress?.message || "Operazione locale in corso…"}</p>
+              <p>{progress?.message || tr("Operazione locale in corso…")}</p>
               {progress?.step != null && progress.steps != null && (
                 <>
                   <progress value={progress.step} max={progress.steps} />
                   <p>
-                    Passaggio {progress.step} di {progress.steps}
+                    <Text source={"Passaggio "} />
+                    {progress.step} <Text source={" di "} />
+                    {progress.steps}
                   </p>
                 </>
               )}
               <button onClick={() => void cancel()}>
-                Annulla addestramento
+                <Text source={"Annulla addestramento"} />
               </button>
             </div>
           )}
-          <h3>Cronologia degli adapter</h3>
+          <h3>
+            <Text source={"Cronologia degli adapter"} />
+          </h3>
           {overview.jobs.length === 0 ? (
-            <p>Nessun addestramento eseguito per questa campagna.</p>
+            <p>
+              <Text
+                source={"Nessun addestramento eseguito per questa campagna."}
+              />
+            </p>
           ) : (
             overview.jobs.map((j) => (
-              <article key={j.id}>
-                <strong>{labels[j.status] || j.status}</strong>
-                <p>
-                  {new Date(j.createdAt).toLocaleString("it-IT")} ·{" "}
-                  {j.manifest.length} estratti
-                </p>
-                {j.error && <p className="error">{j.error}</p>}
-                {j.status === "ready" && (
-                  <>
-                    <p>
-                      {j.model} · GPU: {String(j.metrics.gpu || "non indicata")}{" "}
-                      · passaggi: {String(j.metrics.steps || 0)}
-                    </p>
-                    <button
-                      disabled={disabled || running}
-                      onClick={() => void activate(j.id)}
-                    >
-                      Attiva adapter
-                    </button>
-                  </>
-                )}
-              </article>
+              <TrainingJob
+                key={j.id}
+                j={j}
+                disabled={disabled || running}
+                onActivate={() => void activate(j.id)}
+              />
             ))
           )}
         </>
       )}
     </fieldset>
+  );
+}
+
+function TrainingJob({
+  j,
+  disabled,
+  onActivate,
+}: {
+  j: TrainingOverview["jobs"][number];
+  disabled: boolean;
+  onActivate: () => void;
+}) {
+  return (
+    <article key={j.id}>
+      <strong>{labels[j.status] || j.status}</strong>
+      <p>
+        {new Date(j.createdAt).toLocaleString(
+          localeInfo(getPreferences().locale).intl,
+        )}{" "}
+        · {j.manifest.length} <Text source={" estratti"} />
+      </p>
+      {j.error && <p className="error">{j.error}</p>}
+      {j.status === "ready" && (
+        <>
+          <p>
+            {j.model} <Text source={" · GPU: "} />
+            {String(j.metrics.gpu || tr("non indicata"))}{" "}
+            <Text source={"· passaggi: "} />
+            {String(j.metrics.steps || 0)}
+          </p>
+          <button disabled={disabled} onClick={onActivate}>
+            <Text source={"Attiva adapter"} />
+          </button>
+        </>
+      )}
+    </article>
   );
 }

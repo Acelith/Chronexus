@@ -9,7 +9,20 @@ import {
 import italian from "./catalogs/it.json";
 type Catalog = Record<string, string>;
 const catalogs: Partial<Record<Locale, Catalog>> = { it: italian };
-const loaders = import.meta.glob<{ default: Catalog }>("./catalogs/*.json");
+const loaders: Partial<Record<Locale, () => Promise<{ default: Catalog }>>> = {
+  en: () => import("./catalogs/en.json"),
+  de: () => import("./catalogs/de.json"),
+  fr: () => import("./catalogs/fr.json"),
+  es: () => import("./catalogs/es.json"),
+  "pt-BR": () => import("./catalogs/pt-BR.json"),
+  ja: () => import("./catalogs/ja.json"),
+  ko: () => import("./catalogs/ko.json"),
+  "zh-Hans": () => import("./catalogs/zh-Hans.json"),
+  ar: () => import("./catalogs/ar.json"),
+  "lmo-CH": () => import("./catalogs/lmo-CH.json"),
+  tlh: () => import("./catalogs/tlh.json"),
+  "art-x-rihan": () => import("./catalogs/art-x-rihan.json"),
+};
 const reverse = new Map(
   Object.entries(italian).map(([id, text]) => [text.trim(), id]),
 );
@@ -29,9 +42,11 @@ function subscribe(listener: () => void) {
 }
 export async function loadLocale(locale: Locale) {
   if (catalogs[locale]) return;
-  const loader = loaders[`./catalogs/${locale}.json`];
-  if (loader) catalogs[locale] = (await loader()).default;
-  else catalogs[locale] = {};
+  const loader = loaders[locale];
+  if (loader) {
+    const module = await loader();
+    catalogs[locale] = module.default;
+  } else catalogs[locale] = {};
 }
 export function applyPreferences(preferences: Preferences) {
   if (!validPreferences(preferences))
@@ -82,10 +97,17 @@ export function translate(source: string, values: unknown[] = []): string {
   return leading + message + trailing;
 }
 export const tr = translate;
+const numberFormats = new Map<string, Intl.NumberFormat>();
+const dateFormats = new Map<string, Intl.DateTimeFormat>();
 export function number(value: number, options: Intl.NumberFormatOptions = {}) {
-  return new Intl.NumberFormat(localeInfo(current.locale).intl, options).format(
-    value,
-  );
+  const locale = localeInfo(current.locale).intl;
+  const key = locale + JSON.stringify(options);
+  let formatter = numberFormats.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, options);
+    numberFormats.set(key, formatter);
+  }
+  return formatter.format(value);
 }
 export function date(
   value: Date | string | number,
@@ -96,10 +118,14 @@ export function date(
       ? new Date(value)
       : value;
   if (!Number.isFinite(parsed.getTime())) return tr("Data non indicata");
-  return new Intl.DateTimeFormat(
-    localeInfo(current.locale).intl,
-    options,
-  ).format(parsed);
+  const locale = localeInfo(current.locale).intl;
+  const key = locale + JSON.stringify(options);
+  let formatter = dateFormats.get(key);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, options);
+    dateFormats.set(key, formatter);
+  }
+  return formatter.format(parsed);
 }
 export function plural(
   count: number,

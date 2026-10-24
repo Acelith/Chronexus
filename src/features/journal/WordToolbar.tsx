@@ -1,3 +1,5 @@
+import { tr } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
 import { useState } from "react";
 import { useEditorState } from "@blocknote/react";
 import type { BlockNoteEditor } from "@blocknote/core";
@@ -51,8 +53,8 @@ export default function WordToolbar({
       <>
         <button
           type="button"
-          title="Annulla (Ctrl+Z)"
-          aria-label="Annulla ultima modifica"
+          title={tr("Annulla (Ctrl+Z)")}
+          aria-label={tr("Annulla ultima modifica")}
           disabled={blocked}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
@@ -64,8 +66,8 @@ export default function WordToolbar({
         </button>
         <button
           type="button"
-          title="Ripeti (Ctrl+Y)"
-          aria-label="Ripeti ultima modifica"
+          title={tr("Ripeti (Ctrl+Y)")}
+          aria-label={tr("Ripeti ultima modifica")}
           disabled={blocked}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
@@ -76,7 +78,7 @@ export default function WordToolbar({
           ↷
         </button>
         <select
-          aria-label="Stile del paragrafo"
+          aria-label={tr("Stile del paragrafo")}
           disabled={blocked}
           defaultValue=""
           onChange={(e) => {
@@ -88,21 +90,21 @@ export default function WordToolbar({
           }}
         >
           <option value="" disabled>
-            Paragrafo / titolo
+            {tr("Paragrafo / titolo")}
           </option>
-          <option value="paragraph">Testo normale</option>
-          <option value="h1">Titolo 1</option>
-          <option value="h2">Titolo 2</option>
-          <option value="h3">Titolo 3</option>
-          <option value="quote">Citazione</option>
+          <option value="paragraph">{tr("Testo normale")}</option>
+          <option value="h1">{tr("Titolo 1")}</option>
+          <option value="h2">{tr("Titolo 2")}</option>
+          <option value="h3">{tr("Titolo 3")}</option>
+          <option value="quote">{tr("Citazione")}</option>
         </select>
         {(
           [
-            ["bold", "Grassetto", "G"],
-            ["italic", "Corsivo", "C"],
-            ["underline", "Sottolineato", "S"],
-            ["strike", "Barrato", "abc"],
-            ["code", "Codice in linea", "</>"],
+            ["bold", tr("Grassetto"), "G"],
+            ["italic", tr("Corsivo"), "C"],
+            ["underline", tr("Sottolineato"), "S"],
+            ["strike", tr("Barrato"), "abc"],
+            ["code", tr("Codice in linea"), "</>"],
           ] as const
         ).map(([style, title, text]) => (
           <button
@@ -137,7 +139,7 @@ export default function WordToolbar({
         <button
           type="button"
           disabled={blocked}
-          title="Evidenzia selezione"
+          title={tr("Evidenzia selezione")}
           aria-pressed={activeStyles.backgroundColor === "yellow"}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
@@ -145,7 +147,7 @@ export default function WordToolbar({
             editor.focus();
           }}
         >
-          Evidenzia
+          <Text source={"Evidenzia"} />
         </button>
         <button
           type="button"
@@ -153,7 +155,7 @@ export default function WordToolbar({
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => blockType("bulletListItem")}
         >
-          • Elenco
+          <Text source={"• Elenco"} />
         </button>
         <button
           type="button"
@@ -161,7 +163,7 @@ export default function WordToolbar({
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => blockType("numberedListItem")}
         >
-          1. Elenco
+          <Text source={"1. Elenco"} />
         </button>
         <button
           type="button"
@@ -169,10 +171,10 @@ export default function WordToolbar({
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => blockType("checkListItem")}
         >
-          ☐ Attività
+          <Text source={"☐ Attività"} />
         </button>
         <select
-          aria-label="Allineamento"
+          aria-label={tr("Allineamento")}
           disabled={blocked}
           defaultValue=""
           onChange={(e) => {
@@ -192,12 +194,12 @@ export default function WordToolbar({
           }}
         >
           <option value="" disabled>
-            Allineamento
+            {tr("Allineamento")}
           </option>
-          <option value="left">Sinistra</option>
-          <option value="center">Centro</option>
-          <option value="right">Destra</option>
-          <option value="justify">Giustificato</option>
+          <option value="left">{tr("Sinistra")}</option>
+          <option value="center">{tr("Centro")}</option>
+          <option value="right">{tr("Destra")}</option>
+          <option value="justify">{tr("Giustificato")}</option>
         </select>
         <button
           type="button"
@@ -208,10 +210,10 @@ export default function WordToolbar({
             setLinkForm((v) => !v);
           }}
         >
-          Inserisci link
+          <Text source={"Inserisci link"} />
         </button>
         <select
-          aria-label="Collega pagina del Codex"
+          aria-label={tr("Collega pagina del Codex")}
           disabled={blocked || !pages.length}
           defaultValue=""
           onChange={(e) => {
@@ -224,7 +226,7 @@ export default function WordToolbar({
           }}
         >
           <option value="" disabled>
-            Collega pagina…
+            {tr("Collega pagina…")}
           </option>
           {pages.map((p) => (
             <option value={p.id} key={p.id}>
@@ -241,7 +243,7 @@ export default function WordToolbar({
             e.preventDefault();
             if (!/^(https?:\/\/|mailto:)/i.test(href)) {
               setLinkError(
-                "Inserisci un indirizzo http, https o mailto valido.",
+                tr("Inserisci un indirizzo http, https o mailto valido."),
               );
               return;
             }
@@ -253,7 +255,7 @@ export default function WordToolbar({
           }}
         >
           <label>
-            Testo del link
+            <Text source={"Testo del link"} />
             <input
               value={label}
               disabled={blocked}
@@ -261,7 +263,7 @@ export default function WordToolbar({
             />
           </label>
           <label>
-            Indirizzo
+            <Text source={"Indirizzo"} />
             <input
               type="text"
               placeholder="https://…"
@@ -272,10 +274,10 @@ export default function WordToolbar({
             />
           </label>
           <button type="submit" disabled={blocked}>
-            Inserisci collegamento
+            <Text source={"Inserisci collegamento"} />
           </button>
           <button type="button" onClick={() => setLinkForm(false)}>
-            Annulla
+            <Text source={"Annulla"} />
           </button>
         </form>
       ) : null}

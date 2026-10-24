@@ -1,3 +1,8 @@
+import { localizeLabels } from "../../i18n/store";
+import { localeInfo } from "../../i18n/locales";
+import { getPreferences } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
+import { tr } from "../../i18n/store";
 import { useEffect, useState } from "react";
 import { assistantApi, type Runtime, type Rule } from "./api";
 import { campaignAi, type Overview, type Profile } from "./campaignApi";
@@ -5,14 +10,14 @@ import TrainingPanel from "./TrainingPanel";
 import type { SaveGuard } from "../journal/Editor";
 import { errorMessage } from "../journal/api";
 
-const kinds: Record<string, string> = {
+const kinds: Record<string, string> = localizeLabels({
   page: "Codex e party",
   session: "Diario delle sessioni",
   character: "Scheda del personaggio",
   item: "Oggetti",
   spell: "Incantesimi",
   ability: "Capacità",
-};
+});
 export default function CampaignSettings({
   campaignId,
   name,
@@ -93,8 +98,14 @@ export default function CampaignSettings({
       <header className="section-header">
         <div>
           <p className="eyebrow">{name}</p>
-          <h2>Impostazioni della campagna</h2>
-          <p>Le preferenze valgono soltanto per questa campagna.</p>
+          <h2>
+            <Text source={"Impostazioni della campagna"} />
+          </h2>
+          <p>
+            <Text
+              source={"Le preferenze valgono soltanto per questa campagna."}
+            />
+          </p>
         </div>
       </header>
       {error && (
@@ -106,32 +117,45 @@ export default function CampaignSettings({
       {!draft || !view ? (
         error ? (
           <button disabled={busy} onClick={() => void run(reload)}>
-            Riprova impostazioni
+            <Text source={"Riprova impostazioni"} />
           </button>
         ) : (
-          <p role="status">Caricamento impostazioni…</p>
+          <p role="status">
+            <Text source={"Caricamento impostazioni…"} />
+          </p>
         )
       ) : (
         <>
           {view.sourceError && (
             <p role="alert">
-              {view.sourceError} Riduci i tipi di fonti incluse e salva le
-              preferenze.
+              {view.sourceError}{" "}
+              <Text
+                source={
+                  " Riduci i tipi di fonti incluse e salva le preferenze."
+                }
+              />
             </p>
           )}
           <fieldset disabled={busy || trainingActive}>
-            <legend>AI locale · modello</legend>
+            <legend>
+              <Text source={"AI locale · modello"} />
+            </legend>
             <p>
-              {draft.settings.enabled ? "Attiva" : "Disattivata"} ·{" "}
-              {draft.settings.model || "Nessun modello scelto"}
+              {draft.settings.enabled ? tr("Attiva") : tr("Disattivata")} ·{" "}
+              {draft.settings.model || tr("Nessun modello scelto")}
             </p>
             {draft.settings.digest && (
-              <p className="muted">Identità: {draft.settings.digest}</p>
+              <p className="muted">
+                <Text source={"Identità: "} />
+                {draft.settings.digest}
+              </p>
             )}
             <p>
-              Gemma 4 12B è il modello previsto per M8. Puoi mantenere o
-              riselezionare Qwen. Nessun download o contatto con Ollama avviene
-              aprendo questa schermata.
+              <Text
+                source={
+                  "Gemma 4 12B è il modello previsto per M8. Puoi mantenere o riselezionare Qwen. Nessun download o contatto con Ollama avviene aprendo questa schermata."
+                }
+              />
             </p>
             <button
               onClick={() =>
@@ -143,24 +167,29 @@ export default function CampaignSettings({
                 })
               }
             >
-              Controlla Ollama e GPU
+              <Text source={"Controlla Ollama e GPU"} />
             </button>
             {runtime && (
               <>
-                <p>Ollama {runtime.version} · cloud disabilitato verificato</p>
+                <p>
+                  <Text source={"Ollama "} />
+                  {runtime.version}{" "}
+                  <Text source={" · cloud disabilitato verificato"} />
+                </p>
                 <label>
-                  Modello locale
+                  <Text source={"Modello locale"} />
                   <select
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
                   >
-                    <option value="">Scegli un modello</option>
+                    <option value="">{tr("Scegli un modello")}</option>
                     {runtime.models
                       .filter((m) => !m.dndSpecialized && m.weightDigest)
                       .map((m) => (
                         <option key={m.digest} value={m.name}>
                           {m.name} · {m.quantization} ·{" "}
-                          {Math.round(m.gpuBytes / 1048576)} MiB GPU caricati
+                          {Math.round(m.gpuBytes / 1048576)}{" "}
+                          {tr(" MiB GPU caricati")}
                         </option>
                       ))}
                   </select>
@@ -171,8 +200,11 @@ export default function CampaignSettings({
                     checked={consent}
                     onChange={(e) => setConsent(e.target.checked)}
                   />
-                  Confermo l'uso di un modello multilingue con fonti locali, non
-                  specializzato D&D.
+                  <Text
+                    source={
+                      "Confermo l'uso di un modello multilingue con fonti locali, non specializzato D&D."
+                    }
+                  />
                 </label>
                 <button
                   disabled={!model || !consent || dirty}
@@ -186,12 +218,14 @@ export default function CampaignSettings({
                       );
                       await reload();
                       setNotice(
-                        "Modello attivato per questa campagna. La GPU sarà verificata prima di inviare gli appunti.",
+                        tr(
+                          "Modello attivato per questa campagna. La GPU sarà verificata prima di inviare gli appunti.",
+                        ),
                       );
                     })
                   }
                 >
-                  Attiva modello per la campagna
+                  <Text source={"Attiva modello per la campagna"} />
                 </button>
               </>
             )}
@@ -204,7 +238,7 @@ export default function CampaignSettings({
                 })
               }
             >
-              Disattiva AI della campagna
+              <Text source={"Disattiva AI della campagna"} />
             </button>
           </fieldset>
           <form
@@ -213,40 +247,42 @@ export default function CampaignSettings({
               void run(async () => {
                 await campaignAi.save(campaignId, draft);
                 await reload();
-                setNotice("Preferenze della campagna salvate.");
+                setNotice(tr("Preferenze della campagna salvate."));
               });
             }}
           >
             <fieldset disabled={busy || trainingActive}>
-              <legend>Fonti e risorse</legend>
+              <legend>
+                <Text source={"Fonti e risorse"} />
+              </legend>
               <label>
-                Edizione D&D
+                <Text source={"Edizione D&D"} />
                 <select
                   value={draft.edition}
                   onChange={(e) =>
                     patch({ edition: e.target.value, ruleKeys: [] })
                   }
                 >
-                  <option value="5e-2014">D&D 5e · 2014</option>
-                  <option value="5e-2024">D&D 5e · 2024</option>
-                  <option value="3.5">D&D 3.5</option>
+                  <option value="5e-2014">{tr("D&D 5e · 2014")}</option>
+                  <option value="5e-2024">{tr("D&D 5e · 2024")}</option>
+                  <option value="3.5">{tr("D&D 3.5")}</option>
                 </select>
               </label>
               <label>
-                Contesto massimo
+                <Text source={"Contesto massimo"} />
                 <select
                   value={draft.context}
                   onChange={(e) => patch({ context: Number(e.target.value) })}
                 >
                   {[2048, 4096, 8192].map((n) => (
                     <option key={n} value={n}>
-                      {n} token
+                      {n} <Text source={" token"} />
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                Lunghezza massima risposta
+                <Text source={"Lunghezza massima risposta"} />
                 <input
                   type="number"
                   min={128}
@@ -256,9 +292,11 @@ export default function CampaignSettings({
                 />
               </label>
               <p>
-                Un contesto maggiore richiede più VRAM. Il runtime e la GPU
-                fisica sono condivisi; queste preferenze non ne cambiano le
-                impostazioni globali.
+                <Text
+                  source={
+                    "Un contesto maggiore richiede più VRAM. Il runtime e la GPU fisica sono condivisi; queste preferenze non ne cambiano le impostazioni globali."
+                  }
+                />
               </p>
               {Object.entries(kinds).map(([id, label]) => (
                 <label className="checkbox-row" key={id}>
@@ -276,13 +314,24 @@ export default function CampaignSettings({
                   {label}
                 </label>
               ))}
-              <h3>Regole locali approvate</h3>
+              <h3>
+                <Text source={"Regole locali approvate"} />
+              </h3>
               <p>
-                Fino a sei voci della stessa edizione, già consultate nella
-                Wiki.
+                <Text
+                  source={
+                    "Fino a sei voci della stessa edizione, già consultate nella Wiki."
+                  }
+                />
               </p>
               {rules.length === 0 ? (
-                <p>Nessuna voce locale disponibile per questa edizione.</p>
+                <p>
+                  <Text
+                    source={
+                      "Nessuna voce locale disponibile per questa edizione."
+                    }
+                  />
+                </p>
               ) : (
                 rules.map((r) => (
                   <label className="checkbox-row" key={r.key}>
@@ -306,28 +355,39 @@ export default function CampaignSettings({
                 ))
               )}
               <button type="submit" disabled={!dirty}>
-                Salva preferenze
+                <Text source={"Salva preferenze"} />
               </button>
               {dirty && (
                 <p role="status">
-                  Salva le preferenze prima di aggiornare le conoscenze o
-                  cambiare modello.
+                  <Text
+                    source={
+                      "Salva le preferenze prima di aggiornare le conoscenze o cambiare modello."
+                    }
+                  />
                 </p>
               )}
             </fieldset>
           </form>
           <fieldset disabled={busy || dirty || trainingActive}>
-            <legend>Conoscenze locali</legend>
+            <legend>
+              <Text source={"Conoscenze locali"} />
+            </legend>
             <p>
-              Ultimo aggiornamento:{" "}
+              <Text source={"Ultimo aggiornamento:"} />{" "}
               {view.profile.indexedAt
-                ? new Date(view.profile.indexedAt).toLocaleString("it-IT")
-                : "Mai eseguito"}
+                ? new Date(view.profile.indexedAt).toLocaleString(
+                    localeInfo(getPreferences().locale).intl,
+                  )
+                : tr("Mai eseguito")}
             </p>
             <p>
-              {view.added} estratti nuovi · {view.changed} modificati ·{" "}
-              {view.removed} rimossi rispetto all'ultimo aggiornamento delle
-              conoscenze.
+              {view.added} <Text source={" estratti nuovi · "} />
+              {view.changed} <Text source={" modificati ·"} /> {view.removed}{" "}
+              <Text
+                source={
+                  " rimossi rispetto all'ultimo aggiornamento delle conoscenze."
+                }
+              />
             </p>
             <button
               onClick={() =>
@@ -336,20 +396,26 @@ export default function CampaignSettings({
                   setView(v);
                   setDraft(v.profile);
                   setNotice(
-                    "Conoscenze aggiornate. I pesi del modello non sono stati riaddestrati.",
+                    tr(
+                      "Conoscenze aggiornate. I pesi del modello non sono stati riaddestrati.",
+                    ),
                   );
                 })
               }
             >
-              Aggiorna conoscenze
+              <Text source={"Aggiorna conoscenze"} />
             </button>
             <details>
               <summary>
-                Anteprima delle fonti incluse ({view.sources.length} estratti)
+                <Text source={"Anteprima delle fonti incluse ("} />
+                {view.sources.length} <Text source={" estratti)"} />
               </summary>
               <p>
-                Estratti della campagna selezionata; le conversazioni AI e le
-                fotografie non sono dati di addestramento.
+                <Text
+                  source={
+                    "Estratti della campagna selezionata; le conversazioni AI e le fotografie non sono dati di addestramento."
+                  }
+                />
               </p>
               {view.sources.slice(0, 100).map((s) => (
                 <article key={s.key}>
@@ -363,13 +429,15 @@ export default function CampaignSettings({
                         })
                       }
                     >
-                      Escludi questa fonte
+                      <Text source={"Escludi questa fonte"} />
                     </button>
                   )}
                 </article>
               ))}
               {view.sources.length > 100 && (
-                <p>Anteprima limitata ai primi 100 estratti.</p>
+                <p>
+                  <Text source={"Anteprima limitata ai primi 100 estratti."} />
+                </p>
               )}
             </details>
           </fieldset>
@@ -386,7 +454,8 @@ export default function CampaignSettings({
               disabled={busy || trainingActive}
               onClick={() => patch({ excludedIds: [] })}
             >
-              Riammetti le fonti escluse ({draft.excludedIds.length})
+              <Text source={"Riammetti le fonti escluse ("} />
+              {draft.excludedIds.length})
             </button>
           )}
         </>

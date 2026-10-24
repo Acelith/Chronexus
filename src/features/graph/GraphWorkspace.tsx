@@ -1,3 +1,5 @@
+import { Text } from "../../i18n/Text";
+import { tr } from "../../i18n/store";
 import NodePortrait from "./NodePortrait";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { errorMessage, type Session } from "../journal/api";
@@ -59,7 +61,9 @@ export default function GraphWorkspace({
       flush: async () => {
         if (dirty.current)
           throw Error(
-            "Salva o annulla la relazione aperta prima di cambiare vista o chiudere Chronexus.",
+            tr(
+              "Salva o annulla la relazione aperta prima di cambiare vista o chiudere Chronexus.",
+            ),
           );
       },
       dirty: () => dirty.current,
@@ -95,7 +99,8 @@ export default function GraphWorkspace({
   }, [campaignId, query, refresh]);
   const edge = data?.edges.find((edge) => edge.id === edgeId);
   const nodeTitle = (id: string) =>
-    data?.nodes.find((node) => node.id === id)?.title ?? "Pagina non visibile";
+    data?.nodes.find((node) => node.id === id)?.title ??
+    tr("Pagina non visibile");
   function apply(next: GraphQuery) {
     selectionVersion.current += 1;
     setRelationLoading(false);
@@ -149,7 +154,7 @@ export default function GraphWorkspace({
       setForm(null);
       setRelationship(saved);
       setEdgeId(`relationship:${saved.id}`);
-      setNotice("Relazione salvata sul computer.");
+      setNotice(tr("Relazione salvata sul computer."));
       await reload();
     } catch (reason) {
       setError(errorMessage(reason));
@@ -167,7 +172,7 @@ export default function GraphWorkspace({
       setRelationship(null);
       setEdgeId(null);
       setNotice(
-        "Relazione eliminata. Le menzioni negli appunti sono conservate.",
+        tr("Relazione eliminata. Le menzioni negli appunti sono conservate."),
       );
       await reload();
     } catch (reason) {
@@ -185,19 +190,27 @@ export default function GraphWorkspace({
         title:
           relationship.sourceKind === "session"
             ? (sessions.find((s) => s.id === relationship.sourceId)?.title ??
-              "Sessione")
+              tr("Sessione"))
             : (pages.find((p) => p.id === relationship.sourceId)?.title ??
-              "Pagina"),
+              tr("Pagina")),
       }
     : edge?.provenance;
   return (
-    <section className="graph-workspace" aria-label="Grafo della campagna">
+    <section
+      className="graph-workspace"
+      aria-label={tr("Grafo della campagna")}
+    >
       <div className="graph-heading">
         <div>
-          <h3>Connessioni della campagna</h3>
+          <h3>
+            <Text source={"Connessioni della campagna"} />
+          </h3>
           <p className="editor-hint">
-            Esplora come persone, luoghi, oggetti ed eventi si intrecciano nella
-            storia.
+            <Text
+              source={
+                "Esplora come persone, luoghi, oggetti ed eventi si intrecciano nella storia."
+              }
+            />
           </p>
         </div>
         <button
@@ -209,13 +222,13 @@ export default function GraphWorkspace({
             setError("");
           }}
         >
-          Nuova relazione
+          <Text source={"Nuova relazione"} />
         </button>
       </div>
       <div className="graph-filter-details">
         <form
           className="graph-filters"
-          aria-label="Filtri del grafo"
+          aria-label={tr("Filtri del grafo")}
           onSubmit={(event) => {
             event.preventDefault();
             apply(draft);
@@ -223,7 +236,7 @@ export default function GraphWorkspace({
         >
           <fieldset disabled={disabled}>
             <label>
-              Cerca nodi
+              <Text source={"Cerca nodi"} />
               <input
                 type="search"
                 maxLength={200}
@@ -234,9 +247,9 @@ export default function GraphWorkspace({
               />
             </label>
             <label>
-              Tipo nodo
+              <Text source={"Tipo nodo"} />
               <select
-                aria-label="Tipo nodo"
+                aria-label={tr("Tipo nodo")}
                 value={draft.kind ?? ""}
                 onChange={(event) =>
                   setDraft({
@@ -245,20 +258,20 @@ export default function GraphWorkspace({
                   })
                 }
               >
-                <option value="">Tutti i tipi</option>
+                <option value="">{tr("Tutti i tipi")}</option>
                 {Object.entries(pageKinds).map(([key, label]) => (
                   <option key={key} value={key}>
                     {label}
                   </option>
                 ))}
-                <option value="session">Sessione</option>
-                <option value="missing">Pagina mancante</option>
+                <option value="session">{tr("Sessione")}</option>
+                <option value="missing">{tr("Pagina mancante")}</option>
               </select>
             </label>
             <label>
-              Collegamenti
+              <Text source={"Collegamenti"} />
               <select
-                aria-label="Collegamenti"
+                aria-label={tr("Collegamenti")}
                 value={draft.edgeKind}
                 onChange={(event) =>
                   setDraft({
@@ -267,18 +280,22 @@ export default function GraphWorkspace({
                   })
                 }
               >
-                <option value="all">Menzioni e relazioni</option>
-                <option value="mentions">Solo menzioni</option>
-                <option value="assertions">Solo relazioni dichiarate</option>
+                <option value="all">{tr("Menzioni e relazioni")}</option>
+                <option value="mentions">{tr("Solo menzioni")}</option>
+                <option value="assertions">
+                  {tr("Solo relazioni dichiarate")}
+                </option>
               </select>
             </label>
             <details className="graph-advanced">
-              <summary>Altri filtri</summary>
+              <summary>
+                <Text source={"Altri filtri"} />
+              </summary>
               <div>
                 <label>
-                  Certezza delle relazioni
+                  <Text source={"Certezza delle relazioni"} />
                   <select
-                    aria-label="Certezza delle relazioni"
+                    aria-label={tr("Certezza delle relazioni")}
                     value={draft.certainty ?? ""}
                     onChange={(event) =>
                       setDraft({
@@ -289,7 +306,7 @@ export default function GraphWorkspace({
                       })
                     }
                   >
-                    <option value="">Tutte le certezze</option>
+                    <option value="">{tr("Tutte le certezze")}</option>
                     {Object.entries(certainties).map(([key, label]) => (
                       <option key={key} value={key}>
                         {label}
@@ -298,9 +315,9 @@ export default function GraphWorkspace({
                   </select>
                 </label>
                 <label>
-                  Fonte sessione
+                  <Text source={"Fonte sessione"} />
                   <select
-                    aria-label="Fonte sessione"
+                    aria-label={tr("Fonte sessione")}
                     value={draft.sessionId ?? ""}
                     onChange={(event) =>
                       setDraft({
@@ -309,18 +326,19 @@ export default function GraphWorkspace({
                       })
                     }
                   >
-                    <option value="">Tutte le sessioni</option>
+                    <option value="">{tr("Tutte le sessioni")}</option>
                     {sessions.map((session) => (
                       <option key={session.id} value={session.id}>
-                        Sessione {session.sequence}: {session.title}
+                        {tr("Sessione ")}
+                        {session.sequence}: {session.title}
                       </option>
                     ))}
                   </select>
                 </label>
                 <label>
-                  Nodo centrale
+                  <Text source={"Nodo centrale"} />
                   <select
-                    aria-label="Nodo centrale"
+                    aria-label={tr("Nodo centrale")}
                     value={draft.focusId ?? ""}
                     onChange={(event) =>
                       setDraft({
@@ -329,7 +347,7 @@ export default function GraphWorkspace({
                       })
                     }
                   >
-                    <option value="">Nessun centro</option>
+                    <option value="">{tr("Nessun centro")}</option>
                     {pages.map((page) => (
                       <option key={page.id} value={`page:${page.id}`}>
                         {page.title}
@@ -337,15 +355,16 @@ export default function GraphWorkspace({
                     ))}
                     {sessions.map((session) => (
                       <option key={session.id} value={`session:${session.id}`}>
-                        Sessione {session.sequence}: {session.title}
+                        {tr("Sessione ")}
+                        {session.sequence}: {session.title}
                       </option>
                     ))}
                   </select>
                 </label>
                 <label>
-                  Profondità
+                  <Text source={"Profondità"} />
                   <select
-                    aria-label="Profondità"
+                    aria-label={tr("Profondità")}
                     value={draft.depth}
                     disabled={!draft.focusId || disabled}
                     onChange={(event) =>
@@ -355,16 +374,22 @@ export default function GraphWorkspace({
                       })
                     }
                   >
-                    <option value={1}>1 passaggio</option>
-                    <option value={2}>2 passaggi</option>
+                    <option value={1}>
+                      <Text source={"1 passaggio"} />
+                    </option>
+                    <option value={2}>
+                      <Text source={"2 passaggi"} />
+                    </option>
                   </select>
                 </label>
               </div>
             </details>
             <div className="actions">
-              <button className="primary">Applica filtri</button>
+              <button className="primary">
+                <Text source={"Applica filtri"} />
+              </button>
               <button type="button" onClick={() => apply(defaultQuery)}>
-                Azzera filtri
+                <Text source={"Azzera filtri"} />
               </button>
             </div>
           </fieldset>
@@ -382,7 +407,7 @@ export default function GraphWorkspace({
               setRefresh((value) => value + 1);
             }}
           >
-            Ricarica grafo
+            <Text source={"Ricarica grafo"} />
           </button>
         </div>
       ) : null}
@@ -402,40 +427,60 @@ export default function GraphWorkspace({
           onCancel={() => setForm(null)}
         />
       ) : null}
-      <div className="graph-legend" aria-label="Legenda del grafo">
+      <div className="graph-legend" aria-label={tr("Legenda del grafo")}>
         <span>
           <i className="mention-line" aria-hidden="true" />
-          Menzione: tratteggiata, dalla fonte alla pagina
+          <Text source={"Menzione: tratteggiata, dalla fonte alla pagina"} />
         </span>
         <span>
           <i className="assertion-line" aria-hidden="true" />
-          Relazione dichiarata: continua, etichetta e certezza
+          <Text
+            source={"Relazione dichiarata: continua, etichetta e certezza"}
+          />
         </span>
         <span>
-          Cerchio: personaggi e pagine · Esagono: luogo · Rombo: oggetto o
-          pagina mancante · Rettangolo: sessione
+          <Text
+            source={
+              "Cerchio: personaggi e pagine · Esagono: luogo · Rombo: oggetto o pagina mancante · Rettangolo: sessione"
+            }
+          />
         </span>
       </div>
       {loading ? (
-        <p role="status">Caricamento grafo…</p>
+        <p role="status">
+          <Text source={"Caricamento grafo…"} />
+        </p>
       ) : data ? (
         <>
           <p role="status" className="graph-count">
-            {data.nodes.length} nodi e {data.edges.length} collegamenti nella
-            vista.
+            {data.nodes.length} <Text source={" nodi e "} />
+            {data.edges.length} <Text source={" collegamenti nella vista."} />
           </p>
           {data.truncated ? (
             <p className="graph-limit" role="status">
-              Vista limitata a 150 nodi e 400 collegamenti. I filtri
-              corrispondono a {data.totalNodes} nodi e {data.totalEdges}{" "}
-              collegamenti: scegli un nodo centrale o restringi la ricerca.
+              <Text
+                source={
+                  "Vista limitata a 150 nodi e 400 collegamenti. I filtri corrispondono a "
+                }
+              />
+              {data.totalNodes} <Text source={" nodi e "} />
+              {data.totalEdges}{" "}
+              <Text
+                source={
+                  "collegamenti: scegli un nodo centrale o restringi la ricerca."
+                }
+              />
             </p>
           ) : null}
           <div className="graph-layout">
             <div>
               {data.nodes.length ? (
                 <Suspense
-                  fallback={<p role="status">Apertura visualizzazione…</p>}
+                  fallback={
+                    <p role="status">
+                      <Text source={"Apertura visualizzazione…"} />
+                    </p>
+                  }
                 >
                   <GraphCanvas
                     data={data}
@@ -452,22 +497,35 @@ export default function GraphWorkspace({
                 </Suspense>
               ) : (
                 <div className="empty">
-                  <h4>Nessun nodo con questi filtri</h4>
+                  <h4>
+                    <Text source={"Nessun nodo con questi filtri"} />
+                  </h4>
                   <p>
-                    Crea pagine nel Codex o azzera i filtri per esplorare la
-                    campagna.
+                    <Text
+                      source={
+                        "Crea pagine nel Codex o azzera i filtri per esplorare la campagna."
+                      }
+                    />
                   </p>
                 </div>
               )}
               {!data.edges.length && data.nodes.length ? (
                 <p className="editor-hint">
-                  Nessun collegamento con questi filtri. Le relazioni si
-                  aggiungono esplicitamente; non vengono dedotte dalle note.
+                  <Text
+                    source={
+                      "Nessun collegamento con questi filtri. Le relazioni si aggiungono esplicitamente; non vengono dedotte dalle note."
+                    }
+                  />
                 </p>
               ) : null}
             </div>
-            <aside className="graph-detail" aria-label="Dettaglio collegamento">
-              <h4>Dettagli della voce</h4>
+            <aside
+              className="graph-detail"
+              aria-label={tr("Dettaglio collegamento")}
+            >
+              <h4>
+                <Text source={"Dettagli della voce"} />
+              </h4>
               {selectedNode ? (
                 <div className="graph-node-detail">
                   <NodePortrait
@@ -479,19 +537,23 @@ export default function GraphWorkspace({
                   <h4>{selectedNode.title}</h4>
                   <span className="node-kind">
                     {selectedNode.kind === "session"
-                      ? "Sessione"
+                      ? tr("Sessione")
                       : selectedNode.kind === "missing"
-                        ? "Pagina mancante"
+                        ? tr("Pagina mancante")
                         : pageKinds[selectedNode.kind]}
                   </span>
                   <p>
                     {pagePreview(
                       pages.find((p) => p.id === selectedNode.entityId),
                     ) ||
-                      "Apri la voce per leggere gli appunti. Seleziona un collegamento per consultarne fonte e certezza."}
+                      tr(
+                        "Apri la voce per leggere gli appunti. Seleziona un collegamento per consultarne fonte e certezza.",
+                      )}
                   </p>
                   <div className="node-connections">
-                    <h5>Collegamenti principali</h5>
+                    <h5>
+                      <Text source={"Collegamenti principali"} />
+                    </h5>
                     {data.edges
                       .filter(
                         (e) =>
@@ -520,7 +582,9 @@ export default function GraphWorkspace({
                         e.source === selectedNode.id ||
                         e.target === selectedNode.id,
                     ) ? (
-                      <p>Nessun collegamento in questa vista.</p>
+                      <p>
+                        <Text source={"Nessun collegamento in questa vista."} />
+                      </p>
                     ) : null}
                   </div>
                   <div className="actions">
@@ -528,7 +592,7 @@ export default function GraphWorkspace({
                       disabled={disabled}
                       onClick={() => onNode(selectedNode)}
                     >
-                      Apri la voce
+                      <Text source={"Apri la voce"} />
                     </button>
                     <button
                       disabled={disabled}
@@ -540,15 +604,19 @@ export default function GraphWorkspace({
                         })
                       }
                     >
-                      Esplora i collegamenti
+                      <Text source={"Esplora i collegamenti"} />
                     </button>
                   </div>
                 </div>
               ) : relationLoading ? (
-                <p role="status">Apertura relazione…</p>
+                <p role="status">
+                  <Text source={"Apertura relazione…"} />
+                </p>
               ) : relationship ? (
                 <>
-                  <h4>Relazione dichiarata</h4>
+                  <h4>
+                    <Text source={"Relazione dichiarata"} />
+                  </h4>
                   <p className="relation-statement">
                     {pages.find((p) => p.id === relationship.fromPageId)?.title}{" "}
                     <strong>{relationship.label}</strong>{" "}
@@ -559,20 +627,27 @@ export default function GraphWorkspace({
                   </p>
                   {relationship.evidence ? (
                     <>
-                      <h5>Evidenza registrata</h5>
+                      <h5>
+                        <Text source={"Evidenza registrata"} />
+                      </h5>
                       <p className="preserve-lines">{relationship.evidence}</p>
                     </>
                   ) : null}
                   {relationship.notes ? (
                     <>
-                      <h5>Note</h5>
+                      <h5>
+                        <Text source={"Note"} />
+                      </h5>
                       <p className="preserve-lines">{relationship.notes}</p>
                     </>
                   ) : null}
                   {!relationship.sourceAvailable ? (
                     <p role="alert">
-                      Il blocco della fonte non è più disponibile. L'evidenza
-                      registrata è conservata.
+                      <Text
+                        source={
+                          "Il blocco della fonte non è più disponibile. L'evidenza registrata è conservata."
+                        }
+                      />
                     </p>
                   ) : null}
                   <div className="actions">
@@ -580,40 +655,54 @@ export default function GraphWorkspace({
                       disabled={disabled}
                       onClick={() => setForm(relationship)}
                     >
-                      Modifica relazione
+                      <Text source={"Modifica relazione"} />
                     </button>
                     <button
                       disabled={disabled}
                       onClick={() => setConfirm(true)}
                     >
-                      Elimina relazione
+                      <Text source={"Elimina relazione"} />
                     </button>
                   </div>
                 </>
               ) : edge ? (
                 <>
-                  <h4>Menzione negli appunti</h4>
+                  <h4>
+                    <Text source={"Menzione negli appunti"} />
+                  </h4>
                   <p>
-                    {nodeTitle(edge.source)} menziona {nodeTitle(edge.target)}.
+                    {nodeTitle(edge.source)} <Text source={" menziona "} />
+                    {nodeTitle(edge.target)}.
                   </p>
                   <p className="preserve-lines">{edge.preview}</p>
                   <p className="editor-hint">
-                    Questa citazione non afferma una relazione tra le pagine.
-                    Per rimuoverla modifica gli appunti di origine.
+                    <Text
+                      source={
+                        "Questa citazione non afferma una relazione tra le pagine. Per rimuoverla modifica gli appunti di origine."
+                      }
+                    />
                   </p>
                 </>
               ) : (
                 <>
-                  <h4>Esplora le connessioni</h4>
+                  <h4>
+                    <Text source={"Esplora le connessioni"} />
+                  </h4>
                   <p>
-                    Apri un nodo per leggere la pagina. Seleziona un
-                    collegamento per vedere certezza, evidenza e fonte.
+                    <Text
+                      source={
+                        "Apri un nodo per leggere la pagina. Seleziona un collegamento per vedere certezza, evidenza e fonte."
+                      }
+                    />
                   </p>
                 </>
               )}
               {source ? (
                 <div className="graph-source">
-                  <h5>Fonte: {source.title}</h5>
+                  <h5>
+                    <Text source={"Fonte: "} />
+                    {source.title}
+                  </h5>
                   <button
                     disabled={disabled}
                     onClick={() =>
@@ -625,23 +714,30 @@ export default function GraphWorkspace({
                     }
                   >
                     {relationship && !relationship.sourceAvailable
-                      ? "Apri documento della fonte"
-                      : "Apri fonte"}
+                      ? tr("Apri documento della fonte")
+                      : tr("Apri fonte")}
                   </button>
                 </div>
               ) : relationship ? (
-                <p className="editor-hint">Nessuna fonte collegata.</p>
+                <p className="editor-hint">
+                  <Text source={"Nessuna fonte collegata."} />
+                </p>
               ) : null}
             </aside>
           </div>
           <details className="graph-accessible">
-            <summary>Elenco accessibile di nodi e collegamenti</summary>
-            <h4>Nodi</h4>
+            <summary>
+              <Text source={"Elenco accessibile di nodi e collegamenti"} />
+            </summary>
+            <h4>
+              <Text source={"Nodi"} />
+            </h4>
             <ul>
               {data.nodes.map((node) => (
                 <li key={node.id}>
                   <button disabled={disabled} onClick={() => onNode(node)}>
-                    Apri nodo {node.title}
+                    <Text source={"Apri nodo "} />
+                    {node.title}
                   </button>
                   <button
                     disabled={disabled}
@@ -654,12 +750,15 @@ export default function GraphWorkspace({
                       })
                     }
                   >
-                    Centra {node.title}
+                    <Text source={"Centra "} />
+                    {node.title}
                   </button>
                 </li>
               ))}
             </ul>
-            <h4>Collegamenti</h4>
+            <h4>
+              <Text source={"Collegamenti"} />
+            </h4>
             <ul>
               {data.edges.map((item) => (
                 <li key={item.id}>
@@ -669,10 +768,12 @@ export default function GraphWorkspace({
                       void selectEdge(item);
                     }}
                   >
-                    {item.kind === "mention" ? "Menzione" : "Relazione"}:{" "}
-                    {nodeTitle(item.source)} → {item.label} →{" "}
+                    {item.kind === "mention" ? tr("Menzione") : tr("Relazione")}
+                    : {nodeTitle(item.source)} → {item.label} →{" "}
                     {nodeTitle(item.target)}
-                    {item.certainty ? ` · ${certainties[item.certainty]}` : ""}
+                    {item.certainty
+                      ? tr(" · {0}", [certainties[item.certainty]])
+                      : ""}
                   </button>
                 </li>
               ))}
@@ -748,10 +849,15 @@ function DeleteConfirmation({
           }
         }}
       >
-        <h4 id="delete-relation-title">Eliminare questa relazione?</h4>
+        <h4 id="delete-relation-title">
+          <Text source={"Eliminare questa relazione?"} />
+        </h4>
         <p id="delete-relation-description">
-          La relazione dichiarata verrà rimossa. Pagine, sessioni e menzioni
-          negli appunti resteranno conservate.
+          <Text
+            source={
+              "La relazione dichiarata verrà rimossa. Pagine, sessioni e menzioni negli appunti resteranno conservate."
+            }
+          />
         </p>
         {error ? (
           <p role="alert" className="error">
@@ -760,10 +866,10 @@ function DeleteConfirmation({
         ) : null}
         <div className="actions">
           <button disabled={busy} onClick={onCancel}>
-            Annulla eliminazione
+            <Text source={"Annulla eliminazione"} />
           </button>
           <button disabled={busy} onClick={onDelete}>
-            Conferma eliminazione
+            <Text source={"Conferma eliminazione"} />
           </button>
         </div>
       </div>

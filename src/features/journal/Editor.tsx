@@ -1,3 +1,5 @@
+import { tr } from "../../i18n/store";
+import { Text } from "../../i18n/Text";
 import { EditorSaveBar, EditorModeBar } from "./EditorChrome";
 import {
   Component,
@@ -8,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { type PartialBlock } from "@blocknote/core";
-import { it as dictionary } from "@blocknote/core/locales";
+import { editorDictionary } from "../../i18n/editorLocale";
 import {
   SuggestionMenuController,
   useCreateBlockNote,
@@ -63,7 +65,7 @@ function NoteEditor(props: Props) {
     throw new Error(it.unavailable);
   const editor = useCreateBlockNote({
     schema,
-    dictionary,
+    dictionary: editorDictionary(),
     initialContent: session.document.blocks as PartialBlock<
       typeof schema.blockSchema
     >[],
@@ -152,7 +154,7 @@ function NoteEditor(props: Props) {
       const message =
         error instanceof Error
           ? error.message
-          : "Markdown non valido. Il testo è conservato.";
+          : tr("Markdown non valido. Il testo è conservato.");
       setSourceError(message);
       throw Error(message, { cause: error });
     }
@@ -186,7 +188,10 @@ function NoteEditor(props: Props) {
 
   function insertPage(page: KnowledgePage) {
     editor.insertInlineContent([
-      { type: "pageMention", props: { pageId: page.id, label: page.title } },
+      {
+        type: "pageMention",
+        props: { pageId: page.id, label: page.title },
+      },
       " ",
     ]);
   }
@@ -202,7 +207,9 @@ function NoteEditor(props: Props) {
         setLinkError(
           reason instanceof Error
             ? reason.message
-            : "Creazione non riuscita. Il nome è conservato come testo: riprova con [[.",
+            : tr(
+                "Creazione non riuscita. Il nome è conservato come testo: riprova con [[.",
+              ),
         );
         throw reason;
       })
@@ -228,7 +235,7 @@ function NoteEditor(props: Props) {
     if (canCreatePage(links.pages, query))
       items.push({
         title: `Crea bozza «${title}»`,
-        subtext: "Nuova pagina nel Codex di questa campagna",
+        subtext: tr("Nuova pagina nel Codex di questa campagna"),
         onItemClick: () => createLinkedPage(title),
       });
     return items;
@@ -259,7 +266,11 @@ function NoteEditor(props: Props) {
           {linkError}
         </p>
       ) : null}
-      {linking ? <p role="status">Creazione pagina…</p> : null}
+      {linking ? (
+        <p role="status">
+          <Text source={"Creazione pagina…"} />
+        </p>
+      ) : null}
       <EditorModeBar
         mode={mode}
         disabled={!!blocked}
@@ -288,15 +299,16 @@ function NoteEditor(props: Props) {
       {mode === "markdown" ? (
         <>
           <p className="editor-hint">
-            Modifica titoli, elenchi, attività, citazioni, grassetto, corsivo e
-            link. I collegamenti al Codex conservano l’UUID. Colori,
-            sottolineatura e allineamento sono formati visuali: il Markdown
-            standard non li rappresenta: restano nei blocchi non modificati.
-            Tabelle, immagini e HTML non vengono convertiti.
+            <Text
+              source={
+                "Modifica titoli, elenchi, attività, citazioni, grassetto, corsivo e link. I collegamenti al Codex conservano l’UUID. Colori, sottolineatura e allineamento sono formati visuali: il Markdown standard non li rappresenta: restano nei blocchi non modificati. Tabelle, immagini e HTML non vengono convertiti."
+              }
+            />
           </p>
           <textarea
+            dir="auto"
             className="markdown-source"
-            aria-label="Codice Markdown"
+            aria-label={tr("Codice Markdown")}
             spellCheck={false}
             value={source}
             disabled={blocked}
@@ -358,7 +370,8 @@ class EditorBoundary extends Component<
         <p>{it.unavailable}</p>
         <p>{it.copyHint}</p>
         <textarea
-          aria-label="Documento originale"
+          dir="auto"
+          aria-label={tr("Documento originale")}
           readOnly
           value={JSON.stringify(this.props.document, null, 2)}
         />

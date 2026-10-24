@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 import type { JournalDocument } from "../journal/api";
 export function blockOptions(
   document: JournalDocument,
@@ -20,7 +21,7 @@ export function blockOptions(
           .join("");
         result.push({
           id: value.id,
-          text: text.slice(0, 100) || "Blocco senza testo",
+          text: text.slice(0, 100) || tr("Blocco senza testo"),
         });
       }
       if (Array.isArray(value.children)) visit(value.children);

@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 import { createContext } from "react";
 import type { KnowledgePage } from "./api";
 export interface KnowledgeLinks {
@@ -9,6 +10,6 @@ export const KnowledgeContext = createContext<KnowledgeLinks>({
   pages: [],
   open: () => {},
   create: async () => {
-    throw Error("Seleziona una campagna prima di creare una pagina.");
+    throw Error(tr("Seleziona una campagna prima di creare una pagina."));
   },
 });

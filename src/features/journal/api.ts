@@ -1,3 +1,4 @@
+import { tr, translateError } from "../../i18n/store";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 
 export interface Campaign {
@@ -26,7 +27,9 @@ export async function command<T>(
 ): Promise<T> {
   if (!isTauri())
     throw new Error(
-      "Avvia Chronexus come applicazione desktop per accedere al tuo archivio locale.",
+      tr(
+        "Avvia Chronexus come applicazione desktop per accedere al tuo archivio locale.",
+      ),
     );
   try {
     return await invoke<T>(name, payload);
@@ -34,7 +37,9 @@ export async function command<T>(
     throw new Error(
       typeof error === "string"
         ? error
-        : "Archivio non disponibile. Verifica spazio e permessi, poi riprova.",
+        : tr(
+            "Archivio non disponibile. Verifica spazio e permessi, poi riprova.",
+          ),
       { cause: error },
     );
   }
@@ -71,6 +76,6 @@ export const api = {
 
 export function errorMessage(error: unknown): string {
   return error instanceof Error
-    ? error.message
-    : "Operazione non riuscita. Riprova.";
+    ? translateError(error.message)
+    : tr("Operazione non riuscita. Riprova.");
 }

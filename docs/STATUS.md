@@ -259,3 +259,25 @@ Skill: accessibility, react-testing, impeccable per impostazioni e testo semanti
 Rust/SQLite/Tauri per preferenze locali atomiche, senza cambiare i dati salvati.
 Restano da completare integrazione di tutte le viste, trascrizioni, cataloghi,
 collaudo desktop e documentazione definitiva.
+### M10 — integrazione verificata, collaudo desktop in corso
+
+Collegate le viste ai cataloghi: 1429 messaggi candidati per ciascuna lingua
+naturale, fallback italiano, dizionari BlockNote locali, date/numeri locali,
+plurali della ricerca e font offline arabi/CJK. Le traduzioni sono bozze:
+corretti termini portoghesi rimasti in inglese; cinese normalizzato con OpenCC.
+Klingon/Rihannsu: solo lessico verificato e italiano per il resto; glossario con
+grafia romanizzata. Braille italiano a sei punti in sottoinsieme letterario,
+Morse e SGA Minecraft/Monocraft: etichette decorative con testo semantico,
+laboratorio reversibile e recupero italiano. Nessuna conversione degli appunti.
+
+Controlli eseguiti: 113 test frontend superati, TypeScript e lint superati.
+React Doctor corrente: 63 e nessun nuovo rilievo nelle modifiche; confronto
+ripetuto con lo stesso strumento sul commit M9 6ef5222: 61. I punteggi storici
+74/84 non sono comparabili con questa esecuzione/versione. Risolte le nuove
+segnalazioni su formatter e componenti, separando dialogo backup, immagini e job.
+Il dialogo backup usa ora dialog nativo; jsdom richiede uno shim nel solo test.
+Prime prove desktop: 13 lingue × 13 viste e axe EN/AR/JA senza violazioni rilevate.
+Da terminare: trascrizioni native, riavvio, ripristino, font/IME e build finale.
+Skill aggiunte alla verifica: systematic-debugging e react-doctor per regressioni;
+webapp-testing per ricognizione e prove browser, usando il runner Playwright JS
+esistente nel progetto. Revisione linguistica e prova assistiva reale non eseguite.

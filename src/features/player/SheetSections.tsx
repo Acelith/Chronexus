@@ -1,3 +1,5 @@
+import { Text } from "../../i18n/Text";
+import { tr } from "../../i18n/store";
 import { Flag, NumberField, TextField } from "./fields";
 import { sheetSections, type SheetDetails, type SheetField } from "./sheet";
 
@@ -32,8 +34,11 @@ export function SheetEditor({
   return (
     <div className="sheet-sections">
       <p className="muted">
-        Apri le sezioni che usi. Valori e unità di misura sono manuali; nessun
-        calcolo o conversione automatica.
+        <Text
+          source={
+            "Apri le sezioni che usi. Valori e unità di misura sono manuali; nessun calcolo o conversione automatica."
+          }
+        />
       </p>
       {sheetSections.map((section) => (
         <details key={section.title}>
@@ -55,18 +60,18 @@ export function SheetEditor({
           {section.title === "Combattimento e sensi" ? (
             <div className="player-fields">
               <Flag
-                label="Ispirazione"
+                label={tr("Ispirazione")}
                 value={value.inspiration}
                 onChange={(inspiration) => onChange({ ...value, inspiration })}
               />
               <NumberField
-                label="Successi contro morte"
+                label={tr("Successi contro morte")}
                 value={value.deathSuccesses}
                 max={3}
                 onChange={(n) => onChange({ ...value, deathSuccesses: n ?? 0 })}
               />
               <NumberField
-                label="Fallimenti contro morte"
+                label={tr("Fallimenti contro morte")}
                 value={value.deathFailures}
                 max={3}
                 onChange={(n) => onChange({ ...value, deathFailures: n ?? 0 })}
@@ -76,22 +81,28 @@ export function SheetEditor({
         </details>
       ))}
       <details>
-        <summary>Armi, attacchi e munizioni ({value.attacks.length})</summary>
+        <summary>
+          <Text source={"Armi, attacchi e munizioni ("} />
+          {value.attacks.length})
+        </summary>
         {value.attacks.map((attack, index) => (
           <fieldset className="sheet-attack" key={attack.id}>
-            <legend>Attacco {index + 1}</legend>
+            <legend>
+              <Text source={"Attacco "} />
+              {index + 1}
+            </legend>
             <div className="player-fields">
               {Object.entries({
-                name: "Arma o attacco",
-                bonus: "Bonus attacco",
-                damage: "Danno e tipo",
-                range: "Gittata",
-                weight: "Peso dell’arma",
-                ammunition: "Munizioni",
+                name: tr("Arma o attacco"),
+                bonus: tr("Bonus attacco"),
+                damage: tr("Danno e tipo"),
+                range: tr("Gittata"),
+                weight: tr("Peso dell’arma"),
+                ammunition: tr("Munizioni"),
               }).map(([key, label]) => (
                 <TextField
                   key={key}
-                  label={`${label} ${index + 1}`}
+                  label={tr("{0} {1}", [label, index + 1])}
                   value={attack[key as keyof typeof attack]}
                   required={key === "name"}
                   onChange={(v) =>
@@ -114,7 +125,8 @@ export function SheetEditor({
                 })
               }
             >
-              Rimuovi attacco {index + 1}
+              <Text source={"Rimuovi attacco "} />
+              {index + 1}
             </button>
           </fieldset>
         ))}
@@ -139,7 +151,7 @@ export function SheetEditor({
             })
           }
         >
-          Aggiungi attacco
+          <Text source={"Aggiungi attacco"} />
         </button>
       </details>
     </div>
@@ -169,33 +181,45 @@ export function SheetSummary({ value }: { value: SheetDetails }) {
           {!Object.keys(section.fields).some(
             (key) => value.fields[key as SheetField],
           ) ? (
-            <p className="muted">Nessun valore annotato in questa sezione.</p>
+            <p className="muted">
+              <Text source={"Nessun valore annotato in questa sezione."} />
+            </p>
           ) : null}
           {section.title === "Combattimento e sensi" ? (
             <p>
-              Ispirazione: {value.inspiration ? "sì" : "no"} · Tiri contro
-              morte: {value.deathSuccesses} successi / {value.deathFailures}{" "}
-              fallimenti
+              <Text source={"Ispirazione: "} />
+              {value.inspiration ? tr("sì") : "no"}{" "}
+              <Text source={" · Tiri contro morte: "} />
+              {value.deathSuccesses} <Text source={" successi / "} />
+              {value.deathFailures} <Text source={" fallimenti"} />
             </p>
           ) : null}
         </details>
       ))}
       <details open={value.attacks.length > 0}>
-        <summary>Armi e munizioni ({value.attacks.length})</summary>
+        <summary>
+          <Text source={"Armi e munizioni ("} />
+          {value.attacks.length})
+        </summary>
         {value.attacks.map((a) => (
           <article className="sheet-attack" key={a.id}>
             <h5>{a.name}</h5>
             <p>
-              Attacco {a.bonus || "—"} · Danno {a.damage || "—"} · Gittata{" "}
-              {a.range || "—"}
+              <Text source={"Attacco "} />
+              {a.bonus || "—"} <Text source={" · Danno "} />
+              {a.damage || "—"} <Text source={" · Gittata"} /> {a.range || "—"}
             </p>
             <p>
-              Peso {a.weight || "—"} · Munizioni {a.ammunition || "—"}
+              <Text source={"Peso "} />
+              {a.weight || "—"} <Text source={" · Munizioni "} />
+              {a.ammunition || "—"}
             </p>
           </article>
         ))}
         {!value.attacks.length ? (
-          <p className="muted">Nessun attacco annotato.</p>
+          <p className="muted">
+            <Text source={"Nessun attacco annotato."} />
+          </p>
         ) : null}
       </details>
     </div>

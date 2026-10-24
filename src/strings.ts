@@ -1,4 +1,5 @@
-export const it = {
+import { localizeLabels } from "./i18n/store";
+export const it = localizeLabels({
   appName: "Chronexus",
   tagline: "Il tuo diario di campagna",
   local: "Archivio personale · offline",
@@ -37,4 +38,4 @@ export const it = {
   unavailable:
     "Impossibile aprire gli appunti. Il documento originale è conservato.",
   copyHint: "Puoi copiare il documento originale qui sotto prima di riavviare.",
-};
+});

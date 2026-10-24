@@ -1,6 +1,7 @@
+import { localizeLabels } from "../../i18n/store";
 import type { CharacterInput, Stat } from "./api";
 
-export const sheetSections = [
+export const sheetSections = localizeLabels([
   {
     title: "Identità e background",
     fields: {
@@ -76,7 +77,7 @@ export const sheetSections = [
       spellCount: "Numero incantesimi preparati o conosciuti",
     },
   },
-] as const;
+] as const);
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type SheetField = KeysOfUnion<(typeof sheetSections)[number]["fields"]>;
 export interface Attack {
@@ -102,11 +103,11 @@ export const emptySheet = (): SheetDetails => ({
   deathFailures: 0,
   attacks: [],
 });
-export const trainingLabels = {
+export const trainingLabels = localizeLabels({
   none: "Nessuna",
   proficient: "Competenza",
   expert: "Maestria",
-} as const;
+} as const);
 const abilities = [
   "Forza",
   "Destrezza",

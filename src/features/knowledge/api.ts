@@ -1,6 +1,7 @@
+import { localizeLabels } from "../../i18n/store";
 import { command, type JournalDocument } from "../journal/api";
 
-export const pageKinds = {
+export const pageKinds = localizeLabels({
   npc: "Personaggio",
   place: "Luogo",
   faction: "Fazione",
@@ -9,7 +10,7 @@ export const pageKinds = {
   event: "Evento",
   lore: "Conoscenza",
   note: "Nota",
-} as const;
+} as const);
 export type PageKind = keyof typeof pageKinds;
 export interface PageMetadata {
   title: string;
