@@ -332,3 +332,21 @@ manipolazione, conservando le altre fonti pulite. Se tutte sono sospette, ferma
 la domanda e ne conserva le copie per revisione. Metriche tracciano esclusioni
 e possibile invio. Non è una classificazione infallibile; possibili falsi positivi.
 Nessun tool del modello, nessuna scrittura implicita nel mondo di gioco.
+
+
+## M8 — Adapter di campagna e copie GGUF derivate
+
+- Impostazioni AI per campagna (013), senza mutare le preferenze delle altre
+  campagne; migrazione conserva le scelte M7 già esplicite.
+- QLoRA locale su checkpoint Google Gemma 4 12B fissato, distinto dal retrieval.
+  Ricostruzione da snapshot corrente per evitare accumulo di note eliminate.
+- Ollama 0.40.10 non supporta più ADAPTER. Il worker applica l'adapter compatto
+  a copie GGUF, preservando i tensori non modificati e la base immutabile.
+  Gli adapter e la provenienza sono dati della campagna e vanno nei backup;
+  le copie di inferenza sono ricostruibili e restano fuori dagli archivi.
+- Nessuna attivazione implicita: validazione sintetica GPU/citazioni, selezione
+  esplicita e invalidazione se cambiano fonti o policy. Pesi aggiornati e loss
+  non dimostrano da soli una maggiore accuratezza delle risposte.
+- Backend Python isolato, non server aggiuntivo: worker distribuito con l'app,
+  caricamento offline senza remote code, annullamento e uscita se muore il parent.
+  Stato ed evidenze: docs/AI_TRAINING.md e docs/STATUS.md.

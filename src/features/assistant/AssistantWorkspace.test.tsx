@@ -1,9 +1,11 @@
+import { campaignAi } from "./campaignApi";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, test, vi } from "vitest";
 import AssistantWorkspace from "./AssistantWorkspace";
 import { assistantApi, type Turn, type Event } from "./api";
 import type { SaveGuard } from "../journal/Editor";
+vi.mock("./campaignApi", () => ({ campaignAi: { get: vi.fn() } }));
 vi.mock("./api", () => ({
   assistantApi: {
     settings: vi.fn(),
@@ -57,6 +59,9 @@ const turn: Turn = {
 };
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(campaignAi.get).mockResolvedValue({
+    profile: { edition: "5e-2014", ruleKeys: [] },
+  } as unknown as Awaited<ReturnType<typeof campaignAi.get>>);
   vi.mocked(assistantApi.settings).mockResolvedValue(settings);
   vi.mocked(assistantApi.history).mockResolvedValue([]);
   vi.mocked(assistantApi.rules).mockResolvedValue([]);

@@ -753,6 +753,7 @@ export function App() {
                       key={campaign.id}
                       campaignId={campaign.id}
                       name={campaign.name}
+                      register={register}
                     />
                   </Suspense>
                 ) : null}

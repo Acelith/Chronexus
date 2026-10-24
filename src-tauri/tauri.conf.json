@@ -25,6 +25,7 @@
     }
   },
   "bundle": {
+    "resources": { "../scripts/ai/train.py": "ai/train.py" },
     "active": true,
     "icon": [
       "icons/32x32.png",

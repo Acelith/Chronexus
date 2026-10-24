@@ -16,6 +16,7 @@ import {
 import { errorMessage } from "../journal/api";
 import type { SaveGuard } from "../journal/Editor";
 import type { SearchResult } from "../search/SearchPanel";
+import { campaignAi } from "./campaignApi";
 const statuses: Record<string, string> = {
   running: "In corso",
   complete: "Risposta conclusa · da verificare",
@@ -49,6 +50,7 @@ export default function AssistantWorkspace({
     [mode, setMode] = useState("campaign"),
     [edition, setEdition] = useState("5e-2014"),
     [rules, setRules] = useState<Rule[]>([]),
+    [approvedKeys, setApprovedKeys] = useState<string[]>([]),
     [keys, setKeys] = useState<string[]>([]),
     [sourceNotice, setSourceNotice] = useState(""),
     [confirmDelete, setConfirmDelete] = useState(false),
@@ -66,13 +68,17 @@ export default function AssistantWorkspace({
     void Promise.all([
       assistantApi.settings(campaignId),
       assistantApi.history(campaignId),
+      campaignAi.get(campaignId),
     ])
-      .then(([s, h]) => {
+      .then(([s, h, preferences]) => {
         if (active) {
           setSettings(s);
           setModel(s.model);
           setHistory(h);
           setMore(h.length === 50);
+          setEdition(preferences.profile.edition);
+          setApprovedKeys(preferences.profile.ruleKeys);
+          setKeys(preferences.profile.ruleKeys);
         }
       })
       .catch((e) => {
@@ -90,7 +96,7 @@ export default function AssistantWorkspace({
     void assistantApi
       .rules(edition)
       .then((rows) => {
-        if (active) setRules(rows);
+        if (active) setRules(rows.filter((r) => approvedKeys.includes(r.key)));
       })
       .catch((e) => {
         if (active) setError(errorMessage(e));
@@ -98,7 +104,7 @@ export default function AssistantWorkspace({
     return () => {
       active = false;
     };
-  }, [edition]);
+  }, [edition, approvedKeys]);
   useLayoutEffect(() => {
     register({
       dirty: () => job.current !== null,
@@ -376,6 +382,7 @@ export default function AssistantWorkspace({
                     Edizione
                     <select
                       aria-label="Edizione"
+                      disabled
                       value={edition}
                       onChange={(e) => {
                         setEdition(e.target.value);
@@ -388,8 +395,9 @@ export default function AssistantWorkspace({
                     </select>
                   </label>
                   <p>
-                    Scegli fino a sei voci già consultate nella Wiki. Non
-                    vengono mescolate edizioni.
+                    Edizione e fonti sono quelle approvate nelle Impostazioni
+                    della campagna. Puoi scegliere quali usare per questa
+                    domanda.
                   </p>
                   {rules.length === 0 ? (
                     <p>

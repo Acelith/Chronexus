@@ -4,6 +4,7 @@ import { beforeEach, expect, test, vi } from "vitest";
 import CampaignSettings from "./CampaignSettings";
 import { campaignAi, type Overview } from "./campaignApi";
 import { assistantApi } from "./api";
+vi.mock("./TrainingPanel", () => ({ default: () => null }));
 vi.mock("./campaignApi", () => ({
   campaignAi: { get: vi.fn(), save: vi.fn(), refresh: vi.fn() },
 }));

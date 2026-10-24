@@ -6,16 +6,15 @@ M7 operativa e collaudata su Windows: assistente locale con fonti, GPU e cronolo
 **Accettazione completa ancora parziale**: manca la prova con rete fisicamente
 scollegata/blocco firewall. La prova proxy e le connessioni loopback sono distinte.
 Restano inoltre M6 macOS/Linux/CI reali e revisione del wizard Windows interattivo.
-M8 autorizzata e in corso: impostazioni AI persistenti per campagna (schema 013),
-fonti/edizione/contesto e aggiornamento delle conoscenze implementati. Campagne
-esistenti conservano la scelta M7, nuove campagne partono disattivate. Nuovo menu
-Impostazioni della campagna; nessun contatto runtime al caricamento della pagina.
-Verifiche della prima parte: 66 test Rust e 57 frontend PASS, build frontend,
-lint e format PASS. Qualifica reale Gemma 4 12B e riaddestramento ancora in corso;
-nessuna inferenza/training Gemma dichiarata superata. M9 tiradadi pianificata.
-M9 specifica ora asset grafici originali generati in sviluppo, dadi medievali
-decorati ma leggibili, numeri renderizzati dall'app e verifica visiva/accessibile;
-nessun asset generato o tiradadi implementato in questo aggiornamento.
+M8 implementata su Windows, accettazione finale in corso: impostazioni per
+campagna (013), training QLoRA e adapter con backup (014). Gemma 4 12B e Qwen
+confrontati nell'app su quattro casi ciascuno, tutti con esito atteso. Training
+reale dal menu su quattro estratti sintetici: otto passaggi, pesi cambiati,
+11.705.906.688 byte di picco CUDA; merge/import, tre verifiche GPU/citazioni e
+attivazione esplicita riusciti. Nuovo appunto recuperato con citazione.
+Verifiche: 69 test Rust, 59 frontend e tre worker Python PASS; build frontend,
+lint/typecheck/format e clippy PASS. Annullamento nativo, riavvio e ricostruzione
+dell'adapter dal backup in verifica. M9 tiradadi resta pianificata.
 Nessun push autorizzato o eseguito.
 
 Il modello specifico D&D 1.5B è stato provato su GPU e scartato per qualità.
@@ -40,7 +39,7 @@ L'utente ha approvato esplicitamente Qwen3:4b-instruct multilingue con fonti loc
   e fonti; runtime/pesi esclusi. Nessuna scrittura implicita in note/grafo/scheda.
 - Gate prudente esclude estratti con possibili istruzioni al modello. Se tutti
   sono sospetti ferma la richiesta e conserva le copie per revisione.
-- Schema **012 additivo**; vecchi backup migrati in copia, nuovi richiedono versione
+- Schema M7 **012 additivo**; vecchi backup migrati in copia, nuovi richiedono versione
   compatibile. Identificatori legacy it.nodex.desktop/nodex.sqlite3/.nodex mantenuti.
 
 ## Verifiche effettive M7

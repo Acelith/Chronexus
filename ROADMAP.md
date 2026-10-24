@@ -155,15 +155,18 @@ GPU reale verificata e nessun cloud. Specifica, candidati e accettazione in
 
 ## M8 - Gemma 4 12B e riaddestramento locale per campagna
 
-**Stato: pianificata, non avviata.** Questa richiesta aggiorna soltanto la
-roadmap; non sostituisce il modello installato e non avvia addestramenti.
+**Stato: implementazione Windows in verifica finale, autorizzata il 24 ottobre
+2026.** Impostazioni per campagna, inferenza Gemma e QLoRA reale con adapter
+sono implementati e provati su dati sintetici; verifiche e limiti aggiornati in
+[docs/STATUS.md](docs/STATUS.md) e [docs/AI_TRAINING.md](docs/AI_TRAINING.md).
 
 ### M8.1 - Qualifica e sostituzione del modello
 
 - Target richiesto: **Gemma 4 12B**, in sostituzione di Qwen3:4b-instruct.
   Prima dell'implementazione verificare su fonti ufficiali esistenza, nome
   esatto, licenza, pesi disponibili e supporto dei runtime locali. Non sono
-  ancora attestati disponibilità, requisiti hardware o specializzazione D&D.
+  attestati tutti i target hardware; disponibilità e checkpoint Windows sono
+  verificati in AI_TRAINING.md. Non è un modello fine-tuned D&D.
 - Misurare inferenza e addestramento sulla GPU disponibile, con consumo VRAM,
   quantizzazione e qualità delle risposte italiane confrontati con M7. Non
   presumere che un modello eseguibile in inferenza sia anche addestrabile sulla
@@ -356,4 +359,4 @@ Questo è il checkpoint precedente all'autorizzazione M7. Stato aggiornato,
 verifiche e limiti: docs/STATUS.md. La prossima attività della roadmap dopo
 questa implementazione resta completare M6 sui runner macOS/Linux e il wizard
 interattivo Windows. M8 è ora definita sopra come attività futura per Gemma
-e riaddestramento locale per campagna; la sua implementazione non è avviata.
+e riaddestramento locale per campagna; il suo stato corrente è riportato sopra.

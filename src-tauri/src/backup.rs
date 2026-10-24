@@ -38,7 +38,7 @@ pub(crate) fn sync_dir(path: &Path) -> AppResult<()> {
 fn canonical_id(value: &str) -> bool {
     Uuid::parse_str(value).is_ok_and(|id| id.to_string() == value)
 }
-fn attachment_path(name: &str) -> bool {
+pub(crate) fn attachment_path(name: &str) -> bool {
     let parts: Vec<_> = name.split('/').collect();
     if parts.len() != 3 || parts[0] != "attachments" || !canonical_id(parts[1]) {
         return false;
@@ -283,6 +283,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if expected_version >= 13 {
         crate::assistant::campaign::validate_archive(&connection)?;
     }
+    if expected_version >= 14 {
+        crate::assistant::training::validate_archive(&connection)?;
+    }
     if expected_version >= 11 {
         crate::wiki::validate_archive(&connection)?;
     }
@@ -317,6 +320,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
 }
 
 fn attachments(directory: &Path, connection: &Connection) -> AppResult<Vec<(String, PathBuf)>> {
+    if version(connection)? >= 14 {
+        crate::assistant::training::validate_files(connection, directory)?;
+    }
     if version(connection)? >= 8 {
         crate::images::validate_files(connection, directory)?;
     }
@@ -550,6 +556,9 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
     }
     sync_dir(directory.path())?;
     let connection = validate_db(&directory.path().join(DB_ENTRY), manifest.schema_version)?;
+    if manifest.schema_version >= 14 {
+        crate::assistant::training::validate_files(&connection, directory.path())?;
+    }
     if manifest.schema_version >= 12
         && manifest.assistant_settings.as_ref()
             != Some(&crate::assistant::store::settings(&connection)?)

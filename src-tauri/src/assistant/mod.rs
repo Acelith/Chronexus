@@ -2,6 +2,7 @@ pub mod campaign;
 #[cfg(test)]
 mod campaign_tests;
 pub mod runtime;
+pub mod training;
 
 pub mod store;
 #[cfg(test)]

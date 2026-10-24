@@ -576,6 +576,7 @@ async fn configure_local_ai(
     if !multilingual_consent {
         return Err("Conferma il modello multilingue con fonti locali; il candidato D&D non ha superato la valutazione.".into());
     }
+    db.with(|c| assistant::training::model_owned(c, campaign_id.as_deref(), &model))?;
     assistant::runtime::check_model_name(&model)?;
     let client = assistant::runtime::client()?;
     let runtime = assistant::runtime::probe_at(&client, assistant::runtime::BASE).await?;
@@ -596,6 +597,31 @@ async fn configure_local_ai(
             assistant::store::set_settings(c, &settings)
         }
     })
+}
+#[tauri::command]
+fn get_training_overview(
+    db: tauri::State<Database>,
+    campaign_id: String,
+) -> AppResult<assistant::training::Overview> {
+    db.with_store(|s| assistant::training::overview(&s.connection, &s.root, &campaign_id))
+}
+#[tauri::command]
+async fn start_campaign_training(
+    app: tauri::AppHandle,
+    campaign_id: String,
+    id: String,
+    dataset_hash: String,
+    events: tauri::ipc::Channel<serde_json::Value>,
+) -> AppResult<assistant::training::Job> {
+    assistant::training::start(app, campaign_id, id, dataset_hash, events).await
+}
+#[tauri::command]
+async fn activate_campaign_training(
+    app: tauri::AppHandle,
+    campaign_id: String,
+    id: String,
+) -> AppResult<assistant::campaign::Profile> {
+    assistant::training::activate_with_restore(app, campaign_id, id).await
 }
 #[tauri::command]
 fn get_campaign_ai(
@@ -698,12 +724,13 @@ pub fn run() {
                 std::fs::create_dir_all(&directory)?;
                 let store = backup::Store::open(&directory).map_err(std::io::Error::other)?;
                 assistant::store::recover(&store.connection).map_err(std::io::Error::other)?;
+                assistant::training::recover(&store.connection).map_err(std::io::Error::other)?;
                 Ok(Mutex::new(store))
             })().map_err(|error| format!("Archivio non disponibile: {error}. Verifica spazio e permessi della cartella dati e riavvia Chronexus. Se usi una versione precedente, torna a quella più recente."));
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
+        .invoke_handler(tauri::generate_handler![get_training_overview,start_campaign_training,activate_campaign_training,get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
 }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { assistantApi, type Runtime, type Rule } from "./api";
 import { campaignAi, type Overview, type Profile } from "./campaignApi";
+import TrainingPanel from "./TrainingPanel";
+import type { SaveGuard } from "../journal/Editor";
 import { errorMessage } from "../journal/api";
 
 const kinds: Record<string, string> = {
@@ -14,9 +16,11 @@ const kinds: Record<string, string> = {
 export default function CampaignSettings({
   campaignId,
   name,
+  register,
 }: {
   campaignId: string;
   name: string;
+  register?: (g: SaveGuard | null) => void;
 }) {
   const [view, setView] = useState<Overview | null>(null);
   const [draft, setDraft] = useState<Profile | null>(null);
@@ -24,6 +28,7 @@ export default function CampaignSettings({
   const [model, setModel] = useState("");
   const [consent, setConsent] = useState(false);
   const [rules, setRules] = useState<Rule[]>([]);
+  const [trainingActive, setTrainingActive] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -102,7 +107,13 @@ export default function CampaignSettings({
         <p role="status">Caricamento impostazioni…</p>
       ) : (
         <>
-          <fieldset disabled={busy}>
+          {view.sourceError && (
+            <p role="alert">
+              {view.sourceError} Riduci i tipi di fonti incluse e salva le
+              preferenze.
+            </p>
+          )}
+          <fieldset disabled={busy || trainingActive}>
             <legend>AI locale · modello</legend>
             <p>
               {draft.settings.enabled ? "Attiva" : "Disattivata"} ·{" "}
@@ -200,7 +211,7 @@ export default function CampaignSettings({
               });
             }}
           >
-            <fieldset disabled={busy}>
+            <fieldset disabled={busy || trainingActive}>
               <legend>Fonti e risorse</legend>
               <label>
                 Edizione D&D
@@ -299,7 +310,7 @@ export default function CampaignSettings({
               )}
             </fieldset>
           </form>
-          <fieldset disabled={busy || dirty}>
+          <fieldset disabled={busy || dirty || trainingActive}>
             <legend>Conoscenze locali</legend>
             <p>
               Ultimo aggiornamento:{" "}
@@ -356,8 +367,19 @@ export default function CampaignSettings({
               )}
             </details>
           </fieldset>
+          <TrainingPanel
+            campaignId={campaignId}
+            disabled={busy || dirty || trainingActive}
+            version={JSON.stringify(view.profile)}
+            register={register}
+            onActive={setTrainingActive}
+            onActivated={reload}
+          />
           {draft.excludedIds.length > 0 && (
-            <button disabled={busy} onClick={() => patch({ excludedIds: [] })}>
+            <button
+              disabled={busy || trainingActive}
+              onClick={() => patch({ excludedIds: [] })}
+            >
               Riammetti le fonti escluse ({draft.excludedIds.length})
             </button>
           )}

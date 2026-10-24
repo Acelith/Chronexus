@@ -137,15 +137,22 @@ pub fn allowed(p: &Profile, s: &Source) -> bool {
 }
 pub fn snapshot(c: &Connection, campaign: &str, p: &Profile) -> AppResult<Vec<Source>> {
     require_campaign(c, campaign)?;
-    let mut q=c.prepare("SELECT kind,source_id,NULLIF(block_id,'') FROM search_documents WHERE campaign_id=?1 AND (block_id<>'' OR kind NOT IN ('page','session')) ORDER BY kind,source_id,block_id LIMIT 4001").map_err(storage)?;
+    let mut q=c.prepare("SELECT kind,source_id,NULLIF(block_id,'') FROM search_documents WHERE campaign_id=?1 AND kind IN (SELECT value FROM json_each(?2)) AND source_id NOT IN (SELECT value FROM json_each(?3)) AND (block_id<>'' OR kind NOT IN ('page','session')) ORDER BY kind,source_id,block_id LIMIT 4001").map_err(storage)?;
     let rows = q
-        .query_map([campaign], |r| {
-            Ok((
-                r.get::<_, String>(0)?,
-                r.get::<_, String>(1)?,
-                r.get::<_, Option<String>>(2)?,
-            ))
-        })
+        .query_map(
+            params![
+                campaign,
+                serde_json::to_string(&p.include_kinds).map_err(|_| "Tipi fonte non validi.")?,
+                serde_json::to_string(&p.excluded_ids).map_err(|_| "Esclusioni non valide.")?
+            ],
+            |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, Option<String>>(2)?,
+                ))
+            },
+        )
         .map_err(storage)?
         .collect::<rusqlite::Result<Vec<_>>>()
         .map_err(storage)?;
@@ -195,10 +202,24 @@ pub struct Overview {
     pub added: usize,
     pub changed: usize,
     pub removed: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_error: Option<String>,
 }
 pub fn overview(c: &Connection, campaign: &str) -> AppResult<Overview> {
     let profile = get(c, campaign)?;
-    let sources = snapshot(c, campaign, &profile)?;
+    let sources = match snapshot(c, campaign, &profile) {
+        Ok(s) => s,
+        Err(error) => {
+            return Ok(Overview {
+                profile,
+                sources: vec![],
+                added: 0,
+                changed: 0,
+                removed: 0,
+                source_error: Some(error),
+            })
+        }
+    };
     let now = stamps(&sources);
     let added = now
         .iter()
@@ -224,11 +245,15 @@ pub fn overview(c: &Connection, campaign: &str) -> AppResult<Overview> {
         added,
         changed,
         removed,
+        source_error: None,
     })
 }
 pub fn refresh(c: &Connection, campaign: &str) -> AppResult<Overview> {
     crate::search::rebuild(c)?;
     let mut view = overview(c, campaign)?;
+    if let Some(error) = view.source_error {
+        return Err(error);
+    }
     view.profile.manifest = stamps(&view.sources);
     view.profile.indexed_at = Some(
         c.query_row("SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now')", [], |r| {

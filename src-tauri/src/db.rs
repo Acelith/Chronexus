@@ -1,7 +1,7 @@
 use rusqlite::Connection;
 use std::{path::Path, time::Duration};
 
-pub const MIGRATIONS: [&str; 13] = [
+pub const MIGRATIONS: [&str; 14] = [
     include_str!("../migrations/001_foundation.sql"),
     include_str!("../migrations/002_journal.sql"),
     include_str!("../migrations/003_knowledge.sql"),
@@ -15,6 +15,7 @@ pub const MIGRATIONS: [&str; 13] = [
     include_str!("../migrations/011_wiki.sql"),
     include_str!("../migrations/012_assistant.sql"),
     include_str!("../migrations/013_campaign_ai.sql"),
+    include_str!("../migrations/014_training.sql"),
 ];
 pub const LATEST_SCHEMA: i64 = MIGRATIONS.len() as i64;
 

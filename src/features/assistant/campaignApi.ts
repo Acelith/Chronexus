@@ -21,6 +21,7 @@ export interface Overview {
   added: number;
   changed: number;
   removed: number;
+  sourceError?: string;
 }
 export const campaignAi = {
   get: (campaignId: string) =>

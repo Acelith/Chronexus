@@ -1,5 +1,9 @@
 # M7 — Assistente D&D locale sulla GPU
 
+> M8: Gemma 4 12B, impostazioni per campagna e training QLoRA sono documentati
+> in [AI_TRAINING.md](AI_TRAINING.md). Il profilo M7 Qwen descritto qui resta
+> disponibile per il rollback; modello e fonti sono ora scelti per campagna.
+
 Stato: funzioni implementate e collaudate su Windows; accettazione fisica offline
 e piattaforme aggiuntive ancora da verificare. Configurazione disattivata
 inizialmente; l'app rimane utilizzabile senza Ollama. Risultati aggiornati in
