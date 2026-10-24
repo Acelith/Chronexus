@@ -4,6 +4,7 @@ export function useDiceTimeline(
   animate: boolean,
   reduced: boolean,
   onDone: () => void,
+  special = false,
 ) {
   const [phase, setPhase] = useState<Phase>(
     animate && !reduced ? "rolling" : "finished",
@@ -24,7 +25,7 @@ export function useDiceTimeline(
     const landing = setTimeout(() => setPhase("landing"), 1000),
       burn = setTimeout(() => setPhase("burn"), 1150),
       reveal = setTimeout(() => setPhase("reveal"), 1650),
-      complete = setTimeout(finish, 2500);
+      complete = setTimeout(finish, special ? 3600 : 2500);
     cancel.current = () => {
       clearTimeout(landing);
       clearTimeout(burn);
@@ -37,6 +38,6 @@ export function useDiceTimeline(
       clearTimeout(reveal);
       clearTimeout(complete);
     };
-  }, [animate, reduced, finish]);
+  }, [animate, reduced, finish, special]);
   return { phase, finish };
 }

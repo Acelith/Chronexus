@@ -115,3 +115,19 @@ Valori intermedi e tiri multipli/misti non attivano questi effetti speciali.
 Risultati salvati, storico e retry restano invariati; skip e movimento ridotto
 obbligatori. Requisiti e matrice di verifica in ROADMAP.md. Nessuna animazione
 nuova realizzata in questa modifica documentale.
+
+
+## M12 — implementazione React in verifica finale
+
+Esiti speciali esclusivamente per un dado: d4/6/8/10/12/20 massimo celebra,
+1 minaccia; d100 1 celebra e 100 minaccia. Due attori SVG originali bronzei,
+ali/coda articolate, fiato di fuoco e volto frontale con avvicinamento nella
+minaccia. Gli effetti iniziano alla rivelazione del risultato già salvato;
+nessuna anticipazione prima della fase reveal. Durata ordinaria 2,5 s,
+estremi 3,6 s; skip, esito statico con movimento ridotto e stop in scheda nascosta.
+Replay locale dello stesso tiro, nessun nuovo valore/RPC/storico o modifica alla
+selezione. Geometria fisica LTR indipendente dalla lingua della navigazione.
+22 test del dominio/React PASS, typecheck/lint PASS; collaudo visivo desktop e
+pacchetti attesi dopo M13, come richiesto dall’utente. Nessuna pubblicazione.
+Skill: frontend-design/impeccable per feedback e attori coerenti con il tema,
+accessibility per skip/movimento ridotto, react-testing/react-doctor per verifiche.

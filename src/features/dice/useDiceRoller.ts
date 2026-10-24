@@ -15,7 +15,8 @@ export function useDiceRoller(
     [current, setCurrent] = useState<Roll | null>(null),
     [pending, setPending] = useState(false),
     [animating, setAnimating] = useState(false),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [playback, setPlayback] = useState(0);
   const request = useRef<{ id: string; composition: string } | null>(null),
     pendingTask = useRef<Promise<void> | null>(null),
     inAnimation = useRef(false);
@@ -52,6 +53,7 @@ export function useDiceRoller(
         setQuantities(emptyQuantities());
         request.current = null;
         setCurrent(saved);
+        setPlayback((value) => value + 1);
         inAnimation.current = true;
         setAnimating(true);
         onSaved(saved);
@@ -73,11 +75,20 @@ export function useDiceRoller(
     current,
     pending,
     animating,
+    playback,
+    replay: () => {
+      if (!current || pendingTask.current || inAnimation.current || busy)
+        return;
+      setPlayback((value) => value + 1);
+      inAnimation.current = true;
+      setAnimating(true);
+    },
     error,
     done,
     submit,
     review: (roll: Roll) => {
       setCurrent(roll);
+      setPlayback((value) => value + 1);
       done();
     },
   };

@@ -262,3 +262,82 @@ test("il tiro è registrato ma lo storico non anticipa il risultato prima della 
     /Totale 136/,
   );
 });
+
+test("i due draghi reagiscono soltanto alla rivelazione, con sequenza finita e skip", () => {
+  motion(false);
+  vi.useFakeTimers();
+  const done = vi.fn();
+  const extreme: Roll = {
+    ...saved,
+    groups: [{ sides: 100, quantity: 1, values: [1], subtotal: 1 }],
+    total: 1,
+  };
+  const view = render(<DiceScene roll={extreme} animate onDone={done} />);
+  expect(document.querySelector(".living-dragons")).toBeNull();
+  expect(document.querySelector(".dice-scene")).toHaveAttribute(
+    "data-outcome",
+    "pending",
+  );
+  act(() => vi.advanceTimersByTime(1650));
+  expect(document.querySelector(".dice-scene")).toHaveAttribute(
+    "data-outcome",
+    "celebration",
+  );
+  expect(document.querySelectorAll(".living-dragon")).toHaveLength(2);
+  expect(screen.getByText(t.best)).toBeInTheDocument();
+  act(() => vi.advanceTimersByTime(1950));
+  expect(done).toHaveBeenCalledTimes(1);
+  expect(document.querySelector(".living-dragons")).toBeNull();
+  view.unmount();
+  render(
+    <DiceScene
+      roll={{
+        ...extreme,
+        total: 100,
+        groups: [{ sides: 100, quantity: 1, values: [100], subtotal: 100 }],
+      }}
+      animate
+      onDone={done}
+    />,
+  );
+  act(() => vi.advanceTimersByTime(1650));
+  expect(document.querySelector(".dragons-threat")).not.toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: t.skip }));
+  act(() => vi.advanceTimersByTime(4000));
+  expect(document.querySelector(".living-dragons")).toBeNull();
+  expect(done).toHaveBeenCalledTimes(2);
+});
+test("movimento ridotto mantiene esito statico e replay non invoca un nuovo tiro", async () => {
+  motion(true);
+  vi.useFakeTimers();
+  const done = vi.fn();
+  const extreme: Roll = {
+    ...saved,
+    groups: [{ sides: 20, quantity: 1, values: [1], subtotal: 1 }],
+    total: 1,
+  };
+  const view = render(<DiceScene roll={extreme} animate onDone={done} />);
+  expect(screen.getByText(t.worst)).toBeInTheDocument();
+  expect(document.querySelector(".living-dragons")).toBeNull();
+  act(() => vi.advanceTimersByTime(0));
+  view.unmount();
+  motion(false);
+  render(<DiceWorkspace campaignId="campaign" register={vi.fn()} />);
+  await act(async () => {});
+  fireEvent.change(screen.getByLabelText(t.quantity(6)), {
+    target: { value: "3" },
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: t.roll }));
+  });
+  act(() => vi.advanceTimersByTime(2500));
+  expect(diceApi.roll).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole("button", { name: t.replay }));
+  expect(screen.getByText(t.rolling)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: t.skip }));
+  expect(diceApi.roll).toHaveBeenCalledTimes(1);
+  expect(document.querySelector(".dice-scene")).toHaveAttribute(
+    "data-roll-id",
+    saved.id,
+  );
+});

@@ -6,7 +6,8 @@ Ultima istruzione: realizzare tutte e tre le milestone, poi compilare e pubblica
 su Forgegit soltanto alla fine. Il precedente divieto della pianificazione è
 superato. Ordine operativo: M12 animazioni, M13 alfabeti, M11 distribuzione.
 Elfico confermato come Espruar. Lavoro iniziale pulito; skill pertinenti lette.
-Nessun nuovo test o build ancora eseguito, nessuna pubblicazione effettuata.
+M12: logica/attori/replay implementati; 22 test React/dominio PASS, typecheck/lint
+PASS. Collaudo visivo/build finale dopo M13. Nessuna pubblicazione effettuata.
 Le sezioni seguenti sono checkpoint precedenti.
 
 ## M10 — operativa su Windows; accettazione linguistica e assistiva aperta

@@ -24,6 +24,8 @@ export default function DiceWorkspace({
     current,
     pending,
     animating,
+    playback,
+    replay,
     error,
     done,
     submit,
@@ -66,7 +68,7 @@ export default function DiceWorkspace({
           {current ? (
             <>
               <DiceScene
-                key={current.id}
+                key={`${current.id}:${playback}`}
                 roll={current}
                 animate={animating}
                 onDone={done}
@@ -74,6 +76,15 @@ export default function DiceWorkspace({
               <p className="editor-hint">
                 {t.selectionReset} {t.animationHint}
               </p>
+              {!animating ? (
+                <button
+                  type="button"
+                  disabled={busy || pending}
+                  onClick={replay}
+                >
+                  {t.replay}
+                </button>
+              ) : null}
               {!animating ? (
                 <details className="dice-current-detail">
                   <summary>

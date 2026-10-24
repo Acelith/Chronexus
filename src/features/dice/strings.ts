@@ -53,4 +53,7 @@ export const diceText = localizeLabels({
     "L’animazione mostra il tiro già salvato. Cambiare vista non elimina il risultato.",
   details: "Dettaglio del risultato",
   zero: "Azzera selezione",
+  replay: "Rivedi animazione del tiro salvato",
+  best: "Esito migliore del dado singolo · i draghi festeggiano",
+  worst: "Esito peggiore del dado singolo · i draghi ti sfidano",
 });
