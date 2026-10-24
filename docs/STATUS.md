@@ -1,5 +1,34 @@
 # Stato Chronexus — 24 ottobre 2026
 
+## Editor visuale/Markdown e collaudo finale — 24 ottobre 2026
+
+- Barra persistente con stili, titoli, citazioni, elenchi/attività, evidenziazione,
+  allineamento, link esterni e pagine Codex, annulla/ripeti. Modalità Markdown
+  direttamente modificabile, applicazione, annullamento e salvataggio espliciti.
+- Guard di navigazione/chiusura include il sorgente. Sintassi non supportata o
+  link non validi mantengono la bozza; UUID e ID/fonti dei blocchi invariati
+  conservati. Formati visuali dei blocchi invariati conservati nel round trip.
+- Test: 73 frontend PASS; baseline 69 Rust PASS dalla nuova posizione (nessuna
+  modifica Rust/schema). Typecheck, lint, format e build frontend PASS.
+  Build desktop Windows da D PASS; ricostruzione finale dopo il refactoring
+  verificata nel commit di consolidamento. Warning Vite sul chunk editor ancora presente.
+- Prova desktop ripetibile `scripts/qa/gui-editor.mjs check`: PASS su archivio
+  sintetico isolato; scroll a tre risoluzioni, formati, menzioni UUID, errori
+  bloccanti e menu impostazioni. Chiusura ordinata e nuova apertura dello stesso
+  archivio: fase `restart` PASS, contenuti e formati recuperati da SQLite.
+- Riparazione AI: Python della venv su D/CUDA disponibili; Ollama avviato da D,
+  Gemma 4 12B risponde «OK» con VRAM rilevata. Nessun nuovo training eseguito.
+- Guide: `docs/EDITOR.md`; schema JSON v1 e SQLite 014 invariati; nessuna
+  campagna personale modificata. Il Markdown non rappresenta tutti i formati Word:
+  tabelle, HTML, immagini e blocchi di codice sono esplicitamente rifiutati.
+- Skill: react-testing, systematic-debugging, react-doctor per controlli e correzioni;
+  impeccable per il detector finale (nessun pattern segnalato dopo la correzione).
+- Commit GUI: d5b07a1; disposizione grafo: f8d6b68; spostamento: 313e056.
+  Editor e roadmap multilingua nei commit successivi. Nessun push.
+- React Doctor finale sui nuovi file inclusi: 74/100, invariato rispetto alla
+  prima scansione; un avviso residuo di complessità nel componente editor.
+  Nessun errore lint/types; detector impeccable finale: array vuoto.
+
 ## GUI di riferimento e navigazione — 24 ottobre 2026
 
 - Ripresa la composizione allegata: cuoio scuro, pergamena, font locali OFL,
@@ -20,7 +49,7 @@
   indipendenti e font locali caricati. Screenshot e rapporti in .tools/ui-refresh/.
 - Skill: impeccable per confronto e rilevamento finale; imagegen per materiali e
   incisione offline; react-testing per regressioni; react-doctor per diagnosi React.
-  Refactoring dell’editor e milestone multilingua ancora in consolidamento.
+  Editor consolidato nella sezione precedente; multilingua pianificato come M10.
 
 ## Riparazione dopo spostamento su D — 24 ottobre 2026
 

@@ -1,3 +1,4 @@
+import { EditorSaveBar, EditorModeBar } from "./EditorChrome";
 import {
   Component,
   useContext,
@@ -6,12 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  BlockNoteSchema,
-  defaultBlockSpecs,
-  defaultInlineContentSpecs,
-  type PartialBlock,
-} from "@blocknote/core";
+import { type PartialBlock } from "@blocknote/core";
 import { it as dictionary } from "@blocknote/core/locales";
 import {
   SuggestionMenuController,
@@ -23,25 +19,18 @@ import "@blocknote/mantine/style.css";
 import { api, type JournalDocument, type Session } from "./api";
 import { Autosave, type SaveState } from "./autosave";
 import { it } from "../../strings";
-import { PageMention } from "../knowledge/Mention";
+import {
+  markdownBlocks,
+  markdownForParser,
+  markdownForSource,
+  restoreMarkdownBlocks,
+  validateMarkdown,
+} from "./markdown";
+import { schema } from "./schema";
+import WordToolbar from "./WordToolbar";
 import { KnowledgeContext } from "../knowledge/context";
 import { knowledgeApi, pageKinds, type KnowledgePage } from "../knowledge/api";
 import { canCreatePage, matchingPages } from "../knowledge/links";
-
-const schema = BlockNoteSchema.create({
-  inlineContentSpecs: {
-    ...defaultInlineContentSpecs,
-    pageMention: PageMention,
-  },
-  blockSpecs: {
-    paragraph: defaultBlockSpecs.paragraph,
-    heading: defaultBlockSpecs.heading,
-    bulletListItem: defaultBlockSpecs.bulletListItem,
-    numberedListItem: defaultBlockSpecs.numberedListItem,
-    checkListItem: defaultBlockSpecs.checkListItem,
-    quote: defaultBlockSpecs.quote,
-  },
-});
 
 export type SaveGuard = { flush: () => Promise<void>; dirty: () => boolean };
 type Props = {
@@ -60,6 +49,12 @@ function NoteEditor(props: Props) {
   const linkingTask = useRef<Promise<void> | null>(null);
   const [linking, setLinking] = useState(false);
   const [linkError, setLinkError] = useState("");
+  const [mode, setMode] = useState<"visual" | "markdown">("visual");
+  const [source, setSource] = useState("");
+  const [sourceDirty, setSourceDirty] = useState(false);
+  const sourceDraft = useRef({ text: "", original: "", dirty: false });
+  const applySource = useRef<() => void>(() => {});
+  const [sourceError, setSourceError] = useState("");
   if (
     session.document.version !== 1 ||
     !Array.isArray(session.document.blocks) ||
@@ -96,9 +91,13 @@ function NoteEditor(props: Props) {
     register({
       flush: async () => {
         await linkingTask.current;
+        applySource.current();
         await saver.flush();
       },
-      dirty: () => saver.dirty || linkingTask.current !== null,
+      dirty: () =>
+        saver.dirty ||
+        sourceDraft.current.dirty ||
+        linkingTask.current !== null,
     });
     return () => {
       register(null);
@@ -128,6 +127,62 @@ function NoteEditor(props: Props) {
       stop();
     };
   }, [editor, focusBlock]);
+
+  function applyMarkdown() {
+    if (!sourceDraft.current.dirty) return;
+    try {
+      validateMarkdown(sourceDraft.current.text);
+      const parsed = editor.tryParseMarkdownToBlocks(
+        markdownForParser(sourceDraft.current.text),
+      );
+      const restored = restoreMarkdownBlocks(
+        parsed,
+        editor.document,
+      ) as PartialBlock<typeof schema.blockSchema>[];
+      editor.replaceBlocks(
+        editor.document,
+        restored.length ? restored : [{ type: "paragraph", content: [] }],
+      );
+      saver.change({ ...session.document, blocks: editor.document });
+      sourceDraft.current.dirty = false;
+      setSourceDirty(false);
+      sourceDraft.current.original = sourceDraft.current.text;
+      setSourceError("");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Markdown non valido. Il testo è conservato.";
+      setSourceError(message);
+      throw Error(message, { cause: error });
+    }
+  }
+  useEffect(() => {
+    applySource.current = applyMarkdown;
+  });
+  function openMarkdown() {
+    setSourceDirty(false);
+    const text = markdownForSource(
+      editor.blocksToMarkdownLossy(
+        markdownBlocks(editor.document) as PartialBlock<
+          typeof schema.blockSchema
+        >[],
+      ),
+    );
+    sourceDraft.current = { text, original: text, dirty: false };
+    setSource(text);
+    setSourceError("");
+    setMode("markdown");
+  }
+  function showVisual() {
+    try {
+      applyMarkdown();
+      setMode("visual");
+    } catch {
+      /* error shown without losing source */
+    }
+  }
+  const blocked = linking || props.disabled;
 
   function insertPage(page: KnowledgePage) {
     editor.insertInlineContent([
@@ -179,28 +234,21 @@ function NoteEditor(props: Props) {
     return items;
   }
 
-  const status = {
-    saved: it.saved,
-    dirty: it.dirty,
-    saving: it.saving,
-    error: it.failed,
-  }[state.kind];
   return (
     <>
-      <div className="save-bar">
-        <span role="status" className={`save-state ${state.kind}`}>
-          {status}
-        </span>
-        <button
-          type="button"
-          onClick={() => {
+      <EditorSaveBar
+        state={state}
+        sourceDirty={sourceDirty}
+        blocked={!!props.disabled}
+        onSave={() => {
+          try {
+            applyMarkdown();
             void saver.flush().catch(() => {});
-          }}
-          disabled={state.kind === "saved" || state.kind === "saving"}
-        >
-          {state.kind === "error" ? it.retry : it.saveNow}
-        </button>
-      </div>
+          } catch {
+            /* error shown */
+          }
+        }}
+      />
       {state.kind === "error" ? (
         <p className="error" role="alert">
           {state.message}
@@ -212,8 +260,59 @@ function NoteEditor(props: Props) {
         </p>
       ) : null}
       {linking ? <p role="status">Creazione pagina…</p> : null}
+      <EditorModeBar
+        mode={mode}
+        disabled={!!blocked}
+        dirty={sourceDirty}
+        onVisual={showVisual}
+        onMarkdown={openMarkdown}
+        onDiscard={() => {
+          sourceDraft.current.dirty = false;
+          setSourceDirty(false);
+          setSourceError("");
+          setMode("visual");
+        }}
+      >
+        <WordToolbar
+          editor={editor}
+          blocked={!!blocked}
+          pages={links.pages}
+          insertPage={insertPage}
+        />
+      </EditorModeBar>
+      {sourceError ? (
+        <p role="alert" className="error">
+          {sourceError}
+        </p>
+      ) : null}
+      {mode === "markdown" ? (
+        <>
+          <p className="editor-hint">
+            Modifica titoli, elenchi, attività, citazioni, grassetto, corsivo e
+            link. I collegamenti al Codex conservano l’UUID. Colori,
+            sottolineatura e allineamento sono formati visuali: il Markdown
+            standard non li rappresenta: restano nei blocchi non modificati.
+            Tabelle, immagini e HTML non vengono convertiti.
+          </p>
+          <textarea
+            className="markdown-source"
+            aria-label="Codice Markdown"
+            spellCheck={false}
+            value={source}
+            disabled={blocked}
+            onChange={(e) => {
+              setSource(e.target.value);
+              sourceDraft.current.text = e.target.value;
+              sourceDraft.current.dirty =
+                e.target.value !== sourceDraft.current.original;
+              setSourceDirty(sourceDraft.current.dirty);
+            }}
+          />
+        </>
+      ) : null}
       <div
         className="note-sheet"
+        hidden={mode === "markdown"}
         aria-label={it.notes}
         data-focused-source={focusBlock}
       >
@@ -224,7 +323,7 @@ function NoteEditor(props: Props) {
           editor={editor}
           theme="light"
           emojiPicker={false}
-          editable={!linking && !props.disabled}
+          editable={!blocked && mode === "visual"}
           onChange={() =>
             saver.change({
               ...session.document,

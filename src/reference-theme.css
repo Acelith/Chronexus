@@ -1236,3 +1236,20 @@ aside.graph-detail {
   flex: 0 0 42%;
   overflow-wrap: normal;
 }
+
+.shell > main::after,
+.shell > aside::after,
+.graph-canvas {
+  background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20fill%3D%22none%22%20stroke%3D%22%23a88a52%22%20stroke-width%3D%22.9%22%3E%3Cg%20transform%3D%22rotate%280%2016%2016%29%22%3E%3Cpath%20d%3D%22M1%2031V1h30M5%2024V5h19M1%201l23%2023M4%204l2%2012%209-9%201%2014%208-7M5%2025l4-9M25%205l-9%204%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20fill%3D%22none%22%20stroke%3D%22%23a88a52%22%20stroke-width%3D%22.9%22%3E%3Cg%20transform%3D%22rotate%2890%2016%2016%29%22%3E%3Cpath%20d%3D%22M1%2031V1h30M5%2024V5h19M1%201l23%2023M4%204l2%2012%209-9%201%2014%208-7M5%2025l4-9M25%205l-9%204%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20fill%3D%22none%22%20stroke%3D%22%23a88a52%22%20stroke-width%3D%22.9%22%3E%3Cg%20transform%3D%22rotate%28270%2016%2016%29%22%3E%3Cpath%20d%3D%22M1%2031V1h30M5%2024V5h19M1%201l23%2023M4%204l2%2012%209-9%201%2014%208-7M5%2025l4-9M25%205l-9%204%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20fill%3D%22none%22%20stroke%3D%22%23a88a52%22%20stroke-width%3D%22.9%22%3E%3Cg%20transform%3D%22rotate%28180%2016%2016%29%22%3E%3Cpath%20d%3D%22M1%2031V1h30M5%2024V5h19M1%201l23%2023M4%204l2%2012%209-9%201%2014%208-7M5%2025l4-9M25%205l-9%204%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  background-position:
+    left top,
+    right top,
+    left bottom,
+    right bottom;
+  background-repeat: no-repeat;
+  background-size: 28px 28px;
+}

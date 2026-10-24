@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { command } from "../journal/api";
 import type { Attachment } from "../images/ImageGallery";
 import { Icon } from "../../components/Ornaments";
+const kindIcons: Record<string, string> = {
+  place: "castle",
+  npc: "helmet",
+  session: "scroll",
+  faction: "party",
+};
 export default function NodePortrait({
   campaignId,
   pageId,
@@ -40,19 +46,7 @@ export default function NodePortrait({
       {portrait.pageId === pageId && portrait.url ? (
         <img src={portrait.url} alt="Ritratto allegato alla voce" />
       ) : (
-        <Icon
-          name={
-            kind === "place"
-              ? "castle"
-              : kind === "npc"
-                ? "helmet"
-                : kind === "session"
-                  ? "scroll"
-                  : kind === "faction"
-                    ? "party"
-                    : "star"
-          }
-        />
+        <Icon name={kindIcons[kind] ?? "star"} />
       )}
     </div>
   );

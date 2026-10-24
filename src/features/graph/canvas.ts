@@ -1,4 +1,4 @@
-import { iconPaths } from "../../components/Ornaments";
+import { iconPaths } from "../../components/iconPaths";
 import type { ElementDefinition, StylesheetJson } from "cytoscape";
 import { type GraphData } from "./api";
 export function graphElements(data: GraphData): ElementDefinition[] {
