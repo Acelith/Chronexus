@@ -72,7 +72,7 @@ pub fn set_settings(c: &Connection, s: &Settings) -> AppResult<Settings> {
     .map_err(storage)?;
     settings(c)
 }
-fn validate_settings(s: &Settings) -> AppResult<()> {
+pub(crate) fn validate_settings(s: &Settings) -> AppResult<()> {
     if s.model.len() > 160 || s.digest.len() > 64 {
         return Err("Configurazione AI oltre i limiti.".into());
     }

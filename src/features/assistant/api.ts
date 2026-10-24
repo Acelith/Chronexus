@@ -58,13 +58,20 @@ export interface Event {
   text: string;
 }
 export const assistantApi = {
-  settings: () => command<Settings>("get_ai_settings"),
+  settings: (campaignId?: string) =>
+    command<Settings>("get_ai_settings", { campaignId }),
   probe: () => command<Runtime>("probe_local_ai"),
-  configure: (enabled: boolean, model: string, multilingualConsent: boolean) =>
+  configure: (
+    enabled: boolean,
+    model: string,
+    multilingualConsent: boolean,
+    campaignId?: string,
+  ) =>
     command<Settings>("configure_local_ai", {
       enabled,
       model,
       multilingualConsent,
+      campaignId,
     }),
   history: (campaignId: string, offset = 0) =>
     command<Turn[]>("list_ai_history", { campaignId, offset }),

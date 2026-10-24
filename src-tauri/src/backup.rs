@@ -280,6 +280,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if expected_version >= 12 {
         crate::assistant::store::validate_archive(&connection)?;
     }
+    if expected_version >= 13 {
+        crate::assistant::campaign::validate_archive(&connection)?;
+    }
     if expected_version >= 11 {
         crate::wiki::validate_archive(&connection)?;
     }

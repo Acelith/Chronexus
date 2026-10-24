@@ -535,8 +535,14 @@ async fn probe_local_ai() -> AppResult<assistant::runtime::Runtime> {
     assistant::runtime::probe_at(&client, assistant::runtime::BASE).await
 }
 #[tauri::command]
-fn get_ai_settings(db: tauri::State<Database>) -> AppResult<assistant::store::Settings> {
-    db.with(assistant::store::settings)
+fn get_ai_settings(
+    db: tauri::State<Database>,
+    campaign_id: Option<String>,
+) -> AppResult<assistant::store::Settings> {
+    db.with(|c| match campaign_id {
+        Some(id) => Ok(assistant::campaign::get(c, &id)?.settings),
+        None => assistant::store::settings(c),
+    })
 }
 #[tauri::command]
 async fn configure_local_ai(
@@ -545,15 +551,26 @@ async fn configure_local_ai(
     enabled: bool,
     model: String,
     multilingual_consent: bool,
+    campaign_id: Option<String>,
 ) -> AppResult<assistant::store::Settings> {
     if assistant::service::busy(&state)? {
         return Err("Annulla la generazione prima di modificare la configurazione AI.".into());
     }
     if !enabled {
         return db.with(|c| {
-            let mut s = assistant::store::settings(c)?;
+            let mut s = match &campaign_id {
+                Some(id) => assistant::campaign::get(c, id)?.settings,
+                None => assistant::store::settings(c)?,
+            };
             s.enabled = false;
-            assistant::store::set_settings(c, &s)
+            if let Some(id) = &campaign_id {
+                let mut p = assistant::campaign::get(c, id)?;
+                p.settings = s.clone();
+                assistant::campaign::write(c, id, &p)?;
+                Ok(s)
+            } else {
+                assistant::store::set_settings(c, &s)
+            }
         });
     }
     if !multilingual_consent {
@@ -564,16 +581,47 @@ async fn configure_local_ai(
     let runtime = assistant::runtime::probe_at(&client, assistant::runtime::BASE).await?;
     let selected=runtime.models.into_iter().find(|m|m.name==model&&!m.dnd_specialized&&m.weight_digest.is_some()).ok_or("Scegli un modello multilingue GGUF locale verificabile. Il modello D&D di prova non è qualificato.")?;
     db.with(|c| {
-        assistant::store::set_settings(
-            c,
-            &assistant::store::Settings {
-                enabled: true,
-                model: selected.name,
-                digest: selected.digest,
-                specialization: "multilingual-rag".into(),
-            },
-        )
+        let settings = assistant::store::Settings {
+            enabled: true,
+            model: selected.name,
+            digest: selected.digest,
+            specialization: "multilingual-rag".into(),
+        };
+        if let Some(id) = &campaign_id {
+            let mut p = assistant::campaign::get(c, id)?;
+            p.settings = settings.clone();
+            assistant::campaign::write(c, id, &p)?;
+            Ok(settings)
+        } else {
+            assistant::store::set_settings(c, &settings)
+        }
     })
+}
+#[tauri::command]
+fn get_campaign_ai(
+    db: tauri::State<Database>,
+    campaign_id: String,
+) -> AppResult<assistant::campaign::Overview> {
+    db.with(|c| assistant::campaign::overview(c, &campaign_id))
+}
+#[tauri::command]
+fn save_campaign_ai(
+    db: tauri::State<Database>,
+    state: tauri::State<assistant::service::State>,
+    campaign_id: String,
+    profile: assistant::campaign::Profile,
+) -> AppResult<assistant::campaign::Profile> {
+    if assistant::service::busy(&state)? {
+        return Err("Attendi o annulla l'operazione AI prima di cambiare le fonti.".into());
+    }
+    db.with(|c| assistant::campaign::save_preferences(c, &campaign_id, &profile))
+}
+#[tauri::command]
+fn refresh_campaign_ai(
+    db: tauri::State<Database>,
+    campaign_id: String,
+) -> AppResult<assistant::campaign::Overview> {
+    db.with(|c| assistant::campaign::refresh(c, &campaign_id))
 }
 #[tauri::command]
 async fn ask_local_ai(
@@ -655,7 +703,7 @@ pub fn run() {
             app.manage(Database(connection));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
+        .invoke_handler(tauri::generate_handler![get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .run(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
 }

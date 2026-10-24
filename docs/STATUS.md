@@ -1,4 +1,4 @@
-# Stato Chronexus — 23 ottobre 2026
+# Stato Chronexus — 24 ottobre 2026
 
 ## Milestone e prossimo passo
 
@@ -6,7 +6,14 @@ M7 operativa e collaudata su Windows: assistente locale con fonti, GPU e cronolo
 **Accettazione completa ancora parziale**: manca la prova con rete fisicamente
 scollegata/blocco firewall. La prova proxy e le connessioni loopback sono distinte.
 Restano inoltre M6 macOS/Linux/CI reali e revisione del wizard Windows interattivo.
-Nessuna M8 definita, nessun push autorizzato o eseguito.
+M8 autorizzata e in corso: impostazioni AI persistenti per campagna (schema 013),
+fonti/edizione/contesto e aggiornamento delle conoscenze implementati. Campagne
+esistenti conservano la scelta M7, nuove campagne partono disattivate. Nuovo menu
+Impostazioni della campagna; nessun contatto runtime al caricamento della pagina.
+Verifiche della prima parte: 66 test Rust e 57 frontend PASS, build frontend,
+lint e format PASS. Qualifica reale Gemma 4 12B e riaddestramento ancora in corso;
+nessuna inferenza/training Gemma dichiarata superata. M9 tiradadi pianificata.
+Nessun push autorizzato o eseguito.
 
 Il modello specifico D&D 1.5B è stato provato su GPU e scartato per qualità.
 L'utente ha approvato esplicitamente Qwen3:4b-instruct multilingue con fonti locali,

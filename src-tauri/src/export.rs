@@ -146,7 +146,7 @@ pub fn write_export(
         .into_iter()
         .map(|id| graph::get_relationship(c, campaign_id, &id))
         .collect::<AppResult<Vec<_>>>()?;
-    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"importSources":sources,"party":party,"assistantConversations":conversations});
+    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"importSources":sources,"party":party,"assistantConversations":conversations,"assistantCampaignSettings":crate::assistant::campaign::get(c,campaign_id)?});
     let mut files: Vec<(String, Vec<u8>)> = vec![(
         "campaign.json".into(),
         serde_json::to_vec_pretty(&data).map_err(|_| "Esportazione JSON non riuscita.")?,

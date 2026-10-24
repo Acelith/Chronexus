@@ -105,7 +105,7 @@ fn fit_context(r: &Request, mut sources: Vec<Source>) -> AppResult<Vec<Source>> 
     }
     Ok(sources)
 }
-fn instruction_risk(text: &str) -> bool {
+pub(crate) fn instruction_risk(text: &str) -> bool {
     let text = text.to_lowercase();
     [
         "system:",
@@ -183,14 +183,21 @@ async fn run(
     events: &Channel<Event>,
     cancelled: &mut watch::Receiver<bool>,
 ) -> AppResult<Turn> {
-    let (generation, config, sources, excluded, all_blocked) = db.with_store(|s| {
-        let config = store::settings(&s.connection)?;
+    let (generation, profile, sources, excluded, all_blocked) = db.with_store(|s| {
+        let profile = super::campaign::get(&s.connection,&r.campaign_id)?;
+        let config = &profile.settings;
         if !config.enabled { return Err("L'assistente è disattivato. Configura e attiva il modello locale prima di fare domande.".into()); }
-        let sources = store::retrieve(&s.connection, &r.campaign_id, &r.question, &r.mode, r.edition.as_deref(), &r.rule_keys)?;
-        let (fitted,excluded,all_blocked) = select_safe_sources(r,sources)?;
-        store::begin(&s.connection, &r.campaign_id, &r.id, &r.question, &r.mode, r.edition.as_deref(), &config, &fitted)?;
-        Ok((s.directory.clone(), config, fitted, excluded, all_blocked))
+        if r.mode=="rules" && (r.edition.as_deref()!=Some(&profile.edition) || r.rule_keys.iter().any(|k|!profile.rule_keys.contains(k))) {return Err("Approva prima le fonti e l'edizione nelle Impostazioni della campagna.".into());}
+        let sources = store::retrieve(&s.connection, &r.campaign_id, &r.question, &r.mode, r.edition.as_deref(), &r.rule_keys)?.into_iter().filter(|s|super::campaign::allowed(&profile,s)).collect();
+        let (mut fitted,excluded,all_blocked) = select_safe_sources(r,sources)?;
+        let had_sources=!fitted.is_empty();
+        let budget=(profile.context-profile.max_tokens-128) as usize;
+        while !fitted.is_empty() && user_prompt(&r.question,&fitted)?.len()+system_prompt(&r.mode,r.edition.as_deref()).len()>budget {fitted.pop();}
+        if had_sources && fitted.is_empty(){return Err("Il contesto scelto è troppo piccolo per domanda e fonti. Aumentalo nelle impostazioni della campagna.".into());}
+        store::begin(&s.connection, &r.campaign_id, &r.id, &r.question, &r.mode, r.edition.as_deref(), config, &fitted)?;
+        Ok((s.directory.clone(), profile, fitted, excluded, all_blocked))
     })?;
+    let config = &profile.settings;
     let persist = |status: &str, answer: &str, metrics: &Value, error: &str| {
         db.with_store(|s| {
             if s.directory != generation { return Err("L'archivio è cambiato durante la generazione; nessuna risposta è stata scritta nel nuovo archivio.".into()); }
@@ -236,7 +243,7 @@ async fn run(
             &client,
             runtime::BASE,
             "/api/generate",
-            json!({"model":config.model,"prompt":"","stream":false,"keep_alive":"2m","options":{"num_ctx":8192,"num_gpu":99,"num_batch":64}}),
+            json!({"model":config.model,"prompt":"","stream":false,"keep_alive":"2m","options":{"num_ctx":profile.context,"num_gpu":99,"num_batch":64}}),
         );
         tokio::select! {result=load=>{result?;},_=cancelled.changed()=>return Err("Generazione annullata.".into())}
         let resident = runtime::get(&client, runtime::BASE, "/api/ps").await?;
@@ -252,7 +259,7 @@ async fn run(
         if gpu == 0 {
             return Err("Il modello è caricato solo sulla CPU. Libera memoria GPU o verifica i driver; nessun appunto è stato inviato al modello.".into());
         }
-        metrics = json!({"gpuBytes":gpu,"residentBytes":size,"processor":if gpu>=size {"gpu"}else{"mixed"},"context":8192,"weightDigest":model.weight_digest,"runtimeVersion":info.version,"excludedSourceCount":excluded.len(),"excludedSourceIds":excluded,"sentToModel":false});
+        metrics = json!({"gpuBytes":gpu,"residentBytes":size,"processor":if gpu>=size {"gpu"}else{"mixed"},"context":profile.context,"weightDigest":model.weight_digest,"runtimeVersion":info.version,"excludedSourceCount":excluded.len(),"excludedSourceIds":excluded,"sentToModel":false});
         emit(
             events,
             &r.id,
@@ -263,7 +270,7 @@ async fn run(
                 "Generazione locale: GPU e CPU (caricamento misto)…"
             },
         );
-        let payload = json!({"model":config.model,"stream":true,"think":false,"keep_alive":"2m","messages":[{"role":"system","content":system_prompt(&r.mode,r.edition.as_deref())},{"role":"user","content":user_prompt(&r.question,&sources)?}],"options":{"num_ctx":8192,"num_predict":512,"num_gpu":99,"num_batch":64,"temperature":0.0}});
+        let payload = json!({"model":config.model,"stream":true,"think":false,"keep_alive":"2m","messages":[{"role":"system","content":system_prompt(&r.mode,r.edition.as_deref())},{"role":"user","content":user_prompt(&r.question,&sources)?}],"options":{"num_ctx":profile.context,"num_predict":profile.max_tokens,"num_gpu":99,"num_batch":64,"temperature":0.0}});
         let send = client
             .post(format!("{}/api/chat", runtime::BASE))
             .json(&payload)

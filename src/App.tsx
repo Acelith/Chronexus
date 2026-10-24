@@ -44,6 +44,9 @@ const PartyWorkspace = lazy(() => import("./features/party/PartyWorkspace"));
 const AssistantWorkspace = lazy(
   () => import("./features/assistant/AssistantWorkspace"),
 );
+const CampaignSettings = lazy(
+  () => import("./features/assistant/CampaignSettings"),
+);
 const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
 
 export function App() {
@@ -62,6 +65,7 @@ export function App() {
     | "wiki"
     | "party"
     | "assistant"
+    | "settings"
     | PlayerView
   >("journal");
   const [playerReturn, setPlayerReturn] = useState<{
@@ -619,6 +623,18 @@ export function App() {
                     >
                       Assistente locale
                     </button>
+                    <button
+                      aria-current={view === "settings" ? "page" : undefined}
+                      disabled={busy}
+                      onClick={() =>
+                        void run(async () => {
+                          setView("settings");
+                          setForm(null);
+                        })
+                      }
+                    >
+                      Impostazioni della campagna
+                    </button>
                     {(
                       [
                         ["character", "Personaggio"],
@@ -726,6 +742,17 @@ export function App() {
                       onCreate={createPage}
                       onUpdate={updatePage}
                       onRecover={recoverPage}
+                    />
+                  </Suspense>
+                ) : null}
+                {campaign && view === "settings" ? (
+                  <Suspense
+                    fallback={<p role="status">Apertura impostazioni…</p>}
+                  >
+                    <CampaignSettings
+                      key={campaign.id}
+                      campaignId={campaign.id}
+                      name={campaign.name}
                     />
                   </Suspense>
                 ) : null}

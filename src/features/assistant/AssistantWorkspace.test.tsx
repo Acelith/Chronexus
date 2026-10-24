@@ -106,6 +106,7 @@ test("does not contact the runtime on mount; explicit activation requires consen
     true,
     settings.model,
     true,
+    "c",
   );
 });
 test("streams, cancels on navigation and retains errors and partial answers", async () => {

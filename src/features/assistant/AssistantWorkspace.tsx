@@ -64,7 +64,7 @@ export default function AssistantWorkspace({
   useEffect(() => {
     let active = true;
     void Promise.all([
-      assistantApi.settings(),
+      assistantApi.settings(campaignId),
       assistantApi.history(campaignId),
     ])
       .then(([s, h]) => {
@@ -136,7 +136,9 @@ export default function AssistantWorkspace({
     setConfigBusy(true);
     setError("");
     try {
-      setSettings(await assistantApi.configure(enabled, model, consent));
+      setSettings(
+        await assistantApi.configure(enabled, model, consent, campaignId),
+      );
     } catch (e) {
       setError(errorMessage(e));
     } finally {
