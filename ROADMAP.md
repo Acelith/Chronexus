@@ -327,18 +327,18 @@ macOS/Linux e della distribuzione, senza dichiararle eseguite.
 - Verificare che gli asset generati siano presenti nel pacchetto e che l'intera
   scena funzioni offline, senza richieste di rete o generazione durante il tiro.
 
-## M10 — Multilingua, accessibilità e alfabeti alternativi (pianificata)
+## M10 — Multilingua, accessibilità e alfabeti alternativi (operativa Windows; revisione aperta)
 
 Obiettivo: cambiare lingua dalle impostazioni mantenendo inalterati gli appunti,
 i nomi propri, gli UUID, le citazioni, i backup e le fonti della campagna.
 
 - Localizzazione completa dell’interfaccia: italiano, inglese, tedesco, francese,
   spagnolo, portoghese, giapponese, coreano, cinese, arabo e dialetto ticinese.
-  Concordare varianti regionali (portoghese, cinese) e revisione ticinese con
-  parlanti competenti; non presentare traduzioni automatiche come validate.
+  Varianti concordate: portoghese brasiliano, cinese semplificato, ticinese in
+  bozza da revisionare; non presentare traduzioni automatiche come validate.
 - Lingue/alfabeti di fantasia: Klingon, Romulano e Galactic alphabet.
-  Definire prima la variante esatta dell’alfabeto galattico e del Romulano,
-  verificare disponibilità/licenze di font, mapping e lessico; distinguere
+  Varianti confermate: SGA di Minecraft e Rihannsu romanizzato del dizionario
+  indicato dall’utente. Verificare licenze di font, mapping e lessico; distinguere
   traduzione da traslitterazione e segnalare i termini senza equivalente.
 - Braille e Morse come modalità di resa/accessibilità, non semplici lingue.
   Mantenere testo semantico per screen reader/display Braille; definire grado,
@@ -359,9 +359,15 @@ i nomi propri, gli UUID, le citazioni, i backup e le fonti della campagna.
   Verificare leggibilità degli alfabeti alternativi con font assente e ritorno
   alla lingua ordinaria. Verificare round trip dei dati e archivi precedenti.
 
-Questa richiesta aggiunge la milestone: la localizzazione non è implementata
-nel rifacimento grafico/editor del 24 ottobre 2026. Dopo la consegna Windows di
-M9, M10 è il prossimo sviluppo funzionale pianificato.
+Implementata il 24 ottobre 2026: preferenze globali persistenti, 13 lingue
+selezionabili e tre scritture, cataloghi/font offline, dizionari editor, RTL,
+laboratorio reversibile e recupero italiano. 1427 messaggi candidati per catalogo
+naturale; Klingon/Rihannsu con lessico parziale dichiarato e glossario verificato.
+113 test frontend, 79 Rust e collaudi nativi Windows descritti in docs/I18N.md.
+Le traduzioni sono bozze: M10 non è dichiarata integralmente accettata finché
+restano revisione linguistica/dialettale, lingue di fantasia complete dove
+verificabili, prova assistiva fisica/IME reale e verifiche macOS/Linux.
+Non viene avviata una nuova milestone senza richiesta dell’utente.
 
 ## Future (not MVP)
 Automatic ruleset adapters (D&D 5e 2014/2024, Pathfinder), optional portable sync with conflict handling, advanced timeline, maps, PDF character exports, OCR, AI-assisted suggestions requiring user consent, multi-PC campaigns, extensions. Manual D&D 2014 labels and optional SRD catalog belong to the requested M5 extension above.
@@ -397,5 +403,5 @@ Questo è il checkpoint precedente all'autorizzazione M7. Stato aggiornato,
 verifiche e limiti: docs/STATUS.md. La prossima attività della roadmap dopo
 questa implementazione resta completare M6 sui runner macOS/Linux e il wizard
 interattivo Windows. M8 per Gemma e riaddestramento locale è ora operativa su
-Windows, con i limiti riportati sopra. M9 è ora operativa su Windows; la prossima
-funzione pianificata è M10.
+Windows, con i limiti riportati sopra. M9 è ora operativa su Windows;
+M10 è operativa su Windows; revisione linguistica e assistiva restano aperte.

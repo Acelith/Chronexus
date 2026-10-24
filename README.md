@@ -9,6 +9,16 @@ Chronexus è il nuovo nome di Nodex: l'identificatore `it.nodex.desktop`, i nomi
 tecnici dei database e l'estensione `.nodex` restano invariati per riaprire gli
 archivi e i backup esistenti. L'eseguibile si chiama ora `chronexus.exe` su Windows.
 
+## Lingue e scritture
+
+Nel menu sinistro, **Impostazioni dell’app → Lingua e scrittura**: 11 lingue
+naturali, Klingon/Rihannsu sperimentali e tre rese visuali (Braille, Morse,
+Galattico di Minecraft). Cambio immediato, scelta persistente, font e cataloghi
+locali. Appunti, schede, citazioni e backup mantengono i dati originali.
+Le traduzioni sono bozze da revisionare; le lingue inventate hanno fallback
+italiano. Il pulsante **Italiano · Ripristina lingua e scrittura** resta leggibile.
+Dettagli, fonti, limiti e manutenzione: [docs/I18N.md](docs/I18N.md).
+
 ## Prerequisiti e avvio
 
 - Node >= 22.12 e pnpm 11 (`packageManager` fissa la versione).

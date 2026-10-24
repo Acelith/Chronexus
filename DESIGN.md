@@ -25,3 +25,16 @@ slot in 2,5 secondi indipendenti dal numero di dadi. Le fiamme precedono i numer
 non coprono i risultati finali; movimento ridotto mostra direttamente il risultato.
 Al massimo 14 dadi nella scena, distribuiti su tutti i tipi selezionati; il dettaglio
 semantico conserva e rende leggibili tutti i valori, anche su 100 dadi.
+
+
+## M10 — lingue e scritture
+
+Conservare pergamena, ornamenti e tipografia latina del riferimento. Le lingue
+araba/CJK usano font Noto locali leggibili, senza richiedere servizi font remoti.
+L’arabo specchia la disposizione e isola i dati misti; testi delle campagne e
+citazioni restano originali. Nessuna traduzione mediante riscrittura del DOM.
+SGA usa Monocraft OFL, non glifi di lingue reali spacciati per l’alfabeto Minecraft.
+Glifi decorativi aria-hidden e testo semantico, recupero italiano sempre normale;
+font assente o carattere non rappresentabile conservano il testo leggibile.
+La casella «mostra anche il testo ordinario» governa solo le etichette controllate.
+Dialoghi critici, dati e menu nativi restano ordinari. Dettagli: docs/I18N.md.

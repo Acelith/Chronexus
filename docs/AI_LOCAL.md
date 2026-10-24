@@ -154,3 +154,13 @@ Fonti primarie consultate il 23 ottobre 2026:
 [GPU e configurazione](https://docs.ollama.com/faq),
 [release portable](https://github.com/ollama/ollama/releases/tag/v0.40.10),
 [modello e licenza](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507).
+
+
+### M10 — preferenze linguistiche globali
+
+Il cambio della lingua UI non attiva Ollama/GPU, non invia appunti e non cambia il
+modello o le autorizzazioni della campagna. Controlli e diagnostici pubblici hanno
+cataloghi locali; domande, risposte, citazioni e fonti conservano i testi originali.
+Le bozze di traduzione dell’interfaccia sono state preparate su sole stringhe UI,
+non su dataset di campagna. Non confondere questo passaggio di sviluppo con un
+nuovo addestramento del modello D&D. Dettagli e limiti: I18N.md.

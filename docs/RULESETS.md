@@ -103,3 +103,10 @@ in inglese. La cache è locale, limitata e compresa nel backup schema 011.
 M7 è soltanto pianificata: modello specifico D&D da valutare, retrieval sulle
 fonti selezionate, edizioni separate e nessuna formula applicata automaticamente.
 Vedere docs/AI_LOCAL.md; nessun runtime o modello è stato eseguito.
+
+
+### M10 — lingua dell’interfaccia e delle fonti
+
+Le etichette UI si localizzano; nomi/regole/importazioni, edizione e provenienza
+restano originali. Non tradurre query API, identificatori o valori persistiti dei
+preset per cambiare lingua. Scelte, bozze e limiti: I18N.md.

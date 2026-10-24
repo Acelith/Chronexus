@@ -396,3 +396,18 @@ Lo script contiene soltanto dati fittizi e un minuscolo PNG di test; output in .
   CHRONEXUS_AI_QA=isolated. Verificare anche le risposte, non solo parole chiave.
 - Mancano: prova con rete fisicamente disconnessa/blocco firewall, GPU e
   pacchetti macOS/Linux; OOM fisico non provocato. Nessun risultato inventato.
+
+
+## M10 — lingue, scritture e integrità
+
+113 Vitest e 79 Rust superati; typecheck/lint/format, clippy -D warnings,
+i18n:check e build desktop Windows superati. Native QA in profilo isolato,
+frontend compilato: 13 lingue × 13 viste, tre scritture, minimo arabo 760×600,
+riavvio, backup/restore 015, preferenze globali conservate e JSON corrotto
+recuperato dal menu. Snapshot confrontati senza cambiamenti impliciti ai dati.
+Axe EN/AR/JA sulle impostazioni senza violazioni; cinque font locali caricati,
+Monocraft realmente bloccato con testo normale ancora leggibile. Unicode in
+Markdown/visuale e composizione simulata, ricerca CJK e UUID originario conservati.
+Nessuna richiesta remota nei percorsi osservati. Nessuna prova dichiarata su
+IME di sistema, lettore/display Braille fisico, macOS o Linux.
+Script protetti, fonti, ripetizione e limiti: I18N.md. Evidenze locali .tools/m10.

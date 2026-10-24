@@ -8,7 +8,7 @@ Core promise: "From an item in my inventory, find the session in which I acquire
 Operating principles:
 - Local-first/offline-first: all core operations work without Internet.
 - Windows, macOS, Linux distribution; installation should be understandable to a non-developer.
-- Italian UI initially; centralize translatable strings for later i18n.
+- Italian default UI; M10 adds local language catalogs and writing modes. Follow docs/I18N.md; never translate or transcribe saved campaign content implicitly.
 - Easy to back up, export, restore and move to a different OS.
 - Clear evidence and uncertainty: player notes are a perspective, not omniscient truth.
 - Fast access during a live tabletop session; keyboard-friendly and autosaved.
@@ -271,3 +271,23 @@ reconstructible derived GGUF copies remain outside ordinary backups and Git.
 Explicit activation follows local GPU/citation checks and never changes notes,
 character resources or asserted facts. Gemma is multilingual, not D&D fine-tuned.
 Verified Windows behavior, setup and platform limits: docs/AI_TRAINING.md.
+
+
+## Localization and writing modes (M10)
+
+Global app settings in the sidebar, separate from campaign AI settings, persist
+locale/script/showOriginal in atomic interface-preferences.json v1 outside
+campaign restore generations. SQLite remains 015 and backup formats are unchanged.
+Natural locales: it, en, de, fr, es, pt-BR, ja, ko, zh-Hans, ar, lmo-CH.
+Experimental romanized tlh and art-x-rihan use individually sourced vocabulary
+and explicit Italian fallback. Braille is an Italian uncontracted six-dot subset;
+Morse and Minecraft SGA are writing modes, never fake language translations.
+Preserve ordinary semantic text and an always-readable Italian recovery action.
+
+Catalogs/fonts and BlockNote dictionaries are bundled offline. Parameterized UI
+messages, Intl dates/numbers/plurals, Arabic RTL/bidi and mixed CJK text must not
+modify documents, UUIDs, preset labels, original D&D sources or AI conversations.
+Do not translate IPC keys, selectors, URIs or program values. See docs/I18N.md for
+sources, licenses, maintenance scripts and actual Windows acceptance. Machine
+drafts, Ticinese variants and partial fictional lexicons must be labeled honestly;
+physical assistive testing, OS IME and macOS/Linux validation remain open.

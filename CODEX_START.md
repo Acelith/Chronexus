@@ -10,7 +10,7 @@ The full requirements are in `PROJECT_SPEC.md`. Engineering rules are in `AGENTS
 ## First execution scope (critical)
 
 This section preserves the original bootstrap instructions. The repository has
-since reached M7; for subsequent work follow the current user request and
+since reached M10 on Windows (linguistic/assistive acceptance open); follow the current user request and
 docs/STATUS.md, without repeating setup or overwriting existing features.
 For an existing repository, read `docs/STATUS.md` first and follow the latest user
 request instead of repeating M0/M1. M0–M6 features have been delivered on Windows; consult STATUS for remaining
@@ -55,3 +55,18 @@ I have limited Codex allowance. Be precise and economical with context: inspect 
 
 Start by inspecting the repository and STATUS, then carry out the current user
 request. The M0/M1-only scope applies solely to the original empty-project run.
+
+
+## Checkpoint M10 — language boundaries
+
+M10 is operational on Windows with linguistic/assistive acceptance still open;
+read docs/STATUS.md and docs/I18N.md instead of repeating completed milestones.
+Explicit current user instructions take precedence over repository guidance.
+Keep app language preferences global and campaign AI settings separate. All
+requested language/script options exist; natural catalogs are machine drafts,
+Ticinese needs dialect review, Klingon/Rihannsu are partial sourced lexicons.
+Preserve semantic text, original campaign content, UUIDs, source languages,
+SQLite 015 and .nodex archives. Never pass selectors, IPC keys, URIs or stored
+content to translation functions. Follow i18n scan/normalize/check and actual
+native QA, and never report native-reader, physical Braille/IME or platform
+validation that was not run. No new milestone or installer was requested by M10.

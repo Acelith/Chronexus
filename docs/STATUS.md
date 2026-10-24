@@ -1,5 +1,55 @@
 # Stato Chronexus — 24 ottobre 2026
 
+## M10 — operativa su Windows; accettazione linguistica e assistiva aperta
+
+- **Impostazioni dell’app → Lingua e scrittura** nel menu sinistro, anche senza
+  campagna: scelta immediata e persistente, distinta dalle impostazioni AI della
+  campagna. Recupero italiano sempre ordinario, anche con preferenze danneggiate.
+- 11 lingue naturali (PT brasiliano, cinese semplificato, ticinese in bozza),
+  Klingon e Rihannsu romanizzati con lessico parziale/fallback; Braille italiano
+  in sottoinsieme, Morse e SGA Minecraft. 1427 messaggi candidati per catalogo
+  naturale, font/dizionari editor locali. Traduzioni non certificate.
+- Arabo RTL/bidi, CJK, date/numeri/plurali locali; glifi decorativi con testo
+  semantico e laboratorio reversibile. Nomi, documenti, UUID, preset, fonti D&D
+  e risposte AI restano originali. JSON preferenze v1 esterno ai backup;
+  SQLite **015** e `.nodex` invariati. Nessun archivio personale usato nel QA.
+- **113 test frontend e 79 Rust PASS**, clippy -D warnings, lint, typecheck,
+  format, i18n:check e build desktop release Windows PASS. React Doctor ultimo
+  changed: 68, nessun nuovo rilievo; detector impeccable senza rilievi.
+- Desktop con frontend compilato: **13 lingue × 13 viste**, tre scritture,
+  testo nascosto semanticamente disponibile, arabo 760×600, riavvio, restore
+  015 ed error recovery PASS. Backup creato in DE e ripristinato mantenendo EN;
+  JSON globale assente dallo ZIP e dati confrontati invariati. Axe impostazioni
+  EN/AR/JA senza violazioni; nessuna certificazione completa di accessibilità.
+- Cinque font locali, fallimento reale Monocraft con testo normale leggibile,
+  Unicode Markdown/visuale, composizione simulata, ricerca CJK e UUID originario
+  PASS. Nessun host remoto nei percorsi QA osservati. Log/schermate in .tools/m10;
+  fonti, script, manutenzione e limiti in [I18N.md](I18N.md).
+
+**Avvio**: `./scripts/Dev.ps1 -Task desktop`; eseguibile compilato
+`src-tauri/target/release/chronexus.exe`. Installer precedenti non rigenerati.
+
+**Commit di implementazione**: 79376ee (preferenze e cataloghi), af92934 (viste e
+scritture), a2d0e1c (correzioni/accettazione). Questo checkpoint è completato dal
+commit documentale M10. Nessun push remoto.
+
+**Skill usate**: impeccable e accessibility per leggibilità/RTL/testo semantico;
+react-testing e webapp-testing per comportamento e collaudi Playwright del
+progetto; Rust/Tauri/SQLite per preferenze atomiche separate dai dati;
+systematic-debugging e react-doctor per regressioni e verifiche.
+
+**Limiti aperti (5)**: revisione madrelingua/ticinese e lessici inventati parziali;
+IME OS e assistive fisiche non provati; macOS/Linux e distribuzione ancora da
+validare; font aggiuntivi circa 40 MB e avviso dimensione editor; debito React
+preesistente su complessità/componenti grandi, senza nuovi rilievi nei cambiamenti.
+
+**Prossimo passo**: completare l’accettazione M10 con revisore linguistico e
+collaudo assistivo/IME reale. Target verificabile: campagna → sessione → editor →
+backup nelle lingue scelte, conservando contenuti e accessibilità. Non è stata
+aggiunta né avviata una milestone successiva.
+
+Le sezioni seguenti conservano i checkpoint precedenti e il percorso di verifica.
+
 ## M9 — operativa e collaudata su Windows
 
 - Tiradadi da menu sinistro: d4/d6/d8/d10/d12/d20/d100, composizioni miste,

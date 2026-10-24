@@ -350,3 +350,14 @@ Nessun tool del modello, nessuna scrittura implicita nel mondo di gioco.
 - Backend Python isolato, non server aggiuntivo: worker distribuito con l'app,
   caricamento offline senza remote code, annullamento e uscita se muore il parent.
   Stato ed evidenze: docs/AI_TRAINING.md e docs/STATUS.md.
+
+
+## M10 — localizzazione senza mutazioni dei dati
+
+Preferenze globali JSON atomiche v1 fuori dalle generazioni backup; nessuna
+migrazione SQLite. Cataloghi locali con hash della sorgente italiana, fallback,
+parametri e dizionari editor; nessun modello AI o rete necessario per cambiare
+lingua. Nomi/preset salvati, UUID, Markdown e fonti non passano al traduttore.
+Le lingue di fantasia rimangono lessici parziali dichiarati: non inventare una
+traduzione integrale. Braille/Morse/SGA separati dalla lingua, originali semantici
+e pacchetto reversibile. Varianti/font/fonti/limiti e prove: I18N.md.
