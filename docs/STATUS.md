@@ -1,12 +1,12 @@
 # Stato Chronexus — 24 ottobre 2026
 
-## M12/M13 operative Windows → M11 distribuzione in corso
+## M12/M13 operative Windows → pubblicazione M11 interrotta su richiesta
 
 M12: due draghi SVG, estremi del singolo dado (d100 invertito), replay senza RNG,
 skip/movimento ridotto. M13: Espruar/Dethek OFL locali, preferenze v2 compatibili
 in lettura v1, pacchetti reversibili versionati e fallback. SQLite 015 invariato.
 
-Verifiche: 127 test frontend, 81 Rust, 2 Node font/licenze e 11 distribuzione PASS;
+Verifiche: 127 test frontend, 81 Rust, 2 Node font/licenze e 13 distribuzione PASS;
 lint/typecheck/format/clippy/i18n PASS; React Doctor changed 100, detector impeccable
 senza rilievi. Desktop isolato: 14 estremi reali, replay, tiri misti, font/fallback,
 axe 0; 173 tiri identici dopo chiusura/riavvio e backup/ripristino reale.
@@ -20,7 +20,10 @@ verificato; cinque ZIP AI completi pronti in locale, upload grandi bloccati.
 Due tentativi indipendenti falliti: secondo HTTP 502 dopo 297.304.064 byte in
 235,52 s; API dichiarano limite 2048 MiB, curl proxy_used=0. Nessuna causa server
 inventata: richiesti dettagli/log del gateway all'utente. Accesso autenticato OK.
-Non ritentare grandi upload senza un cambiamento o una nuova verifica del servizio.
+L’utente ha chiesto «lascia stare allora»: interrompere la pubblicazione remota
+di questa consegna, senza altri tentativi o modifiche alla bozza finché non la
+richiederà nuovamente. Sessione autenticata in RAM chiusa; nessuna credenziale
+scritta nei file del progetto. Pacchetti locali e bozza esistente conservati.
 
 Output: installers/Chronexus-0.2.0-Windows-x64-final, sei ZIP (uno solo app più
 cinque app/AI), SHA256SUMS.txt e package-report.json. Ollama 0.40.10 e Gemma 4 12B
