@@ -163,13 +163,34 @@ export default function TrainingPanel({
       )}
       {notice && <p role="status">{notice}</p>}
       {!overview ? (
-        <p role="status">Caricamento stato addestramento…</p>
+        error ? (
+          <button
+            onClick={() => {
+              setError("");
+              void trainingApi
+                .get(campaignId)
+                .then(setOverview)
+                .catch((e) => setError(errorMessage(e)));
+            }}
+          >
+            Riprova stato addestramento
+          </button>
+        ) : (
+          <p role="status">Caricamento stato addestramento…</p>
+        )
       ) : (
         <>
           <p>
             {overview.added} estratti nuovi · {overview.changed} modificati ·{" "}
             {overview.removed} rimossi rispetto all'ultimo addestramento
             riuscito. Totale: {overview.sources} estratti.
+          </p>
+          <p>
+            Dimensione degli estratti: {Math.ceil(overview.datasetBytes / 1024)}{" "}
+            KiB. L'addestramento usa la GPU e include tutti gli estratti
+            approvati. Se la selezione supera i limiti viene richiesta una
+            riduzione, senza omettere dati automaticamente per abbreviare il
+            lavoro.
           </p>
           <p>
             Ultimo addestramento riuscito:{" "}

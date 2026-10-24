@@ -17,6 +17,7 @@ vi.mock("./api", () => ({ assistantApi: { cancel: vi.fn() } }));
 const initial: TrainingOverview = {
   jobs: [],
   datasetHash: "hash-a",
+  datasetBytes: 1024,
   sources: 1,
   blocked: 0,
   added: 1,

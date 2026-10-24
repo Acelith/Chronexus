@@ -180,6 +180,7 @@ async fn hash_large(
 pub struct Overview {
     pub jobs: Vec<Job>,
     pub dataset_hash: String,
+    pub dataset_bytes: usize,
     pub sources: usize,
     pub blocked: usize,
     pub added: usize,
@@ -214,6 +215,9 @@ pub fn overview(c: &Connection, root: &Path, campaign: &str) -> AppResult<Overvi
     Ok(Overview {
         jobs,
         dataset_hash,
+        dataset_bytes: serde_json::to_vec(&sources)
+            .map_err(|_| "Dataset non serializzabile.")?
+            .len(),
         sources: sources.len(),
         blocked: sources
             .iter()

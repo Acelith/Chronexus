@@ -183,6 +183,12 @@ pub fn snapshot(c: &Connection, campaign: &str, p: &Profile) -> AppResult<Vec<So
         s.key = format!("wiki:{key}");
         out.push(s);
     }
+    if out.len() > 4000 {
+        return Err(
+            "La selezione supera 4000 estratti, comprese le regole. Riduci le fonti approvate."
+                .into(),
+        );
+    }
     Ok(out)
 }
 pub fn stamps(sources: &[Source]) -> Vec<Stamp> {

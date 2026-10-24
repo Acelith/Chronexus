@@ -7,10 +7,29 @@ from unittest.mock import patch
 import numpy as np
 import gguf
 from safetensors.numpy import save_file
-from train import examples, merge_gguf, train
+from train import examples, merge_gguf, train, training_plan
 
 
 class WorkerTests(unittest.TestCase):
+    def test_all_fragments_are_covered_beyond_64_examples_and_overflow_fails(self):
+        rows = examples([{"title":f"Pagina {i}","text":f"Informazione {i}"} for i in range(73)])
+        plan = training_plan(rows)
+        covered = {row[-1]["content"] for row in plan}
+        self.assertEqual(covered,{row[-1]["content"] for row in rows})
+        self.assertTrue(any("Informazione 72" in text for text in covered))
+        with self.assertRaisesRegex(ValueError,"8000"):
+            training_plan(rows*110)
+        with self.assertRaisesRegex(ValueError,"estratti approvati"):
+            training_plan([])
+
+    def test_long_sources_preserve_the_tail_in_token_windows(self):
+        class CharacterTokenizer:
+            def __call__(self,text,**_):return {"input_ids":[ord(c) for c in text]}
+            def decode(self,tokens,**_):return "".join(chr(c) for c in tokens)
+        text="Appunti "*100+"Fine importante."
+        rows=examples([{"title":"Pagina","text":text}],CharacterTokenizer())
+        fragments=[json.loads(row[1]["content"])["sources"][0]["text"] for row in rows]
+        self.assertEqual("".join(fragments),text)
     def test_missing_cuda_fails_before_loading_campaign_or_model(self):
         with patch("torch.cuda.is_available", return_value=False):
             with self.assertRaisesRegex(RuntimeError,"GPU CUDA non disponibile"):

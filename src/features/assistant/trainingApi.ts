@@ -22,6 +22,7 @@ export interface TrainingJob {
 export interface TrainingOverview {
   jobs: TrainingJob[];
   datasetHash: string;
+  datasetBytes: number;
   sources: number;
   blocked: number;
   added: number;

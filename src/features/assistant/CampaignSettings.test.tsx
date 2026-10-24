@@ -70,4 +70,13 @@ test("surfaces load errors without contacting Ollama", async () => {
     "Archivio non disponibile",
   );
   expect(assistantApi.probe).not.toHaveBeenCalled();
+  expect(
+    screen.queryByText("Caricamento impostazioni…"),
+  ).not.toBeInTheDocument();
+  vi.mocked(campaignAi.get).mockResolvedValue(structuredClone(initial));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Riprova impostazioni" }),
+  );
+  await screen.findByText("Fonti e risorse");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

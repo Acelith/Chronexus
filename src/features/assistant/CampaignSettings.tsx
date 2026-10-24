@@ -104,7 +104,13 @@ export default function CampaignSettings({
       )}
       {notice && <p role="status">{notice}</p>}
       {!draft || !view ? (
-        <p role="status">Caricamento impostazioni…</p>
+        error ? (
+          <button disabled={busy} onClick={() => void run(reload)}>
+            Riprova impostazioni
+          </button>
+        ) : (
+          <p role="status">Caricamento impostazioni…</p>
+        )
       ) : (
         <>
           {view.sourceError && (

@@ -90,7 +90,10 @@ macOS, altri acceleratori e Linux non sono ancora verificati.
 ## Cosa apprende l'adapter
 
 Il profilo iniziale usa QLoRA NF4, rango 4, alpha 8, proiezioni q/output degli
-ultimi quattro blocchi (44–47), da 8 a 64 passaggi. Gli esempi insegnano a
+ultimi quattro blocchi (44–47), da 8 a 8000 passaggi. Il testo di ogni estratto viene diviso in finestre di
+64 token, senza tagliare silenziosamente le code; ogni frammento entra nel
+training almeno una volta. Oltre 8000 frammenti il job viene rifiutato, chiedendo
+di ridurre le fonti, anziché addestrare solo i primi esempi. Gli esempi insegnano a
 riportare gli appunti citandoli e mantenendo le affermazioni come testimonianze.
 Non è un addestramento completo di tutti i pesi, né prova di memorizzazione
 affidabile di un'intera campagna. Loss e cambiamento dei tensori non dimostrano
@@ -147,3 +150,9 @@ e le misure GPU sono evidenze distinte. Non interpretare il solo rapporto tra
 Verifiche ulteriori, checkpoint corrente e limiti di accettazione sono in
 [STATUS.md](STATUS.md). La prova fisica offline/firewall e macOS/Linux restano
 separate dalle opzioni offline delle librerie e dalle osservazioni loopback.
+
+
+Ulteriore prova reale: 74 estratti sintetici, 74 esempi e 74 passaggi GPU, con
+controllo di copertura, attivazione e domanda sull'ultima fonte riusciti. Il
+profilo originale di collaudo è stato poi ripristinato. Il limite precedente
+di 64 passaggi, scoperto in revisione, è stato corretto e coperto da regressione.
