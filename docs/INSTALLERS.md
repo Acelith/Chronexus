@@ -181,3 +181,9 @@ sono 18; nessuna modifica al binario o ai dati dell’app richiede una nuova bui
 Il canale updater usa il solo installer firmato con `.sig` e `latest.json`, senza
 ridistribuire a ogni versione i pesi AI della M11. Compilazione protetta e procedure
 sono in docs/UPDATES.md; i pacchetti precedenti e la bozza v0.2.0 restano distinti.
+
+
+0.4.0 pubblicata il 25 ottobre 2026: release id 3, installer app-only firmato
+updater, .sig e latest.json. Tutti e tre riscaricati senza login con hash verificati;
+API latest confermata dall’app desktop sintetica. Sorgente compilato d75f5f3.
+La bozza id 2/v0.2.0 non è stata modificata e non è diventata una release completa.

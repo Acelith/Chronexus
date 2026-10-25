@@ -517,7 +517,7 @@ separato dall'assistente integrato della campagna.
 - Implementazione e istruzioni: docs/AUTOMATION.md. Schema 015 invariato.
   Verifiche Windows e limiti effettivi: docs/STATUS.md.
 
-## M15 — Aggiornamento interno con backup obbligatorio
+## M15 — Aggiornamento interno con backup obbligatorio (operativa Windows)
 
 Implementata la richiesta del 25 ottobre 2026: controllo esplicito, download e
 installazione dalle impostazioni globali, con canale pubblico Forgegit o server
@@ -537,3 +537,8 @@ HTTPS configurabile. Nessun login client, telemetria o invio di campagne.
   Primo bootstrap manuale; prova upgrade pubblico e altri OS restano distinte.
 
 Istruzioni ed evidenze: docs/UPDATES.md e docs/STATUS.md. SQLite 015 invariato.
+
+Checkpoint M15: release pubblica v0.4.0, tre allegati updater verificati con
+accesso anonimo, sorgente compilato d75f5f3. Bootstrap manuale e discovery API/
+manifesto, firme/versioni e backup verificati. Resta la prova di upgrade tra due
+versioni updater pubbliche e l’accettazione macOS/Linux. Dettagli in STATUS.md.

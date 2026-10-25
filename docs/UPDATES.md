@@ -51,6 +51,10 @@ restituito dall’API e controlla che la versione coincida con il tag della rele
 Non usa la rotta GitHub `releases/latest/download`, assente in Forgejo 12.
 È possibile configurare anche l’URL diretto di un manifesto Tauri statico.
 
+**Stato del 25 ottobre 2026:** [release 0.4.0 pubblicata](https://github.com/Acelith/Chronexus/releases/tag/v0.4.0),
+tre allegati con download anonimi e SHA-256 verificati; API latest e controllo
+nell’app funzionanti. L’installer iniziale è disponibile per il bootstrap manuale.
+
 Il repository è stato reso pubblico dall’utente: accesso anonimo verificato con
 HTTP 200 e `private:false`. Al momento della prima verifica nessuna release
 stabile risultava pubblicata (API latest 404); il repository pubblico da solo non

@@ -1,63 +1,60 @@
 # Stato Chronexus — 25 ottobre 2026
 
-## M15 — aggiornamento interno, versione 0.4.0
+## M15 — operativa Windows, release pubblica 0.4.0
 
-Implementati nelle impostazioni globali: controllo esplicito, download annullabile,
-verifica firma/versione e installazione ufficiale Tauri con backup obbligatorio.
-Canale predefinito: API pubblica Forgejo latest; risolve l’unico latest.json della
-release stabile. Alternativa: manifesto HTTPS statico configurabile. Nessun login,
-controllo all’avvio o invio di campagne. Store bloccato tra snapshot e installer,
-AI attiva rifiutata; nessun nuovo strumento MCP. SQLite 015 e appID invariati.
+Release pubblicata e verificata senza autenticazione:
+https://github.com/Acelith/Chronexus/releases/tag/v0.4.0
+API stabile: https://api.github.com/repos/Acelith/Chronexus/releases/latest
+Release id 3, tre allegati: setup Windows x64, .sig e latest.json. Upload, download,
+SHA-256, download anonimi e API latest PASS. Nessuna modifica alla bozza M11 id 2.
+Tag v0.4.0 identifica il sorgente compilato d75f5f3; le modifiche successive sono
+soltanto documentazione/strumenti di pubblicazione. Codice e tag su origin.
 
-Ogni tentativo di installazione crea un .nodex verificato con tutte le campagne,
-immagini e allegati gestiti; ricevuta SHA-256 con preferenze UI/canale a fianco.
-Errore backup/ricevuta impedisce l’installer; nessuna cancellazione automatica.
-Chiave privata cifrata e password protetta con Windows DPAPI fuori Git. Chiave
-pubblica/versione firmata incorporate; runtime/pesi AI separati. docs/UPDATES.md.
+Impostazioni dell’app: controllo esplicito, download annullabile e installazione
+ufficiale Tauri con backup verificato obbligatorio. Discovery API Forgejo stabile
+con latest.json unico o manifesto HTTPS configurabile. Nessun account client,
+controllo all’avvio o invio campagne. Firma vincolata a pacchetto e versione.
+Prima di ogni installazione: .nodex completo con immagini/allegati gestiti e
+ricevuta SHA-256/preferenze in update-backups. Fallimento blocca l’installer;
+Store bloccato fino all’handoff, AI attiva rifiutata, backup mai eliminati.
+Chiave privata cifrata/password Windows DPAPI fuori Git; client con sola chiave
+pubblica. SQLite 015/appID invariati. Pesi/runtime AI separati. docs/UPDATES.md.
 
-Verifiche completate prima della build finale:
-- pnpm test: PASS, 136 test / 32 file; pnpm lint, typecheck/build, format:check PASS.
-- cargo test offline: PASS, 96 unitari + 1 integrazione crittografica. Un test
-  del pacchetto release locale è ignorato nel run ordinario perché richiede file
-  firmati; sarà eseguito esplicitamente dopo la build, senza dichiararlo già PASS.
-- cargo fmt e clippy --all-targets -- -D warnings: PASS.
-- Python unittest test_updater_manifest.py: PASS, 4 test; MCP Node: PASS, 5 test.
-- React Doctor changed: 82/100, nessun nuovo rilievo.
-- Desktop debug con frontend incorporato e profilo sintetico: schermata/versione,
-  rifiuto HTTP, canale API Forgegit anonimo non ancora pubblicato, axe 0 e
-  chiusura ordinaria PASS. Non usa il browser personale. L’uscita
-  nativa supera quindi il controllo lasciato aperto nel checkpoint M14.
-- API repository anonima: HTTP 200, private:false dopo la modifica dell’utente.
-  API latest: 404, nessuna release stabile pubblicata al momento della verifica.
+Verifiche realmente eseguite:
+- pnpm test PASS: 136 test / 32 file; lint/typecheck/build/format:check PASS.
+- cargo test offline PASS: 96 unitari + 1 integrazione crittografica. Il test del
+  pacchetto reale, ignorato nel run ordinario, è stato eseguito esplicitamente:
+  PASS per firma dell’installer definitivo e rifiuto della sua copia manomessa.
+- cargo fmt e clippy --all-targets -- -D warnings PASS.
+- Python manifesto 4 test PASS, publisher 4 PASS; MCP Node 5 PASS.
+- React Doctor changed 82/100, nessun nuovo rilievo.
+- Desktop debug autonomo/profili sintetici: schermata/versione, HTTP rifiutato,
+  errore per canale non pubblicato, poi discovery del canale pubblico sia API sia
+  statico, nessuna reinstallazione della versione corrente, endpoint persistente
+  dopo riavvio e chiusure ordinarie PASS. Axe sulla sezione aggiornamenti: 0 rilievi.
+- Backup/ripristino reale con immagini e blocco callback installer su errore PASS.
+- NSIS Windows firmato updater costruito; licenze/font e mcp.mjs ispezionati
+  dentro il setup. 32.006.516 byte; SHA-256:
+  c8d4f7138b5be438f05ee1511f55676e109cc37cb340bd0ba31d849867da1b15.
 
-Distribuzione 0.4.0: installer Windows NSIS firmato e manifesto pronti in
-installers/Chronexus-0.4.0-Windows-x64. Sorgente compilato d75f5f3; firma reale e
-rifiuto di una copia manomessa PASS nel test dedicato eseguito con --ignored.
-Installer 32.006.516 byte, SHA-256 c8d4f7138b5be438f05ee1511f55676e109cc37cb340bd0ba31d849867da1b15.
-Contenuto NSIS ispezionato: licenze/font e adattatore MCP presenti. Codice main
-pubblicato fino a d75f5f3; pubblicazione nuova release in preparazione.
-Publisher app-only aggiunto: 4 test PASS per origine, credenziale Git mirata,
-hash e blocco pubblicazione dopo errore. Segreti solo in RAM, ricevuta senza token. Non confondere la chiave updater con Authenticode. Upgrade pubblico
-tra due versioni updater, macOS/Linux e riavvio dopo installazione non ancora
-certificati. La prima 0.4.0 richiede bootstrap manuale dalle vecchie versioni.
-Nuove stringhe con fallback italiano; nessuna traduzione completa inventata.
+Output locali: installers/Chronexus-0.4.0-Windows-x64, con manifesto, setup/firma,
+checksum/report/ricevuta e LEGGIMI. Sorgenti: c7d95ca feature, d75f5f3 licenze,
+db8fc68 publisher. Bootstrap manuale dalle versioni prive di updater, con backup
+ordinario prima della prima installazione; le successive usano il nuovo flusso.
+Limiti: upgrade pubblico reale tra due versioni updater non ancora eseguito,
+installer non Authenticode, macOS/Linux non certificati, nuove stringhe con fallback
+italiano. Non dichiarare installazioni personali o upgrade eseguiti quando non lo sono.
 
-Il controllo del browser è stato interrotto dall’utente nel turno precedente;
-nessun’altra automazione del suo browser è stata eseguita. La visibilità pubblica
-è stata modificata dall’utente e poi verificata tramite API anonima.
-M11 v0.2.0 resta bozza incompleta con allegati AI grandi: non modificarla per M15.
-Prossimo passo: verificare firma del nuovo installer e pubblicare il canale 0.4.0
-solo dopo upload/download anonimi verificati, senza sovrascrivere tag o asset.
+Skill: tauri-v2/rust-best-practices per updater e Store; react-testing/react-doctor
+per UX/regressioni; frontend-design per il tema; systematic-debugging per il
+manifesto Windows dei test; webapp-testing per desktop sintetico e accessibilità.
+Il browser personale è stato fermato dall’utente nel turno precedente e non più
+controllato. La visibilità del repository è stata modificata dall’utente e verificata.
 
-Skill applicate: tauri-v2/rust-best-practices per updater e Store; react-testing e
-react-doctor per UX/regressioni; frontend-design per riuso del tema esistente;
-systematic-debugging per il manifesto Windows dei test; webapp-testing per il
-profilo desktop sintetico. Computer-use consultata e interrotta dall’utente per
-il solo tentativo precedente sul browser. Nessuna nuova skill installata.
-
+Prossima accettazione M15: upgrade da 0.4.0 a una successiva release firmata in
+ambiente isolato e runner macOS/Linux. Milestone di distribuzione M11 ancora
+aperta per i pacchetti AI grandi; nessun loro nuovo upload durante M15.
 I checkpoint seguenti sono storici.
-
-# Stato Chronexus — 25 ottobre 2026
 
 ## M14 — integrazione nascosta per assistenti esterni, versione 0.3.0
 
