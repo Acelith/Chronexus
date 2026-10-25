@@ -21,6 +21,7 @@ import {
   type Campaign,
   type Session,
 } from "./features/journal/api";
+import { useExternalUpdates } from "./features/journal/useExternalUpdates";
 import type { SaveGuard } from "./features/journal/Editor";
 import { it } from "./strings";
 import {
@@ -109,6 +110,31 @@ export function App() {
   const guard = useRef<SaveGuard | null>(null);
   const operation = useRef(false);
   const loadVersion = useRef(0);
+  const [externalEpoch, setExternalEpoch] = useState(0);
+  const canRefreshExternal = useCallback(
+    () => !operation.current && !guard.current?.dirty(),
+    [],
+  );
+  const refreshExternal = useCallback(async () => {
+    if (!campaignId) return true;
+    const version = loadVersion.current;
+    try {
+      const [notes, knowledge] = await Promise.all([
+        api.sessions(campaignId),
+        knowledgeApi.pages(campaignId),
+      ]);
+      if (version !== loadVersion.current) return true;
+      if (!canRefreshExternal()) return false;
+      setSessions(notes);
+      setPages(knowledge);
+      setSessionId((previous) => previous ?? notes[0]?.id ?? null);
+      setExternalEpoch((previous) => previous + 1);
+    } catch (reason) {
+      setError(errorMessage(reason));
+    }
+    return true;
+  }, [campaignId, canRefreshExternal]);
+  useExternalUpdates(campaignId, canRefreshExternal, refreshExternal);
   const campaign = campaigns.find((item) => item.id === campaignId);
   const session = sessions.find((item) => item.id === sessionId);
   const register = useCallback((value: SaveGuard | null) => {
@@ -400,10 +426,19 @@ export function App() {
       return saved;
     });
   }
-  async function updatePage(id: string, metadata: PageMetadata) {
+  async function updatePage(
+    id: string,
+    metadata: PageMetadata,
+    expected: PageMetadata,
+  ) {
     if (!campaignId) return;
     return run(async () => {
-      const saved = await knowledgeApi.update(campaignId, id, metadata);
+      const saved = await knowledgeApi.update(
+        campaignId,
+        id,
+        metadata,
+        expected,
+      );
       onPageSaved(saved);
       return saved;
     });
@@ -878,6 +913,7 @@ export function App() {
                     >
                       <CodexWorkspace
                         key={campaign.id}
+                        externalEpoch={externalEpoch}
                         campaignId={campaign.id}
                         pages={pages}
                         selectedId={pageId}
@@ -971,7 +1007,7 @@ export function App() {
                       }
                     >
                       <PartyWorkspace
-                        key={campaign.id}
+                        key={`${campaign.id}:${externalEpoch}`}
                         campaignId={campaign.id}
                         pages={pages}
                         register={register}
@@ -1023,7 +1059,7 @@ export function App() {
                       }
                     >
                       <GraphWorkspace
-                        key={campaign.id}
+                        key={`${campaign.id}:${externalEpoch}`}
                         campaignId={campaign.id}
                         pages={pages}
                         sessions={sessions}
@@ -1046,7 +1082,7 @@ export function App() {
                       }
                     >
                       <PlayerWorkspace
-                        key={`${campaign.id}-${view}`}
+                        key={`${campaign.id}-${view}:${externalEpoch}`}
                         campaignId={campaign.id}
                         view={view}
                         pages={pages}
@@ -1129,7 +1165,7 @@ export function App() {
                               fallback={<p role="status">{it.editorLoading}</p>}
                             >
                               <Editor
-                                key={session.id}
+                                key={`${session.id}:${externalEpoch}`}
                                 session={session}
                                 register={register}
                                 onSaved={onSaved}

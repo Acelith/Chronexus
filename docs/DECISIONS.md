@@ -378,3 +378,16 @@ ufficiale Windows del modello base Gemma 4 12B; escludere la variante opzionale
 MLX e qualsiasi dato/adattatore privato. Installazione in staging nuovo, verifica
 completa e spostamento finale; nessuna sovrascrittura di destinazioni diverse.
 Pubblicazione in bozza e checksum verificati via download prima di renderla finale.
+
+## 2026-10-25 — M14: external automation over the running app
+
+Use an opt-in authenticated loopback bridge and a dependency-free Node MCP stdio
+adapter. The bridge is deliberately private, not MCP HTTP. This avoids a second
+SQLite connection/root lock and keeps restores atomic through the existing
+Arc<Mutex<Store>>. Use fixed domain tools and campaign-scoped writes. Revision
+checks protect documents/player data; full-page etags protect metadata whose
+updates do not increment document revision. GUI metadata forms also compare the
+snapshot they opened, preserving drafts after an external update. Dirty editors
+postpone refresh. The built-in assistant has no bridge tools. Discovery lives
+outside backup generations; shutdown stops the thread explicitly to release its
+AppHandle callback and removes the current credential. SQLite remains 015.

@@ -38,8 +38,13 @@ export const knowledgeApi = {
     command<KnowledgePage[]>("list_pages", { campaignId }),
   create: (campaignId: string, metadata: PageMetadata) =>
     command<KnowledgePage>("create_page", { campaignId, ...metadata }),
-  update: (campaignId: string, id: string, metadata: PageMetadata) =>
-    command<KnowledgePage>("update_page", { campaignId, id, ...metadata }),
+  update: (
+    campaignId: string,
+    id: string,
+    input: PageMetadata,
+    expected: PageMetadata,
+  ) =>
+    command<KnowledgePage>("update_page", { campaignId, id, input, expected }),
   save: (page: KnowledgePage, revision: number, document: JournalDocument) =>
     command<KnowledgePage>("save_page_document", {
       campaignId: page.campaignId,

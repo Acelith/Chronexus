@@ -1,4 +1,5 @@
 mod assistant;
+mod automation;
 mod backup;
 #[cfg(test)]
 mod backup_tests;
@@ -35,10 +36,11 @@ mod search;
 mod search_tests;
 mod wiki;
 use journal::{AppResult, Campaign, Session};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
+use tauri::Emitter;
 use tauri::Manager;
 
-struct Database(Result<Mutex<backup::Store>, String>);
+struct Database(Result<Arc<Mutex<backup::Store>>, String>);
 impl Database {
     fn with<T>(&self, action: impl FnOnce(&rusqlite::Connection) -> AppResult<T>) -> AppResult<T> {
         let connection = self.0.as_ref().map_err(Clone::clone)?.lock().map_err(|_| {
@@ -146,12 +148,10 @@ fn update_page(
     db: tauri::State<Database>,
     campaign_id: String,
     id: String,
-    title: String,
-    kind: String,
-    status: String,
-    aliases: Vec<String>,
+    input: knowledge::Metadata,
+    expected: knowledge::Metadata,
 ) -> AppResult<knowledge::Page> {
-    db.with(|c| knowledge::update_page(c, &campaign_id, &id, &title, &kind, &status, &aliases))
+    db.with(|c| knowledge::update_page_checked(c, &campaign_id, &id, input, expected))
 }
 #[tauri::command]
 fn save_page_document(
@@ -735,7 +735,7 @@ fn list_ai_rule_sources(
     db.with(|c|{let mut q=c.prepare("SELECT key,payload FROM wiki_cache WHERE key LIKE 'entry/%' ORDER BY fetched_at DESC").map_err(journal::storage)?;let rows=q.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(journal::storage)?.collect::<rusqlite::Result<Vec<_>>>().map_err(journal::storage)?;let mut out=Vec::new();for (key,raw) in rows{let value:serde_json::Value=serde_json::from_str(&raw).map_err(|_|"Fonte wiki illeggibile.")?;if value["document"]["gamesystem"]["key"].as_str()==Some(&edition){out.push(serde_json::json!({"key":key,"title":value["entry"]["name"],"document":value["document"]["name"]}))}}Ok(serde_json::json!(out))})
 }
 pub fn run() {
-    tauri::Builder::default()
+    let application = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .manage(assistant::service::State::default())
         .setup(|app| {
@@ -755,12 +755,27 @@ pub fn run() {
                 let store = backup::Store::open(&directory).map_err(std::io::Error::other)?;
                 assistant::store::recover(&store.connection).map_err(std::io::Error::other)?;
                 assistant::training::recover(&store.connection).map_err(std::io::Error::other)?;
-                Ok(Mutex::new(store))
+                Ok(Arc::new(Mutex::new(store)))
             })().map_err(|error| format!("Archivio non disponibile: {error}. Verifica spazio e permessi della cartella dati e riavvia Chronexus. Se usi una versione precedente, torna a quella più recente."));
             app.manage(Database(connection));
+            if let Some(config)=automation::Config::parse(std::env::args()).map_err(std::io::Error::other)? {
+                let state=app.state::<Database>();
+                let store=Arc::clone(state.0.as_ref().map_err(|e|std::io::Error::other(e.clone()))?);
+                let root=store.lock().map_err(|_|std::io::Error::other("Archivio occupato."))?.root.clone();
+                let handle=app.handle().clone();
+                let server=automation::Server::start(&root,config,store,Arc::new(move|campaign|{let _=handle.emit("chronexus:external-change",campaign);})).map_err(std::io::Error::other)?;
+                app.manage(server);
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_interface_preferences,save_interface_preferences,roll_dice,list_dice_rolls,get_training_overview,start_campaign_training,activate_campaign_training,get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
-        .run(tauri::generate_context!())
+        .build(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
+    application.run(|app, event| {
+        if matches!(event, tauri::RunEvent::Exit) {
+            if let Some(server) = app.try_state::<automation::Server>() {
+                server.shutdown();
+            }
+        }
+    });
 }

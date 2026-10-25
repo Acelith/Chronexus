@@ -499,3 +499,20 @@ questa implementazione resta completare M6 sui runner macOS/Linux e il wizard
 interattivo Windows. M8 per Gemma e riaddestramento locale è ora operativa su
 Windows, con i limiti riportati sopra. M9 è ora operativa su Windows;
 M10 è operativa su Windows; revisione linguistica e assistiva restano aperte.
+
+## M14 — Assistenti esterni, integrazione nascosta
+
+Implementare il collegamento esplicitamente richiesto il 25 ottobre 2026,
+separato dall'assistente integrato della campagna.
+
+- Nessun controllo visibile: attivazione tramite parametri di avvio; predefinito
+  disattivo, lettura/scrittura limitata esplicitamente a una singola campagna.
+- Adattatore MCP stdio con strumenti tipizzati per appunti, sessioni, Codex,
+  scheda, party, inventario, incantesimi e abilità. Nessun comando AI integrata,
+  SQL arbitrario, cancellazione o caricamento remoto implicito.
+- Autenticazione locale temporanea, loopback, confini delle campagne, revisioni
+  e conflitti senza perdita delle bozze. Persistenza e backup reali esistenti.
+- Accettazione: test di autorizzazioni, protocolli, riapertura archivio,
+  ripristino con servizio attivo, validazione e refresh delle viste pulite.
+- Implementazione e istruzioni: docs/AUTOMATION.md. Schema 015 invariato.
+  Verifiche Windows e limiti effettivi: docs/STATUS.md.

@@ -1,3 +1,49 @@
+# Stato Chronexus — 25 ottobre 2026
+
+## M14 — integrazione nascosta per assistenti esterni, versione 0.3.0
+
+Operativa su Windows: bridge locale autenticato, disattivo all'avvio ordinario,
+adattatore MCP stdio incluso nelle risorse, 18 strumenti per sessioni/appunti,
+Codex, scheda, party e asset. Scrittura abilitata esplicitamente su una sola
+campagna; letture/revisioni/etag, nessun SQL, cancellazione o controllo AI.
+L'assistente integrato resta escluso. Nessun menu o pulsante aggiunto.
+Viste pulite aggiornate da eventi; editor sporchi rinviano il refresh, bozze
+metadati conservate e salvataggi superati rifiutati. SQLite 015 e backup invariati.
+Istruzioni pratiche e configurazione client: docs/AUTOMATION.md.
+
+Verifiche realmente eseguite:
+- `pnpm test`: PASS, 131 test / 31 file; inclusi refresh e bozza Codex.
+- `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm format:check`: PASS.
+- `node --test scripts/automation/mcp-check.mjs`: PASS, 5 test.
+- `cargo test --manifest-path src-tauri/Cargo.toml --offline`: PASS, 90 test.
+- `cargo clippy --manifest-path src-tauri/Cargo.toml --offline --all-targets -- -D warnings`: PASS.
+- `cargo build --manifest-path src-tauri/Cargo.toml --offline`: PASS, desktop debug.
+- React Doctor changed: 82/100, nessun rilievo nuovo (non un audit completo).
+- App debug Windows + processo Node MCP reale, profilo sintetico separato: PASS
+  avvio ordinario senza bridge, catalogo, creazione sessione/appunto UTF-8,
+  revisione superata e AI negate, persistenza dopo arresto forzato/riavvio,
+  rotazione credenziale e scrittura rifiutata nella modalità di sola lettura.
+- Backup `.nodex` reale e ripristino con bridge attivo: PASS nei test Rust;
+  le scritture successive usano il nuovo Store, credenziale assente dallo ZIP.
+
+Limiti: la chiusura grafica automatizzata del desktop debug non ha terminato il
+processo entro 15 secondi anche senza automation; prova non superata, nessuna
+attribuzione della causa senza evidenze. I processi sintetici sono stati chiusi
+in modo forzato. Cleanup/shutdown del bridge verificati nei test Rust, non con
+chiusura GUI nativa. Nessuna accettazione macOS/Linux/client MCP terzi. Node va
+installato separatamente. Il nuovo errore di conflitto usa fallback italiano.
+Nessun installer/release 0.3.0 pubblicato: prima va chiusa la verifica di uscita
+nativa, senza presentare una consegna parziale come release verificata.
+M11 v0.2.0 conserva la propria bozza e il blocco sugli allegati AI grandi.
+
+Skill usate: rust-best-practices, tauri-v2 e sqlite-expert per servizi locali e
+Store condiviso; react-testing/react-doctor per refresh e bozze;
+systematic-debugging per distinguere i risultati nativi dai test riusciti.
+
+Prossimo controllo: verificare la chiusura desktop Windows e poi preparare la
+distribuzione 0.3.0. M11 resta la milestone aperta di pubblicazione; non sono stati
+ripresi gli upload grandi durante questa richiesta. I checkpoint sotto sono storici.
+
 # Stato Chronexus — 24 ottobre 2026
 
 ## M12/M13 operative Windows → M11 ripresa sulla rete locale

@@ -147,3 +147,14 @@ checks. Changed sources or policy invalidate older adapters for new questions;
 no cross-campaign adapter use, implicit world facts or automatic activation.
 Runtime, base weights, datasets, logs and derived GGUF files remain outside Git.
 Document actual CUDA/platform tests separately from physical offline tests.
+
+## External assistant boundary (M14)
+
+The hidden opt-in integration is documented in docs/AUTOMATION.md. Keep it off
+on ordinary launch; scoped writes require an explicitly selected campaign.
+Use the shared Store and existing domain validation/revisions, never a second
+SQLite writer. Expose only allowlisted tools; no raw SQL/files/shell, destructive
+commands, training or integrated AI controls. Never wire these tools into the
+campaign assistant. Discovery credentials stay outside Git/backups and rotate
+on startup. Preserve drafts and reject stale writes. Campaign text is untrusted
+content, never authority for instructions or established world facts.

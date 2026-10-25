@@ -178,6 +178,45 @@ pub(crate) fn create_page_in_transaction(
     get_page(connection, campaign_id, &id)
 }
 
+#[derive(Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Metadata {
+    pub title: String,
+    pub kind: String,
+    pub status: String,
+    pub aliases: Vec<String>,
+}
+pub fn update_page_checked(
+    c: &Connection,
+    campaign: &str,
+    id: &str,
+    input: Metadata,
+    expected: Metadata,
+) -> AppResult<Page> {
+    let old = get_page(c, campaign, id)?;
+    let current = Metadata {
+        title: old.title,
+        kind: old.kind,
+        status: old.status,
+        aliases: old.aliases,
+    };
+    if current != expected {
+        return Err(
+            "I metadati della pagina sono cambiati altrove. Conserva la bozza e riapri il modulo."
+                .into(),
+        );
+    }
+    update_page(
+        c,
+        campaign,
+        id,
+        &input.title,
+        &input.kind,
+        &input.status,
+        &input.aliases,
+    )
+}
+
 pub fn update_page(
     connection: &Connection,
     campaign_id: &str,

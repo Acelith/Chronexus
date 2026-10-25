@@ -1,7 +1,7 @@
 {
   "name": "chronexus",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "packageManager": "pnpm@11.25.0",
   "scripts": {
@@ -12,6 +12,7 @@
     "format:check": "prettier --check src scripts eslint.config.js vite.config.ts tsconfig.json index.html",
     "lint": "eslint src",
     "test": "vitest run",
+    "test:automation": "node --test scripts/automation/mcp-check.mjs",
     "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
     "tauri": "tauri",
     "desktop": "pnpm icons && tauri dev",

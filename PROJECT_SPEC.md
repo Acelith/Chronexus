@@ -304,3 +304,17 @@ original text and reversible packets; no implicit campaign conversion.
 Future validated milestone deliveries follow this standing publication instruction,
 unless explicitly forbidden; the present planning task forbids all publication.
 Exact criteria and remaining decisions are in ROADMAP.md. None is implemented now.
+
+## M14 — External assistants (hidden opt-in)
+
+External assistants may use a local MCP stdio adapter to read and edit sessions,
+notes, Codex metadata, the manual character sheet, party and local player assets.
+The ordinary UI remains unchanged. The integrated campaign assistant has no
+access to these tools. Enable the loopback bridge explicitly at startup; writes
+require an explicit campaign UUID. Temporary authentication, bounded messages,
+revision/etag conflicts and deferred GUI refresh preserve player data. Use the
+existing shared Store, indexing and backup services; no schema change, arbitrary
+SQL, deletion, AI control or network upload. See docs/AUTOMATION.md.
+
+Historical M11–M13 planning text above is superseded by their implementation
+checkpoints in ROADMAP.md and docs/STATUS.md; M11 publication remains incomplete.

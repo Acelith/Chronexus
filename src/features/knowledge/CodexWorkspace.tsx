@@ -1,6 +1,6 @@
 import { tr } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { SaveGuard } from "../journal/Editor";
 import { errorMessage } from "../journal/api";
 import {
@@ -22,6 +22,7 @@ interface Props {
   fallback: string;
   busy: boolean;
   focusBlock?: string;
+  externalEpoch?: number;
   register: (guard: SaveGuard | null) => void;
   onSelect: (id: string, label: string) => void;
   onSource: (link: Backlink) => void;
@@ -30,6 +31,7 @@ interface Props {
   onUpdate: (
     id: string,
     metadata: PageMetadata,
+    expected: PageMetadata,
   ) => Promise<KnowledgePage | undefined>;
   onRecover: (id: string, title: string) => Promise<KnowledgePage | undefined>;
 }
@@ -128,8 +130,12 @@ export default function CodexWorkspace(props: Props) {
                   initial={page}
                   busy={props.busy}
                   onCancel={() => setForm(null)}
-                  onSave={async (metadata) => {
-                    if (await props.onUpdate(page.id, metadata)) setForm(null);
+                  onSave={async (metadata, expected) => {
+                    if (
+                      expected &&
+                      (await props.onUpdate(page.id, metadata, expected))
+                    )
+                      setForm(null);
                   }}
                 />
               ) : null}
@@ -141,7 +147,7 @@ export default function CodexWorkspace(props: Props) {
                 }
               >
                 <Editor
-                  key={page.id}
+                  key={`${page.id}:${props.externalEpoch ?? 0}`}
                   page={page}
                   register={props.register}
                   onSaved={props.onSaved}
@@ -216,9 +222,19 @@ function PageForm({
 }: {
   initial?: KnowledgePage;
   busy: boolean;
-  onSave: (metadata: PageMetadata) => Promise<void>;
+  onSave: (metadata: PageMetadata, expected?: PageMetadata) => Promise<void>;
   onCancel: () => void;
 }) {
+  const snapshot = useRef(
+    initial
+      ? {
+          title: initial.title,
+          kind: initial.kind,
+          status: initial.status,
+          aliases: [...initial.aliases],
+        }
+      : undefined,
+  );
   const [title, setTitle] = useState(initial?.title ?? "");
   const [kind, setKind] = useState<PageMetadata["kind"]>(
     initial?.kind ?? "note",
@@ -233,15 +249,18 @@ function PageForm({
       aria-label={initial ? tr("Modifica pagina") : tr("Nuova pagina")}
       onSubmit={(event) => {
         event.preventDefault();
-        void onSave({
-          title,
-          kind,
-          status,
-          aliases: aliases
-            .split("\n")
-            .map((alias) => alias.trim())
-            .filter(Boolean),
-        });
+        void onSave(
+          {
+            title,
+            kind,
+            status,
+            aliases: aliases
+              .split("\n")
+              .map((alias) => alias.trim())
+              .filter(Boolean),
+          },
+          snapshot.current,
+        );
       }}
     >
       <label>
