@@ -58,6 +58,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, revisione linguistica aperta |
 | 30 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Pianificata | — | Da implementare su richiesta |
 | 31 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata | — | Da implementare su richiesta |
+| 32 | M20 | README di qualità con immagini, guida rapida e crediti | Pianificata | — | Da implementare su richiesta |
 
 
 ## M0 - Foundation and real local database
@@ -1085,6 +1086,60 @@ dell’app; non esistono backup periodici automatici.
 - Preferenze persistenti dopo riavvio e non alterate dal ripristino; interfaccia
   italiana, tastiera, stati vuoti/errore. Piattaforme dichiarate solo se provate.
 
+## M20 — Presentazione del progetto: README di qualità (pianificata)
+
+**Stato:** richiesta il 25 ottobre 2026; non implementata. L’attuale `README.md`
+mescola guida utente, cronologia delle milestone e note da sviluppatore. Obiettivo:
+una pagina del repository al livello dei progetti indicati dall’utente come
+riferimento (ApolloShell, AdventureLog, Uptime Kuma, Gogs, Seerr,
+astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
+
+### M20.1 — Struttura della pagina
+
+- Intestazione centrata: logo Chronexus con variante chiara/scura, nome, frase di
+  presentazione breve («il diario del giocatore di ruolo, offline e tuo»), link
+  rapidi Scarica · Funzionalità · Guida · Roadmap.
+- Badge solo veri e verificabili: ultima release, licenza, piattaforma Windows x64,
+  «offline-first», lingue; nessun conteggio inventato o servizio inesistente.
+- Screenshot principale subito sotto, poi galleria con didascalie: diario ed editor,
+  Codex e backlink, grafo, scheda/inventario, tiradadi con draghi, wiki, araldo,
+  lingue e scritture. Al massimo una o due GIF brevi (tiro dei dadi, araldo).
+- Sezioni: Cos’è · Perché Chronexus (giocatore, non GM; dati locali; menzioni ≠ fatti)
+  · Funzionalità (tabella con icone del progetto, non emoji) · Download e
+  installazione (tabella dei metodi, requisiti, primo avvio) · Aggiornamenti e
+  backup · AI locale facoltativa · Lingue · Privacy · Roadmap · Sviluppo ·
+  Contribuire · Crediti e licenze · Domande frequenti.
+- Callout `[!NOTE]`/`[!WARNING]` per limiti e avvisi (installer non Authenticode,
+  macOS/Linux non verificati, backup non cifrati, AI non addestrata su D&D);
+  dettagli lunghi in sezioni `<details>` richiudibili; ancore su ogni titolo.
+- Lingua principale italiana con `README.en.md` collegato in alto; contenuti
+  equivalenti e aggiornati insieme.
+
+### M20.2 — Contenuti e materiali
+
+- Spostare cronologia di milestone, collaudi e istruzioni tecniche in documenti
+  dedicati (es. `docs/DEVELOPMENT.md`, guide esistenti) senza perdere informazioni;
+  il README rimanda a quelli e a ROADMAP/STATUS.
+- Screenshot e GIF generati da campagne **sintetiche** con gli script di collaudo:
+  mai Speratia, foto, appunti o altri dati personali. Formato WebP/AVIF ottimizzato
+  (la cartella non deve dipendere da eccezioni a `*.png` in `.gitignore`), testo
+  alternativo descrittivo, peso complessivo dichiarato e contenuto.
+- Ogni affermazione corrisponde a STATUS: piattaforme e verifiche solo se eseguite,
+  versioni e numeri reali. Crediti e licenze completi: font OFL, SRD 5.1 CC BY 4.0,
+  Open5e, Wikidot (licenza dichiarata dalle pagine), Ollama/Gemma, librerie.
+- Eventuali descrizione, argomenti e immagine social del repository Forgegit sono
+  impostazioni remote: modificarle solo con autorizzazione esplicita.
+
+### Accettazione M20
+
+- Resa verificata sulla pagina reale di github.com (Forgejo): HTML consentito,
+  callout, immagini chiaro/scuro, tabelle e `<details>`; adattamenti se un elemento
+  non è supportato. Controllo anche a larghezza mobile.
+- Tutti i link interni ed esterni validi; nessun dato privato nelle immagini; peso
+  delle immagini entro il limite dichiarato; markdown formattato e coerente.
+- Un nuovo utente trova download, requisiti, primo avvio, backup e privacy in meno
+  di un minuto; informazioni tecniche rimosse dal README ancora raggiungibili.
+
 ## Accettazioni residue e prossima fase
 
 - **M6:** runner/pacchetti macOS/Linux e collaudi di distribuzione non dimostrati
@@ -1100,8 +1155,9 @@ dell’app; non esistono backup periodici automatici.
   di Wikidot; M16 è inclusa nella release 0.5.0.
 - **M15a:** illustrazioni incluse nella 0.5.0; restano upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
-- **Milestone pianificate: M18** (Qwen3.8-27B locale) e **M19** (cartella backup nei
-  Documenti, backup periodici e di aggiornamento); da implementare solo su richiesta.
+- **Milestone pianificate: M18** (Qwen3.8-27B locale), **M19** (cartella backup nei
+  Documenti, backup periodici e di aggiornamento) e **M20** (README di qualità);
+  da implementare solo su richiesta.
   I residui sopra restano aperti.
 
 ## Fuori dal perimetro attuale

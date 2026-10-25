@@ -1,3 +1,10 @@
+# Pianificazione — 25 ottobre 2026: M20
+
+Solo documentazione. Nuova M20 in ROADMAP: README di qualità ispirato ai progetti
+indicati dall’utente (intestazione centrata, badge reali, screenshot sintetici,
+tabelle di funzioni e installazione, callout e sezioni richiudibili, README.en.md,
+contenuti tecnici spostati in docs). Codice, versione e release invariati.
+
 # Pianificazione — 25 ottobre 2026: M19
 
 Solo documentazione. Nuova M19 in ROADMAP: cartella `Chronexus/` nei Documenti con
