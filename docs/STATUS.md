@@ -9,7 +9,7 @@ I controlli scartano risultati incompleti, numeri alterati e scritture tardive.
 Verifiche effettive:
 - Lint e TypeScript PASS; frontend 159 test PASS; i18n 14 test PASS.
 - Rust 115 test PASS complessivi, 2 ignorati (fixture Wikidot locale e prova della
-  firma sul pacchetto finale, da eseguire dopo la build); migrazione 016 → 017,
+  firma sul pacchetto finale); prova firma poi eseguita PASS, vedi sotto. Migrazione 016 → 017,
   sorgenti immutate, cache per fonte/lingua e backup/restore verificati.
 - Build frontend PASS (avviso preesistente chunk >500 kB); build debug Windows
   PASS; Clippy senza warning PASS. Formattazione finale PASS.
@@ -25,8 +25,16 @@ Verifiche effettive:
   nessuna nuova segnalazione dopo la correzione delle identità dei blocchi.
 - Test script rilascio 26 PASS; protocollo MCP 5 PASS, senza nuovi tool esposti.
 
-Distribuzione 0.6.0: versione e note preparate; pacchetto firmato e pubblicazione
-ancora da completare. Non dichiarare questa build installata sul profilo personale.
+Distribuzione **0.6.0 pubblicata**: https://github.com/Acelith/Chronexus/releases/tag/v0.6.0
+(release id 5, tre allegati). Sorgente/tag `v0.6.0` → `b4f04c4`
+(`feat(wiki): traduce le voci nella lingua dell'app con cache locale`).
+Build NSIS Windows x64 firmata updater, installer 32.603.355 byte; SHA-256
+`a7bbe026e68ef4122499f8f8ac1d1bc50d2551bbdd7e1a73110338d984b8f675`.
+Firma del pacchetto reale con chiave di produzione PASS, copia manomessa rifiutata
+(test ignorato eseguito esplicitamente). Upload, riscaricamento/checksum e download
+anonimi dei tre allegati, manifesto statico e API stable latest verificati dal
+publisher. Installer e report in `installers/Chronexus-0.6.0-Windows-x64/` fuori Git.
+Non installata sul profilo personale: upgrade reale 0.5.0 → 0.6.0 ancora da provare.
 Nessun contenuto/fixture privata o peso AI in Git. Prove locali in `.tools/m17/`,
 script ripetibili in `scripts/qa/m17-*.mjs`, guida `docs/WIKI_TRANSLATION.md`.
 

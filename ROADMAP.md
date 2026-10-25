@@ -55,7 +55,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 26 | M15 | Updater, backup pre-installazione e release 0.4.0 | 25/10/2026 | `c7d95ca → ad7760d` | Windows; canale pubblico |
 | 27 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | 25/10/2026 | `2fbf17a → 923516f` | Windows; altri OS aperti |
 | 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
-| 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | Implementazione e verifiche in STATUS | Windows; revisione linguistica aperta |
+| 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, revisione linguistica aperta |
 | 30 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Pianificata | — | Da implementare su richiesta |
 
 

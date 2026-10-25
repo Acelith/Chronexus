@@ -1,5 +1,15 @@
 # Installer Windows con AI locale
 
+## Aggiornamento M17 — 25 ottobre 2026
+
+[Chronexus 0.6.0](https://github.com/Acelith/Chronexus/releases/tag/v0.6.0)
+include la traduzione locale della wiki. Installer app Windows x64 firmato updater,
+schema 017 additivo. Pacchetto locale in `installers/Chronexus-0.6.0-Windows-x64/`.
+Firma reale e download anonimi verificati, nessuna installazione personale
+eseguita. Runtime e Qwen3 4b-instruct restano separati; le copie già tradotte si
+leggono senza runtime. M18 non è implementata. Dettagli in WIKI_TRANSLATION.md
+e STATUS.md; i pacchetti/release precedenti non sono stati sovrascritti.
+
 ## Politica Forgegit — pianificata con M11
 
 Destinazione verificata di `origin`: `https://github.com/Acelith/Chronexus.git`,

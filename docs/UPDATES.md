@@ -1,5 +1,11 @@
 # Aggiornamenti interni — M15
 
+Release corrente: [0.6.0 — M17](https://github.com/Acelith/Chronexus/releases/tag/v0.6.0),
+installer Windows x64 firmato e canale pubblico verificato. Schema 017: i backup
+pre-installazione includono anche la cache derivata delle traduzioni wiki, senza
+cambiare gli originali. Upgrade installato 0.5.0 → 0.6.0 non ancora collaudato;
+non confondere la verifica di firma/download con un’installazione reale.
+
 Da Chronexus 0.4.0, **Impostazioni dell’app → Aggiornamenti dell’app** permette di
 controllare, scaricare e installare una nuova versione. Il controllo è esplicito:
 nessuna richiesta all’avvio, nessun login, nessun invio delle campagne.
