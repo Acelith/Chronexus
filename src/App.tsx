@@ -52,6 +52,7 @@ const AssistantWorkspace = lazy(
   () => import("./features/assistant/AssistantWorkspace"),
 );
 const DiceWorkspace = lazy(() => import("./features/dice/DiceWorkspace"));
+const UpdateSettings = lazy(() => import("./features/updates/UpdateSettings"));
 const LanguageSettings = lazy(
   () => import("./features/preferences/LanguageSettings"),
 );
@@ -936,7 +937,10 @@ export function App() {
                         <p role="status">{tr("Apertura impostazioni…")}</p>
                       }
                     >
-                      <LanguageSettings />
+                      <>
+                        <UpdateSettings busy={busy} run={run} />
+                        <LanguageSettings disabled={busy} />
+                      </>
                     </Suspense>
                   ) : null}
                   {campaign && view === "dice" ? (

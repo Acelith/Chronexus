@@ -391,3 +391,23 @@ snapshot they opened, preserving drafts after an external update. Dirty editors
 postpone refresh. The built-in assistant has no bridge tools. Discovery lives
 outside backup generations; shutdown stops the thread explicitly to release its
 AppHandle callback and removes the current credential. SQLite remains 015.
+
+## 2026-10-25 — M15: signed updater and pre-install snapshot
+
+Use Tauri updater 2.14 with authenticated version comments; fetch manifests and
+packages through our bounded Rust HTTPS reader so redirects, sizes and anonymous
+access stay explicit. Resolve Forgejo via its latest-release API and unique
+latest.json attachment, not GitHub-only download aliases. Custom static manifests
+are allowed on the same HTTPS origin as their artifacts. No automatic startup
+request. Store update settings beside profile metadata, outside SQLite (015).
+
+Create a real verified .nodex and hash/preferences receipt before each installer
+handoff. Hold the active Store through snapshot/handoff; try_lock the AI slot in
+Store -> AI order to avoid inversion with existing services. The external bridge
+cannot issue updater commands. Preserve all safety copies. Windows uses passive
+NSIS and closes without automatically restoring automation launch arguments.
+
+MSVC integration tests that instantiate Tauri's mock builder need a separate
+common-controls v6 manifest for TaskDialogIndirect. Add linker arguments only to
+integration test targets; the app already embeds its own manifest. This fixes the
+loader failure without changing system DLLs or duplicating app resources.

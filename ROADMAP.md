@@ -516,3 +516,24 @@ separato dall'assistente integrato della campagna.
   ripristino con servizio attivo, validazione e refresh delle viste pulite.
 - Implementazione e istruzioni: docs/AUTOMATION.md. Schema 015 invariato.
   Verifiche Windows e limiti effettivi: docs/STATUS.md.
+
+## M15 — Aggiornamento interno con backup obbligatorio
+
+Implementata la richiesta del 25 ottobre 2026: controllo esplicito, download e
+installazione dalle impostazioni globali, con canale pubblico Forgegit o server
+HTTPS configurabile. Nessun login client, telemetria o invio di campagne.
+
+- Scoprire l’ultima release stabile con API Forgejo e il suo `latest.json`, oppure
+  leggere un manifesto Tauri statico. Rifiutare bozze/anteprime e URL insicuri.
+- Verificare firma e versione firmata prima di rendere disponibile l’installazione;
+  timeout, limiti, annullamento ed errori recuperabili. Nessun downgrade implicito.
+- Creare e verificare un backup `.nodex` di tutte le campagne, con immagini e
+  allegati, prima di ogni tentativo d’installazione. Ricevuta e preferenze a fianco;
+  backup fallito blocca l’installer. Non eliminare automaticamente copie precedenti.
+- Usare il componente ufficiale Tauri. Tenere chiavi private cifrate fuori Git,
+  artefatti firmati e canale pubblico separati dai pacchetti AI grandi M11.
+- Accettazione: firme/manomissioni/versioni, discovery anonima, backup/ripristino
+  con immagini, concorrenza Store/AI/MCP, errori download/backup e test desktop.
+  Primo bootstrap manuale; prova upgrade pubblico e altri OS restano distinte.
+
+Istruzioni ed evidenze: docs/UPDATES.md e docs/STATUS.md. SQLite 015 invariato.

@@ -1,5 +1,58 @@
 # Stato Chronexus — 25 ottobre 2026
 
+## M15 — aggiornamento interno, versione 0.4.0
+
+Implementati nelle impostazioni globali: controllo esplicito, download annullabile,
+verifica firma/versione e installazione ufficiale Tauri con backup obbligatorio.
+Canale predefinito: API pubblica Forgejo latest; risolve l’unico latest.json della
+release stabile. Alternativa: manifesto HTTPS statico configurabile. Nessun login,
+controllo all’avvio o invio di campagne. Store bloccato tra snapshot e installer,
+AI attiva rifiutata; nessun nuovo strumento MCP. SQLite 015 e appID invariati.
+
+Ogni tentativo di installazione crea un .nodex verificato con tutte le campagne,
+immagini e allegati gestiti; ricevuta SHA-256 con preferenze UI/canale a fianco.
+Errore backup/ricevuta impedisce l’installer; nessuna cancellazione automatica.
+Chiave privata cifrata e password protetta con Windows DPAPI fuori Git. Chiave
+pubblica/versione firmata incorporate; runtime/pesi AI separati. docs/UPDATES.md.
+
+Verifiche completate prima della build finale:
+- pnpm test: PASS, 136 test / 32 file; pnpm lint, typecheck/build, format:check PASS.
+- cargo test offline: PASS, 96 unitari + 1 integrazione crittografica. Un test
+  del pacchetto release locale è ignorato nel run ordinario perché richiede file
+  firmati; sarà eseguito esplicitamente dopo la build, senza dichiararlo già PASS.
+- cargo fmt e clippy --all-targets -- -D warnings: PASS.
+- Python unittest test_updater_manifest.py: PASS, 4 test; MCP Node: PASS, 5 test.
+- React Doctor changed: 82/100, nessun nuovo rilievo.
+- Desktop debug con frontend incorporato e profilo sintetico: schermata/versione,
+  rifiuto HTTP, canale API Forgegit anonimo non ancora pubblicato, axe 0 e
+  chiusura ordinaria PASS. Non usa il browser personale. L’uscita
+  nativa supera quindi il controllo lasciato aperto nel checkpoint M14.
+- API repository anonima: HTTP 200, private:false dopo la modifica dell’utente.
+  API latest: 404, nessuna release stabile pubblicata al momento della verifica.
+
+Distribuzione 0.4.0: installer firmato/manifesto e prova firma sul pacchetto reale
+in preparazione. Non confondere la chiave updater con Authenticode. Upgrade pubblico
+tra due versioni updater, macOS/Linux e riavvio dopo installazione non ancora
+certificati. La prima 0.4.0 richiede bootstrap manuale dalle vecchie versioni.
+Nuove stringhe con fallback italiano; nessuna traduzione completa inventata.
+
+Il controllo del browser è stato interrotto dall’utente nel turno precedente;
+nessun’altra automazione del suo browser è stata eseguita. La visibilità pubblica
+è stata modificata dall’utente e poi verificata tramite API anonima.
+M11 v0.2.0 resta bozza incompleta con allegati AI grandi: non modificarla per M15.
+Prossimo passo: verificare firma del nuovo installer e pubblicare il canale 0.4.0
+solo dopo upload/download anonimi verificati, senza sovrascrivere tag o asset.
+
+Skill applicate: tauri-v2/rust-best-practices per updater e Store; react-testing e
+react-doctor per UX/regressioni; frontend-design per riuso del tema esistente;
+systematic-debugging per il manifesto Windows dei test; webapp-testing per il
+profilo desktop sintetico. Computer-use consultata e interrotta dall’utente per
+il solo tentativo precedente sul browser. Nessuna nuova skill installata.
+
+I checkpoint seguenti sono storici.
+
+# Stato Chronexus — 25 ottobre 2026
+
 ## M14 — integrazione nascosta per assistenti esterni, versione 0.3.0
 
 Operativa su Windows: bridge locale autenticato, disattivo all'avvio ordinario,

@@ -18,7 +18,11 @@ import {
 } from "../../i18n/store";
 import { preferencesApi } from "../../i18n/preferencesApi";
 import { errorMessage } from "../journal/api";
-export default function LanguageSettings() {
+export default function LanguageSettings({
+  disabled = false,
+}: {
+  disabled?: boolean;
+}) {
   const preferences = usePreferences();
   const [pending, setPending] = useState(false),
     [error, setError] = useState("");
@@ -53,7 +57,7 @@ export default function LanguageSettings() {
           {tr("Lingua dell’interfaccia")}
           <select
             value={preferences.locale}
-            disabled={pending}
+            disabled={pending || disabled}
             onChange={(event) =>
               void change({
                 ...preferences,
@@ -72,7 +76,7 @@ export default function LanguageSettings() {
           {tr("Modalità di scrittura")}
           <select
             value={preferences.script}
-            disabled={pending}
+            disabled={pending || disabled}
             onChange={(event) =>
               void change({
                 ...preferences,
@@ -96,7 +100,7 @@ export default function LanguageSettings() {
           <input
             type="checkbox"
             checked={preferences.showOriginal}
-            disabled={pending}
+            disabled={pending || disabled}
             onChange={(event) =>
               void change({
                 ...preferences,
@@ -157,7 +161,7 @@ export default function LanguageSettings() {
       <button
         type="button"
         className="language-recovery"
-        disabled={pending}
+        disabled={pending || disabled}
         lang="it"
         dir="ltr"
         onClick={() =>

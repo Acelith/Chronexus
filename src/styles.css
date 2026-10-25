@@ -1913,3 +1913,14 @@ textarea::placeholder {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.update-notes {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  max-height: 16rem;
+  overflow: auto;
+}
+.update-path {
+  overflow-wrap: anywhere;
+}

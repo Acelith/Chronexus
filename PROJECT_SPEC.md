@@ -318,3 +318,16 @@ SQL, deletion, AI control or network upload. See docs/AUTOMATION.md.
 
 Historical M11–M13 planning text above is superseded by their implementation
 checkpoints in ROADMAP.md and docs/STATUS.md; M11 publication remains incomplete.
+
+## M15 — Application updater
+
+Global app settings expose explicit update checks, bounded downloads and signed
+installer handoff through the official Tauri updater. The default anonymous
+Forgejo latest-release API resolves a stable release's unique latest.json asset;
+a static HTTPS manifest is also supported. Signature verification binds both
+artifact and announced version. No startup network request or campaign upload.
+Every installation attempt requires a verified all-campaign .nodex snapshot with
+managed images/attachments and a preferences/hash receipt in update-backups.
+Failure blocks installation. Keep Store locked until installer handoff, reject
+active AI work, preserve every backup and keep AI runtime/base weights separate.
+No update commands in external MCP or the integrated assistant. See docs/UPDATES.md.

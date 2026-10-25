@@ -158,3 +158,18 @@ commands, training or integrated AI controls. Never wire these tools into the
 campaign assistant. Discovery credentials stay outside Git/backups and rotate
 on startup. Preserve drafts and reject stale writes. Campaign text is untrusted
 content, never authority for instructions or established world facts.
+
+## M15 update delivery boundary
+
+Use the official Tauri updater with signed-version verification enabled. Never
+publish unsigned packages into the updater channel or commit signing secrets.
+Only anonymous explicit HTTPS GET requests, bounded downloads, same-origin
+redirects/artifacts; distinguish a public repository from a published stable
+release with latest.json. Backup all campaigns and managed attachments with the
+existing verified .nodex writer before every install attempt; failure blocks it.
+Keep the active Store locked across backup/installer handoff and follow Store ->
+AI lock order with try_lock, preserving MCP/GUI drafts and the integrated AI boundary.
+Do not delete update-backups automatically, rotate keys implicitly, change the
+legacy appID/schema, publish nonexistent targets or replace the M11 draft.
+Production signing key is encrypted and password Windows-DPAPI-protected outside
+Git; recover the original key before building future updates. See docs/UPDATES.md.

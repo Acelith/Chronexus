@@ -419,3 +419,16 @@ Installa-AI.cmd per gli altri quattro. Non sono inclusi dati personali o trainin
 
 La pubblicazione 0.2.0 è attualmente in bozza: gateway HTTP 502 sugli allegati AI
 grandi. Pacchetti completi disponibili localmente; stato reale in docs/STATUS.md.
+
+## Aggiornamenti interni (0.4.0)
+
+In **Impostazioni dell’app → Aggiornamenti dell’app** sono disponibili controllo,
+download e installazione con backup verificato obbligatorio. Nessun login client;
+endpoint Forgegit pubblico o manifesto HTTPS configurabile. Le versioni precedenti
+richiedono una prima installazione manuale. Procedura: [docs/UPDATES.md](docs/UPDATES.md).
+
+`pnpm package:desktop` produce ora artefatti updater firmati e richiede la chiave
+privata del manutentore, che non è nel repository. Per una build locale non
+destinata al canale aggiornamenti, usare `pnpm icons` e
+`pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'`.
+Non pubblicare quella build come aggiornamento firmato.

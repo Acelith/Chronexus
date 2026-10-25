@@ -175,3 +175,9 @@ Usare prima `finalize=False` per completare upload e download mantenendo la bozz
 aggiornare le note con le prove effettive e poi finalizzare. Controllare l’insieme
 esatto degli allegati prima di rendere pubblica la release. I test della ripresa
 sono 18; nessuna modifica al binario o ai dati dell’app richiede una nuova build.
+
+### Aggiornamenti dell’app 0.4.0
+
+Il canale updater usa il solo installer firmato con `.sig` e `latest.json`, senza
+ridistribuire a ogni versione i pesi AI della M11. Compilazione protetta e procedure
+sono in docs/UPDATES.md; i pacchetti precedenti e la bozza v0.2.0 restano distinti.
