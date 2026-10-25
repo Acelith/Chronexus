@@ -437,7 +437,8 @@ and acceptance in ROADMAP M19.
 
 Planned 25 October 2026, not implemented. M23: measured audit of correctness,
 security, duplication and performance with docs/AUDIT.md. M24: optional shared
-campaigns through a self-hosted Chronexus server (accounts, roles, invites,
+campaigns through a self-hosted Chronexus server, developed in a separate
+repository with a versioned API contract (accounts, roles, invites,
 per-item sharing defaulting to private, incremental sync with visible conflicts
 and revocation); the local SQLite archive stays the primary copy and nothing is
 sent while sharing is off. M25: Android APK with Tauri 2 mobile, signing in to the

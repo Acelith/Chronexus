@@ -510,3 +510,15 @@ contenuto con provenienza: non rende la traduzione una fonte canonica e permette
 backup, invalidazione e svuotamento senza riscrivere gli originali. Il blocco AI
 condiviso impedisce concorrenza con assistente, training e installazione updater.
 La sostituzione del modello appartiene alla qualifica M18.
+
+## 25 ottobre 2026 — Server self-hosted in un repository separato (M24, pianificata)
+
+Per la campagna condivisa l’utente ha scelto un server Chronexus self-hosted al
+posto del peer-to-peer: un account unico per desktop e Android (M25), permessi per
+singolo elemento e disponibilità anche con gli altri dispositivi spenti. Il server
+sta in un repository esterno (proposto `acelith/Chronexus-Server`) perché ha cicli
+di rilascio, dipendenze, distribuzione (Docker) e superficie di sicurezza propri;
+l’app resta installabile e utilizzabile senza di esso. Il confine è un’API HTTP
+versionata con contratto pubblicato dal server; nessuna copia manuale di tipi o
+schema fra i repository. Hosting, registrazione e cifratura end-to-end restano da
+decidere all’avvio di M24.

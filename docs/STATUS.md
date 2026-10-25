@@ -3,7 +3,7 @@
 Aggiunte su richiesta dell’utente dopo la release 0.8.0, nessuna implementata:
 M23 audit completo del codice (prossima), M24 campagna condivisa (proposta: server
 Chronexus self-hosted con condivisione selettiva, P2P valutato e non scelto come
-base; da confermare con l’utente), M25 app Android APK con lo stesso account del
+base; confermato dall’utente, da sviluppare in un repository separato), M25 app Android APK con lo stesso account del
 server. Dettagli in ROADMAP.
 
 # Stato Chronexus — 25 ottobre 2026 (release 0.8.0)

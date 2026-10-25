@@ -62,7 +62,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 33 | M20 | README di qualità con immagini, guida rapida e crediti | 25/10/2026 | `d1d1e89` | Resa verificata su github.com |
 | 34 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Consegnata su Windows, release 0.8.0 | — | Spostata in fondo su istruzione dell’utente; eseguita il 25 ottobre 2026 |
 | 35 | M23 | Audit completo del codice: bug, ripetizioni, ottimizzazione | Pianificata, **prossima** | — | Richiesta il 25/10/2026 |
-| 36 | M24 | Campagna condivisa con server self-hosted e condivisione selettiva | Pianificata | — | Dopo M23; scelta server/P2P da confermare |
+| 36 | M24 | Campagna condivisa con server self-hosted e condivisione selettiva | Pianificata | — | Dopo M23; server confermato, in un repository separato |
 | 37 | M25 | App Android (APK) collegata al server con lo stesso account | Pianificata | — | Dipende da M24 |
 
 
@@ -1362,12 +1362,22 @@ resta **facoltativa**: senza attivarla Chronexus funziona offline come oggi.
 | **Server Chronexus self-hosted** | Account unico per desktop e Android, permessi per elemento, sempre raggiungibile, backup centrale, adatto a M25 | Va ospitato e mantenuto; dati di campagna sul server |
 | Servizio cloud di terzi (Firebase/Supabase hosted) | Rapido | Dati presso terzi, dipendenza esterna: contrario ai principi del progetto |
 
-**Scelta proposta:** server Chronexus **self-hosted** (Rust, stesso dominio dei
-dati, container Docker) sull’infrastruttura dell’utente, accanto a Forgegit, con
+**Scelta confermata dall’utente (25/10/2026):** server Chronexus **self-hosted**
+(Rust, container Docker) sull’infrastruttura dell’utente, accanto a Forgegit, con
 il desktop che resta **local-first**: archivio SQLite locale come oggi e
 sincronizzazione esplicita solo degli elementi condivisi. Il P2P resta un’opzione
-futura per sessioni dal vivo, non la base. Da confermare con l’utente prima
-dell’implementazione: ospitalità del server, registrazione, cifratura end-to-end.
+futura per sessioni dal vivo, non la base.
+
+**Repository separato:** il server vive in un **repository esterno** su Forgegit
+(nome proposto `acelith/Chronexus-Server`), con codice, versioni, release e
+immagini Docker propri; questo repository contiene solo il client di
+sincronizzazione del desktop/Android. Il contratto fra i due è un’API HTTP
+versionata e documentata (schema OpenAPI e tipi condivisi pubblicati dal server,
+mai copiati a mano), con compatibilità dichiarata fra versioni di app e server.
+Il repository va creato all’avvio di M24, su richiesta esplicita, con lo stesso
+modello di commit, test e documenti (`AGENTS.md`, `ROADMAP.md`, `docs/STATUS.md`).
+Restano da confermare prima del codice: dominio/hosting, registrazione (solo inviti
+o aperta) e cifratura end-to-end.
 
 ### M24.1 — Server e account
 

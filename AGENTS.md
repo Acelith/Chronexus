@@ -281,8 +281,9 @@ README screenshots come only from synthetic campaigns (scripts/qa/m20-readme-med
 
 Planned 25 October 2026, in order: M23 full code audit (bugs, duplication,
 optimization, flaky MCP test, report in docs/AUDIT.md, no format/schema changes
-without migration); M24 opt-in shared campaigns, proposed as a self-hosted
-Chronexus server with accounts and per-item selective sharing (default private,
+without migration); M24 opt-in shared campaigns through a user-confirmed self-hosted
+Chronexus server kept in a separate repository (proposed acelith/Chronexus-Server,
+versioned HTTP API contract; this repo holds only the sync client) with accounts and per-item selective sharing (default private,
 desktop stays local-first; P2P evaluated and not chosen as the base); M25 Android
 APK (Tauri 2 mobile) using the same M24 account, read-mostly first. M24/M25 change
 the no-account/no-server invariant only as an explicit opt-in and need user
