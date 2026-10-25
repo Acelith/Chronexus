@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | [Open5e v2](https://open5e.com/api-docs/) | API REST pubblica con ricerca trasversale, creature, incantesimi, oggetti e documenti con edizione/editore/licenze | Aggiunta come wiki opzionale; fonte distinta per ogni voce |
 | [D&D 5e API](https://docs.dnd5eapi.co/introduction) | Catalogo SRD 2014 già integrato e modificabile nelle importazioni personali | Conservato; nessuna sostituzione degli incantesimi salvati |
-| [Wikidot](https://developer.wikidot.com/doc:api) | API XML-RPC autenticata della piattaforma, non un catalogo D&D pubblico equivalente verificato | Nessuno scraping nella release attuale; lettura HTML e selettore pianificati in M16 |
+| [Wikidot](https://developer.wikidot.com/doc:api) | API XML-RPC autenticata della piattaforma, non un catalogo D&D pubblico equivalente verificato | M16: lettura HTML pubblica di dnd5e.wikidot.com, senza API/chiavi; fonte predefinita |
 
 Prova reale: ricerca `magic missile`, apertura della voce SRD 5.1, documento
 `srd-2014`, licenze CC BY 4.0 e OGL dichiarate dall'API. Il catalogo Open5e
@@ -64,6 +64,19 @@ SRD 2014 separato. Questa consegna non implementa scraping né modifica impostaz
 Le verifiche citate sopra appartengono all’indagine precedente, non a nuovi test
 eseguiti durante il riordino documentale. Criteri completi in ROADMAP.md, M16.
 
+
+### Verifica di implementazione M16 — 25 ottobre 2026
+
+`robots.txt` ricontrollato: per tutti gli agenti vieta solo percorsi paginati
+`/*/p/*` e varianti, e blocca l’agente `voltron`; le pagine usate (`/spells`, `/`,
+`/lineage`, `/wondrous-items` e le singole voci) non sono vietate. Il piè di pagina
+dichiara «CC BY-SA 3.0 salvo diversa indicazione»: Chronexus mostra questa
+dichiarazione per ogni voce senza considerarla una licenza dei contenuti di gioco
+degli editori, e non ridistribuisce cataloghi. Il sito ospita regole 2014; le
+2024 sono su una wiki separata non usata. Struttura osservata: titolo in
+`.page-title`, contenuto in `#page-content`, incantesimi con «Source:», riga
+livello/scuola e paragrafo «Casting Time/Range/Components/Duration». Pagine reali
+salvate solo in una cartella temporanea per il test QA ignorato, mai in Git.
 
 Aggiornamento dei requisiti M16 (solo pianificazione): cache offline svuotabile
 per fonte o interamente, senza cancellare copie importate/dati delle campagne.

@@ -428,6 +428,31 @@ un provider Wikidot funzionante. La release attuale resta Open5e. Requisiti e
 criteri di accettazione in ROADMAP M16; nessun adapter, migrazione o UI aggiunti ora.
 
 
+## 2026-10-25 — M16 implementata: adapter Wikidot, cache separata, epoch
+
+- L’utente ha chiesto di eseguire M16: precede M15a, che resta pianificata.
+- HTML Wikidot letto dal backend Rust, non dalla WebView: nessun nuovo host nella
+  CSP, controllo di redirect/dimensioni/tempi e nessun cookie. `scraper` 0.29 (ISC,
+  html5ever MIT/Apache, cssparser/selectors MPL-2.0 non modificati) senza feature
+  predefinite. Il risultato salvato è testo strutturato, mai l’HTML originale.
+- Si scarica l’indice della categoria e si filtra localmente: il termine digitato
+  non lascia il dispositivo. Una richiesta alla volta, ≥1,5 s fra le richieste,
+  nessun retry automatico (403/429 riportati come limitazione del sito).
+- Tabella `wikidot_cache` (migrazione 016) separata da `wiki_cache` Open5e, così
+  ogni fonte si svuota da sola senza mescolare chiavi o eviction. Backup schema 016
+  non apribili dalle versioni precedenti (stesso criterio delle migrazioni passate).
+- Preferenza `wiki-preferences.json` separata da `interface-preferences.json`: un
+  campo nuovo nel file v2 avrebbe fatto ricadere i client 0.4.0 nel recupero
+  italiano. File assente = Wikidot non esplicito; la ricevuta pre-aggiornamento
+  lo include. Il ripristino non tocca la cartella radice.
+- Epoch atomico della cache: ogni svuotamento lo incrementa e annulla le richieste
+  Wikidot; le scritture (anche Open5e dal frontend) che portano un epoch vecchio sono
+  rifiutate dentro il lock del database, quindi nulla ricompare dopo lo svuotamento.
+- `catalogSource.provider` opzionale e omesso per SRD: le voci esistenti mantengono
+  lo stesso JSON. Le chiavi AI `wikidot/<pagina>` usano edizione 5e-2014.
+- Cambio fonte: dialogo con focus sull’azione, Escape = rifiuto; solo l’accettazione
+  salva Open5e e ripete una volta la ricerca; un errore Open5e non riapre proposte.
+
 ## 2026-10-25 — M15a prima di M16; cache eliminabile e cambio fonte su consenso
 
 Inserire M15a tra l’updater consegnato M15 e lo scraping pianificato M16, senza

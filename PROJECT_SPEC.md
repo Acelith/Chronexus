@@ -336,7 +336,7 @@ active AI work, preserve every backup and keep AI runtime/base weights separate.
 No update commands in external MCP or the integrated assistant. See docs/UPDATES.md.
 
 
-## M15a — Epic update herald (planned before M16)
+## M15a — Epic update herald (planned; M16 was executed first on request)
 
 After a real compatible update check, announce the new version through a medieval
 popup: a vassal/herald playing a trumpet and holding a parchment update manifesto.
@@ -349,12 +349,15 @@ reuse M15 download/signature verification and mandatory backup before installati
 no installer starts from an animation alone. This is planned behavior; current
 0.4.0 still checks explicitly and has no herald popup. See ROADMAP M15a.
 
-## M16 — Wikidot HTML and wiki selection (planned, not implemented)
+## M16 — Wikidot HTML and wiki selection (implemented on Windows)
 
-The user requested a new milestone, not immediate runtime changes. Current
-released wiki: Open5e v2; SRD character catalog: D&D 5e API 2014. On M16 delivery,
-global app settings must offer Wikidot D&D and Open5e, defaulting to Wikidot for
+Implemented 25 October 2026 at the user's explicit request, before M15a. The
+published 0.4.0 still uses Open5e; the next release will carry M16. Global app
+settings offer Wikidot D&D and Open5e, defaulting to Wikidot for
 new profiles and existing preferences without an explicit provider choice.
+Implementation: `wiki-preferences.json` v1 outside restore generations, Rust
+adapter `src-tauri/src/wikidot/`, separate `wikidot_cache` (schema 016) and
+`catalogSource.provider = "wikidot"` for imported spells. Evidence: docs/STATUS.md.
 Persist the choice, show the active source and preserve saved imports/identity;
 if Wikidot cannot supply information, explicitly ask whether to switch to Open5e.
 Persist the new provider and retry only after consent; declining keeps Wikidot
@@ -368,8 +371,7 @@ Extract actual fields, preserve URLs/source/edition and distinguish UA/homebrew.
 Preview supported imports; incomplete/changed markup must surface missing fields,
 not invented data. Verify site instructions/robots and content rights before
 implementation/distribution; public access does not make a bundled catalog licensed.
-Acceptance and migration/default rules are specified in ROADMAP M16. No database,
-preferences, UI or package/version has been changed by this planning task.
+Acceptance and migration/default rules are specified in ROADMAP M16.
 
 
 M16 also requires a user-controlled offline-cache clear action in app settings,

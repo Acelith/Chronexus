@@ -411,3 +411,15 @@ Markdown/visuale e composizione simulata, ricerca CJK e UUID originario conserva
 Nessuna richiesta remota nei percorsi osservati. Nessuna prova dichiarata su
 IME di sistema, lettore/display Braille fisico, macOS o Linux.
 Script protetti, fonti, ripetizione e limiti: I18N.md. Evidenze locali .tools/m10.
+
+## Collaudo M16 — Wikidot, scelta della fonte e cache
+
+Usa un eseguibile **debug** con Vite sulla porta 1420, `NODEX_DEV_DATA_DIR` e
+`WEBVIEW2_USER_DATA_FOLDER` su cartelle assolute **vuote** sotto `.tools/m16/` e
+`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9223`. Imposta
+`CHRONEXUS_WIKI_QA=isolated` ed esegui `node scripts/qa/m16-wiki.mjs check`; chiudi
+la finestra normalmente, riaprila con le stesse cartelle ed esegui `restart`.
+Lo script legge davvero un indice e una pagina pubblici di dnd5e.wikidot.com e, solo
+dopo il consenso simulato, una ricerca Open5e. Rapporti e schermate in `.tools/m16/`.
+Il parser sulle pagine reali si prova salvandole fuori dal repository e lanciando
+`cargo test real_saved_pages -- --ignored` con `CHRONEXUS_QA_WIKIDOT_DIR`.

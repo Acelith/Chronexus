@@ -20,6 +20,8 @@ Le versioni precedenti richiedono una prima installazione manuale della 0.4.0.
    chiude l’app. Riaprire Chronexus al termine. Non viene riattivato implicitamente
    il bridge per assistenti esterni. Su altri sistemi il riavvio è manuale.
 
+Da M16 la ricevuta include anche `wikiPreferences` (fonte wiki scelta), se salvata.
+
 I backup si trovano nella cartella dati, sottocartella `update-backups`; il
 percorso esatto compare nelle impostazioni. Hanno nomi unici e non vengono
 sovrascritti o eliminati automaticamente. Un nuovo tentativo d’installazione crea

@@ -3,7 +3,8 @@
 Aggiornata il 25 ottobre 2026. La numerazione storica M0–M15 resta stabile per
 non rendere ambigui commit, guide e release. I suffissi **a/b/c/d** identificano
 estensioni inserite tra fasi esistenti: quelle già consegnate sono retrospettive;
-la nuova M15a è invece pianificata prima di M16.
+M15a resta pianificata, mentre M16 è stata eseguita prima su richiesta esplicita
+(la sua sezione resta dopo M15a per non spostare i riferimenti).
 Le sezioni e la tabella seguono l’ordine delle implementazioni Git, non l’ordine
 numerico degli ID: **M12 e M13 precedono M11**, eseguita alla fine su richiesta.
 Le date indicano consegne/inizio dei lavori, non una certificazione multipiattaforma.
@@ -12,16 +13,16 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 
 ## Metodo e stato
 
-- Eseguire soltanto le milestone o le parti autorizzate dall’utente; questa
-  richiesta pianifica M15a e aggiorna M16: solo documentazione, senza avviare
-  lo sviluppo delle funzionalità.
+- Eseguire soltanto le milestone o le parti autorizzate dall’utente. Il 25 ottobre
+  l’utente ha chiesto esplicitamente di eseguire M16: è stata implementata prima
+  di M15a, che resta pianificata senza cambiare il proprio ID.
 - Suddividere il lavoro in parti verificabili: implementazione, test reali,
   correzioni, commit dettagliati e checkpoint in docs/STATUS.md.
 - «Operativa Windows» non significa accettazione completa su macOS/Linux,
   revisione linguistica o installazione personale. Mantenere i residui visibili.
 - Milestone originarie ed estensioni retrospettive condividono lo stesso codice:
   non sono funzionalità da implementare una seconda volta.
-- Nessuna nuova versione, build, release o pubblicazione per questo riordino.
+- La consegna M16 non ha ancora creato versioni, pacchetti o release.
 
 ## Registro cronologico
 
@@ -53,8 +54,8 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 24 | M11 | Distribuzione Forgegit app/AI | 24/10/2026; app completata 25/10 | `43467fb → 4abb4e3; M15` | Parziale: AI grandi aperti |
 | 25 | M14 | Assistenti esterni MCP nascosti | 25/10/2026 | `fa38d2e` | Windows |
 | 26 | M15 | Updater, backup pre-installazione e release 0.4.0 | 25/10/2026 | `c7d95ca → ad7760d` | Windows; canale pubblico |
-| 27 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | Pianificata | `Richiesta attuale` | Da implementare prima di M16 |
-| 28 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | Pianificata | `Richiesta attuale` | Da implementare dopo M15a |
+| 27 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | 25/10/2026 | `2fbf17a → 923516f` | Windows; altri OS aperti |
+| 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | Pianificata | — | Prossima milestone |
 
 
 ## M0 - Foundation and real local database
@@ -719,9 +720,10 @@ accesso anonimo, sorgente compilato d75f5f3. Bootstrap manuale e discovery API/
 manifesto, firme/versioni e backup verificati. Resta la prova di upgrade tra due
 versioni updater pubbliche e l’accettazione macOS/Linux. Dettagli in STATUS.md.
 
-## M15a — Annuncio epico degli aggiornamenti (pianificata, prima di M16)
+## M15a — Annuncio epico degli aggiornamenti (pianificata)
 
-**Stato:** nuova milestone richiesta dopo M15 e prima di M16; non implementata.
+**Stato:** richiesta dopo M15; non implementata. Era prevista prima di M16, ma
+l’utente ha chiesto di eseguire M16 per prima: resta la prossima milestone.
 Estende la presentazione dell’updater esistente, senza sostituire firme e backup.
 L’ID M16 resta assegnato a Wikidot; non rinumerare i riferimenti precedenti.
 
@@ -771,11 +773,19 @@ L’ID M16 resta assegnato a Wikidot; non rinumerare i riferimenti precedenti.
 - Regressione del percorso M15: firma errata e backup fallito bloccano l’installer;
   nessun download/installazione senza l’azione esplicita dell’utente.
 
-## M16 — Scraping HTML Wikidot e scelta della wiki (pianificata)
+## M16 — Scraping HTML Wikidot e scelta della wiki (operativa Windows)
 
-**Stato:** nuova milestone richiesta il 25 ottobre 2026; non implementata.
-La release attuale 0.4.0 usa ancora Open5e per la Wiki D&D e D&D 5e API per il
-catalogo SRD della scheda. Questa modifica documentale non cambia il programma.
+**Stato aggiornato:** implementata il 25 ottobre 2026 su richiesta esplicita, prima
+di M15a. Schema 016, adapter Rust, selettore globale, cache separata eliminabile,
+proposta di cambio fonte su consenso e importazione esplicita degli incantesimi.
+Evidenze, test, collaudo desktop reale e limiti in [docs/STATUS.md](docs/STATUS.md).
+Restano macOS/Linux e la revisione delle nuove stringhe nelle altre lingue.
+La release pubblicata 0.4.0 non contiene ancora M16.
+
+Scelte di implementazione verificate: indici `spells`, homepage (talenti,
+background, classi/sottoclassi), `lineage` e `wondrous-items`; robots.txt del
+25/10/2026 vieta solo percorsi paginati `/p/`; la pagina dichiara CC BY-SA 3.0
+salvo diversa indicazione, mostrata come licenza dichiarata, non garantita.
 
 ### M16.1 — Fonte selezionabile nelle impostazioni globali
 
@@ -883,7 +893,7 @@ catalogo SRD della scheda. Questa modifica documentale non cambia il programma.
 
 Ricerca già svolta: [docs/RESEARCH_DND.md](docs/RESEARCH_DND.md). API XML-RPC e
 scraping HTML sono due accessi distinti; una lettura XML-RPC anonima ha restituito
-401 nell’indagine precedente. Nessuna implementazione M16 è dichiarata completata.
+401 nell’indagine precedente. M16 usa solo l’HTML pubblico, senza chiavi.
 
 ## Accettazioni residue e prossima fase
 
@@ -896,9 +906,10 @@ scraping HTML sono due accessi distinti; una lettura XML-RPC anonima ha restitui
 - **M11:** distribuzione dei pacchetti AI grandi ancora aperta; la release app
   0.4.0 di M15 non pubblica né completa la vecchia bozza 0.2.0.
 - **M15:** upgrade reale fra due versioni dotate di updater e verifica altri OS.
-- **Prossima nuova milestone funzionale: M15a**, annuncio epico degli aggiornamenti;
-  segue **M16**, scraping/gestione fonti e cache. Entrambe solo pianificate:
-  questa consegna non ne autorizza o dichiara l’implementazione.
+- **M16:** macOS/Linux, traduzioni delle nuove stringhe e cambi futuri dell’HTML
+  di Wikidot; nessuna release contenente M16 pubblicata finora.
+- **Prossima nuova milestone funzionale: M15a**, annuncio epico degli aggiornamenti,
+  solo pianificata e da implementare su richiesta.
 
 ## Fuori dal perimetro attuale
 

@@ -340,7 +340,21 @@ ricercabili. Le immagini usano gli allegati esistenti e sono incluse nel backup.
 Rimuovere dal party conserva pagina, appunti e immagini. Il party non crea
 schede giocabili complete aggiuntive o relazioni fattuali implicite.
 
-**Wiki D&D** consulta [Open5e v2](https://open5e.com/api-docs/), accanto al catalogo
+**Wiki D&D (M16).** In **Impostazioni dell’app → Fonti D&D / Wiki** scegli
+**Wikidot D&D 5e** (predefinita) oppure **Open5e**; la scelta è globale e non cambia
+con il ripristino delle campagne. Con Wikidot scegli una categoria (incantesimi,
+talenti, specie, background, classi, oggetti magici) e premi **Cerca su Wikidot**:
+Chronexus scarica l’indice pubblico della categoria e filtra il nome sul
+dispositivo, poi apri una voce. Il testo è mostrato come testo semplice con fonte
+dichiarata, origine (pubblicato, Unearthed Arcana, homebrew), URL e licenza della
+pagina; i campi non riconosciuti sono segnalati, non inventati. Per un incantesimo,
+**Prepara importazione nella scheda** apre il modulo in Incantesimi: si salva solo
+con **Salva voce**. Se Wikidot non fornisce informazioni, Chronexus chiede se usare
+Open5e: solo accettando la scelta viene salvata e la ricerca ripetuta lì.
+**Svuota cache offline** elimina le copie consultate di una fonte o di entrambe,
+dopo conferma; campagne, incantesimi importati, immagini, backup e scelta restano.
+
+**Open5e** consulta [Open5e v2](https://open5e.com/api-docs/), accanto al catalogo
 SRD personale esistente. Cerca termini inglesi, apri una voce e controlla fonte,
 edizione e licenze; le risposte consultate rimangono in SQLite e nel backup.
 La ricerca invia solo il termine esplicitamente digitato; nessun appunto viene

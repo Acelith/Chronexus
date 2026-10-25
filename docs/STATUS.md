@@ -1,3 +1,67 @@
+# Stato Chronexus — 25 ottobre 2026 (M16)
+
+## M16 — Wikidot, scelta della fonte e cache eliminabile: operativa Windows
+
+Implementata su richiesta esplicita dell’utente **prima di M15a**, che resta
+pianificata. Versione sorgente ancora 0.4.0; schema SQLite **016** (additivo).
+
+- **Impostazioni dell’app → Fonti D&D / Wiki**, anche senza campagna: Wikidot D&D 5e
+  (predefinita) oppure Open5e. Preferenza globale `wiki-preferences.json` v1 fuori
+  dalle generazioni di ripristino; file assente = Wikidot, mai scritto in lettura.
+- Adapter Rust di sola lettura per `https://dnd5e.wikidot.com/`: GET HTTPS senza
+  credenziali/cookie, una richiesta alla volta distanziata ≥1,5 s, 2 MiB, timeout,
+  annullamento, redirect solo verso pagine ammesse, nessun nuovo tentativo automatico.
+  Categorie: incantesimi, talenti, specie, background, classi/sottoclassi, oggetti
+  magici. Si scarica solo l’indice della categoria; il nome cercato resta locale.
+- HTML trattato come testo inerte (`scraper` 0.29, ISC): script, frame, moduli,
+  media e pubblicità scartati; limiti di profondità/blocchi/testo; titolo e
+  contenuto assenti → errore. Incantesimi: campi reali o elenco dei mancanti,
+  mai valori inventati. Fonte dichiarata, origine (pubblicato/UA/homebrew/non
+  indicata), edizione 5e-2014, URL e licenza dichiarata dalla pagina.
+- Cache Wikidot separata (`wikidot_cache`, max 200 voci + indici) inclusa e
+  validata nei backup. **Svuota cache offline** per Wikidot, Open5e o entrambe, con
+  conferma, avviso sulle fonti AI approvate e invalidazione delle richieste in corso
+  (epoch lato Rust, anche per i salvataggi Open5e). Nessun riscaricamento automatico.
+- Wikidot senza informazioni (nessun risultato, errore rete/HTTP, campi non
+  riconosciuti): dialogo «Vuoi usare Open5e?». Accettare salva Open5e e ripete una
+  volta la ricerca; rifiuto/Escape restano su Wikidot senza richieste a Open5e.
+- Importazione esplicita degli incantesimi: anteprima → modulo modificabile in
+  Incantesimi → **Salva voce**. `catalogSource.provider = "wikidot"` conservato;
+  le voci SRD mantengono il JSON precedente. Export con `SOURCES-WIKIDOT.txt`.
+- Assistente locale: le voci Wikidot in cache sono fonti regole 5e-2014 approvabili;
+  se svuotate, le nuove domande ricevono l’errore esplicito già esistente.
+
+Verifiche realmente eseguite:
+- `cargo test`: 106 PASS + 1 test QA ignorato; eseguito a parte sulle pagine reali
+  salvate fuori Git: 574 incantesimi, 199 talenti, 247 classi/sottoclassi, 102
+  background, 83 specie, 882 oggetti; Acid Splash senza campi mancanti. `cargo fmt`
+  e `clippy --all-targets -D warnings` PASS.
+- Instabilità preesistente: `automation::tests::running_bridge…` e
+  `transport_auth…` falliscono a volte in parallelo; riprodotto anche sul commit
+  base 66865f3 (3 fallimenti su 9 esecuzioni). Passano da soli; non modificati.
+- `pnpm test` 146 PASS / 35 file; lint, typecheck, format:check, i18n:check, build PASS
+  (avviso preesistente sul chunk editor).
+- Desktop Windows debug, profilo isolato vuoto, `scripts/qa/m16-wiki.mjs`
+  `check` + `restart` PASS: default senza campagna e senza rete all’apertura;
+  indice e pagina reali di Wikidot via Rust (nessuna richiesta dalla WebView);
+  importazione salvata solo esplicitamente; rifiuto senza traffico Open5e;
+  accettazione con una sola richiesta Open5e; svuotamento annullato e confermato,
+  Open5e e incantesimo intatti; chiusura ordinaria e riavvio senza richieste.
+
+Limiti: nuove stringhe con fallback italiano (cataloghi non rigenerati); macOS/
+Linux non provati; robots.txt e licenza verificati il 25/10/2026 ma la pagina può
+dichiarare diritti diversi e i contenuti di gioco appartengono agli editori:
+nessun catalogo ridistribuito. Struttura HTML futura del sito non garantita.
+Nessun pacchetto, versione o release creati in questa consegna.
+
+Commit: 2fbf17a backend/migrazione 016; 923516f interfaccia e collaudo; il
+checkpoint documentale segue. Nessun push.
+
+Skill: nessuna Skill specialistica disponibile in questa sessione oltre a quelle
+generiche; usati strumenti ordinari, test Rust/Vitest e Playwright del progetto.
+
+Prossima milestone: **M15a** (annuncio epico degli aggiornamenti).
+
 # Aggiornamento della pianificazione — 25 ottobre 2026
 
 ## Prossime fasi: M15a, poi M16
