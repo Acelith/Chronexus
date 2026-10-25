@@ -111,8 +111,8 @@ dialog.herald[open] {
   outline: none;
 }
 .herald-manifesto h2:focus-visible {
-  outline: 2px solid #6c302b;
-  outline-offset: 4px;
+  outline: 1px dashed #6c302b;
+  outline-offset: 6px;
 }
 .herald-manifesto h3 {
   margin: 20px 0 6px;
@@ -187,6 +187,41 @@ dialog.herald[open] {
   }
   to {
     clip-path: inset(0 0 0 0);
+  }
+}
+/* Raster herald faces right: trumpet and pennant cross the scroll's top roll. */
+dialog.herald.herald-illustrated {
+  width: min(980px, calc(100vw - 32px));
+}
+dialog.herald.herald-illustrated[open] {
+  grid-template-columns: 300px minmax(0, 1fr);
+  align-items: end;
+}
+.herald-illustrated .herald-stage {
+  margin-right: -150px;
+  align-self: center;
+}
+.herald-manifesto.herald-scroll {
+  background-color: transparent;
+  background-size: 100% 100%;
+  border: 0;
+  box-shadow: none;
+  filter: drop-shadow(0 24px 40px #241e17aa);
+  padding: 84px 72px 92px 150px;
+}
+.herald-scroll .herald-notes {
+  background: #f4e6c780;
+}
+@media (max-width: 760px) {
+  dialog.herald.herald-illustrated[open] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .herald-illustrated .herald-stage {
+    width: 150px;
+    margin: 0 auto -40px;
+  }
+  .herald-manifesto.herald-scroll {
+    padding: 70px 44px 80px;
   }
 }
 @media (max-width: 760px) {

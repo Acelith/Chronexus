@@ -78,7 +78,7 @@ export default function HeraldAnnouncement({
   return (
     <dialog
       ref={dialog}
-      className={`herald${still ? " herald-still" : ""}`}
+      className={`herald${heraldArt.herald ? " herald-illustrated" : ""}${still ? " herald-still" : ""}`}
       aria-labelledby="herald-title"
       aria-describedby="herald-summary"
       onCancel={(event) => {
@@ -94,7 +94,7 @@ export default function HeraldAnnouncement({
         )}
       </div>
       <article
-        className="herald-manifesto"
+        className={`herald-manifesto${heraldArt.manifesto ? " herald-scroll" : ""}`}
         style={
           heraldArt.manifesto
             ? { backgroundImage: `url(${heraldArt.manifesto})` }

@@ -1,8 +1,12 @@
 # Illustrazioni dell’araldo (M15a)
 
-Stato: **da fornire**. Finché mancano, l’annuncio mostra l’emblema geometrico
-SVG (trombetta con stendardo) definito in `src/features/updates/HeraldAnnouncement.tsx`.
-Nessuna immagine viene scaricata a runtime.
+Stato: **installate il 25 ottobre 2026**. Illustrazioni fornite dall’utente
+(generate esternamente a partire dai prompt qui sotto, senza dati di campagna) e
+convertite localmente con ffmpeg: `herald.webp` 630×840 con alpha originale (113 KB);
+`manifesto.webp` 1200×857, sfondo bianco reso trasparente con colorkey (94 KB).
+Originali non conservati nel repository. Se un file viene rimosso, impostare la
+voce a `null` in `heraldArt.ts`: torna l’emblema geometrico SVG (trombetta con
+stendardo). Nessuna immagine viene scaricata a runtime.
 
 ## File attesi
 
