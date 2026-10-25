@@ -1,3 +1,47 @@
+# Stato Chronexus — 25 ottobre 2026: M17
+
+M17 implementata su Windows: traduzione esplicita della voce wiki nella lingua
+selezionata dell’app, per Wikidot e Open5e. Originale/provenienza e importazioni
+immutati; bozze automatiche separate e consultabili offline. Schema 017 additivo,
+cache limitata a 100 copie, inclusa nei backup e nello svuotamento per provider.
+I controlli scartano risultati incompleti, numeri alterati e scritture tardive.
+
+Verifiche effettive:
+- Lint e TypeScript PASS; frontend 159 test PASS; i18n 14 test PASS.
+- Rust 115 test PASS complessivi, 2 ignorati (fixture Wikidot locale e prova della
+  firma sul pacchetto finale, da eseguire dopo la build); migrazione 016 → 017,
+  sorgenti immutate, cache per fonte/lingua e backup/restore verificati.
+- Build frontend PASS (avviso preesistente chunk >500 kB); build debug Windows
+  PASS; Clippy senza warning PASS. Formattazione finale PASS.
+- QA desktop su profilo sintetico isolato: Qwen3 4b-instruct su RTX 4080 SUPER,
+  GGUF verificato, cloud disabilitato, 37/37 layer GPU. Traduzione italiana,
+  tedesca e araba con numeri/negazione conservati nella fixture; titoli/termini
+  variabili confermano che non è una revisione linguistica o regole ufficiali.
+- Originale conservato; copia riletta anche con runtime spento e richieste browser
+  pubbliche bloccate. Non equivale a una prova fisica senza rete/firewall.
+- Annullamento reale senza copia parziale; cache clear durante l’inferenza
+  interrompe il lavoro e rifiuta la scrittura tardiva; blocco AI condiviso liberato.
+- Axe sulla voce 0 violazioni; vista 1200/760 px ispezionata. React Doctor 81/100,
+  nessuna nuova segnalazione dopo la correzione delle identità dei blocchi.
+- Test script rilascio 26 PASS; protocollo MCP 5 PASS, senza nuovi tool esposti.
+
+Distribuzione 0.6.0: versione e note preparate; pacchetto firmato e pubblicazione
+ancora da completare. Non dichiarare questa build installata sul profilo personale.
+Nessun contenuto/fixture privata o peso AI in Git. Prove locali in `.tools/m17/`,
+script ripetibili in `scripts/qa/m17-*.mjs`, guida `docs/WIKI_TRANSLATION.md`.
+
+Limiti: prima traduzione richiede Ollama/GPU e Qwen approvato già presenti;
+24.000 byte/500 frammenti/240 s, errore e originale per i testi oltre limite;
+ticinese e altre lingue da revisionare, Klingon/Romulano con fallback esplicito.
+macOS/Linux, lettori assistivi reali e upgrade installato restano aperti.
+**Prossima milestone: M18**, sostituzione dei Qwen con il modello locale
+qualificato, ancora pianificata. Non anticipata da M17.
+
+Skill applicate: Tauri v2 e Rust Best Practices (IPC, runtime e validazioni),
+SQLite Expert (migrazione/cache), Impeccable (contesto esistente e stati UI),
+React Testing e React Doctor (test e controllo regressioni), Systematic Debugging
+(formato JSON/numeri), Webapp Testing (QA desktop) e Computer Use (ricognizione delle finestre).
+
 # Pianificazione — 25 ottobre 2026: M18
 
 Solo documentazione. Richiesta: rimuovere tutti i Qwen e usare «Qwen3.8-max».

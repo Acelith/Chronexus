@@ -1,3 +1,4 @@
+import WikiTranslation from "./WikiTranslation";
 import { systemMessage } from "../../i18n/store";
 import { localeInfo } from "../../i18n/locales";
 import { getPreferences } from "../../i18n/store";
@@ -258,29 +259,35 @@ export default function Open5eWiki({
                   {entry.warning ? (
                     <p role="status">{systemMessage(entry.warning)}</p>
                   ) : null}
-                  <p className="wiki-prose">{entry.payload.entry.desc}</p>
-                  <dl>
-                    {Object.entries(entry.payload.entry)
-                      .filter(
-                        ([k, v]) =>
-                          ![
-                            "name",
-                            "key",
-                            "desc",
-                            "document",
-                            "crossreferences",
-                          ].includes(k) &&
-                          v !== null &&
-                          v !== "" &&
-                          (!Array.isArray(v) || v.length),
-                      )
-                      .map(([k, v]) => (
-                        <div key={k}>
-                          <dt>{labels[k] ?? k.replaceAll("_", " ")}</dt>
-                          <dd>{plain(v)}</dd>
-                        </div>
-                      ))}
-                  </dl>
+                  <WikiTranslation
+                    provider="open5e"
+                    sourceKey={`entry/${selected ? category(selected) : ""}/${entry.payload.entry.key}`}
+                    sourceVersion={entry.fetchedAt}
+                  >
+                    <p className="wiki-prose">{entry.payload.entry.desc}</p>
+                    <dl>
+                      {Object.entries(entry.payload.entry)
+                        .filter(
+                          ([k, v]) =>
+                            ![
+                              "name",
+                              "key",
+                              "desc",
+                              "document",
+                              "crossreferences",
+                            ].includes(k) &&
+                            v !== null &&
+                            v !== "" &&
+                            (!Array.isArray(v) || v.length),
+                        )
+                        .map(([k, v]) => (
+                          <div key={k}>
+                            <dt>{labels[k] ?? k.replaceAll("_", " ")}</dt>
+                            <dd>{plain(v)}</dd>
+                          </div>
+                        ))}
+                    </dl>
+                  </WikiTranslation>
                   <button
                     disabled={busy || !selected}
                     onClick={() => selected && void open(selected, true)}

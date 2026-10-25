@@ -21,7 +21,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
   revisione linguistica o installazione personale. Mantenere i residui visibili.
 - Milestone originarie ed estensioni retrospettive condividono lo stesso codice:
   non sono funzionalità da implementare una seconda volta.
-- Le consegne M16 e M15a non hanno ancora creato versioni, pacchetti o release.
+- M16 e M15a sono incluse nella release 0.5.0. M17 introduce la traduzione locale della wiki su richiesta del 25 ottobre 2026.
 
 ## Registro cronologico
 
@@ -55,7 +55,8 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 26 | M15 | Updater, backup pre-installazione e release 0.4.0 | 25/10/2026 | `c7d95ca → ad7760d` | Windows; canale pubblico |
 | 27 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | 25/10/2026 | `2fbf17a → 923516f` | Windows; altri OS aperti |
 | 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
-| 29 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Pianificata | — | Da implementare su richiesta |
+| 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | Implementazione e verifiche in STATUS | Windows; revisione linguistica aperta |
+| 30 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Pianificata | — | Da implementare su richiesta |
 
 
 ## M0 - Foundation and real local database
@@ -899,6 +900,51 @@ Ricerca già svolta: [docs/RESEARCH_DND.md](docs/RESEARCH_DND.md). API XML-RPC e
 scraping HTML sono due accessi distinti; una lettura XML-RPC anonima ha restituito
 401 nell’indagine precedente. M16 usa solo l’HTML pubblico, senza chiavi.
 
+## M17 — Traduzione locale della wiki nella lingua dell’app
+
+**Stato:** implementata su Windows il 25 ottobre 2026, su richiesta esplicita.
+La successiva M18 rimane pianificata e non viene anticipata da questa consegna.
+
+### Comportamento e confini
+
+- Wikidot e Open5e: la voce aperta offre **Traduci in [lingua dell’app]**; la prima
+  generazione è esplicita. Una traduzione già salvata viene riletta automaticamente
+  quando si riapre la stessa voce nella stessa lingua, senza inferenza o rete.
+- Le lingue naturali M10 sono destinazioni; l’inglese mostra l’originale. Ticinese
+  e tutte le traduzioni sono bozze da revisionare. Klingon/Romulano dichiarano il
+  fallback all’originale; gli alfabeti alternativi non sono lingue da tradurre.
+- Solo il backend Rust legge il testo pubblico dalla cache esistente. Modello
+  Qwen3 **4b-instruct** già approvato, identità dei pesi GGUF fissata, loopback
+  fisso senza proxy/redirect, cloud disabilitato verificato e preflight GPU.
+  Nessun download o avvio automatico del runtime; nessun contenuto di campagna,
+  retrieval, cronologia AI o adapter di campagna entra nella traduzione.
+- Originale sempre consultabile, fonte/edizione/licenza/origine e nomi originali
+  visibili. Blocchi, liste e tabelle mantengono la struttura; testo inerte, mai
+  HTML eseguito. Importazioni/incantesimi salvati continuano a usare l’originale.
+- Bozza segnalata; controllo strutturale e dei numeri, senza promettere correttezza
+  linguistica o equivalenza delle regole. Risposta incompleta, limite di output,
+  timeout o numeri modificati: errore visibile, nessuna copia parziale salvata.
+
+### Persistenza e accettazione
+
+- Migrazione additiva **017**, tabella `wiki_translations` nel medesimo Store.
+  Chiave provider/voce/lingua, SHA-256 del contenuto con provenienza e revisione
+  del traduttore, identità modello registrata; massimo 100 copie da 256 KiB.
+  Aggiornare una fonte invalida il riuso della vecchia traduzione.
+- Cache cancellabile per provider o totale con le conferme M16. Epoch, generazione
+  di ripristino e lingua vengono ricontrollate prima della scrittura. Nessun
+  ripopolamento tardivo dopo svuotamento; nessun cambiamento ai dati importati.
+- Traduzioni incluse e validate nei backup; ripristino dei precedenti schemi e
+  migrazione 016 → 017 senza riscrivere le fonti. Nessun downgrade automatico:
+  dopo la migrazione le build precedenti non leggono lo schema 017.
+- Annullamento e abbandono vista/cambio lingua scartano la generazione; una sola
+  operazione sul runtime con il blocco AI condiviso, compresi updater/training.
+- Limiti: 24.000 byte di testo, 500 frammenti, batch da 1.800 byte, massimo 240 s
+  complessivi. Nessun troncamento silenzioso o traduzione massiva del catalogo.
+- Test dominio/frontend, migrazione e backup/restore; prova reale Windows GPU,
+  copia offline, origine immutata e accessibilità. macOS/Linux e revisione
+  madrelingua/assistiva restano da verificare. Evidenze in `docs/STATUS.md`.
+
 ## M18 — Sostituzione dei modelli Qwen con Qwen3.8-27B locale (pianificata)
 
 **Stato:** richiesta il 25 ottobre 2026; non implementata. L’ID M17 risulta già
@@ -978,8 +1024,8 @@ famiglia, **Qwen3.8-27B**, eseguito in locale. Non chiamarlo Qwen3.8-Max né D&D
   0.4.0 di M15 non pubblica né completa la vecchia bozza 0.2.0.
 - **M15:** upgrade reale fra due versioni dotate di updater e verifica altri OS.
 - **M16:** macOS/Linux, traduzioni delle nuove stringhe e cambi futuri dell’HTML
-  di Wikidot; nessuna release contenente M16 pubblicata finora.
-- **M15a:** illustrazioni definitive dell’araldo e della pergamena, upgrade reale
+  di Wikidot; M16 è inclusa nella release 0.5.0.
+- **M15a:** illustrazioni incluse nella 0.5.0; restano upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
 - **Prossima milestone pianificata: M18**, sostituzione dei Qwen con Qwen3.8-27B
   locale; da implementare solo su richiesta. I residui sopra restano aperti.

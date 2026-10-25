@@ -487,3 +487,13 @@ pendenti evita che i dati appena eliminati ricompaiano senza una nuova richiesta
 L’insuccesso Wikidot deve proporre un cambio fonte esplicito: consenso necessario
 prima di consultare Open5e; scelta persistente e visibile, nessun fallback silenzioso.
 Entrambe le modifiche restano di pianificazione; codice e versione invariati.
+
+## 25 ottobre 2026 — Traduzioni wiki derivate e locali (M17)
+
+La traduzione usa il Qwen3 4b-instruct già approvato, senza contesto o adapter
+di campagna, con prima inferenza esplicita e originale conservato. Una tabella
+separata nello Store (017) lega la bozza al provider, alla lingua e all’hash del
+contenuto con provenienza: non rende la traduzione una fonte canonica e permette
+backup, invalidazione e svuotamento senza riscrivere gli originali. Il blocco AI
+condiviso impedisce concorrenza con assistente, training e installazione updater.
+La sostituzione del modello appartiene alla qualifica M18.

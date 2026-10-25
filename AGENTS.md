@@ -223,3 +223,16 @@ campaign images/notes, backups or provider preferences, and never auto-refetch.
 When Wikidot has no usable information, ask before switching provider or querying
 Open5e. Persist an accepted switch visibly; refusal/dismissal keeps Wikidot and
 sends no alternative request. Preserve cache/source identity and avoid prompt loops.
+
+## M17 wiki translation boundary
+
+M17 adds explicit per-entry local translation into the app locale, using the
+already approved Qwen3 4b-instruct with pinned GGUF weight identity, fixed loopback,
+cloud-disabled and GPU checks. No startup inference/download, campaign retrieval,
+adapters or external translation service. Originals/attribution and spell imports
+remain canonical. All translations are unreviewed inert drafts; fantasy languages
+fall back explicitly. Schema 017 stores at most 100 derived copies in the shared
+Store; backup validation, source hash/locale/restore generation and cache epoch
+checks are mandatory. Cache clear cancels pending translations and clears the
+chosen provider's copies. M18 replacement model remains separately planned;
+update this translator during that qualification, never switch models silently.

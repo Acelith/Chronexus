@@ -397,3 +397,18 @@ history. Campaigns or backups configured with Qwen are disabled until an explici
 new choice; conversations and model identity are preserved. QLoRA stays on Gemma.
 Qualification, quantization and acceptance are in ROADMAP M18. M17 is reserved by
 concurrent wiki-translation work.
+
+## M17 — Local wiki translations
+
+Explicit per-entry translation follows the global app locale. Cached translations
+are shown on reopening; no inference at startup or mere entry opening. The Rust
+adapter reads only cached Wikidot/Open5e originals, uses the approved local
+Qwen3 4b-instruct GGUF with pinned weight identity and GPU/cloud checks, never
+campaign context or trained adapters. Originals, attribution, edition, origin,
+licence and spell imports remain canonical and unchanged. Translations are inert,
+labelled unreviewed drafts, with original text available; fantasy languages fall
+back explicitly, scripts never become target languages. Schema 017 adds a bounded
+derived cache in the same Store, validated in backups. Provider cache clear also
+clears translations and invalidates pending writes. Changed source hash, locale
+or restore generation prevents reuse or late writes. See ROADMAP M17 and
+docs/WIKI_TRANSLATION.md. Planned M18 will qualify replacement models separately.

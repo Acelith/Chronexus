@@ -5,7 +5,7 @@ use serde_json::Value;
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Entry {
-    payload: Value,
+    pub(crate) payload: Value,
     fetched_at: String,
 }
 fn valid_key(key: &str) -> bool {

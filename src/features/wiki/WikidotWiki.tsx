@@ -1,3 +1,4 @@
+import WikiTranslation, { WikiBlock as BlockView } from "./WikiTranslation";
 import { useEffect, useRef, useState } from "react";
 import { localeInfo } from "../../i18n/locales";
 import { getPreferences, systemMessage, tr } from "../../i18n/store";
@@ -10,7 +11,6 @@ import {
   spellFromWikidot,
   wikidotApi,
   wikidotCategories,
-  type Block,
   type Cached,
   type Entry,
   type IndexRow,
@@ -26,40 +26,6 @@ export interface Unavailable {
 }
 function when(iso: string) {
   return new Date(iso).toLocaleString(localeInfo(getPreferences().locale).intl);
-}
-export function BlockView({ block }: { block: Block }) {
-  switch (block.kind) {
-    case "heading":
-      return <h5>{block.text}</h5>;
-    case "paragraph":
-      return <p className="wiki-prose">{block.text}</p>;
-    case "list":
-      return (
-        <ul>
-          {block.items.map((item, i) => (
-            <li key={i} className="wiki-prose">
-              {item}
-            </li>
-          ))}
-        </ul>
-      );
-    case "table":
-      return (
-        <div className="wiki-table">
-          <table>
-            <tbody>
-              {block.rows.map((row, r) => (
-                <tr key={r}>
-                  {row.map((cell, c) => (
-                    <td key={c}>{cell}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-  }
 }
 export default function WikidotWiki({
   onUnavailable,
@@ -336,9 +302,15 @@ export default function WikidotWiki({
                       )}
                     </p>
                   ) : null}
-                  {page.blocks.map((block, i) => (
-                    <BlockView key={i} block={block} />
-                  ))}
+                  <WikiTranslation
+                    provider="wikidot"
+                    sourceKey={page.page}
+                    sourceVersion={entry.fetchedAt}
+                  >
+                    {page.blocks.map((block, i) => (
+                      <BlockView key={i} block={block} />
+                    ))}
+                  </WikiTranslation>
                   {page.truncated ? (
                     <p className="muted">
                       <Text

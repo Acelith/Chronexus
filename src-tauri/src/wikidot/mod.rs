@@ -577,8 +577,8 @@ pub fn summary(c: &Connection) -> AppResult<CacheSummary> {
         c.query_row(sql, [], |r| Ok((r.get(0)?, r.get(1)?)))
             .map_err(storage)
     };
-    let (oe, ob) = count("SELECT COUNT(*),COALESCE(SUM(LENGTH(payload)),0) FROM wiki_cache")?;
-    let (we, wb) = count("SELECT COUNT(*),COALESCE(SUM(LENGTH(payload)),0) FROM wikidot_cache")?;
+    let (oe, ob) = count("SELECT COUNT(*),COALESCE(SUM(LENGTH(payload)),0) FROM (SELECT payload FROM wiki_cache UNION ALL SELECT payload FROM wiki_translations WHERE provider='open5e')")?;
+    let (we, wb) = count("SELECT COUNT(*),COALESCE(SUM(LENGTH(payload)),0) FROM (SELECT payload FROM wikidot_cache UNION ALL SELECT payload FROM wiki_translations WHERE provider='wikidot')")?;
     let keys = approved_rule_keys(c)?;
     let exists = |table: &str, key: String| -> AppResult<bool> {
         c.query_row(
@@ -615,6 +615,11 @@ pub fn summary(c: &Connection) -> AppResult<CacheSummary> {
 /// backups and the provider preference live elsewhere and are untouched.
 pub fn clear(c: &Connection, provider: &str) -> AppResult<CacheSummary> {
     let tx = c.unchecked_transaction().map_err(storage)?;
+    tx.execute(
+        "DELETE FROM wiki_translations WHERE provider=?1 OR ?1='all'",
+        [provider],
+    )
+    .map_err(storage)?;
     match provider {
         "open5e" => {
             tx.execute("DELETE FROM wiki_cache", []).map_err(storage)?;
