@@ -1,4 +1,13 @@
-# Distribuzione corrente M18 — 0.7.0 in preparazione
+# Consegna locale M18 — 0.7.0
+
+Installer NSIS Windows x64 compilato dal commit `2052df7`, firmato updater e
+verificato con la chiave di produzione. Percorso locale:
+`installers/Chronexus-0.7.0-Windows-x64/Chronexus_0.7.0_x64-setup.exe`.
+Dimensione 32.630.931 byte, SHA-256
+`69b9ef340f43f177b266c99ce1f9e1eac9320fdf3229ff1500106389350e270e`.
+Pubblicazione sospesa su richiesta dell’utente dopo il rifiuto delle credenziali
+del primo push; nessuna release 0.7.0 creata. Nessuna installazione eseguita.
+La release pubblica resta la 0.6.0. Non riprendere la pubblicazione implicitamente.
 
 L’installer contiene l’app e lo schema 018, **nessun peso AI**. Il modello
 principale è Qwen3.8-27B; Gemma 4 12B è opzionale e secondaria. Preparazione

@@ -1,4 +1,9 @@
-# Aggiornamento M18 — 0.7.0 in preparazione
+# M18 — 0.7.0 locale, canale pubblico invariato
+
+Pacchetto Windows firmato updater compilato e firma reale verificata. L’utente
+ha chiesto di lasciare la pubblicazione dopo il rifiuto delle credenziali del
+primo push. Nessuna release 0.7.0 creata, canale pubblico ancora 0.6.0;
+non proporre la 0.7.0 come aggiornamento pubblicato. Dettagli in INSTALLERS.md.
 
 Schema 018: vecchie scelte Qwen disabilitate senza perdita di cronologia,
 citazioni o adapter Gemma. Backup precedenti ripristinabili. Nessun modello è

@@ -1002,7 +1002,8 @@ wiki e strumento di traduzione. Gemma 4 12B resta secondaria e conserva il QLoRA
 Schema 018 disabilita i vecchi Qwen senza cancellare cronologia o identità.
 Confronto reale 35/35 per ciascun modello e benchmark desktop 40/40 per ciascuno;
 ripristino di un backup 017 reale verificato. Dettagli, digest e limiti in
-`docs/AI_MODELS.md` e `docs/STATUS.md`. Distribuzione 0.7.0 in preparazione.
+`docs/AI_MODELS.md` e `docs/STATUS.md`. Installer 0.7.0 compilato e firmato,
+consegna locale; pubblicazione interrotta su richiesta dell’utente.
 M17 è la traduzione wiki già consegnata, non viene rinumerata.
 
 L’utente ha chiesto di rimuovere tutti i modelli Qwen e sostituirli con

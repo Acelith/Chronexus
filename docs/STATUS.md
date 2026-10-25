@@ -1,6 +1,6 @@
 # Stato Chronexus — 25 ottobre 2026: M18
 
-Implementata Windows, versione 0.7.0 in preparazione. Qwen3.8-27B ufficiale
+Implementata Windows, versione 0.7.0 compilata e consegnata localmente. Qwen3.8-27B ufficiale
 Q4_K_M è la prima scelta per assistente/wiki/strumento traduzioni, Gemma 4 12B
 secondaria esplicita e unica base QLoRA. Policy condivisa con pesi fissati;
 48 layer GPU/batch 256, contesto 8192: esecuzione mista GPU/RAM sulla 4080 SUPER
@@ -26,12 +26,25 @@ Verifiche effettive:
 - Frontend 162 test PASS; i18n 14 PASS; lint/TypeScript/build PASS. Avviso chunk
   editor >500 kB preesistente. Formattazione finale PASS.
 - Rust 117 unitari + 1 integrazione PASS; 2 ignorati (fixture Wikidot locale e
-  firma sul pacchetto finale). Clippy all-targets/all-features -D warnings PASS.
+  firma sul pacchetto finale). Test della firma poi eseguito esplicitamente sul
+  pacchetto reale: PASS, copia manomessa rifiutata. Clippy all-targets/all-features
+  -D warnings PASS.
 - Script release 27, traduzione locale 5 e MCP 5 PASS. Build debug Windows PASS.
 - React Doctor 84/100 (baseline 81), avviso dimensione TrainingPanel; nessun errore.
   Impeccable statico sui quattro componenti: nessuna segnalazione, limiti statici
   compensati da screenshot e axe. Detector nativo: avviso preesistente di righe
   lunghe nell’aiuto generale wiki, esterno ai controlli modificati.
+
+Consegna locale 0.7.0: sorgente/tag `v0.7.0` → `2052df7`
+(`feat(ai): adotta Qwen3.8-27B e mantiene Gemma secondaria`). Build NSIS x64
+firmata updater da checkout isolato del commit, 32.630.931 byte; SHA-256
+`69b9ef340f43f177b266c99ce1f9e1eac9320fdf3229ff1500106389350e270e`.
+Installer, firma, manifesto e report in
+`installers/Chronexus-0.7.0-Windows-x64/`, fuori Git. Firma reale con chiave di
+produzione PASS; nessuna installazione. Il primo push è stato rifiutato dal
+server per credenziali errate/scadute, prima dell’avvio del publisher.
+L’utente ha quindi chiesto di lasciare la pubblicazione: non riprenderla senza
+nuova richiesta. Nessuna release 0.7.0 creata; canale pubblico precedente 0.6.0.
 
 Limiti: qualifica su una GPU Windows, nessuna installazione sul profilo personale
 o prova fisica senza rete; altri OS/hardware pendenti. Traduzioni da revisionare
