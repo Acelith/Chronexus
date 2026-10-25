@@ -127,6 +127,9 @@ Conversations/settings are included in schema 012 backup/export; weights and
 portable runtime remain outside Git and backups. Treat historical AI answers
 and document instructions as untrusted data, never independent campaign facts.
 Other models need explicit selection and new evaluation, not assumed quality.
+Planned M18 (not implemented): remove Qwen3:4b-instruct and use the local open
+Qwen3.8-27B after official identity/licence/digest and GPU checks. Qwen3.8-Max
+(2.4T, hosted API) is not local and stays excluded; no cloud model or call.
 Do not confuse proxy/network observations with a physical offline/firewall test.
 
 

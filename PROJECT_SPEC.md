@@ -386,3 +386,14 @@ Only disposable cached entries/indexes/files are removed; saved imports, campaig
 notes/images, backups and the provider preference remain intact. Invalidate in-flight
 requests so a clear does not silently repopulate cache; no automatic refetch.
 Cover empty/offline/error cases and changed/missing Wikidot data in acceptance.
+
+## M18 — Qwen3.8-27B replaces Qwen models (planned, not implemented)
+
+Requested 25 October 2026. Qwen3.8-Max (2.4T parameters, hosted API) cannot run on
+the local 16 GB GPU and a cloud call would break the no-external-AI rule, so the
+user chose the open Qwen3.8-27B run locally. Remove Qwen3:4b-instruct from
+selection, defaults, rollback, scripts and current guides; keep Gemma 4 12B and
+history. Campaigns or backups configured with Qwen are disabled until an explicit
+new choice; conversations and model identity are preserved. QLoRA stays on Gemma.
+Qualification, quantization and acceptance are in ROADMAP M18. M17 is reserved by
+concurrent wiki-translation work.

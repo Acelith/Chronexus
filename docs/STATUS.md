@@ -1,3 +1,12 @@
+# Pianificazione — 25 ottobre 2026: M18
+
+Solo documentazione. Richiesta: rimuovere tutti i Qwen e usare «Qwen3.8-max».
+Verifica: Qwen3.8-Max ha 2,4 T parametri ed è un’API cloud o pesi da server
+multi-GPU; non adatto alla RTX 4080 SUPER 16 GB né alla regola «nessuna AI esterna».
+Scelta dell’utente: Qwen3.8-27B aperto in locale. Nuova M18 in ROADMAP (M17 è usato
+da un lavoro concorrente di traduzione della wiki, non toccato). Codice, schema,
+versione 0.5.0 e release invariati; nessuna pubblicazione.
+
 # Release 0.5.0 — 25 ottobre 2026: pubblicata
 
 https://github.com/Acelith/Chronexus/releases/tag/v0.5.0 — release id 4, tre

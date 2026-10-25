@@ -55,6 +55,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 26 | M15 | Updater, backup pre-installazione e release 0.4.0 | 25/10/2026 | `c7d95ca → ad7760d` | Windows; canale pubblico |
 | 27 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | 25/10/2026 | `2fbf17a → 923516f` | Windows; altri OS aperti |
 | 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
+| 29 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Pianificata | — | Da implementare su richiesta |
 
 
 ## M0 - Foundation and real local database
@@ -898,6 +899,73 @@ Ricerca già svolta: [docs/RESEARCH_DND.md](docs/RESEARCH_DND.md). API XML-RPC e
 scraping HTML sono due accessi distinti; una lettura XML-RPC anonima ha restituito
 401 nell’indagine precedente. M16 usa solo l’HTML pubblico, senza chiavi.
 
+## M18 — Sostituzione dei modelli Qwen con Qwen3.8-27B locale (pianificata)
+
+**Stato:** richiesta il 25 ottobre 2026; non implementata. L’ID M17 risulta già
+usato da un lavoro concorrente non ancora registrato (traduzione della wiki,
+migrazione 017): questa milestone usa M18 per evitare ambiguità.
+
+L’utente ha chiesto di rimuovere tutti i modelli Qwen e sostituirli con
+«Qwen3.8-max». Verifica del 25/10/2026: Qwen3.8-Max ha 2,4 T parametri (95 B
+attivi) e il servizio ospitato è un’API cloud; i pesi aperti richiedono server
+multi-GPU, non la RTX 4080 SUPER da 16 GB. L’API cloud violerebbe il vincolo «nessuna
+AI esterna». L’utente ha quindi scelto il modello aperto più piccolo della stessa
+famiglia, **Qwen3.8-27B**, eseguito in locale. Non chiamarlo Qwen3.8-Max né D&D.
+
+### M18.1 — Qualifica del modello prima di ogni modifica
+
+- Verificare sulle fonti ufficiali (organizzazione Qwen su Hugging Face/ModelScope,
+  libreria Ollama) nome esatto, licenza dichiarata (fonti secondarie: Apache 2.0),
+  tag Ollama, manifest e SHA-256 dei pesi GGUF. Rifiutare repository somiglianti
+  non ufficiali; nessuna quantizzazione comunitaria senza provenienza documentata.
+- Misurare sulla GPU reale quantizzazione, contesto e VRAM: Q4_K_M è indicata
+  intorno a 17 GB, oltre i 16 GB disponibili. Scegliere e documentare la
+  quantizzazione; caricamento solo CPU sempre bloccato, misto dichiarato.
+- Usare il modello solo come testo: nessun invio di immagini o OCR introdotto dal
+  fatto che il checkpoint è multimodale. Escludere la modalità di ragionamento
+  esposta nel contenuto (problema già visto con Qwen3:4b standard).
+- Valutazione reale con il benchmark M7 (campagna, regole per edizione, assenze,
+  istruzioni malevole) e i confronti M8; risposte italiane, citazioni valide, nessun
+  fatto inventato. Se qualità, memoria o latenza non sono accettabili, fermarsi e
+  chiedere all’utente: nessuna sostituzione implicita con un altro modello.
+
+### M18.2 — Rimozione di Qwen3:4b-instruct
+
+- Eliminare Qwen3:4b-instruct come modello selezionabile, predefinito o di
+  rollback nell’assistente e nelle impostazioni della campagna; Gemma 4 12B resta.
+  Il candidato D&D scartato rimane escluso.
+- Aggiornare script e strumenti che fissano `qwen3:4b-instruct` (avvio AI, installer
+  AI offline, traduzione locale delle stringhe, QA) e le guide correnti. Non
+  riscrivere storia Git, release o pacchetti già pubblicati: i checkpoint storici
+  restano veritieri.
+- Campagne che usano Qwen3:4b: disattivare l’assistente di quella campagna con
+  avviso visibile e richiedere una nuova scelta esplicita con consenso; nessuna
+  attivazione automatica di Qwen3.8-27B. Conversazioni, citazioni e identità del
+  modello che le ha prodotte restano invariate e nei backup.
+- Backup precedenti con Qwen configurato: ripristinabili, con lo stesso trattamento.
+  Eventuale migrazione versionata, additiva e numerata dopo le migrazioni già
+  esistenti al momento dell’implementazione.
+
+### M18.3 — Addestramento, distribuzione e limiti
+
+- Il QLoRA M8 resta basato sul checkpoint Gemma verificato. QLoRA di un 27B su 16 GB
+  non è presunto: se la campagna usa Qwen3.8-27B, «Riaddestra sui nuovi dati» resta
+  disattivato con spiegazione, salvo una qualifica futura separata.
+- Nessun peso in Git, backup o installer dell’app; download solo esplicito
+  dell’utente (`ollama pull`) prima dell’uso offline. Aggiornare o ritirare i
+  pacchetti AI offline basati su Qwen3:4b senza sovrascrivere release esistenti.
+- Invariati: adapter loopback fisso, cloud disabilitato verificato, digest fissato,
+  preflight GPU, retrieval per campagna/edizione, nessuna mutazione implicita.
+
+### Accettazione M18
+
+- Identità ufficiale, licenza e digest documentati; misure VRAM/latenza reali.
+- Benchmark M7/M8 ripetuto con Qwen3.8-27B e confronto con Gemma 4 12B.
+- Nessuna occorrenza selezionabile di Qwen3:4b; campagne e backup con Qwen migrati
+  senza perdita, assistente disattivato fino a nuova scelta esplicita.
+- Runtime assente, modello mancante, CPU sola, memoria insufficiente e cloud attivo
+  producono errori chiari senza inviare appunti. Test Rust/frontend e QA desktop.
+
 ## Accettazioni residue e prossima fase
 
 - **M6:** runner/pacchetti macOS/Linux e collaudi di distribuzione non dimostrati
@@ -913,8 +981,8 @@ scraping HTML sono due accessi distinti; una lettura XML-RPC anonima ha restitui
   di Wikidot; nessuna release contenente M16 pubblicata finora.
 - **M15a:** illustrazioni definitive dell’araldo e della pergamena, upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
-- **Nessuna nuova milestone funzionale pianificata.** Le successive richiedono una
-  nuova richiesta dell’utente; i residui sopra restano aperti.
+- **Prossima milestone pianificata: M18**, sostituzione dei Qwen con Qwen3.8-27B
+  locale; da implementare solo su richiesta. I residui sopra restano aperti.
 
 ## Fuori dal perimetro attuale
 
