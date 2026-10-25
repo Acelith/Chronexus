@@ -54,7 +54,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 25 | M14 | Assistenti esterni MCP nascosti | 25/10/2026 | `fa38d2e` | Windows |
 | 26 | M15 | Updater, backup pre-installazione e release 0.4.0 | 25/10/2026 | `c7d95ca → ad7760d` | Windows; canale pubblico |
 | 27 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | 25/10/2026 | `2fbf17a → 923516f` | Windows; altri OS aperti |
-| 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250` | Windows; illustrazioni da fornire |
+| 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
 
 
 ## M0 - Foundation and real local database

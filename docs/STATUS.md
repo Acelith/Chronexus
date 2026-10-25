@@ -1,4 +1,23 @@
-# Release 0.5.0 — 25 ottobre 2026 (in pubblicazione)
+# Release 0.5.0 — 25 ottobre 2026: pubblicata
+
+https://github.com/Acelith/Chronexus/releases/tag/v0.5.0 — release id 4, tre
+allegati. Publisher: bozza, upload e riscaricamento SHA-256 verificati, poi
+pubblicazione con verifica dei download anonimi, della rotta statica `latest.json`
+e dell’API `releases/latest` (v0.5.0, non bozza, non anteprima). Controllo curl
+indipendente PASS. Tag `v0.5.0` → deef244; main su origin a 7a96ec5 prima di
+questo checkpoint. Il main remoto era già a a4e1fb4 prima del push di questa
+sessione: quei commit non sono stati pubblicati da questa sessione.
+
+Incidente: durante una verifica della versione è stato avviato per errore
+`.tools/m15a/target/debug/chronexus.exe` senza `NODEX_DEV_DATA_DIR` (circa un
+minuto, poi chiuso normalmente). Una build debug senza override usa la cartella
+dati personale `it.nodex.desktop`: se l’archivio non era bloccato da un’altra
+istanza, può averlo migrato allo schema 016 (additivo) e aver scritto
+`update-announcements.json`. Non verificato: la lettura della cartella personale è
+stata negata dal sistema di permessi. Se la 0.4.0 installata segnala uno schema
+più recente, installare la 0.5.0 pubblicata (dati conservati).
+
+# Dettagli della build 0.5.0
 
 Su richiesta dell’utente: illustrazioni dell’araldo integrate (daed026), versione
 0.5.0 (deef244, sorgente compilato, tag annotato `v0.5.0`). Build NSIS firmata
