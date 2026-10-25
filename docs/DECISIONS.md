@@ -426,3 +426,19 @@ Wikidot predefinito in futuro, Open5e alternativa esplicita, catalogo SRD distin
 La richiesta è di pianificazione: non cambiare prima la preferenza dell’app senza
 un provider Wikidot funzionante. La release attuale resta Open5e. Requisiti e
 criteri di accettazione in ROADMAP M16; nessun adapter, migrazione o UI aggiunti ora.
+
+
+## 2026-10-25 — M15a prima di M16; cache eliminabile e cambio fonte su consenso
+
+Inserire M15a tra l’updater consegnato M15 e lo scraping pianificato M16, senza
+rinumerare Wikidot o gli ID storici. Il vassallo con trombetta e manifesto è una
+presentazione del flusso M15: non sostituisce firme, conferma utente o backup.
+Il controllo all’avvio è una futura estensione disattivabile dell’updater, non
+autorizzazione a richieste automatiche per wiki/AI o una funzione già implementata.
+
+La cancellazione cache M16 riguarda solo dati derivati della fonte, non copie
+salvate, note/immagini di campagna, preferenze o backup. Invalidare richieste
+pendenti evita che i dati appena eliminati ricompaiano senza una nuova richiesta.
+L’insuccesso Wikidot deve proporre un cambio fonte esplicito: consenso necessario
+prima di consultare Open5e; scelta persistente e visibile, nessun fallback silenzioso.
+Entrambe le modifiche restano di pianificazione; codice e versione invariati.

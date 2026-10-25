@@ -2,7 +2,8 @@
 
 Aggiornata il 25 ottobre 2026. La numerazione storica M0–M15 resta stabile per
 non rendere ambigui commit, guide e release. I suffissi **a/b/c/d** identificano
-milestone retrospettive per richieste prima assorbite nelle fasi esistenti.
+estensioni inserite tra fasi esistenti: quelle già consegnate sono retrospettive;
+la nuova M15a è invece pianificata prima di M16.
 Le sezioni e la tabella seguono l’ordine delle implementazioni Git, non l’ordine
 numerico degli ID: **M12 e M13 precedono M11**, eseguita alla fine su richiesta.
 Le date indicano consegne/inizio dei lavori, non una certificazione multipiattaforma.
@@ -12,7 +13,8 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 ## Metodo e stato
 
 - Eseguire soltanto le milestone o le parti autorizzate dall’utente; questa
-  richiesta aggiorna la documentazione e pianifica M16, non ne avvia lo sviluppo.
+  richiesta pianifica M15a e aggiorna M16: solo documentazione, senza avviare
+  lo sviluppo delle funzionalità.
 - Suddividere il lavoro in parti verificabili: implementazione, test reali,
   correzioni, commit dettagliati e checkpoint in docs/STATUS.md.
 - «Operativa Windows» non significa accettazione completa su macOS/Linux,
@@ -51,7 +53,8 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 24 | M11 | Distribuzione Forgegit app/AI | 24/10/2026; app completata 25/10 | `43467fb → 4abb4e3; M15` | Parziale: AI grandi aperti |
 | 25 | M14 | Assistenti esterni MCP nascosti | 25/10/2026 | `fa38d2e` | Windows |
 | 26 | M15 | Updater, backup pre-installazione e release 0.4.0 | 25/10/2026 | `c7d95ca → ad7760d` | Windows; canale pubblico |
-| 27 | M16 | Scraping Wikidot e selettore wiki predefinita | Pianificata | `Richiesta attuale` | Da implementare |
+| 27 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | Pianificata | `Richiesta attuale` | Da implementare prima di M16 |
+| 28 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | Pianificata | `Richiesta attuale` | Da implementare dopo M15a |
 
 
 ## M0 - Foundation and real local database
@@ -716,6 +719,58 @@ accesso anonimo, sorgente compilato d75f5f3. Bootstrap manuale e discovery API/
 manifesto, firme/versioni e backup verificati. Resta la prova di upgrade tra due
 versioni updater pubbliche e l’accettazione macOS/Linux. Dettagli in STATUS.md.
 
+## M15a — Annuncio epico degli aggiornamenti (pianificata, prima di M16)
+
+**Stato:** nuova milestone richiesta dopo M15 e prima di M16; non implementata.
+Estende la presentazione dell’updater esistente, senza sostituire firme e backup.
+L’ID M16 resta assegnato a Wikidot; non rinumerare i riferimenti precedenti.
+
+### Annuncio e controllo reale della disponibilità
+
+- Quando è disponibile una versione più recente e compatibile, mostrare un popup
+  medievale epico: **un vassallo/araldo che suona la trombetta e presenta un
+  manifesto in pergamena** per invitare all’aggiornamento, coerente con Chronexus.
+- Basare l’annuncio sul canale reale M15: niente versioni simulate, bozze,
+  anteprime non abilitate, reinstallazione della versione corrente o falso allarme
+  quando il server non risponde. Titolo, versione e note da dati reali e resi sicuri.
+- Aggiungere un controllo automatico leggero dopo l’avvio dell’interfaccia, oltre
+  al controllo manuale, con preferenza per disabilitarlo. Nessun polling continuo
+  o invio di campagne. È un’estensione futura rispetto al solo controllo esplicito
+  della 0.4.0; non abilita richieste automatiche della wiki o dei modelli AI.
+- Rinviare il popup durante scrittura, salvataggio, ripristino, addestramento o
+  altri dialoghi/operazioni in corso; non cancellare bozze né rubare il focus
+  mentre si prende nota. Evitare annunci duplicati della stessa versione.
+
+### Presentazione e azioni
+
+- Breve animazione del vassallo e della trombetta, manifesto leggibile con versione,
+  novità e azione per aggiornare; asset locali con licenze/provenienza documentate.
+  Nessuna generazione, download di asset o servizio AI durante l’annuncio.
+- Breve suono di trombetta controllabile/disattivabile; rispettare preferenze audio
+  e movimento ridotto. Se l’audio automatico è bloccato dalla piattaforma, mantenere
+  annuncio visuale/testuale funzionante senza errori o riproduzioni ripetute.
+- Consentire **Aggiorna**, **Ricordamelo più tardi** e chiusura del popup. Il rinvio
+  rispetta una politica dichiarata senza ripresentare continuamente l’avviso;
+  il controllo manuale nelle impostazioni resta disponibile.
+- L’azione di aggiornamento riusa il flusso M15: download con avanzamento e
+  annullamento, firma/versione verificate e backup obbligatorio prima di installare.
+  Non avviare installer direttamente dall’animazione né aggirare un errore di backup.
+- Dialogo accessibile: testo ordinario, tastiera, focus gestito e ripristinato,
+  Escape/chiusura, contrasto e layout alle dimensioni minime. L’animazione non
+  ostacola la lettura e può essere saltata; nessun lampeggiamento intenso.
+
+### Accettazione M15a
+
+- Update disponibile reale, stessa versione, versione vecchia/target incompatibile,
+  errore server e offline; popup solo nel caso valido, controllo automatico
+  disattivabile e nessuna richiesta automatica alle fonti D&D.
+- Aggiornamento, rinvio/chiusura, riavvio, avvisi duplicati e arrivo della risposta
+  durante una bozza o altro dialogo; nessuna perdita di contenuto o focus inatteso.
+- Animazione/audio locale, audio disattivato/bloccato, movimento ridotto, tastiera
+  e screen reader; versione e note sempre leggibili anche senza effetti.
+- Regressione del percorso M15: firma errata e backup fallito bloccano l’installer;
+  nessun download/installazione senza l’azione esplicita dell’utente.
+
 ## M16 — Scraping HTML Wikidot e scelta della wiki (pianificata)
 
 **Stato:** nuova milestone richiesta il 25 ottobre 2026; non implementata.
@@ -733,8 +788,8 @@ catalogo SRD della scheda. Questa modifica documentale non cambia il programma.
   validazione e recupero delle preferenze; riavvio e ripristino di una campagna
   non devono cambiare implicitamente la wiki selezionata o cancellarne i dati.
 - Cambio fonte senza fondere risultati, ID o cache; mostrare il provider attivo.
-  Se Wikidot non risponde, errore chiaro e scelta manuale di Open5e: nessuna
-  sostituzione silenziosa della fonte richiesta dall’utente.
+  Se Wikidot non reperisce le informazioni, chiedere esplicitamente all’utente
+  se vuole cambiare fonte (M16.5), senza sostituzioni o richieste silenziose.
 - Mantenere distinto il catalogo D&D 5e API / SRD 2014 già collegato alla scheda,
   gli incantesimi personalizzati e le copie importate; non riscriverli al cambio wiki.
 
@@ -775,6 +830,37 @@ catalogo SRD della scheda. Questa modifica documentale non cambia il programma.
   verificare le condizioni delle singole fonti, mantenere attribuzioni e non
   includere automaticamente l’intero catalogo nei pacchetti/release pubblici.
 
+### M16.4 — Cache offline eliminabile dall’utente
+
+- Nelle impostazioni della wiki aggiungere **Svuota cache offline**, con selezione
+  della fonte interessata e possibilità di svuotare tutte le cache wiki.
+  Mostrare quantità/dimensioni disponibili e cosa verrà eliminato prima della conferma.
+- Eliminare soltanto pagine/indici e file derivati posseduti dalla cache scelta:
+  conservare campagne, appunti, incantesimi/oggetti importati, immagini gestite,
+  preferenze di fonte e backup. Spiegare che le sole voci in cache non saranno
+  più consultabili offline finché l’utente non le riapre online.
+- Conferma e annullamento, esito/errore visibili e svuotamento coerente; annullare
+  o invalidare richieste pendenti affinché non ripopolino subito la cache appena
+  cancellata. Non avviare un riscaricamento automatico dopo lo svuotamento.
+- Distinguere cache da copie salvate/importate. Se una cache alimenta il retrieval
+  delle regole AI, segnalare le fonti non più disponibili per nuove richieste,
+  preservando conversazioni, citazioni storiche e dati salvati della campagna.
+
+### M16.5 — Cambio fonte proposto quando Wikidot non fornisce informazioni
+
+- In caso di voce non trovata, ricerca senza risultati, errore rete/server o
+  struttura HTML non interpretabile nei campi necessari, mostrare il motivo e
+  chiedere: **«Wikidot non ha fornito le informazioni. Vuoi usare Open5e?»**.
+- Offrire passaggio alla fonte alternativa, nuovo tentativo su Wikidot o
+  annullamento; se esiste una copia in cache utilizzabile, permetterne la lettura
+  dichiarandone la data senza imporre il cambio di fonte.
+- Cambiare fonte e ripetere la ricerca soltanto dopo accettazione. Rendere chiaro
+  che la nuova scelta viene salvata nelle impostazioni globali; un rifiuto o la
+  chiusura mantengono Wikidot e non inviano richieste all’altra fonte.
+- Conservare il termine pubblico cercato, attribuire i risultati al provider reale
+  e non fondere cache o riscrivere voci già importate. Nessun loop di popup/retry
+  o selezione implicita di un’altra fonte se anche l’alternativa non risponde.
+
 ### Accettazione M16
 
 - Selezione Wikidot/Open5e, default Wikidot, profili esistenti senza preferenza,
@@ -786,6 +872,12 @@ catalogo SRD della scheda. Questa modifica documentale non cambia il programma.
   annullamento, HTTP 403/429/5xx e redirect fuori whitelist senza perdita delle bozze.
 - Import esplicito e backup/ripristino delle copie salvate con identità/provenienza;
   nessuna migrazione distruttiva o modifica alla selezione globale per effetto del restore.
+- Svuotamento cache per fonte/totale, conferma/annullamento, dati importati e backup
+  intatti, scelta fonte conservata, richieste pendenti invalidate e nessun refetch
+  automatico. Gestire cache già vuota, errori di eliminazione e uso offline.
+- Fallimenti Wikidot con richiesta di cambio fonte: accettazione persistente e
+  ricerca alternativa, rifiuto/chiusura senza richieste a Open5e, uso della cache,
+  dati mancanti/markup cambiato e alternativa indisponibile senza loop di popup.
 - Interfaccia italiana, tastiera e stati vuoti/caricamento/errore; accesso impostazioni
   anche senza campagna. Dichiarare soltanto le piattaforme realmente verificate.
 
@@ -804,8 +896,9 @@ scraping HTML sono due accessi distinti; una lettura XML-RPC anonima ha restitui
 - **M11:** distribuzione dei pacchetti AI grandi ancora aperta; la release app
   0.4.0 di M15 non pubblica né completa la vecchia bozza 0.2.0.
 - **M15:** upgrade reale fra due versioni dotate di updater e verifica altri OS.
-- **Prossima nuova milestone funzionale: M16**, quando l’utente ne chiederà
-  l’implementazione. In questa consegna resta solo pianificata.
+- **Prossima nuova milestone funzionale: M15a**, annuncio epico degli aggiornamenti;
+  segue **M16**, scraping/gestione fonti e cache. Entrambe solo pianificate:
+  questa consegna non ne autorizza o dichiara l’implementazione.
 
 ## Fuori dal perimetro attuale
 

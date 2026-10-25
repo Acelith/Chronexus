@@ -63,3 +63,11 @@ La versione pubblica 0.4.0 continua a usare Open5e nella Wiki D&D e il catalogo
 SRD 2014 separato. Questa consegna non implementa scraping né modifica impostazioni.
 Le verifiche citate sopra appartengono all’indagine precedente, non a nuovi test
 eseguiti durante il riordino documentale. Criteri completi in ROADMAP.md, M16.
+
+
+Aggiornamento dei requisiti M16 (solo pianificazione): cache offline svuotabile
+per fonte o interamente, senza cancellare copie importate/dati delle campagne.
+Se Wikidot non restituisce informazioni utilizzabili, domanda esplicita prima
+del cambio a Open5e e della nuova ricerca; rifiuto/chiusura mantengono Wikidot.
+Un cambio accettato viene salvato nelle impostazioni. M15a, annunci epici degli
+aggiornamenti, precede ora M16 nell’ordine di esecuzione.

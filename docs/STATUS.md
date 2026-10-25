@@ -1,3 +1,33 @@
+# Aggiornamento della pianificazione — 25 ottobre 2026
+
+## Prossime fasi: M15a, poi M16
+
+Solo documentazione: inserita M15a prima di M16, conservando gli ID storici.
+M15a pianifica un annuncio epico di aggiornamento con vassallo/araldo, trombetta
+animata/audio controllabile e manifesto in pergamena, controllo all’avvio
+limitato/disattivabile, rinvio/chiusura e protezione delle bozze. Il percorso di
+download/firma e backup obbligatorio resta quello M15, senza installazione implicita.
+
+M16 aggiornata: cache offline eliminabile per fonte o totale con conferma,
+annullamento e invalidazione delle richieste pendenti; importazioni, campagne,
+immagini, preferenze e backup preservati. Se Wikidot non fornisce informazioni,
+chiedere prima di passare a Open5e; accettazione salva la fonte e permette una
+nuova ricerca, rifiuto/chiusura mantengono Wikidot e non contattano l’alternativa.
+Default futuro Wikidot confermato. Gestire copie in cache, errori e popup duplicati.
+
+Allineati ROADMAP, PROJECT_SPEC, AGENTS, DECISIONS, RESEARCH_DND e UPDATES.
+Versione 0.4.0/SQLite 015, sorgenti applicativi, impostazioni, pacchetti e release
+invariati. Nessun popup, scraping o selettore nuovo implementato in questo turno.
+Verifiche documentali PASS: 28 milestone/ordine concordi, 60 commit validi,
+27 link locali, sette soli file Markdown e git diff --check;
+nessun test app/build o rete, perché le modifiche riguardano soltanto Markdown.
+Skill: catalogo disponibile valutato, nessuna specialistica necessaria per
+questa modifica documentale; strumenti ordinari Git/file.
+
+Prossima nuova milestone: M15a, da implementare solo su richiesta; poi M16.
+Nessuna pubblicazione o nuova versione per questa pianificazione.
+I checkpoint seguenti sono storici e il loro precedente ordine M16 è superato.
+
 # Pianificazione — 25 ottobre 2026
 
 ## Roadmap riconciliata e M16 pianificata

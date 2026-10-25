@@ -336,6 +336,19 @@ active AI work, preserve every backup and keep AI runtime/base weights separate.
 No update commands in external MCP or the integrated assistant. See docs/UPDATES.md.
 
 
+## M15a — Epic update herald (planned before M16)
+
+After a real compatible update check, announce the new version through a medieval
+popup: a vassal/herald playing a trumpet and holding a parchment update manifesto.
+Plan a lightweight startup check with opt-out, alongside the manual M15 check;
+no continuous polling or automatic wiki/model requests. Delay the dialog during
+writing/saving/other operations and deduplicate announcements per version.
+Use local assets, controllable short audio, reduced motion and an accessible
+keyboard/focus/close path. Offer update, remind later and dismiss. Update actions
+reuse M15 download/signature verification and mandatory backup before installation;
+no installer starts from an animation alone. This is planned behavior; current
+0.4.0 still checks explicitly and has no herald popup. See ROADMAP M15a.
+
 ## M16 — Wikidot HTML and wiki selection (planned, not implemented)
 
 The user requested a new milestone, not immediate runtime changes. Current
@@ -343,7 +356,10 @@ released wiki: Open5e v2; SRD character catalog: D&D 5e API 2014. On M16 deliver
 global app settings must offer Wikidot D&D and Open5e, defaulting to Wikidot for
 new profiles and existing preferences without an explicit provider choice.
 Persist the choice, show the active source and preserve saved imports/identity;
-no silent fallback when Wikidot is unavailable. Keep the SRD catalog distinct.
+if Wikidot cannot supply information, explicitly ask whether to switch to Open5e.
+Persist the new provider and retry only after consent; declining keeps Wikidot
+and must not contact the other provider. Offer a dated cached copy where available,
+and avoid repeated prompts. Keep the SRD catalog distinct.
 
 Read public dnd5e.wikidot.com HTML through a bounded, allowlisted, read-only Rust
 adapter, explicit index/entry requests and provider-scoped offline cache. No
@@ -354,3 +370,11 @@ not invented data. Verify site instructions/robots and content rights before
 implementation/distribution; public access does not make a bundled catalog licensed.
 Acceptance and migration/default rules are specified in ROADMAP M16. No database,
 preferences, UI or package/version has been changed by this planning task.
+
+
+M16 also requires a user-controlled offline-cache clear action in app settings,
+per provider or all wiki caches, with scope/confirmation/cancel and visible outcome.
+Only disposable cached entries/indexes/files are removed; saved imports, campaign
+notes/images, backups and the provider preference remain intact. Invalidate in-flight
+requests so a clear does not silently repopulate cache; no automatic refetch.
+Cover empty/offline/error cases and changed/missing Wikidot data in acceptance.

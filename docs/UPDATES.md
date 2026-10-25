@@ -158,3 +158,13 @@ Forgegit; nessun token nel client installato. La ricevuta locale contiene solo
 ID, versione, sorgente e URL degli allegati, e permette la ripresa senza duplicarli.
 La finalizzazione verifica anche download anonimi e API latest. Errori mantengono
 le prove locali; non cancellare o sovrascrivere la vecchia bozza M11.
+
+
+### Evoluzione pianificata M15a — annuncio epico
+
+Prima di M16 è pianificato un popup medievale per aggiornamenti realmente
+disponibili, con vassallo/araldo, trombetta e manifesto in pergamena. Comprende
+controllo leggero all’avvio disattivabile, rinvio/chiusura, audio controllabile,
+movimento ridotto e protezione delle bozze. Riusa firme e backup M15. Non è
+presente nella 0.4.0: questa richiesta aggiorna solo la roadmap, senza cambiare
+il controllo esplicito o i pacchetti già pubblicati.
