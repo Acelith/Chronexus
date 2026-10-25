@@ -57,10 +57,13 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
 | 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, revisione linguistica aperta |
 | 30 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Implementata Windows | 018 | Qualifica e confronto reali, Gemma secondaria; altri OS pendenti |
-| 31 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | 25/10/2026 | `467ca7b` | Windows; non ancora in una release |
-| 32 | M22 | Installazione guidata di Ollama e modelli dalle impostazioni | 25/10/2026 | `54a6b42` | Windows; non ancora in una release |
+| 31 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | 25/10/2026 | `467ca7b` | Windows; release 0.8.0 |
+| 32 | M22 | Installazione guidata di Ollama e modelli dalle impostazioni | 25/10/2026 | `54a6b42` | Windows; release 0.8.0 |
 | 33 | M20 | README di qualità con immagini, guida rapida e crediti | 25/10/2026 | `d1d1e89` | Resa verificata su github.com |
 | 34 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Consegnata su Windows, release 0.8.0 | — | Spostata in fondo su istruzione dell’utente; eseguita il 25 ottobre 2026 |
+| 35 | M23 | Audit completo del codice: bug, ripetizioni, ottimizzazione | Pianificata, **prossima** | — | Richiesta il 25/10/2026 |
+| 36 | M24 | Campagna condivisa con server self-hosted e condivisione selettiva | Pianificata | — | Dopo M23; scelta server/P2P da confermare |
+| 37 | M25 | App Android (APK) collegata al server con lo stesso account | Pianificata | — | Dipende da M24 |
 
 
 ## M0 - Foundation and real local database
@@ -1295,6 +1298,139 @@ astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
 - Un nuovo utente trova download, requisiti, primo avvio, backup e privacy in meno
   di un minuto; informazioni tecniche rimosse dal README ancora raggiungibili.
 
+## M23 — Audit completo del codice: bug, ripetizioni e ottimizzazione (pianificata)
+
+**Ordine:** richiesta dall’utente il 25 ottobre 2026 dopo la release 0.8.0; è la
+prossima da eseguire, prima di M24/M25, perché condivisione e mobile poggiano sul
+codice esistente. **Stato:** pianificata, non avviata.
+
+### M23.1 — Inventario e misure di partenza
+
+- Mappa dei moduli Rust/React, dei comandi Tauri e delle dipendenze, con dimensioni
+  dei file, complessità e codice duplicato (strumenti locali, nessun servizio esterno).
+- Baseline misurata: tempi di avvio, apertura campagna, salvataggio, ricerca, grafo
+  con campagne grandi sintetiche, dimensione del bundle e memoria. Nessun dato
+  personale nelle misure o nei report.
+
+### M23.2 — Correttezza e sicurezza
+
+- Revisione di concorrenza e lock (Store, AI, updater, MCP, backup periodici),
+  gestione errori, percorsi file, input dei comandi, migrazioni e ripristino.
+- Correggere il test MCP `transport_auth_origin_scoping…` instabile in parallelo
+  e altri test intermittenti, senza indebolire le asserzioni.
+- `cargo audit`/`npm audit` o equivalenti offline sulle dipendenze, licenze
+  (allineare `Cargo.toml` MIT con `LICENSE` Apache-2.0 solo su conferma dell’utente)
+  e superficie Tauri (capabilities, CSP, comandi esposti).
+- Ogni bug confermato riceve un test che fallisce prima della correzione.
+
+### M23.3 — Ripetizioni e struttura
+
+- Unificare i pattern ripetuti: file di preferenze atomici (interfaccia, wiki,
+  aggiornamenti, araldo, backup), lettura JSON limitata, controlli dei percorsi,
+  helper `spawn_blocking`, client HTTP e server di test finti, `perform`/stati di
+  attesa nei pannelli React.
+- Ridurre `lib.rs` (registrazione dei comandi per dominio), separare componenti
+  React troppo grandi (`App.tsx`), eliminare codice morto e script ritirati non più
+  necessari, senza cambiare formati su disco, schema o identificativi legacy.
+
+### M23.4 — Ottimizzazione
+
+- Intervenire solo sui colli di bottiglia misurati (query SQLite e indici, render
+  React ripetuti, caricamento lazy, dimensione del bundle, editor e grafo).
+- Confronto prima/dopo con gli stessi dati sintetici; nessuna regressione funzionale.
+
+### Accettazione M23
+
+- Report `docs/AUDIT.md` con problemi trovati, gravità, correzioni e problemi
+  lasciati aperti con motivazione. Commit separati per tema, ciascuno verificato.
+- Test Rust/frontend, clippy, lint, typecheck e build verdi; test MCP stabile su
+  esecuzioni ripetute. Collaudo desktop dei flussi principali su profilo isolato.
+- Nessuna perdita di dati: backup di ogni versione precedente ancora ripristinabili.
+
+## M24 — Campagna condivisa tra più persone (pianificata)
+
+**Ordine:** dopo M23, prima di M25. **Stato:** pianificata, non avviata. Cambia un
+invariante del progetto: oggi nessun account e nessun servizio. La condivisione
+resta **facoltativa**: senza attivarla Chronexus funziona offline come oggi.
+
+### Valutazione delle opzioni
+
+| Opzione | Pro | Contro |
+| --- | --- | --- |
+| Peer-to-peer (es. iroh/libp2p, WebRTC) con CRDT | Nessun server, dati solo fra i giocatori | Sincronizza solo se i dispositivi sono accesi insieme; NAT e relay servono comunque; account e permessi deboli; Android in background lo blocca; nessuno storico centrale |
+| Cartella condivisa (Syncthing/OneDrive) | Semplice | Conflitti su SQLite, nessun permesso per singolo elemento, rischio di corruzione: scartata |
+| **Server Chronexus self-hosted** | Account unico per desktop e Android, permessi per elemento, sempre raggiungibile, backup centrale, adatto a M25 | Va ospitato e mantenuto; dati di campagna sul server |
+| Servizio cloud di terzi (Firebase/Supabase hosted) | Rapido | Dati presso terzi, dipendenza esterna: contrario ai principi del progetto |
+
+**Scelta proposta:** server Chronexus **self-hosted** (Rust, stesso dominio dei
+dati, container Docker) sull’infrastruttura dell’utente, accanto a Forgegit, con
+il desktop che resta **local-first**: archivio SQLite locale come oggi e
+sincronizzazione esplicita solo degli elementi condivisi. Il P2P resta un’opzione
+futura per sessioni dal vivo, non la base. Da confermare con l’utente prima
+dell’implementazione: ospitalità del server, registrazione, cifratura end-to-end.
+
+### M24.1 — Server e account
+
+- Servizio HTTPS (Rust/axum, SQLite o PostgreSQL) con account, sessioni, passkey o
+  password robuste con limiti ai tentativi, inviti alla campagna e ruoli
+  (proprietario, giocatore, solo lettura). Nessuna telemetria, log senza contenuti.
+- Il desktop si collega solo su azione esplicita dell’utente, con URL del server
+  scelto e verificato; nessuna richiesta all’avvio se la condivisione è spenta.
+
+### M24.2 — Condivisione selettiva
+
+- Per ogni campagna l’utente sceglie cosa condividere: pagine Codex, sessioni,
+  relazioni, immagini, party, schede o parti di esse. Predefinito: **privato**.
+- Gli appunti privati, la scheda completa, l’AI locale, gli adapter e le
+  preferenze non lasciano mai il dispositivo se non condivisi esplicitamente.
+- Conoscenza del giocatore: un’affermazione condivisa da un altro giocatore resta
+  attribuita a lui e non diventa fatto stabilito; nessun metadato da GM.
+
+### M24.3 — Sincronizzazione e conflitti
+
+- Registro delle modifiche con UUID stabili e revisioni già presenti; invio e
+  ricezione incrementali, funzionamento offline e riallineamento successivo.
+- Conflitti mostrati all’utente con entrambe le versioni, mai sovrascritture
+  silenziose; testo collaborativo valutato con CRDT (Yjs/Automerge/Loro) solo per
+  i documenti condivisi.
+- Revoca: un elemento non più condiviso viene rimosso dal server e dagli altri
+  dispositivi alla prossima sincronizzazione, con avviso.
+
+### Accettazione M24
+
+- Due o tre utenti sintetici su server di prova: inviti, ruoli, condivisione di
+  una parte della campagna, modifiche concorrenti, conflitto risolto, revoca,
+  lavoro offline e riallineamento. Elementi privati mai presenti sul server.
+- Test di sicurezza (autenticazione, autorizzazione per elemento, limiti), backup
+  e ripristino del server, guida all’installazione self-hosted.
+
+## M25 — Chronexus su Android (APK) collegato al server (pianificata)
+
+**Ordine:** dopo M24, da cui dipende per account e dati condivisi. **Stato:**
+pianificata, non avviata.
+
+- App Android con Tauri 2 mobile (stesso codice React/Rust; le icone Android sono
+  già generate da `pnpm icons`), distribuita come **APK firmato** nelle release
+  Forgegit; Play Store fuori perimetro salvo richiesta.
+- Accesso al server M24 con lo **stesso account** del desktop: elenco campagne,
+  consultazione di pagine, sessioni, grafo, party e scheda condivisi; cache locale
+  per la consultazione offline. Prima versione principalmente in lettura; modifiche
+  da mobile valutate dopo il collaudo (note rapide, tiri di dado, punti ferita).
+- Interfaccia adattata a schermi piccoli e touch: navigazione, editor in sola
+  lettura, grafo con gesti, testi leggibili, modalità scura, accessibilità.
+- Fuori dalla prima versione: AI locale, addestramento, import Logseq, backup
+  `.nodex` completi su mobile.
+- Sicurezza: token in Android Keystore, HTTPS obbligatorio, nessun dato privato
+  oltre a quanto condiviso, cancellazione locale al logout.
+
+### Accettazione M25
+
+- APK firmato installato su un dispositivo Android reale (versione minima da
+  dichiarare), accesso con l’account del desktop, contenuti condivisi visibili e
+  aggiornati, uso offline della cache, logout che rimuove i dati locali.
+- Test frontend su viewport mobile, prove su almeno un telefono reale; iOS fuori
+  perimetro salvo nuova richiesta.
+
 ## Accettazioni residue e prossima fase
 
 - **M6:** runner/pacchetti macOS/Linux e collaudi di distribuzione non dimostrati
@@ -1315,14 +1451,15 @@ astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
   da 17,7 GB tramite l’interfaccia, macOS/Linux.
 - **M19–M22:** pubblicate nella release 0.8.0 il 25 ottobre 2026. Per M19 restano
   macOS/Linux, prove fisiche di disco pieno/sola lettura/Documenti reindirizzati e
-  un aggiornamento reale con backup nei Documenti. Nessuna milestone pianificata
-  aperta. M18 è implementata su Windows; altre GPU/OS e prova fisica
+  un aggiornamento reale con backup nei Documenti. M18 è implementata su Windows; altre GPU/OS e prova fisica
   offline pendenti. Implementare solo su richiesta; i residui sopra restano aperti.
+- **Pianificate (25/10/2026):** M23 audit (prossima), poi M24 campagna condivisa,
+  poi M25 Android. Nessuna è implementata; ciascuna richiede una richiesta esplicita.
 
 ## Fuori dal perimetro attuale
 
 Adattatori automatici di regole verificati per altri sistemi/edizioni,
-sincronizzazione multipostazione con conflitti, timeline avanzata, mappe
+sincronizzazione multipostazione oltre a quanto pianificato in M24, timeline avanzata, mappe
 interattive, esportazione PDF delle schede e OCR richiedono scelte e milestone
 proprie. Nessuna di queste funzioni è implicitamente autorizzata da M16.
 

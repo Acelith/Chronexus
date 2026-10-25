@@ -269,10 +269,22 @@ or download QLoRA checkpoints. This planning request does not authorize running
 installers now. See ROADMAP M22 for scope and acceptance. Publication remains
 stopped until a new user request.
 
-M21 and M22 are implemented on Windows (not yet released); M20 README is delivered
-with Forgejo rendering to verify after a push. M19 is implemented (not released).
+M19–M22 are implemented on Windows and published in release 0.8.0 (source
+c540c2d, tag v0.8.0); the M20 README rendering is verified on github.com.
 M22 setup: only the pinned official Ollama 0.40.10 archive and SHA-256, GitHub
 asset hosts for redirects, managed copy under the app data `ai-runtime` folder,
 explicit start/stop tied to the app, model pulls limited to the M18 policy and
 verified by weight digest. Never overwrite or stop a runtime Chronexus did not start.
 README screenshots come only from synthetic campaigns (scripts/qa/m20-readme-media.mjs).
+
+## Planned M23–M25 (not implemented)
+
+Planned 25 October 2026, in order: M23 full code audit (bugs, duplication,
+optimization, flaky MCP test, report in docs/AUDIT.md, no format/schema changes
+without migration); M24 opt-in shared campaigns, proposed as a self-hosted
+Chronexus server with accounts and per-item selective sharing (default private,
+desktop stays local-first; P2P evaluated and not chosen as the base); M25 Android
+APK (Tauri 2 mobile) using the same M24 account, read-mostly first. M24/M25 change
+the no-account/no-server invariant only as an explicit opt-in and need user
+confirmation of hosting, registration and encryption choices before coding.
+Never upload private notes, sheets, AI data or preferences unless shared.
