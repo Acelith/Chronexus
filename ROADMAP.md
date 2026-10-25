@@ -3,8 +3,8 @@
 Aggiornata il 25 ottobre 2026. La numerazione storica M0–M15 resta stabile per
 non rendere ambigui commit, guide e release. I suffissi **a/b/c/d** identificano
 estensioni inserite tra fasi esistenti: quelle già consegnate sono retrospettive;
-M15a resta pianificata, mentre M16 è stata eseguita prima su richiesta esplicita
-(la sua sezione resta dopo M15a per non spostare i riferimenti).
+M16 è stata eseguita prima di M15a su richiesta esplicita; le sezioni restano
+nell’ordine originale per non spostare i riferimenti, la tabella segue Git.
 Le sezioni e la tabella seguono l’ordine delle implementazioni Git, non l’ordine
 numerico degli ID: **M12 e M13 precedono M11**, eseguita alla fine su richiesta.
 Le date indicano consegne/inizio dei lavori, non una certificazione multipiattaforma.
@@ -14,15 +14,14 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 ## Metodo e stato
 
 - Eseguire soltanto le milestone o le parti autorizzate dall’utente. Il 25 ottobre
-  l’utente ha chiesto esplicitamente di eseguire M16: è stata implementata prima
-  di M15a, che resta pianificata senza cambiare il proprio ID.
+  l’utente ha chiesto di eseguire M16 e poi M15a: entrambe implementate, ID invariati.
 - Suddividere il lavoro in parti verificabili: implementazione, test reali,
   correzioni, commit dettagliati e checkpoint in docs/STATUS.md.
 - «Operativa Windows» non significa accettazione completa su macOS/Linux,
   revisione linguistica o installazione personale. Mantenere i residui visibili.
 - Milestone originarie ed estensioni retrospettive condividono lo stesso codice:
   non sono funzionalità da implementare una seconda volta.
-- La consegna M16 non ha ancora creato versioni, pacchetti o release.
+- Le consegne M16 e M15a non hanno ancora creato versioni, pacchetti o release.
 
 ## Registro cronologico
 
@@ -55,7 +54,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 25 | M14 | Assistenti esterni MCP nascosti | 25/10/2026 | `fa38d2e` | Windows |
 | 26 | M15 | Updater, backup pre-installazione e release 0.4.0 | 25/10/2026 | `c7d95ca → ad7760d` | Windows; canale pubblico |
 | 27 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | 25/10/2026 | `2fbf17a → 923516f` | Windows; altri OS aperti |
-| 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | Pianificata | — | Prossima milestone |
+| 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250` | Windows; illustrazioni da fornire |
 
 
 ## M0 - Foundation and real local database
@@ -720,10 +719,14 @@ accesso anonimo, sorgente compilato d75f5f3. Bootstrap manuale e discovery API/
 manifesto, firme/versioni e backup verificati. Resta la prova di upgrade tra due
 versioni updater pubbliche e l’accettazione macOS/Linux. Dettagli in STATUS.md.
 
-## M15a — Annuncio epico degli aggiornamenti (pianificata)
+## M15a — Annuncio epico degli aggiornamenti (operativa Windows)
 
-**Stato:** richiesta dopo M15; non implementata. Era prevista prima di M16, ma
-l’utente ha chiesto di eseguire M16 per prima: resta la prossima milestone.
+**Stato aggiornato:** implementata il 25 ottobre 2026 dopo M16. Controllo all’avvio
+(uno per sessione, ogni 20 ore al massimo, disattivabile), popup accessibile con
+rinvio/ignora per versione, fanfara Web Audio, attesa di un’app inattiva e
+passaggio al flusso M15. Le illustrazioni raster sono da fornire: fino ad allora
+emblema geometrico. Upgrade reale fra due release firmate ancora da provare.
+Evidenze in [docs/STATUS.md](docs/STATUS.md).
 Estende la presentazione dell’updater esistente, senza sostituire firme e backup.
 L’ID M16 resta assegnato a Wikidot; non rinumerare i riferimenti precedenti.
 
@@ -908,8 +911,10 @@ scraping HTML sono due accessi distinti; una lettura XML-RPC anonima ha restitui
 - **M15:** upgrade reale fra due versioni dotate di updater e verifica altri OS.
 - **M16:** macOS/Linux, traduzioni delle nuove stringhe e cambi futuri dell’HTML
   di Wikidot; nessuna release contenente M16 pubblicata finora.
-- **Prossima nuova milestone funzionale: M15a**, annuncio epico degli aggiornamenti,
-  solo pianificata e da implementare su richiesta.
+- **M15a:** illustrazioni definitive dell’araldo e della pergamena, upgrade reale
+  dal popup fra due release firmate, ascolto della fanfara su più sistemi.
+- **Nessuna nuova milestone funzionale pianificata.** Le successive richiedono una
+  nuova richiesta dell’utente; i residui sopra restano aperti.
 
 ## Fuori dal perimetro attuale
 

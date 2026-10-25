@@ -1,3 +1,58 @@
+# Stato Chronexus — 25 ottobre 2026 (M15a)
+
+## M15a — Araldo degli aggiornamenti: operativa Windows (illustrazioni da fornire)
+
+- Controllo automatico leggero dopo l’avvio (6 s): uno per sessione e al massimo
+  ogni 20 ore, disattivabile in **Impostazioni dell’app → Aggiornamenti**; contatta
+  solo il canale aggiornamenti M15, mai wiki o modelli AI. Errori silenziosi.
+- Se esiste una versione più recente e compatibile, popup `<dialog>`: araldo con
+  trombetta (emblema geometrico provvisorio), manifesto con versione e note come
+  testo semplice, **Aggiorna**, **Ricordamelo più tardi** (3 giorni, per versione),
+  **Ignora questa versione**; Escape = rinvio. Nessun doppio annuncio.
+- Attende un’app inattiva: nessun salvataggio/modulo/ripristino/ricerca, nessuna
+  bozza sporca, dialogo aperto o campo di testo con il focus, AI/addestramento o
+  aggiornamento in corso. Focus sul titolo e restituito alla chiusura.
+- Fanfara sintetizzata in Web Audio (nessun file), disattivabile; audio bloccato
+  dalla piattaforma = annuncio completo senza suono né nuovi tentativi. Animazione
+  di ~1,5 s saltabile, statica con movimento ridotto.
+- **Aggiorna** apre le impostazioni e avvia il download verificato M15;
+  l’installazione resta l’azione esplicita con backup obbligatorio.
+- Preferenze in `update-announcements.json` fuori dai ripristini, incluse nella
+  ricevuta pre-aggiornamento. SQLite resta 016.
+
+Verifiche realmente eseguite:
+- `cargo test` 109 PASS (3 nuovi di politica), clippy `-D warnings` e fmt PASS.
+  Il test MCP instabile preesistente è fallito una volta, poi 2 esecuzioni verdi.
+- `pnpm test` 152 PASS; lint, typecheck, format:check, i18n:check, build PASS.
+- Desktop Windows debug, profili isolati, CDP 9224, `scripts/qa/m15a-herald.mjs`:
+  `fixture` (offerta sintetica solo debug: popup a app inattiva, focus, axe 0
+  violazioni, Escape = rinvio), `quiet` (riavvio senza controllo entro 20 ore),
+  `real` (canale Forgegit reale: 0.4.0 è corrente, controllo registrato e nessun
+  popup), `optout` (nessuna richiesta automatica). Schermate 1200 px e 760 px con
+  movimento ridotto. Il blocco iniziale per un `<select>` con focus è stato
+  corretto e coperto da test.
+
+Limiti: upgrade reale da popup fra due release firmate non provato (serve una
+0.5.0 pubblicata); illustrazioni raster dell’araldo e della pergamena da fornire
+(prompt e attivazione in `assets/herald/README.md`); suono reale nella WebView2 non
+ascoltato da un umano; nuove stringhe con fallback italiano; macOS/Linux non provati.
+Durante il collaudo una sessione Codex usava lo stesso Vite (1420) e una propria
+build debug: non toccate, collaudo eseguito su porta CDP e target separati.
+
+Skill lette e applicate: frontend-design e impeccable (craft-floor, animate) per
+direzione visiva, un solo momento animato ed emblema geometrico al posto di una
+finta illustrazione SVG; accessibility per dialogo, focus, movimento ridotto e
+audio; react-testing per i test con timer finti; imagegen consultata ma non
+eseguibile qui (nessuno strumento integrato né OPENAI_API_KEY): l’utente fornirà
+le immagini. tauri-v2/rust-best-practices consultate per comandi e preferenze.
+
+Commit: 126d250 implementazione; checkpoint documentale nel commit successivo. Nessun push.
+Prossima milestone: nessuna nuova pianificata; residui in ROADMAP.
+
+Correzione del checkpoint M16: la frase «nessuna Skill specialistica disponibile»
+era imprecisa. Le Skill locali in `~/.agents/skills` esistevano ma non erano state
+cercate, quindi in M16 non sono state lette né applicate.
+
 # Stato Chronexus — 25 ottobre 2026 (M16)
 
 ## M16 — Wikidot, scelta della fonte e cache eliminabile: operativa Windows

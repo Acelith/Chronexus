@@ -162,11 +162,15 @@ La finalizzazione verifica anche download anonimi e API latest. Errori mantengon
 le prove locali; non cancellare o sovrascrivere la vecchia bozza M11.
 
 
-### Evoluzione pianificata M15a — annuncio epico
+### M15a — annuncio dell’araldo (dalla versione successiva alla 0.4.0)
 
-Prima di M16 è pianificato un popup medievale per aggiornamenti realmente
-disponibili, con vassallo/araldo, trombetta e manifesto in pergamena. Comprende
-controllo leggero all’avvio disattivabile, rinvio/chiusura, audio controllabile,
-movimento ridotto e protezione delle bozze. Riusa firme e backup M15. Non è
-presente nella 0.4.0: questa richiesta aggiorna solo la roadmap, senza cambiare
-il controllo esplicito o i pacchetti già pubblicati.
+Circa 6 secondi dopo l’avvio Chronexus esegue un controllo automatico leggero:
+uno per sessione e al massimo ogni 20 ore, solo verso il canale configurato qui.
+Si disattiva con **Controlla una volta all’avvio…**; il pulsante manuale resta.
+Se trova una versione più recente compatibile, appena l’app è inattiva compare
+l’araldo con il manifesto: **Aggiorna** apre questa sezione e avvia il download
+verificato; **Crea backup e installa** resta necessario. **Ricordamelo più tardi**
+(o Escape) rimanda di 3 giorni quella versione, **Ignora questa versione** non la
+riannuncia. La trombetta si disattiva dall’annuncio o da qui. Preferenze in
+`update-announcements.json`, incluse nella ricevuta del backup pre-installazione.
+Collaudo: `scripts/qa/m15a-herald.mjs` (vedi docs/QA.md).

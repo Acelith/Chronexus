@@ -423,3 +423,18 @@ Lo script legge davvero un indice e una pagina pubblici di dnd5e.wikidot.com e, 
 dopo il consenso simulato, una ricerca Open5e. Rapporti e schermate in `.tools/m16/`.
 Il parser sulle pagine reali si prova salvandole fuori dal repository e lanciando
 `cargo test real_saved_pages -- --ignored` con `CHRONEXUS_QA_WIKIDOT_DIR`.
+
+## Collaudo M15a — araldo degli aggiornamenti
+
+Compila un eseguibile debug in un target separato se un’altra istanza tiene
+bloccato `src-tauri/target` (`CARGO_TARGET_DIR=.tools/m15a/target`). Per ogni fase
+usa `NODEX_DEV_DATA_DIR` e `WEBVIEW2_USER_DATA_FOLDER` assoluti sotto `.tools/m15a/`,
+`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9224`,
+`CHRONEXUS_HERALD_QA=isolated` e lo stesso `NODEX_DEV_DATA_DIR` per lo script.
+
+1. `fixture`: profilo nuovo con `NODEX_DEV_HERALD_VERSION=0.5.0` (solo debug,
+   nessuna rete né pacchetto reale): popup, focus, axe, Escape = rinvio.
+2. `quiet`: chiudi normalmente e riapri lo stesso profilo: nessun controllo.
+3. `real`: profilo nuovo senza fixture: controllo reale del canale pubblico; con
+   0.4.0 corrente non deve comparire nulla. Disattiva poi il controllo all’avvio.
+4. `optout`: riapri lo stesso profilo: nessuna richiesta automatica.

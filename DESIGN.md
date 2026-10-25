@@ -38,3 +38,12 @@ Glifi decorativi aria-hidden e testo semantico, recupero italiano sempre normale
 font assente o carattere non rappresentabile conservano il testo leggibile.
 La casella «mostra anche il testo ordinario» governa solo le etichette controllate.
 Dialoghi critici, dati e menu nativi restano ordinari. Dettagli: docs/I18N.md.
+
+## M15a — araldo degli aggiornamenti
+
+L’unico momento animato fuori dal tiradadi: araldo a sinistra che sovrappone la
+pergamena del manifesto (cornice doppia bordeaux), ~1,5 s, saltabile e statico con
+movimento ridotto. Testo, versione, note e pulsanti sempre HTML. Finché mancano le
+illustrazioni raster (`assets/herald/`) si usa l’emblema geometrico trombetta e
+stendardo, mai una figura disegnata a mano in SVG. Su finestre strette l’emblema
+passa sopra il manifesto.

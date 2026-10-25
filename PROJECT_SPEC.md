@@ -336,7 +336,13 @@ active AI work, preserve every backup and keep AI runtime/base weights separate.
 No update commands in external MCP or the integrated assistant. See docs/UPDATES.md.
 
 
-## M15a — Epic update herald (planned; M16 was executed first on request)
+## M15a — Epic update herald (implemented on Windows after M16)
+
+Implemented 25 October 2026: `updates::herald` policy and `update-announcements.json`
+outside restore generations, one automatic check per session and per 20 hours,
+per-version remind (3 days) and dismiss, idle gating, Web Audio fanfare and a native
+dialog handing off to the M15 flow. Raster herald art is pending (geometric emblem
+until then, see assets/herald/README.md). Original plan below for reference.
 
 After a real compatible update check, announce the new version through a medieval
 popup: a vassal/herald playing a trumpet and holding a parchment update manifesto.
@@ -346,8 +352,8 @@ writing/saving/other operations and deduplicate announcements per version.
 Use local assets, controllable short audio, reduced motion and an accessible
 keyboard/focus/close path. Offer update, remind later and dismiss. Update actions
 reuse M15 download/signature verification and mandatory backup before installation;
-no installer starts from an animation alone. This is planned behavior; current
-0.4.0 still checks explicitly and has no herald popup. See ROADMAP M15a.
+no installer starts from an animation alone. The published 0.4.0 still checks
+only explicitly; the herald ships with the next release. See ROADMAP M15a.
 
 ## M16 — Wikidot HTML and wiki selection (implemented on Windows)
 

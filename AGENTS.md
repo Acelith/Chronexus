@@ -195,15 +195,23 @@ provider/source/edition/origin (UA/homebrew) identity and show missing fields
 instead of inventing them.
 
 
-## Planned M15a and implemented M16 refinements
+## Implemented M15a and M16 refinements
 
-M15a is the next milestone when implementation is requested. M15a adds a medieval
+M15a is implemented on Windows (after M16); raster herald art is still pending.
+Keep the startup check updater-only, once per session and per 20 hours, opt-out,
+silent on errors, and the debug-only NODEX_DEV_HERALD_VERSION fixture out of
+release builds. M15a adds a medieval
 update popup (vassal/herald, trumpet, parchment manifesto), based on real newer
 compatible releases, with bounded startup checking/opt-out, postponement while
 editing/busy, dismiss/remind-later, local assets, controllable audio and reduced
 motion. Reuse M15 signatures and mandatory backups; never install from the
 animation alone. The planned startup-check exception is updater-only, not
-permission for wiki crawling or AI requests. Current 0.4.0 behavior is unchanged.
+permission for wiki crawling or AI requests. The published 0.4.0 predates M15a.
+
+Local Skills live in `~/.agents/skills` (and Codex ones in `~/.codex/skills`): read
+the relevant SKILL.md files before UI, accessibility, testing, Rust/Tauri or SQLite
+work, and report which were applied. imagegen needs Codex's built-in tool or an
+OPENAI_API_KEY; otherwise ask the user for images instead of faking illustrations.
 
 M16 offline cache is explicitly clearable per provider or in full, with
 confirmation and pending-request invalidation (cache epoch checked in Rust before

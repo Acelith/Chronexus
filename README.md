@@ -441,6 +441,13 @@ download e installazione con backup verificato obbligatorio. Nessun login client
 endpoint Forgegit pubblico o manifesto HTTPS configurabile. Le versioni precedenti
 richiedono una prima installazione manuale. Procedura: [docs/UPDATES.md](docs/UPDATES.md).
 
+**Araldo (M15a, dopo la 0.4.0).** All’avvio Chronexus controlla una volta il canale
+aggiornamenti (al massimo ogni 20 ore; disattivabile nella stessa sezione). Se esiste
+una nuova versione, quando l’app è inattiva un araldo con trombetta presenta il
+manifesto: **Aggiorna** avvia il download verificato, **Ricordamelo più tardi**
+rimanda di 3 giorni, **Ignora questa versione** non la riannuncia. L’installazione
+richiede sempre **Crea backup e installa**. Suono disattivabile.
+
 `pnpm package:desktop` produce ora artefatti updater firmati e richiede la chiave
 privata del manutentore, che non è nel repository. Per una build locale non
 destinata al canale aggiornamenti, usare `pnpm icons` e

@@ -428,6 +428,26 @@ un provider Wikidot funzionante. La release attuale resta Open5e. Requisiti e
 criteri di accettazione in ROADMAP M16; nessun adapter, migrazione o UI aggiunti ora.
 
 
+## 2026-10-25 — M15a: araldo come presentazione del flusso M15
+
+- La politica (quando controllare, quando annunciare) è Rust puro e testato; il
+  controllo riusa la funzione M15 rifattorizzata, quindi firme, versioni stabili e
+  same-origin restano identici. Un fallimento automatico non mostra nulla.
+- Limiti: un controllo per sessione (AtomicBool) e al massimo ogni 20 ore,
+  registrato solo dopo un controllo riuscito; orologio all’indietro non blocca.
+  Rinvio di 3 giorni e «ignora» sono per versione: una più recente si annuncia.
+- File `update-announcements.json` separato: aggiungere campi a
+  `update-settings.json` (deny_unknown_fields) avrebbe rotto la lettura M15.
+- Il popup non installa: «Aggiorna» porta alle impostazioni e avvia il download
+  verificato; il backup obbligatorio resta legato al pulsante d’installazione.
+- Attesa di un’app inattiva lato frontend (guardie, dialoghi, campi di testo) più
+  un comando locale per AI/addestramento/aggiornamento in corso. Un `<select>` con
+  focus non conta come scrittura (bug trovato nel collaudo desktop).
+- Fanfara Web Audio invece di un file: nessuna licenza o asset audio, volume
+  basso, nessun nuovo tentativo se l’autoplay è bloccato.
+- Nessuna figura SVG disegnata a mano (craft-floor di impeccable): emblema
+  geometrico finché l’utente non fornisce le illustrazioni raster.
+
 ## 2026-10-25 — M16 implementata: adapter Wikidot, cache separata, epoch
 
 - L’utente ha chiesto di eseguire M16: precede M15a, che resta pianificata.
