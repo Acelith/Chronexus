@@ -40,14 +40,18 @@ Verifiche realmente eseguite:
   pannello AI. Schermate README da `scripts/qa/m20-readme-media.mjs`.
 
 Limiti: download completo dei 17,7 GB di Qwen3.8-27B tramite interfaccia non
-ripetuto; installazione guidata solo Windows x64; resa del README su Forgejo da
-verificare dopo il push (API markdown non anonima); `Cargo.toml` dichiara MIT mentre
+ripetuto; installazione guidata solo Windows x64; `Cargo.toml` dichiara MIT mentre
 `LICENSE` è Apache-2.0: incoerenza segnalata all’utente, non modificata; nuove
 stringhe con fallback italiano; macOS/Linux non provati.
 
 Skill: frontend-design e impeccable (craft-floor) per README, icone SVG del progetto
 al posto delle emoji e composizione del logo; accessibility per pannello AI e nome
 del logo; react-testing per i test; imagegen non necessaria (immagini dell’utente).
+
+Push del 25/10/2026: `main` su origin a 7f2dd90 (nessuna release). Resa del README
+verificata sulla pagina reale di github.com (Forgejo 12.0.4): callout WARNING/
+IMPORTANT/NOTE, due sezioni richiudibili, centrature, tre tabelle, tutte le immagini
+e i badge caricati (release v0.7.0), 12 link interni con risposta 200.
 
 Prossima e unica milestone pianificata: M19.
 

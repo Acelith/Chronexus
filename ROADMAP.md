@@ -57,9 +57,9 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
 | 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, revisione linguistica aperta |
 | 30 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Implementata Windows | 018 | Qualifica e confronto reali, Gemma secondaria; altri OS pendenti |
-| 31 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | 25/10/2026 | vedi STATUS | Windows; non ancora in una release |
-| 32 | M22 | Installazione guidata di Ollama e modelli dalle impostazioni | 25/10/2026 | vedi STATUS | Windows; non ancora in una release |
-| 33 | M20 | README di qualità con immagini, guida rapida e crediti | 25/10/2026 | vedi STATUS | Resa Forgejo da verificare dopo il push |
+| 31 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | 25/10/2026 | `467ca7b` | Windows; non ancora in una release |
+| 32 | M22 | Installazione guidata di Ollama e modelli dalle impostazioni | 25/10/2026 | `54a6b42` | Windows; non ancora in una release |
+| 33 | M20 | README di qualità con immagini, guida rapida e crediti | 25/10/2026 | `d1d1e89` | Resa verificata su github.com |
 | 34 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata, **ultima** | — | Spostata in fondo su istruzione dell’utente |
 
 
@@ -1230,13 +1230,13 @@ dell’app; non esistono backup periodici automatici.
 - Preferenze persistenti dopo riavvio e non alterate dal ripristino; interfaccia
   italiana, tastiera, stati vuoti/errore. Piattaforme dichiarate solo se provate.
 
-## M20 — Presentazione del progetto: README di qualità (consegnata, resa da verificare)
+## M20 — Presentazione del progetto: README di qualità (consegnata e verificata)
 
 **Stato aggiornato:** README italiano e `README.en.md` riscritti, guida utente e
 sviluppo spostate senza perdite in `docs/GUIDE.md` e `docs/DEVELOPMENT.md`,
-schermate da campagna sintetica in `docs/media/`. La resa reale su github.com
-(callout, `<details>`, allineamenti) si verifica dopo il push: l’API markdown di
-Forgejo richiede autenticazione.
+schermate da campagna sintetica in `docs/media/`. Resa verificata il 25/10/2026
+sulla pagina reale di github.com (Forgejo 12.0.4) dopo il push: callout, `<details>`,
+centrature, tabelle, immagini e badge (release v0.7.0) corretti; 12 link interni 200.
 
 **Stato originale:** richiesta il 25 ottobre 2026; non implementata. L’attuale `README.md`
 mescola guida utente, cronologia delle milestone e note da sviluppatore. Obiettivo:
@@ -1306,7 +1306,7 @@ astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
 - **M15a:** illustrazioni incluse nella 0.5.0; restano upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
 - **M21/M22/M20:** consegnate su Windows il 25 ottobre 2026, non ancora in una
-  release; restano resa del README su Forgejo, download completo reale di un modello
+  release; restano download completo reale di un modello
   da 17,7 GB tramite l’interfaccia, macOS/Linux.
 - **Unica milestone pianificata: M19** (backup nei Documenti), spostata in fondo su
   istruzione dell’utente. M18 è implementata su Windows; altre GPU/OS e prova fisica
