@@ -1,6 +1,7 @@
 use super::{Settings, DEFAULT_ENDPOINT};
 use crate::{
     backup::{self, BackupReceipt, Store},
+    backup_folder,
     journal::AppResult,
 };
 use serde_json::json;
@@ -59,12 +60,15 @@ pub fn write_settings(root: &Path, settings: &Settings) -> AppResult<()> {
     backup::sync_dir(root)
 }
 /// The installer callback is unreachable if snapshot creation or verification fails.
+/// M19: written to `Documenti/Chronexus/Backup aggiornamenti`; when Documents is
+/// unusable, to the data folder with a notice passed to `install`. Never skipped.
 pub fn before_install<T>(
     store: &Store,
+    documents: Option<&Path>,
     target: &str,
-    install: impl FnOnce(&BackupReceipt) -> AppResult<T>,
+    install: impl FnOnce(&BackupReceipt, Option<&str>) -> AppResult<T>,
 ) -> AppResult<T> {
-    let directory = store.root.join("update-backups");
+    let (directory, notice) = backup_folder::update_folder(&store.root, documents);
     fs::create_dir_all(&directory)
         .map_err(|_| "Impossibile creare la cartella dei backup: installazione bloccata.")?;
     let meta = fs::symlink_metadata(&directory).map_err(|_| "Cartella backup non leggibile.")?;
@@ -75,6 +79,7 @@ pub fn before_install<T>(
     let settings = read_settings(&store.root)?;
     let wiki = read_json(&store.root.join(crate::wiki_provider::FILE))?;
     let announcements = read_json(&store.root.join(super::herald::FILE))?;
+    let backups = read_json(&store.root.join(backup_folder::PREFERENCES))?;
     let stamp = chrono::DateTime::<chrono::Utc>::from(std::time::SystemTime::now())
         .format("%Y%m%dT%H%M%SZ")
         .to_string();
@@ -97,7 +102,7 @@ pub fn before_install<T>(
         }
         hash.update(&bytes[..n]);
     }
-    let record = json!({"format":"chronexus-update-backup","version":1,"fromVersion":env!("CARGO_PKG_VERSION"),"targetVersion":target,"backup":receipt.path,"sha256":format!("{:x}",hash.finalize()),"interfacePreferences":preferences,"updateSettings":settings,"wikiPreferences":wiki,"updateAnnouncements":announcements});
+    let record = json!({"format":"chronexus-update-backup","version":1,"fromVersion":env!("CARGO_PKG_VERSION"),"targetVersion":target,"backup":receipt.path,"sha256":format!("{:x}",hash.finalize()),"interfacePreferences":preferences,"updateSettings":settings,"wikiPreferences":wiki,"updateAnnouncements":announcements,"backupPreferences":backups});
     let mut sidecar = NamedTempFile::new_in(&directory)
         .map_err(|_| "Backup creato ma ricevuta non salvabile: installazione bloccata.")?;
     serde_json::to_writer_pretty(sidecar.as_file_mut(), &record)
@@ -110,5 +115,5 @@ pub fn before_install<T>(
         .persist_noclobber(directory.join(format!("{name}.json")))
         .map_err(|_| "Ricevuta backup non salvata: installazione bloccata.")?;
     backup::sync_dir(&directory)?;
-    install(&receipt)
+    install(&receipt, notice.as_deref())
 }

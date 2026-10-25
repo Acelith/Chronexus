@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, test, vi } from "vitest";
 import BackupWorkspace from "./BackupWorkspace";
-import { backupApi, type BackupPreview } from "./api";
+import { backupApi, backupFolderApi, type BackupPreview } from "./api";
 import type { SaveGuard } from "../journal/Editor";
 
 vi.mock("./api", () => ({
@@ -12,7 +12,14 @@ vi.mock("./api", () => ({
     restore: vi.fn(),
     cancel: vi.fn(),
   },
+  BACKUP_STATUS_EVENT: "chronexus:backup-status",
+  backupFolderApi: {
+    list: vi.fn(),
+    inspect: vi.fn(),
+    copyLegacy: vi.fn(),
+  },
 }));
+const emptyListing = { folders: [], backups: [], truncated: false };
 const counts = {
   campaigns: 2,
   sessions: 12,
@@ -36,6 +43,7 @@ const preview: BackupPreview = {
 beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(backupApi.cancel).mockResolvedValue();
+  vi.mocked(backupFolderApi.list).mockResolvedValue(emptyListing);
 });
 function setup() {
   let guard: SaveGuard | null = null;
@@ -170,4 +178,81 @@ test("blocca altre operazioni durante il lavoro e richiede nuova verifica dopo e
   expect(
     screen.getByRole("button", { name: "Seleziona backup" }),
   ).toBeEnabled();
+});
+test("elenca i backup delle cartelle, ripristina con verifica e copia quelli legacy", async () => {
+  const listed = {
+    folders: [
+      {
+        location: "updates" as const,
+        path: "C:/Users/Zoë/Documents/Chronexus/Backup aggiornamenti",
+        exists: false,
+        error: "C:/x è un collegamento simbolico o una giunzione",
+      },
+    ],
+    backups: [
+      {
+        location: "periodic" as const,
+        name: "chronexus-periodico-20261025T100000Z-abcd1234.nodex",
+        kind: "periodic" as const,
+        size: 2 * 1024 * 1024,
+        modified: "2026-10-25T10:00:00Z",
+        registered: true,
+      },
+      {
+        location: "legacy" as const,
+        name: "before-update-x.nodex",
+        kind: "update" as const,
+        size: 1024,
+        modified: "2026-10-01T10:00:00Z",
+        registered: false,
+      },
+    ],
+    truncated: false,
+  };
+  vi.mocked(backupFolderApi.list).mockResolvedValue(listed);
+  vi.mocked(backupFolderApi.inspect).mockResolvedValue(preview);
+  vi.mocked(backupFolderApi.copyLegacy).mockResolvedValue(
+    "C:/Docs/Chronexus/Backup aggiornamenti/before-update-x.nodex",
+  );
+  const { user } = setup();
+  const region = await screen.findByRole("region", {
+    name: "Backup nelle cartelle di Chronexus",
+  });
+  expect(within(region).getByText(/giunzione/)).toBeInTheDocument();
+  expect(
+    within(region).getByText(/Periodico · Documenti · Backup periodici/),
+  ).toBeInTheDocument();
+  expect(within(region).getByText(/2\.0 MiB/)).toBeInTheDocument();
+  expect(within(region).getByText(/· 1 KiB/)).toBeInTheDocument();
+  const copy = within(region).getAllByRole("button", {
+    name: "Copia nei Documenti",
+  });
+  expect(copy).toHaveLength(1);
+  await user.click(copy[0]);
+  expect(backupFolderApi.copyLegacy).toHaveBeenCalledWith(
+    "before-update-x.nodex",
+  );
+  expect(
+    await screen.findByText(/L’originale resta nella cartella dati/),
+  ).toBeInTheDocument();
+  await user.click(
+    within(region).getByRole("button", {
+      name: "Verifica e ripristina chronexus-periodico-20261025T100000Z-abcd1234.nodex",
+    }),
+  );
+  expect(backupFolderApi.inspect).toHaveBeenCalledWith(
+    "periodic",
+    "chronexus-periodico-20261025T100000Z-abcd1234.nodex",
+  );
+  expect(await screen.findByRole("alertdialog")).toHaveTextContent(
+    "campagne.nodex",
+  );
+});
+test("mostra lo stato vuoto dell’elenco", async () => {
+  setup();
+  expect(
+    await screen.findByText(
+      "Nessun backup nelle cartelle di Chronexus per ora.",
+    ),
+  ).toBeInTheDocument();
 });

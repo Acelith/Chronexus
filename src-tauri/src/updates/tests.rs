@@ -75,7 +75,7 @@ fn backup_is_verified_restorable_and_includes_images_before_installer_runs() {
         r#"{"version":2,"locale":"it","script":"standard","showOriginal":true}"#,
     )
     .unwrap();
-    let path = safety::before_install(&store, "0.4.0", |receipt| {
+    let path = safety::before_install(&store, None, "0.4.0", |receipt, _| {
         let prepared =
             backup::prepare_restore(PathBuf::from(&receipt.path).as_path(), root.path()).unwrap();
         drop(prepared);
@@ -109,7 +109,8 @@ fn backup_is_verified_restorable_and_includes_images_before_installer_runs() {
     );
     assert!(!images::bytes(&store.directory, &image).unwrap().is_empty());
     let second =
-        safety::before_install(&store, "0.4.0", |receipt| Ok(receipt.path.clone())).unwrap();
+        safety::before_install(&store, None, "0.4.0", |receipt, _| Ok(receipt.path.clone()))
+            .unwrap();
     assert_ne!(path, second);
     assert!(PathBuf::from(path).is_file());
 }
@@ -119,7 +120,7 @@ fn failed_backup_never_calls_installer_and_installer_failure_keeps_backup() {
     let store = backup::Store::open(root.path()).unwrap();
     fs::write(root.path().join("update-backups"), "blocked").unwrap();
     let invoked = AtomicBool::new(false);
-    let result: AppResult<()> = safety::before_install(&store, "0.4.0", |_| {
+    let result: AppResult<()> = safety::before_install(&store, None, "0.4.0", |_, _| {
         invoked.store(true, Ordering::Relaxed);
         Ok(())
     });
@@ -128,7 +129,7 @@ fn failed_backup_never_calls_installer_and_installer_failure_keeps_backup() {
     let other = tempfile::tempdir().unwrap();
     let store = backup::Store::open(other.path()).unwrap();
     let result: AppResult<()> =
-        safety::before_install(&store, "0.4.0", |_| Err("installer failed".into()));
+        safety::before_install(&store, None, "0.4.0", |_, _| Err("installer failed".into()));
     assert!(result.is_err());
     assert_eq!(
         fs::read_dir(other.path().join("update-backups"))
@@ -231,4 +232,50 @@ fn forgejo_discovery_accepts_only_stable_release_with_unique_same_origin_manifes
     )
     .unwrap()
     .is_none());
+}
+#[test]
+fn update_backup_goes_to_documents_with_receipt_or_blocks_installer() {
+    let root = tempfile::tempdir().unwrap();
+    let store = backup::Store::open(&root.path().join("dati")).unwrap();
+    let documents = root.path().join("Documenti utente");
+    fs::create_dir(&documents).unwrap();
+    fs::write(
+        store.root.join(crate::backup_folder::PREFERENCES),
+        r#"{"version":1,"enabled":true,"frequency":"daily","hours":12,"keep":3,"destination":null}"#,
+    )
+    .unwrap();
+    let (path, notice) = safety::before_install(&store, Some(&documents), "0.9.0", |r, n| {
+        Ok((r.path.clone(), n.map(str::to_string)))
+    })
+    .unwrap();
+    let folder = documents.join("Chronexus").join("Backup aggiornamenti");
+    assert!(PathBuf::from(&path).starts_with(&folder) && notice.is_none());
+    let receipt = fs::read_dir(&folder)
+        .unwrap()
+        .filter_map(Result::ok)
+        .find(|p| p.path().extension().is_some_and(|e| e == "json"))
+        .unwrap();
+    let receipt: serde_json::Value =
+        serde_json::from_slice(&fs::read(receipt.path()).unwrap()).unwrap();
+    assert_eq!(receipt["backupPreferences"]["keep"], 3);
+    assert!(!store.root.join("update-backups").exists());
+    // Documents unusable: data folder with a notice, never skipped.
+    fs::write(documents.join("Chronexus").join("x"), "").unwrap();
+    let blocked = root.path().join("bloccati");
+    fs::write(&blocked, "file").unwrap();
+    let (path, notice) = safety::before_install(&store, Some(&blocked), "0.9.0", |r, n| {
+        Ok((r.path.clone(), n.map(str::to_string)))
+    })
+    .unwrap();
+    assert!(PathBuf::from(path).starts_with(store.root.join("update-backups")));
+    assert!(notice.unwrap().contains("cartella dati"));
+    // Both unusable: the installer is never reached.
+    fs::remove_dir_all(store.root.join("update-backups")).unwrap();
+    fs::write(store.root.join("update-backups"), "file").unwrap();
+    let invoked = AtomicBool::new(false);
+    let result: AppResult<()> = safety::before_install(&store, Some(&blocked), "0.9.0", |_, _| {
+        invoked.store(true, Ordering::Relaxed);
+        Ok(())
+    });
+    assert!(result.is_err() && !invoked.load(Ordering::Relaxed));
 }

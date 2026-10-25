@@ -41,8 +41,14 @@ Le versioni precedenti richiedono una prima installazione manuale della 0.4.0.
 
 Da M16 la ricevuta include anche `wikiPreferences` (fonte wiki scelta), se salvata.
 
-I backup si trovano nella cartella dati, sottocartella `update-backups`; il
-percorso esatto compare nelle impostazioni. Hanno nomi unici e non vengono
+Da M19 i backup si trovano in `Documenti/Chronexus/Backup aggiornamenti`, creata
+al primo aggiornamento; la ricevuta include anche `backupPreferences`. Se i
+Documenti non esistono, la cartella è un link simbolico/giunzione o un file, o non
+è creabile, il backup va nella cartella dati, sottocartella `update-backups`, con
+un avviso nell’avanzamento: il backup non viene mai saltato e, se fallisce anche
+lì, l’installer non parte. I backup già presenti in `update-backups` restano dove
+sono; **Backup e ripristino** li elenca e offre una copia verificata con SHA-256
+nei Documenti senza cancellare l’originale. Il percorso compare nelle impostazioni. Hanno nomi unici e non vengono
 sovrascritti o eliminati automaticamente. Un nuovo tentativo d’installazione crea
 un nuovo backup. I pesi base/runtime AI restano installati separatamente e non
 vengono riscaricati né duplicati nel backup. SQLite resta **015**.

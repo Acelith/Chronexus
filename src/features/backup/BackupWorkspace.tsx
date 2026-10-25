@@ -6,12 +6,33 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { SaveGuard } from "../journal/Editor";
 import { errorMessage } from "../journal/api";
 import {
+  BACKUP_STATUS_EVENT,
   backupApi,
+  backupFolderApi,
   type ArchiveCounts,
+  type BackupListing,
   type BackupPreview,
   type BackupReceipt,
+  type ListedBackup,
   type RestoreReceipt,
 } from "./api";
+
+const kindLabels: Record<ListedBackup["kind"], string> = {
+  periodic: "Periodico",
+  update: "Prima di un aggiornamento",
+  other: "Altro backup",
+};
+const locationLabels: Record<ListedBackup["location"], string> = {
+  periodic: "Documenti · Backup periodici",
+  updates: "Documenti · Backup aggiornamenti",
+  custom: "Cartella scelta da te",
+  legacy: "Cartella dati di Chronexus",
+};
+function megabytes(bytes: number) {
+  return bytes < 1024 * 1024
+    ? `${Math.max(1, Math.round(bytes / 1024))} KiB`
+    : `${(bytes / 1024 / 1024).toFixed(1)} MiB`;
+}
 
 export default function BackupWorkspace({
   register,
@@ -31,6 +52,36 @@ export default function BackupWorkspace({
   const cancel = useRef<HTMLButtonElement>(null);
   const choose = useRef<HTMLButtonElement>(null);
   const hadPreview = useRef(false);
+  const [listing, setListing] = useState<BackupListing | null>(null);
+  const [listError, setListError] = useState("");
+  async function refreshListing() {
+    try {
+      setListing(await backupFolderApi.list());
+      setListError("");
+    } catch (reason) {
+      setListError(errorMessage(reason));
+    }
+  }
+  useEffect(() => {
+    let active = true;
+    const load = () =>
+      backupFolderApi
+        .list()
+        .then((next) => {
+          if (!active) return;
+          setListing(next);
+          setListError("");
+        })
+        .catch((reason) => {
+          if (active) setListError(errorMessage(reason));
+        });
+    void load();
+    window.addEventListener(BACKUP_STATUS_EVENT, load);
+    return () => {
+      active = false;
+      window.removeEventListener(BACKUP_STATUS_EVENT, load);
+    };
+  }, []);
   useEffect(() => {
     register({
       dirty: () => operation.current || preview !== null,
@@ -281,6 +332,36 @@ export default function BackupWorkspace({
               <Text source={"Seleziona backup"} />
             </button>
           </section>
+          <BackupList
+            listing={listing}
+            error={listError}
+            busy={busy}
+            onRefresh={() =>
+              void perform(refreshListing, tr("Lettura delle cartelle…"))
+            }
+            onRestore={(item) =>
+              void perform(async () => {
+                setPreview(
+                  await backupFolderApi.inspect(item.location, item.name),
+                );
+                setStatus(
+                  tr("Backup verificato. Conferma o annulla il ripristino."),
+                );
+              }, tr("Selezione e verifica del backup…"))
+            }
+            onCopy={(item) =>
+              void perform(async () => {
+                const path = await backupFolderApi.copyLegacy(item.name);
+                await refreshListing();
+                setStatus(
+                  tr(
+                    "Copia verificata con SHA-256 in {0}. L’originale resta nella cartella dati.",
+                    [path],
+                  ),
+                );
+              }, tr("Copia verificata in corso…"))
+            }
+          />
           <p className="backup-footnote">
             <Text
               source={
@@ -290,6 +371,112 @@ export default function BackupWorkspace({
           </p>
         </>
       )}
+    </section>
+  );
+}
+
+function BackupList({
+  listing,
+  error,
+  busy,
+  onRefresh,
+  onRestore,
+  onCopy,
+}: {
+  listing: BackupListing | null;
+  error: string;
+  busy: boolean;
+  onRefresh: () => void;
+  onRestore: (item: ListedBackup) => void;
+  onCopy: (item: ListedBackup) => void;
+}) {
+  return (
+    <section
+      className="backup-action backup-available"
+      aria-labelledby="available-backups-title"
+    >
+      <div>
+        <h3 id="available-backups-title">
+          <Text source={"Backup nelle cartelle di Chronexus"} />
+        </h3>
+        <p>
+          <Text
+            source={
+              "Backup periodici e di aggiornamento trovati nei Documenti, nella cartella scelta e nella cartella dati. Il ripristino segue la stessa verifica di un file selezionato a mano."
+            }
+          />
+        </p>
+        {error ? (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        ) : null}
+        {listing?.folders
+          .filter((folder) => folder.error)
+          .map((folder) => (
+            <p key={folder.location} className="error">
+              {folder.error}
+            </p>
+          ))}
+        {listing && !listing.backups.length ? (
+          <p className="muted">
+            <Text
+              source={"Nessun backup nelle cartelle di Chronexus per ora."}
+            />
+          </p>
+        ) : null}
+        {listing?.backups.length ? (
+          <ul className="backup-list">
+            {listing.backups.map((item) => (
+              <li key={`${item.location}/${item.name}`}>
+                <div>
+                  <strong>
+                    <bdi>{item.name}</bdi>
+                  </strong>
+                  <br />
+                  <span className="muted">
+                    {[
+                      tr(kindLabels[item.kind]),
+                      tr(locationLabels[item.location]),
+                      item.modified
+                        ? formatDateTime(item.modified, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })
+                        : "",
+                      megabytes(item.size),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                </div>
+                <div className="actions">
+                  {item.location === "legacy" ? (
+                    <button disabled={busy} onClick={() => onCopy(item)}>
+                      {tr("Copia nei Documenti")}
+                    </button>
+                  ) : null}
+                  <button
+                    disabled={busy}
+                    onClick={() => onRestore(item)}
+                    aria-label={tr("Verifica e ripristina {0}", [item.name])}
+                  >
+                    {tr("Verifica e ripristina…")}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {listing?.truncated ? (
+          <p className="muted">
+            {tr("Elenco limitato ai primi 500 file per cartella.")}
+          </p>
+        ) : null}
+      </div>
+      <button disabled={busy} onClick={onRefresh}>
+        <Text source={"Aggiorna elenco"} />
+      </button>
     </section>
   );
 }

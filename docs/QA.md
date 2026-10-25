@@ -454,3 +454,20 @@ il modello qualificato presente e verifica il percorso di download senza scarica
 Profilo debug vuoto, CDP 9224, `CHRONEXUS_README_QA=isolated`, poi
 `node scripts/qa/m20-readme-media.mjs`: crea la campagna inventata «La Torre di
 Varek» e salva le schermate in `.tools/m20/`; convertirle in WebP in `docs/media/`.
+
+## Collaudo M19 — backup nei Documenti e periodici
+
+Eseguibile debug (target separato se `src-tauri/target` è bloccato), Vite su 1420,
+CDP 9224 e, per ogni fase, gli stessi `NODEX_DEV_DATA_DIR` (profilo nuovo sotto
+`.tools/m19/`), `NODEX_DEV_DOCUMENTS_DIR` (Documenti simulati con spazi e Unicode,
+mai quelli reali), `NODEX_DEV_NO_OPEN=1` e `CHRONEXUS_BACKUP_QA=isolated`.
+
+1. `node scripts/qa/m19-backups.mjs auto`: campagna sintetica con immagine,
+   pianificazione ogni 2 ore e 2 copie dalle impostazioni; nessun backup né
+   cartella mentre un campo ha il focus; backup automatico dopo l’inattività;
+   «Esegui backup ora» due volte: rotazione a 2 copie, `manuale.nodex` intatto.
+2. Chiudi l’app, poi `… m19-backups.mjs age` (invecchia l’ultimo backup di 3 ore).
+3. Riapri lo stesso profilo e `… m19-backups.mjs restart`: preferenze conservate,
+   backup scaduto eseguito dopo il riavvio, copia verificata di un backup
+   `update-backups` nei Documenti con originale conservato, ripristino dall’elenco
+   con immagine e preferenze invariate.

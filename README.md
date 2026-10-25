@@ -92,8 +92,14 @@ collegare un personaggio o un luogo, poi esplora **Codex** e **Grafo**.
 - **Backup e ripristino** crea un file `.nodex` con tutte le campagne e le
   immagini, verificato con SHA-256; il ripristino mostra un’anteprima e conserva
   una copia di sicurezza dei dati attuali.
-- Prima di ogni aggiornamento Chronexus crea e verifica un backup completo: se non
-  riesce, l’installazione si ferma.
+- **Backup periodici** (Impostazioni dell’app → Backup, disattivati finché non li
+  attivi): ogni giorno, ogni settimana o ogni N ore, solo con l’app aperta e
+  inattiva, nella cartella `Documenti/Chronexus/Backup periodici` o in una cartella
+  scelta da te. Chronexus conserva il numero di copie indicato ed elimina solo le
+  copie periodiche che ha creato e registrato.
+- Prima di ogni aggiornamento Chronexus crea e verifica un backup completo in
+  `Documenti/Chronexus/Backup aggiornamenti` (o nella cartella dati, con avviso, se i
+  Documenti non sono utilizzabili): se non riesce, l’installazione si ferma.
 - L’araldo annuncia le nuove versioni dopo un controllo leggero all’avvio, che puoi
   disattivare. L’installazione parte solo quando la confermi.
 

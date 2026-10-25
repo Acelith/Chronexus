@@ -251,6 +251,9 @@ export default function UpdateSettings({
                   {tr("Backup salvato in")}: <bdi>{progress.backupPath}</bdi>
                 </p>
               ) : null}
+              {progress.backupNotice ? (
+                <p role="alert">{progress.backupNotice}</p>
+              ) : null}
             </div>
           ) : null}
           {herald ? (

@@ -1,3 +1,43 @@
+# Stato Chronexus — 25 ottobre 2026 (M19)
+
+**M19 — Backup nei Documenti, periodici e di aggiornamento.** Consegnata su
+Windows, non in una release, nessun push. Modulo `src-tauri/src/backup_folder`:
+`Documenti/Chronexus/{Backup periodici,Backup aggiornamenti}` creata solo al primo
+backup o apertura richiesta, mai attraverso link simbolici/giunzioni o file al
+posto della cartella. Impostazioni dell’app → Backup (anche senza campagna):
+attivazione (predefinito **spento**), ogni giorno/settimana/N ore (2–72), copie
+1–60, cartella alternativa solo dal selettore di sistema, avviso cloud, ultimo
+successo, prossimo, ultimo errore con azione, «Esegui backup ora», «Apri
+cartella». Preferenze `backup-preferences.json` e indice `periodic-backups.json`
+(SHA-256) nella radice dati, fuori dalle generazioni di ripristino. Esecuzione
+solo con l’app aperta e inattiva (45 s senza input, nessun campo di testo attivo,
+nessun dialogo/bozza/operazione; il backend salta con AI, aggiornamento, archivio
+occupato o ripristino in attesa); un errore attende un intero intervallo. La
+rotazione avviene solo dopo un nuovo backup verificato e cancella solo file
+registrati con hash invariato nella stessa cartella. I backup M15 vanno in
+«Backup aggiornamenti» (ricevuta con `backupPreferences`), con ripiego avvisato in
+`update-backups/`; se falliscono entrambi l’installer non parte. Backup e
+ripristino elenca le cartelle con tipo, data, dimensione, ripristino M4 e copia
+verificata dei vecchi backup di aggiornamento senza cancellare l’originale.
+
+Verifiche realmente eseguite:
+- `cargo test`: 134 superati con `--test-threads=1` (12 nuovi M19, giunzione
+  Windows reale inclusa). In parallelo fallisce a intermittenza il test MCP
+  `transport_auth_origin_scoping…`, già instabile prima di M19 e verde da solo.
+- `cargo fmt --check`, `cargo clippy --all-targets -D warnings`: superati.
+- `pnpm typecheck`, `pnpm lint`, `prettier --check`, `pnpm test`: 332 test superati.
+- Collaudo desktop isolato (`scripts/qa/m19-backups.mjs`, Documenti simulati con
+  spazi e Unicode): salto durante la scrittura, backup automatico all’inattività,
+  rotazione con file manuale intatto, ripresa dopo riavvio, copia legacy
+  verificata, ripristino reale con immagine, preferenze invariate; axe senza
+  violazioni nei due pannelli.
+- Non verificati: macOS/Linux, Documenti reindirizzati reali, disco pieno e sola
+  lettura fisici, installazione reale di un aggiornamento con backup nei Documenti;
+  nuove stringhe non tradotte (ripiego italiano).
+
+Prossimo passo: nessuna milestone pianificata aperta; eventuale release con
+M19–M22 solo su richiesta.
+
 # Stato Chronexus — 25 ottobre 2026 (M21, M22, M20)
 
 Eseguite su richiesta dell’utente; M19 spostata in fondo alla roadmap. Versione

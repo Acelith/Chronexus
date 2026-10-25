@@ -92,6 +92,8 @@ pub struct Progress {
     pub downloaded: usize,
     pub total: Option<u64>,
     pub backup_path: Option<String>,
+    /// M19: why the backup went to the data folder instead of Documents.
+    pub backup_notice: Option<String>,
 }
 fn root(app: &tauri::AppHandle) -> AppResult<PathBuf> {
     app.state::<Database>().with_store(|s| Ok(s.root.clone()))
@@ -108,6 +110,7 @@ fn emit(
         downloaded,
         total,
         backup_path: backup,
+        backup_notice: None,
     });
 }
 fn client() -> AppResult<reqwest::Client> {
@@ -127,7 +130,13 @@ pub fn get_update_settings(app: tauri::AppHandle) -> AppResult<Overview> {
     Ok(Overview {
         settings: safety::read_settings(&root)?,
         current_version: app.package_info().version.to_string(),
-        backup_directory: root.join("update-backups").display().to_string(),
+        backup_directory: crate::backup_folder::planned_update_folder(
+            crate::backup_folder::commands::documents(&app).as_deref(),
+        )
+        .map_or_else(
+            || root.join("update-backups").display().to_string(),
+            |p| crate::backup_folder::shown(&p),
+        ),
     })
 }
 #[tauri::command]
@@ -397,6 +406,7 @@ pub async fn install_app_update(
         .ok_or("Scarica e verifica prima il pacchetto.")?;
     // Holding the AI slot prevents new inference/training during snapshot and exit.
     let handle = app.clone();
+    let documents = crate::backup_folder::commands::documents(&app);
     tauri::async_runtime::spawn_blocking(move || {
         pending.update.verify(&bytes).map_err(|_| "Il pacchetto non supera la verifica della firma.")?;
         emit(&events, "backup", 0, None, None);
@@ -406,8 +416,8 @@ pub async fn install_app_update(
             let slot = ai.running.try_lock().map_err(|_| "Attendi la conclusione dell’operazione AI prima di aggiornare.")?;
             if slot.is_some() { return Err("Ferma la risposta o l’addestramento AI prima di installare l’aggiornamento.".into()) }
             // Keep the same archive lock across the snapshot and installer handoff.
-            safety::before_install(store, &pending.offer.version, |receipt| {
-                emit(&events, "install", 0, None, Some(receipt.path.clone()));
+            safety::before_install(store, documents.as_deref(), &pending.offer.version, |receipt, notice| {
+                let _ = events.send(Progress { phase: "install".into(), downloaded: 0, total: None, backup_path: Some(receipt.path.clone()), backup_notice: notice.map(str::to_string) });
                 pending.update.install(bytes.as_slice()).map_err(|_| format!("Installazione non avviata. Backup conservato in {}. Riprova o usa l’installer firmato manualmente.", receipt.path))?;
                 Ok(receipt.path.clone())
             })

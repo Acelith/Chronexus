@@ -41,6 +41,7 @@ import type { AbilityDetails, PlayerView } from "./features/player/api";
 import type { SearchResult } from "./features/search/SearchPanel";
 import { OperationContext } from "./operations";
 import { heraldApi, type UpdateOffer } from "./features/updates/api";
+import { usePeriodicBackup } from "./features/backup/usePeriodicBackup";
 import { useStartupHerald } from "./features/updates/useStartupHerald";
 const SearchPanel = lazy(() => import("./features/search/SearchPanel"));
 
@@ -61,6 +62,7 @@ const AssistantWorkspace = lazy(
 const DiceWorkspace = lazy(() => import("./features/dice/DiceWorkspace"));
 const UpdateSettings = lazy(() => import("./features/updates/UpdateSettings"));
 const WikiSettings = lazy(() => import("./features/wiki/WikiSettings"));
+const BackupSettings = lazy(() => import("./features/backup/BackupSettings"));
 const AiSetupSettings = lazy(
   () => import("./features/ai-setup/AiSetupSettings"),
 );
@@ -167,6 +169,8 @@ export function App() {
     [loading, busy, backupOpen, searchOpen, form],
   );
   const herald = useStartupHerald(heraldCanShow);
+  // M19: same idle rule as the herald; the backend adds AI/update/restore checks.
+  const periodic = usePeriodicBackup(heraldCanShow);
   const campaign = campaigns.find((item) => item.id === campaignId);
   const session = sessions.find((item) => item.id === sessionId);
   const register = useCallback((value: SaveGuard | null) => {
@@ -485,6 +489,25 @@ export function App() {
   }
   return (
     <OperationContext.Provider value={run}>
+      {periodic.outcome ? (
+        <div
+          className={
+            periodic.outcome.error
+              ? "periodic-backup-notice error"
+              : "periodic-backup-notice"
+          }
+          role={periodic.outcome.error ? "alert" : "status"}
+        >
+          <p>
+            {periodic.outcome.error
+              ? tr("Backup periodico non riuscito: {0}", [
+                  periodic.outcome.error,
+                ])
+              : tr("Backup periodico creato e verificato.")}
+          </p>
+          <button onClick={periodic.dismiss}>{tr("Chiudi")}</button>
+        </div>
+      ) : null}
       {herald.announcement ? (
         <Suspense fallback={null}>
           <HeraldAnnouncement
@@ -1000,6 +1023,7 @@ export function App() {
                           onHandoffUsed={() => setUpdateHandoff(null)}
                         />
                         <LanguageSettings disabled={busy} />
+                        <BackupSettings disabled={busy} />
                         <WikiSettings disabled={busy} />
                         <AiSetupSettings disabled={busy} />
                       </>

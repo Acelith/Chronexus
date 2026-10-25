@@ -13,6 +13,11 @@ vi.mock("./features/backup/api", () => ({
     restore: vi.fn(),
     cancel: vi.fn(),
   },
+  BACKUP_STATUS_EVENT: "chronexus:backup-status",
+  backupFolderApi: {
+    list: vi.fn(async () => ({ folders: [], backups: [], truncated: false })),
+    tick: vi.fn(),
+  },
 }));
 
 vi.mock("./features/journal/api", async (original) => ({

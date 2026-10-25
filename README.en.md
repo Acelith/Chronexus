@@ -92,8 +92,14 @@ character or place, then explore **Codex** and **Graph**.
 - **Backup and restore** writes a `.nodex` file with every campaign and image,
   verified with SHA-256; restoring shows a preview and keeps a safety copy of the
   current data.
-- Before every update Chronexus creates and verifies a full backup: if it fails,
-  the installation stops.
+- **Periodic backups** (App settings → Backup, off until you enable them): daily,
+  weekly or every N hours, only while the app is open and idle, into
+  `Documents/Chronexus/Backup periodici` or a folder you pick. Chronexus keeps the
+  number of copies you choose and deletes only periodic copies it created and
+  registered.
+- Before every update Chronexus creates and verifies a full backup in
+  `Documents/Chronexus/Backup aggiornamenti` (or the data folder, with a notice, when
+  Documents is unusable): if it fails, the installation stops.
 - The herald announces new versions after a light startup check you can turn off.
   Installation starts only after you confirm.
 

@@ -60,7 +60,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 31 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | 25/10/2026 | `467ca7b` | Windows; non ancora in una release |
 | 32 | M22 | Installazione guidata di Ollama e modelli dalle impostazioni | 25/10/2026 | `54a6b42` | Windows; non ancora in una release |
 | 33 | M20 | README di qualità con immagini, guida rapida e crediti | 25/10/2026 | `d1d1e89` | Resa verificata su github.com |
-| 34 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata, **ultima** | — | Spostata in fondo su istruzione dell’utente |
+| 34 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Consegnata su Windows, non rilasciata | — | Spostata in fondo su istruzione dell’utente; eseguita il 25 ottobre 2026 |
 
 
 ## M0 - Foundation and real local database
@@ -1156,14 +1156,19 @@ famiglia, **Qwen3.8-27B**, eseguito in locale. Non chiamarlo Qwen3.8-Max né D&D
 - Runtime assente, modello mancante, CPU sola, memoria insufficiente e cloud attivo
   producono errori chiari senza inviare appunti. Test Rust/frontend e QA desktop.
 
-## M19 — Cartella backup nei Documenti, backup periodici e di aggiornamento (pianificata, ultima)
+## M19 — Cartella backup nei Documenti, backup periodici e di aggiornamento (consegnata su Windows)
 
 **Ordine:** su istruzione dell’utente del 25 ottobre 2026 è l’ultima milestone.
 
-**Stato:** richiesta il 25 ottobre 2026; non implementata. Oggi i backup manuali
-vanno dove sceglie l’utente, le copie preventive del ripristino in `backups/` e i
-backup pre-aggiornamento in `update-backups/`, entrambi nella cartella dati
-dell’app; non esistono backup periodici automatici.
+**Stato aggiornato:** implementata il 25 ottobre 2026 (`src-tauri/src/backup_folder`,
+`src/features/backup`), collaudata su Windows con profilo isolato e Documenti
+simulati; non ancora in una release. Predefinito scelto: backup periodici
+**disattivati** (settimanali, 5 copie quando attivati) perché il `.nodex` non è
+cifrato e i Documenti sono spesso sincronizzati. Intervallo ogni N ore: 2–72; copie
+1–60. Il piano originale resta sotto come riferimento. Residui: macOS/Linux,
+Documenti reindirizzati reali, disco pieno e cartella in sola lettura fisici,
+installazione reale di un aggiornamento con backup nei Documenti, traduzioni delle
+nuove stringhe (oggi in italiano anche nelle altre lingue).
 
 ### M19.1 — Cartella dedicata nei Documenti
 
@@ -1308,8 +1313,10 @@ astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
 - **M21/M22/M20:** consegnate su Windows il 25 ottobre 2026, non ancora in una
   release; restano download completo reale di un modello
   da 17,7 GB tramite l’interfaccia, macOS/Linux.
-- **Unica milestone pianificata: M19** (backup nei Documenti), spostata in fondo su
-  istruzione dell’utente. M18 è implementata su Windows; altre GPU/OS e prova fisica
+- **M19:** consegnata su Windows il 25 ottobre 2026, non in una release; restano
+  macOS/Linux, prove fisiche di disco pieno/sola lettura/Documenti reindirizzati e
+  un aggiornamento reale con backup nei Documenti. Nessuna milestone pianificata
+  aperta. M18 è implementata su Windows; altre GPU/OS e prova fisica
   offline pendenti. Implementare solo su richiesta; i residui sopra restano aperti.
 
 ## Fuori dal perimetro attuale

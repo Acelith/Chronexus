@@ -419,9 +419,12 @@ clears translations and invalidates pending writes. Changed source hash, locale
 or restore generation prevents reuse or late writes. See ROADMAP M17 and
 docs/WIKI_TRANSLATION.md. M18 qualifies the replacement models separately.
 
-## M19 — Documents backup folder, periodic and update backups (planned)
+## M19 — Documents backup folder, periodic and update backups (implemented)
 
-Requested 25 October 2026, not implemented. Create `Chronexus/` in the OS Documents
+Implemented 25 October 2026 on Windows (`src-tauri/src/backup_folder`). Global
+`backup-preferences.json` (default disabled, weekly, keep 5; hours 2–72, copies
+1–60) and `periodic-backups.json` index with SHA-256 live in the data root, outside
+restore generations. Original plan: create `Chronexus/` in the OS Documents
 folder on first need, with "Backup periodici" and "Backup aggiornamenti". Periodic
 backups are global settings (enable, interval, retention, destination), run only
 while the app is open and idle, reuse the verified `.nodex` writer and rotate only

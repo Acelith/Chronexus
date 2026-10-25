@@ -179,9 +179,13 @@ Do not delete update-backups automatically, rotate keys implicitly, change the
 legacy appID/schema, publish nonexistent targets or replace the M11 draft.
 Production signing key is encrypted and password Windows-DPAPI-protected outside
 Git; recover the original key before building future updates. See docs/UPDATES.md.
-Planned M19 (not implemented): Documents/Chronexus backup folder, periodic
-backups only while the app is open and idle, rotation limited to registered
-periodic files; update backups keep the M15 guarantees and are never auto-deleted.
+M19 (implemented, Windows): Documents/Chronexus folder created on first need,
+never through links/junctions; periodic backups default off, only while the app
+is open and idle (frontend idle gate + backend try_lock, AI/update/restore checks),
+rotation limited to registered periodic files with matching SHA-256; update
+backups keep the M15 guarantees, fall back to data `update-backups/` with notice
+and are never auto-deleted. Debug profiles use NODEX_DEV_DOCUMENTS_DIR, never the
+real Documents. No free-text paths from the frontend.
 
 
 ## Chronological roadmap and M16 planning boundary
@@ -266,7 +270,7 @@ installers now. See ROADMAP M22 for scope and acceptance. Publication remains
 stopped until a new user request.
 
 M21 and M22 are implemented on Windows (not yet released); M20 README is delivered
-with Forgejo rendering to verify after a push. M19 is the last planned milestone.
+with Forgejo rendering to verify after a push. M19 is implemented (not released).
 M22 setup: only the pinned official Ollama 0.40.10 archive and SHA-256, GitHub
 asset hosts for redirects, managed copy under the app data `ai-runtime` folder,
 explicit start/stop tied to the app, model pulls limited to the M18 policy and

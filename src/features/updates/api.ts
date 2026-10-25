@@ -18,6 +18,8 @@ export interface UpdateProgress {
   downloaded: number;
   total: number | null;
   backupPath: string | null;
+  /** M19: why the backup is in the data folder instead of Documents. */
+  backupNotice?: string | null;
 }
 export const updatesApi = {
   overview: () => command<UpdateOverview>("get_update_settings"),

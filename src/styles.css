@@ -2011,3 +2011,68 @@ textarea::placeholder {
     gap: 2px;
   }
 }
+/* M19: backup folder and periodic schedule. */
+.backup-schedule fieldset {
+  border: 1px solid #b89b60;
+  padding: 14px 18px;
+  margin: 16px 0;
+  display: grid;
+  gap: 12px;
+}
+.backup-schedule input[type="number"] {
+  max-width: 10rem;
+  min-height: 44px;
+}
+.backup-folder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0;
+}
+.backup-cloud-warning {
+  border-inline-start: 4px solid #a8672a;
+  padding: 8px 12px;
+  background: rgba(168, 103, 42, 0.12);
+}
+.periodic-backup-notice {
+  position: fixed;
+  inset-block-end: 18px;
+  inset-inline-end: 18px;
+  z-index: 30;
+  max-width: min(420px, calc(100vw - 36px));
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f3e6c8;
+  color: #2b1d12;
+  border: 2px solid #b19259;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.periodic-backup-notice p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.backup-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+.backup-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  justify-content: space-between;
+  border-block-end: 1px solid #b59968;
+  padding-block: 8px;
+}
+.backup-list li > div:first-child {
+  flex: 1 1 22rem;
+  min-width: 0;
+}
+.backup-list strong {
+  overflow-wrap: anywhere;
+}
