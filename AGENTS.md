@@ -176,6 +176,9 @@ Do not delete update-backups automatically, rotate keys implicitly, change the
 legacy appID/schema, publish nonexistent targets or replace the M11 draft.
 Production signing key is encrypted and password Windows-DPAPI-protected outside
 Git; recover the original key before building future updates. See docs/UPDATES.md.
+Planned M19 (not implemented): Documents/Chronexus backup folder, periodic
+backups only while the app is open and idle, rotation limited to registered
+periodic files; update backups keep the M15 guarantees and are never auto-deleted.
 
 
 ## Chronological roadmap and M16 planning boundary

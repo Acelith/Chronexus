@@ -1,3 +1,12 @@
+# Pianificazione — 25 ottobre 2026: M19
+
+Solo documentazione. Nuova M19 in ROADMAP: cartella `Chronexus/` nei Documenti con
+«Backup periodici» e «Backup aggiornamenti», backup periodici configurabili
+nell’app (solo ad app aperta e inattiva, rotazione solo dei periodici registrati) e
+backup pre-aggiornamento M15 spostati lì con ripiego nella cartella dati e nessuna
+eliminazione automatica. Codice, schema, versione e release invariati; nessuna
+pubblicazione.
+
 # Stato Chronexus — 25 ottobre 2026: M17
 
 M17 implementata su Windows: traduzione esplicita della voce wiki nella lingua

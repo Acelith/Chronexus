@@ -57,6 +57,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
 | 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, revisione linguistica aperta |
 | 30 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Pianificata | — | Da implementare su richiesta |
+| 31 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata | — | Da implementare su richiesta |
 
 
 ## M0 - Foundation and real local database
@@ -1012,6 +1013,78 @@ famiglia, **Qwen3.8-27B**, eseguito in locale. Non chiamarlo Qwen3.8-Max né D&D
 - Runtime assente, modello mancante, CPU sola, memoria insufficiente e cloud attivo
   producono errori chiari senza inviare appunti. Test Rust/frontend e QA desktop.
 
+## M19 — Cartella backup nei Documenti, backup periodici e di aggiornamento (pianificata)
+
+**Stato:** richiesta il 25 ottobre 2026; non implementata. Oggi i backup manuali
+vanno dove sceglie l’utente, le copie preventive del ripristino in `backups/` e i
+backup pre-aggiornamento in `update-backups/`, entrambi nella cartella dati
+dell’app; non esistono backup periodici automatici.
+
+### M19.1 — Cartella dedicata nei Documenti
+
+- Creare, alla prima necessità e senza scritture all’avvio, `Chronexus/` nella
+  cartella Documenti dell’utente risolta dal sistema (Windows Known Folder anche se
+  reindirizzata, macOS `~/Documents`, Linux XDG `DOCUMENTS`), con le sottocartelle
+  **Backup periodici** e **Backup aggiornamenti**. Mostrare il percorso completo
+  nell’app con apertura nel file manager.
+- Rifiutare percorsi non sicuri: link simbolici/junction, file al posto della
+  cartella, assenza di permessi. Ogni file ha nome univoco con data UTC e non
+  sovrascrive mai un file esistente. Nessun percorso fornito dal frontend come testo
+  libero: scelta di una cartella diversa solo tramite selettore di sistema.
+- Avvisare che i Documenti possono essere sincronizzati (es. OneDrive): il `.nodex`
+  contiene tutte le campagne non cifrate. È una scelta di archiviazione dell’utente,
+  non un invio di Chronexus; offrire una cartella alternativa locale o esterna.
+
+### M19.2 — Backup periodici configurabili
+
+- In **Impostazioni dell’app → Backup** (globale, anche senza campagna): attivo o no,
+  frequenza (es. ogni giorno, ogni settimana o ogni N ore entro limiti dichiarati),
+  numero di copie da conservare e cartella di destinazione. Preferenza globale in
+  un file atomico fuori dalle generazioni di ripristino, inclusa nella ricevuta dei
+  backup pre-aggiornamento. Valore predefinito da decidere all’implementazione.
+- Funziona solo con l’app aperta: nessun servizio in background o attività
+  pianificata del sistema. Se un backup è scaduto viene eseguito dopo l’avvio
+  quando l’app è inattiva, senza interrompere scrittura, salvataggi, ripristino,
+  aggiornamento, AI o addestramento; usa lo stesso Store e il writer `.nodex`
+  verificato (snapshot SQLite, allegati gestiti, manifest e SHA-256, rilettura).
+- Stato visibile: ultimo backup riuscito, prossimo previsto, errore con causa e
+  azione (spazio insufficiente, cartella non raggiungibile, permessi). Un fallimento
+  non blocca l’uso dell’app e viene riproposto al prossimo intervallo, senza cicli.
+- Rotazione solo dopo un nuovo backup verificato e solo sui file periodici creati
+  da Chronexus e registrati in un indice locale con hash: mai backup manuali, copie
+  preventive del ripristino, backup pre-aggiornamento o file sconosciuti.
+
+### M19.3 — Backup pre-aggiornamento nella stessa cartella
+
+- I nuovi backup obbligatori M15 vanno in **Backup aggiornamenti** con la loro
+  ricevuta. Restano garanzie M15: backup verificato prima dell’installer, Store
+  bloccato fino alla consegna, fallimento = installazione bloccata.
+- Se i Documenti non sono scrivibili, usare la cartella dati attuale
+  `update-backups/` con avviso esplicito, mai saltare il backup. Nessuna eliminazione
+  automatica dei backup di aggiornamento, coerente con M15.
+- I backup già presenti in `update-backups/` non vengono spostati in automatico:
+  elencarli e offrire una copia esplicita verificata con SHA-256, senza cancellare
+  l’originale.
+
+### M19.4 — Ripristino e visibilità
+
+- **Backup e ripristino** elenca i `.nodex` delle due cartelle (e della cartella
+  personalizzata) con data, tipo e dimensione; il ripristino resta il flusso M4 con
+  anteprima, verifica integrità, conferma e copia preventiva.
+- Cambiare cartella non sposta né elimina i backup già creati.
+
+### Accettazione M19
+
+- Cartella creata solo quando serve, Documenti reindirizzati, percorsi con spazi e
+  Unicode, cartella mancante/sola lettura/link simbolico/disco pieno.
+- Backup periodico eseguito, saltato durante scrittura o operazioni attive, ripreso
+  dopo riavvio, rotazione limitata ai soli file periodici registrati, file estranei
+  intatti. Nessun backup con l’app chiusa.
+- Aggiornamento con backup nei Documenti e ripiego nella cartella dati; errore di
+  backup che blocca l’installer. Ripristino reale di un backup periodico con immagini.
+- Preferenze persistenti dopo riavvio e non alterate dal ripristino; interfaccia
+  italiana, tastiera, stati vuoti/errore. Piattaforme dichiarate solo se provate.
+
 ## Accettazioni residue e prossima fase
 
 - **M6:** runner/pacchetti macOS/Linux e collaudi di distribuzione non dimostrati
@@ -1027,8 +1100,9 @@ famiglia, **Qwen3.8-27B**, eseguito in locale. Non chiamarlo Qwen3.8-Max né D&D
   di Wikidot; M16 è inclusa nella release 0.5.0.
 - **M15a:** illustrazioni incluse nella 0.5.0; restano upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
-- **Prossima milestone pianificata: M18**, sostituzione dei Qwen con Qwen3.8-27B
-  locale; da implementare solo su richiesta. I residui sopra restano aperti.
+- **Milestone pianificate: M18** (Qwen3.8-27B locale) e **M19** (cartella backup nei
+  Documenti, backup periodici e di aggiornamento); da implementare solo su richiesta.
+  I residui sopra restano aperti.
 
 ## Fuori dal perimetro attuale
 

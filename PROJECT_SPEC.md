@@ -412,3 +412,14 @@ derived cache in the same Store, validated in backups. Provider cache clear also
 clears translations and invalidates pending writes. Changed source hash, locale
 or restore generation prevents reuse or late writes. See ROADMAP M17 and
 docs/WIKI_TRANSLATION.md. Planned M18 will qualify replacement models separately.
+
+## M19 — Documents backup folder, periodic and update backups (planned)
+
+Requested 25 October 2026, not implemented. Create `Chronexus/` in the OS Documents
+folder on first need, with "Backup periodici" and "Backup aggiornamenti". Periodic
+backups are global settings (enable, interval, retention, destination), run only
+while the app is open and idle, reuse the verified `.nodex` writer and rotate only
+registered periodic files. M15 pre-update backups move there with fallback to the
+data-folder `update-backups/`; they are never deleted automatically and existing
+ones are only copied on request. Warn that Documents may be cloud-synced. Details
+and acceptance in ROADMAP M19.
