@@ -1971,3 +1971,43 @@ textarea::placeholder {
 .update-path {
   overflow-wrap: anywhere;
 }
+.ai-setup-status {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+}
+.ai-setup-status > div {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+  gap: 12px;
+}
+.ai-setup-status dt {
+  font-weight: 600;
+}
+.ai-setup-status dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.ai-setup-models {
+  border: 1px solid #b89b60;
+  padding: 14px 18px;
+  margin: 16px 0;
+  display: grid;
+  gap: 10px;
+}
+.ai-setup-models label.checkbox-row {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+}
+.ai-setup-models input[type="radio"] {
+  width: auto;
+  flex: none;
+  margin-top: 5px;
+}
+@media (max-width: 760px) {
+  .ai-setup-status > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}

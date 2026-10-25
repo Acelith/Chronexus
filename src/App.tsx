@@ -56,6 +56,9 @@ const AssistantWorkspace = lazy(
 const DiceWorkspace = lazy(() => import("./features/dice/DiceWorkspace"));
 const UpdateSettings = lazy(() => import("./features/updates/UpdateSettings"));
 const WikiSettings = lazy(() => import("./features/wiki/WikiSettings"));
+const AiSetupSettings = lazy(
+  () => import("./features/ai-setup/AiSetupSettings"),
+);
 const HeraldAnnouncement = lazy(
   () => import("./features/updates/HeraldAnnouncement"),
 );
@@ -992,6 +995,7 @@ export function App() {
                         />
                         <LanguageSettings disabled={busy} />
                         <WikiSettings disabled={busy} />
+                        <AiSetupSettings disabled={busy} />
                       </>
                     </Suspense>
                   ) : null}

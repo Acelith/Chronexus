@@ -8,6 +8,10 @@ use std::sync::OnceLock;
 #[serde(rename_all = "camelCase")]
 pub struct ModelSpec {
     pub name: String,
+    pub label: String,
+    /// Weights plus projector, shown before the explicit M22 download.
+    #[serde(default)]
+    pub download_bytes: u64,
     pub weight_digest: String,
     pub gpu_layers: u32,
     pub batch: u32,

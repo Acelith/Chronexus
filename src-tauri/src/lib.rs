@@ -1,3 +1,4 @@
+mod ai_setup;
 mod assistant;
 mod automation;
 mod backup;
@@ -903,6 +904,98 @@ fn list_ai_rule_sources(
         }
         Ok(serde_json::json!(out))})
 }
+fn data_root(db: &Database) -> AppResult<std::path::PathBuf> {
+    db.with_store(|s| Ok(s.root.clone()))
+}
+const AI_SETUP_BUSY: &str = "È già in corso un’operazione sui componenti AI.";
+#[tauri::command]
+async fn ai_setup_status(
+    db: tauri::State<'_, Database>,
+    state: tauri::State<'_, ai_setup::State>,
+) -> AppResult<ai_setup::Status> {
+    ai_setup::status(&data_root(&db)?, &state, assistant::runtime::BASE).await
+}
+#[tauri::command]
+async fn ai_install_runtime(
+    db: tauri::State<'_, Database>,
+    state: tauri::State<'_, ai_setup::State>,
+    accept: bool,
+    events: tauri::ipc::Channel<ai_setup::Progress>,
+) -> AppResult<()> {
+    if !accept {
+        return Err(
+            "Conferma dimensioni, provenienza e licenza prima di installare Ollama.".into(),
+        );
+    }
+    if !cfg!(all(windows, target_arch = "x86_64")) {
+        return Err("L’installazione guidata è disponibile per ora solo su Windows x64.".into());
+    }
+    let _gate = state.gate.try_lock().map_err(|_| AI_SETUP_BUSY)?;
+    let token = state.token();
+    let source = ai_setup::download::Source {
+        url: ai_setup::OLLAMA_URL,
+        sha256: ai_setup::OLLAMA_SHA256,
+        bytes: ai_setup::OLLAMA_BYTES,
+        unpacked: ai_setup::OLLAMA_EXTRACTED_BYTES,
+        loopback_test: false,
+    };
+    ai_setup::download::install(&data_root(&db)?, &source, &token, |p| {
+        let _ = events.send(p);
+    })
+    .await
+}
+#[tauri::command]
+async fn ai_start_runtime(
+    db: tauri::State<'_, Database>,
+    state: tauri::State<'_, ai_setup::State>,
+) -> AppResult<String> {
+    let _gate = state.gate.try_lock().map_err(|_| AI_SETUP_BUSY)?;
+    ai_setup::start(&data_root(&db)?, &state, assistant::runtime::BASE).await
+}
+#[tauri::command]
+fn ai_stop_runtime(
+    state: tauri::State<ai_setup::State>,
+    service: tauri::State<assistant::service::State>,
+) -> AppResult<()> {
+    if assistant::service::busy(&service)? {
+        return Err("Attendi o annulla la risposta AI prima di arrestare il runtime.".into());
+    }
+    state.shutdown();
+    Ok(())
+}
+#[tauri::command]
+async fn ai_pull_model(
+    state: tauri::State<'_, ai_setup::State>,
+    role: String,
+    accept: bool,
+    events: tauri::ipc::Channel<ai_setup::Progress>,
+) -> AppResult<ai_setup::ModelState> {
+    if !accept {
+        return Err("Conferma dimensioni e provenienza del modello prima del download.".into());
+    }
+    let _gate = state.gate.try_lock().map_err(|_| AI_SETUP_BUSY)?;
+    let token = state.token();
+    ai_setup::pull(assistant::runtime::BASE, &role, &token, |p| {
+        let _ = events.send(p);
+    })
+    .await
+}
+#[tauri::command]
+fn ai_cancel_setup(state: tauri::State<ai_setup::State>) {
+    state.cancel();
+}
+#[tauri::command]
+fn ai_remove_runtime(
+    db: tauri::State<Database>,
+    state: tauri::State<ai_setup::State>,
+    accept: bool,
+) -> AppResult<()> {
+    if !accept {
+        return Err("Conferma la rimozione del runtime gestito.".into());
+    }
+    let _gate = state.gate.try_lock().map_err(|_| AI_SETUP_BUSY)?;
+    ai_setup::remove_runtime(&data_root(&db)?, &state)
+}
 pub fn run() {
     let application = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -910,6 +1003,7 @@ pub fn run() {
         .manage(updates::State::default())
         .manage(assistant::service::State::default())
         .manage(wikidot::State::default())
+        .manage(ai_setup::State::default())
         .setup(|app| {
             // Keep the window usable when initialization fails so the UI can explain recovery.
             let connection = (|| -> Result<_, Box<dyn std::error::Error>> {
@@ -940,12 +1034,13 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![wiki_translation::read_wiki_translation,wiki_translation::translate_wiki,updates::get_update_settings,updates::save_update_settings,updates::check_app_update,updates::download_app_update,updates::cancel_app_update,updates::install_app_update,updates::get_herald_settings,updates::save_herald_settings,updates::startup_update_check,updates::record_update_announcement,updates::update_announcement_blocked,get_interface_preferences,save_interface_preferences,roll_dice,list_dice_rolls,get_training_overview,start_campaign_training,activate_campaign_training,get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,wiki_cache_epoch,get_wiki_provider,save_wiki_provider,wiki_cache_summary,clear_wiki_cache,cancel_wikidot,wikidot_search,wikidot_entry,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
+        .invoke_handler(tauri::generate_handler![ai_setup_status,ai_install_runtime,ai_start_runtime,ai_stop_runtime,ai_pull_model,ai_cancel_setup,ai_remove_runtime,wiki_translation::read_wiki_translation,wiki_translation::translate_wiki,updates::get_update_settings,updates::save_update_settings,updates::check_app_update,updates::download_app_update,updates::cancel_app_update,updates::install_app_update,updates::get_herald_settings,updates::save_herald_settings,updates::startup_update_check,updates::record_update_announcement,updates::update_announcement_blocked,get_interface_preferences,save_interface_preferences,roll_dice,list_dice_rolls,get_training_overview,start_campaign_training,activate_campaign_training,get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,wiki_cache_epoch,get_wiki_provider,save_wiki_provider,wiki_cache_summary,clear_wiki_cache,cancel_wikidot,wikidot_search,wikidot_entry,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .build(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
     application.run(|app, event| {
         if matches!(event, tauri::RunEvent::Exit) {
             app.state::<updates::State>().shutdown();
+            app.state::<ai_setup::State>().shutdown();
             if let Some(server) = app.try_state::<automation::Server>() {
                 server.shutdown();
             }
