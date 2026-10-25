@@ -12,6 +12,9 @@ class PackageTests(unittest.TestCase):
  def test_refuses_existing_output(self):
   with tempfile.TemporaryDirectory() as d:
    with self.assertRaises(ValueError):m.build(Path(d))
+ def test_secondary_bundle_is_never_implicit(self):
+  with tempfile.TemporaryDirectory() as d:
+   with self.assertRaisesRegex(ValueError,'secondary-gemma'):m.build(Path(d)/'new')
  def test_four_volumes_fit_server(self):
   self.assertGreater(m.CHUNK*4,7381383680)
   self.assertLess(m.CHUNK+1024**2,m.LIMIT)

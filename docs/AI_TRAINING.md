@@ -1,3 +1,11 @@
+# Stato corrente M18
+
+Qwen3.8-27B è principale per l’inferenza; Gemma 4 12B rimane secondaria e
+**l’unica base qualificata per QLoRA**. Con Qwen il pulsante di riaddestramento
+è disattivato con spiegazione, anche se il worker è installato. L’attivazione
+di un adapter Gemma resta esplicita, limitata alla campagna e alle fonti valide.
+Nessun training del 27B viene promesso o eseguito. [Qualifica](AI_MODELS.md).
+
 # M8 — Gemma e apprendimento della campagna
 
 M8 introduce **Gemma 4 12B** locale e impostazioni AI per singola campagna.
@@ -34,7 +42,8 @@ citazioni; né il modello base né un adapter diventano fonti di fatti.
    `ollama pull gemma4:12b`, sul runtime scelto, prima dell'uso offline.
 2. Aprire la campagna → **Impostazioni della campagna** → **AI locale**.
    Controllare Ollama, scegliere Gemma, confermare il modello multilingue e
-   attivarlo per quella campagna. Qwen resta selezionabile per il rollback.
+   attivarlo per quella campagna. Qwen3.8-27B è la prima scelta per l’inferenza;
+   il precedente Qwen3 4B è ritirato.
 3. Scegliere edizione, tipi di appunti, fonti Wiki approvate e limiti di
    contesto/risposta. Salvare. Le fonti escluse non entrano né nelle domande
    né nel training. Le fonti Wiki devono essere già locali e della stessa

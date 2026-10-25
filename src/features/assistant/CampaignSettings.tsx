@@ -1,3 +1,11 @@
+import {
+  usableModels,
+  preferredModel,
+  modelLabel,
+  retiredQwen,
+  retiredNotice,
+  modelGuidance,
+} from "./models";
 import { localizeLabels } from "../../i18n/store";
 import { localeInfo } from "../../i18n/locales";
 import { getPreferences } from "../../i18n/store";
@@ -144,6 +152,9 @@ export default function CampaignSettings({
               {draft.settings.enabled ? tr("Attiva") : tr("Disattivata")} ·{" "}
               {draft.settings.model || tr("Nessun modello scelto")}
             </p>
+            {retiredQwen(draft.settings.model) ? (
+              <p role="status">{tr(retiredNotice)}</p>
+            ) : null}
             {draft.settings.digest && (
               <p className="muted">
                 <Text source={"Identità: "} />
@@ -151,19 +162,14 @@ export default function CampaignSettings({
               </p>
             )}
             <p>
-              <Text
-                source={
-                  "Gemma 4 12B è il modello previsto per M8. Puoi mantenere o riselezionare Qwen. Nessun download o contatto con Ollama avviene aprendo questa schermata."
-                }
-              />
+              <Text source={modelGuidance} />
             </p>
             <button
               onClick={() =>
                 void run(async () => {
                   const r = await assistantApi.probe();
                   setRuntime(r);
-                  if (!model && r.models.some((m) => m.name === "gemma4:12b"))
-                    setModel("gemma4:12b");
+                  setModel((previous) => preferredModel(r.models, previous));
                 })
               }
             >
@@ -179,19 +185,18 @@ export default function CampaignSettings({
                 <label>
                   <Text source={"Modello locale"} />
                   <select
+                    aria-label={tr("Modello locale")}
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
                   >
                     <option value="">{tr("Scegli un modello")}</option>
-                    {runtime.models
-                      .filter((m) => !m.dndSpecialized && m.weightDigest)
-                      .map((m) => (
-                        <option key={m.digest} value={m.name}>
-                          {m.name} · {m.quantization} ·{" "}
-                          {Math.round(m.gpuBytes / 1048576)}{" "}
-                          {tr(" MiB GPU caricati")}
-                        </option>
-                      ))}
+                    {usableModels(runtime.models).map((m) => (
+                      <option key={m.digest} value={m.name}>
+                        {modelLabel(m.name)} · {m.quantization} ·{" "}
+                        {Math.round(m.gpuBytes / 1048576)}{" "}
+                        {tr(" MiB GPU caricati")}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <label className="checkbox-row">

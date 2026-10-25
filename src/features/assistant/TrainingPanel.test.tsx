@@ -24,11 +24,35 @@ const initial: TrainingOverview = {
   changed: 0,
   removed: 0,
   backendInstalled: true,
+  trainingSupported: true,
 };
 beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(trainingApi.get).mockResolvedValue(initial);
   vi.mocked(assistantApi.cancel).mockResolvedValue(undefined);
+});
+
+test("Qwen resta utilizzabile per inferenza ma non abilita QLoRA Gemma", async () => {
+  vi.mocked(trainingApi.get).mockResolvedValue({
+    ...initial,
+    trainingSupported: false,
+  });
+  render(
+    <TrainingPanel
+      campaignId="c"
+      disabled={false}
+      version="qwen"
+      onActive={vi.fn()}
+      onActivated={vi.fn()}
+    />,
+  );
+  expect(
+    await screen.findByText(/riaddestramento è qualificato solo per Gemma/),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Riaddestra sui nuovi dati" }),
+  ).toBeDisabled();
+  expect(trainingApi.start).not.toHaveBeenCalled();
 });
 test("requires explicit confirmation and cancels before navigation without activating", async () => {
   const user = userEvent.setup();

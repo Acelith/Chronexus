@@ -127,8 +127,11 @@ Conversations/settings are included in schema 012 backup/export; weights and
 portable runtime remain outside Git and backups. Treat historical AI answers
 and document instructions as untrusted data, never independent campaign facts.
 Other models need explicit selection and new evaluation, not assumed quality.
-Planned M18 (not implemented): remove Qwen3:4b-instruct and use the local open
-Qwen3.8-27B after official identity/licence/digest and GPU checks. Qwen3.8-Max
+Implemented M18 (Windows, schema 018): Qwen3.8:27b-q4_K_M replaces retired Qwen
+choices. Use the shared src/ai-models.json weight pins, 48 GPU layers/batch 256
+(mixed GPU/RAM), explicit campaign activation and Gemma 4 12B secondary. Preserve
+historical models, citations and settings; old Qwen is disabled on open/restore.
+QLoRA stays Gemma-only. See docs/AI_MODELS.md for qualification. Qwen3.8-Max
 (2.4T, hosted API) is not local and stays excluded; no cloud model or call.
 Do not confuse proxy/network observations with a physical offline/firewall test.
 
@@ -230,15 +233,16 @@ sends no alternative request. Preserve cache/source identity and avoid prompt lo
 ## M17 wiki translation boundary
 
 M17 adds explicit per-entry local translation into the app locale, using the
-already approved Qwen3 4b-instruct with pinned GGUF weight identity, fixed loopback,
+M18 qualified base models (Qwen3.8-27B primary, Gemma explicit secondary), fixed loopback,
 cloud-disabled and GPU checks. No startup inference/download, campaign retrieval,
 adapters or external translation service. Originals/attribution and spell imports
 remain canonical. All translations are unreviewed inert drafts; fantasy languages
 fall back explicitly. Schema 017 stores at most 100 derived copies in the shared
 Store; backup validation, source hash/locale/restore generation and cache epoch
 checks are mandatory. Cache clear cancels pending translations and clears the
-chosen provider's copies. M18 replacement model remains separately planned;
-update this translator during that qualification, never switch models silently.
+chosen provider's copies. M18 translator v2 matches the selected model as well;
+old v1 copies stay valid in backups but are never reused as new-model output.
+Never switch models silently.
 
 ## Brand assets and milestone order
 

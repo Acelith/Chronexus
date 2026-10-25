@@ -187,6 +187,7 @@ pub struct Overview {
     pub changed: usize,
     pub removed: usize,
     pub backend_installed: bool,
+    pub training_supported: bool,
 }
 pub fn overview(c: &Connection, root: &Path, campaign: &str) -> AppResult<Overview> {
     let p = campaign::get(c, campaign)?;
@@ -213,6 +214,8 @@ pub fn overview(c: &Connection, root: &Path, campaign: &str) -> AppResult<Overvi
     let dataset_hash = store::hash(&json!({"manifest":stamps,"policy":policy(&p)}).to_string());
     let root = home(root);
     Ok(Overview {
+        training_supported: p.settings.enabled
+            && (p.settings.model == "gemma4:12b" || super::models::derived(&p.settings.model)),
         jobs,
         dataset_hash,
         dataset_bytes: serde_json::to_vec(&sources)

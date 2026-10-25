@@ -3,6 +3,11 @@ import { localeInfo } from "../../i18n/locales";
 import { systemMessage, tr, usePreferences } from "../../i18n/store";
 import { command, errorMessage } from "../journal/api";
 import type { Block } from "./wikidot";
+import {
+  PRIMARY_MODEL,
+  SECONDARY_MODEL,
+  modelLabel,
+} from "../assistant/models";
 
 interface Translation {
   locale: string;
@@ -69,13 +74,16 @@ export default function WikiTranslation({
   children: ReactNode;
 }) {
   const { locale } = usePreferences();
+  const [model, setModel] = useState(PRIMARY_MODEL);
   // A locale/content change unmounts the request owner and drops late results.
   return (
     <TranslationView
-      key={`${provider}:${sourceKey}:${sourceVersion}:${locale}`}
+      key={`${provider}:${sourceKey}:${sourceVersion}:${locale}:${model}`}
       provider={provider}
       sourceKey={sourceKey}
       locale={locale}
+      model={model}
+      onModelChange={setModel}
     >
       {children}
     </TranslationView>
@@ -85,11 +93,15 @@ function TranslationView({
   provider,
   sourceKey,
   locale,
+  model,
+  onModelChange,
   children,
 }: {
   provider: "wikidot" | "open5e";
   sourceKey: string;
   locale: ReturnType<typeof usePreferences>["locale"];
+  model: string;
+  onModelChange: (model: string) => void;
   children: ReactNode;
 }) {
   const [translation, setTranslation] = useState<Translation | null>(null);
@@ -107,6 +119,7 @@ function TranslationView({
         provider,
         key: sourceKey,
         locale,
+        model,
       })
         .then((value) => {
           if (active.current) setTranslation(value);
@@ -125,7 +138,7 @@ function TranslationView({
           () => undefined,
         );
     };
-  }, [provider, sourceKey, locale, supported, original]);
+  }, [provider, sourceKey, locale, model, supported, original]);
   async function translate() {
     if (busy || request.current) return;
     const id = crypto.randomUUID();
@@ -134,10 +147,13 @@ function TranslationView({
     setError("");
     try {
       const value = await command<Translation>("translate_wiki", {
-        provider,
-        key: sourceKey,
-        locale,
-        requestId: id,
+        request: {
+          provider,
+          key: sourceKey,
+          locale,
+          requestId: id,
+          model,
+        },
       });
       if (active.current && request.current === id) setTranslation(value);
     } catch (reason) {
@@ -170,13 +186,29 @@ function TranslationView({
       <p className="editor-hint">
         {supported
           ? tr(
-              "Traduzione locale in {0}. Nessun testo viene inviato a servizi esterni. Richiede Ollama senza cloud e Qwen3 4b-instruct già installato; nessun download automatico.",
+              "Traduzione locale in {0}. Richiede Ollama senza cloud e il modello selezionato già installato. Nessun testo viene inviato a servizi esterni; nessun download o cambio di AI automatico.",
               [localeInfo(locale).name],
             )
           : tr(
               "Traduzione wiki non disponibile per questa lingua. Consulta l’originale.",
             )}
       </p>
+      {supported ? (
+        <label>
+          {tr("Modello per la traduzione")}
+          <select
+            aria-label={tr("Modello per la traduzione")}
+            value={model}
+            onChange={(e) => onModelChange(e.target.value)}
+          >
+            {[PRIMARY_MODEL, SECONDARY_MODEL].map((name) => (
+              <option key={name} value={name}>
+                {modelLabel(name)}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
       {translation ? (
         <>
           <p role="status">

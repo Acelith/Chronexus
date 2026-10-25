@@ -188,6 +188,7 @@ async fn run(
         super::training::model_owned(&s.connection,Some(&r.campaign_id),&profile.settings.model)?;
         let config = &profile.settings;
         if !config.enabled { return Err("L'assistente è disattivato. Configura e attiva il modello locale prima di fare domande.".into()); }
+        super::models::options(&config.model)?;
         if r.mode=="rules" && (r.edition.as_deref()!=Some(&profile.edition) || r.rule_keys.iter().any(|k|!profile.rule_keys.contains(k))) {return Err("Approva prima le fonti e l'edizione nelle Impostazioni della campagna.".into());}
         let sources = store::retrieve(&s.connection, &r.campaign_id, &r.question, &r.mode, r.edition.as_deref(), &r.rule_keys)?.into_iter().filter(|s|super::campaign::allowed(&profile,s)).collect();
         let (mut fitted,excluded,all_blocked) = select_safe_sources(r,sources)?;
@@ -199,12 +200,7 @@ async fn run(
         Ok((s.directory.clone(), profile, fitted, excluded, all_blocked))
     })?;
     let config = &profile.settings;
-    let batch = if config.model.starts_with("gemma4:") || config.model.starts_with("chronexus-12b-")
-    {
-        256
-    } else {
-        64
-    };
+    let (gpu_layers, batch) = super::models::options(&config.model)?;
     let persist = |status: &str, answer: &str, metrics: &Value, error: &str| {
         db.with_store(|s| {
             if s.directory != generation { return Err("L'archivio è cambiato durante la generazione; nessuna risposta è stata scritta nel nuovo archivio.".into()); }
@@ -240,6 +236,7 @@ async fn run(
         if model.weight_digest.is_none() {
             return Err("Il runtime non fornisce l'identità verificabile dei pesi locali.".into());
         }
+        super::models::verify(&model.name, model.weight_digest.as_deref())?;
         emit(
             events,
             &r.id,
@@ -250,7 +247,7 @@ async fn run(
             &client,
             runtime::BASE,
             "/api/generate",
-            json!({"model":config.model,"prompt":"","stream":false,"keep_alive":"2m","options":{"num_ctx":profile.context,"num_gpu":99,"num_batch":batch}}),
+            json!({"model":config.model,"prompt":"","stream":false,"keep_alive":"2m","options":{"num_ctx":profile.context,"num_gpu":gpu_layers,"num_batch":batch}}),
         );
         tokio::select! {result=load=>{result?;},_=cancelled.changed()=>return Err("Generazione annullata.".into())}
         let resident = runtime::get(&client, runtime::BASE, "/api/ps").await?;
@@ -277,7 +274,7 @@ async fn run(
                 "Generazione locale: GPU e CPU (caricamento misto)…"
             },
         );
-        let payload = json!({"model":config.model,"stream":true,"think":false,"keep_alive":"2m","messages":[{"role":"system","content":system_prompt(&r.mode,r.edition.as_deref())},{"role":"user","content":user_prompt(&r.question,&sources)?}],"options":{"num_ctx":profile.context,"num_predict":profile.max_tokens,"num_gpu":99,"num_batch":batch,"temperature":0.0}});
+        let payload = json!({"model":config.model,"stream":true,"think":false,"keep_alive":"2m","messages":[{"role":"system","content":system_prompt(&r.mode,r.edition.as_deref())},{"role":"user","content":user_prompt(&r.question,&sources)?}],"options":{"num_ctx":profile.context,"num_predict":profile.max_tokens,"num_gpu":gpu_layers,"num_batch":batch,"temperature":0.0}});
         let send = client
             .post(format!("{}/api/chat", runtime::BASE))
             .json(&payload)

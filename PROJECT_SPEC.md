@@ -387,7 +387,7 @@ notes/images, backups and the provider preference remain intact. Invalidate in-f
 requests so a clear does not silently repopulate cache; no automatic refetch.
 Cover empty/offline/error cases and changed/missing Wikidot data in acceptance.
 
-## M18 — Qwen3.8-27B replaces Qwen models (planned, not implemented)
+## M18 — Qwen3.8-27B replaces Qwen models (implemented Windows)
 
 Requested 25 October 2026. Qwen3.8-Max (2.4T parameters, hosted API) cannot run on
 the local 16 GB GPU and a cloud call would break the no-external-AI rule, so the
@@ -395,15 +395,21 @@ user chose the open Qwen3.8-27B run locally. Remove Qwen3:4b-instruct from
 selection, defaults, rollback, scripts and current guides; keep Gemma 4 12B and
 history. Campaigns or backups configured with Qwen are disabled until an explicit
 new choice; conversations and model identity are preserved. QLoRA stays on Gemma.
-Qualification, quantization and acceptance are in ROADMAP M18. M17 is reserved by
-concurrent wiki-translation work.
+The shared compiled policy pins official Qwen3.8:27b-q4_K_M weights, 48 GPU layers,
+batch 256, context 8192; real 16 GB hardware uses mixed GPU/RAM, never CPU-only.
+Gemma remains an explicit secondary choice and the sole qualified training base.
+Schema 018 disables retired choices on open/restore without rewriting history.
+Wiki translation v2 uses the same base allowlist and model-specific cache matching;
+v1 copies remain valid archive data but are not reused for new-model generation.
+No startup download/inference, automatic fallback, image input or external AI.
+Qualification, measurements and acceptance are in docs/AI_MODELS.md and ROADMAP M18.
 
 ## M17 — Local wiki translations
 
 Explicit per-entry translation follows the global app locale. Cached translations
 are shown on reopening; no inference at startup or mere entry opening. The Rust
 adapter reads only cached Wikidot/Open5e originals, uses the approved local
-Qwen3 4b-instruct GGUF with pinned weight identity and GPU/cloud checks, never
+Qwen3.8-27B or explicitly selected Gemma GGUF with pinned weight identity and GPU/cloud checks, never
 campaign context or trained adapters. Originals, attribution, edition, origin,
 licence and spell imports remain canonical and unchanged. Translations are inert,
 labelled unreviewed drafts, with original text available; fantasy languages fall
@@ -411,7 +417,7 @@ back explicitly, scripts never become target languages. Schema 017 adds a bounde
 derived cache in the same Store, validated in backups. Provider cache clear also
 clears translations and invalidates pending writes. Changed source hash, locale
 or restore generation prevents reuse or late writes. See ROADMAP M17 and
-docs/WIKI_TRANSLATION.md. Planned M18 will qualify replacement models separately.
+docs/WIKI_TRANSLATION.md. M18 qualifies the replacement models separately.
 
 ## M19 — Documents backup folder, periodic and update backups (planned)
 

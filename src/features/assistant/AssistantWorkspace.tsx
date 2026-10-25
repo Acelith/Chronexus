@@ -1,3 +1,11 @@
+import {
+  usableModels,
+  preferredModel,
+  modelLabel,
+  retiredQwen,
+  retiredNotice,
+  modelGuidance,
+} from "./models";
 import { localizeLabels } from "../../i18n/store";
 import { localeInfo } from "../../i18n/locales";
 import { getPreferences } from "../../i18n/store";
@@ -129,13 +137,7 @@ export default function AssistantWorkspace({
     try {
       const r = await assistantApi.probe();
       setRuntime(r);
-      setModel((previous) =>
-        r.models.some((m) => m.name === previous && !m.dndSpecialized)
-          ? previous
-          : (r.models.find((m) => m.name === "qwen3:4b-instruct")?.name ??
-            r.models.find((m) => !m.dndSpecialized)?.name ??
-            ""),
-      );
+      setModel((previous) => preferredModel(r.models, previous));
     } catch (e) {
       setRuntime(null);
       setError(errorMessage(e));
@@ -299,6 +301,10 @@ export default function AssistantWorkspace({
           </p>
         </div>
       </header>
+      <p className="editor-hint">{tr(modelGuidance)}</p>
+      {settings && retiredQwen(settings.model) ? (
+        <p role="status">{tr(retiredNotice)}</p>
+      ) : null}
       {error && (
         <p role="alert" className="error">
           {error}
@@ -335,13 +341,11 @@ export default function AssistantWorkspace({
                 onChange={(e) => setModel(e.target.value)}
               >
                 <option value="">{tr("Scegli un modello")}</option>
-                {runtime.models
-                  .filter((m) => !m.dndSpecialized && m.weightDigest)
-                  .map((m) => (
-                    <option key={m.digest} value={m.name}>
-                      {m.name} · {m.quantization}
-                    </option>
-                  ))}
+                {usableModels(runtime.models).map((m) => (
+                  <option key={m.digest} value={m.name}>
+                    {modelLabel(m.name)} · {m.quantization}
+                  </option>
+                ))}
               </select>
             </label>
             {runtime.models.some((m) => m.dndSpecialized) && (

@@ -764,9 +764,11 @@ async fn configure_local_ai(
     }
     db.with(|c| assistant::training::model_owned(c, campaign_id.as_deref(), &model))?;
     assistant::runtime::check_model_name(&model)?;
+    assistant::models::options(&model)?;
     let client = assistant::runtime::client()?;
     let runtime = assistant::runtime::probe_at(&client, assistant::runtime::BASE).await?;
     let selected=runtime.models.into_iter().find(|m|m.name==model&&!m.dnd_specialized&&m.weight_digest.is_some()).ok_or("Scegli un modello multilingue GGUF locale verificabile. Il modello D&D di prova non è qualificato.")?;
+    assistant::models::verify(&selected.name, selected.weight_digest.as_deref())?;
     db.with(|c| {
         let settings = assistant::store::Settings {
             enabled: true,

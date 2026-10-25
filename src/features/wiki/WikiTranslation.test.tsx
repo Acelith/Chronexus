@@ -1,3 +1,4 @@
+import policy from "../../ai-models.json";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
@@ -13,7 +14,7 @@ vi.mock("../journal/api", async (original) => ({
 const translated = {
   locale: "it",
   title: "Luce di prova",
-  model: "qwen3:4b-instruct",
+  model: policy.primary.name,
   sourceHash: "a".repeat(64),
   blocks: [{ kind: "paragraph", text: "Una luce per 1 minuto." }],
 };
@@ -32,6 +33,45 @@ beforeEach(() => {
   vi.mocked(command).mockResolvedValue(null);
 });
 afterEach(() => applyPreferences(defaultPreferences));
+
+test("Gemma è una scelta esplicita e non un fallback automatico", async () => {
+  const user = userEvent.setup();
+  vi.mocked(command).mockImplementation(async (name, args) => {
+    if (name === "translate_wiki") {
+      if (
+        (args as { request: { model: string } }).request.model ===
+        policy.primary.name
+      )
+        throw Error("Modello principale assente.");
+      return { ...translated, model: policy.secondary.name } as never;
+    }
+    return null as never;
+  });
+  render(view());
+  const button = screen.getByRole("button", { name: "Traduci in Italiano" });
+  await waitFor(() => expect(button).toBeEnabled());
+  await user.click(button);
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Modello principale assente.",
+  );
+  expect(
+    vi.mocked(command).mock.calls.filter(([n]) => n === "translate_wiki"),
+  ).toHaveLength(1);
+  await user.selectOptions(
+    screen.getByLabelText("Modello per la traduzione"),
+    policy.secondary.name,
+  );
+  const retry = screen.getByRole("button", { name: "Traduci in Italiano" });
+  await waitFor(() => expect(retry).toBeEnabled());
+  await user.click(retry);
+  expect(await screen.findByText("Una luce per 1 minuto.")).toBeVisible();
+  expect(command).toHaveBeenCalledWith(
+    "translate_wiki",
+    expect.objectContaining({
+      request: expect.objectContaining({ model: policy.secondary.name }),
+    }),
+  );
+});
 
 test.each(["wikidot", "open5e"] as const)(
   "%s: legge solo cache finché l’utente non traduce e conserva l’originale",

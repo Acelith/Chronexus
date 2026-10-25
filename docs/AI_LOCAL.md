@@ -1,8 +1,18 @@
+# Modelli correnti — M18, 25 ottobre 2026
+
+**Qwen3.8-27B è la prima scelta; Gemma 4 12B è secondaria.** Setup, digest,
+requisiti e misure reali in [AI_MODELS.md](AI_MODELS.md). Il vecchio Qwen3 4B
+non è più eseguibile/selezionabile nell’app: le sezioni M7 sotto sono evidenza
+storica, non istruzioni di rollback attuali. La migrazione 018 disabilita le
+vecchie scelte preservando risposte e citazioni. Nessuna attivazione automatica.
+Il launcher `scripts/Start-LocalAI.ps1` avvia soltanto il runtime già presente;
+il modello si prepara esplicitamente come descritto nella nuova guida.
+
 # M7 — Assistente D&D locale sulla GPU
 
 > M8: Gemma 4 12B, impostazioni per campagna e training QLoRA sono documentati
 > in [AI_TRAINING.md](AI_TRAINING.md). Il profilo M7 Qwen descritto qui resta
-> disponibile per il rollback; modello e fonti sono ora scelti per campagna.
+> solo come evidenza storica; M18 ritira quel rollback. Modello e fonti sono scelti per campagna.
 
 Stato: funzioni implementate e collaudate su Windows; accettazione fisica offline
 e piattaforme aggiuntive ancora da verificare. Configurazione disattivata

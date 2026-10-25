@@ -1,8 +1,22 @@
+// M18: repeat the M7 synthetic benchmark on an EMPTY isolated profile.
 import { chromium, expect } from "@playwright/test";
 import assert from "node:assert/strict";
-import { writeFile } from "node:fs/promises";
+import { writeFile, readFile, mkdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
-const b = await chromium.connectOverCDP("http://127.0.0.1:9223");
+assert.equal(process.env.CHRONEXUS_AI_QA, "isolated");
+const policy = JSON.parse(
+  await readFile(new URL("../../src/ai-models.json", import.meta.url), "utf8"),
+);
+const MODEL = process.env.CHRONEXUS_TEST_MODEL ?? policy.primary.name;
+assert(
+  Object.values(policy).some((s) => s.name === MODEL),
+  "Use only a qualified model",
+);
+const LABEL = MODEL === policy.primary.name ? "qwen" : "gemma";
+await mkdir(".tools/m18", { recursive: true });
+const b = await chromium.connectOverCDP(
+  `http://127.0.0.1:${process.env.CHRONEXUS_QA_CDP ?? "9227"}`,
+);
 let p = b
   .contexts()
   .flatMap((c) => c.pages())
@@ -40,7 +54,8 @@ const a = await ipc("create_campaign", {
   other = await ipc("create_campaign", { name: "Altra campagna M7" });
 await ipc("configure_local_ai", {
   enabled: true,
-  model: "qwen3:4b-instruct",
+  model: MODEL,
+  campaignId: a.id,
   multilingualConsent: true,
 });
 const cases = [];
@@ -246,6 +261,13 @@ for (let i = 0; i < 5; i++) {
 const before = JSON.stringify(await ipc("list_pages", { campaignId: a.id }));
 const results = [];
 for (const test of cases) {
+  const view = await ipc("get_campaign_ai", { campaignId: a.id });
+  const profile = {
+    ...view.profile,
+    edition: test.edition ?? "5e-2014",
+    ruleKeys: test.ruleKeys ?? [],
+  };
+  await ipc("save_campaign_ai", { campaignId: a.id, profile });
   const request = {
     id: randomUUID(),
     campaignId: a.id,
@@ -288,7 +310,7 @@ for (const test of cases) {
   };
   results.push(row);
   await writeFile(
-    ".tools/m7-runtime/evaluation.json",
+    `.tools/m18/native-evaluation-${LABEL}.json`,
     JSON.stringify(
       {
         campaignId: a.id,
@@ -315,7 +337,7 @@ assert.equal(
   before,
 );
 await writeFile(
-  ".tools/m7-runtime/evaluation-summary.json",
+  `.tools/m18/native-summary-${LABEL}.json`,
   JSON.stringify(
     {
       total: results.length,
@@ -326,15 +348,9 @@ await writeFile(
     2,
   ),
 );
-await p.reload();
-await p.getByRole("button", { name: a.name, exact: true }).click();
-await p.getByRole("button", { name: "Assistente locale", exact: true }).click();
-await expect(
-  p.getByRole("heading", { name: "Assistente locale", exact: true }),
-).toBeVisible();
-await p.screenshot({
-  path: ".tools/m7-runtime/assistant-ui.png",
-  fullPage: true,
-});
-console.log("Evaluation finished");
+console.log(
+  "Native evaluation finished",
+  results.filter((r) => r.pass).length,
+  results.length,
+);
 await b.close();

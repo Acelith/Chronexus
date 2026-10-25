@@ -232,6 +232,11 @@ export default function TrainingPanel({
               />
             </p>
           )}
+          {!overview.trainingSupported && (
+            <p role="status">
+              <Text source="Il riaddestramento è qualificato solo per Gemma 4 12B. Per usarlo, scegli e attiva Gemma come opzione secondaria; Qwen3.8-27B resta disponibile per assistente e traduzioni." />
+            </p>
+          )}
           {overview.blocked > 0 && (
             <p role="alert">
               {overview.blocked}{" "}
@@ -247,6 +252,7 @@ export default function TrainingPanel({
               disabled ||
               running ||
               !overview.backendInstalled ||
+              !overview.trainingSupported ||
               !overview.sources ||
               overview.blocked > 0
             }

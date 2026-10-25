@@ -154,6 +154,10 @@ pub async fn probe_at(client: &Client, base: &str) -> AppResult<Runtime> {
             continue;
         }
         let weight = weight_digest(&show);
+        if !super::models::allowed(name, weight.as_deref()) && weight.as_deref() != Some(DND_WEIGHT)
+        {
+            continue;
+        }
         let loaded = resident["models"]
             .as_array()
             .and_then(|m| m.iter().find(|r| r["digest"].as_str() == Some(&digest)));

@@ -1,0 +1,20 @@
+{
+  "primary": {
+    "name": "qwen3.8:27b-q4_K_M",
+    "label": "Qwen3.8-27B",
+    "weightDigest": "f5f1dd8920d417aac2718b0bda3403da274301efdd6760b4f0f4b864ff2ad57d",
+    "manifestDigest": "25b843619e944cd0ae6069f94ff4e5e26a16e109ccbc0a66a0f05979ed70098e",
+    "projectorDigest": "ac3714bfdddeca31351f2752bf1a63f266f4df87c0b68c895e44945ca704448e",
+    "gpuLayers": 48,
+    "batch": 256
+  },
+  "secondary": {
+    "name": "gemma4:12b",
+    "label": "Gemma 4 12B",
+    "weightDigest": "bb722270d54346adc198f213851dbe0207e87c3ecf2a0aff4d92262726215391",
+    "manifestDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+    "projectorDigest": "0cb0cd0a5c499d92942caa22fe5abb98f6e8874868d590e2b094ece4ac8e6d28",
+    "gpuLayers": 99,
+    "batch": 256
+  }
+}

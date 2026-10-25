@@ -111,7 +111,9 @@ const translated = await call("read_wiki_translation", {
   key: "entry/spells/m17-light",
   locale: "it",
 });
-assert(translated && translated.title !== "Test Light");
+// A proper-name fixture may keep its title; verify translated prose instead.
+assert(translated && translated.blocks[0].text !== original.payload.entry.desc);
+assert.match(translated.blocks[0].text, /luce/i);
 assert.match(translated.blocks[0].text, /1/);
 assert.match(translated.blocks[0].text, /30/);
 assert.match(translated.blocks[0].text.toLowerCase(), /non/);

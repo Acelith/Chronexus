@@ -1,4 +1,4 @@
-"""Build five AI ZIP assets and a lightweight app-only ZIP for Forgejo's 2 GiB attachment limit. No private data."""
+"""Optional secondary Gemma bundle for the legacy M11 workflow, never the default M18 model. No private data."""
 import argparse, hashlib, json, re, subprocess, zipfile
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
@@ -23,7 +23,8 @@ def versions():
     if a != b or b != c or not re.fullmatch(r'\d+\.\d+\.\d+', a): raise ValueError('Version mismatch')
     return a
 
-def build(output):
+def build(output, *, secondary_gemma=False):
+    if not secondary_gemma: raise ValueError("M18: use the signed app release; this optional Gemma bundle requires --secondary-gemma")
     version = versions()
     if output.exists() or not output.resolve().is_relative_to(ROOT/'installers'): raise ValueError('Choose a new installers subdirectory')
     runtime = ROOT/'.tools/m7-runtime/ollama'
@@ -97,7 +98,7 @@ def build(output):
         for notice in sorted((ROOT/'assets').rglob('*')):
             if notice.is_file() and notice.suffix.lower() in ['.txt','.md','.json']:
                 z.write(notice,'Licenze-app/'+notice.relative_to(ROOT/'assets').as_posix())
-        z.writestr('LEGGIMI.txt',f'Chronexus {version} Windows x64: esegui il setup. Solo app, senza AI. Installer non firmato; WebView2 richiesto. Per Ollama/Gemma scarica separatamente i cinque ZIP AI della stessa release. Dati SQLite 015 e appID invariati.\n')
+        z.writestr('LEGGIMI.txt',f'Chronexus {version} Windows x64: esegui il setup. Solo app, senza AI. Installer non firmato; WebView2 richiesto. Per Ollama/Gemma scarica separatamente i cinque ZIP AI della stessa release. Schema SQLite corrente e appID conservati. Gemma è l’opzione secondaria; Qwen3.8 richiede il setup esplicito M18.\n')
     assets=[{'name':p.name,'size':p.stat().st_size,'sha256':sha(p)} for p in sorted(output.glob('*.zip'))]
     (output/'SHA256SUMS.txt').write_text(''.join(f"{x['sha256']}  {x['name']}\n" for x in assets))
     receipt={'version':version,'assets':assets,'modelManifest':DIGEST,'weight':WEIGHT}
@@ -105,4 +106,6 @@ def build(output):
     print(json.dumps(receipt,indent=2),flush=True)
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('output',type=Path)
-    build(parser.parse_args().output.resolve())
+    parser.add_argument("--secondary-gemma",action="store_true",help="Explicitly package the optional secondary model, not Qwen3.8")
+    args=parser.parse_args()
+    build(args.output.resolve(),secondary_gemma=args.secondary_gemma)

@@ -1,3 +1,11 @@
+# Aggiornamento M18 — 0.7.0 in preparazione
+
+Schema 018: vecchie scelte Qwen disabilitate senza perdita di cronologia,
+citazioni o adapter Gemma. Backup precedenti ripristinabili. Nessun modello è
+scaricato dall’updater; preparare il 27B separatamente e attivarlo esplicitamente.
+Il flusso firmato M15 e il backup obbligatorio prima dell’installazione restano
+invariati. Il checkpoint 0.6.0 sotto è storico; installazione personale non eseguita.
+
 # Aggiornamenti interni — M15
 
 Release corrente: [0.6.0 — M17](https://github.com/Acelith/Chronexus/releases/tag/v0.6.0),

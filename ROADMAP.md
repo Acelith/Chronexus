@@ -57,7 +57,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
 | 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, revisione linguistica aperta |
 | 30 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | Pianificata, **prima** | — | Da eseguire prima di ogni altra milestone aperta |
-| 31 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Pianificata/in corso | — | Dopo M21 |
+| 31 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Implementata Windows | 018 | Qualifica e confronto reali, Gemma secondaria; altri OS pendenti |
 | 32 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata | — | Dopo M21 |
 | 33 | M20 | README di qualità con immagini, guida rapida e crediti | Pianificata | — | Dopo M21 (usa i suoi loghi) |
 
@@ -906,7 +906,7 @@ scraping HTML sono due accessi distinti; una lettura XML-RPC anonima ha restitui
 ## M17 — Traduzione locale della wiki nella lingua dell’app
 
 **Stato:** implementata su Windows il 25 ottobre 2026, su richiesta esplicita.
-La successiva M18 rimane pianificata e non viene anticipata da questa consegna.
+M18 è stata successivamente implementata; vedere la sua sezione e STATUS.
 
 ### Comportamento e confini
 
@@ -994,11 +994,16 @@ futuri del marchio. L’ID M21 segue gli ID già usati; l’ordine è nel regist
   lettore di schermo), test e lint invariati; versioni di piattaforma dichiarate
   solo se provate. Pubblicazione secondo la regola delle release solo su richiesta.
 
-## M18 — Sostituzione dei modelli Qwen con Qwen3.8-27B locale (pianificata)
+## M18 — Sostituzione dei modelli Qwen con Qwen3.8-27B locale (implementata Windows)
 
-**Stato:** richiesta il 25 ottobre 2026; non implementata. L’ID M17 risulta già
-usato da un lavoro concorrente non ancora registrato (traduzione della wiki,
-migrazione 017): questa milestone usa M18 per evitare ambiguità.
+**Stato:** implementata il 25 ottobre 2026 su richiesta esplicita di eseguire M18.
+Qwen3.8-27B Q4_K_M qualificato prima delle modifiche; prima scelta per assistente,
+wiki e strumento di traduzione. Gemma 4 12B resta secondaria e conserva il QLoRA.
+Schema 018 disabilita i vecchi Qwen senza cancellare cronologia o identità.
+Confronto reale 35/35 per ciascun modello e benchmark desktop 40/40 per ciascuno;
+ripristino di un backup 017 reale verificato. Dettagli, digest e limiti in
+`docs/AI_MODELS.md` e `docs/STATUS.md`. Distribuzione 0.7.0 in preparazione.
+M17 è la traduzione wiki già consegnata, non viene rinumerata.
 
 L’utente ha chiesto di rimuovere tutti i modelli Qwen e sostituirli con
 «Qwen3.8-max». Verifica del 25/10/2026: Qwen3.8-Max ha 2,4 T parametri (95 B
@@ -1203,8 +1208,8 @@ astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
 - **M15a:** illustrazioni incluse nella 0.5.0; restano upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
 - **Ordine delle prossime milestone (istruzione dell’utente): prima M21** (logo
-  dell’araldo, icona e marchio), poi M18 (Qwen3.8-27B locale, già avviata in
-  un’altra sessione), M19 (backup nei Documenti) e M20 (README di qualità).
+  dell’araldo, icona e marchio), poi M19 (backup nei Documenti) e M20 (README di qualità).
+  M18 è implementata su Windows; altre GPU/OS e prova fisica offline pendenti.
   Implementare solo su richiesta; i residui sopra restano aperti.
 
 ## Fuori dal perimetro attuale

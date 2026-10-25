@@ -1,6 +1,7 @@
 pub mod campaign;
 #[cfg(test)]
 mod campaign_tests;
+pub mod models;
 pub mod runtime;
 pub mod training;
 

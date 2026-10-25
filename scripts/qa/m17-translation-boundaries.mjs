@@ -37,10 +37,12 @@ const start = async () => {
   await p.evaluate((id) => {
     window.__m17Result = window.__TAURI_INTERNALS__
       .invoke("translate_wiki", {
-        provider: "open5e",
-        key: "entry/spells/m17-boundary",
-        locale: "it",
-        requestId: id,
+        request: {
+          provider: "open5e",
+          key: "entry/spells/m17-boundary",
+          locale: "it",
+          requestId: id,
+        },
       })
       .then(
         (value) => ({ value }),

@@ -8,7 +8,11 @@ fn translation(c: &Connection) -> Translation {
     Translation {
         locale: "it".into(),
         source_hash: source(c, "open5e", "entry/spells/test").unwrap().2,
-        model: MODEL.into(),
+        model: crate::assistant::models::policy()
+            .unwrap()
+            .primary
+            .name
+            .clone(),
         model_digest: "a".repeat(64),
         revision: REVISION.into(),
         title: "Luce di prova".into(),
@@ -121,6 +125,59 @@ fn migration_from_016_keeps_original_sources() {
     assert!(cached(&c, "open5e", "entry/spells/test", "it")
         .unwrap()
         .is_none());
+}
+
+#[test]
+fn retired_translation_is_valid_archive_data_but_never_reused_as_a_new_model_copy() {
+    let d = tempfile::tempdir().unwrap();
+    let mut archive = backup::Store::open(&d.path().join("profile")).unwrap();
+    journal::create_campaign(&archive.connection, "Prova cache storica").unwrap();
+    seed(&archive.connection);
+    let mut old = translation(&archive.connection);
+    old.model = "qwen3:4b-instruct".into();
+    old.revision = "wiki-translation-v1".into();
+    let raw = serde_json::to_string(&old).unwrap();
+    archive.connection.execute("INSERT INTO wiki_translations(provider,source_key,locale,source_hash,payload) VALUES('open5e','entry/spells/test','it',?1,?2)",params![old.source_hash,raw]).unwrap();
+    validate_archive(&archive.connection).unwrap();
+    assert!(
+        cached(&archive.connection, "open5e", "entry/spells/test", "it")
+            .unwrap()
+            .is_none()
+    );
+    let file = d.path().join("historical-cache.nodex");
+    backup::write_backup(&archive.connection, &archive.directory, &file).unwrap();
+    let p = archive.prepare(&file).unwrap();
+    archive.restore(&p.token).unwrap();
+    let preserved: String = archive
+        .connection
+        .query_row("SELECT payload FROM wiki_translations", [], |r| r.get(0))
+        .unwrap();
+    assert_eq!(preserved, raw);
+    let mut current = translation(&archive.connection);
+    current.model = models::policy().unwrap().secondary.name.clone();
+    store(&archive.connection, "open5e", "entry/spells/test", &current).unwrap();
+    assert!(
+        cached(&archive.connection, "open5e", "entry/spells/test", "it")
+            .unwrap()
+            .is_none()
+    );
+    assert!(cached_for(
+        &archive.connection,
+        "open5e",
+        "entry/spells/test",
+        "it",
+        &current.model
+    )
+    .unwrap()
+    .is_some());
+    assert!(cached_for(
+        &archive.connection,
+        "open5e",
+        "entry/spells/test",
+        "it",
+        "qwen3:4b-instruct"
+    )
+    .is_err());
 }
 
 #[test]

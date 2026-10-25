@@ -29,6 +29,7 @@ export interface TrainingOverview {
   changed: number;
   removed: number;
   backendInstalled: boolean;
+  trainingSupported: boolean;
 }
 export interface TrainingProgress {
   phase: string;

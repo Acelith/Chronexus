@@ -1,3 +1,4 @@
+import policy from "../../ai-models.json";
 import { campaignAi } from "./campaignApi";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -21,7 +22,7 @@ vi.mock("./api", () => ({
 }));
 const settings = {
   enabled: true,
-  model: "qwen3:4b-instruct",
+  model: policy.primary.name,
   digest: "a".repeat(64),
   specialization: "multilingual-rag",
 };
@@ -78,7 +79,7 @@ test("does not contact the runtime on mount; explicit activation requires consen
       {
         name: settings.model,
         digest: settings.digest,
-        weightDigest: "w",
+        weightDigest: policy.primary.weightDigest,
         quantization: "Q4_K_M",
         dndSpecialized: false,
         residentBytes: 0,

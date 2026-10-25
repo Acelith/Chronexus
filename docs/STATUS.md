@@ -1,3 +1,47 @@
+# Stato Chronexus — 25 ottobre 2026: M18
+
+Implementata Windows, versione 0.7.0 in preparazione. Qwen3.8-27B ufficiale
+Q4_K_M è la prima scelta per assistente/wiki/strumento traduzioni, Gemma 4 12B
+secondaria esplicita e unica base QLoRA. Policy condivisa con pesi fissati;
+48 layer GPU/batch 256, contesto 8192: esecuzione mista GPU/RAM sulla 4080 SUPER
+16 GB. Profilo 99 layer scartato per pressione di memoria/latenza. Nessun
+cloud, download, attivazione di campagna o fallback automatico.
+
+Schema 018 disabilita i vecchi Qwen globali/per campagna senza riscrivere
+nomi/digest, risposte o citazioni. Ripristino reale del backup sintetico 017
+verificato nella nuova app; Gemma attiva conservata. Traduttore v2 con selezione
+esplicita e cache coerente col modello; copie v1 valide nei backup, mai attribuite
+al nuovo modello. Script installer vecchio Qwen ritirati; bundle Gemma solo con
+--secondary-gemma. Identità, setup e misure in docs/AI_MODELS.md.
+
+Verifiche effettive:
+- Qualifica prima delle modifiche: SHA-256 GGUF indipendente, Qwen e Gemma 35/35
+  su fonti identiche; benchmark nativo 40/40 ciascuno, dati canonici invariati.
+- UI ripristino/migrazione: storia e citazioni correnti intatte, vecchio Qwen
+  rifiutato, consenso necessario, Qwen primo, Gemma secondaria, training corretto.
+- Wiki nativa: italiano, numeri/negazione/raggio conservati, originale intatto;
+  cache visibile con runtime spento e HTTPS browser bloccato. Annullamento e
+  cache clear impediscono copie parziali/tardive e liberano il blocco AI.
+- Axe 0 violazioni su impostazioni/voce; viste 1200/760 px ispezionate.
+- Frontend 162 test PASS; i18n 14 PASS; lint/TypeScript/build PASS. Avviso chunk
+  editor >500 kB preesistente. Formattazione finale PASS.
+- Rust 117 unitari + 1 integrazione PASS; 2 ignorati (fixture Wikidot locale e
+  firma sul pacchetto finale). Clippy all-targets/all-features -D warnings PASS.
+- Script release 27, traduzione locale 5 e MCP 5 PASS. Build debug Windows PASS.
+- React Doctor 84/100 (baseline 81), avviso dimensione TrainingPanel; nessun errore.
+  Impeccable statico sui quattro componenti: nessuna segnalazione, limiti statici
+  compensati da screenshot e axe. Detector nativo: avviso preesistente di righe
+  lunghe nell’aiuto generale wiki, esterno ai controlli modificati.
+
+Limiti: qualifica su una GPU Windows, nessuna installazione sul profilo personale
+o prova fisica senza rete; altri OS/hardware pendenti. Traduzioni da revisionare
+(soprattutto significato/terminologia), nessuna garanzia di regole ufficiali.
+Prossima milestone pianificata: M21, poi M19/M20 secondo ROADMAP.
+Skill applicate: Rust Best Practices/Tauri v2 (policy e IPC), SQLite Expert
+(migrazione/backup), Impeccable (stati coerenti con UI esistente), React Testing
+e React Doctor (regressioni), Systematic Debugging (memoria/formato/semantica),
+Webapp Testing (collaudi desktop isolati). Pesi/fixture/report fuori Git.
+
 # Pianificazione — 25 ottobre 2026: M21 prima di tutto
 
 Solo documentazione e asset. L’utente ha scelto i loghi dell’araldo (icona,

@@ -1,3 +1,14 @@
+# Distribuzione corrente M18 — 0.7.0 in preparazione
+
+L’installer contiene l’app e lo schema 018, **nessun peso AI**. Il modello
+principale è Qwen3.8-27B; Gemma 4 12B è opzionale e secondaria. Preparazione
+manuale, requisiti, SHA-256 e uso offline in [AI_MODELS.md](AI_MODELS.md).
+Gli script M7 `Build-OfflineInstallers.ps1` e `scripts/distribution/` sono
+ritirati e rifiutano nuove build del vecchio Qwen. Le sezioni sotto e i pacchetti
+già pubblicati sono storici. `scripts/release/package.py` conserva il bundle
+Gemma solo su richiesta esplicita con `--secondary-gemma`; non è il pacchetto
+principale e non distribuisce il 27B. Non sovrascrivere release esistenti.
+
 # Installer Windows con AI locale
 
 ## Aggiornamento M17 — 25 ottobre 2026
@@ -7,7 +18,7 @@ include la traduzione locale della wiki. Installer app Windows x64 firmato updat
 schema 017 additivo. Pacchetto locale in `installers/Chronexus-0.6.0-Windows-x64/`.
 Firma reale e download anonimi verificati, nessuna installazione personale
 eseguita. Runtime e Qwen3 4b-instruct restano separati; le copie già tradotte si
-leggono senza runtime. M18 non è implementata. Dettagli in WIKI_TRANSLATION.md
+leggono senza runtime. Questo è il checkpoint storico M17. Dettagli in WIKI_TRANSLATION.md
 e STATUS.md; i pacchetti/release precedenti non sono stati sovrascritti.
 
 ## Politica Forgegit — pianificata con M11

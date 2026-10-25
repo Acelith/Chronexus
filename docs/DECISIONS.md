@@ -1,3 +1,16 @@
+# M18 — Policy unica, inferenza mista e migrazione non distruttiva
+
+`src/ai-models.json` è compilato da Rust/TypeScript e letto dagli strumenti locali:
+identità, pesi approvati e parametri non divergono fra assistente e traduttore.
+Qwen3.8-27B Q4_K_M ufficiale richiede più di 16 GB: sulla RTX 4080 SUPER
+48 layer GPU/batch 256/contesto 8192 passano la qualifica; la configurazione
+99 layer causa pressione di memoria e latenza e viene esclusa. Gemma resta più
+rapida e secondaria, mai fallback automatico. Entrambe usano soltanto testo.
+Schema 018 disabilita scelte Qwen ritirate conservandone nome/digest/storia;
+validatori di archivio accettano le identità storiche, la policy live le rifiuta.
+Lo stesso vale per le traduzioni v1: conservate nel backup, mai attribuite al nuovo
+modello. QLoRA continua soltanto su Gemma perché il 27B non è qualificato per training.
+
 # Decisioni
 
 ## Chronexus — rinomina compatibile

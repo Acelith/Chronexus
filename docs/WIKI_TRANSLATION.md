@@ -1,3 +1,12 @@
+# Aggiornamento M18
+
+Traduttore `wiki-translation-v2`: Qwen3.8-27B principale, Gemma secondaria
+esplicita. Le vecchie copie v1 rimangono dati validi nei backup; non sono
+riutilizzate come risultati del nuovo modello. Cambiare modello non genera
+automaticamente una traduzione: serve il pulsante. La cache derivata conserva
+una copia per voce/lingua; una nuova traduzione può sostituire soltanto questa
+copia, mai l’originale. Tutte le traduzioni rimangono bozze da verificare.
+
 # Traduzione locale della wiki — M17
 
 Apri una voce in **Wiki D&D**, quindi premi **Traduci in [lingua dell’app]**.
@@ -6,7 +15,9 @@ ricerca e identificativi originali: questa funzione traduce la voce aperta,
 non un intero catalogo né i termini della ricerca.
 
 La prima traduzione richiede Ollama avviato con `OLLAMA_NO_CLOUD=1`, il modello
-locale `qwen3:4b-instruct` già installato e una GPU disponibile. Chronexus non
+locale `qwen3.8:27b-q4_K_M` già installato e una GPU disponibile. Dal selettore
+**Modello per la traduzione** puoi scegliere esplicitamente **Gemma 4 12B · Secondario**.
+Il 27B usa GPU e RAM insieme sul sistema qualificato. Chronexus non
 avvia il runtime e non scarica pesi. Se mancano questi requisiti, mostra un errore
 e lascia leggibile l’originale. Le traduzioni già salvate si leggono senza modello
 o rete, finché l’originale è ancora nella cache e non è cambiato.
@@ -32,10 +43,13 @@ appunti, schede, citazioni o conoscenze della campagna.
 ## Confini tecnici
 
 - Rust legge soltanto voci già consultate dalle cache M16/Open5e. Il comando non
-  accetta testo libero, URL, prompt, nomi di modelli o contenuti della campagna.
+  accetta testo libero, URL, prompt o contenuti della campagna. Il solo modello
+  facoltativo è una delle due identità base qualificate in `src/ai-models.json`;
+  nessun adapter, modello arbitrario o ripiego automatico.
 - Connessione fissa `127.0.0.1:11434`, senza proxy/redirect; controlli esistenti
   cloud disabilitato e formato GGUF. Pesi Qwen approvati SHA-256
-  `85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9`.
+  `f5f1dd8920d417aac2718b0bda3403da274301efdd6760b4f0f4b864ff2ad57d`.
+  Digest Gemma e qualifica in [AI_MODELS.md](AI_MODELS.md).
   Identità wrapper corrente registrata nella copia; preflight GPU prima del testo.
 - Nessun retrieval o adapter di campagna, training, tool o cronologia del modello.
   Testo della wiki come dati non attendibili; risultato sempre testo React inerte.

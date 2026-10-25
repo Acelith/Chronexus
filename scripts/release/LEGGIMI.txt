@@ -1,3 +1,7 @@
+M18: questo pacchetto AI opzionale contiene Gemma come modello SECONDARIO.
+Il modello principale Qwen3.8-27B va preparato esplicitamente secondo docs/AI_LOCAL.md.
+Nessun modello viene attivato automaticamente.
+
 CHRONEXUS 0.2.0 — WINDOWS x64 — APP E AI LOCALE
 
 Scarica tutti e cinque gli ZIP. Estrai soltanto Chronexus-0.2.0-Windows-x64.zip.
@@ -28,7 +32,7 @@ Nessun servizio o avvio automatico aggiunto. I pesi non fanno parte dei backup.
 Richiesti Windows x64, WebView2 già disponibile e driver GPU compatibili per AI.
 Installer non firmato: Windows può mostrare un avviso. Nessun driver incluso.
 Nessun installer macOS/Linux viene dichiarato verificato in questa release.
-Dati SQLite 015 e identificativo it.nodex.desktop conservati.
+Schema SQLite corrente e identificativo it.nodex.desktop conservati.
 Nuove preferenze lingua v2 leggono le v1; i vecchi client non conoscono Espruar/Dethek.
 Traduzioni automatiche in bozza e alfabeti decorativi: nessuna revisione madrelingua
 integrale o certificazione assistiva dichiarata. Il risultato AI va verificato.
