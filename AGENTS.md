@@ -239,3 +239,11 @@ Store; backup validation, source hash/locale/restore generation and cache epoch
 checks are mandatory. Cache clear cancels pending translations and clears the
 chosen provider's copies. M18 replacement model remains separately planned;
 update this translator during that qualification, never switch models silently.
+
+## Brand assets and milestone order
+
+The user-chosen herald logos live in `assets/brand/` (originals in
+`assets/brand/source/`, never overwrite them). M21 (app icon, sidebar logo,
+wordmark) is the first milestone to execute, before M18, M19, M20 and any other
+open milestone, unless the user changes the order. Keep the app name as
+accessible text; do not change the legacy app identifier for branding.

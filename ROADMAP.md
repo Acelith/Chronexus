@@ -56,9 +56,10 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 27 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | 25/10/2026 | `2fbf17a → 923516f` | Windows; altri OS aperti |
 | 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
 | 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, revisione linguistica aperta |
-| 30 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Pianificata | — | Da implementare su richiesta |
-| 31 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata | — | Da implementare su richiesta |
-| 32 | M20 | README di qualità con immagini, guida rapida e crediti | Pianificata | — | Da implementare su richiesta |
+| 30 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | Pianificata, **prima** | — | Da eseguire prima di ogni altra milestone aperta |
+| 31 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Pianificata/in corso | — | Dopo M21 |
+| 32 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata | — | Dopo M21 |
+| 33 | M20 | README di qualità con immagini, guida rapida e crediti | Pianificata | — | Dopo M21 (usa i suoi loghi) |
 
 
 ## M0 - Foundation and real local database
@@ -947,6 +948,52 @@ La successiva M18 rimane pianificata e non viene anticipata da questa consegna.
   copia offline, origine immutata e accessibilità. macOS/Linux e revisione
   madrelingua/assistiva restano da verificare. Evidenze in `docs/STATUS.md`.
 
+## M21 — Nuova identità visiva: logo dell’araldo, icona e marchio (pianificata, prima)
+
+**Stato:** richiesta il 25 ottobre 2026; non implementata. Su istruzione esplicita
+dell’utente è **la prima milestone da eseguire**: M18, M19, M20 e ogni altra
+milestone non completata o in corso vengono dopo. Le immagini scelte sono salvate
+in `assets/brand/` (originali in `assets/brand/source/`, varianti preparate e
+provenienza in `assets/brand/README.md`) e restano la fonte per gli aggiornamenti
+futuri del marchio. L’ID M21 segue gli ID già usati; l’ordine è nel registro.
+
+### M21.1 — Icona dell’applicazione
+
+- Usare `assets/brand/chronexus-icon.svg` (illustrazione con angoli trasparenti)
+  come sorgente di `pnpm icons` per finestra, barra delle applicazioni, installer
+  NSIS e formati macOS/Linux; sostituire l’attuale `assets/chronexus.svg` senza
+  cambiare identificatore, nome eseguibile o percorsi dati.
+- Verificare la leggibilità a 16, 24, 32, 48 e 256 px; se la sagoma si perde,
+  preparare una variante semplificata per le dimensioni piccole derivata dagli
+  originali, senza inventare un marchio diverso.
+- Controllare peso e qualità (PNG a 256 colori oggi incorporato): ottimizzare senza
+  artefatti visibili; nessun file ignorato da Git come unica sorgente.
+
+### M21.2 — Marchio nell’interfaccia
+
+- Barra laterale: logo verticale `chronexus-logo.webp` al posto della rosa dei venti
+  e del nome scritto, con nome accessibile «Chronexus» (`alt`/titolo), frase «Le tue
+  storie vivono» invariata, dimensioni ridotte nelle finestre strette.
+- Valutare il marchio orizzontale per schermate senza barra laterale, splash o
+  informazioni sull’app; coerenza con l’araldo degli aggiornamenti (M15a).
+- Nessun testo dell’interfaccia rasterizzato oltre al logo; contrasto sul cuoio
+  scuro, tema e lingue (RTL/CJK) invariati; DESIGN.md aggiornato.
+
+### M21.3 — Fuori dall’app
+
+- Mettere a disposizione di M20 marchio e icona per l’intestazione del README
+  (versioni chiaro/scuro se necessarie); eventuale immagine social o avatar del
+  repository Forgegit solo con autorizzazione esplicita.
+- Licenze e provenienza documentate; nessun dato di campagna nelle immagini.
+
+### Accettazione M21
+
+- Icone generate e controllate in Esplora file, barra delle applicazioni,
+  installer e finestra; build desktop e installer di prova costruiti.
+- Barra laterale a 1586×992, 1200×800 e 760×540, accessibilità del nome (axe e
+  lettore di schermo), test e lint invariati; versioni di piattaforma dichiarate
+  solo se provate. Pubblicazione secondo la regola delle release solo su richiesta.
+
 ## M18 — Sostituzione dei modelli Qwen con Qwen3.8-27B locale (pianificata)
 
 **Stato:** richiesta il 25 ottobre 2026; non implementata. L’ID M17 risulta già
@@ -1155,10 +1202,10 @@ astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
   di Wikidot; M16 è inclusa nella release 0.5.0.
 - **M15a:** illustrazioni incluse nella 0.5.0; restano upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
-- **Milestone pianificate: M18** (Qwen3.8-27B locale), **M19** (cartella backup nei
-  Documenti, backup periodici e di aggiornamento) e **M20** (README di qualità);
-  da implementare solo su richiesta.
-  I residui sopra restano aperti.
+- **Ordine delle prossime milestone (istruzione dell’utente): prima M21** (logo
+  dell’araldo, icona e marchio), poi M18 (Qwen3.8-27B locale, già avviata in
+  un’altra sessione), M19 (backup nei Documenti) e M20 (README di qualità).
+  Implementare solo su richiesta; i residui sopra restano aperti.
 
 ## Fuori dal perimetro attuale
 

@@ -1,3 +1,13 @@
+# Pianificazione — 25 ottobre 2026: M21 prima di tutto
+
+Solo documentazione e asset. L’utente ha scelto i loghi dell’araldo (icona,
+marchio orizzontale, logo verticale): originali in `assets/brand/source/`, varianti
+preparate in `assets/brand/` (icona con angoli trasparenti provata con `tauri icon`).
+Su sua istruzione non sono ancora integrati: nuova M21 in ROADMAP, da eseguire
+**prima** di M18, M19, M20 e di ogni altra milestone aperta. Un’integrazione
+iniziata in questo turno è stata annullata prima del commit; app, versione e
+release invariate.
+
 # Pianificazione — 25 ottobre 2026: M20
 
 Solo documentazione. Nuova M20 in ROADMAP: README di qualità ispirato ai progetti
