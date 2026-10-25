@@ -276,7 +276,7 @@ Verified Windows behavior, setup and platform limits: docs/AI_TRAINING.md.
 ## Localization and writing modes (M10)
 
 Global app settings in the sidebar, separate from campaign AI settings, persist
-locale/script/showOriginal in atomic interface-preferences.json v1 outside
+locale/script/showOriginal in atomic interface-preferences.json v2 (reads v1) outside
 campaign restore generations. SQLite remains 015 and backup formats are unchanged.
 Natural locales: it, en, de, fr, es, pt-BR, ja, ko, zh-Hans, ar, lmo-CH.
 Experimental romanized tlh and art-x-rihan use individually sourced vocabulary
@@ -293,17 +293,20 @@ drafts, Ticinese variants and partial fictional lexicons must be labeled honestl
 physical assistive testing, OS IME and macOS/Linux validation remain open.
 
 
-## Planned extensions M11–M13 (requirements only)
+## Delivery alignment and M11–M13 status
 
-M11 adds versioned Forgegit releases and app/AI packages to the user’s origin.
-M12 adds two-dragon celebration/threat animations only for exactly one die:
-d4/6/8/10/12/20 max is best, 1 worst; d100 1 is best and 100 worst. Persisted results
-and D&D rules remain unchanged. M13 adds Elfico and Dethek as writing modes, with
-exact variant/mapping and font licenses checked before implementation, semantic
-original text and reversible packets; no implicit campaign conversion.
-Future validated milestone deliveries follow this standing publication instruction,
-unless explicitly forbidden; the present planning task forbids all publication.
-Exact criteria and remaining decisions are in ROADMAP.md. None is implemented now.
+ROADMAP.md preserves historical milestone IDs and orders actual deliveries by
+Git chronology. Retrospective milestones M4a/M5a, M6a–M6d, M7a and M8a–M8c now
+explicitly record rename, sheet/catalog expansion, medieval graph, Party, Open5e,
+local AI packaging, moved-workspace repair and reference GUI/visual-Markdown editor.
+These are already delivered extensions, not authorization to implement them again.
+
+M12 delivers single-die dragon extremes (d100 inverted); M13 delivers D&D/FR
+Espruar and Dethek with local fonts and reversible/semantic fallback. M12/M13
+were implemented before M11 distribution, as explicitly requested. M11 remains
+partial for the large AI packages/old v0.2.0 draft; M15 published app-only v0.4.0.
+The standing publication rule applies to verified implemented deliveries, not to
+this documentation-only planning change. See STATUS for remaining acceptance.
 
 ## M14 — External assistants (hidden opt-in)
 
@@ -316,8 +319,8 @@ revision/etag conflicts and deferred GUI refresh preserve player data. Use the
 existing shared Store, indexing and backup services; no schema change, arbitrary
 SQL, deletion, AI control or network upload. See docs/AUTOMATION.md.
 
-Historical M11–M13 planning text above is superseded by their implementation
-checkpoints in ROADMAP.md and docs/STATUS.md; M11 publication remains incomplete.
+Historical planning is superseded by the current chronological register in
+ROADMAP.md and the verified checkpoints in docs/STATUS.md.
 
 ## M15 — Application updater
 
@@ -331,3 +334,23 @@ managed images/attachments and a preferences/hash receipt in update-backups.
 Failure blocks installation. Keep Store locked until installer handoff, reject
 active AI work, preserve every backup and keep AI runtime/base weights separate.
 No update commands in external MCP or the integrated assistant. See docs/UPDATES.md.
+
+
+## M16 — Wikidot HTML and wiki selection (planned, not implemented)
+
+The user requested a new milestone, not immediate runtime changes. Current
+released wiki: Open5e v2; SRD character catalog: D&D 5e API 2014. On M16 delivery,
+global app settings must offer Wikidot D&D and Open5e, defaulting to Wikidot for
+new profiles and existing preferences without an explicit provider choice.
+Persist the choice, show the active source and preserve saved imports/identity;
+no silent fallback when Wikidot is unavailable. Keep the SRD catalog distinct.
+
+Read public dnd5e.wikidot.com HTML through a bounded, allowlisted, read-only Rust
+adapter, explicit index/entry requests and provider-scoped offline cache. No
+XML-RPC key, login, campaign upload, startup crawl or execution of remote HTML.
+Extract actual fields, preserve URLs/source/edition and distinguish UA/homebrew.
+Preview supported imports; incomplete/changed markup must surface missing fields,
+not invented data. Verify site instructions/robots and content rights before
+implementation/distribution; public access does not make a bundled catalog licensed.
+Acceptance and migration/default rules are specified in ROADMAP M16. No database,
+preferences, UI or package/version has been changed by this planning task.

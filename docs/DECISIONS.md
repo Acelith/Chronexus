@@ -411,3 +411,18 @@ MSVC integration tests that instantiate Tauri's mock builder need a separate
 common-controls v6 manifest for TaskDialogIndirect. Add linker arguments only to
 integration test targets; the app already embeds its own manifest. This fixes the
 loader failure without changing system DLLs or duplicating app resources.
+
+
+## 2026-10-25 — Registro cronologico e M16 pianificata
+
+Conservare gli ID storici M0–M15, già usati nei commit e nelle guide. Le estensioni
+fuori roadmap ricevono suffissi retrospettivi a/b/c/d e sono collocate nel loro
+punto reale di consegna; l’ordine è esplicito nella tabella, inclusa M11 dopo
+M12/M13. Non riscrivere tag/storia, spostare funzionalità già consegnate nel backlog
+o segnare come concluse le accettazioni ancora aperte.
+
+Il selettore Wiki richiesto appartiene alla nuova M16 insieme allo scraping:
+Wikidot predefinito in futuro, Open5e alternativa esplicita, catalogo SRD distinto.
+La richiesta è di pianificazione: non cambiare prima la preferenza dell’app senza
+un provider Wikidot funzionante. La release attuale resta Open5e. Requisiti e
+criteri di accettazione in ROADMAP M16; nessun adapter, migrazione o UI aggiunti ora.

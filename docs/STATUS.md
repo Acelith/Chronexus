@@ -1,3 +1,34 @@
+# Pianificazione — 25 ottobre 2026
+
+## Roadmap riconciliata e M16 pianificata
+
+Aggiornamento esclusivamente documentale richiesto dall’utente: tutte le milestone
+esistenti hanno stato ed evidenze Git; registro e sezioni seguono l’ordine reale.
+ID M0–M15 conservati; aggiunte milestone retrospettive M4a/M5a, M6a–M6d, M7a e
+M8a–M8c per rinomina, scheda/API, tema/grafo, Party/Open5e, installer AI, spostamento
+su D e GUI/editor. M12 e M13 sono prima della distribuzione M11, senza riscrivere
+la storia. Richieste già consegnate non diventano nuovo lavoro da rifare.
+
+**M16 da implementare:** scraping HTML pubblico Wikidot, scelta Wikidot/Open5e
+nelle impostazioni globali, Wikidot predefinito quando manca una scelta esplicita,
+preferenza persistente, parser/cache sicuri e separati, provenienza e importazione
+esplicita. Catalogo SRD 2014 e incantesimi già salvati conservati. Specifica,
+ricerca e istruzioni AI allineate; pianificazione M11–M13 obsoleta corretta.
+
+Runtime invariato: versione 0.4.0, SQLite 015, Wiki D&D attualmente Open5e. Nessuna
+modifica a UI, dati, dipendenze, installer, tag o release; nessuna implementazione
+M16 dichiarata. Rimangono accettazioni M6/M7/M8/M10/M11/M15 già documentate.
+
+Verifiche di questa consegna: confronto con cronologia Git, validazione di ordine,
+ID/commit/link documentali e git diff --check: PASS (27 milestone, 60 commit
+validi, 27 link locali, 6 soli file Markdown). Test dell’app/build non eseguiti
+perché sono cambiati solo Markdown; i risultati sotto restano storici.
+Skill: valutato il catalogo disponibile; nessuna Skill specialistica necessaria
+per questo riordino documentale. Usati gli strumenti ordinari Git e file.
+
+Prossima nuova milestone funzionale: M16, soltanto su richiesta di implementazione.
+Nessuna pubblicazione/versione per questa modifica di pianificazione.
+
 # Stato Chronexus — 25 ottobre 2026
 
 ## M15 — operativa Windows, release pubblica 0.4.0
