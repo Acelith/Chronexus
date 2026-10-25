@@ -27,7 +27,25 @@
   "bundle": {
     "resources": {
       "../scripts/ai/train.py": "ai/train.py",
-      "../scripts/automation/mcp.mjs": "automation/mcp.mjs"
+      "../scripts/automation/mcp.mjs": "automation/mcp.mjs",
+      "../LICENSE": "licenses/Chronexus-LICENSE.txt",
+      "../assets/dice/README.md": "licenses/assets/dice/README.md",
+      "../assets/fonts/cinzel-OFL.txt": "licenses/assets/fonts/cinzel-OFL.txt",
+      "../assets/fonts/ebgaramond-OFL.txt": "licenses/assets/fonts/ebgaramond-OFL.txt",
+      "../assets/fonts/forgotten-realms/Dethek-OFL.txt": "licenses/assets/fonts/forgotten-realms/Dethek-OFL.txt",
+      "../assets/fonts/forgotten-realms/Dethek-Readme.txt": "licenses/assets/fonts/forgotten-realms/Dethek-Readme.txt",
+      "../assets/fonts/forgotten-realms/Espruar-OFL.txt": "licenses/assets/fonts/forgotten-realms/Espruar-OFL.txt",
+      "../assets/fonts/forgotten-realms/Espruar-Readme.txt": "licenses/assets/fonts/forgotten-realms/Espruar-Readme.txt",
+      "../assets/fonts/forgotten-realms/metadata.json": "licenses/assets/fonts/forgotten-realms/metadata.json",
+      "../assets/fonts/forgotten-realms/README.md": "licenses/assets/fonts/forgotten-realms/README.md",
+      "../assets/fonts/m10/Monocraft-OFL.txt": "licenses/assets/fonts/m10/Monocraft-OFL.txt",
+      "../assets/fonts/m10/notosansarabic-OFL.txt": "licenses/assets/fonts/m10/notosansarabic-OFL.txt",
+      "../assets/fonts/m10/notosansjp-OFL.txt": "licenses/assets/fonts/m10/notosansjp-OFL.txt",
+      "../assets/fonts/m10/notosanskr-OFL.txt": "licenses/assets/fonts/m10/notosanskr-OFL.txt",
+      "../assets/fonts/m10/notosanssc-OFL.txt": "licenses/assets/fonts/m10/notosanssc-OFL.txt",
+      "../assets/fonts/m10/README.md": "licenses/assets/fonts/m10/README.md",
+      "../assets/fonts/README.md": "licenses/assets/fonts/README.md",
+      "../assets/gui/README.md": "licenses/assets/gui/README.md"
     },
     "active": true,
     "icon": [

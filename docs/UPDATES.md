@@ -127,3 +127,7 @@ sono certificati da queste prove Windows.
 
 Fonti: [Updater Tauri](https://v2.tauri.app/plugin/updater/) e
 [rotte Forgejo 12.0.4](https://codeberg.org/forgejo/forgejo/src/tag/v12.0.4/routers/web/web.go).
+
+Gli installer updater includono direttamente la licenza dell’app e le licenze/
+provenienze dei font e degli asset pubblici. Non dipendono da un ZIP esterno per
+conservarle durante aggiornamenti successivi.
