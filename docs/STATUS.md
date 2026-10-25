@@ -30,8 +30,14 @@ Verifiche completate prima della build finale:
 - API repository anonima: HTTP 200, private:false dopo la modifica dell’utente.
   API latest: 404, nessuna release stabile pubblicata al momento della verifica.
 
-Distribuzione 0.4.0: installer firmato/manifesto e prova firma sul pacchetto reale
-in preparazione. Non confondere la chiave updater con Authenticode. Upgrade pubblico
+Distribuzione 0.4.0: installer Windows NSIS firmato e manifesto pronti in
+installers/Chronexus-0.4.0-Windows-x64. Sorgente compilato d75f5f3; firma reale e
+rifiuto di una copia manomessa PASS nel test dedicato eseguito con --ignored.
+Installer 32.006.516 byte, SHA-256 c8d4f7138b5be438f05ee1511f55676e109cc37cb340bd0ba31d849867da1b15.
+Contenuto NSIS ispezionato: licenze/font e adattatore MCP presenti. Codice main
+pubblicato fino a d75f5f3; pubblicazione nuova release in preparazione.
+Publisher app-only aggiunto: 4 test PASS per origine, credenziale Git mirata,
+hash e blocco pubblicazione dopo errore. Segreti solo in RAM, ricevuta senza token. Non confondere la chiave updater con Authenticode. Upgrade pubblico
 tra due versioni updater, macOS/Linux e riavvio dopo installazione non ancora
 certificati. La prima 0.4.0 richiede bootstrap manuale dalle vecchie versioni.
 Nuove stringhe con fallback italiano; nessuna traduzione completa inventata.

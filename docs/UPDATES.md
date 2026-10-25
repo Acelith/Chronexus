@@ -131,3 +131,26 @@ Fonti: [Updater Tauri](https://v2.tauri.app/plugin/updater/) e
 Gli installer updater includono direttamente la licenza dell’app e le licenze/
 provenienze dei font e degli asset pubblici. Non dipendono da un ZIP esterno per
 conservarle durante aggiornamenti successivi.
+
+### Pubblicazione riprendibile dei tre allegati updater
+
+Dopo il test crittografico del pacchetto reale, creare il tag annotato `vVERSIONE`
+sul `sourceCommit` di package-report.json e pubblicare main/tag con Git ordinario.
+Il publisher controlla albero pulito, origin fisso, identità e permessi, versione,
+tag/commit remoto, hash e assenza di modifiche applicative dopo la compilazione.
+Non modifica release esistenti non riconosciute dalla sua ricevuta locale.
+
+```powershell
+# Accesso di scrittura già configurato in Git per questo preciso repository;
+# nessuna scansione di credenziali, file o variabili di altri servizi.
+python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --git-credentials
+# Dopo verifica di tutti e tre gli allegati nella bozza:
+python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --git-credentials --finalize
+```
+
+Senza `--git-credentials` il programma richiede un token nel terminale, senza
+echo/salvataggio. Credenziale ordinaria Git usata soltanto sull’origin HTTPS
+Forgegit; nessun token nel client installato. La ricevuta locale contiene solo
+ID, versione, sorgente e URL degli allegati, e permette la ripresa senza duplicarli.
+La finalizzazione verifica anche download anonimi e API latest. Errori mantengono
+le prove locali; non cancellare o sovrascrivere la vecchia bozza M11.
