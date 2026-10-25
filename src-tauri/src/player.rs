@@ -12,7 +12,7 @@ const LIMIT: i64 = 1_000_000;
 fn text(value: &str, max: usize) -> AppResult<()> {
     if value.chars().count() > max || value.contains('\0') {
         return Err(format!(
-            "Testo non valido: massimo {max} caratteri, senza caratteri nulli."
+            "Invalid text: up to {max} characters, without null characters."
         ));
     }
     Ok(())
@@ -170,32 +170,32 @@ fn validate_character(input: &CharacterInput) -> AppResult<()> {
     let sheet = &input.sheet;
     for (key, value) in &sheet.fields {
         if !SHEET_FIELDS.contains(&key.as_str()) {
-            return Err("Campo della scheda sconosciuto.".into());
+            return Err("Unknown sheet field.".into());
         }
         text(value, 4000)?;
     }
-    bounded(sheet.death_successes, 0, 3, "Successi contro morte")?;
-    bounded(sheet.death_failures, 0, 3, "Fallimenti contro morte")?;
+    bounded(sheet.death_successes, 0, 3, "Death save successes")?;
+    bounded(sheet.death_failures, 0, 3, "Death save failures")?;
     if sheet.attacks.len() > 30 {
-        return Err("Massimo 30 armi o attacchi.".into());
+        return Err("Up to 30 weapons or attacks.".into());
     }
-    for (number, label) in [(input.level, "Livello"), (input.experience, "Esperienza")] {
+    for (number, label) in [(input.level, "Level"), (input.experience, "Experience")] {
         if let Some(n) = number {
             bounded(n, 0, LIMIT, label)?;
         }
     }
-    bounded(input.hp_maximum, 0, LIMIT, "Punti vita massimi")?;
-    bounded(input.hp_current, 0, input.hp_maximum, "Punti vita attuali")?;
-    bounded(input.hp_temporary, 0, LIMIT, "Punti vita temporanei")?;
+    bounded(input.hp_maximum, 0, LIMIT, "Maximum hit points")?;
+    bounded(input.hp_current, 0, input.hp_maximum, "Current hit points")?;
+    bounded(input.hp_temporary, 0, LIMIT, "Temporary hit points")?;
     if input.stats.len() > 100 || input.resources.len() > 50 {
-        return Err("Massimo 100 statistiche e 50 risorse per personaggio.".into());
+        return Err("Up to 100 statistics and 50 resources per character.".into());
     }
     let mut ids = HashSet::new();
     for attack in &sheet.attacks {
         identifier(&attack.id)?;
         title(&attack.name)?;
         if !ids.insert(&attack.id) {
-            return Err("Attacco duplicato.".into());
+            return Err("Duplicate attack.".into());
         }
         for value in [
             &attack.bonus,
@@ -216,17 +216,17 @@ fn validate_character(input: &CharacterInput) -> AppResult<()> {
             || !["ability", "skill", "save", "defense", "movement", "other"]
                 .contains(&stat.group.as_str())
         {
-            return Err("Statistica duplicata o categoria non valida.".into());
+            return Err("Duplicate statistic or invalid category.".into());
         }
     }
     for resource in &input.resources {
         identifier(&resource.id)?;
         title(&resource.label)?;
         if !ids.insert(&resource.id) || !["resource", "slot"].contains(&resource.kind.as_str()) {
-            return Err("Risorsa duplicata o tipo non valido.".into());
+            return Err("Duplicate resource or invalid type.".into());
         }
-        bounded(resource.maximum, 0, LIMIT, "Risorsa massima")?;
-        bounded(resource.current, 0, resource.maximum, "Risorsa attuale")?;
+        bounded(resource.maximum, 0, LIMIT, "Maximum resource")?;
+        bounded(resource.current, 0, resource.maximum, "Current resource")?;
     }
     Ok(())
 }
@@ -261,7 +261,7 @@ fn require_character(c: &Connection, campaign: &str, id: &str) -> AppResult<Char
     identifier(id)?;
     get_character(c, campaign)?
         .filter(|item| item.id == id)
-        .ok_or("Personaggio non trovato in questa campagna.".into())
+        .ok_or("Character not found in this campaign.".into())
 }
 pub fn save_character(
     c: &Connection,
@@ -284,20 +284,23 @@ fn save_character_inner(
 ) -> AppResult<Character> {
     require_campaign(c, campaign)?;
     validate_character(&input)?;
-    let data = serde_json::to_string(&input).map_err(|_| "Scheda non leggibile.")?;
+    let data = serde_json::to_string(&input).map_err(|_| "Sheet not readable.")?;
     let chosen = id
         .map(String::from)
         .unwrap_or_else(|| Uuid::new_v4().to_string());
     identifier(&chosen)?;
     if id.is_some() {
-        let revision = revision.ok_or("Revisione mancante. Riapri la scheda.")?;
+        let revision = revision.ok_or("Missing revision. Reopen the sheet.")?;
         let changed=c.execute("UPDATE characters SET data=?1,revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE campaign_id=?2 AND id=?3 AND revision=?4",params![data,campaign,chosen,revision]).map_err(storage)?;
         if changed != 1 {
-            return Err("Scheda modificata altrove. Riaprila prima di salvare; le modifiche restano nel modulo.".into());
+            return Err(
+                "Sheet changed elsewhere. Reopen it before saving; your changes stay in the form."
+                    .into(),
+            );
         }
     } else {
         if get_character(c, campaign)?.is_some() {
-            return Err("Questa campagna ha già un personaggio. Apri la sua scheda.".into());
+            return Err("This campaign already has a character. Open its sheet.".into());
         }
         c.execute(
             "INSERT INTO characters(id,campaign_id,data) VALUES (?1,?2,?3)",
@@ -320,7 +323,7 @@ pub fn change_counter(
     let tx = c.unchecked_transaction().map_err(storage)?;
     let mut character = require_character(&tx, campaign, id)?;
     if character.revision != revision {
-        return Err("Contatore modificato altrove. Riapri la scheda.".into());
+        return Err("Counter changed elsewhere. Reopen the sheet.".into());
     }
     let value = match target {
         "hp" => &mut character.data.hp_current,
@@ -331,13 +334,11 @@ pub fn change_counter(
                 .resources
                 .iter_mut()
                 .find(|r| r.id == resource)
-                .ok_or("Risorsa non trovata. Riapri la scheda.")?
+                .ok_or("Resource not found. Reopen the sheet.")?
                 .current
         }
     };
-    *value = value
-        .checked_add(delta)
-        .ok_or("Variazione troppo grande.")?;
+    *value = value.checked_add(delta).ok_or("Change too large.")?;
     let saved = save_character_inner(&tx, campaign, Some(id), Some(revision), character.data)?;
     tx.commit().map_err(storage)?;
     Ok(saved)
@@ -431,16 +432,14 @@ fn validate_details(details: &AssetDetails) -> AppResult<()> {
             ..
         } => {
             title(name)?;
-            bounded(*quantity, 0, LIMIT, "Quantità")?;
+            bounded(*quantity, 0, LIMIT, "Quantity")?;
             text(category, 100)?;
             text(description, 16000)?;
             text(value, 200)?;
             text(notes, 16000)?;
             text(location, 200)?;
             if weight.is_some_and(|w| !w.is_finite() || !(0.0..=1_000_000.0).contains(&w)) {
-                return Err(
-                    "Peso: inserisci un valore da 0 a 1000000, nella tua unità di misura.".into(),
-                );
+                return Err("Weight: enter a value from 0 to 1000000, in your own unit.".into());
             }
         }
         AssetDetails::Spell { fields } | AssetDetails::Ability { fields } => {
@@ -480,10 +479,10 @@ fn source_available(c: &Connection, campaign: &str, links: &AssetLinks) -> AppRe
         .optional()
         .map_err(storage)?;
     let Some(raw) = raw else {
-        return Err("Sessione fonte non trovata in questa campagna.".into());
+        return Err("Source session not found in this campaign.".into());
     };
     let document: serde_json::Value =
-        serde_json::from_str(&raw).map_err(|_| "Documento fonte non leggibile.")?;
+        serde_json::from_str(&raw).map_err(|_| "Source document not readable.")?;
     Ok(links
         .source_block_id
         .as_ref()
@@ -494,7 +493,7 @@ fn validate_links(c: &Connection, campaign: &str, links: &AssetLinks) -> AppResu
     if let Some(block) = &links.source_block_id {
         text(block, 128)?;
         if block.is_empty() || links.source_session_id.is_none() {
-            return Err("Seleziona una sessione prima del blocco fonte.".into());
+            return Err("Select a session before the source block.".into());
         }
     }
     for id in [
@@ -557,7 +556,7 @@ fn get_asset(c: &Connection, campaign: &str, character: &str, id: &str) -> AppRe
         )
         .optional()
         .map_err(storage)?
-        .ok_or("Voce non trovata per questo personaggio.")?;
+        .ok_or("Entry not found for this character.")?;
     asset.source_available = source_available(c, campaign, &asset.input.links)?;
     Ok(asset)
 }
@@ -586,7 +585,7 @@ pub fn save_asset(
         if let Some(id) = new {
             if new != old && knowledge::get_page(&tx, campaign, id)?.kind != kind {
                 return Err(
-                    "La pagina collegata non ha il tipo richiesto (PNG, luogo o missione).".into(),
+                    "The linked page does not have the required type (NPC, place or quest).".into(),
                 );
             }
         }
@@ -600,29 +599,28 @@ pub fn save_asset(
         })
     {
         return Err(
-            "Blocco fonte non trovato. Seleziona un blocco attuale o rimuovi il riferimento."
-                .into(),
+            "Source block not found. Select a current block or remove the reference.".into(),
         );
     }
     if let Some(old) = &previous {
         if std::mem::discriminant(&old.input.details) != std::mem::discriminant(&input.details) {
-            return Err("Il tipo della voce non può essere cambiato. Crea una nuova voce.".into());
+            return Err("The entry type cannot be changed. Create a new entry.".into());
         }
     }
     let chosen = id
         .map(String::from)
         .unwrap_or_else(|| Uuid::new_v4().to_string());
     identifier(&chosen)?;
-    let details = serde_json::to_string(&input.details).map_err(|_| "Voce non leggibile.")?;
+    let details = serde_json::to_string(&input.details).map_err(|_| "Entry not readable.")?;
     let links = &input.links;
     let changed = if id.is_some() {
-        tx.execute("UPDATE player_assets SET details=?1,page_id=?2,source_session_id=?3,source_block_id=?4,npc_id=?5,place_id=?6,quest_id=?7,provenance_notes=?8,revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE campaign_id=?9 AND character_id=?10 AND id=?11 AND revision=?12",params![details,links.page_id,links.source_session_id,links.source_block_id,links.npc_id,links.place_id,links.quest_id,links.provenance_notes,campaign,character,chosen,revision.ok_or("Revisione mancante. Riapri la voce.")?]).map_err(storage)?
+        tx.execute("UPDATE player_assets SET details=?1,page_id=?2,source_session_id=?3,source_block_id=?4,npc_id=?5,place_id=?6,quest_id=?7,provenance_notes=?8,revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE campaign_id=?9 AND character_id=?10 AND id=?11 AND revision=?12",params![details,links.page_id,links.source_session_id,links.source_block_id,links.npc_id,links.place_id,links.quest_id,links.provenance_notes,campaign,character,chosen,revision.ok_or("Missing revision. Reopen the entry.")?]).map_err(storage)?
     } else {
         tx.execute("INSERT INTO player_assets(id,campaign_id,character_id,details,page_id,source_session_id,source_block_id,npc_id,place_id,quest_id,provenance_notes) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11)",params![chosen,campaign,character,details,links.page_id,links.source_session_id,links.source_block_id,links.npc_id,links.place_id,links.quest_id,links.provenance_notes]).map_err(storage)?
     };
     if changed != 1 {
         return Err(
-            "Voce modificata altrove. Riaprila prima di salvare; il modulo resta aperto.".into(),
+            "Entry changed elsewhere. Reopen it before saving; the form stays open.".into(),
         );
     }
     let saved = get_asset(&tx, campaign, character, &chosen)?;
@@ -644,7 +642,7 @@ pub fn delete_asset(
     crate::images::detach_asset(c, campaign, id)?;
     let changed=c.execute("DELETE FROM player_assets WHERE campaign_id=?1 AND character_id=?2 AND id=?3 AND revision=?4",params![campaign,character,id,revision]).map_err(storage)?;
     if changed != 1 {
-        return Err("Voce modificata altrove o non trovata. Riaprila prima di eliminarla.".into());
+        return Err("Entry changed elsewhere or not found. Reopen it before deleting it.".into());
     }
     for kind in ["item", "spell", "ability"] {
         crate::search::remove(c, campaign, kind, id)?;

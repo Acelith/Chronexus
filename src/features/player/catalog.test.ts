@@ -33,7 +33,7 @@ test("cached index works offline without network and paths cannot escape the API
     "__proto__",
   ]) {
     expect(validCatalogPath(path)).toBe(false);
-    await expect(loadCatalog(path)).rejects.toThrow("non ammesso");
+    await expect(loadCatalog(path)).rejects.toThrow("not allowed");
   }
 });
 test("explicit lookup performs bounded GET then persists response and refresh falls back visibly", async () => {
@@ -54,7 +54,7 @@ test("explicit lookup performs bounded GET then persists response and refresh fa
   });
   vi.mocked(command).mockResolvedValue(entry);
   fetchMock.mockRejectedValue(Error("Offline"));
-  expect((await loadCatalog("spells", true)).warning).toContain("copia locale");
+  expect((await loadCatalog("spells", true)).warning).toContain("local copy");
 });
 test("bad responses and storage errors never masquerade as saved results", async () => {
   vi.mocked(command).mockResolvedValue(null);
@@ -63,7 +63,7 @@ test("bad responses and storage errors never masquerade as saved results", async
   fetchMock.mockResolvedValue(
     new Response(new Uint8Array(2 * 1024 * 1024 + 1)),
   );
-  await expect(loadCatalog("spells")).rejects.toThrow("troppo grande");
+  await expect(loadCatalog("spells")).rejects.toThrow("too large");
   fetchMock.mockResolvedValue(new Response(JSON.stringify(entry.payload)));
   vi.mocked(command)
     .mockResolvedValueOnce(null)

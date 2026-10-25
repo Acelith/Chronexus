@@ -26,7 +26,7 @@ pub fn policy() -> AppResult<&'static Policy> {
     POLICY
         .get_or_init(|| {
             serde_json::from_str(include_str!("../../../src/ai-models.json"))
-                .map_err(|_| "Catalogo dei modelli locali non valido.".into())
+                .map_err(|_| "Invalid local model catalog.".into())
         })
         .as_ref()
         .map_err(Clone::clone)
@@ -36,9 +36,7 @@ pub fn base(name: &str) -> AppResult<&'static ModelSpec> {
     [&p.primary, &p.secondary]
         .into_iter()
         .find(|m| m.name == name)
-        .ok_or_else(|| {
-            "Modello non qualificato o ritirato. Scegli Qwen3.8-27B oppure Gemma 4 12B.".into()
-        })
+        .ok_or_else(|| "Model not qualified or retired. Choose Qwen3.8-27B or Gemma 4 12B.".into())
 }
 pub fn derived(name: &str) -> bool {
     name.starts_with("chronexus-12b-")
@@ -51,7 +49,7 @@ pub fn allowed(name: &str, weight: Option<&str>) -> bool {
 }
 pub fn verify(name: &str, weight: Option<&str>) -> AppResult<()> {
     if !allowed(name, weight) {
-        return Err("Modello non qualificato o pesi cambiati. Controlla Qwen3.8-27B o scegli esplicitamente Gemma 4 12B.".into());
+        return Err("Model not qualified or weights changed. Check Qwen3.8-27B or explicitly choose Gemma 4 12B.".into());
     }
     Ok(())
 }
@@ -96,8 +94,8 @@ mod tests {
         for migration in db::MIGRATIONS.iter().take(17) {
             c.execute_batch(migration).unwrap();
         }
-        let old = journal::create_campaign(&c, "Vecchio Qwen").unwrap();
-        let gemma = journal::create_campaign(&c, "Gemma conservata").unwrap();
+        let old = journal::create_campaign(&c, "Old Qwen").unwrap();
+        let gemma = journal::create_campaign(&c, "Gemma kept").unwrap();
         let settings = store::Settings {
             enabled: true,
             model: "qwen3:4b-instruct".into(),
@@ -117,7 +115,7 @@ mod tests {
             &c,
             &old.id,
             &turn,
-            "Domanda sintetica",
+            "Synthetic question",
             "campaign",
             None,
             &settings,
@@ -129,7 +127,7 @@ mod tests {
             &old.id,
             &turn,
             "complete",
-            "Risposta storica sintetica.",
+            "Synthetic historical answer.",
             &serde_json::json!({}),
             "",
         )
@@ -153,7 +151,7 @@ mod tests {
         archive.restore(&preview.token).unwrap();
         let history = store::history(&archive.connection, &old.id, 0).unwrap();
         assert_eq!(history[0].model, settings.model);
-        assert_eq!(history[0].answer, "Risposta storica sintetica.");
+        assert_eq!(history[0].answer, "Synthetic historical answer.");
         assert!(
             !campaign::get(&archive.connection, &old.id)
                 .unwrap()

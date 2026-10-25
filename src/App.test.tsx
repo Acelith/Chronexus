@@ -90,18 +90,18 @@ test("crea una campagna dallo stato vuoto e ne modifica il nome", async () => {
     screen.getByRole("heading", { name: "Chronexus" }),
   ).toBeInTheDocument();
   await user.click(
-    await screen.findByRole("button", { name: "Crea campagna" }),
+    await screen.findByRole("button", { name: "Create campaign" }),
   );
-  await user.type(screen.getByLabelText("Nome della campagna"), "Le ceneri");
-  await user.click(screen.getByRole("button", { name: "Crea campagna" }));
+  await user.type(screen.getByLabelText("Campaign name"), "Le ceneri");
+  await user.click(screen.getByRole("button", { name: "Create campaign" }));
   expect(
     await screen.findByRole("heading", { name: "Le ceneri" }),
   ).toBeInTheDocument();
   expect(api.createCampaign).toHaveBeenCalledWith("Le ceneri");
-  await user.click(screen.getByRole("button", { name: "Rinomina campagna" }));
-  await user.clear(screen.getByLabelText("Nome della campagna"));
-  await user.type(screen.getByLabelText("Nome della campagna"), "Le stelle");
-  await user.click(screen.getByRole("button", { name: "Salva nome" }));
+  await user.click(screen.getByRole("button", { name: "Rename campaign" }));
+  await user.clear(screen.getByLabelText("Campaign name"));
+  await user.type(screen.getByLabelText("Campaign name"), "Le stelle");
+  await user.click(screen.getByRole("button", { name: "Save name" }));
   expect(
     await screen.findByRole("heading", { name: "Le stelle" }),
   ).toBeInTheDocument();
@@ -125,18 +125,16 @@ test("apertura backup attende gli appunti e rimane nell'editor se il salvataggio
   vi.mocked(api.sessions).mockResolvedValue([session]);
   render(<App />);
   await screen.findByText("Editor di test");
-  flush.mockRejectedValueOnce(new Error("Appunti non salvati"));
-  await user.click(screen.getByRole("button", { name: "Backup e ripristino" }));
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Appunti non salvati",
-  );
+  flush.mockRejectedValueOnce(new Error("Unsaved notes"));
+  await user.click(screen.getByRole("button", { name: "Backup and restore" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Unsaved notes");
   expect(screen.getByText("Editor di test")).toBeInTheDocument();
   expect(
-    screen.queryByRole("heading", { name: "Backup e ripristino" }),
+    screen.queryByRole("heading", { name: "Backup and restore" }),
   ).not.toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Backup e ripristino" }));
+  await user.click(screen.getByRole("button", { name: "Backup and restore" }));
   expect(
-    await screen.findByRole("heading", { name: "Backup e ripristino" }),
+    await screen.findByRole("heading", { name: "Backup and restore" }),
   ).toBeInTheDocument();
   expect(screen.queryByText("Editor di test")).not.toBeInTheDocument();
 });
@@ -171,27 +169,27 @@ test("ripristino da archivio vuoto aggiorna la barra campagne e apre i documenti
     return { safetyPath: "C:/backup/prima.nodex", counts, warning: null };
   });
   render(<App />);
-  await screen.findByRole("button", { name: "Crea campagna" });
-  await user.click(screen.getByRole("button", { name: "Backup e ripristino" }));
+  await screen.findByRole("button", { name: "Create campaign" });
+  await user.click(screen.getByRole("button", { name: "Backup and restore" }));
   await user.click(
     await screen.findByRole("button", {
-      name: "Seleziona backup",
+      name: "Select backup",
     }),
   );
   await screen.findByRole("alertdialog");
-  await user.click(screen.getByRole("button", { name: "Nuova campagna" }));
+  await user.click(screen.getByRole("button", { name: "New campaign" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Conferma o annulla",
+    "Confirm or cancel",
   );
   await user.click(
     await screen.findByRole("button", {
-      name: "Sostituisci archivio",
+      name: "Replace archive",
     }),
   );
-  await screen.findByRole("region", { name: "Ripristino completato" });
+  await screen.findByRole("region", { name: "Restore completed" });
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   await user.selectOptions(
-    screen.getByRole("combobox", { name: "Campagna attuale" }),
+    screen.getByRole("combobox", { name: "Current campaign" }),
     "a",
   );
   expect(await screen.findByText("Editor di test")).toBeInTheDocument();
@@ -211,15 +209,15 @@ test("crea una pagina tipizzata e la rinomina conservando il Codex", async () =>
   vi.mocked(knowledgeApi.update).mockResolvedValue(updated);
   render(<App />);
   await user.click(await screen.findByRole("button", { name: "Codex" }));
-  await user.click(await screen.findByRole("button", { name: "Nuova pagina" }));
-  await user.type(screen.getByLabelText("Titolo della pagina"), "Varek");
-  await user.selectOptions(screen.getByLabelText("Tipo"), "npc");
-  await user.selectOptions(screen.getByLabelText("Stato"), "stub");
+  await user.click(await screen.findByRole("button", { name: "New page" }));
+  await user.type(screen.getByLabelText("Page title"), "Varek");
+  await user.selectOptions(screen.getByLabelText("Type"), "npc");
+  await user.selectOptions(screen.getByLabelText("Status"), "stub");
   await user.type(
-    screen.getByLabelText("Alias (uno per riga, massimo 20)"),
+    screen.getByLabelText("Aliases (one per line, up to 20)"),
     "Il mercante",
   );
-  await user.click(screen.getByRole("button", { name: "Crea pagina" }));
+  await user.click(screen.getByRole("button", { name: "Create page" }));
   expect(
     await screen.findByRole("heading", { name: "Varek" }),
   ).toBeInTheDocument();
@@ -229,14 +227,11 @@ test("crea una pagina tipizzata e la rinomina conservando il Codex", async () =>
     status: "stub",
     aliases: ["Il mercante"],
   });
-  await user.click(screen.getByRole("button", { name: "Modifica pagina" }));
-  await user.clear(screen.getByLabelText("Titolo della pagina"));
-  await user.type(
-    screen.getByLabelText("Titolo della pagina"),
-    "Varek il grigio",
-  );
-  await user.selectOptions(screen.getByLabelText("Stato"), "active");
-  await user.click(screen.getByRole("button", { name: "Salva pagina" }));
+  await user.click(screen.getByRole("button", { name: "Edit page" }));
+  await user.clear(screen.getByLabelText("Page title"));
+  await user.type(screen.getByLabelText("Page title"), "Varek il grigio");
+  await user.selectOptions(screen.getByLabelText("Status"), "active");
+  await user.click(screen.getByRole("button", { name: "Save page" }));
   expect(
     await screen.findByRole("heading", { name: "Varek il grigio" }),
   ).toBeInTheDocument();
@@ -275,10 +270,10 @@ test("crea una sessione con numero titolo e data facoltativa", async () => {
   vi.mocked(api.createSession).mockResolvedValue(session);
   render(<App />);
   await user.click(
-    await screen.findByRole("button", { name: /\+ Nuova sessione/ }),
+    await screen.findByRole("button", { name: /\+ New session/ }),
   );
-  await user.type(screen.getByLabelText("Titolo della sessione"), "Il ponte");
-  await user.click(screen.getByRole("button", { name: "Crea sessione" }));
+  await user.type(screen.getByLabelText("Session title"), "Il ponte");
+  await user.click(screen.getByRole("button", { name: "Create session" }));
   expect(api.createSession).toHaveBeenCalledWith("a", 1, "Il ponte", null);
   expect(await screen.findByText("Editor di test")).toBeInTheDocument();
 });
@@ -294,7 +289,7 @@ test("un errore di scrittura impedisce il cambio campagna e preserva la nota ape
   await screen.findByText("Editor di test");
   flush.mockRejectedValue(new Error("Disco pieno: riprova."));
   await user.selectOptions(
-    screen.getByRole("combobox", { name: "Campagna attuale" }),
+    screen.getByRole("combobox", { name: "Current campaign" }),
     "b",
   );
   expect(await screen.findByRole("alert")).toHaveTextContent("Disco pieno");
@@ -313,11 +308,11 @@ test("un errore iniziale spiega come riprovare senza mostrare dati fittizi", asy
   render(<App />);
   const alert = await screen.findByRole("alert");
   expect(alert).toHaveTextContent("Archivio non disponibile");
-  await user.click(within(alert).getByRole("button", { name: "Riprova" }));
+  await user.click(within(alert).getByRole("button", { name: "Try again" }));
   await waitFor(() =>
     expect(screen.queryByRole("alert")).not.toBeInTheDocument(),
   );
   expect(
-    await screen.findByRole("button", { name: "Crea campagna" }),
+    await screen.findByRole("button", { name: "Create campaign" }),
   ).toBeInTheDocument();
 });

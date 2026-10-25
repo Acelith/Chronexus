@@ -98,7 +98,7 @@ def build(output, *, secondary_gemma=False):
         for notice in sorted((ROOT/'assets').rglob('*')):
             if notice.is_file() and notice.suffix.lower() in ['.txt','.md','.json']:
                 z.write(notice,'Licenze-app/'+notice.relative_to(ROOT/'assets').as_posix())
-        z.writestr('LEGGIMI.txt',f'Chronexus {version} Windows x64: esegui il setup. Solo app, senza AI. Installer non firmato; WebView2 richiesto. Per Ollama/Gemma scarica separatamente i cinque ZIP AI della stessa release. Schema SQLite corrente e appID conservati. Gemma è l’opzione secondaria; Qwen3.8 richiede il setup esplicito M18.\n')
+        z.writestr('LEGGIMI.txt',f'Chronexus {version} Windows x64: run the setup. App only, without AI. Installer lacks Authenticode signing; WebView2 required. For Ollama/Gemma, download the five separate AI ZIPs from the same release. Current SQLite schema and appID preserved. Gemma is the secondary option; Qwen3.8 requires the explicit M18 setup.\n')
     assets=[{'name':p.name,'size':p.stat().st_size,'sha256':sha(p)} for p in sorted(output.glob('*.zip'))]
     (output/'SHA256SUMS.txt').write_text(''.join(f"{x['sha256']}  {x['name']}\n" for x in assets))
     receipt={'version':version,'assets':assets,'modelManifest':DIGEST,'weight':WEIGHT}

@@ -84,26 +84,26 @@ export default function DndCatalog({
   return (
     <section
       className="dnd-catalog"
-      aria-label={tr("Catalogo D&D")}
+      aria-label={tr("D&D catalog")}
       aria-busy={busy}
     >
       <header className="player-heading">
         <div>
           <span className="eyebrow">
-            <Text source={"Compendio SRD · 2014"} />
+            <Text source={"SRD compendium · 2014"} />
           </span>
           <h4>
-            <Text source={"Cerca in D&D"} />
+            <Text source={"Search D&D"} />
           </h4>
         </div>
         <button type="button" onClick={onClose}>
-          <Text source={"Chiudi catalogo"} />
+          <Text source={"Close catalog"} />
         </button>
       </header>
       <p className="muted">
         <Text
           source={
-            "Contenuti in inglese. La connessione serve solo per le voci non ancora consultate o per aggiornarle. La ricerca per nome resta sul dispositivo. Nessun dato della campagna viene inviato."
+            "English content. The connection is needed only for entries not yet viewed or to refresh them. Name search stays on the device. No campaign data is sent."
           }
         />
       </p>
@@ -115,9 +115,9 @@ export default function DndCatalog({
         }}
       >
         <label>
-          <Text source={"Categoria D&D"} />
+          <Text source={"D&D category"} />
           <select
-            aria-label={tr("Categoria D&D")}
+            aria-label={tr("D&D category")}
             disabled={busy}
             value={category}
             onChange={(e) => {
@@ -138,35 +138,35 @@ export default function DndCatalog({
           </select>
         </label>
         <label>
-          <Text source={"Nome nel catalogo"} />
+          <Text source={"Catalog name"} />
           <input
             autoFocus
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={tr("Es. Magic Missile")}
+            placeholder={tr("e.g. Magic Missile")}
             maxLength={200}
           />
         </label>
         {category === "spells" ? (
           <label>
-            <Text source={"Livello incantesimo"} />
+            <Text source={"Spell level"} />
             <select
-              aria-label={tr("Livello incantesimo")}
+              aria-label={tr("Spell level")}
               value={level}
               onChange={(e) => setLevel(e.target.value)}
             >
-              <option value="">{tr("Tutti")}</option>
+              <option value="">{tr("All")}</option>
               {Array.from({ length: 10 }, (_, i) => (
                 <option key={i} value={i}>
-                  {i === 0 ? tr("Trucchetti") : tr("{0}° livello", [i])}
+                  {i === 0 ? tr("Cantrips") : tr("Level {0}", [i])}
                 </option>
               ))}
             </select>
           </label>
         ) : null}
         <button type="submit" className="primary" disabled={busy}>
-          <Text source={"Cerca nell’API"} />
+          <Text source={"Search the API"} />
         </button>
         {rows ? (
           <button
@@ -174,7 +174,7 @@ export default function DndCatalog({
             disabled={busy}
             onClick={() => void load(category, true)}
           >
-            <Text source={"Aggiorna indice online"} />
+            <Text source={"Refresh online index"} />
           </button>
         ) : null}
       </form>
@@ -185,17 +185,19 @@ export default function DndCatalog({
       ) : null}
       <p role="status">
         {busy
-          ? tr("Consultazione catalogo…")
+          ? tr("Reading catalog…")
           : receipt
-            ? tr("{0} · {1} · {2} risultati", [
-                receipt.cached ? tr("Copia locale") : tr("Scaricato dall’API"),
+            ? tr("{0} · {1} · {2} results", [
+                receipt.cached
+                  ? tr("Local copy")
+                  : tr("Downloaded from the API"),
                 new Date(receipt.fetchedAt).toLocaleString(
                   localeInfo(getPreferences().locale).intl,
                 ),
                 results?.length ?? 0,
               ])
             : tr(
-                "Premi Cerca nell’API per caricare l’indice. Non vengono effettuate richieste all’apertura.",
+                "Press Search the API to load the index. No requests are made on opening.",
               )}
       </p>
       {receipt?.warning ? (
@@ -203,12 +205,12 @@ export default function DndCatalog({
       ) : null}
       {rows ? (
         <div className="catalog-layout">
-          <nav className="player-asset-list" aria-label={tr("Risultati D&D")}>
+          <nav className="player-asset-list" aria-label={tr("D&D results")}>
             {!results?.length ? (
               <p>
                 <Text
                   source={
-                    "Nessun risultato. Prova il nome inglese o un’altra categoria. I tuoi incantesimi personalizzati restano disponibili nel grimorio."
+                    "No results. Try the English name or another category. Your custom spells stay available in the spellbook."
                   }
                 />
               </p>
@@ -227,8 +229,8 @@ export default function DndCatalog({
                 {row.level !== undefined ? (
                   <span>
                     {row.level === 0
-                      ? tr("Trucchetto")
-                      : tr("Livello {0}", [row.level])}
+                      ? tr("Cantrip")
+                      : tr("Level {0}", [row.level])}
                   </span>
                 ) : null}
               </button>
@@ -237,23 +239,20 @@ export default function DndCatalog({
               <p className="muted">
                 <Text
                   source={
-                    "Mostrate le prime 100 voci. Restringi la ricerca per nome o livello."
+                    "Showing the first 100 entries. Narrow the search by name or level."
                   }
                 />
               </p>
             ) : null}
           </nav>
-          <article
-            className="catalog-document"
-            aria-label={tr("Anteprima D&D")}
-          >
+          <article className="catalog-document" aria-label={tr("D&D preview")}>
             {document ? (
               <>
                 <h4>{document.data.name}</h4>
                 <p className="muted">
                   {document.receipt.cached
-                    ? tr("Copia locale")
-                    : tr("Dall’API")}{" "}
+                    ? tr("Local copy")
+                    : tr("From the API")}{" "}
                   ·{" "}
                   {new Date(document.receipt.fetchedAt).toLocaleString(
                     localeInfo(getPreferences().locale).intl,
@@ -270,7 +269,7 @@ export default function DndCatalog({
                 {textContent(document.data.higher_level) ? (
                   <>
                     <h5>
-                      <Text source={"A livelli superiori"} />
+                      <Text source={"At higher levels"} />
                     </h5>
                     <p className="player-text">
                       {textContent(document.data.higher_level)}
@@ -302,7 +301,7 @@ export default function DndCatalog({
                 </dl>
                 <details className="catalog-extra">
                   <summary>
-                    <Text source={"Altri dettagli della fonte"} />
+                    <Text source={"More source details"} />
                   </summary>
                   <dl className="catalog-metadata">
                     {Object.entries(document.data)
@@ -330,7 +329,7 @@ export default function DndCatalog({
                   </dl>
                 </details>
                 <p className="muted">
-                  <Text source={"Fonte: "} />
+                  <Text source={"Source: "} />
                   {catalogBase + document.path}
                 </p>
                 <div className="actions">
@@ -339,7 +338,7 @@ export default function DndCatalog({
                     disabled={busy}
                     onClick={() => void load(document.path, true)}
                   >
-                    <Text source={"Aggiorna voce online"} />
+                    <Text source={"Refresh online entry"} />
                   </button>
                   {document.path.startsWith("spells/") && onImport ? (
                     <button
@@ -354,14 +353,14 @@ export default function DndCatalog({
                         }
                       }}
                     >
-                      <Text source={"Usa questi dati nel modulo"} />
+                      <Text source={"Use this data in the form"} />
                     </button>
                   ) : null}
                 </div>
                 <p className="muted">
                   <Text
                     source={
-                      "L’importazione prepara un modulo modificabile. La voce viene salvata solo premendo Salva voce. L’API non pubblica incantesimi personalizzati."
+                      "Importing prepares an editable form. The entry is saved only when you press Save entry. The API does not publish custom spells."
                     }
                   />
                 </p>
@@ -394,7 +393,7 @@ export default function DndCatalog({
               </>
             ) : (
               <p className="muted">
-                <Text source={"Seleziona una voce per leggerne i dettagli."} />
+                <Text source={"Select an entry to read its details."} />
               </p>
             )}
           </article>
@@ -405,7 +404,7 @@ export default function DndCatalog({
         <p>
           <Text
             source={
-              "System Reference Document 5.1: https://dnd.wizards.com/resources/systems-reference-document · Licenza: https://creativecommons.org/licenses/by/4.0/"
+              "System Reference Document 5.1: https://dnd.wizards.com/resources/systems-reference-document · License: https://creativecommons.org/licenses/by/4.0/"
             }
           />
         </p>
@@ -423,11 +422,11 @@ function CatalogValue({
   if (value === null || value === undefined) return <>—</>;
   if (typeof value === "string" || typeof value === "number")
     return <>{String(value)}</>;
-  if (typeof value === "boolean") return <>{value ? tr("Sì") : tr("No")}</>;
+  if (typeof value === "boolean") return <>{value ? tr("Yes") : tr("No")}</>;
   if (depth > 3)
     return (
       <span className="muted">
-        <Text source={"Dettagli annidati nella fonte API."} />
+        <Text source={"Nested details in the API source."} />
       </span>
     );
   if (Array.isArray(value))
@@ -440,8 +439,8 @@ function CatalogValue({
         ))}
         {value.length > 40 ? (
           <p>
-            <Text source={"Altre "} />
-            {value.length - 40} <Text source={" voci nella fonte API."} />
+            <Text source={"Others "} />
+            {value.length - 40} <Text source={" entries in the API source."} />
           </p>
         ) : null}
       </>
@@ -485,69 +484,69 @@ const quickFields = new Set([
   "equipment_category",
 ]);
 const fieldLabels: Record<string, string> = localizeLabels({
-  casting_time: "Tempo di lancio",
-  duration: "Durata",
-  range: "Portata",
-  components: "Componenti",
-  concentration: "Concentrazione",
-  ritual: "Rituale",
-  level: "Livello",
-  school: "Scuola",
-  hit_die: "Dado vita",
-  alignment: "Allineamento",
-  size: "Taglia",
-  speed: "Velocità",
-  cost: "Costo",
-  weight: "Peso",
-  equipment_category: "Categoria",
-  classes: "Classi",
-  subclasses: "Sottoclassi",
-  material: "Materiali",
-  damage: "Danni",
-  damage_type: "Tipo di danno",
-  damage_at_slot_level: "Danno per livello dello slot",
-  damage_at_character_level: "Danno per livello del personaggio",
-  attack_type: "Tipo di attacco",
-  proficiencies: "Competenze",
-  proficiency_choices: "Scelte di competenza",
-  saving_throws: "Tiri salvezza",
-  starting_equipment: "Equipaggiamento iniziale",
-  starting_equipment_options: "Scelte equipaggiamento iniziale",
-  multi_classing: "Multiclasse",
-  spellcasting: "Lancio incantesimi",
-  spellcasting_ability: "Caratteristica da incantatore",
-  desc: "Descrizione",
-  name: "Nome",
-  traits: "Tratti",
-  languages: "Linguaggi",
-  language_desc: "Lingue",
-  age: "Età",
-  size_description: "Descrizione taglia",
-  ability_bonuses: "Bonus caratteristiche",
-  ability_score: "Caratteristica",
+  casting_time: "Casting time",
+  duration: "Duration",
+  range: "Range",
+  components: "Components",
+  concentration: "Concentration",
+  ritual: "Ritual",
+  level: "Level",
+  school: "School",
+  hit_die: "Hit die",
+  alignment: "Alignment",
+  size: "Size",
+  speed: "Speed",
+  cost: "Cost",
+  weight: "Weight",
+  equipment_category: "Category",
+  classes: "Classes",
+  subclasses: "Subclasses",
+  material: "Materials",
+  damage: "Damage",
+  damage_type: "Damage type",
+  damage_at_slot_level: "Damage by slot level",
+  damage_at_character_level: "Damage by character level",
+  attack_type: "Attack type",
+  proficiencies: "Proficiencies",
+  proficiency_choices: "Proficiency choices",
+  saving_throws: "Saving throws",
+  starting_equipment: "Starting equipment",
+  starting_equipment_options: "Starting equipment choices",
+  multi_classing: "Multiclass",
+  spellcasting: "Spellcasting",
+  spellcasting_ability: "Spellcasting ability",
+  desc: "Description",
+  name: "Name",
+  traits: "Traits",
+  languages: "Languages",
+  language_desc: "Languages",
+  age: "Age",
+  size_description: "Size description",
+  ability_bonuses: "Ability score bonuses",
+  ability_score: "Ability score",
   bonus: "Bonus",
-  quantity: "Quantità",
-  unit: "Unità",
-  normal: "Normale",
-  long: "Lunga",
-  damage_dice: "Dadi di danno",
-  properties: "Proprietà",
-  weapon_category: "Categoria arma",
-  weapon_range: "Tipo arma",
-  category_range: "Categoria e portata",
-  two_handed_damage: "Danno a due mani",
-  special: "Speciale",
-  rarity: "Rarità",
-  subraces: "Sottospecie",
-  choice: "Scelta",
-  choose: "Numero da scegliere",
-  from: "Opzioni",
-  options: "Opzioni",
-  count: "Numero",
-  feature: "Privilegio",
-  prerequisites: "Prerequisiti",
-  class: "Classe",
-  race: "Specie",
+  quantity: "Quantity",
+  unit: "Unit",
+  normal: "Normal",
+  long: "Long",
+  damage_dice: "Damage dice",
+  properties: "Properties",
+  weapon_category: "Weapon category",
+  weapon_range: "Weapon type",
+  category_range: "Category and range",
+  two_handed_damage: "Two-handed damage",
+  special: "Special",
+  rarity: "Rarity",
+  subraces: "Subspecies",
+  choice: "Choice",
+  choose: "Number to choose",
+  from: "Options",
+  options: "Options",
+  count: "Number",
+  feature: "Feature",
+  prerequisites: "Prerequisites",
+  class: "Class",
+  race: "Species",
 });
 function fieldLabel(key: string) {
   return fieldLabels[key] ?? key.replaceAll("_", " ");

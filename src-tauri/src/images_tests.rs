@@ -15,7 +15,7 @@ fn images_are_real_copies_scoped_to_owner_and_survive_backup_restore() {
     let a = journal::create_campaign(&source.connection, "A").unwrap();
     let b = journal::create_campaign(&source.connection, "B").unwrap();
     let p =
-        knowledge::create_page(&source.connection, &a.id, "Mappa", "place", "active", &[]).unwrap();
+        knowledge::create_page(&source.connection, &a.id, "Map", "place", "active", &[]).unwrap();
     let target = ImageTarget {
         kind: "page".into(),
         id: p.id,
@@ -25,7 +25,7 @@ fn images_are_real_copies_scoped_to_owner_and_survive_backup_restore() {
         &source.directory,
         &b.id,
         &target,
-        "Mappa",
+        "Map",
         "map",
         png()
     )
@@ -116,7 +116,7 @@ fn invalid_formats_payloads_and_paths_do_not_add_records() {
     let dir = tempfile::tempdir().unwrap();
     let store = backup::Store::open(dir.path()).unwrap();
     let a = journal::create_campaign(&store.connection, "A").unwrap();
-    let p = knowledge::create_page(&store.connection, &a.id, "PNG", "npc", "active", &[]).unwrap();
+    let p = knowledge::create_page(&store.connection, &a.id, "NPC", "npc", "active", &[]).unwrap();
     let target = ImageTarget {
         kind: "page".into(),
         id: p.id,

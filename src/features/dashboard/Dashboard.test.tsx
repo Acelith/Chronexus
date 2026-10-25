@@ -29,12 +29,12 @@ test("dashboard shows real counts and opens the latest session without placehold
       onNewSession={vi.fn()}
     />,
   );
-  await screen.findByText("Nessun personaggio creato per questa campagna.");
-  await user.click(screen.getByRole("button", { name: /Sessione 84/ }));
+  await screen.findByText("No character created for this campaign.");
+  await user.click(screen.getByRole("button", { name: /Session 84/ }));
   expect(onSession).toHaveBeenCalledWith(session);
   expect(
     screen.getByText(
-      "Il Codex è vuoto. Crea pagine o collegamenti [[ dal diario.",
+      "The Codex is empty. Create pages or [[ links from the journal.",
     ),
   ).toBeInTheDocument();
 });

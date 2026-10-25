@@ -42,22 +42,16 @@ test("party links an existing character and keeps failed edits guarded and recov
       onOpen={vi.fn()}
     />,
   );
-  await screen.findByText("Chi viaggia con te?");
-  await user.click(screen.getByRole("button", { name: "Aggiungi membro" }));
-  await user.selectOptions(
-    screen.getByLabelText("Pagina del personaggio"),
-    "p",
-  );
-  await user.type(
-    screen.getByLabelText("Ruolo nella compagnia"),
-    "Esploratore",
-  );
+  await screen.findByText("Who travels with you?");
+  await user.click(screen.getByRole("button", { name: "Add member" }));
+  await user.selectOptions(screen.getByLabelText("Character page"), "p");
+  await user.type(screen.getByLabelText("Role in the company"), "Esploratore");
   const guard = register.mock.calls[0][0] as SaveGuard;
   expect(guard.dirty()).toBe(true);
-  await expect(guard.flush()).rejects.toThrow("Salva o annulla");
-  await user.click(screen.getByRole("button", { name: "Salva membro" }));
+  await expect(guard.flush()).rejects.toThrow("Save or cancel");
+  await user.click(screen.getByRole("button", { name: "Save member" }));
   await screen.findByText("Disco pieno");
-  expect(screen.getByLabelText("Ruolo nella compagnia")).toHaveValue(
+  expect(screen.getByLabelText("Role in the company")).toHaveValue(
     "Esploratore",
   );
   expect(onSaved).not.toHaveBeenCalled();
@@ -68,7 +62,7 @@ test("party links an existing character and keeps failed edits guarded and recov
     status: "active",
     revision: 0,
   });
-  await user.click(screen.getByRole("button", { name: "Salva membro" }));
+  await user.click(screen.getByRole("button", { name: "Save member" }));
   await screen.findByText("Appunti condivisi");
   expect(onSaved).toHaveBeenCalledWith(page);
   expect(guard.dirty()).toBe(false);

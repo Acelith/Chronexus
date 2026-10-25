@@ -102,30 +102,30 @@ export default function HeraldAnnouncement({
         }
       >
         <h2 id="herald-title" ref={heading} tabIndex={-1}>
-          {tr("Chronexus {0} è disponibile", [offer.version])}
+          {tr("Chronexus {0} is available", [offer.version])}
         </h2>
         <p id="herald-summary">
           {tr(
-            "L’araldo porta il manifesto della nuova versione firmata. Puoi aggiornare ora, rimandare o ignorare soltanto questa versione.",
+            "The herald brings news of a new signed version. You can update now, ask for a reminder, or skip this version.",
           )}
         </p>
-        <h3>{tr("Novità")}</h3>
+        <h3>{tr("What's new")}</h3>
         {offer.notes ? (
           <pre className="update-notes herald-notes">{offer.notes}</pre>
         ) : (
-          <p>{tr("Nessuna nota di rilascio disponibile.")}</p>
+          <p>{tr("No release notes available.")}</p>
         )}
         <p className="herald-safety">
           {tr(
-            "«Aggiorna» apre le impostazioni e scarica il pacchetto verificandone la firma. L’installazione parte solo quando confermi, dopo un backup verificato di tutte le campagne.",
+            "«Update» opens the settings and downloads the package, verifying its signature. Installation starts only when you confirm, after a verified backup of all campaigns.",
           )}
         </p>
         <div className="actions">
           <button className="primary" onClick={onUpdate}>
-            {tr("Aggiorna")}
+            {tr("Update")}
           </button>
-          <button onClick={onLater}>{tr("Ricordamelo più tardi")}</button>
-          <button onClick={onDismiss}>{tr("Ignora questa versione")}</button>
+          <button onClick={onLater}>{tr("Remind me later")}</button>
+          <button onClick={onDismiss}>{tr("Ignore this version")}</button>
         </div>
         <div className="herald-controls">
           <button
@@ -137,20 +137,18 @@ export default function HeraldAnnouncement({
               if (next) void playFanfare().then((ok) => setBlocked(!ok));
             }}
           >
-            {sound
-              ? tr("Suono della trombetta: attivo")
-              : tr("Suono della trombetta: disattivato")}
+            {sound ? tr("Trumpet sound: on") : tr("Trumpet sound: off")}
           </button>
           {!still ? (
             <button onClick={() => setSettled(true)}>
-              {tr("Salta animazione")}
+              {tr("Skip animation")}
             </button>
           ) : null}
         </div>
         {blocked && sound ? (
           <p className="muted">
             {tr(
-              "Il sistema non ha permesso l’audio automatico. L’annuncio resta completo anche senza suono.",
+              "The system did not allow automatic audio. The announcement is complete even without sound.",
             )}
           </p>
         ) : null}

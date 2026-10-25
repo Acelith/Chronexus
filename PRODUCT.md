@@ -2,25 +2,25 @@
 <!-- impeccable:product-schema 1 -->
 ## Platform
 web
-Desktop Tauri 2 su Windows/macOS/Linux, con interfaccia React locale.
+Desktop Tauri 2 on Windows/macOS/Linux, with a local React interface.
 ## Users
-Giocatore di campagne di ruolo che registra ciò che il proprio personaggio conosce.
+Role-playing campaign player who records what their character knows.
 ## Product Purpose
-Scrivere appunti, gestire scheda e ritrovare collegamenti tra sessioni, persone, luoghi e oggetti.
+Write notes, manage character sheets, and find connections between sessions, people, places, and objects.
 ## Capabilities and Constraints
-Dati locali SQLite e backup reali; UUID persistenti; menzioni distinte da relazioni dichiarate. Nessuna invenzione di fatti o mutazione implicita degli appunti. Le campagne esistenti vanno preservate.
-L'utente richiede GUI fedele al riferimento, impostazioni nel menu sinistro, elenchi a scorrimento indipendente e editor sia visuale sia Markdown. La risposta del 24 ottobre 2026 conferma la modifica diretta del codice Markdown.
+Local SQLite data and real backups; persistent UUIDs; distinct mentions from declared relations. No invention of facts or implicit mutation of notes. Existing campaigns must be preserved.
+The user requests a GUI faithful to the reference, settings in the left menu, independent scrolling lists, and both visual and Markdown editors. The response from 24 October 2026 confirms the direct modification of Markdown code.
 ## Brand Commitments
-Chronexus; italiano predefinito e multilingua offline, con traduzioni in bozza e lingue inventate parziali. L'immagine allegata il 24 ottobre 2026 è l'autorità grafica di questa revisione.
+Chronexus; English by default and offline multilingual, with draft translations and partial invented languages. The image attached on 24 October 2026 is the graphic authority for this revision.
 ## Evidence on Hand
-PROJECT_SPEC.md, ROADMAP.md, implementazione reale e test. Riferimento locale di lavoro: .tools/ui-refresh/reference.png. I nomi esemplificativi della schermata non diventano dati delle campagne.
+PROJECT_SPEC.md, ROADMAP.md, real implementation, and testing. Local work reference: .tools/ui-refresh/reference.png. Example names on the screen do not become campaign data.
 ## Operating Context
-Il repository corrente è D:/Development/Chronexus; la copia da C ha richiesto la ricostruzione dei collegamenti delle dipendenze. Il percorso dei dati utente non segue la cartella del codice.
+The current repository is D:/Development/Chronexus; the copy from C required the reconstruction of dependency links. The user data path does not follow the code folder.
 ## Product Principles
-- Conservare dati e provenienza.
-- Consentire azioni comprensibili con mouse e tastiera.
-- Rendere evidenti salvataggio ed errori.
-- Separare aspetto medievale e comportamento prevedibile.
+- Preserve data and provenance.
+- Allow understandable actions with mouse and keyboard.
+- Make saving and errors evident.
+- Separate medieval appearance and predictable behavior.
 
 ## M10 language boundary
 App settings are global, campaign AI settings remain separate. Language affects

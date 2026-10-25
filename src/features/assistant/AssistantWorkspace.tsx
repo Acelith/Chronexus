@@ -31,12 +31,12 @@ import type { SaveGuard } from "../journal/Editor";
 import type { SearchResult } from "../search/SearchPanel";
 import { campaignAi } from "./campaignApi";
 const statuses: Record<string, string> = localizeLabels({
-  running: "In corso",
-  complete: "Risposta conclusa · da verificare",
-  cancelled: "Annullata · bozza",
-  error: "Non verificata",
-  no_sources: "Nessuna fonte pertinente",
-  interrupted: "Interrotta · bozza conservata",
+  running: "In progress",
+  complete: "Answer finished · to be checked",
+  cancelled: "Cancelled · draft",
+  error: "Not verified",
+  no_sources: "No relevant source",
+  interrupted: "Interrupted · draft kept",
 });
 export default function AssistantWorkspace({
   campaignId,
@@ -177,6 +177,7 @@ export default function AssistantWorkspace({
           mode,
           edition: mode === "rules" ? edition : null,
           ruleKeys: mode === "rules" ? keys : [],
+          locale: getPreferences().locale,
         },
         (e) => {
           if (!mounted.current || e.requestId !== id) return;
@@ -219,19 +220,19 @@ export default function AssistantWorkspace({
       setSourceNotice(
         !state.available
           ? tr(
-              "La fonte originale non è più disponibile. La copia citata è conservata qui.",
+              "The original source is no longer available. The cited copy is kept here.",
             )
           : state.changed
             ? tr(
-                "La fonte è cambiata dalla risposta. Il testo citato qui sotto è la versione precedente.",
+                "The source changed after the answer. The text cited below is the earlier version.",
               )
-            : tr("La fonte corrisponde alla versione citata."),
+            : tr("The source matches the cited version."),
       );
       if (state.available && source.kind !== "wiki") {
         if (state.changed) {
           setSourceNotice(
             tr(
-              "La fonte è cambiata. Usa «Apri versione attuale» dopo aver confrontato la copia citata.",
+              "The source changed. Use «Open current version» after comparing the cited copy.",
             ),
           );
           setChangedSource(source);
@@ -279,7 +280,7 @@ export default function AssistantWorkspace({
   if (loading)
     return (
       <p role="status">
-        <Text source={"Apertura assistente locale…"} />
+        <Text source={"Opening local assistant…"} />
       </p>
     );
   return (
@@ -287,15 +288,15 @@ export default function AssistantWorkspace({
       <header className="section-heading">
         <div>
           <p className="eyebrow">
-            <Text source={"Il consigliere del viandante"} />
+            <Text source={"The wayfarer's counsel"} />
           </p>
           <h2>
-            <Text source={"Assistente locale"} />
+            <Text source={"Local assistant"} />
           </h2>
           <p>
             <Text
               source={
-                "Interroga i tuoi appunti o le fonti D&D salvate nella Wiki. Le risposte sono da verificare e non modificano la campagna."
+                "Ask your notes or the D&D sources saved in the Wiki. Answers must be checked and never change the campaign."
               }
             />
           </p>
@@ -312,35 +313,35 @@ export default function AssistantWorkspace({
       )}
       <details className="assistant-settings" open={!settings?.enabled}>
         <summary>
-          <Text source={"Modello e riservatezza ·"} />{" "}
+          <Text source={"Model and privacy ·"} />{" "}
           {settings?.enabled ? "attivo" : "disattivato"}
         </summary>
         <p>
           <Text
             source={
-              "Ollama deve essere avviato su questo computer con OLLAMA_NO_CLOUD=1. L’app controlla il blocco del cloud prima di inviare le fonti. Nessun ripiego su servizi esterni."
+              "Ollama must run on this computer with OLLAMA_NO_CLOUD=1. The app checks the cloud block before sending sources. No fallback to external services."
             }
           />
         </p>
         <button disabled={configBusy || running} onClick={() => void check()}>
-          <Text source={"Controlla Ollama"} />
+          <Text source={"Check Ollama"} />
         </button>
         {runtime && (
           <>
             <p>
               <Text source={"Ollama "} />
               {runtime.version}{" "}
-              <Text source={" · cloud disabilitato e verificato"} />
+              <Text source={" · cloud disabled and verified"} />
             </p>
             <label>
-              <Text source={"Modello locale"} />
+              <Text source={"Local model"} />
               <select
-                aria-label={tr("Modello locale")}
+                aria-label={tr("Local model")}
                 value={model}
                 disabled={configBusy || running}
                 onChange={(e) => setModel(e.target.value)}
               >
-                <option value="">{tr("Scegli un modello")}</option>
+                <option value="">{tr("Choose a model")}</option>
                 {usableModels(runtime.models).map((m) => (
                   <option key={m.digest} value={m.name}>
                     {modelLabel(m.name)} · {m.quantization}
@@ -352,7 +353,7 @@ export default function AssistantWorkspace({
               <p>
                 <Text
                   source={
-                    "Il modello sperimentale D&D è escluso: non ha superato le prove di qualità."
+                    "The experimental D&D model is excluded: it did not pass the quality tests."
                   }
                 />
               </p>
@@ -366,7 +367,7 @@ export default function AssistantWorkspace({
               />
               <Text
                 source={
-                  "Uso un modello multilingue, non addestrato specificamente su D&D, guidato dalle mie fonti locali."
+                  "I am using a multilingual model, not trained specifically on D&D, guided by my local sources."
                 }
               />
             </label>
@@ -374,32 +375,32 @@ export default function AssistantWorkspace({
               disabled={!model || !consent || configBusy || running}
               onClick={() => void configure(true)}
             >
-              <Text source={"Attiva modello locale"} />
+              <Text source={"Enable local model"} />
             </button>
           </>
         )}
         {settings?.enabled && (
           <>
             <p>
-              <Text source={"Configurato: "} />
+              <Text source={"Configured: "} />
               {settings.model}
             </p>
             <p className="assistant-digest">
-              <Text source={"Identità: "} />
+              <Text source={"Identity: "} />
               {settings.digest}
             </p>
             <button
               disabled={configBusy || running}
               onClick={() => void configure(false)}
             >
-              <Text source={"Disattiva assistente"} />
+              <Text source={"Disable assistant"} />
             </button>
           </>
         )}
         <p>
           <Text
             source={
-              "Primo caricamento più lento. Servono driver compatibili e memoria GPU disponibile. Pesi esclusi dai backup; conversazioni e copie delle fonti incluse."
+              "Slower first load. Compatible drivers and free GPU memory are needed. Weights are excluded from backups; conversations and source copies are included."
             }
           />
         </p>
@@ -409,28 +410,28 @@ export default function AssistantWorkspace({
           <form onSubmit={ask}>
             <fieldset disabled={running || !settings?.enabled || configBusy}>
               <legend>
-                <Text source={"Una domanda, con le sue fonti"} />
+                <Text source={"A question, with its sources"} />
               </legend>
               <label>
-                <Text source={"Ambito"} />
+                <Text source={"Scope"} />
                 <select
-                  aria-label={tr("Ambito")}
+                  aria-label={tr("Scope")}
                   value={mode}
                   onChange={(e) => {
                     setMode(e.target.value);
                     setKeys([]);
                   }}
                 >
-                  <option value="campaign">{tr("Campagna attuale")}</option>
-                  <option value="rules">{tr("Regole D&D locali")}</option>
+                  <option value="campaign">{tr("Current campaign")}</option>
+                  <option value="rules">{tr("Local D&D rules")}</option>
                 </select>
               </label>
               {mode === "rules" && (
                 <>
                   <label>
-                    <Text source={"Edizione"} />
+                    <Text source={"Edition"} />
                     <select
-                      aria-label={tr("Edizione")}
+                      aria-label={tr("Edition")}
                       disabled
                       value={edition}
                       onChange={(e) => {
@@ -446,7 +447,7 @@ export default function AssistantWorkspace({
                   <p>
                     <Text
                       source={
-                        "Edizione e fonti sono quelle approvate nelle Impostazioni della campagna. Puoi scegliere quali usare per questa domanda."
+                        "The edition and sources are those approved in Campaign settings. You can choose which ones to use for this question."
                       }
                     />
                   </p>
@@ -454,7 +455,7 @@ export default function AssistantWorkspace({
                     <p>
                       <Text
                         source={
-                          "Nessuna fonte salvata per questa edizione. Apri prima una voce nella Wiki."
+                          "No source saved for this edition. Open an entry in the Wiki first."
                         }
                       />
                     </p>
@@ -482,22 +483,22 @@ export default function AssistantWorkspace({
                 </>
               )}
               <label>
-                <Text source={"Domanda"} />
+                <Text source={"Question"} />
                 <textarea
-                  aria-label={tr("Domanda")}
+                  aria-label={tr("Question")}
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   minLength={3}
                   maxLength={1000}
                   required
-                  placeholder={tr("Che cosa sappiamo di Mirna?")}
+                  placeholder={tr("What do we know about Mirna?")}
                   rows={4}
                 />
               </label>
               <p>
                 <Text
                   source={
-                    "La ricerca usa parole presenti nei tuoi appunti. Prova nomi e termini precisi; non legge automaticamente l’intera campagna."
+                    "The search uses words found in your notes. Try precise names and terms; it does not read the whole campaign automatically."
                   }
                 />
               </p>
@@ -508,26 +509,26 @@ export default function AssistantWorkspace({
                   (mode === "rules" && keys.length === 0)
                 }
               >
-                <Text source={"Chiedi alle fonti"} />
+                <Text source={"Ask the sources"} />
               </button>
             </fieldset>
           </form>
           {running && (
             <div>
-              <p role="status">{phase || tr("Preparazione…")}</p>
+              <p role="status">{phase || tr("Preparing…")}</p>
               <button onClick={() => void cancel()}>
-                <Text source={"Annulla generazione"} />
+                <Text source={"Cancel generation"} />
               </button>
               <p>
                 <Text
                   source={
-                    "Uscendo da questa sezione, la generazione viene annullata e la bozza conservata."
+                    "Leaving this section cancels the generation and keeps the draft."
                   }
                 />
               </p>
               <div
                 className="assistant-answer"
-                aria-label={tr("Risposta in arrivo")}
+                aria-label={tr("Answer arriving")}
               >
                 {draft}
               </div>
@@ -541,13 +542,13 @@ export default function AssistantWorkspace({
               <h3>{selected.question}</h3>
               <p>
                 {selected.mode === "rules"
-                  ? tr("Regole {0}", [selected.edition])
-                  : tr("Appunti della campagna")}{" "}
+                  ? tr("Rules {0}", [selected.edition])
+                  : tr("Campaign notes")}{" "}
                 · {selected.model}
               </p>
               {selected.error && <p role="alert">{selected.error}</p>}
               <div className="assistant-answer">
-                {selected.answer || tr("Nessuna risposta generata.")}
+                {selected.answer || tr("No answer generated.")}
               </div>
               {typeof selected.metrics.gpuBytes === "number" && (
                 <p className="assistant-metrics">
@@ -562,22 +563,24 @@ export default function AssistantWorkspace({
               )}
               {Number(selected.metrics.excludedSourceCount) > 0 && (
                 <p role="status">
-                  <Text source={"Fonti escluse per possibili istruzioni:"} />{" "}
+                  <Text
+                    source={"Sources excluded for possible instructions:"}
+                  />{" "}
                   {Number(selected.metrics.excludedSourceCount)}
                   <Text
-                    source={". La risposta usa soltanto gli estratti elencati."}
+                    source={". The answer uses only the listed excerpts."}
                   />
                 </p>
               )}
               <h4>
                 {selected.metrics.sentToModel === false
-                  ? tr("Fonti controllate · non inviate al modello")
-                  : tr("Fonti della richiesta")}
+                  ? tr("Checked sources · not sent to the model")
+                  : tr("Request sources")}
               </h4>
               {sourceNotice && <p role="status">{sourceNotice}</p>}
               {changedSource && (
                 <button onClick={() => navigate(changedSource)}>
-                  <Text source={"Apri versione attuale"} />
+                  <Text source={"Open current version"} />
                 </button>
               )}
               {selected.sources.map((s) => (
@@ -588,38 +591,35 @@ export default function AssistantWorkspace({
                   </summary>
                   <p className="assistant-snapshot">{s.text}</p>
                   <p>
-                    <Text source={"Revisione "} />
+                    <Text source={"Revision "} />
                     {s.revision}{" "}
-                    <Text source={" · copia conservata con la risposta"} />
+                    <Text source={" · copy kept with the answer"} />
                   </p>
                   <button onClick={() => void openSource(s)}>
                     {s.kind === "wiki"
-                      ? tr("Verifica versione nella cache")
-                      : tr("Apri fonte citata")}
+                      ? tr("Check the cached version")
+                      : tr("Open cited source")}
                   </button>
                 </details>
               ))}
               {!confirmDelete ? (
                 <button onClick={() => setConfirmDelete(true)}>
-                  <Text source={"Elimina risposta"} />
+                  <Text source={"Delete answer"} />
                 </button>
               ) : (
-                <div
-                  role="alertdialog"
-                  aria-label={tr("Eliminare la risposta?")}
-                >
+                <div role="alertdialog" aria-label={tr("Delete the answer?")}>
                   <p>
                     <Text
                       source={
-                        "Eliminare questa domanda, la risposta e le copie delle fonti? Gli appunti restano conservati."
+                        "Delete this question, the answer and the source copies? Your notes are kept."
                       }
                     />
                   </p>
                   <button onClick={() => void remove()}>
-                    <Text source={"Conferma eliminazione"} />
+                    <Text source={"Confirm deletion"} />
                   </button>
                   <button autoFocus onClick={() => setConfirmDelete(false)}>
-                    <Text source={"Annulla"} />
+                    <Text source={"Cancel"} />
                   </button>
                 </div>
               )}
@@ -628,12 +628,12 @@ export default function AssistantWorkspace({
         </div>
         <aside className="assistant-history">
           <h3>
-            <Text source={"Il filo delle domande"} />
+            <Text source={"The thread of questions"} />
           </h3>
           <p>
             <Text
               source={
-                "Solo questa campagna. Le risposte precedenti non diventano fonti per le nuove domande."
+                "This campaign only. Earlier answers never become sources for new questions."
               }
             />
           </p>
@@ -641,7 +641,7 @@ export default function AssistantWorkspace({
             <p>
               <Text
                 source={
-                  "Nessuna conversazione. Inizia da una domanda sui tuoi appunti."
+                  "No conversations. Start with a question about your notes."
                 }
               />
             </p>
@@ -672,7 +672,7 @@ export default function AssistantWorkspace({
               disabled={configBusy || running}
               onClick={() => void loadMore()}
             >
-              <Text source={"Mostra altre domande"} />
+              <Text source={"Show more questions"} />
             </button>
           )}
         </aside>

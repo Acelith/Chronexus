@@ -13,7 +13,7 @@ const MAX_DEPTH: usize = 48;
 const MAX_BLOCKS: usize = 2000;
 const MAX_TEXT: usize = 20_000;
 const MAX_ROWS: usize = 3000;
-pub const LICENSE_FALLBACK: &str = "Licenza non dichiarata nella pagina.";
+pub const LICENSE_FALLBACK: &str = "License not stated on the page.";
 
 fn selector(s: &str) -> Selector {
     Selector::parse(s).expect("static selector")
@@ -193,7 +193,7 @@ fn table_rows(table: ElementRef, truncated: &mut bool) -> Vec<Vec<String>> {
 fn content(doc: &Html) -> AppResult<ElementRef<'_>> {
     doc.select(&selector("#page-content"))
         .next()
-        .ok_or_else(|| "Struttura della pagina Wikidot non riconosciuta: contenuto assente.".into())
+        .ok_or_else(|| "Unrecognized Wikidot page structure: content missing.".into())
 }
 fn license(doc: &Html) -> String {
     doc.select(&selector(".license-area"))
@@ -330,21 +330,19 @@ pub fn index(html: &str, category: &str) -> AppResult<Vec<IndexRow>> {
         }
     }
     if rows.is_empty() {
-        return Err(
-            "L’indice Wikidot non contiene voci riconoscibili per questa categoria.".into(),
-        );
+        return Err("The Wikidot index contains no recognizable entries for this category.".into());
     }
     Ok(rows)
 }
 pub fn entry(html: &str, page: &str) -> AppResult<Entry> {
-    let category = category_of(page).ok_or("Pagina Wikidot non ammessa.")?;
+    let category = category_of(page).ok_or("Wikidot page not allowed.")?;
     let doc = Html::parse_document(html);
     let title = doc
         .select(&selector(".page-title"))
         .next()
         .map(|t| text_of(t).replace('\n', " "))
         .filter(|t| !t.is_empty() && t.chars().count() <= 200)
-        .ok_or("Struttura della pagina Wikidot non riconosciuta: titolo assente.")?;
+        .ok_or("Unrecognized Wikidot page structure: title missing.")?;
     let root = content(&doc)?;
     let mut walker = Walker {
         blocks: vec![],
@@ -354,7 +352,7 @@ pub fn entry(html: &str, page: &str) -> AppResult<Entry> {
     walker.walk(root, 0);
     walker.flush();
     if walker.blocks.is_empty() {
-        return Err("La pagina Wikidot non contiene testo interpretabile.".into());
+        return Err("The Wikidot page contains no text that can be interpreted.".into());
     }
     let source = walker.blocks.iter().find_map(|b| match b {
         Block::Paragraph { text } => text

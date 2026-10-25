@@ -58,9 +58,7 @@ export class Autosave<T> {
             message:
               error instanceof Error
                 ? error.message
-                : tr(
-                    "Salvataggio non riuscito. Gli appunti restano qui: riprova.",
-                  ),
+                : tr("Saving failed. The notes stay here: try again."),
           });
         throw error;
       });

@@ -6,7 +6,7 @@ import { KnowledgeContext } from "./context";
 export const PageMention = createReactInlineContentSpec(
   {
     type: "pageMention",
-    propSchema: { pageId: { default: "" }, label: { default: "Pagina" } },
+    propSchema: { pageId: { default: "" }, label: { default: "Page" } },
     content: "none",
   },
   {
@@ -20,9 +20,9 @@ export const PageMention = createReactInlineContentSpec(
           contentEditable={false}
           className={`page-mention ${page ? "" : "missing"}`}
           data-page-id={pageId}
-          aria-label={tr("Apri {0}{1}", [
+          aria-label={tr("Open {0}{1}", [
             page?.title ?? label,
-            page ? "" : tr(" (pagina mancante)"),
+            page ? "" : tr(" (missing page)"),
           ])}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => context.open(pageId, label)}

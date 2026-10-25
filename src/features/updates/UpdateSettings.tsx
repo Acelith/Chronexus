@@ -99,30 +99,26 @@ export default function UpdateSettings({
   const disabled = !!pending || busy;
   const changed = endpoint !== overview?.settings.endpoint;
   const labels: Record<string, string> = {
-    download: tr("Download in corso…"),
-    verify: tr("Verifica della firma…"),
-    ready: tr("Pacchetto verificato, pronto per l’installazione."),
-    backup: tr("Creazione e verifica del backup…"),
-    install: tr("Avvio dell’installazione…"),
+    download: tr("Downloading…"),
+    verify: tr("Verifying the signature…"),
+    ready: tr("Package verified, ready to install."),
+    backup: tr("Creating and verifying the backup…"),
+    install: tr("Starting installation…"),
   };
   return (
-    <section
-      className="language-settings"
-      aria-label={tr("Aggiornamenti dell’app")}
-    >
-      <h3>{tr("Aggiornamenti dell’app")}</h3>
+    <section className="language-settings" aria-label={tr("App updates")}>
+      <h3>{tr("App updates")}</h3>
       <p>
         {tr(
-          "Controlla le nuove versioni di Chronexus. Il download non richiede un account e non invia i dati delle campagne.",
+          "Check for new Chronexus versions. Downloading needs no account and sends no campaign data.",
         )}
       </p>
       {overview ? (
         <p>
-          {tr("Versione installata")}:{" "}
-          <strong>{overview.currentVersion}</strong>
+          {tr("Installed version")}: <strong>{overview.currentVersion}</strong>
         </p>
       ) : !error ? (
-        <p role="status">{tr("Lettura delle impostazioni…")}</p>
+        <p role="status">{tr("Reading settings…")}</p>
       ) : null}
       {error ? (
         <p className="error" role="alert">
@@ -144,36 +140,32 @@ export default function UpdateSettings({
                   setOffer(next);
                   if (!next)
                     setNotice(
-                      tr(
-                        "Chronexus è aggiornato. Nessuna nuova versione disponibile.",
-                      ),
+                      tr("Chronexus is up to date. No new version available."),
                     );
                 })
               }
             >
-              {pending === "check"
-                ? tr("Controllo in corso…")
-                : tr("Controlla aggiornamenti")}
+              {pending === "check" ? tr("Checking…") : tr("Check for updates")}
             </button>
           </div>
           {offer ? (
             <div>
               <h4>
-                {tr("Nuova versione disponibile")}: {offer.version}
+                {tr("New version available")}: {offer.version}
               </h4>
               {offer.notes ? (
                 <pre className="update-notes">{offer.notes}</pre>
               ) : (
-                <p>{tr("Nessuna nota di rilascio disponibile.")}</p>
+                <p>{tr("No release notes available.")}</p>
               )}
               <p>
                 {tr(
-                  "Prima dell’installazione viene creato un backup verificato di tutte le campagne, con immagini e allegati gestiti. Se il backup non riesce, l’aggiornamento si ferma.",
+                  "Before installing, a verified backup of all campaigns is created, with managed images and attachments. If the backup fails, the update stops.",
                 )}
               </p>
               <p>
                 {tr(
-                  "L’app si chiuderà per installare l’aggiornamento. Riapri Chronexus al termine. Il runtime e i pesi AI non vengono sostituiti.",
+                  "The app will close to install the update. Reopen Chronexus when it finishes. The AI runtime and weights are not replaced.",
                 )}
               </p>
               <div className="actions">
@@ -189,7 +181,7 @@ export default function UpdateSettings({
                       })
                     }
                   >
-                    {tr("Scarica aggiornamento")}
+                    {tr("Download update")}
                   </button>
                 ) : (
                   <button
@@ -202,14 +194,14 @@ export default function UpdateSettings({
                           setProgress,
                         );
                         setNotice(
-                          `${tr("Aggiornamento installato. Riapri Chronexus. Backup:")} ${path}`,
+                          `${tr("Update installed. Reopen Chronexus. Backup:")} ${path}`,
                         );
                         setOffer(null);
                         setReady(false);
                       })
                     }
                   >
-                    {tr("Crea backup e installa")}
+                    {tr("Create backup and install")}
                   </button>
                 )}
                 {pending === "download" ? (
@@ -220,7 +212,7 @@ export default function UpdateSettings({
                         .catch((reason) => setError(errorMessage(reason)))
                     }
                   >
-                    {tr("Annulla download")}
+                    {tr("Cancel download")}
                   </button>
                 ) : null}
               </div>
@@ -229,12 +221,12 @@ export default function UpdateSettings({
           {progress ? (
             <div aria-live="polite">
               <p role="status">
-                {labels[progress.phase] ?? tr("Operazione in corso…")}
+                {labels[progress.phase] ?? tr("Operation in progress…")}
               </p>
               {progress.phase === "download" ? (
                 <>
                   <progress
-                    aria-label={tr("Download aggiornamento")}
+                    aria-label={tr("Update download")}
                     max={progress.total ?? undefined}
                     value={progress.total ? progress.downloaded : undefined}
                   />
@@ -248,7 +240,7 @@ export default function UpdateSettings({
               ) : null}
               {progress.backupPath ? (
                 <p>
-                  {tr("Backup salvato in")}: <bdi>{progress.backupPath}</bdi>
+                  {tr("Backup saved in")}: <bdi>{progress.backupPath}</bdi>
                 </p>
               ) : null}
               {progress.backupNotice ? (
@@ -258,16 +250,16 @@ export default function UpdateSettings({
           ) : null}
           {herald ? (
             <fieldset className="herald-settings" disabled={disabled}>
-              <legend>{tr("Annuncio delle nuove versioni")}</legend>
+              <legend>{tr("New version announcements")}</legend>
               {(
                 [
                   [
                     "startupCheck",
                     tr(
-                      "Controlla una volta all’avvio (al massimo ogni 20 ore) e annuncia le nuove versioni con l’araldo",
+                      "Check once at startup (at most every 20 hours) and announce new versions with the herald",
                     ),
                   ],
-                  ["sound", tr("Suona la trombetta quando appare l’araldo")],
+                  ["sound", tr("Sound the trumpet when the herald appears")],
                 ] as const
               ).map(([key, label]) => (
                 <label key={key} className="checkbox-row">
@@ -278,7 +270,7 @@ export default function UpdateSettings({
                       const next = { ...herald, [key]: event.target.checked };
                       void perform("herald", async () => {
                         setHerald(await heraldApi.save(next));
-                        setNotice(tr("Preferenze dell’annuncio salvate."));
+                        setNotice(tr("Announcement preferences saved."));
                       });
                     }}
                   />
@@ -287,24 +279,24 @@ export default function UpdateSettings({
               ))}
               <p className="muted">
                 {tr(
-                  "Il controllo automatico contatta solo il canale aggiornamenti, mai le wiki o i modelli AI, e non invia dati delle campagne. Il controllo manuale resta sempre disponibile.",
+                  "The automatic check contacts only the update channel, never the wikis or AI models, and sends no campaign data. The manual check is always available.",
                 )}
               </p>
             </fieldset>
           ) : null}
           <p>
             {tr(
-              "I backup prima degli aggiornamenti sono conservati qui e non vengono eliminati automaticamente:",
+              "Backups made before updates are kept here and never deleted automatically:",
             )}
           </p>
           <p className="update-path">
             <bdi>{overview.backupDirectory}</bdi>
           </p>
           <details>
-            <summary>{tr("Server degli aggiornamenti")}</summary>
+            <summary>{tr("Update server")}</summary>
             <p>
               {tr(
-                "Usa l’API pubblica dell’ultima release Forgegit o un manifesto latest.json del tuo server HTTPS. Sono accettati solo pacchetti firmati da Chronexus sullo stesso server.",
+                "Use the public API of the latest Forgegit release or a latest.json manifest on your HTTPS server. Only packages signed by Chronexus on the same server are accepted.",
               )}
             </p>
             <form
@@ -317,12 +309,12 @@ export default function UpdateSettings({
                   setOffer(null);
                   setReady(false);
                   setProgress(null);
-                  setNotice(tr("Canale aggiornamenti salvato."));
+                  setNotice(tr("Update channel saved."));
                 });
               }}
             >
               <label>
-                {tr("Indirizzo del canale aggiornamenti")}
+                {tr("Update channel address")}
                 <input
                   type="url"
                   required
@@ -334,12 +326,12 @@ export default function UpdateSettings({
                 />
               </label>
               <button disabled={disabled || !changed}>
-                {tr("Salva canale aggiornamenti")}
+                {tr("Save update channel")}
               </button>
               {changed ? (
                 <p>
                   {tr(
-                    "Salva il canale prima di controllare o installare aggiornamenti.",
+                    "Save the channel before checking for or installing updates.",
                   )}
                 </p>
               ) : null}
@@ -357,7 +349,7 @@ export default function UpdateSettings({
             })
           }
         >
-          {tr("Ricarica impostazioni aggiornamenti")}
+          {tr("Reload update settings")}
         </button>
       )}
     </section>

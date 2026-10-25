@@ -17,29 +17,29 @@ import {
   type Answer,
 } from "./api";
 const labels: Record<string, string> = localizeLabels({
-  level: "Livello",
-  school: "Scuola",
-  casting_time: "Tempo di lancio",
-  duration: "Durata",
-  range_text: "Gittata",
-  concentration: "Concentrazione",
-  ritual: "Rituale",
-  higher_level: "Ai livelli superiori",
-  classes: "Classi",
-  armor_class: "Classe armatura",
-  hit_points: "Punti ferita",
-  challenge_rating_decimal: "Grado sfida",
-  actions: "Azioni",
-  traits: "Tratti",
-  reactions: "Reazioni",
-  strength: "Forza",
-  dexterity: "Destrezza",
-  constitution: "Costituzione",
-  intelligence: "Intelligenza",
-  wisdom: "Saggezza",
-  charisma: "Carisma",
-  size: "Taglia",
-  type: "Tipo",
+  level: "Level",
+  school: "School",
+  casting_time: "Casting time",
+  duration: "Duration",
+  range_text: "Range",
+  concentration: "Concentration",
+  ritual: "Ritual",
+  higher_level: "At higher levels",
+  classes: "Classes",
+  armor_class: "Armor class",
+  hit_points: "Hit points",
+  challenge_rating_decimal: "Challenge rating",
+  actions: "Actions",
+  traits: "Traits",
+  reactions: "Reactions",
+  strength: "Strength",
+  dexterity: "Dexterity",
+  constitution: "Constitution",
+  intelligence: "Intelligence",
+  wisdom: "Wisdom",
+  charisma: "Charisma",
+  size: "Size",
+  type: "Type",
 });
 /** Open5e view; `initialQuery` repeats a search the user agreed to move here. */
 export default function Open5eWiki({
@@ -107,14 +107,14 @@ export default function Open5eWiki({
       <p>
         <Text
           source={
-            "Open5e · regole, incantesimi, creature e oggetti da più fonti."
+            "Open5e · rules, spells, creatures and items from several sources."
           }
         />
       </p>
       <p className="editor-hint">
         <Text
           source={
-            "I contenuti sono prevalentemente in inglese. Cerca un termine di regole, ad esempio “magic missile”. Solo quando premi Cerca o apri una voce, il termine o l'identificativo viene inviato a Open5e. Le pagine consultate rimangono disponibili offline; nessun appunto della campagna viene inviato."
+            "Content is mostly in English. Search for a rules term, for example “magic missile”. Only when you press Search or open an entry is the term or identifier sent to Open5e. Viewed pages stay available offline; no campaign notes are sent."
           }
         />
       </p>
@@ -126,7 +126,7 @@ export default function Open5eWiki({
         }}
       >
         <label>
-          <Text source={"Termine nella wiki"} />
+          <Text source={"Term in the wiki"} />
           <input
             type="search"
             minLength={2}
@@ -137,7 +137,7 @@ export default function Open5eWiki({
           />
         </label>
         <button className="primary" disabled={busy}>
-          <Text source={"Cerca nella wiki"} />
+          <Text source={"Search the wiki"} />
         </button>
         {results ? (
           <button
@@ -145,13 +145,13 @@ export default function Open5eWiki({
             disabled={busy}
             onClick={() => void find(1, true)}
           >
-            <Text source={"Aggiorna ricerca online"} />
+            <Text source={"Refresh online search"} />
           </button>
         ) : null}
       </form>
       {busy ? (
         <p role="status">
-          <Text source={"Consultazione wiki…"} />
+          <Text source={"Reading wiki…"} />
         </p>
       ) : null}
       {error ? (
@@ -159,7 +159,7 @@ export default function Open5eWiki({
           {error}{" "}
           <Text
             source={
-              " Riprova con la stessa ricerca; le copie già consultate rimangono locali."
+              " Try again with the same search; copies already viewed stay local."
             }
           />
         </p>
@@ -171,17 +171,17 @@ export default function Open5eWiki({
         <>
           <div className="wiki-results-heading">
             <p>
-              {results.payload.count} <Text source={" risultati per “"} />
+              {results.payload.count} <Text source={" results for “"} />
               {usedQuery}
-              <Text source={"” · pagina"} /> {page}
+              <Text source={"” · page"} /> {page}
             </p>
             <label>
-              <Text source={"Tipo nella pagina"} />
+              <Text source={"Type on the page"} />
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               >
-                <option value="">{tr("Tutti i tipi")}</option>
+                <option value="">{tr("All types")}</option>
                 {kinds.map((k) => (
                   <option key={k}>{k}</option>
                 ))}
@@ -212,7 +212,7 @@ export default function Open5eWiki({
                 <p>
                   <Text
                     source={
-                      "Nessuna voce trovata. Prova il nome inglese o un termine più breve."
+                      "No entries found. Try the English name or a shorter term."
                     }
                   />
                 </p>
@@ -222,7 +222,7 @@ export default function Open5eWiki({
                   disabled={busy || page <= 1}
                   onClick={() => void find(page - 1)}
                 >
-                  <Text source={"Pagina precedente"} />
+                  <Text source={"Previous page"} />
                 </button>
                 <button
                   disabled={
@@ -230,11 +230,11 @@ export default function Open5eWiki({
                   }
                   onClick={() => void find(page + 1)}
                 >
-                  <Text source={"Pagina successiva"} />
+                  <Text source={"Next page"} />
                 </button>
               </div>
             </div>
-            <article className="wiki-entry" aria-label={tr("Voce wiki")}>
+            <article className="wiki-entry" aria-label={tr("Wiki entry")}>
               {entry ? (
                 <>
                   <h4>{entry.payload.entry.name}</h4>
@@ -243,15 +243,15 @@ export default function Open5eWiki({
                     {plain(entry.payload.document.gamesystem)}
                   </p>
                   <p className="wiki-license">
-                    <Text source={"Licenze dichiarate:"} />{" "}
+                    <Text source={"Declared licenses:"} />{" "}
                     {entry.payload.document.licenses
                       ?.map((l) => l.name)
-                      .join("; ") || tr("Non indicate dalla fonte")}
+                      .join("; ") || tr("Not given by the source")}
                     <br />
-                    <Text source={"Fornitore: Open5e · "} />
+                    <Text source={"Provider: Open5e · "} />
                     {entry.payload.document.key}
                     <br />
-                    <Text source={"Copia locale del"} />{" "}
+                    <Text source={"Local copy from"} />{" "}
                     {new Date(entry.fetchedAt).toLocaleString(
                       localeInfo(getPreferences().locale).intl,
                     )}
@@ -292,14 +292,14 @@ export default function Open5eWiki({
                     disabled={busy || !selected}
                     onClick={() => selected && void open(selected, true)}
                   >
-                    <Text source={"Aggiorna voce online"} />
+                    <Text source={"Refresh online entry"} />
                   </button>
                 </>
               ) : (
                 <p>
                   <Text
                     source={
-                      "Apri una voce per leggere il testo completo, la fonte e l’edizione. Le regole di editori o edizioni diverse restano separate."
+                      "Open an entry to read its full text, source and edition. Rules from different publishers or editions stay separate."
                     }
                   />
                 </p>

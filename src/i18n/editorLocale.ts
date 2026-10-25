@@ -25,5 +25,5 @@ const dictionaries = {
 };
 export function editorDictionary() {
   const locale = getPreferences().locale;
-  return dictionaries[locale as keyof typeof dictionaries] ?? it;
+  return dictionaries[locale as keyof typeof dictionaries] ?? en;
 }

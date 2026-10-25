@@ -1,37 +1,37 @@
-# Sviluppo e manutenzione di Chronexus
+# Chronexus Development and Maintenance
 
-Istruzioni tecniche spostate dal README in M20 senza modifiche di contenuto. Guida utente: [GUIDE.md](GUIDE.md); procedure di collaudo: [QA.md](QA.md); rilascio: [UPDATES.md](UPDATES.md) e [INSTALLERS.md](INSTALLERS.md).
+Technical instructions moved from README to M20 without content changes. User guide: [GUIDE.md](GUIDE.md); testing procedures: [QA.md](QA.md); release: [UPDATES.md](UPDATES.md) and [INSTALLERS.md](INSTALLERS.md).
 
-## Nome, identificatori e dati
+## Name, identifiers, and data
 
-Diario personale per il giocatore di una campagna GDR. Desktop, dati locali,
-nessun account e funzioni principali offline; ricerche dei cataloghi online
-solo su richiesta. Nome e branding sono centralizzati
-in `src/strings.ts`, `package.json` e `src-tauri/tauri.conf.json`.
-L'identificatore Tauri determina la cartella dati: non cambiarlo senza migrare i dati.
-Chronexus è il nuovo nome di Nodex: l'identificatore `it.nodex.desktop`, i nomi
-tecnici dei database e l'estensione `.nodex` restano invariati per riaprire gli
-archivi e i backup esistenti. L'eseguibile si chiama ora `chronexus.exe` su Windows.
+Personal diary for a TTRPG campaign player. Desktop, local data,
+no account, and primary offline functions; online catalog searches
+only upon request. Name and branding are centralized
+in `src/strings.ts`, `package.json`, and `src-tauri/tauri.conf.json`.
+The Tauri identifier determines the data folder: do not change it without migrating the data.
+Chronexus is the new name for Nodex: the `it.nodex.desktop` identifier, the
+technical database names, and the `.nodex` extension remain unchanged to reopen the
+existing archives and backups. The executable is now called `chronexus.exe` on Windows.
 
-## Prerequisiti e avvio
+## Prerequisites and startup
 
-- Node >= 22.12 e pnpm 11 (`packageManager` fissa la versione).
-- Rust stable >= 1.90 con Cargo.
-- Windows: Visual Studio C++ Build Tools e WebView2, toolchain MSVC.
+- Node >= 22.12 and pnpm 11 (`packageManager` fixes the version).
+- Rust stable >= 1.90 with Cargo.
+- Windows: Visual Studio C++ Build Tools and WebView2, MSVC toolchain.
 - macOS: Xcode Command Line Tools.
-- Linux: dipendenze WebKitGTK 4.1 e sviluppo richieste dalla distribuzione.
-  Vedere https://v2.tauri.app/start/prerequisites/ per i pacchetti esatti.
+- Linux: WebKitGTK 4.1 dependencies and development requirements from the distribution.
+  See https://v2.tauri.app/start/prerequisites/ for exact packages.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm desktop
 ```
 
-`pnpm dev` apre soltanto il frontend: senza Tauri non ha accesso al database e
-mostra un errore, non un archivio simulato.
+`pnpm dev` opens only the frontend: without Tauri it has no access to the database and
+shows an error, not a simulated archive.
 
-In questa sessione Rust è stato installato in `.tools/`, ignorata da Git.
-Per riutilizzarlo da PowerShell nella radice del progetto:
+In this session, Rust was installed in `.tools/`, ignored by Git.
+To reuse it from PowerShell in the project root:
 
 ```powershell
 $env:RUSTUP_HOME="$PWD/.tools/rustup"
@@ -40,20 +40,20 @@ $env:PATH="$PWD/.tools/cargo/bin;$env:PATH"
 pnpm desktop
 ```
 
-## Spostare il progetto tra dischi (Windows)
+## Moving the project between disks (Windows)
 
-Lo store pnpm è relativo (`pnpm-workspace.yaml`). Dopo un taglia/incolla,
-ricrea i collegamenti locali con `pnpm install --frozen-lockfile --force`:
-non copiare i vecchi collegamenti di `node_modules`. Il lockfile resta invariato.
-Per la toolchain portatile usa `./scripts/Dev.ps1` (avvio desktop), oppure
-`./scripts/Dev.ps1 -Task test:rust` / `-Task build:desktop`: i percorsi sono
-ricavati dalla posizione corrente del repository, senza riferimenti a C: o D:.
-Ollama si avvia con `./scripts/Start-LocalAI.ps1`. I database personali restano
-nella cartella dati dell'app; non vanno copiati o cancellati durante la riparazione.
-L'ambiente Python locale deve poter importare `torch` e rilevare CUDA; se il
-Python di base è stato rimosso, ricreare l'ambiente seguendo `AI_LOCAL.md`.
+The pnpm store is relative (`pnpm-workspace.yaml`). After a cut/paste,
+recreate the local links with `pnpm install --frozen-lockfile --force`:
+do not copy the old `node_modules` links. The lockfile remains unchanged.
+For the portable toolchain use `./scripts/Dev.ps1` (desktop startup), or
+`./scripts/Dev.ps1 -Task test:rust` / `-Task build:desktop`: the paths are
+derived from the current repository location, without references to C: or D:.
+Ollama starts with `./scripts/Start-LocalAI.ps1`. Personal databases remain
+in the app's data folder; they must not be copied or deleted during repair.
+The local Python environment must be able to import `torch` and detect CUDA; if the
+base Python was removed, recreate the environment following `AI_LOCAL.md`.
 
-## Verifiche
+## Verifications
 
 ```sh
 pnpm lint
@@ -65,112 +65,112 @@ pnpm build
 pnpm build:desktop
 ```
 
-La build desktop produce l'eseguibile locale senza installer. La distribuzione
-e la matrice Windows/macOS/Linux sono previste in M6.
+The desktop build produces the local executable without an installer. Distribution
+and the Windows/macOS/Linux matrix are planned for M6.
 
-## Dati
+## Data
 
-SQLite è gestito esclusivamente da Rust nella cartella dati applicazione fornita
-dal sistema operativo (`it.nodex.desktop` sotto la directory dati).
-Migrazioni SQL versionate, transazionali e applicate una sola volta. Nessun dato
-della campagna deve essere aggiunto a Git. Non sincronizzare il database aperto
-con servizi di file sharing. Dopo un ripristino, `active-profile.json` seleziona
-il database e gli allegati in `profiles/<UUID>/`; prima del primo ripristino il
-database resta `nodex.sqlite3` nella cartella base. Non spostare il solo database.
+SQLite is managed exclusively by Rust in the application data folder provided
+by the operating system (`it.nodex.desktop` under the data directory).
+Versioned, transactional SQL migrations applied only once. No campaign data
+must be added to Git. Do not synchronize the open database
+with file sharing services. After a restore, `active-profile.json` selects
+the database and attachments in `profiles/<UUID>/`; before the first restore, the
+database remains `nodex.sqlite3` in the base folder. Do not move the database alone.
 
-Decisioni e limiti verificati: `DECISIONS.md` e `STATUS.md`.
+Decisions and limits verified: `DECISIONS.md` and `STATUS.md`.
 
-## Novità M6
+## New in M6
 
-- **Cerca nella campagna**, anche con Ctrl/⌘ + K: ricerca FTS5 nel contenuto dei
-  blocchi, titoli, alias, scheda e asset; filtri e apertura del blocco trovato.
-  “Manutenzione ricerca” permette di ricostruire l'indice locale.
-- **Riepilogo**: ultima sessione, conteggi effettivi, scheda e pagine recenti.
-  Ctrl/⌘ + Shift + N apre la nuova sessione.
-- **Immagini** nelle pagine Codex, scheda e voci dell'inventario/capacità. Aggiungi
-  ritratti, mappe e riferimenti PNG/JPEG/WebP (20 MiB, 8192 px/lato, 32 MP).
-  L'app conserva una copia originale nell'archivio; anteprime e zoom funzionano
-  offline. Per una mappa usa una pagina Luogo e il tipo immagine Mappa.
-- Le immagini e la loro associazione sono incluse nei backup `.nodex` e verificate
-  con SHA-256. “Rimuovi dalla voce” scollega l'immagine ma conserva il file per
-  recupero: resta incluso nei backup finché non esiste una pulizia dedicata.
-- **Esporta campagna** crea uno ZIP con Markdown, JSON completo, immagini collegate
-  e manifest. I link Markdown usano UUID stabili. Per il recupero dell'app usa
-  `.nodex`: l'export leggibile non è un formato di reimportazione.
+- **Campaign Search**, even with Ctrl/⌘ + K: FTS5 search in the content of
+  blocks, titles, aliases, sheets, and assets; filters and opening of the found block.
+  “Search maintenance” allows rebuilding the local index.
+- **Summary**: last session, actual counts, sheet, and recent pages.
+  Ctrl/⌘ + Shift + N opens the new session.
+- **Images** in Codex pages, sheets, and inventory/ability entries. Add
+  portraits, maps, and PNG/JPEG/WebP references (20 MiB, 8192 px/side, 32 MP).
+  The app keeps an original copy in the archive; previews and zoom work
+  offline. For a map, use a Place page and the Map image type.
+- Images and their associations are included in `.nodex` backups and verified
+with SHA-256. "Remove from entry" unlinks the image but keeps the file for
+recovery: it remains included in backups until a dedicated cleanup exists.
+- **Export campaign** creates a ZIP with Markdown, full JSON, linked images
+and manifest. Markdown links use stable UUIDs. For app recovery, use
+`.nodex`: the readable export is not a re-import format.
 
-## Pacchetti desktop
+## Desktop packages
 
-Pacchetto Windows completo con installer app e AI offline nella root:
-`installers/Chronexus-0.1.0-Windows-x64/`. Mantieni la cartella `AI` accanto
-al suo installer. Istruzioni e rigenerazione: [docs/INSTALLERS.md](INSTALLERS.md).
+Full Windows package with app installer and offline AI in the root:
+`installers/Chronexus-0.1.0-Windows-x64/`. Keep the `AI` folder next
+to its installer. Instructions and regeneration: [docs/INSTALLERS.md](INSTALLERS.md).
 
-`pnpm icons` genera le icone dalla sorgente SVG; eseguilo prima di comandi Cargo
-su un checkout nuovo. `pnpm desktop` e `pnpm build:desktop` lo fanno automaticamente.
-`pnpm package:desktop` crea i pacchetti nativi della piattaforma corrente:
-Windows NSIS `.exe` (italiano, utente corrente), macOS `.app`/`.dmg`, Linux
-`.deb`/`.AppImage`. Gli output sono in `src-tauri/target/release/bundle/`.
+`pnpm icons` generates icons from the SVG source; run it before Cargo commands
+on a new checkout. `pnpm desktop` and `pnpm build:desktop` do this automatically.
+`pnpm package:desktop` creates native packages for the current platform:
+Windows NSIS `.exe` (Italian, current user), macOS `.app`/`.dmg`, Linux
+`.deb`/`.AppImage`. Outputs are in `src-tauri/target/release/bundle/`.
 
-Verificato localmente Windows x64: installer `Chronexus_0.1.0_x64-setup.exe`
-generato, release avviata, accesso SQLite e API reale da `tauri.localhost` riusciti.
-L'installer non è firmato e non è stato installato automaticamente sul sistema.
-La pipeline `.github/workflows/desktop.yml` prepara controlli e pacchetti sui tre
-OS; non è stata eseguita su GitHub in questa sessione e non è stato fatto push.
-macOS/Linux restano da verificare sui rispettivi runner.
+Verified locally on Windows x64: installer `Chronexus_0.1.0_x64-setup.exe`
+generated, release started, SQLite access and real API from `tauri.localhost` succeeded.
+The installer is not signed and was not automatically installed on the system.
+The `.github/workflows/desktop.yml` pipeline prepares checks and packages for the three
+OSs; it was not run on GitHub in this session and was not pushed.
+macOS/Linux remain to be verified on their respective runners.
 
-## Dipendenze principali e licenze
+## Main dependencies and licenses
 
-React, Vite, Mantine, Cytoscape.js, rusqlite, zip, uuid: MIT (uuid anche Apache-2.0).
-Tauri, tauri-plugin-dialog, sha2 e tempfile: MIT/Apache-2.0.
-M7: reqwest 0.13.5 MIT/Apache-2.0 (HTTP loopback, feature predefinite escluse),
-Tokio 1.54.1 MIT. Licenze e versioni verificate nei manifest dei pacchetti locali.
-BlockNote core/react/mantine: MPL-2.0, utilizzati senza
-modificare i sorgenti e senza funzionalità commerciali XL. TypeScript: Apache-2.0.
-Le distribuzioni future dovranno includere gli avvisi delle licenze applicabili.
-Le versioni risolte e le dipendenze transitive sono nei due lockfile.
+React, Vite, Mantine, Cytoscape.js, rusqlite, zip, uuid: MIT (uuid also Apache-2.0).
+Tauri, tauri-plugin-dialog, sha2 and tempfile: MIT/Apache-2.0.
+M7: reqwest 0.13.5 MIT/Apache-2.0 (HTTP loopback, predefined features excluded),
+Tokio 1.54.1 MIT. Licenses and versions verified in local package manifests.
+BlockNote core/react/mantine: MPL-2.0, used without
+modifying sources and without XL commercial features. TypeScript: Apache-2.0.
+Future distributions must include applicable license notices.
+Resolved versions and transitive dependencies are in the two lockfiles.
 
 
-## Distribuzione e importazione Logseq
+## Logseq distribution and import
 
-`pnpm package:desktop` genera le icone e il pacchetto della piattaforma corrente.
-Su Windows l’installer si trova in
+`pnpm package:desktop` generates icons and the current platform package.
+On Windows, the installer is located in
 `src-tauri/target/release/bundle/nsis/Chronexus_0.1.0_x64-setup.exe`.
-Build e avvio Windows verificati. Installazione, avvio e disinstallazione NSIS
-provati in modalità silenziosa, preservando i database personali con hash
-identici. Il wizard interattivo non è stato ispezionato; firma e verifiche
-macOS/Linux restano da eseguire. La matrice CI è in
-`.github/workflows/desktop.yml`; non è stata eseguita da questa sessione.
+Build and Windows startup verified. NSIS installation, startup, and uninstallation
+tested in silent mode, preserving personal databases with identical hashes.
+The interactive wizard was not inspected; macOS/Linux signing and verifications
+remain to be performed. The CI matrix is in
+`.github/workflows/desktop.yml`; it was not run from this session.
 
-Gli strumenti `scripts/prepare-logseq.py` e `scripts/import-logseq.mjs` preparano
-un archivio Logseq in un **profilo debug vuoto e isolato**, tramite i comandi Rust
-reali. Non sono un importatore generale nell’interfaccia. Esempio:
+The `scripts/prepare-logseq.py` and `scripts/import-logseq.mjs` tools prepare
+a Logseq archive in a **blank and isolated debug profile**, via real Rust
+commands. They are not a general importer in the interface. Example:
 
 ```powershell
 py scripts/prepare-logseq.py C:/percorso/campagna.zip .tools/logseq-source
-# Avviare prima pnpm desktop con NODEX_DEV_DATA_DIR assoluto e vuoto,
+# First run pnpm desktop with an absolute, empty NODEX_DEV_DATA_DIR,
 # WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9223
 node scripts/import-logseq.mjs .tools/logseq-source "Campagna di prova"
 ```
 
-Sono letti solo Markdown e immagini raster: configurazioni, Git e script del
-grafo non vengono eseguiti. I sorgenti Markdown originali rimangono immutabili,
-consultabili nell’app e inclusi in backup/export. Le menzioni conservano UUID e
-backlink; non generano relazioni fattuali. Le sessioni hanno una pagina indice
-nel Codex collegata tramite backlink al diario. Gli alias ambigui non vengono
-uniti. Foto, appunti, report e profili personali rimangono in `.tools/` ignorata.
-La conversione non promette equivalenza completa del formato Logseq: per dubbi
-consultare sorgente originale e rapporto d’importazione.
+Only Markdown and raster images are read: configurations, Git, and graph scripts
+are not executed. Original Markdown sources remain immutable,
+viewable in the app and included in backup/export. Mentions retain UUIDs and
+backlinks; they do not generate factual relations. Sessions have an index page
+in the Codex linked via backlink to the diary. Ambiguous aliases are not
+merged. Photos, notes, reports, and personal profiles remain in `.tools/` ignored.
+The conversion does not promise full Logseq format equivalence: for doubts
+consult the original source and the import report.
 
 
-## Versione 0.2.0 — distribuzione Windows
+## Version 0.2.0 — Windows distribution
 
-Le novità includono draghi animati sugli estremi del singolo dado e alfabeti
-Espruar/Dethek con font locali. Il replay conserva il tiro originale.
-I pacchetti Windows app + Gemma 4 12B offline sono documentati in
-[INSTALLERS.md](INSTALLERS.md) e nelle [note 0.2.0](releases/v0.2.0.md).
-Per la sola app usare lo ZIP Installer-Windows-x64. Per app + AI scaricare i
-cinque ZIP rimanenti; estrarre soltanto quello Windows-x64 e usare
-Installa-AI.cmd per gli altri quattro. Non sono inclusi dati personali o training.
+The novelties include animated dragons on the extremes of the single die and alphabets
+Espruar/Dethek with local fonts. The replay preserves the original throw.
+The Windows app packages + Gemma 4 12B offline are documented in
+[INSTALLERS.md](INSTALLERS.md) and in the [notes 0.2.0](releases/v0.2.0.md).
+For the app alone, use the ZIP Installer-Windows-x64. For app + AI, download the
+remaining five ZIPs; extract only the Windows-x64 and use
+Installa-AI.cmd for the other four. No personal data or training is included.
 
-La pubblicazione 0.2.0 è attualmente in bozza: gateway HTTP 502 sugli allegati AI
-grandi. Pacchetti completi disponibili localmente; stato reale in docs/STATUS.md.
+The 0.2.0 publication is currently in draft: HTTP gateway 502 on large AI
+attachments. Complete packages available locally; real status in docs/STATUS.md.
 

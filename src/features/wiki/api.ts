@@ -58,7 +58,7 @@ export function category(hit: Hit): string | null {
 async function fetchJson(path: string): Promise<unknown> {
   const url = new URL(path, base);
   if (url.origin !== new URL(base).origin || !url.pathname.startsWith("/v2/"))
-    throw Error(tr("Percorso wiki non ammesso."));
+    throw Error(tr("Wiki path not allowed."));
   const controller = new AbortController(),
     timer = setTimeout(() => controller.abort(), 12000);
   try {
@@ -69,11 +69,11 @@ async function fetchJson(path: string): Promise<unknown> {
       referrerPolicy: "no-referrer",
       headers: { Accept: "application/json" },
     });
-    if (!r.ok) throw Error(tr("Wiki non disponibile ({0}).", [r.status]));
+    if (!r.ok) throw Error(tr("Wiki not available ({0}).", [r.status]));
     if (Number(r.headers.get("content-length")) > 2097152)
-      throw Error(tr("Risposta wiki troppo grande."));
+      throw Error(tr("Wiki response too large."));
     const reader = r.body?.getReader();
-    if (!reader) throw Error(tr("Risposta wiki vuota."));
+    if (!reader) throw Error(tr("Empty wiki response."));
     const chunks: Uint8Array[] = [];
     let size = 0;
     for (;;) {
@@ -82,7 +82,7 @@ async function fetchJson(path: string): Promise<unknown> {
       size += value.length;
       if (size > 2097152) {
         await reader.cancel();
-        throw Error(tr("Risposta wiki troppo grande."));
+        throw Error(tr("Wiki response too large."));
       }
       chunks.push(value);
     }
@@ -109,7 +109,7 @@ async function cached<T>(
     // A cache clear while this request is pending makes the backend refuse the copy.
     const epoch = await command<number>("wiki_cache_epoch");
     const payload = await load();
-    if (!validate(payload)) throw Error(tr("Risposta wiki non valida."));
+    if (!validate(payload)) throw Error(tr("Invalid wiki response."));
     return await command<Cache<T>>("store_wiki_cache", {
       key,
       payload,
@@ -119,9 +119,7 @@ async function cached<T>(
     if (old)
       return {
         ...old,
-        warning: tr(
-          "Aggiornamento non riuscito. Stai leggendo la copia locale.",
-        ),
+        warning: tr("Refresh failed. You are reading the local copy."),
       };
     throw e;
   }
@@ -139,7 +137,7 @@ export function search(
     page < 1 ||
     page > 100
   )
-    return Promise.reject(Error(tr("Inserisci da 2 a 100 caratteri.")));
+    return Promise.reject(Error(tr("Enter 2 to 100 characters.")));
   return cached(
     `search/${encodeURIComponent(q)}/${page}`,
     () =>
@@ -156,7 +154,7 @@ export function search(
 export function detail(hit: Hit, refresh = false): Promise<Answer<Detail>> {
   const kind = category(hit);
   if (!kind || !safeId(hit.document.key))
-    return Promise.reject(Error(tr("Tipo di voce non supportato.")));
+    return Promise.reject(Error(tr("Unsupported entry type.")));
   return cached(
     `entry/${kind}/${hit.object_pk}`,
     async () => {
@@ -178,7 +176,7 @@ export function plain(value: unknown, depth = 0): string {
   if (value == null) return "";
   if (typeof value === "string" || typeof value === "number")
     return String(value);
-  if (typeof value === "boolean") return value ? tr("Sì") : tr("No");
+  if (typeof value === "boolean") return value ? tr("Yes") : tr("No");
   if (depth > 4) return "";
   if (Array.isArray(value))
     return value

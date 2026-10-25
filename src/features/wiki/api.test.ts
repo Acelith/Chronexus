@@ -24,7 +24,7 @@ test("wiki cache works offline and explicit refresh reports fallback", async () 
   expect((await search("Sample")).payload).toEqual(payload);
   expect(fetchMock).not.toHaveBeenCalled();
   fetchMock.mockRejectedValue(Error("offline"));
-  expect((await search("Sample", 1, true)).warning).toContain("copia locale");
+  expect((await search("Sample", 1, true)).warning).toContain("local copy");
 });
 test("wiki explicit search is bounded, credential-free and cached; storage failures remain errors", async () => {
   vi.mocked(command)
@@ -59,12 +59,12 @@ test("wiki refuses unsafe routes, huge bodies and mismatched detail identities",
   await expect(detail({ ...hit, object_pk: "../secret" })).rejects.toThrow();
   vi.mocked(command).mockResolvedValue(null);
   fetchMock.mockResolvedValue(new Response(new Uint8Array(2097153)));
-  await expect(search("Sample")).rejects.toThrow("troppo grande");
+  await expect(search("Sample")).rejects.toThrow("too large");
   fetchMock.mockImplementation(
     async () =>
       new Response(
         JSON.stringify({ entry: { key: "wrong" }, document: { key: "srd" } }),
       ),
   );
-  await expect(detail(hit)).rejects.toThrow("non valida");
+  await expect(detail(hit)).rejects.toThrow("Invalid");
 });

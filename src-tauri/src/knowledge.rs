@@ -52,7 +52,7 @@ fn validate_kind(kind: &str, status: &str) -> AppResult<()> {
     .contains(&kind)
         || !["stub", "active"].contains(&status)
     {
-        return Err("Tipo o stato della pagina non valido.".into());
+        return Err("Invalid page type or status.".into());
     }
     Ok(())
 }
@@ -100,7 +100,7 @@ pub fn list_pages(connection: &Connection, campaign_id: &str) -> AppResult<Vec<P
 pub fn get_page(connection: &Connection, campaign_id: &str, id: &str) -> AppResult<Page> {
     identifier(campaign_id)?;
     identifier(id)?;
-    let mut page = connection.query_row("SELECT id,campaign_id,title,kind,status,document,revision,updated_at FROM pages WHERE campaign_id=?1 AND id=?2",params![campaign_id,id],page_row).optional().map_err(storage)?.ok_or("Pagina non trovata in questa campagna.")?;
+    let mut page = connection.query_row("SELECT id,campaign_id,title,kind,status,document,revision,updated_at FROM pages WHERE campaign_id=?1 AND id=?2",params![campaign_id,id],page_row).optional().map_err(storage)?.ok_or("Page not found in this campaign.")?;
     page.aliases = aliases(connection, id)?;
     Ok(page)
 }
@@ -112,7 +112,7 @@ fn ensure_available(
 ) -> AppResult<()> {
     let found: bool = connection.query_row("SELECT EXISTS(SELECT 1 FROM pages p WHERE p.campaign_id=?1 AND p.id!=?3 AND (p.title_key=?2 OR EXISTS(SELECT 1 FROM page_aliases a WHERE a.page_id=p.id AND a.alias_key=?2)))",params![campaign_id,key(name),own_id],|row|row.get(0)).map_err(storage)?;
     if found {
-        return Err("Questo nome è già un titolo o alias nel Codex. Seleziona la pagina esistente oppure usa un titolo distinto.".into());
+        return Err("This name is already a title or alias in the Codex. Select the existing page or use a different title.".into());
     }
     Ok(())
 }
@@ -123,7 +123,7 @@ fn write_aliases(
     name: &str,
 ) -> AppResult<()> {
     if values.len() > 20 {
-        return Err("Puoi inserire al massimo 20 alias per pagina.".into());
+        return Err("You can enter up to 20 aliases per page.".into());
     }
     let mut normalized = HashSet::new();
     for alias in values {
@@ -202,8 +202,7 @@ pub fn update_page_checked(
     };
     if current != expected {
         return Err(
-            "I metadati della pagina sono cambiati altrove. Conserva la bozza e riapri il modulo."
-                .into(),
+            "The page metadata changed elsewhere. Keep your draft and reopen the form.".into(),
         );
     }
     update_page(
@@ -295,7 +294,7 @@ pub fn index_document(
     document: &Value,
 ) -> AppResult<()> {
     if session_id.is_some() == page_id.is_some() {
-        return Err("Sorgente del collegamento non valida.".into());
+        return Err("Invalid link source.".into());
     }
     let mentions = extract_mentions(document)?;
     for mention in &mentions {
@@ -308,7 +307,7 @@ pub fn index_document(
             .optional()
             .map_err(storage)?;
         if owner.is_some_and(|id| id != campaign_id) {
-            return Err("Il collegamento punta a una pagina di un'altra campagna. Rimuovilo o scegli una pagina di questa campagna.".into());
+            return Err("The link points to a page of another campaign. Remove it or choose a page of this campaign.".into());
         }
     }
     connection.execute("DELETE FROM mentions WHERE campaign_id=?1 AND (source_session_id=?2 OR source_page_id=?3)",params![campaign_id,session_id,page_id]).map_err(storage)?;
@@ -330,7 +329,7 @@ pub fn save_page_document(
     let transaction = connection.unchecked_transaction().map_err(storage)?;
     let affected = transaction.execute("UPDATE pages SET document=?1,revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?2 AND campaign_id=?3 AND revision=?4",params![document.to_string(),id,campaign_id,revision]).map_err(storage)?;
     if affected != 1 {
-        return Err("Salvataggio fermato: pagina modificata altrove o non appartenente alla campagna. Copia gli appunti prima di riaprirla.".into());
+        return Err("Saving stopped: page changed elsewhere or not part of the campaign. Copy the notes before reopening it.".into());
     }
     index_document(&transaction, campaign_id, None, Some(id), &document)?;
     crate::search::page(&transaction, campaign_id, id)?;
@@ -379,7 +378,7 @@ pub fn recover_page(
         )
         .map_err(storage)?;
     if !referenced {
-        return Err("Nessun riferimento mancante da recuperare in questa campagna.".into());
+        return Err("No missing references to recover in this campaign.".into());
     }
     let existing: bool = transaction
         .query_row(
@@ -389,7 +388,7 @@ pub fn recover_page(
         )
         .map_err(storage)?;
     if existing {
-        return Err("Questa pagina esiste già. Ricarica il Codex.".into());
+        return Err("This page already exists. Reload the Codex.".into());
     }
     ensure_available(&transaction, campaign_id, name, "")?;
     transaction.execute("INSERT INTO pages(id,campaign_id,title,title_key,kind,status,document) VALUES (?1,?2,?3,?4,'note','stub',?5)",params![id,campaign_id,name,key(name),empty_document().to_string()]).map_err(storage)?;

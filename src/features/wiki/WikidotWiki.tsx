@@ -65,7 +65,7 @@ export default function WikidotWiki({
       if (!r.total)
         onUnavailable({
           reason: tr(
-            "Nessuna voce corrisponde a «{0}» nell’indice Wikidot di questa categoria.",
+            "No entry matches «{0}» in the Wikidot index of this category.",
             [term],
           ),
           query: term,
@@ -97,7 +97,7 @@ export default function WikidotWiki({
       if (r.payload.missing.length)
         onUnavailable({
           reason: tr(
-            "La pagina Wikidot non contiene in forma riconoscibile: {0}.",
+            "The Wikidot page does not contain, in a recognizable form: {0}.",
             [r.payload.missing.map((m) => missingLabels[m] ?? m).join(", ")],
           ),
           query: row.name,
@@ -128,7 +128,7 @@ export default function WikidotWiki({
       <p className="editor-hint">
         <Text
           source={
-            "Contenuti in inglese dalla wiki pubblica dnd5e.wikidot.com (regole 2014). Chronexus scarica l’indice della categoria solo quando premi Cerca e filtra il nome sul dispositivo: il termine cercato non viene inviato. Le pagine aperte restano disponibili offline."
+            "English content from the public dnd5e.wikidot.com wiki (2014 rules). Chronexus downloads the category index only when you press Search and filters the name on the device: the search term is not sent. Opened pages stay available offline."
           }
         />
       </p>
@@ -140,7 +140,7 @@ export default function WikidotWiki({
         }}
       >
         <label>
-          <Text source={"Categoria Wikidot"} />
+          <Text source={"Wikidot category"} />
           <select
             value={category}
             disabled={busy}
@@ -161,26 +161,26 @@ export default function WikidotWiki({
           </select>
         </label>
         <label>
-          <Text source={"Nome nella wiki"} />
+          <Text source={"Name in the wiki"} />
           <input
             type="search"
             maxLength={100}
             value={query}
-            placeholder={tr("Es. Magic Missile")}
+            placeholder={tr("e.g. Magic Missile")}
             onChange={(e) => setQuery(e.target.value)}
           />
         </label>
         <button className="primary" disabled={busy}>
-          <Text source={"Cerca su Wikidot"} />
+          <Text source={"Search Wikidot"} />
         </button>
         {result ? (
           <button type="button" disabled={busy} onClick={() => void find(true)}>
-            <Text source={"Aggiorna indice online"} />
+            <Text source={"Refresh online index"} />
           </button>
         ) : null}
         {busy ? (
           <button type="button" onClick={cancel}>
-            <Text source={"Annulla richiesta"} />
+            <Text source={"Cancel request"} />
           </button>
         ) : null}
       </form>
@@ -188,7 +188,7 @@ export default function WikidotWiki({
         <p role="status">
           <Text
             source={
-              "Consultazione Wikidot… Le richieste sono distanziate per rispettare il sito."
+              "Reading Wikidot… Requests are spaced out to respect the site."
             }
           />
         </p>
@@ -205,20 +205,20 @@ export default function WikidotWiki({
         <>
           <div className="wiki-results-heading">
             <p>
-              {tr("{0} di {1} voci · {2} · {3}", [
+              {tr("{0} of {1} entries · {2} · {3}", [
                 result.total,
                 result.indexSize,
-                result.cached ? tr("copia locale") : tr("scaricato ora"),
+                result.cached ? tr("local copy") : tr("downloaded now"),
                 when(result.fetchedAt),
               ])}
             </p>
             <label>
-              <Text source={"Origine"} />
+              <Text source={"Origin"} />
               <select
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value as "" | Origin)}
               >
-                <option value="">{tr("Tutte le origini")}</option>
+                <option value="">{tr("All origins")}</option>
                 {Object.entries(originLabels).map(([key, label]) => (
                   <option key={key} value={key}>
                     {label}
@@ -251,7 +251,7 @@ export default function WikidotWiki({
                 <p>
                   <Text
                     source={
-                      "Nessuna voce trovata. Prova il nome inglese, un termine più breve o un’altra categoria."
+                      "No entries found. Try the English name, a shorter term or another category."
                     }
                   />
                 </p>
@@ -260,21 +260,21 @@ export default function WikidotWiki({
                 <p className="muted">
                   <Text
                     source={
-                      "Mostrate le prime 200 voci. Restringi la ricerca per nome."
+                      "Showing the first 200 entries. Narrow the search by name."
                     }
                   />
                 </p>
               ) : null}
             </div>
-            <article className="wiki-entry" aria-label={tr("Voce wiki")}>
+            <article className="wiki-entry" aria-label={tr("Wiki entry")}>
               {page && entry ? (
                 <>
                   <h4>{page.title}</h4>
                   <p className="wiki-license">
                     {[
                       page.source
-                        ? tr("Fonte dichiarata: {0}", [page.source])
-                        : tr("Fonte non indicata nella pagina"),
+                        ? tr("Declared source: {0}", [page.source])
+                        : tr("Source not stated on the page"),
                       originLabels[page.origin],
                       tr("D&D 5e (2014)"),
                     ].join(" · ")}
@@ -284,8 +284,8 @@ export default function WikidotWiki({
                     {page.license}
                     <br />
                     {entry.cached
-                      ? tr("Copia locale del {0}", [when(entry.fetchedAt)])
-                      : tr("Scaricata il {0}", [when(entry.fetchedAt)])}
+                      ? tr("Local copy from {0}", [when(entry.fetchedAt)])
+                      : tr("Downloaded on {0}", [when(entry.fetchedAt)])}
                   </p>
                   {entry.warning ? (
                     <p role="status">{systemMessage(entry.warning)}</p>
@@ -293,7 +293,7 @@ export default function WikidotWiki({
                   {page.missing.length ? (
                     <p role="status" className="error">
                       {tr(
-                        "Campi non riconosciuti nella pagina: {0}. Nessun valore è stato inventato; leggi il testo originale qui sotto.",
+                        "Unrecognized fields on the page: {0}. No value was invented; read the original text below.",
                         [
                           page.missing
                             .map((m) => missingLabels[m] ?? m)
@@ -315,7 +315,7 @@ export default function WikidotWiki({
                     <p className="muted">
                       <Text
                         source={
-                          "La pagina è stata accorciata ai limiti di sicurezza: apri l’indirizzo originale per il resto."
+                          "The page was shortened to the safety limits: open the original address for the rest."
                         }
                       />
                     </p>
@@ -325,7 +325,7 @@ export default function WikidotWiki({
                       disabled={busy || !selected}
                       onClick={() => selected && void open(selected, true)}
                     >
-                      <Text source={"Aggiorna voce online"} />
+                      <Text source={"Refresh online entry"} />
                     </button>
                     {page.category === "spells" && onImportSpell ? (
                       <button
@@ -339,7 +339,7 @@ export default function WikidotWiki({
                           }
                         }}
                       >
-                        <Text source={"Prepara importazione nella scheda"} />
+                        <Text source={"Prepare import into the sheet"} />
                       </button>
                     ) : null}
                   </div>
@@ -347,7 +347,7 @@ export default function WikidotWiki({
                     <p className="muted">
                       <Text
                         source={
-                          "L’importazione apre un modulo modificabile in Incantesimi: la voce viene salvata solo premendo Salva voce. Le regole della wiki non diventano fatti della campagna."
+                          "Importing opens an editable form in Spells: the entry is saved only when you press Save entry. Wiki rules never become campaign facts."
                         }
                       />
                     </p>
@@ -357,7 +357,7 @@ export default function WikidotWiki({
                 <p>
                   <Text
                     source={
-                      "Apri una voce per leggere testo, fonte dichiarata e origine. Unearthed Arcana e homebrew sono indicati come tali."
+                      "Open an entry to read its text, declared source and origin. Unearthed Arcana and homebrew are labelled as such."
                     }
                   />
                 </p>

@@ -54,9 +54,7 @@ pub fn get(c: &Connection, campaign: &str) -> AppResult<Profile> {
         .optional()
         .map_err(storage)?;
     let p = match raw {
-        Some(s) => {
-            serde_json::from_str(&s).map_err(|_| "Impostazioni AI della campagna illeggibili.")?
-        }
+        Some(s) => serde_json::from_str(&s).map_err(|_| "Campaign AI settings unreadable.")?,
         None => Profile::default(),
     };
     validate(&p)?;
@@ -69,8 +67,7 @@ pub fn validate(p: &Profile) -> AppResult<()> {
         || !(128..=1024).contains(&p.max_tokens)
     {
         return Err(
-            "Edizione o limiti AI non validi: contesto 2048/4096/8192, risposta 128–1024 token."
-                .into(),
+            "Invalid AI edition or limits: context 2048/4096/8192, answer 128–1024 tokens.".into(),
         );
     }
     if p.include_kinds.len() > 6
@@ -80,7 +77,7 @@ pub fn validate(p: &Profile) -> AppResult<()> {
         || p.manifest.len() > 4000
         || p.indexed_at.as_ref().is_some_and(|s| s.len() > 40)
     {
-        return Err("Preferenze delle fonti AI oltre i limiti.".into());
+        return Err("AI source preferences over the limits.".into());
     }
     for id in &p.excluded_ids {
         identifier(id)?;
@@ -90,13 +87,13 @@ pub fn validate(p: &Profile) -> AppResult<()> {
             .strip_prefix("wikidot/")
             .is_some_and(|p| crate::wikidot::category_of(p).is_some());
         if !(key.starts_with("entry/") || wikidot) || key.len() > 200 || key.contains("..") {
-            return Err("Identità fonte regole non valida.".into());
+            return Err("Invalid rules source identity.".into());
         }
     }
     for s in &p.manifest {
         if s.key.len() > 400 || s.hash.len() != 64 || !s.hash.bytes().all(|b| b.is_ascii_hexdigit())
         {
-            return Err("Impronta fonte non valida.".into());
+            return Err("Invalid source fingerprint.".into());
         }
     }
     Ok(())
@@ -104,7 +101,7 @@ pub fn validate(p: &Profile) -> AppResult<()> {
 pub fn write(c: &Connection, campaign: &str, p: &Profile) -> AppResult<Profile> {
     require_campaign(c, campaign)?;
     validate(p)?;
-    let raw = serde_json::to_string(p).map_err(|_| "Impossibile salvare le preferenze AI.")?;
+    let raw = serde_json::to_string(p).map_err(|_| "Cannot save the AI preferences.")?;
     c.execute("INSERT INTO campaign_ai_settings(campaign_id,payload) VALUES(?1,?2) ON CONFLICT(campaign_id) DO UPDATE SET payload=excluded.payload",params![campaign,raw]).map_err(storage)?;
     get(c, campaign)
 }
@@ -119,14 +116,14 @@ pub fn save_preferences(c: &Connection, campaign: &str, proposed: &Profile) -> A
     for id in &p.excluded_ids {
         let exists:bool=c.query_row("SELECT EXISTS(SELECT 1 FROM search_documents WHERE campaign_id=?1 AND source_id=?2)",params![campaign,id],|r|r.get(0)).map_err(storage)?;
         if !exists {
-            return Err("La fonte esclusa non appartiene a questa campagna.".into());
+            return Err("The excluded source does not belong to this campaign.".into());
         }
     }
     for key in &p.rule_keys {
         let s = store::canonical(c, campaign, "wiki", key, None)?
-            .ok_or("Fonte regole non disponibile nella cache locale.")?;
+            .ok_or("Rules source not available in the local cache.")?;
         if s.edition.as_deref() != Some(&p.edition) {
-            return Err("Le fonti devono appartenere all'edizione selezionata.".into());
+            return Err("Sources must belong to the selected edition.".into());
         }
     }
     write(c, campaign, &p)
@@ -145,8 +142,8 @@ pub fn snapshot(c: &Connection, campaign: &str, p: &Profile) -> AppResult<Vec<So
         .query_map(
             params![
                 campaign,
-                serde_json::to_string(&p.include_kinds).map_err(|_| "Tipi fonte non validi.")?,
-                serde_json::to_string(&p.excluded_ids).map_err(|_| "Esclusioni non valide.")?
+                serde_json::to_string(&p.include_kinds).map_err(|_| "Invalid source types.")?,
+                serde_json::to_string(&p.excluded_ids).map_err(|_| "Invalid exclusions.")?
             ],
             |r| {
                 Ok((
@@ -161,7 +158,7 @@ pub fn snapshot(c: &Connection, campaign: &str, p: &Profile) -> AppResult<Vec<So
         .map_err(storage)?;
     if rows.len() > 4000 {
         return Err(
-            "Troppi estratti per un singolo addestramento (massimo 4000). Riduci le fonti.".into(),
+            "Too many excerpts for a single training run (up to 4000). Reduce the sources.".into(),
         );
     }
     let mut out = vec![];
@@ -179,16 +176,16 @@ pub fn snapshot(c: &Connection, campaign: &str, p: &Profile) -> AppResult<Vec<So
     }
     for key in &p.rule_keys {
         let mut s = store::canonical(c, campaign, "wiki", key, None)?
-            .ok_or("Una fonte regole approvata non è più in cache: rivedi la selezione.")?;
+            .ok_or("An approved rules source is no longer cached: review the selection.")?;
         if !allowed(p, &s) {
-            return Err("Una fonte regole non corrisponde all'edizione selezionata.".into());
+            return Err("A rules source does not match the selected edition.".into());
         }
         s.key = format!("wiki:{key}");
         out.push(s);
     }
     if out.len() > 4000 {
         return Err(
-            "La selezione supera 4000 estratti, comprese le regole. Riduci le fonti approvate."
+            "The selection exceeds 4000 excerpts, rules included. Reduce the approved sources."
                 .into(),
         );
     }

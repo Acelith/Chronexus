@@ -34,7 +34,7 @@ export default function ImportSource({
   if (error)
     return (
       <p role="alert" className="error">
-        <Text source={"Sorgente importata: "} />
+        <Text source={"Imported source: "} />
         {error}
       </p>
     );
@@ -42,18 +42,18 @@ export default function ImportSource({
   return (
     <details className="import-source">
       <summary>
-        <Text source={"Sorgente Logseq originale"} />
+        <Text source={"Original Logseq source"} />
       </summary>
       <p>
         {source.name}{" "}
         <Text
           source={
-            " · conservata nel backup e nell’export. Le modifiche negli appunti non alterano questa copia."
+            " · kept in the backup and export. Changes in the notes do not alter this copy."
           }
         />
       </p>
       <textarea
-        aria-label={tr("Markdown originale importato")}
+        aria-label={tr("Original imported Markdown")}
         readOnly
         value={source.content}
         rows={12}

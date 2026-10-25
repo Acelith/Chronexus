@@ -294,7 +294,7 @@ async fn network_errors_redirects_and_types_are_explicit() {
         ("HTTP/1.1 429 Too Many Requests\r\nContent-Length: 0\r\n\r\n".into(), Some("HTTP 429")),
         ("HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n".into(), Some("HTTP 403")),
         ("HTTP/1.1 503 Unavailable\r\nContent-Length: 0\r\n\r\n".into(), Some("HTTP 503")),
-        ("HTTP/1.1 302 Found\r\nLocation: https://evil.test/feat:alert\r\nContent-Length: 0\r\n\r\n".into(), Some("Reindirizzamento")),
+        ("HTTP/1.1 302 Found\r\nLocation: https://evil.test/feat:alert\r\nContent-Length: 0\r\n\r\n".into(), Some("Redirect")),
         ("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}".into(), Some("HTML")),
         ("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 9999999\r\n\r\n".into(), Some("2 MiB")),
     ];
@@ -390,6 +390,6 @@ async fn requests_are_spaced_and_cancellable() {
     state.invalidate();
     assert_ne!(state.epoch(), epoch);
     let result = fetch_entry(&client, &state, &base, "feat:c", &token).await;
-    assert!(result.unwrap_err().contains("annullata"));
+    assert!(result.unwrap_err().contains("cancelled"));
     assert!(!state.token().is_cancelled());
 }

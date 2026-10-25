@@ -3,10 +3,9 @@ use reqwest::{Client, Url};
 use tokio_util::sync::CancellationToken;
 pub fn url(value: &str) -> AppResult<Url> {
     if value.len() > 2048 {
-        return Err("Indirizzo aggiornamenti troppo lungo.".into());
+        return Err("Update address too long.".into());
     }
-    let u = Url::parse(value)
-        .map_err(|_| "Inserisci un indirizzo HTTPS valido per il canale aggiornamenti.")?;
+    let u = Url::parse(value).map_err(|_| "Enter a valid HTTPS address for the update channel.")?;
     if u.scheme() != "https"
         || u.host_str().is_none()
         || !u.username().is_empty()
@@ -14,14 +13,14 @@ pub fn url(value: &str) -> AppResult<Url> {
         || u.fragment().is_some()
         || u.query().is_some()
     {
-        return Err("Usa un indirizzo HTTPS senza credenziali, query o frammenti.".into());
+        return Err("Use an HTTPS address without credentials, query or fragment.".into());
     }
     Ok(u)
 }
 pub fn artifact(endpoint: &Url, download: &Url) -> AppResult<()> {
     url(download.as_str())?;
     if endpoint.origin() != download.origin() {
-        return Err("Il pacchetto deve trovarsi sullo stesso server HTTPS del manifesto.".into());
+        return Err("The package must be on the same HTTPS server as the manifest.".into());
     }
     Ok(())
 }
@@ -37,52 +36,52 @@ pub async fn fetch(
     for _ in 0..=5 {
         let response = tokio::select! {
             biased;
-            _ = cancel.cancelled() => return Err("Download annullato.".into()),
-            value = client.get(destination.clone()).send() => value.map_err(|_| "Server aggiornamenti non raggiungibile. Verifica connessione e certificato HTTPS.")?,
+            _ = cancel.cancelled() => return Err("Download cancelled.".into()),
+            value = client.get(destination.clone()).send() => value.map_err(|_| "Update server not reachable. Check the connection and the HTTPS certificate.")?,
         };
         if response.status().is_redirection() {
             let location = response
                 .headers()
                 .get(reqwest::header::LOCATION)
                 .and_then(|v| v.to_str().ok())
-                .ok_or("Reindirizzamento aggiornamenti non valido.")?;
+                .ok_or("Invalid update redirect.")?;
             destination = destination
                 .join(location)
-                .map_err(|_| "Reindirizzamento aggiornamenti non valido.")?;
+                .map_err(|_| "Invalid update redirect.")?;
             artifact(&initial, &destination)?;
             continue;
         }
         match response.status().as_u16() {
             204 => return Ok(None),
-            401 | 403 | 404 => return Err("Canale aggiornamenti non pubblico o non ancora pubblicato. Verifica che latest.json e l’installer siano scaricabili senza login.".into()),
+            401 | 403 | 404 => return Err("Update channel not public or not published yet. Check that latest.json and the installer can be downloaded without signing in.".into()),
             200 => {},
-            _ => return Err("Il server degli aggiornamenti ha restituito un errore. Riprova più tardi.".into()),
+            _ => return Err("The update server returned an error. Try again later.".into()),
         }
         let total = response.content_length();
         if total.is_some_and(|n| n > limit as u64) {
-            return Err("Pacchetto oltre il limite consentito: download bloccato.".into());
+            return Err("Package over the allowed limit: download blocked.".into());
         }
         let mut response = response;
         let mut bytes = Vec::new();
         loop {
             let chunk = tokio::select! {
             biased;
-                _ = cancel.cancelled() => return Err("Download annullato.".into()),
-                value = response.chunk() => value.map_err(|_| "Download interrotto. Riprova: nulla è stato installato.")?,
+                _ = cancel.cancelled() => return Err("Download cancelled.".into()),
+                value = response.chunk() => value.map_err(|_| "Download interrupted. Try again: nothing was installed.")?,
             };
             let Some(chunk) = chunk else { break };
             if chunk.len() > limit.saturating_sub(bytes.len()) {
-                return Err("Pacchetto oltre il limite consentito: download bloccato.".into());
+                return Err("Package over the allowed limit: download blocked.".into());
             }
             bytes.extend_from_slice(&chunk);
             progress(bytes.len(), total);
         }
         if bytes.is_empty() || total.is_some_and(|n| n != bytes.len() as u64) {
-            return Err("Download incompleto: nessun aggiornamento installato.".into());
+            return Err("Incomplete download: no update installed.".into());
         }
         return Ok(Some(bytes));
     }
-    Err("Troppi reindirizzamenti nel canale aggiornamenti.".into())
+    Err("Too many redirects in the update channel.".into())
 }
 
 /// Accept either a static Tauri manifest or the public Forgejo latest-release API.
@@ -94,24 +93,24 @@ pub fn manifest_asset(
         return Ok(None);
     }
     if value["draft"].as_bool() != Some(false) || value["prerelease"].as_bool() != Some(false) {
-        return Err("Il canale non contiene una release pubblicata stabile.".into());
+        return Err("The channel does not contain a published stable release.".into());
     }
     let tag = value["tag_name"]
         .as_str()
         .filter(|s| !s.is_empty() && s.len() < 100)
-        .ok_or("Versione release Forgegit non valida.")?;
+        .ok_or("Invalid Forgegit release version.")?;
     let matches = value["assets"]
         .as_array()
-        .ok_or("Allegati release assenti.")?
+        .ok_or("Release assets missing.")?
         .iter()
         .filter(|a| a["name"] == "latest.json")
         .collect::<Vec<_>>();
     if matches.len() != 1 {
-        return Err("La release deve contenere un solo allegato pubblico latest.json.".into());
+        return Err("The release must contain exactly one public latest.json asset.".into());
     }
     let download = url(matches[0]["browser_download_url"]
         .as_str()
-        .ok_or("Indirizzo manifesto assente.")?)?;
+        .ok_or("Manifest address missing.")?)?;
     artifact(endpoint, &download)?;
     Ok(Some((download, tag.into())))
 }

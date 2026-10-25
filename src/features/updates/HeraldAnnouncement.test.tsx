@@ -59,7 +59,7 @@ test("annuncio leggibile e accessibile; le azioni non installano nulla", async (
     <HeraldAnnouncement announcement={announcement} {...props} />,
   );
   const heading = screen.getByRole("heading", {
-    name: "Chronexus 0.5.0 è disponibile",
+    name: "Chronexus 0.5.0 is available",
   });
   expect(heading).toHaveFocus();
   // Notes are plain text: markup is shown, never executed.
@@ -67,26 +67,22 @@ test("annuncio leggibile e accessibile; le azioni non installano nulla", async (
   expect(document.querySelector("dialog script")).toBeNull();
   // jsdom has no Web Audio: the visual announcement stays complete.
   expect(
-    await screen.findByText(/non ha permesso l’audio automatico/),
+    await screen.findByText(/did not allow automatic audio/),
   ).toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Salta animazione" }));
-  expect(screen.queryByRole("button", { name: "Salta animazione" })).toBeNull();
-  await user.click(
-    screen.getByRole("button", { name: "Suono della trombetta: attivo" }),
-  );
+  await user.click(screen.getByRole("button", { name: "Skip animation" }));
+  expect(screen.queryByRole("button", { name: "Skip animation" })).toBeNull();
+  await user.click(screen.getByRole("button", { name: "Trumpet sound: on" }));
   expect(props.onSound).toHaveBeenCalledWith(false);
   expect(
-    screen.getByRole("button", { name: "Suono della trombetta: disattivato" }),
+    screen.getByRole("button", { name: "Trumpet sound: off" }),
   ).toHaveAttribute("aria-pressed", "false");
   fireEvent(
     document.querySelector("dialog")!,
     new Event("cancel", { cancelable: true }),
   );
   expect(props.onLater).toHaveBeenCalledTimes(1);
-  await user.click(
-    screen.getByRole("button", { name: "Ignora questa versione" }),
-  );
-  await user.click(screen.getByRole("button", { name: "Aggiorna" }));
+  await user.click(screen.getByRole("button", { name: "Ignore this version" }));
+  await user.click(screen.getByRole("button", { name: "Update" }));
   expect(props.onDismiss).toHaveBeenCalledTimes(1);
   expect(props.onUpdate).toHaveBeenCalledTimes(1);
   unmount();
@@ -105,7 +101,7 @@ test("movimento ridotto: nessuna animazione da saltare", () => {
     />,
   );
   expect(document.querySelector("dialog")).toHaveClass("herald-still");
-  expect(screen.queryByRole("button", { name: "Salta animazione" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Skip animation" })).toBeNull();
   expect(screen.queryByText(/audio automatico/)).toBeNull();
 });
 test("un solo controllo all’avvio; l’annuncio aspetta un’app inattiva", async () => {

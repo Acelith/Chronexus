@@ -117,7 +117,7 @@ pub fn session(c: &Connection, campaign: &str, id: &str) -> AppResult<()> {
         "session",
         id,
         &s.title,
-        &format!("Sessione {}", s.sequence),
+        &format!("Session {}", s.sequence),
         &s.updated_at,
         &s.document,
     )
@@ -171,7 +171,7 @@ pub fn character(c: &Connection, campaign: &str) -> AppResult<()> {
             &pc.id,
             "",
             &pc.data.name,
-            &user_text(&serde_json::to_value(&pc.data).map_err(|_| "Scheda illeggibile.")?),
+            &user_text(&serde_json::to_value(&pc.data).map_err(|_| "Sheet unreadable.")?),
             &updated,
         )?;
     }
@@ -182,8 +182,8 @@ pub fn asset(c: &Connection, campaign: &str, id: &str) -> AppResult<()> {
         return Ok(());
     }
     let (raw,notes,updated):(String,String,String)=c.query_row("SELECT details,provenance_notes,updated_at FROM player_assets WHERE campaign_id=?1 AND id=?2",params![campaign,id],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?))).map_err(storage)?;
-    let data: Value = serde_json::from_str(&raw).map_err(|_| "Voce illeggibile.")?;
-    let kind = data["kind"].as_str().ok_or("Tipo della voce non valido.")?;
+    let data: Value = serde_json::from_str(&raw).map_err(|_| "Entry unreadable.")?;
+    let kind = data["kind"].as_str().ok_or("Invalid entry type.")?;
     remove(c, campaign, kind, id)?;
     insert(
         c,
@@ -252,7 +252,7 @@ pub fn find(
             !["session", "page", "character", "item", "spell", "ability"].contains(&k)
         })
     {
-        return Err("Filtri o testo di ricerca non validi.".into());
+        return Err("Invalid filters or search text.".into());
     }
     let terms: Vec<_> = query
         .split_whitespace()

@@ -1,46 +1,46 @@
-# Appunti: visuale e Markdown
+# Notes: Visual and Markdown
 
-Nella barra sempre visibile, **Visuale** e **Markdown** aprono lo stesso documento.
-Le modifiche visuali si salvano automaticamente; **Salva ora** forza il salvataggio.
-Nel sorgente, **Applica e torna al visuale** converte la bozza. **Salva ora**, cambio
-vista/campagna e chiusura normale applicano e salvano anche il Markdown. Un errore
-mantiene la bozza aperta e blocca la navigazione. **Annulla modifiche Markdown**
-scarta soltanto le modifiche al sorgente non ancora applicate.
+In the always visible bar, **Visual** and **Markdown** open the same document.
+Visual changes are saved automatically; **Save now** forces the save.
+In the source, **Apply and return to visual** converts the draft. **Save now**, view/campaign
+change, and normal closing also apply and save the Markdown. An error
+keeps the draft open and blocks navigation. **Discard Markdown changes**
+only discards source changes that have not yet been applied.
 
-Con il mouse si possono scegliere titoli 1–3, testo, citazioni, elenchi puntati,
-numerati e attività; usare grassetto, corsivo, sottolineatura, barrato, codice in
-linea, evidenziazione, allineamento, annulla/ripeti e collegamenti. Il selettore
-**Collega pagina** inserisce una voce reale del Codex; rimane anche la scorciatoia `[[`.
+With the mouse, you can select 1–3 titles, text, quotes, bulleted,
+numbered lists, and tasks; use bold, italic, underline, strikethrough, inline code,
+highlighting, alignment, undo/redo, and links. The **Link page** selector
+inserts a real entry from the Codex; the `[[` shortcut also remains.
 
-Nel Markdown i collegamenti interni hanno la forma `[Nome](chronexus://page/UUID)`.
-Il nome può cambiare senza cambiare destinazione. Il convertitore usa temporaneamente
-un hostname riservato `.invalid` perché la libreria filtra gli schemi personalizzati;
-non lo apre e non effettua richieste. Riporta l’UUID nel documento strutturato.
-I blocchi rimasti invariati mantengono ID, colori, sottolineatura e allineamento.
-I blocchi modificati nel sorgente seguono i formati rappresentabili in Markdown:
-la fonte può risultare modificata o non più disponibile, come per gli altri cambi
-al documento; l’evidenza già registrata nelle relazioni rimane conservata.
+In Markdown, internal links take the form `[Nome](chronexus://page/UUID)`.
+The name can change without changing the destination. The converter temporarily
+uses a reserved hostname `.invalid` because the library filters custom schemes;
+it does not open it and does not make requests. It reports the UUID in the structured document.
+Blocks that remained unchanged maintain ID, colors, underlining, and alignment.
+Blocks modified in the source follow the formats representable in Markdown:
+the source may result in being modified or no longer available, as with other changes
+to the document; evidence already recorded in the relations remains preserved.
 
-Tabelle, blocchi di codice, HTML, immagini Markdown, separatori e definizioni di
-link non appartengono allo schema degli appunti e sono rifiutati prima della
-conversione. Per immagini e mappe si usa la galleria già inclusa nei backup.
-Non viene dichiarata compatibilità completa con Word o con ogni dialetto Markdown.
-Il documento persistito rimane JSON versione 1, SQLite schema 014; nessuna migrazione.
+Tables, code blocks, HTML, Markdown images, separators, and link definitions do not
+belong to the notes schema and are rejected before conversion. For images and maps,
+the gallery already included in the backups is used.
+Full compatibility with Word or with every Markdown dialect is not declared.
+The persisted document remains JSON version 1, SQLite schema 014; no migration.
 
-## Collaudo ripetibile Windows
+## Repeatable Windows Testing
 
-Usare un eseguibile debug con Vite sulla porta 1420. Prima dell’avvio impostare
-`NODEX_DEV_DATA_DIR` e `WEBVIEW2_USER_DATA_FOLDER` a cartelle assolute vuote sotto
-`.tools/`, e `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9223`.
-Non usare il proprio profilo dati o l’eseguibile release per queste prove.
+Use a debug executable with Vite on port 1420. Before starting, set
+`NODEX_DEV_DATA_DIR` and `WEBVIEW2_USER_DATA_FOLDER` to absolute empty folders under
+`.tools/` and `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9223`.
+Do not use your own data profile or the release executable for these tests.
 
-Impostare `$env:CHRONEXUS_UI_QA='isolated'`, quindi eseguire
-`node scripts/qa/gui-editor.mjs check`. Il comando accetta solo un archivio vuoto
-o l’unica campagna sintetica `Collaudo GUI e Markdown`; controlla editor, sorgente,
-link/ID, formati visuali, errori, finestre e scorrimento. Chiudere normalmente
-l’app, riavviarla con le stesse cartelle, poi eseguire
-`node scripts/qa/gui-editor.mjs restart` per verificare i dati dopo riavvio.
-Rapporti e screenshot rimangono in `.tools/ui-refresh/`, ignorata da Git.
+Set `$env:CHRONEXUS_UI_QA='isolated'`, then run
+`node scripts/qa/gui-editor.mjs check`. The command accepts only an empty archive
+or the single synthetic campaign `Collaudo GUI e Markdown`; check editor, source,
+link/ID, visual formats, errors, windows, and scrolling. Close the app normally,
+restart it with the same folders, then run
+`node scripts/qa/gui-editor.mjs restart` to verify the data after restart.
+Reports and screenshots remain in `.tools/ui-refresh/`, ignored by Git.
 
-Skill applicate: react-testing per la copertura di regressione, systematic-debugging
-per i difetti osservati di conversione URL e layout, react-doctor per la diagnosi.
+Skills applied: react-testing for regression coverage, systematic-debugging
+for observed URL conversion and layout defects, react-doctor for diagnosis.

@@ -108,12 +108,12 @@ pub fn write_export(
     let c = &snapshot;
     if !destination.is_absolute() || destination.extension().and_then(|s| s.to_str()) != Some("zip")
     {
-        return Err("Scegli un nuovo file con estensione .zip.".into());
+        return Err("Choose a new file with the .zip extension.".into());
     }
     let campaign = journal::list_campaigns(c)?
         .into_iter()
         .find(|a| a.id == campaign_id)
-        .ok_or("Campagna non trovata.")?;
+        .ok_or("Campaign not found.")?;
     let sessions = journal::list_sessions(c, campaign_id)?;
     let pages = knowledge::list_pages(c, campaign_id)?;
     let character = player::get_character(c, campaign_id)?;
@@ -149,7 +149,7 @@ pub fn write_export(
     let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"importSources":sources,"party":party,"assistantConversations":conversations,"assistantCampaignSettings":crate::assistant::campaign::get(c,campaign_id)?,"assistantTraining":crate::assistant::training::all(c,campaign_id)?,"diceRolls":crate::dice::all(c,campaign_id)?});
     let mut files: Vec<(String, Vec<u8>)> = vec![(
         "campaign.json".into(),
-        serde_json::to_vec_pretty(&data).map_err(|_| "Esportazione JSON non riuscita.")?,
+        serde_json::to_vec_pretty(&data).map_err(|_| "JSON export failed.")?,
     )];
     let mut index=format!("# {}\n\nEsportazione Chronexus. Le immagini collegate sono incluse; il ripristino completo usa il backup .nodex.\n\n## Pagine\n\n",campaign.name);
     if !party.is_empty() {
@@ -201,11 +201,11 @@ pub fn write_export(
         let mut text = format!(
             "# {}\n\n```json\n{}\n```\n",
             pc.data.name,
-            serde_json::to_string_pretty(&pc.data).map_err(|_| "Scheda illeggibile.")?
+            serde_json::to_string_pretty(&pc.data).map_err(|_| "Sheet unreadable.")?
         );
         append_images(&mut text, &pictures, None, Some(&pc.id), None);
         files.push(("character/sheet.md".into(), text.into_bytes()));
-        index.push_str("\n[Scheda del personaggio](character/sheet.md)\n");
+        index.push_str("\n[Character sheet](character/sheet.md)\n");
     }
     for asset in &assets {
         let mut text = format!(
@@ -215,16 +215,16 @@ pub fn write_export(
                 .and_then(|a| a.iter().find(|a| a["id"] == asset.id))
                 .and_then(|a| a["input"]["details"]["name"].as_str())
                 .unwrap_or("Voce"),
-            serde_json::to_string_pretty(asset).map_err(|_| "Voce illeggibile.")?
+            serde_json::to_string_pretty(asset).map_err(|_| "Entry unreadable.")?
         );
         append_images(&mut text, &pictures, None, None, Some(&asset.id));
         files.push((format!("assets/{}.md", asset.id), text.into_bytes()));
     }
     if !conversations.is_empty() {
-        index.push_str("\n## Conversazioni AI locali\n\nRisposte da verificare; non costituiscono fatti della campagna. I pesi del modello non sono inclusi.\n\n");
+        index.push_str("\n## Local AI conversations\n\nUnverified answers; they are not campaign facts. Model weights are not included.\n\n");
     }
     for turn in &conversations {
-        let mut text = format!("# {}\n\nStato: {}\n\nModello: {} ({})\n\nEdizione: {}\n\n{}\n\n{}\n\n## Fonti al momento della risposta\n\n", turn.question,turn.status,turn.model,turn.digest,turn.edition.as_deref().unwrap_or("appunti campagna"),turn.answer,turn.error);
+        let mut text = format!("# {}\n\nStatus: {}\n\nModel: {} ({})\n\nEdition: {}\n\n{}\n\n{}\n\n## Sources at the time of the answer\n\n", turn.question,turn.status,turn.model,turn.digest,turn.edition.as_deref().unwrap_or("campaign notes"),turn.answer,turn.error);
         for source in &turn.sources {
             text.push_str(&format!(
                 "### [{}] {}\n\nTipo: {}; ID: {}; blocco: {}; revisione: {}; SHA-256: {}\n\n{}\n\n",
@@ -275,17 +275,17 @@ pub fn write_export(
         ));
     }
     if files.iter().map(|(_, b)| b.len()).sum::<usize>() > 512 * 1024 * 1024 {
-        return Err("Esportazione troppo grande (massimo 512 MiB).".into());
+        return Err("Export too large (up to 512 MiB).".into());
     }
     let manifest = json!({"formatVersion":1,"kind":"chronexus-readable-export","files":files.iter().map(|(path,bytes)|json!({"path":path,"size":bytes.len(),"sha256":format!("{:x}",Sha256::digest(bytes))})).collect::<Vec<_>>()});
     files.push((
         "manifest.json".into(),
-        serde_json::to_vec_pretty(&manifest).map_err(|_| "Manifest non leggibile.")?,
+        serde_json::to_vec_pretty(&manifest).map_err(|_| "Manifest not readable.")?,
     ));
     snapshot.commit().map_err(storage)?;
-    let parent = destination.parent().ok_or("Destinazione mancante.")?;
+    let parent = destination.parent().ok_or("Missing destination.")?;
     let mut temp = tempfile::NamedTempFile::new_in(parent)
-        .map_err(|_| "Destinazione non accessibile: verifica cartella e permessi.")?;
+        .map_err(|_| "Destination not accessible: check the folder and permissions.")?;
     {
         let mut zip = ZipWriter::new(temp.as_file_mut());
         for (path, bytes) in &files {
@@ -293,17 +293,17 @@ pub fn write_export(
                 path,
                 SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated),
             )
-            .map_err(|_| "Creazione ZIP fallita.")?;
+            .map_err(|_| "Creating the ZIP failed.")?;
             zip.write_all(bytes)
-                .map_err(|_| "Scrittura ZIP fallita: verifica lo spazio disponibile.")?;
+                .map_err(|_| "Writing the ZIP failed: check available space.")?;
         }
-        zip.finish().map_err(|_| "Chiusura ZIP fallita.")?;
+        zip.finish().map_err(|_| "Closing the ZIP failed.")?;
     }
     temp.as_file()
         .sync_all()
-        .map_err(|_| "Impossibile sincronizzare l'esportazione.")?;
+        .map_err(|_| "Cannot flush the export to disk.")?;
     temp.persist_noclobber(destination)
-        .map_err(|_| "Il file esiste già o non è scrivibile. Scegli un nome nuovo.")?;
+        .map_err(|_| "The file already exists or is not writable. Choose a new name.")?;
     Ok(ExportReceipt {
         path: destination.display().to_string(),
         files: files.len(),

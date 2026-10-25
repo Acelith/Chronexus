@@ -42,20 +42,18 @@ export default function LanguageSettings({
     }
   }
   return (
-    <section
-      className="language-settings"
-      aria-label={tr("Impostazioni dell’app")}
-    >
-      <h3>{tr("Lingua e scrittura")}</h3>
+    <section className="language-settings" aria-label={tr("App settings")}>
+      <h3>{tr("Language and script")}</h3>
       <p>
         {tr(
-          "Scegli la lingua dell’interfaccia. Appunti, nomi, fonti D&D e dati delle campagne mantengono il testo originale.",
+          "Choose the interface language. Notes, names, D&D sources and campaign data keep their original text.",
         )}
       </p>
       <form onSubmit={(event) => event.preventDefault()}>
         <label>
-          {tr("Lingua dell’interfaccia")}
+          {tr("Interface language")}
           <select
+            aria-label={tr("Interface language")}
             value={preferences.locale}
             disabled={pending || disabled}
             onChange={(event) =>
@@ -73,8 +71,9 @@ export default function LanguageSettings({
           </select>
         </label>
         <label>
-          {tr("Modalità di scrittura")}
+          {tr("Script mode")}
           <select
+            aria-label={tr("Script mode")}
             value={preferences.script}
             disabled={pending || disabled}
             onChange={(event) =>
@@ -84,16 +83,16 @@ export default function LanguageSettings({
               })
             }
           >
-            <option value="standard">{tr("Testo ordinario")}</option>
+            <option value="standard">{tr("Ordinary text")}</option>
             <option value="braille">
-              {tr("Braille italiano non contratto")}
+              {tr("Italian uncontracted Braille")}
             </option>
-            <option value="morse">{tr("Morse internazionale")}</option>
+            <option value="morse">{tr("International Morse")}</option>
             <option value="galactic">
-              {tr("Alfabeto Galattico Standard · Minecraft")}
+              {tr("Standard Galactic Alphabet · Minecraft")}
             </option>
-            <option value="espruar">{tr("Elfico D&D · Espruar")}</option>
-            <option value="dethek">{tr("Nanico D&D · Dethek")}</option>
+            <option value="espruar">{tr("D&D Elvish · Espruar")}</option>
+            <option value="dethek">{tr("D&D Dwarvish · Dethek")}</option>
           </select>
         </label>
         <label className="language-checkbox">
@@ -108,19 +107,17 @@ export default function LanguageSettings({
               })
             }
           />
-          {tr("Mostra anche il testo ordinario accanto alla trascrizione")}
+          {tr("Also show the ordinary text next to the transcription")}
         </label>
       </form>
-      {pending ? (
-        <p role="status">{tr("Salvataggio delle preferenze…")}</p>
-      ) : null}
+      {pending ? <p role="status">{tr("Saving preferences…")}</p> : null}
       {error ? (
         <p className="error" role="alert">
           {error}
         </p>
       ) : null}
       <p role="status">
-        {tr("Messaggi disponibili: {0} su {1}.", [
+        {tr("Available messages: {0} of {1}.", [
           coverage.translated,
           coverage.total,
         ])}
@@ -129,28 +126,28 @@ export default function LanguageSettings({
         <p className="language-review">
           {tr(
             preferences.locale === "tlh" || preferences.locale === "art-x-rihan"
-              ? "Vocabolario sperimentale: i termini senza equivalente verificato rimangono in italiano. Non è una traduzione integrale certificata."
-              : "Traduzione preparata automaticamente e da revisionare. Le stringhe mancanti rimangono in italiano. Il ticinese usa forme generali, senza pretendere un’ortografia unica.",
+              ? "Experimental vocabulary: terms without a verified equivalent stay in English. It is not a certified complete translation."
+              : "Translation prepared automatically and awaiting review. Missing strings stay in English. Ticinese uses general forms, without claiming a single spelling.",
           )}
         </p>
       ) : null}
       <p>
         {tr(
-          "Le modalità Braille, Morse e Galattico sono rese del testo, non lingue. Il testo semantico rimane disponibile alle tecnologie assistive.",
+          "Braille, Morse and Galactic are renderings of the text, not languages. The semantic text stays available to assistive technologies.",
         )}
       </p>
       {lexicons[preferences.locale] ? (
         <details className="language-lexicon">
-          <summary>{tr("Lessico verificato · grafia romanizzata")}</summary>
+          <summary>{tr("Verified lexicon · romanized spelling")}</summary>
           <p>
             {tr(
-              "Questi termini sono un riferimento lessicale, non frasi complete. Le azioni senza traduzione verificata restano in italiano.",
+              "These terms are a lexical reference, not complete sentences. Actions without a verified translation stay in English.",
             )}
           </p>
           <dl>
             {lexicons[preferences.locale].map(([source, word]) => (
               <div key={source}>
-                <dt lang="it">{source}</dt>
+                <dt lang="en">{source}</dt>
                 <dd lang={preferences.locale}>{word}</dd>
               </div>
             ))}
@@ -162,13 +159,13 @@ export default function LanguageSettings({
         type="button"
         className="language-recovery"
         disabled={pending || disabled}
-        lang="it"
+        lang="en"
         dir="ltr"
         onClick={() =>
           void change({ ...getPreferences(), ...defaultPreferences })
         }
       >
-        Italiano · Ripristina lingua e scrittura
+        English · Reset language and script
       </button>
     </section>
   );

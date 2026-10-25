@@ -50,8 +50,7 @@ struct Database(Result<Arc<Mutex<backup::Store>>, String>);
 impl Database {
     fn with<T>(&self, action: impl FnOnce(&rusqlite::Connection) -> AppResult<T>) -> AppResult<T> {
         let connection = self.0.as_ref().map_err(Clone::clone)?.lock().map_err(|_| {
-            "Archivio occupato. Riavvia Chronexus senza chiudere gli appunti non salvati."
-                .to_string()
+            "Archive busy. Restart Chronexus without closing unsaved notes.".to_string()
         })?;
         action(&connection.connection)
     }
@@ -64,7 +63,7 @@ impl Database {
             .as_ref()
             .map_err(Clone::clone)?
             .lock()
-            .map_err(|_| "Archivio occupato. Riavvia Chronexus.".to_string())?;
+            .map_err(|_| "Archive busy. Restart Chronexus.".to_string())?;
         action(&mut store)
     }
 }
@@ -248,20 +247,20 @@ fn choose_backup_file(app: &tauri::AppHandle, save: bool) -> AppResult<Option<st
     let dialog = app
         .dialog()
         .file()
-        .add_filter("Archivio Chronexus", &["nodex"]);
+        .add_filter("Chronexus archive", &["nodex"]);
     let file = if save {
         dialog
-            .set_title("Salva backup Chronexus — scegli un nuovo nome")
+            .set_title("Save Chronexus backup — choose a new name")
             .set_file_name(format!("nodex-{}.nodex", uuid::Uuid::new_v4()))
             .blocking_save_file()
     } else {
         dialog
-            .set_title("Seleziona un backup Chronexus da verificare")
+            .set_title("Select a Chronexus backup to verify")
             .blocking_pick_file()
     };
     file.map(|f| {
         f.into_path()
-            .map_err(|_| "Scegli un file locale o su un disco montato.".to_string())
+            .map_err(|_| "Choose a local file or one on a mounted disk.".to_string())
     })
     .transpose()
 }
@@ -276,7 +275,7 @@ async fn create_backup(app: tauri::AppHandle) -> AppResult<Option<backup::Backup
         })
     })
     .await
-    .map_err(|_| "Operazione interrotta. Riprova il backup.".to_string())?
+    .map_err(|_| "Operation interrupted. Try the backup again.".to_string())?
 }
 #[tauri::command]
 async fn inspect_backup(app: tauri::AppHandle) -> AppResult<Option<backup::Preview>> {
@@ -292,7 +291,7 @@ async fn inspect_backup(app: tauri::AppHandle) -> AppResult<Option<backup::Previ
             .with_store(|store| store.prepare(&path).map(Some))
     })
     .await
-    .map_err(|_| "Verifica interrotta. Seleziona nuovamente il backup.".to_string())?
+    .map_err(|_| "Verification interrupted. Select the backup again.".to_string())?
 }
 #[tauri::command]
 async fn restore_backup(app: tauri::AppHandle, token: String) -> AppResult<backup::RestoreReceipt> {
@@ -302,7 +301,7 @@ async fn restore_backup(app: tauri::AppHandle, token: String) -> AppResult<backu
     })
     .await
     .map_err(|_| {
-        "Ripristino interrotto. Riavvia Chronexus e controlla l'archivio attivo prima di riprovare."
+        "Restore interrupted. Restart Chronexus and check the active archive before trying again."
             .to_string()
     })?
 }
@@ -430,11 +429,11 @@ async fn add_image(
     tauri::async_runtime::spawn_blocking(move || {
         use base64::Engine;
         if data_base64.len() > 28 * 1024 * 1024 {
-            return Err("Immagine troppo grande: massimo 20 MiB.".into());
+            return Err("Image too large: up to 20 MiB.".into());
         }
         let bytes = base64::engine::general_purpose::STANDARD
             .decode(data_base64)
-            .map_err(|_| "Dati immagine non validi.")?;
+            .map_err(|_| "Invalid image data.")?;
         app.state::<Database>().with_store(|s| {
             images::add(
                 &s.connection,
@@ -448,7 +447,7 @@ async fn add_image(
         })
     })
     .await
-    .map_err(|_| "Importazione immagine interrotta.".to_string())?
+    .map_err(|_| "Image import interrupted.".to_string())?
 }
 #[tauri::command]
 async fn read_image(
@@ -462,7 +461,7 @@ async fn read_image(
             .with_store(|s| images::read(&s.connection, &s.directory, &campaign_id, &id, thumbnail))
     })
     .await
-    .map_err(|_| "Lettura immagine interrotta.".to_string())?
+    .map_err(|_| "Image reading interrupted.".to_string())?
 }
 #[tauri::command]
 fn detach_image(db: tauri::State<Database>, campaign_id: String, id: String) -> AppResult<()> {
@@ -489,13 +488,13 @@ async fn export_campaign(
                 use tauri_plugin_dialog::DialogExt;
                 app.dialog()
                     .file()
-                    .add_filter("Campagna Markdown e JSON", &["zip"])
-                    .set_title("Esporta campagna — scegli un nome nuovo")
+                    .add_filter("Campaign as Markdown and JSON", &["zip"])
+                    .set_title("Export campaign — choose a new name")
                     .set_file_name(format!("chronexus-export-{}.zip", uuid::Uuid::new_v4()))
                     .blocking_save_file()
                     .map(|f| {
                         f.into_path()
-                            .map_err(|_| "Scegli un file su un disco locale o montato.")
+                            .map_err(|_| "Choose a file on a local or mounted disk.")
                     })
                     .transpose()?
             }
@@ -508,7 +507,7 @@ async fn export_campaign(
         })
     })
     .await
-    .map_err(|_| "Esportazione interrotta. Riprova con un nuovo file.".to_string())?
+    .map_err(|_| "Export interrupted. Try again with a new file.".to_string())?
 }
 #[tauri::command]
 fn get_import_source(
@@ -574,7 +573,7 @@ fn store_wiki_cache(
     })
 }
 const CACHE_CLEARED: &str =
-    "La cache wiki è stata svuotata durante la richiesta: la copia non è stata salvata.";
+    "The wiki cache was cleared during the request: the copy was not saved.";
 #[tauri::command]
 fn wiki_cache_epoch(state: tauri::State<wikidot::State>) -> u64 {
     state.epoch()
@@ -601,7 +600,7 @@ fn clear_wiki_cache(
     provider: String,
 ) -> AppResult<wikidot::CacheSummary> {
     if !["open5e", "wikidot", "all"].contains(&provider.as_str()) {
-        return Err("Scegli quale cache wiki svuotare.".into());
+        return Err("Choose which wiki cache to clear.".into());
     }
     state.invalidate();
     db.with(|c| wikidot::clear(c, &provider))
@@ -620,7 +619,7 @@ async fn wikidot_load<T: serde::Serialize + serde::de::DeserializeOwned>(
 ) -> AppResult<wikidot::Cached<T>> {
     let old = db.with(|c| wikidot::read_raw(c, &key))?;
     let decode = |v: serde_json::Value| -> AppResult<T> {
-        serde_json::from_value(v).map_err(|_| "Copia Wikidot illeggibile.".into())
+        serde_json::from_value(v).map_err(|_| "Wikidot copy unreadable.".into())
     };
     if let (Some((value, at)), false) = (&old, refresh) {
         return Ok(wikidot::Cached {
@@ -633,7 +632,7 @@ async fn wikidot_load<T: serde::Serialize + serde::de::DeserializeOwned>(
     let epoch = state.epoch();
     match load.await {
         Ok(fresh) => {
-            let value = serde_json::to_value(&fresh).map_err(|_| "Copia Wikidot non valida.")?;
+            let value = serde_json::to_value(&fresh).map_err(|_| "Invalid Wikidot copy.")?;
             let at = db.with(|c| {
                 if state.epoch() != epoch {
                     return Err(CACHE_CLEARED.into());
@@ -653,7 +652,7 @@ async fn wikidot_load<T: serde::Serialize + serde::de::DeserializeOwned>(
                 fetched_at: at,
                 cached: true,
                 warning: Some(format!(
-                    "{error} Aggiornamento non riuscito: stai leggendo la copia locale."
+                    "{error} Refresh failed: you are reading the local copy."
                 )),
             }),
             None => Err(error),
@@ -670,7 +669,7 @@ async fn wikidot_search(
 ) -> AppResult<wikidot::SearchResult> {
     wikidot::index_path(&category)?;
     if query.chars().count() > 100 || query.contains('\0') {
-        return Err("Inserisci al massimo 100 caratteri.".into());
+        return Err("Enter at most 100 characters.".into());
     }
     let token = state.token();
     let client = wikidot::client()?;
@@ -703,7 +702,7 @@ async fn wikidot_entry(
     refresh: bool,
 ) -> AppResult<wikidot::Cached<wikidot::Entry>> {
     if wikidot::category_of(&page).is_none() {
-        return Err("Pagina Wikidot non ammessa.".into());
+        return Err("Wikidot page not allowed.".into());
     }
     let token = state.token();
     let client = wikidot::client()?;
@@ -742,7 +741,7 @@ async fn configure_local_ai(
     campaign_id: Option<String>,
 ) -> AppResult<assistant::store::Settings> {
     if assistant::service::busy(&state)? {
-        return Err("Annulla la generazione prima di modificare la configurazione AI.".into());
+        return Err("Cancel the generation before changing the AI configuration.".into());
     }
     if !enabled {
         return db.with(|c| {
@@ -762,14 +761,14 @@ async fn configure_local_ai(
         });
     }
     if !multilingual_consent {
-        return Err("Conferma il modello multilingue con fonti locali; il candidato D&D non ha superato la valutazione.".into());
+        return Err("Confirm the multilingual model with local sources; the D&D candidate did not pass the evaluation.".into());
     }
     db.with(|c| assistant::training::model_owned(c, campaign_id.as_deref(), &model))?;
     assistant::runtime::check_model_name(&model)?;
     assistant::models::options(&model)?;
     let client = assistant::runtime::client()?;
     let runtime = assistant::runtime::probe_at(&client, assistant::runtime::BASE).await?;
-    let selected=runtime.models.into_iter().find(|m|m.name==model&&!m.dnd_specialized&&m.weight_digest.is_some()).ok_or("Scegli un modello multilingue GGUF locale verificabile. Il modello D&D di prova non è qualificato.")?;
+    let selected=runtime.models.into_iter().find(|m|m.name==model&&!m.dnd_specialized&&m.weight_digest.is_some()).ok_or("Choose a verifiable local multilingual GGUF model. The test D&D model is not qualified.")?;
     assistant::models::verify(&selected.name, selected.weight_digest.as_deref())?;
     db.with(|c| {
         let settings = assistant::store::Settings {
@@ -828,7 +827,7 @@ fn save_campaign_ai(
     profile: assistant::campaign::Profile,
 ) -> AppResult<assistant::campaign::Profile> {
     if assistant::service::busy(&state)? {
-        return Err("Attendi o annulla l'operazione AI prima di cambiare le fonti.".into());
+        return Err("Wait for or cancel the AI operation before changing sources.".into());
     }
     db.with(|c| assistant::campaign::save_preferences(c, &campaign_id, &profile))
 }
@@ -874,7 +873,7 @@ fn delete_ai_turn(
     id: String,
 ) -> AppResult<()> {
     if assistant::service::busy(&state)? {
-        return Err("Annulla prima la generazione in corso.".into());
+        return Err("Cancel the generation in progress first.".into());
     }
     db.with(|c| assistant::store::delete(c, &campaign_id, &id))
 }
@@ -892,13 +891,13 @@ fn list_ai_rule_sources(
     db: tauri::State<Database>,
     edition: String,
 ) -> AppResult<serde_json::Value> {
-    db.with(|c|{let mut q=c.prepare("SELECT key,payload FROM wiki_cache WHERE key LIKE 'entry/%' ORDER BY fetched_at DESC").map_err(journal::storage)?;let rows=q.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(journal::storage)?.collect::<rusqlite::Result<Vec<_>>>().map_err(journal::storage)?;let mut out=Vec::new();for (key,raw) in rows{let value:serde_json::Value=serde_json::from_str(&raw).map_err(|_|"Fonte wiki illeggibile.")?;if value["document"]["gamesystem"]["key"].as_str()==Some(&edition){out.push(serde_json::json!({"key":key,"title":value["entry"]["name"],"document":value["document"]["name"]}))}}
+    db.with(|c|{let mut q=c.prepare("SELECT key,payload FROM wiki_cache WHERE key LIKE 'entry/%' ORDER BY fetched_at DESC").map_err(journal::storage)?;let rows=q.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(journal::storage)?.collect::<rusqlite::Result<Vec<_>>>().map_err(journal::storage)?;let mut out=Vec::new();for (key,raw) in rows{let value:serde_json::Value=serde_json::from_str(&raw).map_err(|_|"Wiki source unreadable.")?;if value["document"]["gamesystem"]["key"].as_str()==Some(&edition){out.push(serde_json::json!({"key":key,"title":value["entry"]["name"],"document":value["document"]["name"]}))}}
         if edition == wikidot::EDITION {
             let mut q = c.prepare("SELECT substr(key,7) FROM wikidot_cache WHERE key LIKE 'entry/%' ORDER BY fetched_at DESC").map_err(journal::storage)?;
             let pages = q.query_map([], |r| r.get::<_, String>(0)).map_err(journal::storage)?.collect::<rusqlite::Result<Vec<_>>>().map_err(journal::storage)?;
             for page in pages {
                 if let Some((e, _)) = wikidot::read_entry(c, &page)? {
-                    let document = format!("Wikidot D&D 5e · {}", e.source.as_deref().unwrap_or("fonte non indicata"));
+                    let document = format!("Wikidot D&D 5e · {}", e.source.as_deref().unwrap_or("source not specified"));
                     out.push(serde_json::json!({"key":format!("wikidot/{page}"),"title":e.title,"document":document}));
                 }
             }
@@ -908,7 +907,7 @@ fn list_ai_rule_sources(
 fn data_root(db: &Database) -> AppResult<std::path::PathBuf> {
     db.with_store(|s| Ok(s.root.clone()))
 }
-const AI_SETUP_BUSY: &str = "È già in corso un’operazione sui componenti AI.";
+const AI_SETUP_BUSY: &str = "An AI component operation is already running.";
 #[tauri::command]
 async fn ai_setup_status(
     db: tauri::State<'_, Database>,
@@ -924,12 +923,10 @@ async fn ai_install_runtime(
     events: tauri::ipc::Channel<ai_setup::Progress>,
 ) -> AppResult<()> {
     if !accept {
-        return Err(
-            "Conferma dimensioni, provenienza e licenza prima di installare Ollama.".into(),
-        );
+        return Err("Confirm size, origin and license before installing Ollama.".into());
     }
     if !cfg!(all(windows, target_arch = "x86_64")) {
-        return Err("L’installazione guidata è disponibile per ora solo su Windows x64.".into());
+        return Err("Guided installation is currently available only on Windows x64.".into());
     }
     let _gate = state.gate.try_lock().map_err(|_| AI_SETUP_BUSY)?;
     let token = state.token();
@@ -959,7 +956,7 @@ fn ai_stop_runtime(
     service: tauri::State<assistant::service::State>,
 ) -> AppResult<()> {
     if assistant::service::busy(&service)? {
-        return Err("Attendi o annulla la risposta AI prima di arrestare il runtime.".into());
+        return Err("Wait for or cancel the AI answer before stopping the runtime.".into());
     }
     state.shutdown();
     Ok(())
@@ -972,7 +969,7 @@ async fn ai_pull_model(
     events: tauri::ipc::Channel<ai_setup::Progress>,
 ) -> AppResult<ai_setup::ModelState> {
     if !accept {
-        return Err("Conferma dimensioni e provenienza del modello prima del download.".into());
+        return Err("Confirm the model size and origin before downloading.".into());
     }
     let _gate = state.gate.try_lock().map_err(|_| AI_SETUP_BUSY)?;
     let token = state.token();
@@ -992,7 +989,7 @@ fn ai_remove_runtime(
     accept: bool,
 ) -> AppResult<()> {
     if !accept {
-        return Err("Conferma la rimozione del runtime gestito.".into());
+        return Err("Confirm removal of the managed runtime.".into());
     }
     let _gate = state.gate.try_lock().map_err(|_| AI_SETUP_BUSY)?;
     ai_setup::remove_runtime(&data_root(&db)?, &state)
@@ -1013,22 +1010,27 @@ pub fn run() {
                 let directory = match std::env::var_os("NODEX_DEV_DATA_DIR") {
                     Some(path) => {
                         let path = std::path::PathBuf::from(path);
-                        if !path.is_absolute() { return Err("NODEX_DEV_DATA_DIR deve essere assoluta".into()); }
+                        if !path.is_absolute() { return Err("NODEX_DEV_DATA_DIR must be absolute".into()); }
                         path
                     },
                     None => directory,
                 };
+                // An earlier install leaves its SQLite archive here; see keep_legacy_italian.
+                let archive_existed = directory.join("nodex.sqlite3").exists()
+                    || directory.join("active-profile.json").exists();
                 std::fs::create_dir_all(&directory)?;
                 let store = backup::Store::open(&directory).map_err(std::io::Error::other)?;
+                // A failure only means the app opens in English; it never blocks the archive.
+                let _ = preferences::keep_legacy_italian(&store.root, archive_existed);
                 assistant::store::recover(&store.connection).map_err(std::io::Error::other)?;
                 assistant::training::recover(&store.connection).map_err(std::io::Error::other)?;
                 Ok(Arc::new(Mutex::new(store)))
-            })().map_err(|error| format!("Archivio non disponibile: {error}. Verifica spazio e permessi della cartella dati e riavvia Chronexus. Se usi una versione precedente, torna a quella più recente."));
+            })().map_err(|error| format!("Archive not available: {error}. Check space and permissions of the data folder and restart Chronexus. If you are using an older version, go back to the most recent one."));
             app.manage(Database(connection));
             if let Some(config)=automation::Config::parse(std::env::args()).map_err(std::io::Error::other)? {
                 let state=app.state::<Database>();
                 let store=Arc::clone(state.0.as_ref().map_err(|e|std::io::Error::other(e.clone()))?);
-                let root=store.lock().map_err(|_|std::io::Error::other("Archivio occupato."))?.root.clone();
+                let root=store.lock().map_err(|_|std::io::Error::other("Archive busy."))?.root.clone();
                 let handle=app.handle().clone();
                 let server=automation::Server::start(&root,config,store,Arc::new(move|campaign|{let _=handle.emit("chronexus:external-change",campaign);})).map_err(std::io::Error::other)?;
                 app.manage(server);
@@ -1037,7 +1039,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![backup_folder::commands::get_backup_settings,backup_folder::commands::save_backup_schedule,backup_folder::commands::choose_backup_destination,backup_folder::commands::reset_backup_destination,backup_folder::commands::list_backup_files,backup_folder::commands::inspect_listed_backup,backup_folder::commands::copy_legacy_update_backup,backup_folder::commands::open_backup_folder,backup_folder::commands::periodic_backup_tick,backup_folder::commands::run_periodic_backup_now,ai_setup_status,ai_install_runtime,ai_start_runtime,ai_stop_runtime,ai_pull_model,ai_cancel_setup,ai_remove_runtime,wiki_translation::read_wiki_translation,wiki_translation::translate_wiki,updates::get_update_settings,updates::save_update_settings,updates::check_app_update,updates::download_app_update,updates::cancel_app_update,updates::install_app_update,updates::get_herald_settings,updates::save_herald_settings,updates::startup_update_check,updates::record_update_announcement,updates::update_announcement_blocked,get_interface_preferences,save_interface_preferences,roll_dice,list_dice_rolls,get_training_overview,start_campaign_training,activate_campaign_training,get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,wiki_cache_epoch,get_wiki_provider,save_wiki_provider,wiki_cache_summary,clear_wiki_cache,cancel_wikidot,wikidot_search,wikidot_entry,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .build(tauri::generate_context!())
-        .expect("Impossibile avviare la finestra Chronexus.");
+        .expect("Cannot start the Chronexus window.");
     application.run(|app, event| {
         if matches!(event, tauri::RunEvent::Exit) {
             app.state::<updates::State>().shutdown();
@@ -1087,8 +1089,8 @@ mod wiki_load_tests {
                 .unwrap()
                 .cached
         );
-        let offline = async { Err::<wikidot::Entry, String>("Wikidot non raggiungibile.".into()) };
+        let offline = async { Err::<wikidot::Entry, String>("Wikidot not reachable.".into()) };
         let stale = wikidot_load(&db, &state, key, true, offline).await.unwrap();
-        assert!(stale.cached && stale.warning.unwrap().contains("copia locale"));
+        assert!(stale.cached && stale.warning.unwrap().contains("local copy"));
     }
 }

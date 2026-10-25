@@ -16,16 +16,16 @@ export default function TranscriptionPreview() {
   return (
     <section
       className="transcription-preview"
-      aria-label={tr("Laboratorio di trascrizione")}
+      aria-label={tr("Transcription lab")}
     >
       <h4>
-        <Text source="Prova la scrittura" />
+        <Text source="Try the script" />
       </h4>
       <p>
-        <Text source="Questo spazio è indipendente dagli appunti. I caratteri non supportati rimangono leggibili. Il Braille usa un sottoinsieme letterario italiano a sei punti, non contratto; non è un motore per stampa in rilievo. Morse non distingue maiuscole e minuscole. Il Galattico trascrive A–Z; cifre e punteggiatura restano ordinarie." />
+        <Text source="This space is separate from your notes. Unsupported characters stay readable. Braille uses a six-dot uncontracted Italian literary subset; it is not an embossing engine. Morse does not distinguish upper and lower case. Galactic transcribes A–Z; digits and punctuation stay ordinary." />
       </p>
       <label>
-        <Text source="Testo da trascrivere" />
+        <Text source="Text to transcribe" />
         <textarea
           dir="auto"
           maxLength={10000}
@@ -39,7 +39,7 @@ export default function TranscriptionPreview() {
       {p.script === "espruar" || p.script === "dethek" ? (
         <p>
           {tr(
-            "Espruar e Dethek usano i glifi dei font originali per A–Z e a–z. Cifre e punteggiatura restano ordinarie. La resa dipende dal font, non è una traduzione della lingua. Il pacchetto v2 conserva l’originale e la revisione dell’alfabeto.",
+            "Espruar and Dethek use the glyphs of the original fonts for A–Z and a–z. Digits and punctuation stay ordinary. The rendering depends on the font; it is not a translation of the language. The v2 package keeps the original and the alphabet revision.",
           )}
         </p>
       ) : null}
@@ -47,7 +47,7 @@ export default function TranscriptionPreview() {
         <Label value={source} />
       </div>
       <label>
-        <Text source="Trascrizione" />
+        <Text source="Transcription" />
         <textarea
           className={
             p.script === "galactic"
@@ -63,25 +63,23 @@ export default function TranscriptionPreview() {
       </label>
       {result.unsupported.length ? (
         <p role="status">
-          {tr("Caratteri mantenuti in originale: {0}", [
+          {tr("Characters kept in the original: {0}", [
             result.unsupported.join(" "),
           ])}
         </p>
       ) : null}
       <p>
-        <Text source="Il pacchetto conserva originale e trascrizione, così il ripristino è esatto anche per accenti, maiuscole e caratteri non rappresentabili. Non viene salvato nelle campagne." />
+        <Text source="The package keeps the original and the transcription, so restoring is exact even for accents, capitals and characters that cannot be represented. It is not saved in campaigns." />
       </p>
       <div className="actions">
         <button
           type="button"
           onClick={() => {
             setPacket(transcriptionPacket(source, p.script));
-            setNotice(
-              tr("Pacchetto pronto: seleziona e copia il testo qui sotto."),
-            );
+            setNotice(tr("Package ready: select and copy the text below."));
           }}
         >
-          <Text source="Prepara pacchetto reversibile" />
+          <Text source="Prepare reversible package" />
         </button>
         {p.script === "morse" ? (
           <button
@@ -89,18 +87,16 @@ export default function TranscriptionPreview() {
             onClick={() => {
               setSource(decodeMorse(source));
               setNotice(
-                tr(
-                  "Decodifica Morse in maiuscolo; � indica un codice sconosciuto.",
-                ),
+                tr("Morse decodes to uppercase; � marks an unknown code."),
               );
             }}
           >
-            <Text source="Leggi codici Morse dal testo" />
+            <Text source="Read Morse code from text" />
           </button>
         ) : null}
       </div>
       <label>
-        <Text source="Pacchetto originale e trascrizione" />
+        <Text source="Original and transcription package" />
         <textarea
           dir="ltr"
           maxLength={250000}
@@ -114,17 +110,15 @@ export default function TranscriptionPreview() {
         onClick={() => {
           try {
             setSource(restoreTranscription(packet));
-            setNotice(tr("Originale ripristinato nel laboratorio."));
+            setNotice(tr("Original restored in the lab."));
           } catch {
             setNotice(
-              tr(
-                "Pacchetto non valido: controlla formato, versione e trascrizione.",
-              ),
+              tr("Invalid package: check format, version and transcription."),
             );
           }
         }}
       >
-        <Text source="Ripristina originale dal pacchetto" />
+        <Text source="Restore original from package" />
       </button>
       {notice ? <p role="status">{notice}</p> : null}
     </section>

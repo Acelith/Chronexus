@@ -25,12 +25,12 @@ async fn blocking<T: Send + 'static>(
 ) -> AppResult<T> {
     tauri::async_runtime::spawn_blocking(move || job(app))
         .await
-        .map_err(|_| "Operazione sui backup interrotta.".to_string())?
+        .map_err(|_| "Backup operation interrupted.".to_string())?
 }
 /// Update, AI answer or training in progress: periodic backups wait.
 fn activity(app: &tauri::AppHandle) -> AppResult<Option<&'static str>> {
     Ok(crate::updates::update_announcement_blocked(app.clone())?
-        .then_some("Aggiornamento o operazione AI in corso: il backup periodico attende."))
+        .then_some("Update or AI operation in progress: the periodic backup is waiting."))
 }
 
 #[tauri::command]
@@ -71,11 +71,11 @@ fn pick_folder(app: &tauri::AppHandle) -> AppResult<Option<PathBuf>> {
     use tauri_plugin_dialog::DialogExt;
     app.dialog()
         .file()
-        .set_title("Scegli la cartella dei backup periodici")
+        .set_title("Choose the periodic backup folder")
         .blocking_pick_folder()
         .map(|f| {
             f.into_path()
-                .map_err(|_| "Scegli una cartella locale o su un disco montato.".to_string())
+                .map_err(|_| "Choose a local folder or one on a mounted disk.".to_string())
         })
         .transpose()
 }
@@ -123,9 +123,7 @@ pub fn open_backup_folder(app: tauri::AppHandle, location: Location) -> AppResul
     std::process::Command::new(program)
         .arg(&folder)
         .spawn()
-        .map_err(|_| {
-            "Impossibile aprire il gestore file. Il percorso è mostrato nelle impostazioni."
-        })?;
+        .map_err(|_| "Cannot open the file manager. The path is shown in the settings.")?;
     Ok(super::shown(&folder))
 }
 
@@ -153,10 +151,10 @@ pub async fn periodic_backup_tick(app: tauri::AppHandle) -> AppResult<Tick> {
         let db = app.state::<Database>();
         let shared = db.0.as_ref().map_err(Clone::clone)?;
         let Ok(store) = shared.try_lock() else {
-            return Ok(idle("Archivio occupato: il backup periodico attende."));
+            return Ok(idle("Archive busy: the periodic backup is waiting."));
         };
         if store.pending.is_some() {
-            return Ok(idle("Ripristino in attesa di conferma."));
+            return Ok(idle("Restore waiting for confirmation."));
         }
         let preferences = super::read_preferences(&store.root)?;
         let index = super::read_index(&store.root)?;
@@ -185,7 +183,7 @@ pub async fn run_periodic_backup_now(app: tauri::AppHandle) -> AppResult<Outcome
         let docs = documents(&app);
         app.state::<Database>().with_store(|store| {
             if store.pending.is_some() {
-                return Err("Conferma o annulla prima il ripristino in corso.".into());
+                return Err("Confirm or cancel the restore in progress first.".into());
             }
             super::run(store, docs.as_deref(), super::now())
         })

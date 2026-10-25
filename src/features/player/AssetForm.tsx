@@ -63,7 +63,7 @@ export default function AssetForm({
           value={links[key] ?? ""}
           onChange={(e) => link(key, e.target.value || null)}
         >
-          <option value="">{tr("Nessun collegamento")}</option>
+          <option value="">{tr("No links")}</option>
           {options.map((p) => (
             <option key={p.id} value={p.id}>
               {p.title}
@@ -79,7 +79,7 @@ export default function AssetForm({
         <Suspense
           fallback={
             <p role="status">
-              <Text source={"Apertura catalogo…"} />
+              <Text source={"Opening catalog…"} />
             </p>
           }
         >
@@ -101,9 +101,7 @@ export default function AssetForm({
       <form
         className="player-form"
         aria-label={
-          details.kind === "item"
-            ? tr("Dettagli oggetto")
-            : tr("Dettagli capacità")
+          details.kind === "item" ? tr("Item details") : tr("Ability details")
         }
         onSubmit={(e) => {
           e.preventDefault();
@@ -112,30 +110,30 @@ export default function AssetForm({
       >
         <fieldset disabled={busy || lookup}>
           <legend>
-            {initial ? tr("Modifica") : tr("Aggiungi")}{" "}
+            {initial ? tr("Edit") : tr("Add")}{" "}
             {details.kind === "item"
               ? "oggetto"
               : details.kind === "spell"
                 ? "incantesimo"
-                : tr("capacità")}
+                : tr("ability")}
           </legend>
           {details.kind === "spell" ? (
             <>
               <p className="muted">
                 <Text
                   source={
-                    "Scrivi un incantesimo personalizzato o cerca un nome inglese nel catalogo SRD 2014. “Usa questi dati nel modulo” sostituisce nome e campi dell’incantesimo; conserva note, marcatori e collegamenti. Il salvataggio resta esplicito."
+                    "Write a custom spell or search for an English name in the SRD 2014 catalog. “Use this data in the form” replaces the spell name and fields; notes, markers and links are kept. Saving stays explicit."
                   }
                 />
               </p>
               <button type="button" onClick={() => setLookup((v) => !v)}>
-                <Text source={"Cerca questo nome in D&D"} />
+                <Text source={"Search this name in D&D"} />
               </button>
             </>
           ) : null}
           <div className="player-fields">
             <TextField
-              label={tr("Nome della voce")}
+              label={tr("Entry name")}
               autoFocus
               value={details.name}
               required
@@ -144,43 +142,43 @@ export default function AssetForm({
             {details.kind === "item" ? (
               <>
                 <NumberField
-                  label={tr("Quantità")}
+                  label={tr("Quantity")}
                   value={details.quantity}
                   onChange={(quantity) =>
                     change({ ...details, quantity: quantity ?? 0 })
                   }
                 />
                 <TextField
-                  label={tr("Collocazione (zaino, tasca, indossato…)")}
+                  label={tr("Location (backpack, pocket, worn…)")}
                   value={details.location ?? ""}
                   onChange={(location) => change({ ...details, location })}
                 />
                 <TextField
-                  label={tr("Categoria oggetto")}
+                  label={tr("Item category")}
                   value={details.category}
                   max={100}
                   onChange={(category) => change({ ...details, category })}
                 />
                 <NumberField
-                  label={tr("Peso (unità personale, facoltativo)")}
+                  label={tr("Weight (your own unit, optional)")}
                   value={details.weight}
                   optional
                   decimal
                   onChange={(weight) => change({ ...details, weight })}
                 />
                 <TextField
-                  label={tr("Valore o valuta (testo libero)")}
+                  label={tr("Value or currency (free text)")}
                   value={details.value}
                   onChange={(value) => change({ ...details, value })}
                 />
                 <div className="player-flags">
                   <Flag
-                    label={tr("Equipaggiato")}
+                    label={tr("Equipped")}
                     value={details.equipped}
                     onChange={(equipped) => change({ ...details, equipped })}
                   />
                   <Flag
-                    label={tr("Consumabile")}
+                    label={tr("Consumable")}
                     value={details.consumable}
                     onChange={(consumable) =>
                       change({ ...details, consumable })
@@ -191,51 +189,51 @@ export default function AssetForm({
             ) : (
               <>
                 <TextField
-                  label={tr("Regolamento della capacità")}
+                  label={tr("Ability rules system")}
                   value={details.systemId}
                   max={80}
                   required
                   onChange={(systemId) => change({ ...details, systemId })}
                 />
                 <TextField
-                  label={tr("Livello o rango (testo libero)")}
+                  label={tr("Level or rank (free text)")}
                   value={details.rank}
                   onChange={(rank) => change({ ...details, rank })}
                 />
                 <TextField
-                  label={tr("Scuola o tradizione")}
+                  label={tr("School or tradition")}
                   value={details.school}
                   onChange={(school) => change({ ...details, school })}
                 />
                 <TextField
-                  label={tr("Tempo di attivazione")}
+                  label={tr("Activation time")}
                   value={details.castingTime}
                   onChange={(castingTime) =>
                     change({ ...details, castingTime })
                   }
                 />
                 <TextField
-                  label={tr("Durata")}
+                  label={tr("Duration")}
                   value={details.duration}
                   onChange={(duration) => change({ ...details, duration })}
                 />
                 <TextField
-                  label={tr("Portata")}
+                  label={tr("Range")}
                   value={details.range}
                   onChange={(range) => change({ ...details, range })}
                 />
                 <TextField
-                  label={tr("Componenti")}
+                  label={tr("Components")}
                   value={details.components}
                   onChange={(components) => change({ ...details, components })}
                 />
                 <Flag
-                  label={tr("Rituale")}
+                  label={tr("Ritual")}
                   value={details.ritual ?? false}
                   onChange={(ritual) => change({ ...details, ritual })}
                 />
                 <Flag
-                  label={tr("Concentrazione")}
+                  label={tr("Concentration")}
                   value={details.concentration ?? false}
                   onChange={(concentration) =>
                     change({ ...details, concentration })
@@ -243,12 +241,12 @@ export default function AssetForm({
                 />
                 <div className="player-flags">
                   <Flag
-                    label={tr("Conosciuta")}
+                    label={tr("Known")}
                     value={details.known}
                     onChange={(known) => change({ ...details, known })}
                   />
                   <Flag
-                    label={tr("Preparata")}
+                    label={tr("Prepared")}
                     value={details.prepared}
                     onChange={(prepared) => change({ ...details, prepared })}
                   />
@@ -257,35 +255,35 @@ export default function AssetForm({
             )}
           </div>
           <TextField
-            label={tr("Descrizione")}
+            label={tr("Description")}
             value={details.description}
             max={16000}
             multiline
             onChange={(description) => change({ ...details, description })}
           />
           <TextField
-            label={tr("Note della voce")}
+            label={tr("Entry notes")}
             value={details.notes}
             max={16000}
             multiline
             onChange={(notes) => change({ ...details, notes })}
           />
           <h4>
-            <Text source={"Collegamenti e provenienza"} />
+            <Text source={"Links and provenance"} />
           </h4>
           <p className="muted">
             <Text
               source={
-                "Collega pagine e sessioni della campagna. Per aggiungere un PNG, un luogo o una missione, crea prima la pagina nel Codex."
+                "Link campaign pages and sessions. To add an NPC, a place or a quest, create the page in the Codex first."
               }
             />
           </p>
           <div className="player-fields">
-            {pageSelector(tr("Pagina della voce nel Codex"), "pageId")}
+            {pageSelector(tr("Codex page of the entry"), "pageId")}
             <label>
-              <Text source={"Sessione fonte"} />
+              <Text source={"Source session"} />
               <select
-                aria-label={tr("Sessione fonte")}
+                aria-label={tr("Source session")}
                 value={links.sourceSessionId ?? ""}
                 onChange={(e) =>
                   setInput({
@@ -298,28 +296,28 @@ export default function AssetForm({
                   })
                 }
               >
-                <option value="">{tr("Nessuna sessione")}</option>
+                <option value="">{tr("No sessions")}</option>
                 {sessions.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {tr("Sessione ")}
+                    {tr("Session ")}
                     {s.sequence}: {s.title}
                   </option>
                 ))}
               </select>
             </label>
             <label>
-              <Text source={"Blocco fonte"} />
+              <Text source={"Source block"} />
               <select
-                aria-label={tr("Blocco fonte")}
+                aria-label={tr("Source block")}
                 disabled={!source}
                 value={links.sourceBlockId ?? ""}
                 onChange={(e) => link("sourceBlockId", e.target.value || null)}
               >
-                <option value="">{tr("Intera sessione")}</option>
+                <option value="">{tr("Whole session")}</option>
                 {links.sourceBlockId &&
                 !blocks.some((b) => b.id === links.sourceBlockId) ? (
                   <option value={links.sourceBlockId}>
-                    {tr("Blocco non più presente (riferimento conservato)")}
+                    {tr("Block no longer present (reference kept)")}
                   </option>
                 ) : null}
                 {blocks.map((b) => (
@@ -331,14 +329,14 @@ export default function AssetForm({
             </label>
             {details.kind === "item" ? (
               <>
-                {pageSelector(tr("PNG collegato"), "npcId", "npc")}
-                {pageSelector(tr("Luogo collegato"), "placeId", "place")}
-                {pageSelector(tr("Missione collegata"), "questId", "quest")}
+                {pageSelector(tr("Linked NPC"), "npcId", "npc")}
+                {pageSelector(tr("Linked place"), "placeId", "place")}
+                {pageSelector(tr("Linked quest"), "questId", "quest")}
               </>
             ) : null}
           </div>
           <TextField
-            label={tr("Note di provenienza")}
+            label={tr("Provenance notes")}
             value={links.provenanceNotes}
             max={4000}
             multiline
@@ -346,10 +344,10 @@ export default function AssetForm({
           />
           <div className="actions">
             <button className="primary" disabled={!details.name.trim()}>
-              <Text source={"Salva voce"} />
+              <Text source={"Save entry"} />
             </button>
             <button type="button" onClick={onCancel}>
-              <Text source={"Annulla modifiche"} />
+              <Text source={"Discard changes"} />
             </button>
           </div>
         </fieldset>

@@ -1,39 +1,39 @@
-M18: questo pacchetto AI opzionale contiene Gemma come modello SECONDARIO.
-Il modello principale Qwen3.8-27B va preparato esplicitamente secondo docs/AI_LOCAL.md.
-Nessun modello viene attivato automaticamente.
+M18: this optional AI package contains Gemma as the SECONDARY model.
+Prepare the primary Qwen3.8-27B model explicitly as described in docs/AI_LOCAL.md.
+No model is activated automatically.
 
-CHRONEXUS 0.2.0 — WINDOWS x64 — APP E AI LOCALE
+CHRONEXUS 0.2.0 — WINDOWS x64 — APP AND LOCAL AI (LEGACY BUNDLE)
 
-Scarica tutti e cinque gli ZIP. Estrai soltanto Chronexus-0.2.0-Windows-x64.zip.
-Lascia i quattro ZIP AI-pesi intatti accanto alla cartella estratta (oppure dentro
-la cartella estratta). Non sono archivi ZIP multivolume da aprire con 7-Zip.
-Sono quattro archivi validi separati: Installa-AI.cmd ricostruisce i pesi.
+Download all five ZIPs. Extract only Chronexus-0.2.0-Windows-x64.zip.
+Keep the four AI weight ZIPs intact beside or inside the extracted folder.
+They are separate valid archives, not a multipart ZIP to open with 7-Zip.
+Installa-AI.cmd reconstructs the weights from these four archives.
 
-1. Avvia Chronexus_0.2.0_x64-setup.exe per installare l'app.
-2. Avvia Installa-AI.cmd: verifica SHA-256, copia runtime e ricompone Gemma 4 12B.
-   Servono circa 10 GiB aggiuntivi nella destinazione, oltre ai pacchetti scaricati.
-   Nessun file personale viene sovrascritto. Una copia interrotta resta in una
-   cartella .install-<id> separata: controllala prima di rimuoverla manualmente.
-3. Avvia Start-AI.ps1 nella cartella installata:
+1. Run Chronexus_0.2.0_x64-setup.exe to install the app.
+2. Run Installa-AI.cmd: it verifies SHA-256, copies the runtime and reconstructs
+   Gemma 4 12B. Allow about 10 GiB of additional destination space besides the
+   downloaded packages. Personal files are never overwritten. An interrupted copy
+   stays in a separate .install-<id> folder; inspect it before removing it manually.
+3. Run Start-AI.ps1 in the installed folder:
    %LOCALAPPDATA%\Chronexus\AI\ollama-0.40.10-gemma4-12b
-   (tasto destro > Esegui con PowerShell, oppure powershell -File percorso).
-4. Apri Chronexus, impostazioni della campagna, controlla il runtime e seleziona
-   Gemma 4 12B. L'attivazione è esplicita; l'app funziona anche senza AI.
+   (right-click > Run with PowerShell, or powershell -File path).
+4. Open Chronexus, campaign settings, check the runtime and select Gemma 4 12B.
+   Activation is explicit; the app works without AI.
 
-AI: Ollama 0.40.10 locale, cloud disabilitato, porta 127.0.0.1:11434.
-Gemma 4 12B Q4_K_M è multilingue, non un modello addestrato specificamente per D&D.
-Incluse solo le componenti GGUF Windows ufficiali: nessun profilo, campagna,
-adattatore o checkpoint privato. Licenze Apache 2.0, MIT e avvisi terze parti
-in AI/licenses e AI/runtime. La variante opzionale MLX non serve su Windows.
-Il training QLoRA richiede checkpoint e dipendenze dedicati: non sono inclusi.
-Un runtime già in uso viene soltanto verificato, mai chiuso automaticamente.
-Nessun servizio o avvio automatico aggiunto. I pesi non fanno parte dei backup.
+AI: local Ollama 0.40.10, cloud disabled, port 127.0.0.1:11434.
+Gemma 4 12B Q4_K_M is multilingual, not trained specifically on D&D.
+Only official Windows GGUF components are included: no private profiles,
+campaigns, adapters or checkpoints. Apache 2.0/MIT licenses and third-party
+notices are in AI/licenses and AI/runtime. Optional MLX is unnecessary on Windows.
+QLoRA training requires separate checkpoints/dependencies; these are not included.
+An existing runtime is verified, never stopped automatically. No system service
+or startup entry is added. Model weights are excluded from campaign backups.
 
-Richiesti Windows x64, WebView2 già disponibile e driver GPU compatibili per AI.
-Installer non firmato: Windows può mostrare un avviso. Nessun driver incluso.
-Nessun installer macOS/Linux viene dichiarato verificato in questa release.
-Schema SQLite corrente e identificativo it.nodex.desktop conservati.
-Nuove preferenze lingua v2 leggono le v1; i vecchi client non conoscono Espruar/Dethek.
-Traduzioni automatiche in bozza e alfabeti decorativi: nessuna revisione madrelingua
-integrale o certificazione assistiva dichiarata. Il risultato AI va verificato.
-Checksum dei cinque download nella pagina della release; dettagli interni in AI/bundle.json.
+Requires Windows x64, WebView2 already installed and compatible GPU drivers for AI.
+The legacy installer lacks Authenticode signing: Windows may show a warning.
+No drivers are included. No macOS/Linux installer is claimed verified here.
+The current SQLite schema and it.nodex.desktop identifier are preserved.
+Language preferences v2 read v1; older clients do not understand Espruar/Dethek.
+Machine translations and decorative scripts remain drafts, without complete
+native-language review or assistive certification. Always verify AI answers.
+Checksums for all five downloads are on the release page; details: AI/bundle.json.

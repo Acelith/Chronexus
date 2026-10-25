@@ -2,10 +2,10 @@ import { localizeLabels } from "../../i18n/store";
 import { command } from "../journal/api";
 import type { PageKind } from "../knowledge/api";
 export const certainties = localizeLabels({
-  confirmed: "Confermata",
-  suspected: "Sospetta",
-  disproven: "Smentita",
-  unknown: "Sconosciuta",
+  confirmed: "Confirmed",
+  suspected: "Suspected",
+  disproven: "Disproven",
+  unknown: "Unknown",
 } as const);
 export type Certainty = keyof typeof certainties;
 export interface SourceRef {

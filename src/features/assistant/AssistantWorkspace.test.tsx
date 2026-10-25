@@ -91,23 +91,21 @@ test("does not contact the runtime on mount; explicit activation requires consen
   render(
     <AssistantWorkspace campaignId="c" register={vi.fn()} onSource={vi.fn()} />,
   );
-  await screen.findByRole("heading", { name: "Assistente locale" });
+  await screen.findByRole("heading", { name: "Local assistant" });
   expect(assistantApi.probe).not.toHaveBeenCalled();
   expect(
-    screen.getByRole("button", { name: "Chiedi alle fonti" }),
+    screen.getByRole("button", { name: "Ask the sources" }),
   ).toBeDisabled();
   const user = userEvent.setup();
-  await user.click(screen.getByRole("button", { name: "Controlla Ollama" }));
-  await screen.findByText(/cloud disabilitato e verificato/);
+  await user.click(screen.getByRole("button", { name: "Check Ollama" }));
+  await screen.findByText(/cloud disabled and verified/);
   expect(
-    screen.getByRole("button", { name: "Attiva modello locale" }),
+    screen.getByRole("button", { name: "Enable local model" }),
   ).toBeDisabled();
   await user.click(
-    screen.getByRole("checkbox", { name: /Uso un modello multilingue/ }),
+    screen.getByRole("checkbox", { name: /I am using a multilingual model/ }),
   );
-  await user.click(
-    screen.getByRole("button", { name: "Attiva modello locale" }),
-  );
+  await user.click(screen.getByRole("button", { name: "Enable local model" }));
   expect(assistantApi.configure).toHaveBeenCalledWith(
     true,
     settings.model,
@@ -131,7 +129,7 @@ test("streams, cancels on navigation and retains errors and partial answers", as
       ...turn,
       status: "cancelled",
       answer: "Mirna…",
-      error: "Generazione annullata.",
+      error: "Generation cancelled.",
     });
   });
   render(
@@ -141,21 +139,19 @@ test("streams, cancels on navigation and retains errors and partial answers", as
       onSource={vi.fn()}
     />,
   );
-  await screen.findByLabelText("Domanda");
-  await user.type(screen.getByLabelText("Domanda"), "Chi è Mirna?");
-  await user.click(screen.getByRole("button", { name: "Chiedi alle fonti" }));
+  await screen.findByLabelText("Question");
+  await user.type(screen.getByLabelText("Question"), "Chi è Mirna?");
+  await user.click(screen.getByRole("button", { name: "Ask the sources" }));
   const request = vi.mocked(assistantApi.ask).mock.calls[0][0];
   act(() => receive({ requestId: request.id, phase: "token", text: "Mirna…" }));
-  expect(screen.getByLabelText("Risposta in arrivo")).toHaveTextContent(
-    "Mirna…",
-  );
+  expect(screen.getByLabelText("Answer arriving")).toHaveTextContent("Mirna…");
   const guard = register.mock.calls[0][0] as SaveGuard;
   expect(guard.dirty()).toBe(true);
   await act(() => guard.flush());
   expect(assistantApi.cancel).toHaveBeenCalledWith(request.id);
-  await screen.findByText("Generazione annullata.");
+  await screen.findByText("Generation cancelled.");
   expect(
-    screen.getByText("Annullata · bozza", { selector: "p" }),
+    screen.getByText("Cancelled · draft", { selector: "p" }),
   ).toBeVisible();
   expect(guard.dirty()).toBe(false);
 });
@@ -178,23 +174,21 @@ test("changed sources require explicit current-version navigation and deletion c
   );
   await user.click(await screen.findByRole("button", { name: /Chi è Mirna/ }));
   expect(
-    screen.getByText(/Fonti escluse per possibili istruzioni: 1/),
+    screen.getByText(/Sources excluded for possible instructions: 1/),
   ).toBeVisible();
   await user.click(screen.getByText("[S1] Mirna"));
-  await user.click(screen.getByRole("button", { name: "Apri fonte citata" }));
-  await screen.findByRole("button", { name: "Apri versione attuale" });
+  await user.click(screen.getByRole("button", { name: "Open cited source" }));
+  await screen.findByRole("button", { name: "Open current version" });
   expect(onSource).not.toHaveBeenCalled();
   await user.click(
-    screen.getByRole("button", { name: "Apri versione attuale" }),
+    screen.getByRole("button", { name: "Open current version" }),
   );
   expect(onSource).toHaveBeenCalledWith(
     expect.objectContaining({ sourceId: "page", blockId: "block" }),
   );
-  await user.click(screen.getByRole("button", { name: "Elimina risposta" }));
+  await user.click(screen.getByRole("button", { name: "Delete answer" }));
   expect(assistantApi.remove).not.toHaveBeenCalled();
-  await user.click(
-    screen.getByRole("button", { name: "Conferma eliminazione" }),
-  );
+  await user.click(screen.getByRole("button", { name: "Confirm deletion" }));
   await waitFor(() =>
     expect(assistantApi.remove).toHaveBeenCalledWith("c", "turn"),
   );

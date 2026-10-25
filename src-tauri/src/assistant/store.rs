@@ -74,16 +74,16 @@ pub fn set_settings(c: &Connection, s: &Settings) -> AppResult<Settings> {
 }
 pub(crate) fn validate_settings(s: &Settings) -> AppResult<()> {
     if s.model.len() > 160 || s.digest.len() > 64 {
-        return Err("Configurazione AI oltre i limiti.".into());
+        return Err("AI configuration over the limits.".into());
     }
     if s.enabled {
         super::runtime::check_model_name(&s.model)?;
         if s.digest.len() != 64 || !s.digest.bytes().all(|v| v.is_ascii_hexdigit()) {
-            return Err("Identità del modello non valida.".into());
+            return Err("Invalid model identity.".into());
         }
     }
     if !["dnd-finetuned", "multilingual-rag"].contains(&s.specialization.as_str()) {
-        return Err("Profilo AI non valido.".into());
+        return Err("Invalid AI profile.".into());
     }
     Ok(())
 }
@@ -92,7 +92,7 @@ pub fn question(value: &str) -> AppResult<()> {
         || value.chars().count() > 1000
         || value.chars().any(|c| c == '\0')
     {
-        return Err("Scrivi una domanda da 3 a 1000 caratteri.".into());
+        return Err("Write a question of 3 to 1000 characters.".into());
     }
     Ok(())
 }
@@ -120,7 +120,7 @@ fn crop(value: &str) -> String {
 }
 fn block_identifier(block: &str) -> AppResult<()> {
     if block.is_empty() || block.len() > 128 || block.contains('\0') {
-        return Err("Identità del blocco non valida.".into());
+        return Err("Invalid block identity.".into());
     }
     Ok(())
 }
@@ -148,7 +148,7 @@ pub fn canonical(
     if kind == "wiki" {
         if let Some(page) = id.strip_prefix("wikidot/") {
             if crate::wikidot::category_of(page).is_none() {
-                return Err("Identità fonte regole non valida.".into());
+                return Err("Invalid rules source identity.".into());
             }
             return crate::wikidot::read_entry(c, page)?
                 .map(|(e, _)| {
@@ -178,7 +178,7 @@ pub fn canonical(
         return raw
             .map(|raw| {
                 let v: Value =
-                    serde_json::from_str(&raw).map_err(|_| "Fonte regole illeggibile.")?;
+                    serde_json::from_str(&raw).map_err(|_| "Rules source unreadable.")?;
                 let text = crop(&format!(
                     "{}\n{}\n{}",
                     v["entry"]["name"].as_str().unwrap_or(""),
@@ -190,7 +190,7 @@ pub fn canonical(
                     kind: kind.into(),
                     source_id: id.into(),
                     block_id: None,
-                    title: v["entry"]["name"].as_str().unwrap_or("Voce wiki").into(),
+                    title: v["entry"]["name"].as_str().unwrap_or("Wiki entry").into(),
                     revision: 0,
                     hash: hash(&text),
                     text,
@@ -210,7 +210,7 @@ pub fn canonical(
         "page" => "pages",
         "character" => "characters",
         "item" | "spell" | "ability" => "player_assets",
-        _ => return Err("Tipo fonte AI non valido.".into()),
+        _ => return Err("Invalid AI source type.".into()),
     };
     let revision: Option<i64> = c
         .query_row(
@@ -241,7 +241,7 @@ pub fn canonical(
         let member:Option<(String,String,String)>=c.query_row("SELECT player_name,role,status FROM party_members WHERE campaign_id=?1 AND page_id=?2",params![campaign,id],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?))).optional().map_err(storage)?;
         if let Some((player, role, status)) = member {
             text = format!(
-                "Membro del party. Giocatore: {player}. Ruolo: {role}. Presenza: {status}.\n{text}"
+                "Party member. Player: {player}. Role: {role}. Presence: {status}.\n{text}"
             );
         }
     }
@@ -270,16 +270,16 @@ pub fn retrieve(
     question(q)?;
     let mut out = Vec::new();
     if mode == "rules" {
-        let ed = edition.ok_or("Scegli l'edizione delle regole.")?;
+        let ed = edition.ok_or("Choose the rules edition.")?;
         if !["5e-2014", "5e-2024", "3.5"].contains(&ed) || keys.is_empty() || keys.len() > 6 {
-            return Err("Scegli fino a sei fonti locali della stessa edizione.".into());
+            return Err("Choose up to six local sources of the same edition.".into());
         }
         for key in keys {
             let source = canonical(c, campaign, "wiki", key, None)?
-                .ok_or("Fonte regole non disponibile: consultala nella wiki.")?;
+                .ok_or("Rules source not available: look it up in the wiki.")?;
             if source.edition.as_deref() != Some(ed) {
                 return Err(
-                    "Le fonti selezionate appartengono a edizioni diverse: non saranno mescolate."
+                    "The selected sources belong to different editions: they will not be mixed."
                         .into(),
                 );
             }
@@ -289,7 +289,7 @@ pub fn retrieve(
         }
     } else if mode == "campaign" {
         if edition.is_some() || !keys.is_empty() {
-            return Err("La modalità Campagna non accetta fonti di regole esterne.".into());
+            return Err("Campaign mode does not accept external rules sources.".into());
         }
         let terms = tokens(q);
         // If the question names a known page/alias, keep matching evidence from
@@ -384,7 +384,7 @@ pub fn retrieve(
             }
         }
     } else {
-        return Err("Modalità assistente non valida.".into());
+        return Err("Invalid assistant mode.".into());
     }
     let mut chars = 0;
     out.retain(|s| {
@@ -430,7 +430,7 @@ pub fn get(c: &Connection, campaign: &str, id: &str) -> AppResult<Turn> {
     )
     .optional()
     .map_err(storage)?
-    .ok_or("Risposta AI non trovata in questa campagna.".into())
+    .ok_or("AI answer not found in this campaign.".into())
 }
 pub fn history(c: &Connection, campaign: &str, offset: u32) -> AppResult<Vec<Turn>> {
     require_campaign(c, campaign)?;
@@ -466,11 +466,10 @@ pub fn begin(
         .map_err(storage)?;
     if count >= 1000 {
         return Err(
-            "Cronologia piena: esporta e cancella le risposte meno utili prima di continuare."
-                .into(),
+            "History full: export and delete the least useful answers before continuing.".into(),
         );
     }
-    c.execute("INSERT INTO assistant_turns(id,campaign_id,question,mode,edition,model,digest,status,sources) VALUES(?1,?2,?3,?4,?5,?6,?7,'running',?8)",params![id,campaign,q,mode,edition,config.model,config.digest,serde_json::to_string(sources).map_err(|_|"Fonti AI non serializzabili.")?]).map_err(storage)?;
+    c.execute("INSERT INTO assistant_turns(id,campaign_id,question,mode,edition,model,digest,status,sources) VALUES(?1,?2,?3,?4,?5,?6,?7,'running',?8)",params![id,campaign,q,mode,edition,config.model,config.digest,serde_json::to_string(sources).map_err(|_|"AI sources cannot be serialized.")?]).map_err(storage)?;
     get(c, campaign, id)
 }
 pub fn finish(
@@ -495,9 +494,9 @@ pub fn finish(
         || error.chars().count() > 1000
         || metrics.to_string().len() > 4000
     {
-        return Err("Risposta AI oltre i limiti.".into());
+        return Err("AI answer over the limits.".into());
     }
-    if c.execute("UPDATE assistant_turns SET status=?1,answer=?2,metrics=?3,error=?4,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE campaign_id=?5 AND id=?6",params![status,answer,metrics.to_string(),error,campaign,id]).map_err(storage)?!=1{return Err("Risposta AI non trovata.".into())}
+    if c.execute("UPDATE assistant_turns SET status=?1,answer=?2,metrics=?3,error=?4,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE campaign_id=?5 AND id=?6",params![status,answer,metrics.to_string(),error,campaign,id]).map_err(storage)?!=1{return Err("AI answer not found.".into())}
     get(c, campaign, id)
 }
 pub fn delete(c: &Connection, campaign: &str, id: &str) -> AppResult<()> {
@@ -534,7 +533,7 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
                     || t.error.chars().count() > 1000
                     || t.metrics.to_string().len() > 4000
                 {
-                    return Err("Cronologia AI oltre i limiti nel backup.".into());
+                    return Err("AI history in the backup over the limits.".into());
                 }
                 let mut keys = HashSet::new();
                 for (index, s) in t.sources.iter().enumerate() {
@@ -555,14 +554,14 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
                                 || s.source_id.starts_with("wikidot/"))
                                 || s.source_id.len() > 500))
                     {
-                        return Err("Identità della fonte AI non valida.".into());
+                        return Err("Invalid AI source identity.".into());
                     }
                     if s.text.chars().count() > 1200
                         || hash(&s.text) != s.hash
                         || s.title.chars().count() > 500
                         || s.revision < 0
                     {
-                        return Err("Fonte AI alterata nel backup.".into());
+                        return Err("AI source altered in the backup.".into());
                     }
                     if s.kind != "wiki" {
                         identifier(&s.source_id)?
@@ -574,7 +573,7 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
             }
             offset += rows.len() as u32;
             if offset > 1000 {
-                return Err("Cronologia AI oltre i limiti nel backup.".into());
+                return Err("AI history in the backup over the limits.".into());
             }
         }
     }
@@ -586,7 +585,7 @@ pub fn source_state(c: &Connection, campaign: &str, turn: &str, key: &str) -> Ap
         .sources
         .iter()
         .find(|s| s.key == key)
-        .ok_or("Citazione non appartenente alla risposta.")?;
+        .ok_or("Citation does not belong to the answer.")?;
     let current = canonical(
         c,
         campaign,

@@ -272,24 +272,24 @@ pub async fn status(root: &Path, state: &State, base: &str) -> AppResult<Status>
 /// Start the managed copy only when the port is free; never touch another runtime.
 pub async fn start(root: &Path, state: &State, base: &str) -> AppResult<String> {
     if !managed_installed(root) {
-        return Err("Installa prima Ollama dalle impostazioni.".into());
+        return Err("Install Ollama from the settings first.".into());
     }
     let client = assistant::runtime::client()?;
     if let Ok(s) = assistant::runtime::get(&client, base, "/api/status").await {
         return if assistant::runtime::check_cloud(&s).is_ok() {
-            Ok("Un runtime Ollama locale è già attivo con il cloud disabilitato: Chronexus lo usa senza avviarne un altro.".into())
+            Ok("A local Ollama runtime is already running with cloud disabled: Chronexus uses it without starting another one.".into())
         } else {
-            Err("La porta di Ollama è occupata da un runtime senza cloud disabilitato. Chiudilo o configuralo con OLLAMA_NO_CLOUD=1; Chronexus non lo modifica.".into())
+            Err("The Ollama port is occupied by a runtime without cloud disabled. Close it or configure it with OLLAMA_NO_CLOUD=1; Chronexus does not modify it.".into())
         };
     }
     if tokio::net::TcpStream::connect("127.0.0.1:11434")
         .await
         .is_ok()
     {
-        return Err("La porta 11434 è occupata da un altro programma. Chiudilo e riprova.".into());
+        return Err("Port 11434 is occupied by another program. Close it and try again.".into());
     }
     let models = models_dir(root);
-    fs::create_dir_all(&models).map_err(|_| "Impossibile creare la cartella dei modelli.")?;
+    fs::create_dir_all(&models).map_err(|_| "Cannot create the models folder.")?;
     let log = |name: &str| {
         fs::File::create(base_dir(root).join(name))
             .map(Stdio::from)
@@ -309,7 +309,7 @@ pub async fn start(root: &Path, state: &State, base: &str) -> AppResult<String> 
     hide_window(&mut command);
     let child = command
         .spawn()
-        .map_err(|_| "Impossibile avviare Ollama. Controlla antivirus e permessi.")?;
+        .map_err(|_| "Cannot start Ollama. Check antivirus settings and permissions.")?;
     if let Ok(mut c) = state.child.lock() {
         *c = Some(child);
     }
@@ -317,14 +317,17 @@ pub async fn start(root: &Path, state: &State, base: &str) -> AppResult<String> 
         tokio::time::sleep(Duration::from_millis(500)).await;
         if let Ok(s) = assistant::runtime::get(&client, base, "/api/status").await {
             assistant::runtime::check_cloud(&s).inspect_err(|_| state.shutdown())?;
-            return Ok("Ollama è avviato in locale con il cloud disabilitato. Resta attivo finché Chronexus è aperto.".into());
+            return Ok("Ollama is running locally with cloud disabled. It stays running while Chronexus is open.".into());
         }
         if !state.managed_running() {
             break;
         }
     }
     state.shutdown();
-    Err("Ollama non ha risposto entro 20 secondi. Consulta server-err.log nella cartella del runtime.".into())
+    Err(
+        "Ollama did not respond within 20 seconds. See server-err.log in the runtime folder."
+            .into(),
+    )
 }
 
 #[derive(Clone, Serialize)]
@@ -348,7 +351,7 @@ pub async fn pull(
     let spec = match role {
         "primary" => &policy.primary,
         "secondary" => &policy.secondary,
-        _ => return Err("Scegli il modello principale o quello secondario.".into()),
+        _ => return Err("Choose the primary or secondary model.".into()),
     };
     let status_client = assistant::runtime::client()?;
     assistant::runtime::check_cloud(
@@ -360,12 +363,12 @@ pub async fn pull(
         .connect_timeout(Duration::from_secs(3))
         .read_timeout(Duration::from_secs(300))
         .build()
-        .map_err(|_| "Impossibile preparare la connessione AI locale.")?;
+        .map_err(|_| "Cannot prepare the local AI connection.")?;
     let mut response = tokio::select! {
         biased;
-        _ = token.cancelled() => return Err("Download del modello annullato.".into()),
+        _ = token.cancelled() => return Err("Model download cancelled.".into()),
         r = client.post(format!("{base}/api/pull")).json(&json!({"model": spec.name, "stream": true})).send() =>
-            r.map_err(|_| "Il runtime locale non ha accettato la richiesta di download.")?,
+            r.map_err(|_| "The local runtime did not accept the download request.")?,
     };
     if !response.status().is_success() {
         return Err(format!(
@@ -378,8 +381,8 @@ pub async fn pull(
     loop {
         let chunk = tokio::select! {
             biased;
-            _ = token.cancelled() => return Err("Download del modello annullato. I file parziali restano gestiti da Ollama e non sono un modello pronto.".into()),
-            c = response.chunk() => c.map_err(|_| "Download del modello interrotto. Riprova quando la rete è disponibile.")?,
+            _ = token.cancelled() => return Err("Model download cancelled. Partial files remain managed by Ollama and are not a ready model.".into()),
+            c = response.chunk() => c.map_err(|_| "Model download interrupted. Try again when the network is available.")?,
         };
         let Some(chunk) = chunk else { break };
         pending.extend_from_slice(&chunk);
@@ -393,7 +396,7 @@ pub async fn pull(
             };
             if let Some(error) = event["error"].as_str() {
                 return Err(format!(
-                    "Download del modello non riuscito: {}",
+                    "Model download failed: {}",
                     error.chars().take(200).collect::<String>()
                 ));
             }
@@ -408,10 +411,7 @@ pub async fn pull(
         }
     }
     if !success {
-        return Err(
-            "Il download del modello non si è concluso. Riprova: nessun modello è stato attivato."
-                .into(),
-        );
+        return Err("The model download did not finish. Try again: no model was activated.".into());
     }
     progress(Progress {
         phase: "verify".into(),
@@ -423,9 +423,9 @@ pub async fn pull(
     let state = states
         .into_iter()
         .find(|m| m.role == role)
-        .ok_or("Modello non trovato dopo il download.")?;
+        .ok_or("Model not found after download.")?;
     if state.state != "ready" {
-        return Err("Il modello scaricato non corrisponde ai pesi qualificati: non è stato attivato. Controlla la versione del runtime.".into());
+        return Err("The downloaded model does not match the qualified weights: it was not activated. Check the runtime version.".into());
     }
     Ok(state)
 }
@@ -436,15 +436,15 @@ pub fn remove_runtime(root: &Path, state: &State) -> AppResult<()> {
         return Err("Arresta prima il runtime gestito.".into());
     }
     let dir = runtime_dir(root);
-    let meta = fs::symlink_metadata(&dir).map_err(|_| "Nessun runtime gestito da rimuovere.")?;
+    let meta = fs::symlink_metadata(&dir).map_err(|_| "No managed runtime to remove.")?;
     if !meta.is_dir() || meta.file_type().is_symlink() || !dir.join(RECEIPT).is_file() {
         return Err(
-            "La cartella non appartiene a un runtime gestito da Chronexus: non viene rimossa."
+            "The folder does not belong to a runtime managed by Chronexus: it will not be removed."
                 .into(),
         );
     }
     fs::remove_dir_all(&dir)
-        .map_err(|_| "Impossibile rimuovere il runtime. Chiudi Ollama e riprova.".into())
+        .map_err(|_| "Cannot remove the runtime. Close Ollama and try again.".into())
 }
 pub(crate) fn write_receipt(dir: &Path, files: usize) -> AppResult<()> {
     let receipt = json!({"version": OLLAMA_VERSION, "source": OLLAMA_URL, "sha256": OLLAMA_SHA256, "files": files, "license": "MIT (OLLAMA_LICENSE nel pacchetto ufficiale)"});
@@ -452,7 +452,7 @@ pub(crate) fn write_receipt(dir: &Path, files: usize) -> AppResult<()> {
         dir.join(RECEIPT),
         serde_json::to_vec_pretty(&receipt).unwrap_or_default(),
     )
-    .map_err(|_| "Impossibile registrare il runtime installato.".into())
+    .map_err(|_| "Cannot register the installed runtime.".into())
 }
 pub(crate) const fn margin() -> u64 {
     MARGIN

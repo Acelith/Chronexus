@@ -104,7 +104,7 @@ export default function DiceComposer({
                   />
                   <button
                     type="button"
-                    aria-label={t.add(sides) + tr(" alla quantità")}
+                    aria-label={t.add(sides) + tr(" to the quantity")}
                     onClick={() => step(sides, 1)}
                   >
                     +

@@ -18,14 +18,14 @@ fn sheet() -> CharacterInput {
             modifier: String::new(),
             training: Training::None,
             id: Uuid::new_v4().to_string(),
-            label: "Difesa".into(),
+            label: "Defense".into(),
             value: "12 (manuale)".into(),
             group: "defense".into(),
         }],
         resources: vec![
             Resource {
                 id: Uuid::new_v4().to_string(),
-                label: "Concentrazione".into(),
+                label: "Concentration".into(),
                 kind: "resource".into(),
                 current: 2,
                 maximum: 3,

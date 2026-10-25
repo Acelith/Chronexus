@@ -39,9 +39,9 @@ test("does not search on opening; name and level filter locally; import requires
     });
   render(<DndCatalog onImport={onImport} onClose={vi.fn()} />);
   expect(loadCatalog).not.toHaveBeenCalled();
-  await user.click(screen.getByRole("button", { name: "Cerca nell’API" }));
+  await user.click(screen.getByRole("button", { name: "Search the API" }));
   await screen.findByRole("button", { name: /Light Test/ });
-  await user.type(screen.getByLabelText("Nome nel catalogo"), "Test Spell");
+  await user.type(screen.getByLabelText("Catalog name"), "Test Spell");
   expect(
     screen.queryByRole("button", { name: /Light Test/ }),
   ).not.toBeInTheDocument();
@@ -50,7 +50,7 @@ test("does not search on opening; name and level filter locally; import requires
   await screen.findByText("Descrizione prova");
   expect(onImport).not.toHaveBeenCalled();
   await user.click(
-    screen.getByRole("button", { name: "Usa questi dati nel modulo" }),
+    screen.getByRole("button", { name: "Use this data in the form" }),
   );
   expect(onImport).toHaveBeenCalledWith(
     expect.objectContaining({
@@ -63,12 +63,10 @@ test("failed catalog lookup retains query and permits retry", async () => {
   const user = userEvent.setup();
   vi.mocked(loadCatalog).mockRejectedValue(Error("Connessione assente"));
   render(<DndCatalog initialQuery="Mio incantesimo" onClose={vi.fn()} />);
-  await user.click(screen.getByRole("button", { name: "Cerca nell’API" }));
+  await user.click(screen.getByRole("button", { name: "Search the API" }));
   await waitFor(() =>
     expect(screen.getByRole("alert")).toHaveTextContent("Connessione assente"),
   );
-  expect(screen.getByLabelText("Nome nel catalogo")).toHaveValue(
-    "Mio incantesimo",
-  );
-  expect(screen.getByRole("button", { name: "Cerca nell’API" })).toBeEnabled();
+  expect(screen.getByLabelText("Catalog name")).toHaveValue("Mio incantesimo");
+  expect(screen.getByRole("button", { name: "Search the API" })).toBeEnabled();
 });

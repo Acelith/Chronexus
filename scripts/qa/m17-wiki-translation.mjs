@@ -63,26 +63,24 @@ await call("store_wiki_cache", {
   },
 });
 await page.reload();
-await page.getByRole("button", { name: "Personaggio", exact: true }).click();
+await page.getByRole("button", { name: "Character", exact: true }).click();
 if (
   await page
-    .getByRole("button", { name: "Crea personaggio", exact: true })
+    .getByRole("button", { name: "Create character", exact: true })
     .count()
 ) {
   await page
-    .getByRole("button", { name: "Crea personaggio", exact: true })
+    .getByRole("button", { name: "Create character", exact: true })
     .click();
+  await page.getByLabel("Character name").fill("Personaggio sintetico M17");
   await page
-    .getByLabel("Nome del personaggio")
-    .fill("Personaggio sintetico M17");
-  await page
-    .getByRole("button", { name: "Salva personaggio", exact: true })
+    .getByRole("button", { name: "Save character", exact: true })
     .click();
 }
-await page.getByRole("button", { name: "Wiki D&D", exact: true }).click();
-await page.getByLabel("Termine nella wiki").fill("light");
+await page.getByRole("button", { name: "D&D Wiki", exact: true }).click();
+await page.getByLabel("Term in the wiki").fill("light");
 await page
-  .getByRole("button", { name: "Cerca nella wiki", exact: true })
+  .getByRole("button", { name: "Search the wiki", exact: true })
   .click();
 await page.getByRole("button", { name: /Test Light/ }).click();
 const translate = page.getByRole("button", {
@@ -90,10 +88,10 @@ const translate = page.getByRole("button", {
   exact: true,
 });
 await expect(
-  page.getByRole("region", { name: "Traduzione della voce wiki" }),
+  page.getByRole("region", { name: "Wiki entry translation" }),
 ).toBeVisible();
 await expect(
-  page.getByText("Lettura della traduzione salvata…", { exact: true }),
+  page.getByText("Reading the saved translation…", { exact: true }),
 ).toHaveCount(0);
 if (await translate.count()) {
   await expect(translate).toBeEnabled();
@@ -117,7 +115,7 @@ assert.match(translated.blocks[0].text, /luce/i);
 assert.match(translated.blocks[0].text, /1/);
 assert.match(translated.blocks[0].text, /30/);
 assert.match(translated.blocks[0].text.toLowerCase(), /non/);
-await page.getByText("Mostra originale", { exact: true }).click();
+await page.getByText("Show original", { exact: true }).click();
 await expect(
   page.getByText(original.payload.entry.desc, { exact: true }),
 ).toBeVisible();

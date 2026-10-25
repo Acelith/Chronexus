@@ -28,7 +28,7 @@ const view = (provider: "wikidot" | "open5e" = "wikidot") => (
   </WikiTranslation>
 );
 beforeEach(() => {
-  applyPreferences(defaultPreferences);
+  applyPreferences({ ...defaultPreferences, locale: "it" });
   vi.mocked(command).mockReset();
   vi.mocked(command).mockResolvedValue(null);
 });
@@ -110,7 +110,7 @@ test("riutilizza la copia offline senza inferenza e il cambio lingua elimina que
   expect(screen.queryByText("Una luce per 1 minuto.")).not.toBeInTheDocument();
   await waitFor(() =>
     expect(
-      screen.getByRole("button", { name: "Traduci in Deutsch" }),
+      screen.getByRole("button", { name: "Translate into Deutsch" }),
     ).toBeEnabled(),
   );
   expect(
@@ -165,7 +165,14 @@ test.each(["tlh", "art-x-rihan"] as const)(
   (locale) => {
     applyPreferences({ ...defaultPreferences, locale });
     render(view());
-    expect(screen.getByText(/Traduzione wiki non disponibile/)).toBeVisible();
+    expect(screen.getByText(/Wiki translation not available/)).toBeVisible();
     expect(command).not.toHaveBeenCalled();
   },
 );
+
+test("English default shows the original without inference or cache requests", () => {
+  applyPreferences(defaultPreferences);
+  render(view());
+  expect(screen.getByText("A light for 1 minute.")).toBeVisible();
+  expect(command).not.toHaveBeenCalled();
+});

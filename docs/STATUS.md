@@ -1,482 +1,540 @@
-# Pianificazione — 25 ottobre 2026: M23, M24, M25
+# Chronexus status — 25 October 2026: M26 English-first
 
-Aggiunte su richiesta dell’utente dopo la release 0.8.0, nessuna implementata:
-M23 audit completo del codice (prossima), M24 campagna condivisa (proposta: server
-Chronexus self-hosted con condivisione selettiva, P2P valutato e non scelto come
-base; confermato dall’utente, da sviluppare in un repository separato), M25 app Android APK con lo stesso account del
-server. Dettagli in ROADMAP.
+Implemented in source version **0.8.1**, not published. English is the primary
+interface/source/fallback language for fresh profiles, package/app descriptions,
+public documentation, agent instructions, commit conventions and AI prompts.
+README.md is English; README.it.md preserves the optional Italian overview and
+README.en.md links to the canonical English README. Source release notes are
+English; published artifacts and historical Git commits are not rewritten.
 
-# Stato Chronexus — 25 ottobre 2026 (release 0.8.0)
+Existing language choices survive. Pre-language profiles retain Italian through
+a one-time local preference. Italian aliases/message IDs, original campaign text,
+UUIDs, schema 018, legacy app ID and backup paths remain stable. No new SQL
+migration. Cargo license metadata now matches the existing root Apache-2.0 license.
+AI answers follow an allowlisted interface locale, with English fallback;
+training examples use English wrapper text while quoting originals unchanged.
+No startup inference, training, activation, download or external AI service added.
 
-Pubblicata la release [0.8.0](https://github.com/Acelith/Chronexus/releases/tag/v0.8.0)
-con M19, M20, M21 e M22. Sorgente compilato `c540c2d`, tag annotato `v0.8.0`,
-`main` su origin. Installer NSIS Windows x64 compilato dal commit `c540c2d` (tag annotato `v0.8.0`),
-firmato updater e verificato con la chiave di produzione
-(`updates_signed_release_package_matches_production_key`). Dimensione 33.072.040
+Actual validation:
+
+- **172 current-project Vitest tests PASS**, 14 i18n tests PASS; TypeScript,
+  ESLint, Prettier and frontend build PASS. Editor chunk >500 kB warning remains.
+  Vitest now excludes `.tools`, installers and target copies. Earlier broad runs
+  also counted historical checkout tests; this checkpoint counts only source.
+- **137 Rust unit tests + 1 integration PASS**, 2 ignored (saved Wikidot fixture
+  and real final-package signature). Rustfmt and Clippy all targets/features with
+  `-D warnings` PASS. No new installer exists for a real-package signature test.
+- Release scripts 27, local translator 5, training worker 5, MCP 5 and stable
+  source-message-ID scanner 1 tests PASS. Worker tests do not train real weights.
+- Native Windows isolated profile: fresh English default; Italian survives reload;
+  English recovery survives reload; campaign identity unchanged. Axe 0 violations
+  on language/settings sections; wide/narrow screenshots inspected.
+- Real local Qwen3.8-27B: 4 English cases plus Italian selection PASS (5/5), valid
+  citations, unconfirmed claims kept uncertain, missing information acknowledged,
+  canonical pages unchanged. Initial model-switch warmup after a long Gemma
+  document session timed out before sending context; clean runtime passed. This
+  does not qualify automatic model switching or fix that runtime limitation.
+- React Doctor **62/100**, identical to the original 0.8.0 source baseline;
+  no introduced findings. Existing architecture warnings remain for M23.
+  Impeccable static detector on changed controls: no findings; screenshot/axe
+  checks cover rendering beyond the static detector.
+- English public screenshots contain only synthetic campaign data, 459,016 bytes
+  total. Herald is a documented UI illustration of real 0.8.0 notes; details in
+  docs/media/PROVENANCE.md. Local Markdown links/headings validated.
+
+No installer build, installation, upgrade or publication for this delivery.
+Other operating systems, physical offline/firewall tests and complete linguistic/
+assistive review remain pending. Missing translations in non-English locales
+fall back visibly to English; no fabricated complete coverage. Test profiles,
+runtime logs, weights and reports remain outside Git. Only the temporary QA
+runtime/window were closed; personal installations were not stopped.
+
+Skills applied: React Testing (language persistence and aliases), Tauri v2/Rust
+Best Practices (IPC, metadata, validation), Systematic Debugging (stale language
+assertions and runtime handoff), Impeccable (existing surface and readable copy),
+React Doctor (baseline comparison), Webapp Testing (isolated desktop QA).
+Next planned milestone: **M23**, then M24 server in a separate repository and M25.
+
+
+# Planning — 25 October 2026: M23, M24, M25
+
+Added at user request after release 0.8.0, none implemented:
+M23 full code audit (next), M24 shared campaign (proposal: server
+Chronexus self-hosted with selective sharing, P2P evaluated and not chosen as
+base; confirmed by user, to be developed in a separate repository), M25 Android APK app with the same account as the
+server. Details in ROADMAP.
+
+# Chronexus Status — 25 October 2026 (release 0.8.0)
+
+Release [0.8.0](https://github.com/Acelith/Chronexus/releases/tag/v0.8.0)
+with M19, M20, M21 and M22 published. Source compiled `c540c2d`, tag annotated `v0.8.0`,
+`main` on origin. NSIS Windows x64 installer compiled from commit `c540c2d` (tag annotated `v0.8.0`),
+updater signed and verified with the production key
+(`updates_signed_release_package_matches_production_key`). Size 33.072.040
 byte, SHA-256 `0079f8b8509836e006ad42d37338212593c25b9719119b1e49f2961bbb4d6b3a`.
-Verifiche prima della build: 134 test Rust (`--test-threads=1`), clippy
-`-D warnings`, 332 test frontend, tsc, eslint, controllo cataloghi, 27 test Python
-degli script di rilascio. Bozza con tre allegati caricati e riscaricati, poi
-finalizzata: download anonimi e API `releases/latest` = v0.8.0 verificati.
-Non eseguiti: installazione o upgrade reale, macOS/Linux.
+Checks before build: 134 Rust test (`--test-threads=1`), clippy
+`-D warnings`, 332 frontend test, tsc, eslint, catalog check, 27 Python test
+of release scripts. Draft with three attachments uploaded and re-uploaded, then
+finalized: anonymous downloads and API `releases/latest` = v0.8.0 verified.
+Not performed: real installation or upgrade, macOS/Linux.
 
-# Stato Chronexus — 25 ottobre 2026 (M19)
+# Chronexus Status — 25 October 2026 (M19)
 
-**M19 — Backup nei Documenti, periodici e di aggiornamento.** Consegnata su
-Windows, non in una release, nessun push. Modulo `src-tauri/src/backup_folder`:
-`Documenti/Chronexus/{Backup periodici,Backup aggiornamenti}` creata solo al primo
-backup o apertura richiesta, mai attraverso link simbolici/giunzioni o file al
-posto della cartella. Impostazioni dell’app → Backup (anche senza campagna):
-attivazione (predefinito **spento**), ogni giorno/settimana/N ore (2–72), copie
-1–60, cartella alternativa solo dal selettore di sistema, avviso cloud, ultimo
-successo, prossimo, ultimo errore con azione, «Esegui backup ora», «Apri
-cartella». Preferenze `backup-preferences.json` e indice `periodic-backups.json`
-(SHA-256) nella radice dati, fuori dalle generazioni di ripristino. Esecuzione
-solo con l’app aperta e inattiva (45 s senza input, nessun campo di testo attivo,
-nessun dialogo/bozza/operazione; il backend salta con AI, aggiornamento, archivio
-occupato o ripristino in attesa); un errore attende un intero intervallo. La
-rotazione avviene solo dopo un nuovo backup verificato e cancella solo file
-registrati con hash invariato nella stessa cartella. I backup M15 vanno in
-«Backup aggiornamenti» (ricevuta con `backupPreferences`), con ripiego avvisato in
-`update-backups/`; se falliscono entrambi l’installer non parte. Backup e
-ripristino elenca le cartelle con tipo, data, dimensione, ripristino M4 e copia
-verificata dei vecchi backup di aggiornamento senza cancellare l’originale.
+**M19 — Documents Backup, periodic and update.** Delivered on
+Windows, not in a release, no push. Module `src-tauri/src/backup_folder`:
+`Documenti/Chronexus/{Backup periodici,Backup aggiornamenti}` created only at the first
+backup or requested opening, never through symbolic links/junctions or files at
+the place of the folder. App Settings → Backup (even without campaign):
+activation (default **off**), every day/week/N hours (2–72), copies
+1–60, alternative folder only from system selector, cloud warning, last
+success, next, last error with action, «Run backup now», «Open
+folder». Preferences `backup-preferences.json` and index `periodic-backups.json`
+(SHA-256) in the data root, outside of restore generations. Execution
+only with the app open and idle (45 without input, no active text field,
+no dialog/draft/operation; backend skips with AI, update, archive
+busy or restore pending); an error waits for an entire interval. The
+rotation occurs only after a new verified backup and deletes only files
+registered with unchanged hash in the same folder. M15 backups go to
+«Update Backups» (received with `backupPreferences`), with fallback warned in
+`update-backups/`; if both fail, the installer does not start. Backup and
+restore lists folders with type, date, size, M4 restore and copy
+verified of old update backups without deleting the original.
 
-Verifiche realmente eseguite:
-- `cargo test`: 134 superati con `--test-threads=1` (12 nuovi M19, giunzione
-  Windows reale inclusa). In parallelo fallisce a intermittenza il test MCP
-  `transport_auth_origin_scoping…`, già instabile prima di M19 e verde da solo.
-- `cargo fmt --check`, `cargo clippy --all-targets -D warnings`: superati.
-- `pnpm typecheck`, `pnpm lint`, `prettier --check`, `pnpm test`: 332 test superati.
-- Collaudo desktop isolato (`scripts/qa/m19-backups.mjs`, Documenti simulati con
-  spazi e Unicode): salto durante la scrittura, backup automatico all’inattività,
-  rotazione con file manuale intatto, ripresa dopo riavvio, copia legacy
-  verificata, ripristino reale con immagine, preferenze invariate; axe senza
-  violazioni nei due pannelli.
-- Non verificati: macOS/Linux, Documenti reindirizzati reali, disco pieno e sola
-  lettura fisici, installazione reale di un aggiornamento con backup nei Documenti;
-  nuove stringhe non tradotte (ripiego italiano).
+Checks actually performed:
+- `cargo test`: 134 passed with `--test-threads=1` (12 new M19, real junction
+  Windows included). In parallel, the MCP test
+  `transport_auth_origin_scoping…` fails intermittently, already unstable before M19 and green on its own.
+- `cargo fmt --check`, `cargo clippy --all-targets -D warnings`: passed.
+- `pnpm typecheck`, `pnpm lint`, `prettier --check`, `pnpm test`: 332 tests passed.
+- Isolated desktop testing (`scripts/qa/m19-backups.mjs`, simulated Documents with
+  spaces and Unicode): skip during writing, automatic backup at idle,
+  rotation with manual file intact, resume after restart, legacy copy
+  verified, real restore with image, preferences unchanged; axe without
+  violations in both panels.
+- Not verified: macOS/Linux, real redirected Documents, physical full disk and read-only
+  disk, real installation of an update with backup in Documents;
+  new strings not translated (Italian fallback).
 
-Prossimo passo: nessuna milestone pianificata aperta; eventuale release con
-M19–M22 solo su richiesta.
+Next step: no open planned milestones; potential release with
+M19–M22 only upon request.
 
-# Stato Chronexus — 25 ottobre 2026 (M21, M22, M20)
+# Chronexus Status — 25 October 2026 (M21, M22, M20)
 
-Eseguite su richiesta dell’utente; M19 spostata in fondo alla roadmap. Versione
-sorgente 0.7.0, nessuna release nuova, nessun push.
+Executed at user request; M19 moved to the bottom of the roadmap. Source
+version 0.7.0, no new release, no push.
 
-**M22 — AI locale dalle impostazioni.** Impostazioni dell’app → AI locale:
-componenti. «Controlla componenti» (solo su clic): Ollama, cloud bloccato, GPU via
-`nvidia-smi`, spazio libero, stato di Qwen3.8-27B e Gemma 4 12B rispetto ai pesi
-qualificati. «Installa Ollama…» scarica Ollama 0.40.10 dal solo URL ufficiale
-GitHub (redirect ammessi solo verso gli host asset di GitHub), verifica dimensione e
-SHA-256 `d52aea2d…` (confrontato con il `sha256sum.txt` ufficiale), estrae in una
-cartella temporanea con controllo dei percorsi e la attiva solo a verifica conclusa
-(`ai-runtime/ollama-0.40.10` nella cartella dati, fuori da backup e Git). Avvio e
-arresto espliciti; il runtime gestito si chiude con Chronexus, non tocca runtime
-esistenti né porte occupate e richiede il cloud disabilitato. «Scarica modello…»
-chiede al runtime attivo il solo modello scelto e lo dichiara pronto solo se il
-digest dei pesi coincide con la policy M18. Rimozione limitata al runtime gestito.
+**M22 — Local AI from settings.** App settings → Local AI:
+components. "Check components" (only on click): Ollama, cloud blocked, GPU via
+`nvidia-smi`, free space, status of Qwen3.8-27B and Gemma 4 12B compared to qualified
+weights. "Install Ollama..." downloads Ollama 0.40.10 from the official URL only
+GitHub (redirects allowed only to GitHub asset hosts), verifies size and
+SHA-256 `d52aea2d…` (compared with the official `sha256sum.txt`), extracts to a
+temporary folder with path checking and activates it only after verification is complete
+(`ai-runtime/ollama-0.40.10` in the data folder, outside of backup and Git). Explicit start and
+stop; the managed runtime closes with Chronexus, does not touch existing runtime
+or occupied ports and requires cloud disabled. "Download model..."
+asks the active runtime for only the chosen model and declares it ready only if the
+weight digest matches the M18 policy. Removal limited to the managed runtime.
 
-**M21 — Identità visiva.** Icona dell’app dall’araldo (`assets/chronexus.svg` =
-`assets/brand/chronexus-icon.svg`, generazione `pnpm icons` provata), logo verticale
-nella barra laterale con titolo accessibile «Chronexus».
+**M21 — Visual identity.** App icon from the herald (`assets/chronexus.svg` =
+`assets/brand/chronexus-icon.svg`, `pnpm icons` generation tested), vertical logo
+in the sidebar with accessible title "Chronexus".
 
-**M20 — README.** README italiano e inglese con intestazione, badge veri, tabella
-funzioni con icone del progetto, installazione, avvisi, crediti e licenza Apache-2.0
-del file LICENSE. Contenuti tecnici spostati senza perdite in `docs/GUIDE.md` e
-`docs/DEVELOPMENT.md`. Cinque schermate WebP da campagna sintetica (circa 0,5 MB).
+**M20 — README.** Italian and English README with header, real badges, function
+table with project icons, installation, warnings, credits and Apache-2.0
+license of the LICENSE file. Technical contents moved without loss to `docs/GUIDE.md` and
+`docs/DEVELOPMENT.md`. Five WebP screens from synthetic campaign (approx. 0,5 MB).
 
-Verifiche realmente eseguite:
-- `cargo test`: 122 test, inclusi 5 nuovi M22 (download/hash/redirect, archivi
-  ostili, annullamento, pull con verifica pesi, stato senza rete); 10 esecuzioni
-  complete senza fallimenti M22 dopo aver corretto un keep-alive nel server finto
-  del test. `transport_auth…` (MCP) fallisce in modo intermittente anche da solo e
-  anche sul commit HEAD pulito: instabilità preesistente. clippy e fmt PASS.
-- `pnpm test` 326 PASS; lint, typecheck, format, i18n:check e build PASS.
-- Desktop Windows debug, profili isolati: `scripts/qa/m22-ai-setup.mjs install`
-  reale (download ufficiale 1,59 GB, verifica ed estrazione in 128 s, avvio con
-  cloud disabilitato, arresto, nessun file parziale); pull reale di Gemma 4 12B già
-  presente nel runtime di sviluppo: ricontrollo del registro e pesi verificati
-  «Pronto» in 2 s. Logo a 1440/1200/760 px, axe 0 violazioni su barra laterale e
-  pannello AI. Schermate README da `scripts/qa/m20-readme-media.mjs`.
+Verifications actually performed:
+- `cargo test`: 122 test, including 5 new M22 (download/hash/redirect, archive
+hostiles, cancellation, pull with weight verification, offline status); 10 executions
+complete without M22 failures after correcting a keep-alive in the fake server
+of the test. `transport_auth…` (MCP) fails intermittently even on its own and
+even on the clean HEAD commit: pre-existing instability. clippy and fmt PASS.
+- `pnpm test` 326 PASS; lint, typecheck, format, i18n:check and build PASS.
+- Windows Desktop debug, isolated profiles: `scripts/qa/m22-ai-setup.mjs install`
+real (official 1,59 GB download, verification and extraction in 128 s, start with
+cloud disabled, stop, no partial files); real pull of Gemma 4 12B already
+present in the development runtime: log re-check and weights verified
+«Ready» in 2 s. Logo at 1440/1200/760 px, axe 0 violations on sidebar and
+AI panel. README screenshots from `scripts/qa/m20-readme-media.mjs`.
 
-Limiti: download completo dei 17,7 GB di Qwen3.8-27B tramite interfaccia non
-ripetuto; installazione guidata solo Windows x64; `Cargo.toml` dichiara MIT mentre
-`LICENSE` è Apache-2.0: incoerenza segnalata all’utente, non modificata; nuove
-stringhe con fallback italiano; macOS/Linux non provati.
+Limits: full download of 17,7 GB of Qwen3.8-27B via interface not
+repeated; guided installation only Windows x64; `Cargo.toml` declares MIT while
+`LICENSE` is Apache-2.0: inconsistency reported to the user, not modified; new
+strings with Italian fallback; macOS/Linux not tested.
 
-Skill: frontend-design e impeccable (craft-floor) per README, icone SVG del progetto
-al posto delle emoji e composizione del logo; accessibility per pannello AI e nome
-del logo; react-testing per i test; imagegen non necessaria (immagini dell’utente).
+Skill: frontend-design and impeccable (craft-floor) for README, project SVG icons
+instead of emojis and logo composition; accessibility for AI panel and logo name
+; react-testing for tests; imagegen not necessary (user images).
 
-Push del 25/10/2026: `main` su origin a 7f2dd90 (nessuna release). Resa del README
-verificata sulla pagina reale di github.com (Forgejo 12.0.4): callout WARNING/
-IMPORTANT/NOTE, due sezioni richiudibili, centrature, tre tabelle, tutte le immagini
-e i badge caricati (release v0.7.0), 12 link interni con risposta 200.
+Push of the 25/10/2026: `main` on origin at 7f2dd90 (no release). README rendering
+verified on the real page of github.com (Forgejo 12.0.4): callout WARNING/
+IMPORTANT/NOTE, two collapsible sections, centering, three tables, all images
+e i badge loaded (release v0.7.0), 12 internal links with response 200.
 
-Prossima e unica milestone pianificata: M19.
+Next and only planned milestone: M19.
 
-# Pianificazione — 25 ottobre 2026: M22 assieme ai loghi M21
+# Planning — 25 October 2026: M22 along with M21 logos
 
-Aggiunta M22: installazione guidata di Ollama e modelli da Impostazioni dell’app,
-nella stessa prossima fase dei loghi M21, prima di M19/M20. Qwen3.8-27B principale,
-Gemma secondaria facoltativa; stato componenti, requisiti/spazio/licenze,
-download espliciti con avanzamento/annullamento e verifica integrità. Runtime
-preesistenti e attivazione delle campagne preservati, nessun cloud o setup
-automatico. QLoRA escluso dal download ordinario. Solo pianificazione: codice,
-versione, schema e pacchetto 0.7.0 invariati; nessuna compilazione/installazione
-o pubblicazione. Verifica documentale e `git diff --check`, test app non eseguiti
-per questa modifica solo documentale. Dettagli e accettazione in ROADMAP M22.
+Added M22: guided installation of Ollama and models from App Settings,
+in the same next phase as M21 logos, before M19/M20. Qwen3.8-27B primary,
+Gemma optional secondary; component status, requirements/space/licenses,
+explicit downloads with progress/cancel and integrity check. Pre-existing
+runtimes and campaign activations preserved, no cloud or automatic
+setup. QLoRA excluded from ordinary download. Planning only: code,
+version, schema and 0.7.0 package unchanged; no compilation/installation
+or publication. Documentary verification and `git diff --check`, app tests not performed
+for this documentation-only change. Details and acceptance in ROADMAP M22.
 
-# Stato Chronexus — 25 ottobre 2026: M18
+# Chronexus Status — 25 October 2026: M18
 
-Implementata Windows, versione 0.7.0 compilata e consegnata localmente. Qwen3.8-27B ufficiale
-Q4_K_M è la prima scelta per assistente/wiki/strumento traduzioni, Gemma 4 12B
-secondaria esplicita e unica base QLoRA. Policy condivisa con pesi fissati;
-48 layer GPU/batch 256, contesto 8192: esecuzione mista GPU/RAM sulla 4080 SUPER
-16 GB. Profilo 99 layer scartato per pressione di memoria/latenza. Nessun
-cloud, download, attivazione di campagna o fallback automatico.
+Windows implemented, version 0.7.0 compiled and delivered locally. Official Qwen3.8-27B
+Q4_K_M is the first choice for assistant/wiki/translation tool, Gemma 4 12B
+explicit secondary and sole QLoRA base. Shared policy with fixed weights;
+48 GPU/batch layer 256, context 8192: mixed GPU/RAM execution on 4080 SUPER
+16 GB. 99 layer profile discarded for memory pressure/latency. No
+cloud, download, campaign activation or automatic fallback.
 
-Schema 018 disabilita i vecchi Qwen globali/per campagna senza riscrivere
-nomi/digest, risposte o citazioni. Ripristino reale del backup sintetico 017
-verificato nella nuova app; Gemma attiva conservata. Traduttore v2 con selezione
-esplicita e cache coerente col modello; copie v1 valide nei backup, mai attribuite
-al nuovo modello. Script installer vecchio Qwen ritirati; bundle Gemma solo con
---secondary-gemma. Identità, setup e misure in docs/AI_MODELS.md.
+018 Schema disables old global/per-campaign Qwen without rewriting
+names/digests, responses or citations. Real restoration of synthetic backup 017
+verified in the new app; Gemma active preserved. Translator v2 with selection
+explicit and cache coherent with model; v1 copies valid in backups, never attributed
+to the new model. Old Qwen installer scripts withdrawn; Gemma bundle only with
+--secondary-gemma. Identity, setup and measures in docs/AI_MODELS.md.
 
-Verifiche effettive:
-- Qualifica prima delle modifiche: SHA-256 GGUF indipendente, Qwen e Gemma 35/35
-  su fonti identiche; benchmark nativo 40/40 ciascuno, dati canonici invariati.
-- UI ripristino/migrazione: storia e citazioni correnti intatte, vecchio Qwen
-  rifiutato, consenso necessario, Qwen primo, Gemma secondaria, training corretto.
-- Wiki nativa: italiano, numeri/negazione/raggio conservati, originale intatto;
-  cache visibile con runtime spento e HTTPS browser bloccato. Annullamento e
-  cache clear impediscono copie parziali/tardive e liberano il blocco AI.
-- Axe 0 violazioni su impostazioni/voce; viste 1200/760 px ispezionate.
-- Frontend 162 test PASS; i18n 14 PASS; lint/TypeScript/build PASS. Avviso chunk
-  editor >500 kB preesistente. Formattazione finale PASS.
-- Rust 117 unitari + 1 integrazione PASS; 2 ignorati (fixture Wikidot locale e
-  firma sul pacchetto finale). Test della firma poi eseguito esplicitamente sul
-  pacchetto reale: PASS, copia manomessa rifiutata. Clippy all-targets/all-features
+Actual verifications:
+- Qualification before changes: independent SHA-256 GGUF, Qwen and Gemma 35/35
+  on identical sources; native benchmark 40/40 each, canonical data unchanged.
+- UI restoration/migration: current history and citations intact, old Qwen
+  rejected, consent required, Qwen first, Gemma secondary, correct training.
+- Native Wiki: Italian, numbers/negation/radius preserved, original intact;
+  visible cache with runtime off and HTTPS browser blocked. Cancellation and
+  cache clear prevent partial/late copies and release the AI block.
+- Axe 0 violations on settings/voice; 1200/760 px views inspected.
+- Frontend 162 test PASS; i18n 14 PASS; lint/TypeScript/build PASS. Pre-existing chunk
+  editor >500 kB warning. Final formatting PASS.
+- Rust 117 unitaries + 1 integration PASS; 2 ignored (local Wikidot fixture and
+  signature on final package). Signature test then explicitly performed on
+  actual package: PASS, tampered copy rejected. Clippy all-targets/all-features
   -D warnings PASS.
-- Script release 27, traduzione locale 5 e MCP 5 PASS. Build debug Windows PASS.
-- React Doctor 84/100 (baseline 81), avviso dimensione TrainingPanel; nessun errore.
-  Impeccable statico sui quattro componenti: nessuna segnalazione, limiti statici
-  compensati da screenshot e axe. Detector nativo: avviso preesistente di righe
-  lunghe nell’aiuto generale wiki, esterno ai controlli modificati.
+- Release script 27, local translation 5 and MCP 5 PASS. Windows debug build PASS.
+- React Doctor 84/100 (baseline 81), TrainingPanel size warning; no errors.
+  Impeccable static on four components: no reports, static limits
+  compensated by screenshots and axe. Native detector: pre-existing warning of long lines
+  in general wiki help, external to modified controls.
 
-Consegna locale 0.7.0: sorgente/tag `v0.7.0` → `2052df7`
+Local delivery 0.7.0: source/tag `v0.7.0` → `2052df7`
 (`feat(ai): adotta Qwen3.8-27B e mantiene Gemma secondaria`). Build NSIS x64
-firmata updater da checkout isolato del commit, 32.630.931 byte; SHA-256
+firmata updater from isolated commit checkout, 32.630.931 byte; SHA-256
 `69b9ef340f43f177b266c99ce1f9e1eac9320fdf3229ff1500106389350e270e`.
-Installer, firma, manifesto e report in
-`installers/Chronexus-0.7.0-Windows-x64/`, fuori Git. Firma reale con chiave di
-produzione PASS; nessuna installazione. Il primo push è stato rifiutato dal
-server per credenziali errate/scadute, prima dell’avvio del publisher.
-L’utente ha quindi chiesto di lasciare la pubblicazione: non riprenderla senza
-nuova richiesta. Nessuna release 0.7.0 creata; canale pubblico precedente 0.6.0.
+Installer, signature, manifest, and report in
+`installers/Chronexus-0.7.0-Windows-x64/`, outside Git. Real signature with production
+key PASS; no installation. The first push was rejected by the
+server due to incorrect/expired credentials before the publisher's start.
+The user then requested to leave the publication: do not resume without
+a new request. No 0.7.0 release created; previous public channel 0.6.0.
 
-Limiti: qualifica su una GPU Windows, nessuna installazione sul profilo personale
-o prova fisica senza rete; altri OS/hardware pendenti. Traduzioni da revisionare
-(soprattutto significato/terminologia), nessuna garanzia di regole ufficiali.
-Prossima milestone pianificata: M21, poi M19/M20 secondo ROADMAP.
-Skill applicate: Rust Best Practices/Tauri v2 (policy e IPC), SQLite Expert
-(migrazione/backup), Impeccable (stati coerenti con UI esistente), React Testing
-e React Doctor (regressioni), Systematic Debugging (memoria/formato/semantica),
-Webapp Testing (collaudi desktop isolati). Pesi/fixture/report fuori Git.
+Limits: qualification on a Windows GPU, no installation on personal profile
+or physical test without network; other OS/hardware pending. Translations to be reviewed
+(especially meaning/terminology), no guarantee of official rules.
+Next planned milestone: M21, then M19/M20 according to ROADMAP.
+Skills applied: Rust Best Practices/Tauri v2 (policy and IPC), SQLite Expert
+(migration/backup), Impeccable (consistent states with existing UI), React Testing
+and React Doctor (regressions), Systematic Debugging (memory/format/semantics),
+Webapp Testing (isolated desktop tests). Weights/fixtures/reports outside Git.
 
-# Pianificazione — 25 ottobre 2026: M21 prima di tutto
+# Planning — 25 October 2026: M21 first of all
 
-Solo documentazione e asset. L’utente ha scelto i loghi dell’araldo (icona,
-marchio orizzontale, logo verticale): originali in `assets/brand/source/`, varianti
-preparate in `assets/brand/` (icona con angoli trasparenti provata con `tauri icon`).
-Su sua istruzione non sono ancora integrati: nuova M21 in ROADMAP, da eseguire
-**prima** di M18, M19, M20 e di ogni altra milestone aperta. Un’integrazione
-iniziata in questo turno è stata annullata prima del commit; app, versione e
-release invariate.
+Only documentation and assets. The user chose the herald logos (icon,
+horizontal brand, vertical logo): originals in `assets/brand/source/`, variants
+prepared in `assets/brand/` (icon with transparent corners tested with `tauri icon`).
+Per their instruction, they are not yet integrated: new M21 in ROADMAP, to be executed
+**before** M18, M19, M20, and any other open milestone. An integration
+started in this turn was canceled before the commit; app, version, and
+release unchanged.
 
-# Pianificazione — 25 ottobre 2026: M20
+# Planning — 25 October 2026: M20
 
-Solo documentazione. Nuova M20 in ROADMAP: README di qualità ispirato ai progetti
-indicati dall’utente (intestazione centrata, badge reali, screenshot sintetici,
-tabelle di funzioni e installazione, callout e sezioni richiudibili, README.en.md,
-contenuti tecnici spostati in docs). Codice, versione e release invariati.
+Only documentation. New M20 in ROADMAP: high-quality README inspired by the projects
+indicated by the user (centered header, real badges, synthetic screenshots,
+function and installation tables, callouts and collapsible sections, README.en.md,
+technical content moved to docs). Code, version, and release unchanged.
 
-# Pianificazione — 25 ottobre 2026: M19
+# Planning — 25 October 2026: M19
 
-Solo documentazione. Nuova M19 in ROADMAP: cartella `Chronexus/` nei Documenti con
-«Backup periodici» e «Backup aggiornamenti», backup periodici configurabili
-nell’app (solo ad app aperta e inattiva, rotazione solo dei periodici registrati) e
-backup pre-aggiornamento M15 spostati lì con ripiego nella cartella dati e nessuna
-eliminazione automatica. Codice, schema, versione e release invariati; nessuna
-pubblicazione.
+Only documentation. New M19 in ROADMAP: `Chronexus/` folder in Documents with
+«Periodic Backups» and «Update Backups», configurable periodic backups
+in the app (only when app is open and idle, rotation only of recorded periodic ones) and
+M15 pre-update backups moved there with fallback in the data folder and no
+automatic deletion. Code, schema, version, and release unchanged; no
+publication.
 
-# Stato Chronexus — 25 ottobre 2026: M17
+# Chronexus Status — 25 October 2026: M17
 
-M17 implementata su Windows: traduzione esplicita della voce wiki nella lingua
-selezionata dell’app, per Wikidot e Open5e. Originale/provenienza e importazioni
-immutati; bozze automatiche separate e consultabili offline. Schema 017 additivo,
-cache limitata a 100 copie, inclusa nei backup e nello svuotamento per provider.
-I controlli scartano risultati incompleti, numeri alterati e scritture tardive.
+M17 implemented on Windows: explicit translation of the wiki entry into the
+app's selected language, for Wikidot and Open5e. Original/source and imports
+unchanged; separate and offline-consultable automatic drafts. Additive 017 schema,
+cache limited to 100 copies, included in backups and in clearing for provider.
+Checks discard incomplete results, altered numbers, and late writes.
 
-Verifiche effettive:
-- Lint e TypeScript PASS; frontend 159 test PASS; i18n 14 test PASS.
-- Rust 115 test PASS complessivi, 2 ignorati (fixture Wikidot locale e prova della
-  firma sul pacchetto finale); prova firma poi eseguita PASS, vedi sotto. Migrazione 016 → 017,
-  sorgenti immutate, cache per fonte/lingua e backup/restore verificati.
-- Build frontend PASS (avviso preesistente chunk >500 kB); build debug Windows
-  PASS; Clippy senza warning PASS. Formattazione finale PASS.
-- QA desktop su profilo sintetico isolato: Qwen3 4b-instruct su RTX 4080 SUPER,
-  GGUF verificato, cloud disabilitato, 37/37 layer GPU. Traduzione italiana,
-  tedesca e araba con numeri/negazione conservati nella fixture; titoli/termini
-  variabili confermano che non è una revisione linguistica o regole ufficiali.
-- Originale conservato; copia riletta anche con runtime spento e richieste browser
-  pubbliche bloccate. Non equivale a una prova fisica senza rete/firewall.
-- Annullamento reale senza copia parziale; cache clear durante l’inferenza
-  interrompe il lavoro e rifiuta la scrittura tardiva; blocco AI condiviso liberato.
-- Axe sulla voce 0 violazioni; vista 1200/760 px ispezionata. React Doctor 81/100,
-  nessuna nuova segnalazione dopo la correzione delle identità dei blocchi.
-- Test script rilascio 26 PASS; protocollo MCP 5 PASS, senza nuovi tool esposti.
+Actual verifications:
+- Lint and TypeScript PASS; frontend 159 test PASS; i18n 14 test PASS.
+- Rust 115 overall test PASS, 2 ignored (local Wikidot fixtures and test of
+  signature on the final package); signature test then performed PASS, see below. 016 → 017 migration,
+  sources unchanged, cache for source/language and backup/restore verified.
+- Frontend build PASS (pre-existing warning chunk >500 kB); Windows debug build
+  PASS; Clippy without warnings PASS. Final formatting PASS.
+- QA desktop on isolated synthetic profile: Qwen3 4b-instruct on RTX 4080 SUPER,
+  GGUF verified, cloud disabled, 37/37 GPU layer. Italian translation,
+  German and Arabic with numbers/negation preserved in the fixture; variable titles/terms
+  confirm that it is not a linguistic revision or official rules.
+- Original preserved; copy reread even with runtime off and public browser
+  requests blocked. Not equivalent to a physical proof without network/firewall.
+- Real cancellation without partial copy; cache clear during inference
+  interrupts work and refuses late writing; shared AI block released.
+- Axe on 0 violations; 1200/760 px view inspected. React Doctor 81/100,
+  no new reports after correcting block identities.
+- Test script release 26 PASS; MCP protocol 5 PASS, no new tools exposed.
 
-Distribuzione **0.6.0 pubblicata**: https://github.com/Acelith/Chronexus/releases/tag/v0.6.0
-(release id 5, tre allegati). Sorgente/tag `v0.6.0` → `b4f04c4`
+Distribution **0.6.0 published**: https://github.com/Acelith/Chronexus/releases/tag/v0.6.0
+(release id 5, three attachments). Source/tag `v0.6.0` → `b4f04c4`
 (`feat(wiki): traduce le voci nella lingua dell'app con cache locale`).
-Build NSIS Windows x64 firmata updater, installer 32.603.355 byte; SHA-256
+Build NSIS Windows x64 signed updater, installer 32.603.355 byte; SHA-256
 `a7bbe026e68ef4122499f8f8ac1d1bc50d2551bbdd7e1a73110338d984b8f675`.
-Firma del pacchetto reale con chiave di produzione PASS, copia manomessa rifiutata
-(test ignorato eseguito esplicitamente). Upload, riscaricamento/checksum e download
-anonimi dei tre allegati, manifesto statico e API stable latest verificati dal
-publisher. Installer e report in `installers/Chronexus-0.6.0-Windows-x64/` fuori Git.
-Non installata sul profilo personale: upgrade reale 0.5.0 → 0.6.0 ancora da provare.
-Nessun contenuto/fixture privata o peso AI in Git. Prove locali in `.tools/m17/`,
-script ripetibili in `scripts/qa/m17-*.mjs`, guida `docs/WIKI_TRANSLATION.md`.
+Real package signature with production key PASS, tampered copy rejected
+(ignored test explicitly performed). Upload, redownload/checksum and download
+anonymous of the three attachments, static manifest and stable latest API verified by the
+publisher. Installer and report in `installers/Chronexus-0.6.0-Windows-x64/` outside Git.
+Not installed on personal profile: real upgrade 0.5.0 → 0.6.0 still to be tested.
+No private content/fixture or AI weight in Git. Local proofs in `.tools/m17/`,
+repeatable scripts in `scripts/qa/m17-*.mjs`, guide `docs/WIKI_TRANSLATION.md`.
 
-Limiti: prima traduzione richiede Ollama/GPU e Qwen approvato già presenti;
-24.000 byte/500 frammenti/240 s, errore e originale per i testi oltre limite;
-ticinese e altre lingue da revisionare, Klingon/Romulano con fallback esplicito.
-macOS/Linux, lettori assistivi reali e upgrade installato restano aperti.
-**Prossima milestone: M18**, sostituzione dei Qwen con il modello locale
-qualificato, ancora pianificata. Non anticipata da M17.
+Limits: first translation requires Ollama/GPU and already present approved Qwen;
+24.000 byte/500 fragments/240 s, error and original for tests beyond limit;
+Ticinese and other languages to be revised, Klingon/Romulan with explicit fallback.
+macOS/Linux, real assistive readers and installed upgrade remain open.
+**Next milestone: M18**, replacement of Qwen with the qualified local model
+still planned. Not anticipated by M17.
 
-Skill applicate: Tauri v2 e Rust Best Practices (IPC, runtime e validazioni),
-SQLite Expert (migrazione/cache), Impeccable (contesto esistente e stati UI),
-React Testing e React Doctor (test e controllo regressioni), Systematic Debugging
-(formato JSON/numeri), Webapp Testing (QA desktop) e Computer Use (ricognizione delle finestre).
+Skills applied: Tauri v2 and Rust Best Practices (IPC, runtime and validations),
+SQLite Expert (migration/cache), Impeccable (existing context and UI states),
+React Testing and React Doctor (test and regression control), Systematic Debugging
+(JSON/numbers format), Webapp Testing (desktop QA) and Computer Use (window reconnaissance).
 
-# Pianificazione — 25 ottobre 2026: M18
+# Planning — 25 October 2026: M18
 
-Solo documentazione. Richiesta: rimuovere tutti i Qwen e usare «Qwen3.8-max».
-Verifica: Qwen3.8-Max ha 2,4 T parametri ed è un’API cloud o pesi da server
-multi-GPU; non adatto alla RTX 4080 SUPER 16 GB né alla regola «nessuna AI esterna».
-Scelta dell’utente: Qwen3.8-27B aperto in locale. Nuova M18 in ROADMAP (M17 è usato
-da un lavoro concorrente di traduzione della wiki, non toccato). Codice, schema,
-versione 0.5.0 e release invariati; nessuna pubblicazione.
+Documentation only. Request: remove all Qwen and use «Qwen3.8-max».
+Verification: Qwen3.8-Max has 2,4 T parameters and is a cloud API or weights from multi-GPU server;
+not suitable for RTX 4080 SUPER 16 GB nor for the «no external AI» rule.
+User choice: Qwen3.8-27B open locally. New M18 in ROADMAP (M17 is used
+by a concurrent wiki translation job, untouched). Code, schema,
+version 0.5.0 and release unchanged; no publication.
 
-# Release 0.5.0 — 25 ottobre 2026: pubblicata
+# Release 0.5.0 — 25 October 2026: published
 
-https://github.com/Acelith/Chronexus/releases/tag/v0.5.0 — release id 4, tre
-allegati. Publisher: bozza, upload e riscaricamento SHA-256 verificati, poi
-pubblicazione con verifica dei download anonimi, della rotta statica `latest.json`
-e dell’API `releases/latest` (v0.5.0, non bozza, non anteprima). Controllo curl
-indipendente PASS. Tag `v0.5.0` → deef244; main su origin a 7a96ec5 prima di
-questo checkpoint. Il main remoto era già a a4e1fb4 prima del push di questa
-sessione: quei commit non sono stati pubblicati da questa sessione.
+https://github.com/Acelith/Chronexus/releases/tag/v0.5.0 — release id 4, three
+attachments. Publisher: draft, upload and redownload SHA-256 verified, then
+publication with verification of anonymous downloads, the static route `latest.json`
+and the API `releases/latest` (v0.5.0, not draft, not preview). Independent curl
+check PASS. Tag `v0.5.0` → deef244; main on origin at
+7a96ec5 before
+this checkpoint. The remote main was already at a4e1fb4 before the push of this
 
-Incidente: durante una verifica della versione è stato avviato per errore
-`.tools/m15a/target/debug/chronexus.exe` senza `NODEX_DEV_DATA_DIR` (circa un
-minuto, poi chiuso normalmente). Una build debug senza override usa la cartella
-dati personale `it.nodex.desktop`: se l’archivio non era bloccato da un’altra
-istanza, può averlo migrato allo schema 016 (additivo) e aver scritto
-`update-announcements.json`. Non verificato: la lettura della cartella personale è
-stata negata dal sistema di permessi. Se la 0.4.0 installata segnala uno schema
-più recente, installare la 0.5.0 pubblicata (dati conservati).
-Esito: l’utente ha confermato che la 0.4.0 installata si apre normalmente, quindi
-l’archivio personale non è stato migrato a 016.
+Incident: during a version check, it was started by mistake
+`.tools/m15a/target/debug/chronexus.exe` without `NODEX_DEV_DATA_DIR` (for about one
+minute, then closed normally). A debug build without override uses the personal data folder
+`it.nodex.desktop`: if the archive was not locked by another
+instance, it may have migrated it to the 016 schema (additive) and written
+`update-announcements.json`. Not verified: reading of the personal folder was
+denied by the permissions system. If the installed 0.4.0 reports a
+newer schema, install the published 0.5.0 (data preserved).
+Outcome: the user confirmed that the installed 0.4.0 opens normally, therefore
+the personal archive was not migrated to 016.
 
-# Dettagli della build 0.5.0
+# 0.5.0 build details
 
-Su richiesta dell’utente: illustrazioni dell’araldo integrate (daed026), versione
-0.5.0 (deef244, sorgente compilato, tag annotato `v0.5.0`). Build NSIS firmata
-updater: `installers/Chronexus-0.5.0-Windows-x64/` (fuori Git), setup 32.558.794
+At the user's request: integrated herald illustrations (daed026), version
+0.5.0 (deef244, compiled source, annotated tag `v0.5.0`). NSIS build signed
+updater: `installers/Chronexus-0.5.0-Windows-x64/` (outside Git), setup 32.558.794
 byte, SHA-256 d854b0e8768d980ce3b1d288c12261b23b1d253537da33f503044142e5ca2e51;
-`.sig`, `latest.json`, SHA256SUMS, report e LEGGIMI. Test crittografico ignorato
-eseguito: firma valida con la chiave di produzione, copia manomessa rifiutata.
-Test degli script di rilascio 26 PASS (test M11 della versione reso generico).
-Installer non installato su questo computer per non toccare l’installazione
-personale; upgrade reale 0.4.0 → 0.5.0 dal client non ancora provato.
+`.sig`, `latest.json`, SHA256SUMS, report and READ_ME. Cryptographic test ignored
+performed: valid signature with production key, tampered copy rejected.
+26 release scripts test PASS (M11 version test made generic).
+Installer not installed on this computer to avoid touching the personal
+installation; actual 0.4.0 → 0.5.0 upgrade from client not yet tested.
 
-# Stato Chronexus — 25 ottobre 2026 (M15a)
+# Chronexus Status — 25 October 2026 (M15a)
 
-## M15a — Araldo degli aggiornamenti: operativa Windows (illustrazioni da fornire)
+## M15a — Update Herald: Windows operational (illustrations to be provided)
 
-- Controllo automatico leggero dopo l’avvio (6 s): uno per sessione e al massimo
-  ogni 20 ore, disattivabile in **Impostazioni dell’app → Aggiornamenti**; contatta
-  solo il canale aggiornamenti M15, mai wiki o modelli AI. Errori silenziosi.
-- Se esiste una versione più recente e compatibile, popup `<dialog>`: araldo con
-  trombetta (emblema geometrico provvisorio), manifesto con versione e note come
-  testo semplice, **Aggiorna**, **Ricordamelo più tardi** (3 giorni, per versione),
-  **Ignora questa versione**; Escape = rinvio. Nessun doppio annuncio.
-- Attende un’app inattiva: nessun salvataggio/modulo/ripristino/ricerca, nessuna
-  bozza sporca, dialogo aperto o campo di testo con il focus, AI/addestramento o
-  aggiornamento in corso. Focus sul titolo e restituito alla chiusura.
-- Fanfara sintetizzata in Web Audio (nessun file), disattivabile; audio bloccato
-  dalla piattaforma = annuncio completo senza suono né nuovi tentativi. Animazione
-  di ~1,5 s saltabile, statica con movimento ridotto.
-- **Aggiorna** apre le impostazioni e avvia il download verificato M15;
-  l’installazione resta l’azione esplicita con backup obbligatorio.
-- Preferenze in `update-announcements.json` fuori dai ripristini, incluse nella
-  ricevuta pre-aggiornamento. SQLite resta 016.
+- Light automatic check after startup (6 s): one per session and at most
+  every 20 hours, can be disabled in **App Settings → Updates**; contact
+  only the M15 updates channel, never wiki or AI models. Silent errors.
+- If a newer and compatible version exists, `<dialog>` popup: herald with
+  trumpet (temporary geometric emblem), manifesto with version and notes as
+  plain text, **Update**, **Remind me later** (3 days, per version),
+  **Ignore this version**; Escape = dismiss. No double announcement.
+- Waits for an idle app: no saving/module/restore/search, no
+  dirty draft, open dialog or text field with focus, AI/training or
+  update in progress. Focus on title and returned on close.
+- Synthesized fanfare in Web Audio (no file), can be disabled; audio blocked
+  by platform = full announcement without sound or new attempts. Animation
+  of ~1,5 s skippable, static with reduced movement.
+- **Update** opens settings and starts the verified M15 download;
+  installation remains the explicit action with mandatory backup.
+- Preferences in `update-announcements.json` outside of restores, included in the
+  pre-update receipt. SQLite remains 016.
 
-Verifiche realmente eseguite:
-- `cargo test` 109 PASS (3 nuovi di politica), clippy `-D warnings` e fmt PASS.
-  Il test MCP instabile preesistente è fallito una volta, poi 2 esecuzioni verdi.
+Verifications actually performed:
+- `cargo test` 109 PASS (3 new policies), clippy `-D warnings` and fmt PASS.
+  The unstable pre-existing MCP test failed once, then 2 green executions.
 - `pnpm test` 152 PASS; lint, typecheck, format:check, i18n:check, build PASS.
-- Desktop Windows debug, profili isolati, CDP 9224, `scripts/qa/m15a-herald.mjs`:
-  `fixture` (offerta sintetica solo debug: popup a app inattiva, focus, axe 0
-  violazioni, Escape = rinvio), `quiet` (riavvio senza controllo entro 20 ore),
-  `real` (canale Forgegit reale: 0.4.0 è corrente, controllo registrato e nessun
-  popup), `optout` (nessuna richiesta automatica). Schermate 1200 px e 760 px con
-  movimento ridotto. Il blocco iniziale per un `<select>` con focus è stato
-  corretto e coperto da test.
+- Windows debug Desktop, isolated profiles, CDP 9224, `scripts/qa/m15a-herald.mjs`:
+  `fixture` (synthetic offer only debug: popup at idle app, focus, axe 0
+  violations, Escape = dismiss), `quiet` (restart without check within 20 hours),
+  `real` (real Forgegit channel: 0.4.0 is current, registered check and no
+  popup), `optout` (no automatic request). 1200 px and 760 px screens with
+  reduced movement. The initial block for a `<select>` with focus was
+  corrected and covered by tests.
 
-Limiti: upgrade reale da popup fra due release firmate non provato (serve una
-0.5.0 pubblicata); illustrazioni raster dell’araldo e della pergamena da fornire
-(prompt e attivazione in `assets/herald/README.md`); suono reale nella WebView2 non
-ascoltato da un umano; nuove stringhe con fallback italiano; macOS/Linux non provati.
-Durante il collaudo una sessione Codex usava lo stesso Vite (1420) e una propria
-build debug: non toccate, collaudo eseguito su porta CDP e target separati.
+Limits: real upgrade from popup between two signed releases not tested (requires a
+0.5.0 published); raster illustrations of the heraldry and the scroll to be provided
+(prompt and activation in `assets/herald/README.md`); real sound in WebView2 not
+heard by a human; new strings with Italian fallback; macOS/Linux not tested.
+During testing, a Codex session used the same Vite (1420) and its own
+debug build: untouched, testing performed on CDP port and separate targets.
 
-Skill lette e applicate: frontend-design e impeccable (craft-floor, animate) per
-direzione visiva, un solo momento animato ed emblema geometrico al posto di una
-finta illustrazione SVG; accessibility per dialogo, focus, movimento ridotto e
-audio; react-testing per i test con timer finti; imagegen consultata ma non
-eseguibile qui (nessuno strumento integrato né OPENAI_API_KEY): l’utente fornirà
-le immagini. tauri-v2/rust-best-practices consultate per comandi e preferenze.
+Skills read and applied: frontend-design and impeccable (craft-floor, animate) for
+visual direction, a single animated moment and geometric emblem instead of a
+fake SVG illustration; accessibility for dialogue, focus, reduced movement and
+audio; react-testing for tests with fake timers; imagegen consulted but not
+executable here (no integrated tools or OPENAI_API_KEY): the user will provide
+the images. tauri-v2/rust-best-practices consulted for commands and preferences.
 
-Commit: 126d250 implementazione; checkpoint documentale nel commit successivo. Nessun push.
-Prossima milestone: nessuna nuova pianificata; residui in ROADMAP.
+Commit: 126d250 implementation; documentary checkpoint in the next commit. No push.
+Next milestone: none new planned; residuals in ROADMAP.
 
-Correzione del checkpoint M16: la frase «nessuna Skill specialistica disponibile»
-era imprecisa. Le Skill locali in `~/.agents/skills` esistevano ma non erano state
-cercate, quindi in M16 non sono state lette né applicate.
+Correction of checkpoint M16: the phrase "no specialist Skills available"
+was imprecise. Local Skills in `~/.agents/skills` existed but were not
+searched for, therefore in M16 they were neither read nor applied.
 
-# Stato Chronexus — 25 ottobre 2026 (M16)
+# Chronexus Status — 25 October 2026 (M16)
 
-## M16 — Wikidot, scelta della fonte e cache eliminabile: operativa Windows
+## M16 — Wikidot, font choice and deletable cache: Windows operational
 
-Implementata su richiesta esplicita dell’utente **prima di M15a**, che resta
-pianificata. Versione sorgente ancora 0.4.0; schema SQLite **016** (additivo).
+Implemented at the explicit request of the user **before M15a**, which remains
+planned. Source version still 0.4.0; SQLite schema **016** (additive).
 
-- **Impostazioni dell’app → Fonti D&D / Wiki**, anche senza campagna: Wikidot D&D 5e
-  (predefinita) oppure Open5e. Preferenza globale `wiki-preferences.json` v1 fuori
-  dalle generazioni di ripristino; file assente = Wikidot, mai scritto in lettura.
-- Adapter Rust di sola lettura per `https://dnd5e.wikidot.com/`: GET HTTPS senza
-  credenziali/cookie, una richiesta alla volta distanziata ≥1,5 s, 2 MiB, timeout,
-  annullamento, redirect solo verso pagine ammesse, nessun nuovo tentativo automatico.
-  Categorie: incantesimi, talenti, specie, background, classi/sottoclassi, oggetti
-  magici. Si scarica solo l’indice della categoria; il nome cercato resta locale.
-- HTML trattato come testo inerte (`scraper` 0.29, ISC): script, frame, moduli,
-  media e pubblicità scartati; limiti di profondità/blocchi/testo; titolo e
-  contenuto assenti → errore. Incantesimi: campi reali o elenco dei mancanti,
-  mai valori inventati. Fonte dichiarata, origine (pubblicato/UA/homebrew/non
-  indicata), edizione 5e-2014, URL e licenza dichiarata dalla pagina.
-- Cache Wikidot separata (`wikidot_cache`, max 200 voci + indici) inclusa e
-  validata nei backup. **Svuota cache offline** per Wikidot, Open5e o entrambe, con
-  conferma, avviso sulle fonti AI approvate e invalidazione delle richieste in corso
-  (epoch lato Rust, anche per i salvataggi Open5e). Nessun riscaricamento automatico.
-- Wikidot senza informazioni (nessun risultato, errore rete/HTTP, campi non
-  riconosciuti): dialogo «Vuoi usare Open5e?». Accettare salva Open5e e ripete una
-  volta la ricerca; rifiuto/Escape restano su Wikidot senza richieste a Open5e.
-- Importazione esplicita degli incantesimi: anteprima → modulo modificabile in
-  Incantesimi → **Salva voce**. `catalogSource.provider = "wikidot"` conservato;
-  le voci SRD mantengono il JSON precedente. Export con `SOURCES-WIKIDOT.txt`.
-- Assistente locale: le voci Wikidot in cache sono fonti regole 5e-2014 approvabili;
-  se svuotate, le nuove domande ricevono l’errore esplicito già esistente.
+- **App Settings → D&D Sources / Wiki**, even without a campaign: Wikidot D&D 5e
+  (default) or Open5e. Global preference `wiki-preferences.json` v1 outside
+  of restoration generations; missing file = Wikidot, never written in read.
+- Read-only Rust Adapter for `https://dnd5e.wikidot.com/`: GET HTTPS without
+  credentials/cookies, one request at a time spaced ≥1,5 s, 2 MiB, timeout,
+  cancellation, redirects only to allowed pages, no new automatic attempts.
+  Categories: spells, feats, species, backgrounds, classes/subclasses, magic
+  items. Only the category index is downloaded; the searched name remains local.
+- HTML treated as inert text (`scraper` 0.29, ISC): scripts, frames, modules,
+  media and advertisements discarded; depth limits/blocks/text; title and
+  content missing → error. Spells: real fields or list of missing ones,
+  never invented values. Declared source, origin (published/UA/homebrew/not
+  indicated), edition 5e-2014, URL and license declared by the page.
+- Separate Wikidot cache (`wikidot_cache`, max 200 entries + indices) included and
+  validated in backups. **Clear offline cache** for Wikidot, Open5e, or both, with
+  confirmation, warning on approved AI sources and invalidation of ongoing requests
+  (Rust-side epoch, even for Open5e saves). No automatic redownloading.
+- Wikidot without information (no result, network/HTTP error, unrecognized fields):
+  dialogue «Do you want to use Open5e?». Accepting saves Open5e and repeats a
+  search once; refusal/Escape stay on Wikidot without requests to Open5e.
+- Explicit spell import: preview → editable module in
+  Spells → **Save entry**. `catalogSource.provider = "wikidot"` stored;
+  the SRD entries maintain the previous JSON. Export with `SOURCES-WIKIDOT.txt`.
+- Local assistant: cached Wikidot entries are 5e-2014 rule sources approvable;
+  if cleared, new questions receive the already existing explicit error.
 
-Verifiche realmente eseguite:
-- `cargo test`: 106 PASS + 1 test QA ignorato; eseguito a parte sulle pagine reali
-  salvate fuori Git: 574 incantesimi, 199 talenti, 247 classi/sottoclassi, 102
-  background, 83 specie, 882 oggetti; Acid Splash senza campi mancanti. `cargo fmt`
-  e `clippy --all-targets -D warnings` PASS.
-- Instabilità preesistente: `automation::tests::running_bridge…` e
-  `transport_auth…` falliscono a volte in parallelo; riprodotto anche sul commit
-  base 66865f3 (3 fallimenti su 9 esecuzioni). Passano da soli; non modificati.
-- `pnpm test` 146 PASS / 35 file; lint, typecheck, format:check, i18n:check, build PASS
-  (avviso preesistente sul chunk editor).
-- Desktop Windows debug, profilo isolato vuoto, `scripts/qa/m16-wiki.mjs`
-  `check` + `restart` PASS: default senza campagna e senza rete all’apertura;
-  indice e pagina reali di Wikidot via Rust (nessuna richiesta dalla WebView);
-  importazione salvata solo esplicitamente; rifiuto senza traffico Open5e;
-  accettazione con una sola richiesta Open5e; svuotamento annullato e confermato,
-  Open5e e incantesimo intatti; chiusura ordinaria e riavvio senza richieste.
+Verifications actually performed:
+- `cargo test`: 106 PASS + 1 QA test ignored; performed separately on real pages
+  saved outside Git: 574 spells, 199 talents, 247 classes/subclasses, 102
+  background, 83 species, 882 items; Acid Splash without missing fields. `cargo fmt`
+  and `clippy --all-targets -D warnings` PASS.
+- Pre-existing instability: `automation::tests::running_bridge…` and
+  `transport_auth…` sometimes fail in parallel; reproduced also on commit
+  base 66865f3 (3 failures on 9 executions). They pass alone; not modified.
+- `pnpm test` 146 PASS / 35 files; lint, typecheck, format:check, i18n:check, build PASS
+  (pre-existing warning on the chunk editor).
+- Windows Desktop debug, empty isolated profile, `scripts/qa/m16-wiki.mjs`
+  `check` + `restart` PASS: default without campaign and without network on opening;
+  real Wikidot index and page via Rust (no request from the WebView);
+  import saved only explicitly; rejection without Open5e traffic;
+  acceptance with a single Open5e request; clearing canceled and confirmed,
+  Open5e and spell intact; ordinary closure and restart without requests.
 
-Limiti: nuove stringhe con fallback italiano (cataloghi non rigenerati); macOS/
-Linux non provati; robots.txt e licenza verificati il 25/10/2026 ma la pagina può
-dichiarare diritti diversi e i contenuti di gioco appartengono agli editori:
-nessun catalogo ridistribuito. Struttura HTML futura del sito non garantita.
-Nessun pacchetto, versione o release creati in questa consegna.
+Limits: new strings with Italian fallback (catalogs not regenerated); macOS/
+Linux not tested; robots.txt and license verified on 25/10/2026 but the page may
+declare different rights and game content belongs to the publishers:
+no catalog redistributed. Future HTML structure of the site not guaranteed.
+No package, version, or release created in this delivery.
 
-Commit: 2fbf17a backend/migrazione 016; 923516f interfaccia e collaudo; il
-checkpoint documentale segue. Nessun push.
+Commit: 2fbf17a backend/migrazione 016; 923516f interface and testing; the
+documentary checkpoint follows. No push.
 
-Skill: nessuna Skill specialistica disponibile in questa sessione oltre a quelle
-generiche; usati strumenti ordinari, test Rust/Vitest e Playwright del progetto.
+Skill: no specialist skills available in this session other than general
+ones; ordinary tools, Rust/Vitest and Playwright tests of the project used.
 
-Prossima milestone: **M15a** (annuncio epico degli aggiornamenti).
+Next milestone: **M15a** (epic announcement of updates).
 
-# Aggiornamento della pianificazione — 25 ottobre 2026
+# Planning Update — 25 October 2026
 
-## Prossime fasi: M15a, poi M16
+## Next phases: M15a, then M16
 
-Solo documentazione: inserita M15a prima di M16, conservando gli ID storici.
-M15a pianifica un annuncio epico di aggiornamento con vassallo/araldo, trombetta
-animata/audio controllabile e manifesto in pergamena, controllo all’avvio
-limitato/disattivabile, rinvio/chiusura e protezione delle bozze. Il percorso di
-download/firma e backup obbligatorio resta quello M15, senza installazione implicita.
+Documentation only: M15a inserted before M16, preserving historical IDs.
+M15a plans an epic update announcement with vassal/herald, animated/audio
+controllable trumpet and parchment manifesto, limited/deactivatable start
+check, deferral/closure and draft protection. The download/signature and
+mandatory backup path remains M15, without implicit installation.
 
-M16 aggiornata: cache offline eliminabile per fonte o totale con conferma,
-annullamento e invalidazione delle richieste pendenti; importazioni, campagne,
-immagini, preferenze e backup preservati. Se Wikidot non fornisce informazioni,
-chiedere prima di passare a Open5e; accettazione salva la fonte e permette una
-nuova ricerca, rifiuto/chiusura mantengono Wikidot e non contattano l’alternativa.
-Default futuro Wikidot confermato. Gestire copie in cache, errori e popup duplicati.
+M16 updated: deletable offline cache for source or total with confirmation,
+cancellation and invalidation of pending requests; imports, campaigns,
+images, preferences and backups preserved. If Wikidot does not provide information,
+ask before switching to Open5e; acceptance saves the source and allows a
+new search, refusal/closure maintain Wikidot and do not contact the alternative.
+Future Wikidot default confirmed. Manage cache copies, errors and duplicate popups.
 
-Allineati ROADMAP, PROJECT_SPEC, AGENTS, DECISIONS, RESEARCH_DND e UPDATES.
-Versione 0.4.0/SQLite 015, sorgenti applicativi, impostazioni, pacchetti e release
-invariati. Nessun popup, scraping o selettore nuovo implementato in questo turno.
-Verifiche documentali PASS: 28 milestone/ordine concordi, 60 commit validi,
-27 link locali, sette soli file Markdown e git diff --check;
-nessun test app/build o rete, perché le modifiche riguardano soltanto Markdown.
-Skill: catalogo disponibile valutato, nessuna specialistica necessaria per
-questa modifica documentale; strumenti ordinari Git/file.
+ROADMAP, PROJECT_SPEC, AGENTS, DECISIONS, RESEARCH_DND and UPDATES aligned.
+Version 0.4.0/SQLite 015, application sources, settings, packages and releases
+unchanged. No popup, scraping or new selector implemented in this turn.
+Documentary checks PASS: 28 agreed milestone/order, 60 valid commits,
+27 local links, only seven Markdown files and git diff --check;
+no app/build or network tests, because changes concern only Markdown.
+Skill: available catalog evaluated, no specialist skills necessary for
+this documentary change; ordinary Git/file tools.
 
-Prossima nuova milestone: M15a, da implementare solo su richiesta; poi M16.
-Nessuna pubblicazione o nuova versione per questa pianificazione.
-I checkpoint seguenti sono storici e il loro precedente ordine M16 è superato.
+Next new milestone: M15a, to be implemented only on request; then M16.
+No publication or new version for this planning.
+The following checkpoints are historical and their previous order M16 is surpassed.
 
-# Pianificazione — 25 ottobre 2026
+# Planning — 25 October 2026
 
-## Roadmap riconciliata e M16 pianificata
+## Reconciled Roadmap and planned M16
 
-Aggiornamento esclusivamente documentale richiesto dall’utente: tutte le milestone
-esistenti hanno stato ed evidenze Git; registro e sezioni seguono l’ordine reale.
-ID M0–M15 conservati; aggiunte milestone retrospettive M4a/M5a, M6a–M6d, M7a e
-M8a–M8c per rinomina, scheda/API, tema/grafo, Party/Open5e, installer AI, spostamento
-su D e GUI/editor. M12 e M13 sono prima della distribuzione M11, senza riscrivere
-la storia. Richieste già consegnate non diventano nuovo lavoro da rifare.
+Exclusively documentary update requested by the user: all existing milestones
+have status and Git evidence; log and sections follow the actual order.
+IDs M0–M15 preserved; added retrospective milestones M4a/M5a, M6a–M6d, M7a and
+M8a–M8c for renaming, sheet/API, theme/graph, Party/Open5e, AI installer, moving
+to D and GUI/editor. M12 and M13 are before distribution M11, without rewriting
+history. Already delivered requests do not become new work to be redone.
 
-**M16 da implementare:** scraping HTML pubblico Wikidot, scelta Wikidot/Open5e
-nelle impostazioni globali, Wikidot predefinito quando manca una scelta esplicita,
-preferenza persistente, parser/cache sicuri e separati, provenienza e importazione
-esplicita. Catalogo SRD 2014 e incantesimi già salvati conservati. Specifica,
-ricerca e istruzioni AI allineate; pianificazione M11–M13 obsoleta corretta.
+**M16 to be implemented:** public Wikidot HTML scraping, Wikidot/Open5e choice
+in global settings, Wikidot default when an explicit choice is missing,
+persistent preference, secure and separate parser/cache, explicit origin and import.
+SRD 2014 catalog and already saved spells preserved. Specification,
+research and AI instructions aligned; obsolete M11–M13 planning corrected.
 
-Runtime invariato: versione 0.4.0, SQLite 015, Wiki D&D attualmente Open5e. Nessuna
-modifica a UI, dati, dipendenze, installer, tag o release; nessuna implementazione
-M16 dichiarata. Rimangono accettazioni M6/M7/M8/M10/M11/M15 già documentate.
+Runtime unchanged: version 0.4.0, SQLite 015, D&D Wiki currently Open5e. No
+changes to UI, data, dependencies, installer, tags or release; no M16 implementation
+declared. Acceptances M6/M7/M8/M10/M11/M15 already documented remain.
 
-Verifiche di questa consegna: confronto con cronologia Git, validazione di ordine,
+Checks for this delivery: comparison with Git history, order validation,
 ID/commit/link documentali e git diff --check: PASS (27 milestone, 60 commit
 validi, 27 link locali, 6 soli file Markdown). Test dell’app/build non eseguiti
 perché sono cambiati solo Markdown; i risultati sotto restano storici.
@@ -486,7 +544,7 @@ per questo riordino documentale. Usati gli strumenti ordinari Git e file.
 Prossima nuova milestone funzionale: M16, soltanto su richiesta di implementazione.
 Nessuna pubblicazione/versione per questa modifica di pianificazione.
 
-# Stato Chronexus — 25 ottobre 2026
+# Chronexus status — 25 October 2026
 
 ## M15 — operativa Windows, release pubblica 0.4.0
 
@@ -531,295 +589,295 @@ db8fc68 publisher. Bootstrap manuale dalle versioni prive di updater, con backup
 ordinario prima della prima installazione; le successive usano il nuovo flusso.
 Limiti: upgrade pubblico reale tra due versioni updater non ancora eseguito,
 installer non Authenticode, macOS/Linux non certificati, nuove stringhe con fallback
-italiano. Non dichiarare installazioni personali o upgrade eseguiti quando non lo sono.
+Italian. Do not declare personal installations or upgrades performed when they are not.
 
-Skill: tauri-v2/rust-best-practices per updater e Store; react-testing/react-doctor
-per UX/regressioni; frontend-design per il tema; systematic-debugging per il
-manifesto Windows dei test; webapp-testing per desktop sintetico e accessibilità.
-Il browser personale è stato fermato dall’utente nel turno precedente e non più
-controllato. La visibilità del repository è stata modificata dall’utente e verificata.
+Skill: tauri-v2/rust-best-practices for updater and Store; react-testing/react-doctor
+for UX/regressions; frontend-design for the theme; systematic-debugging for the
+Windows test manifesto; webapp-testing for synthetic desktop and accessibility.
+The personal browser was stopped by the user in the previous shift and is no longer
+monitored. The repository visibility was modified by the user and verified.
 
-Prossima accettazione M15: upgrade da 0.4.0 a una successiva release firmata in
-ambiente isolato e runner macOS/Linux. Milestone di distribuzione M11 ancora
-aperta per i pacchetti AI grandi; nessun loro nuovo upload durante M15.
-I checkpoint seguenti sono storici.
+Next M15 acceptance: upgrade from 0.4.0 to a subsequent signed release in
+isolated environment and macOS/Linux runner. Distribution Milestone M11 still
+open for large AI packages; no new uploads of them during M15.
+The following checkpoints are historical.
 
-## M14 — integrazione nascosta per assistenti esterni, versione 0.3.0
+## M14 — hidden integration for external assistants, version 0.3.0
 
-Operativa su Windows: bridge locale autenticato, disattivo all'avvio ordinario,
-adattatore MCP stdio incluso nelle risorse, 18 strumenti per sessioni/appunti,
-Codex, scheda, party e asset. Scrittura abilitata esplicitamente su una sola
-campagna; letture/revisioni/etag, nessun SQL, cancellazione o controllo AI.
-L'assistente integrato resta escluso. Nessun menu o pulsante aggiunto.
-Viste pulite aggiornate da eventi; editor sporchi rinviano il refresh, bozze
-metadati conservate e salvataggi superati rifiutati. SQLite 015 e backup invariati.
-Istruzioni pratiche e configurazione client: docs/AUTOMATION.md.
+Operational on Windows: authenticated local bridge, disabled at ordinary startup,
+stdio MCP adapter included in resources, 18 tools for sessions/notes,
+Codex, sheet, party and assets. Writing explicitly enabled on a single
+campaign; reads/revisions/etag, no SQL, deletion or AI control.
+The integrated assistant remains excluded. No menu or button added.
+Clean views updated by events; dirty editors trigger refresh, metadata drafts
+preserved and passed saves rejected. SQLite 015 and backups unchanged.
+Practical instructions and client configuration: docs/AUTOMATION.md.
 
-Verifiche realmente eseguite:
-- `pnpm test`: PASS, 131 test / 31 file; inclusi refresh e bozza Codex.
+Verifications actually performed:
+- `pnpm test`: PASS, 131 test / 31 file; including refresh and Codex draft.
 - `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm format:check`: PASS.
 - `node --test scripts/automation/mcp-check.mjs`: PASS, 5 test.
 - `cargo test --manifest-path src-tauri/Cargo.toml --offline`: PASS, 90 test.
 - `cargo clippy --manifest-path src-tauri/Cargo.toml --offline --all-targets -- -D warnings`: PASS.
 - `cargo build --manifest-path src-tauri/Cargo.toml --offline`: PASS, desktop debug.
-- React Doctor changed: 82/100, nessun rilievo nuovo (non un audit completo).
-- App debug Windows + processo Node MCP reale, profilo sintetico separato: PASS
-  avvio ordinario senza bridge, catalogo, creazione sessione/appunto UTF-8,
-  revisione superata e AI negate, persistenza dopo arresto forzato/riavvio,
-  rotazione credenziale e scrittura rifiutata nella modalità di sola lettura.
-- Backup `.nodex` reale e ripristino con bridge attivo: PASS nei test Rust;
-  le scritture successive usano il nuovo Store, credenziale assente dallo ZIP.
+- React Doctor changed: 82/100, no new findings (not a full audit).
+- App debug Windows + real Node MCP process, separate synthetic profile: PASS
+  ordinary startup without bridge, catalog, session/note creation UTF-8,
+  passed revision and denied AI, persistence after forced stop/restart,
+  credential rotation and refused writing in read-only mode.
+- Real `.nodex` backup and restoration with active bridge: PASS in Rust tests;
+  subsequent writes use the new Store, credential absent from ZIP.
 
-Limiti: la chiusura grafica automatizzata del desktop debug non ha terminato il
-processo entro 15 secondi anche senza automation; prova non superata, nessuna
-attribuzione della causa senza evidenze. I processi sintetici sono stati chiusi
-in modo forzato. Cleanup/shutdown del bridge verificati nei test Rust, non con
-chiusura GUI nativa. Nessuna accettazione macOS/Linux/client MCP terzi. Node va
-installato separatamente. Il nuovo errore di conflitto usa fallback italiano.
-Nessun installer/release 0.3.0 pubblicato: prima va chiusa la verifica di uscita
-nativa, senza presentare una consegna parziale come release verificata.
-M11 v0.2.0 conserva la propria bozza e il blocco sugli allegati AI grandi.
+Limits: the automated graphical closure of the desktop debug did not terminate the
+process within 15 seconds even without automation; test failed, no
+attribution of cause without evidence. Synthetic processes were closed
+forcibly. Bridge cleanup/shutdown verified in Rust tests, not with
+native GUI closure. No macOS/Linux/third-party MCP client acceptance. Node must be
+installed separately. The new conflict error uses Italian fallback.
+No 0.3.0 installer/release published: the native exit verification must be
+closed first, without presenting a partial delivery as a verified release.
+M11 v0.2.0 retains its own draft and the block on large AI attachments.
 
-Skill usate: rust-best-practices, tauri-v2 e sqlite-expert per servizi locali e
-Store condiviso; react-testing/react-doctor per refresh e bozze;
-systematic-debugging per distinguere i risultati nativi dai test riusciti.
+Skills used: rust-best-practices, tauri-v2 and sqlite-expert for local services and
+shared Store; react-testing/react-doctor for refresh and drafts;
+systematic-debugging to distinguish native results from successful tests.
 
-Prossimo controllo: verificare la chiusura desktop Windows e poi preparare la
-distribuzione 0.3.0. M11 resta la milestone aperta di pubblicazione; non sono stati
-ripresi gli upload grandi durante questa richiesta. I checkpoint sotto sono storici.
+Next check: verify Windows desktop closure and then prepare the
+0.3.0 distribution. M11 remains the open publication milestone; no large
+uploads were resumed during this request. The checkpoints below are historical.
 
-# Stato Chronexus — 24 ottobre 2026
+# Chronexus Status — 24 October 2026
 
-## M12/M13 operative Windows → M11 ripresa sulla rete locale
+## M12/M13 operative Windows → M11 resume on local network
 
-M12: due draghi SVG, estremi del singolo dado (d100 invertito), replay senza RNG,
-skip/movimento ridotto. M13: Espruar/Dethek OFL locali, preferenze v2 compatibili
-in lettura v1, pacchetti reversibili versionati e fallback. SQLite 015 invariato.
+M12: two SVG dragons, single die extremes (inverted d100), replay without RNG,
+skip/reduced movement. M13: Local Espruar/Dethek OFL, v2 preferences compatible
+in v1 reading, versioned reversible packets and fallback. SQLite 015 unchanged.
 
-Verifiche: 127 test frontend, 81 Rust, 2 Node font/licenze e 13 distribuzione PASS;
+Verifications: 127 frontend test, 81 Rust, 2 Node font/licenses and 13 distribution PASS;
 lint/typecheck/format/clippy/i18n PASS; React Doctor changed 100, detector impeccable
-senza rilievi. Desktop isolato: 14 estremi reali, replay, tiri misti, font/fallback,
-axe 0; 173 tiri identici dopo chiusura/riavvio e backup/ripristino reale.
-Installer Windows 0.2.0 costruito/installato e disinstallato in cartella QA; byte
-identici alla build salvo il marcatore ufficiale NSIS. Avvio release sul profilo
-personale evitato; avvio/IPC testati nella build debug isolata dello stesso sorgente.
+without findings. Isolated Desktop: 14 real extremes, replay, mixed rolls, font/fallback,
+axe 0; 173 identical rolls after close/restart and real backup/restore.
+Windows Installer 0.2.0 built/installed and uninstalled in QA folder; bytes
+identical to build except for the official NSIS marker. Release start on personal
+profile avoided; start/IPC tested in the isolated debug build of the same source.
 
-M11: codice e tag v0.2.0 pubblicati (sorgente compilato 43467fb). Bozza release
-id 2, non pubblicata. Pacchetto leggero app (29 MiB) caricato, riscaricato e SHA-256
-verificato; cinque ZIP AI completi pronti in locale, upload grandi bloccati.
-Due tentativi indipendenti falliti: secondo HTTP 502 dopo 297.304.064 byte in
-235,52 s; API dichiarano limite 2048 MiB, curl proxy_used=0. Nessuna causa server
-inventata: richiesti dettagli/log del gateway all'utente. Accesso autenticato OK.
-Ripresa autorizzata dall’utente il 24 ottobre, con trasporto esplicito
-http://192.168.162.26:3000. Il precedente stop è superato per questa consegna.
-Servizio locale verificato: Forgejo 12.0.4, stesso repository id 13 e stessa
-bozza v0.2.0 del sito pubblico. Nessun cambio di origin Git o del tag compilato.
-Supporto LAN aggiunto con whitelist esatta, blocco redirect e confronto identità;
-18 test distribuzione PASS. Invio/verifica dei cinque allegati mancanti ancora
-pendenti; bozza conservata fino al controllo completo. Autenticazione solo in RAM.
+M11: code and tag v0.2.0 published (compiled source 43467fb). Release draft
+id 2, not published. Lightweight app package (29 MiB) uploaded, re-uploaded and SHA-256
+verified; five complete AI ZIPs ready locally, large uploads blocked.
+Two independent failed attempts: second HTTP 502 after 297.304.064 bytes in
+235,52 s; APIs declare 2048 MiB limit, curl proxy_used=0. No invented server
+cause: requested gateway details/logs from user. Authenticated access OK.
+Resume authorized by user on October 24, with explicit transport
+http://192.168.162.26:3000. The previous stop is bypassed for this delivery.
+Local service verified: Forgejo 12.0.4, same repository id 13 and same
+public site draft v0.2.0. No change in Git origin or compiled tag.
+LAN support added with exact whitelist, redirect block and identity comparison;
+18 distribution test PASS. Sending/verifying the five missing attachments still
+pending; draft kept until full check. Authentication in RAM only.
 
 
-Output: installers/Chronexus-0.2.0-Windows-x64-final, sei ZIP (uno solo app più
-cinque app/AI), SHA256SUMS.txt e package-report.json. Ollama 0.40.10 e Gemma 4 12B
-base pubblici, licenze e checksum; nessun dato privato. AI installata realmente
-ed esecuzione ripetuta PASS: cloud disabilitato, risposta italiana, 49/49 layer
-principali e 5/5 draft GPU. Pacchetto iniziale fuori limite archiviato in .tools.
-Gli strumenti riportano ora anche il codice HTTP del gateway; 13 test release PASS.
-M11 resta incompleta fino a upload/download dei cinque ZIP grandi e uscita dalla
-bozza. Limiti restanti: firma, macOS/Linux, upgrade personale e revisioni M10.
+Output: installers/Chronexus-0.2.0-Windows-x64-final, six ZIPs (one app plus
+five app/AI), SHA256SUMS.txt and package-report.json. Ollama 0.40.10 and Gemma 4 12B
+public base, licenses and checksums; no private data. AI actually installed
+and repeated execution PASS: cloud disabled, Italian response, 49/49 main layer
+and 5/5 GPU draft. Initial package out of limit archived in .tools.
+Tools now also report gateway HTTP code; 13 release test PASS.
+M11 remains incomplete until upload/download of the five large ZIPs and exit from
+draft. Remaining limits: signature, macOS/Linux, personal upgrade and M10 revisions.
 
-Skill: find-skills per ricerca strumenti (nessuna installazione necessaria),
-frontend-design/impeccable/accessibility per resa e movimento, react-testing e
-react-doctor per regressioni, Rust/Tauri e systematic-debugging per persistenza
-e distribuzione. Dettagli in I18N.md, DICE.md e releases/v0.2.0.md.
-Le sezioni seguenti sono checkpoint precedenti.
+Skill: find-skills for tool search (no installation required),
+frontend-design/impeccable/accessibility for rendering and movement, react-testing and
+react-doctor for regressions, Rust/Tauri and systematic-debugging for persistence
+and distribution. Details in I18N.md, DICE.md and releases/v0.2.0.md.
+The following sections are previous checkpoints.
 
-## M10 — operativa su Windows; accettazione linguistica e assistiva aperta
+## M10 — operative on Windows; linguistic and assistive acceptance open
 
-- **Impostazioni dell’app → Lingua e scrittura** nel menu sinistro, anche senza
-  campagna: scelta immediata e persistente, distinta dalle impostazioni AI della
-  campagna. Recupero italiano sempre ordinario, anche con preferenze danneggiate.
-- 11 lingue naturali (PT brasiliano, cinese semplificato, ticinese in bozza),
-  Klingon e Rihannsu romanizzati con lessico parziale/fallback; Braille italiano
-  in sottoinsieme, Morse e SGA Minecraft. 1427 messaggi candidati per catalogo
-  naturale, font/dizionari editor locali. Traduzioni non certificate.
-- Arabo RTL/bidi, CJK, date/numeri/plurali locali; glifi decorativi con testo
-  semantico e laboratorio reversibile. Nomi, documenti, UUID, preset, fonti D&D
-  e risposte AI restano originali. JSON preferenze v1 esterno ai backup;
-  SQLite **015** e `.nodex` invariati. Nessun archivio personale usato nel QA.
-- **113 test frontend e 79 Rust PASS**, clippy -D warnings, lint, typecheck,
-  format, i18n:check e build desktop release Windows PASS. React Doctor ultimo
-  changed: 68, nessun nuovo rilievo; detector impeccable senza rilievi.
-- Desktop con frontend compilato: **13 lingue × 13 viste**, tre scritture,
-  testo nascosto semanticamente disponibile, arabo 760×600, riavvio, restore
-  015 ed error recovery PASS. Backup creato in DE e ripristinato mantenendo EN;
-  JSON globale assente dallo ZIP e dati confrontati invariati. Axe impostazioni
-  EN/AR/JA senza violazioni; nessuna certificazione completa di accessibilità.
-- Cinque font locali, fallimento reale Monocraft con testo normale leggibile,
-  Unicode Markdown/visuale, composizione simulata, ricerca CJK e UUID originario
-  PASS. Nessun host remoto nei percorsi QA osservati. Log/schermate in .tools/m10;
-  fonti, script, manutenzione e limiti in [I18N.md](I18N.md).
+- **App Settings → Language and writing** in the left menu, even without
+  campaign: immediate and persistent choice, distinct from campaign AI settings.
+  Italian recovery always ordinary, even with damaged preferences.
+- 11 natural languages (PT Brazilian, Simplified Chinese, Ticinese in draft),
+  Klingon and Rihannsu romanized with partial/fallback lexicon; Italian Braille
+  in subset, Morse and SGA Minecraft. 1427 candidate messages for catalog
+  natural, local editor fonts/dictionaries. Non-certified translations.
+- Arabic RTL/bidi, CJK, local dates/numbers/plurals; decorative glyphs with text
+  semantic and reversible laboratory. Names, documents, UUIDs, presets, D&D fonts
+  and AI responses remain original. JSON preferences v1 external to backups;
+  SQLite **015** and `.nodex` unchanged. No personal archives used in QA.
+- **113 frontend tests and 79 Rust PASS**, clippy -D warnings, lint, typecheck,
+  format, i18n:check and desktop release build Windows PASS. React Doctor last
+  changed: 68, no new findings; impeccable detector without findings.
+- Desktop with compiled frontend: **13 languages × 13 views**, three scripts,
+  semantically available hidden text, Arabic 760×600, restart, restore
+  015 and error recovery PASS. Backup created in DE and restored maintaining EN;
+  global JSON absent from ZIP and compared data unchanged. Axe settings
+  EN/AR/JA without violations; no complete accessibility certification.
+- Five local fonts, real Monocraft failure with readable normal text,
+  Unicode Markdown/visual, simulated composition, CJK search and original UUID
+  PASS. No remote hosts in observed QA paths. Log/screens in .tools/m10;
+  fonts, scripts, maintenance and limits in [I18N.md](I18N.md).
 
-**Avvio**: `./scripts/Dev.ps1 -Task desktop`; eseguibile compilato
-`src-tauri/target/release/chronexus.exe`. Installer precedenti non rigenerati.
+**Start**: `./scripts/Dev.ps1 -Task desktop`; compiled executable
+`src-tauri/target/release/chronexus.exe`. Previous installers not regenerated.
 
-**Commit di implementazione**: 79376ee (preferenze e cataloghi), af92934 (viste e
-scritture), a2d0e1c (correzioni/accettazione). Questo checkpoint è completato dal
-commit documentale M10. Nessun push remoto.
+**Implementation commits**: 79376ee (preferences and catalogs), af92934 (views and
+scripts), a2d0e1c (fixes/acceptance). This checkpoint is completed by the
+M10 documentation commit. No remote push.
 
-**Skill usate**: impeccable e accessibility per leggibilità/RTL/testo semantico;
-react-testing e webapp-testing per comportamento e collaudi Playwright del
-progetto; Rust/Tauri/SQLite per preferenze atomiche separate dai dati;
-systematic-debugging e react-doctor per regressioni e verifiche.
+**Skill usate**: impeccable accessibility for readability/RTL/semantic text;
+react-testing and webapp-testing for behavior and Playwright testing of the
+project; Rust/Tauri/SQLite for atomic preferences separate from data;
+systematic-debugging and react-doctor for regressions and verifications.
 
-**Limiti aperti (5)**: revisione madrelingua/ticinese e lessici inventati parziali;
-IME OS e assistive fisiche non provati; macOS/Linux e distribuzione ancora da
-validare; font aggiuntivi circa 40 MB e avviso dimensione editor; debito React
-preesistente su complessità/componenti grandi, senza nuovi rilievi nei cambiamenti.
+**Open limits (5)**: native/Ticinese review and partial invented lexicons;
+IME OS and physical assistive devices not tested; macOS/Linux and distribution still to be
+validated; additional fonts about 40 MB and editor size warning; pre-existing React
+debt on complexity/large components, without new findings in the changes.
 
-**Nuova pianificazione — 24 ottobre 2026**: ordine invertito su richiesta:
-M11 release versionate e pacchetti app/AI su Forgegit; M12 draghi animati per
-esiti estremi di un solo dado (d100 invertito); M13 alfabeti Elfico/Dethek.
-Nessuna delle tre è implementata; restano aperte le revisioni M10 già indicate.
+**New planning — 24 October 2026**: reversed order at request:
+M11 versioned releases and app/AI packages on Forgegit; M12 animated dragons for
+extreme outcomes of a single die (inverted d100); M13 Elphic/Dethek alphabets.
+None of the three are implemented; M10 revisions already indicated remain open.
 
-**Prossimo passo funzionale pianificato**: M11, verificando capacità del server,
-versionamento e pacchetti prima di realizzare il rilascio. La presente richiesta
-scambia soltanto le milestone: non implementare o pubblicare ora.
+**Next planned functional step**: M11, verifying server capacity,
+versioning and packages before implementing the release. This request
+only swaps the milestones: do not implement or publish now.
 
-**Pubblicazione**: origin verificato `https://github.com/Acelith/Chronexus.git`.
-Registrata istruzione permanente per pubblicare future consegne di milestone
-verificate con release/pacchetti versionati, salvo divieto successivo. **Nessuna
-pubblicazione in questa esecuzione**, inclusi push, tag remoti, release e upload.
-Modificate soltanto roadmap/specifiche/guide. Skill disponibili valutate: nessuna
-specializzazione richiede applicazione per questa modifica documentale.
-Verifiche di questa richiesta: diff e coerenza requisiti; nessun test applicativo,
-nessuna build e nessuna verifica di nuove funzionalità dichiarata.
+**Publication**: origin verified `https://github.com/Acelith/Chronexus.git`.
+Permanent instruction recorded to publish future verified milestone deliveries
+with versioned releases/packages, unless subsequent prohibition. **No
+publication in this execution**, including pushes, remote tags, releases, and uploads.
+Modify only roadmap/specifications/guides. Available skills evaluated: no
+specialization requires application for this documentary modification.
+Verifications of this request: diff and requirements consistency; no application tests,
+no build, and no verification of new declared features.
 
-Le sezioni seguenti conservano i checkpoint precedenti e il percorso di verifica.
+The following sections preserve previous checkpoints and the verification path.
 
-## M9 — operativa e collaudata su Windows
+## M9 — operational and tested on Windows
 
-- Tiradadi da menu sinistro: d4/d6/d8/d10/d12/d20/d100, composizioni miste,
-  quantità da 0 a 50 per tipo e 1–100 dadi per tiro. Azzeramento solo dopo
-  conferma; errori conservano selezione e ID per retry senza duplicazioni.
-- Storico per campagna in SQLite 015: valori, subtotali, totale, data, UUID e
-  paginazione a 30. CSPRNG del sistema operativo e rejection sampling nel Rust;
-  risultati salvati prima della scena e invariati dopo skip o cambio vista.
-- Draghi/texture/fuoco originali locali, geometrie e cifre renderizzate dal codice;
-  sequenza di 2,5 secondi, slot, skip e movimento ridotto. Al massimo 14 dadi
-  rappresentativi nella scena, tutti i valori nei dettagli e nello storico.
-  Il totale del nuovo tiro non viene anticipato nello storico durante la sequenza.
-- 85 test frontend PASS (12 nuovi), 77 Rust PASS (8 nuovi); clippy -D warnings,
-  lint, typecheck, format e build desktop Windows PASS. React Doctor: nessun
-  problema nei cambiamenti, 74/100 invariato; detector impeccable: nessun rilievo.
-- Native check: tutti i tipi, d100, tiri misti e 100 dadi, valori confrontati con
-  SQLite, retry, interruzione, skip/reduced, isolamento e storico su 187 tiri
-  sintetici PASS. Tempi misurati 2528/2520/2524 ms per 1/7/100 dadi. Nessuna
-  richiesta Internet al tiro con richieste remote bloccate; IPC locale ammesso.
-- Backup/ripristino UI ed export JSON 015 PASS; chiusura e riavvio dopo ripristino
-  PASS con risultati identici. Archivio 014 migrato senza perdita coperto da Rust.
-  Frecce/Tab/Shift+Tab/Enter/doppio Enter e dettagli da tastiera PASS; un solo
-  tiro per invio doppio. Screenshot separati con fixture esplicita per 6/9/100.
-- Axe WCAG A/AA su scena vuota e risultato: zero violazioni rilevate; verifica
-  visuale/tastiera completata, senza dichiarare certificazione o prova con NVDA.
-  Finestre 1586×992/1200×800/900×700/760×540 senza overflow della finestra.
-- Rapporti/screenshot e archivi sintetici: .tools/m9 (ignorati). Campagne personali
-  non modificate. macOS/Linux, installer aggiornati e prova fisica offline non
-  eseguiti; warning Vite preesistente sul peso del chunk editor. Nessun push.
-- Commit: 3b0e2ac backend/migrazione; 7aed999 UI/scena; 5fba9fc rivelazione e
-  fixture grafica. Checkpoint finale nel successivo commit documentale.
-- Skill: rust-best-practices/sqlite-expert/tauri-v2 per dati e IPC;
-  impeccable/imagegen per grafica; react-testing/accessibility per collaudi;
-  systematic-debugging/react-doctor per correzioni. Prossima funzione: M10.
+- Tiradadi from left menu: d4/d6/d8/d10/d12/d20/d100, mixed compositions,
+  quantities from 0 to 50 per type and 1–100 dice per throw. Reset only after
+  confirmation; errors retain selection and ID for retry without duplications.
+- Campaign history in SQLite 015: values, subtotals, total, date, UUID and
+  pagination at 30. OS CSPRNG and rejection sampling in Rust;
+  results saved before the scene and unchanged after skip or view change.
+- Original local dragons/textures/fire, geometries and figures rendered by code;
+  sequence of 2,5 seconds, slot, skip and reduced movement. Maximum 14 representative dice
+  in the scene, all values in details and in history.
+  The total of the new throw is not anticipated in the history during the sequence.
+- 85 frontend tests PASS (12 new), 77 Rust PASS (8 new); clippy -D warnings,
+  lint, typecheck, format and Windows desktop build PASS. React Doctor: no
+  problems in changes, 74/100 unchanged; impeccable detector: no findings.
+- Native check: all types, d100, mixed throws and 100 dice, values compared with
+  SQLite, retry, interruption, skip/reduced, isolation and history on 187 synthetic throws
+  PASS. Measured times 2528/2520/2524 ms for 1/7/100 dice. No
+  Internet request at throw with remote requests blocked; local IPC allowed.
+- UI Backup/restore and JSON export 015 PASS; closing and restarting after restore
+  PASS with identical results. Archive 014 migrated without loss covered by Rust.
+  Arrows/Tab/Shift+Tab/Enter/double Enter and keyboard details PASS; single
+  press for double enter. Separate screenshots with explicit fixture for 6/9/100.
+- Axe WCAG A/AA on empty scene and result: zero violations detected; visual/keyboard
+  verification completed, without declaring certification or proof with NVDA.
+  1586×992/1200×800/900×700/760×540 Windows without window overflow.
+- Reports/screenshots and synthetic archives: .tools/m9 (ignored). Personal campaigns
+  not modified. macOS/Linux, installers updated and physical offline test not
+  performed; pre-existing Vite warning on editor chunk weight. No push.
+- Commit: 3b0e2ac backend/migration; 7aed999 UI/scene; 5fba9fc detection and
+  graphic fixture. Final checkpoint in the subsequent documentation commit.
+- Skill: rust-best-practices/sqlite-expert/tauri-v2 for data and IPC;
+  impeccable/imagegen for graphics; react-testing/accessibility for testing;
+  systematic-debugging/react-doctor for corrections. Next function: M10.
 
-## Editor visuale/Markdown e collaudo finale — 24 ottobre 2026
+## Visual Editor/Markdown and final testing — 24 October 2026
 
-- Barra persistente con stili, titoli, citazioni, elenchi/attività, evidenziazione,
-  allineamento, link esterni e pagine Codex, annulla/ripeti. Modalità Markdown
-  direttamente modificabile, applicazione, annullamento e salvataggio espliciti.
-- Guard di navigazione/chiusura include il sorgente. Sintassi non supportata o
-  link non validi mantengono la bozza; UUID e ID/fonti dei blocchi invariati
-  conservati. Formati visuali dei blocchi invariati conservati nel round trip.
-- Test: 73 frontend PASS; baseline 69 Rust PASS dalla nuova posizione (nessuna
-  modifica Rust/schema). Typecheck, lint, format e build frontend PASS.
-  Build desktop Windows da D PASS; ricostruzione finale dopo il refactoring
-  verificata nel commit di consolidamento. Warning Vite sul chunk editor ancora presente.
-- Prova desktop ripetibile `scripts/qa/gui-editor.mjs check`: PASS su archivio
-  sintetico isolato; scroll a tre risoluzioni, formati, menzioni UUID, errori
-  bloccanti e menu impostazioni. Chiusura ordinata e nuova apertura dello stesso
-  archivio: fase `restart` PASS, contenuti e formati recuperati da SQLite.
-- Riparazione AI: Python della venv su D/CUDA disponibili; Ollama avviato da D,
-  Gemma 4 12B risponde «OK» con VRAM rilevata. Nessun nuovo training eseguito.
-- Guide: `docs/EDITOR.md`; schema JSON v1 e SQLite 014 invariati; nessuna
-  campagna personale modificata. Il Markdown non rappresenta tutti i formati Word:
-  tabelle, HTML, immagini e blocchi di codice sono esplicitamente rifiutati.
-- Skill: react-testing, systematic-debugging, react-doctor per controlli e correzioni;
-  impeccable per il detector finale (nessun pattern segnalato dopo la correzione).
-- Commit GUI: d5b07a1; disposizione grafo: f8d6b68; spostamento: 313e056.
-  Editor: 64d65c6; M10 nel successivo commit documentale. Nessun push.
-- React Doctor finale sui nuovi file inclusi: 74/100, invariato rispetto alla
-  prima scansione; un avviso residuo di complessità nel componente editor.
-  Nessun errore lint/types; detector impeccable finale: array vuoto.
+- Persistent bar with styles, titles, quotes, lists/activities, highlighting,
+  alignment, external links and Codex pages, undo/redo. Markdown mode
+  directly editable, application, undo, and explicit saving.
+- Navigation/closing guard includes the source. Unsupported syntax or
+  invalid links keep the draft; UUID and block ID/sources unchanged
+  preserved. Visual block formats unchanged preserved in the round trip.
+- Test: 73 frontend PASS; baseline 69 Rust PASS from new position (no
+  Rust/schema changes). Typecheck, lint, format and frontend build PASS.
+  Desktop Windows build from D PASS; final reconstruction after refactoring
+  verified in the consolidation commit. Vite warning on editor chunk still present.
+- Repeatable desktop test `scripts/qa/gui-editor.mjs check`: PASS on isolated
+  synthetic archive; scroll at three resolutions, formats, UUID mentions, blocking
+  errors and settings menu. Orderly closing and new opening of the same
+  archive: `restart` phase PASS, contents and formats recovered from SQLite.
+- AI Repair: Python of the venv on D/CUDA available; Ollama started from D,
+  Gemma 4 12B responds «OK» with VRAM detected. No new training performed.
+- Guide: `docs/EDITOR.md`; JSON schema v1 and SQLite 014 unchanged; no
+  personal campaign modified. Markdown does not represent all Word formats:
+  tables, HTML, images and code blocks are explicitly rejected.
+- Skill: react-testing, systematic-debugging, react-doctor for checks and corrections;
+  impeccable for the final detector (no pattern reported after correction).
+- GUI Commit: d5b07a1; graph layout: f8d6b68; movement: 313e056.
+  Editor: 64d65c6; M10 in the subsequent documentation commit. No push.
+- Final React Doctor on new files included: 74/100, unchanged compared to the
+  first scan; one residual complexity warning in the editor component.
+  No lint/types error; final impeccable detector: empty array.
 
-## GUI di riferimento e navigazione — 24 ottobre 2026
+## Reference GUI and navigation — 24 October 2026
 
-- Ripresa la composizione allegata: cuoio scuro, pergamena, font locali OFL,
-  rosa dei venti, incisione originale, tab con icone e dettaglio laterale del grafo.
-  Le illustrazioni dei personaggi dipendono dagli allegati reali; nessun dato
-  dell’esempio inserito negli archivi personali. La corrispondenza pixel per pixel
-  con l’immagine non è certificata: icone, incisione e geometria dei dati sono originali.
-- Impostazioni della campagna e assistente nel menu sinistro. Menu azioni compatto,
-  selettore campagne e ultima modifica derivata dai documenti disponibili.
-- Diario e Codex: elenco e documento scorrono indipendentemente dalla cornice;
-  vecchia regola mobile orizzontale rimossa anche alla dimensione minima.
-- Grafo con nodi a medaglione, etichette visibili, disposizione stabile con
-  riduzione degli incroci su piccoli grafi (coppie duplicate escluse), zoom,
-  filtri avanzati e fonti/certezze mantenuti. Ritratto reale nel dettaglio, se allegato.
-- Verifiche: 14 test mirati App/grafo PASS; typecheck e lint PASS; build frontend
-  PASS (warning preesistente sul peso dell’editor). Prove native con fixture isolate
-  a 1586×992, 900×700 e 760×540: nessun overflow della finestra, liste verticali
-  indipendenti e font locali caricati. Screenshot e rapporti in .tools/ui-refresh/.
-- Skill: impeccable per confronto e rilevamento finale; imagegen per materiali e
-  incisione offline; react-testing per regressioni; react-doctor per diagnosi React.
-  Editor consolidato nella sezione precedente; multilingua pianificato come M10.
+- Resume the attached composition: dark leather, parchment, local OFL fonts,
+  compass rose, original engraving, tabs with icons and side detail of the graph.
+  Character illustrations depend on real attachments; no data
+  from the example inserted in personal archives. Pixel-for-pixel correspondence is
+  with the image not certified: icons, engraving, and data geometry are original.
+- Campaign settings and assistant in the left menu. Compact action menu,
+  campaign selector and last modification derived from available documents.
+- Diary and Codex: list and document scroll independently from the frame;
+  old horizontal mobile rule removed even at minimum size.
+- Graph with medallion nodes, visible labels, stable layout with
+  reduction of crossings on small graphs (duplicate pairs excluded), zoom,
+  advanced filters and sources/certainties maintained. Real portrait in detail, if attached.
+- Verifications: 14 targeted App/graph tests PASS; typecheck and lint PASS; frontend build
+  PASS (pre-existing warning on editor weight). Native tests with isolated fixtures
+  at 1586×992, 900×700 and 760×540: no window overflow, independent vertical lists
+  and local fonts loaded. Screenshots and reports in .tools/ui-refresh/.
+- Skill: impeccable for comparison and final detection; imagegen for materials and
+  offline engraving; react-testing for regressions; react-doctor for React diagnosis.
+  Editor consolidated in the previous section; multilingual planned as M10.
 
-## Riparazione dopo spostamento su D — 24 ottobre 2026
+## Repair after move to D — 24 October 2026
 
-- Collegamenti node_modules ricreati con lockfile invariato: i precedenti
-  puntavano a C. Store relativo in pnpm-workspace.yaml e launcher Dev.ps1.
-- Baseline dalla nuova posizione: 59 test frontend e 69 Rust PASS;
-  typecheck e Vite 8.3.5 PASS. Python della venv su D importa PyTorch
-  2.14.1+cu130, CUDA disponibile. Nessuna campagna personale modificata.
-- Skill: systematic-debugging per la causa dei collegamenti rotti; tauri-v2
-  per la verifica della toolchain portatile. Rifacimento GUI/editor in corso.
+- node_modules links recreated with unchanged lockfile: previous ones
+  pointed to C. Relative store in pnpm-workspace.yaml and Dev.ps1 launcher.
+- Baseline from new position: 59 frontend tests and 69 Rust PASS;
+  typecheck and Vite 8.3.5 PASS. venv Python on D imports PyTorch
+  2.14.1+cu130, CUDA available. No personal campaign modified.
+- Skill: systematic-debugging for the cause of broken links; tauri-v2
+  for portable toolchain verification. GUI/editor remake in progress.
 
-## Milestone e prossimo passo
+## Milestone and next step
 
-M7 operativa e collaudata su Windows: assistente locale con fonti, GPU e cronologia.
-**Accettazione completa ancora parziale**: manca la prova con rete fisicamente
-scollegata/blocco firewall. La prova proxy e le connessioni loopback sono distinte.
-Restano inoltre M6 macOS/Linux/CI reali e revisione del wizard Windows interattivo.
-M8 operativa e collaudata su Windows: Gemma 4 12B locale, impostazioni per
-campagna (013), QLoRA reale e adapter con backup/ripristino (014). Accettazione
-sulle altre piattaforme e prova fisica offline/firewall ancora pendenti.
-**M9 consegnata su Windows. Prossima milestone funzionale: M10 — Multilingua.**
-M10 aggiunta alla roadmap: tutte le 16 lingue/modalità richieste, RTL, CJK,
-accessibilità Braille, Morse e alfabeti di fantasia; solo pianificazione,
-nessuna localizzazione implementata in questo intervento.
-Nessun push autorizzato o eseguito.
+M7 operational and tested on Windows: local assistant with sources, GPU, and history.
+**Full acceptance still partial**: missing proof with physically
+disconnected network/firewall block. Proxy test and loopback connections are distinct.
+M6 macOS/Linux/CI real and revision of the interactive Windows wizard also remain.
+M8 operational and tested on Windows: local Gemma 4 12B, campaign settings for
+(013), real QLoRA and adapter with backup/restore (014). Acceptance
+on other platforms and physical offline/firewall test still pending.
+**M9 delivered on Windows. Next functional milestone: M10 — Multilingual.**
+M10 added to roadmap: all requested 16 languages/modes, RTL, CJK,
+Braille accessibility, Morse, and fantasy alphabets; planning only,
+no localization implemented in this intervention.
+No push authorized or executed.
 
-Il modello specifico D&D 1.5B è stato provato su GPU e scartato per qualità.
-L'utente ha approvato esplicitamente Qwen3:4b-instruct multilingue con fonti locali,
-**non fine-tuned D&D**. Setup e identità verificabili: [AI_LOCAL.md](AI_LOCAL.md).
+The specific D&D 1.5B model was tested on GPU and discarded for quality.
+The user explicitly approved Qwen3:4b-instruct multilingual with local sources,
+**not fine-tuned D&D**. Verifiable setup and identity: [AI_LOCAL.md](AI_LOCAL.md).
 
-## Verifiche effettive M8
+## Actual M8 Verifications
 
-- 69 test Rust e clippy offline con `-D warnings`: PASS. 59 test frontend:
-  PASS; ultimi ritocchi coperti anche da 7 test mirati dell'assistente.
-  Lint, typecheck, format e build frontend: PASS. Worker Python: 5 PASS.
-- `pnpm build:desktop` e `pnpm package:desktop`: PASS; installer NSIS Windows
-  non firmato generato. Installazione M8 non ripetuta, non confonderla con M6.
-- GPU RTX 4080 SUPER 16 GB: 4 casi Qwen e 4 Gemma con esito atteso nell'app.
+- 69 Rust and clippy tests offline with `-D warnings`: PASS. 59 frontend tests:
+  PASS; final touches also covered by 7 targeted assistant tests.
+  Lint, typecheck, format and frontend build: PASS. Python Worker: 5 PASS.
+- `pnpm build:desktop` and `pnpm package:desktop`: PASS; unsigned Windows
+  NSIS installer generated. M8 installation not repeated, do not confuse with M6.
+- GPU RTX 4080 SUPER 16 GB: 4 Qwen cases and 4 Gemma with expected result in the app.
   Training dal menu su 4 estratti/8 passaggi e successiva prova su 74 estratti,
   74 esempi/74 passaggi: pesi modificati, copertura completa, tre controlli di
   citazioni/assenze/GPU, attivazione e domanda sull'ultima fonte PASS.
@@ -864,7 +922,7 @@ L'utente ha approvato esplicitamente Qwen3:4b-instruct multilingue con fonti loc
 - Schema M7 **012 additivo**; vecchi backup migrati in copia, nuovi richiedono versione
   compatibile. Identificatori legacy it.nodex.desktop/nodex.sqlite3/.nodex mantenuti.
 
-## Verifiche effettive M7
+## M7 checks actually performed
 
 - `cargo test --offline --manifest-path src-tauri/Cargo.toml`: **63 PASS**.
 - `cargo clippy --offline --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings`:
@@ -873,143 +931,143 @@ L'utente ha approvato esplicitamente Qwen3:4b-instruct multilingue con fonti loc
   test mirati dell'assistente. Lint, typecheck, format:check: PASS.
 - `pnpm package:desktop`: PASS, installer Windows NSIS non firmato. L'installazione
   M7 non è stata ripetuta; installazione/avvio/rimozione M6 erano stati verificati
-  preservando due DB personali con SHA-256 identico.
-- GPU reale: Ollama 0.40.10, Qwen3:4b-instruct Q4_K_M, contesto 8192, **3539 MiB
-  interamente in VRAM** sulla RTX 4080 SUPER. Le prestazioni dipendono dal carico.
-- Benchmark finale **40/40 esiti attesi**: 20 campagna, 10 regole originali di
-  prova in conflitto fra edizioni, 5 assenze con inferenza GPU; 5 attacchi bloccati
-  prima del modello. Dati canonici invariati. Non è accuratezza universale.
-- Prove native: streaming, annullamento dopo token GPU con bozza non vuota,
-  navigazione, blocco citato, rinomina, regole 2024, delete, backup/export: PASS.
-- Ripristino e secondo riavvio senza Ollama: identiche **90 conversazioni/fonti/
-  metriche, 25 pagine, un membro Party e configurazione**. Immagine originale
-  inclusa nel backup/export. Nessuna campagna di prova nel profilo personale.
-- Errori di protocollo nativi simulati: cloud attivo, modello mancante, CPU,
-  OOM, stream incompleto/malformato/eccessivo, citazione inventata; nessun invio
-  appunti nei primi quattro casi. Runtime realmente assente: errore conservato.
-- Cloud disabilitato + proxy esterni non raggiungibili: inferenza reale riuscita;
-  **80 campioni, 173 connessioni del runtime/esecutore, solo 127.0.0.1**.
-  Non è una prova fisica offline o una verifica firewall. Nessun guasto GPU provocato.
+  preserving two personal DBs with identical SHA-256.
+- Real GPU: Ollama 0.40.10, Qwen3:4b-instruct Q4_K_M, context 8192, **3539 MiB
+  entirely in VRAM** on the RTX 4080 SUPER. Performance depends on load.
+- Final Benchmark **40/40 expected results**: 20 campaign, 10 original rules of
+  test in conflict between editions, 5 absences with GPU inference; 5 attacks blocked
+  before the model. Canonical data unchanged. Not universal accuracy.
+- Native tests: streaming, cancellation after GPU token with non-empty draft,
+  navigation, cited block, rename, 2024 rules, delete, backup/export: PASS.
+- Restore and second restart without Ollama: identical **90 conversations/sources/
+  metrics, 25 pages, one Party member and configuration**. Original image
+  included in backup/export. No test campaign in personal profile.
+- Simulated native protocol errors: cloud active, missing model, CPU,
+  OOM, incomplete/malformed/excessive stream, invented citation; no note submission
+  in the first four cases. Runtime actually absent: error preserved.
+- Cloud disabled + external proxies unreachable: successful real inference;
+  **80 samples, 173 runtime/executor connections, only 127.0.0.1**.
+  Not a physical offline test or firewall verification. No GPU failure provoked.
 
-## Campagna privata preesistente
+## Pre-existing private campaign
 
-Speratia M6: 84 sessioni, 209 pagine, 18 asset, 36 immagini, 207 Markdown originali.
-Backup schema 009 verificato nella build 011 durante M6; UUID/checksum preservati.
-Trascrizione Oran parziale; PF attuali illeggibili segnalati, da aggiornare.
-Backup già consegnato: C:/Users/Joel/Downloads/Speratia_Chronexus_M6_2026-10-23.nodex
-(52.321.017 byte), SHA-256
-58a3e5fdc05670b46536c911eb92e5c83d7b8f86b5721c3c3adda5b893fd714c.
-Ripristino sostituisce l'intero archivio con copia preventiva, non fonde campagne.
-Archivi/foto/DB/profili/modelli restano fuori Git; nessun dato privato pubblicato.
+Speratia M6: 84 sessions, 209 pages, 18 assets, 36 images, 207 original Markdown.
+Backup schema 009 verified in build 011 during M6; UUID/checksum preserved.
+Partial Oran transcription; current PFs reported unreadable, to be updated.
+Backup already delivered: C:/Users/Joel/Downloads/Speratia_Chronexus_M6_2026-10-23.nodex
+(52.321.017 bytes), SHA-256
+58a3e5fdc05670b46536c911eb92e5c83d7b8f86b5721c3cadda5b893fd714c.
+Restore replaces the entire archive with a preventive copy, does not merge campaigns.
+Archives/photos/DB/profiles/models remain outside Git; no private data published.
 
 ## Commit M7
 
-- e6f1763 feat(ai): integra inferenza GPU locale e conversazioni persistenti
-- a89874e fix(ai): evita prove duplicate e recupera i ruoli del party
-- d63ba16 fix(ai): restringe le fonti ai nomi presenti nella domanda
-- cf39425 fix(ai): esclude istruzioni sospette prima dell inferenza
-- 4ac9f7f feat(ai): aggiunge interfaccia assistente e avvio locale
-- Guide e checkpoint finale: vedere l'ultimo commit Git.
+- e6f1763 feat(ai): integrates local GPU inference and persistent conversations
+- a89874e fix(ai): avoids duplicate tests and retrieves party roles
+- d63ba16 fix(ai): restricts sources to names present in the prompt
+- cf39425 fix(ai): excludes suspicious instructions before inference
+- 4ac9f7f feat(ai): adds assistant interface and local startup
+- Guide and final checkpoint: see the last Git commit.
 
-## Avvio, Skill e limiti
+## Startup, Skill and limits
 
-Installer app M8 nella root: `installers/Chronexus-M8-Windows-x64/`.
-Il precedente `Chronexus-0.1.0-Windows-x64/` contiene la distribuzione M7 e il
-suo runtime Qwen; non è stato sovrascritto. Il nuovo installer app non incorpora
-il checkpoint Google da 24 GB o l'ambiente QLoRA. Su questa macchina il backend
-è già preparato; per altri computer seguire [AI_TRAINING.md](AI_TRAINING.md).
+App M8 installer in root: `installers/Chronexus-M8-Windows-x64/`.
+The previous `Chronexus-0.1.0-Windows-x64/` contains the M7 distribution and its
+Qwen runtime; it was not overwritten. The new app installer does not incorporate
+the Google checkpoint from 24 GB or the QLoRA environment. On this machine the backend
+is already prepared; for other computers follow [AI_TRAINING.md](AI_TRAINING.md).
 
-Avvio: `powershell -File scripts/Start-LocalAI.ps1`, poi il nuovo Chronexus
-oppure `pnpm desktop` nell'ambiente Rust configurato. Campagna → Impostazioni
-della campagna → Controlla Ollama → gemma4:12b → conferma multilingue → Attiva.
-Riaddestra sui nuovi dati e Attiva adapter sono due azioni distinte.
-Dettagli installer e limiti: [INSTALLERS.md](INSTALLERS.md).
+Startup: `powershell -File scripts/Start-LocalAI.ps1`, then the new Chronexus
+or `pnpm desktop` in the configured Rust environment. Campaign → Campaign Settings
+→ Check Ollama → gemma4:12b → confirm multilingual → Activate.
+Retrain on new data and Activate adapter are two distinct actions.
+Installer details and limits: [INSTALLERS.md](INSTALLERS.md).
 
-Skill M8 letta/applicata: **vercel-react-best-practices**, per caricamento
-condizionale, richieste locali indipendenti, progresso e recupero degli errori.
-Non sono state applicate Skill AI/database assenti dal catalogo.
+Skill M8 read/applied: **vercel-react-best-practices**, for conditional loading,
+independent local requests, progress and error recovery.
+AI Skills/databases missing from the catalog were not applied.
 
-Skill M7 effettivamente letta/applicata: **vercel-react-best-practices**, per
-caricamento differito, richieste indipendenti e aggiornamenti dello streaming.
-Il tema esistente è mantenuto; nessuna nuova Skill AI/Rust/database disponibile
-applicata. Ricerca Skill/design M6 già documentata in RESEARCH_DND.md.
+Skill M7 effectively read/applied: **vercel-react-best-practices**, for
+deferred loading, independent requests, and streaming updates.
+The existing theme is maintained; no new AI/Rust/database Skill is available
+applied. Skill/design M6 research already documented in RESEARCH_DND.md.
 
-Limiti: citazioni controllate strutturalmente, non verità semantica; modello
-prolisso e non esperto D&D addestrato ad hoc; gate lessicale con possibili falsi
-positivi/attacchi nuovi. Retrieval a estratti, non intera campagna o embeddings.
-Wiki principalmente inglese/cache espellibile; un solo PG giocabile, Party in Codex;
-bundle editor grande, backup manuali. Prossime verifiche: offline fisico M7 e
-attività residue M6 macOS/Linux/CI e wizard Windows. Vedere ROADMAP.md.
-## M10 in corso — fondazioni linguistiche
+Limits: structurally controlled citations, not semantic truth; verbose model
+and non-expert D&D trained ad hoc; lexical gate with possible false
+positives/new attacks. Retrieval by extracts, not entire campaign or embeddings.
+Wiki primarily English/expellable cache; a single playable PG, Party in Codex;
+large bundle editor, manual backups. Next verifications: physical offline M7 and
+residual M6 activities macOS/Linux/CI and Windows wizard. See ROADMAP.md.
+## M10 in progress — linguistic foundations
 
-Preferenze globali versionate in `interface-preferences.json`, indipendenti dal
-backup delle campagne e senza migrazione SQLite (015 invariata). Menù globale
-Lingua e scrittura disponibile anche senza campagna; cambio senza riavvio,
-ripristino italiano, fallback e isolamento bidirezionale. Cataloghi in preparazione:
-le traduzioni automatiche non sono revisioni linguistiche. Nessun dato di campagna
-viene inviato al modello: la preparazione locale legge soltanto stringhe UI.
+Global preferences versioned in `interface-preferences.json`, independent from
+campaign backups and without SQLite migration (015 unchanged). Global menu
+Language and writing available even without a campaign; change without restart,
+Italian restoration, fallback, and bidirectional isolation. Catalogs in preparation:
+automatic translations are not linguistic revisions. No campaign data
+is sent to the model: local preparation reads only UI strings.
 
-Verifiche fondazioni: 3 test frontend e 4 test Rust selezionati superati;
-TypeScript e lint superati dopo correzione del pattern degli errori.
-React Doctor: 84, nessuna regressione rispetto al riferimento 74 della M9.
-Skill: accessibility, react-testing, impeccable per impostazioni e testo semantico;
-Rust/SQLite/Tauri per preferenze locali atomiche, senza cambiare i dati salvati.
-Restano da completare integrazione di tutte le viste, trascrizioni, cataloghi,
-collaudo desktop e documentazione definitiva.
-### M10 — integrazione verificata, collaudo desktop in corso
+Foundation verifications: 3 frontend test and 4 selected Rust test passed;
+TypeScript and lint passed after correcting the error pattern.
+React Doctor: 84, no regression compared to the M9 reference 74.
+Skill: accessibility, react-testing, impeccable for settings and semantic text;
+Rust/SQLite/Tauri for atomic local preferences, without changing saved data.
+Remaining to complete: integration of all views, transcriptions, catalogs,
+desktop testing, and final documentation.
+### M10 — verified integration, desktop testing in progress
 
-Collegate le viste ai cataloghi: 1429 messaggi candidati per ciascuna lingua
-naturale, fallback italiano, dizionari BlockNote locali, date/numeri locali,
-plurali della ricerca e font offline arabi/CJK. Le traduzioni sono bozze:
-corretti termini portoghesi rimasti in inglese; cinese normalizzato con OpenCC.
-Klingon/Rihannsu: solo lessico verificato e italiano per il resto; glossario con
-grafia romanizzata. Braille italiano a sei punti in sottoinsieme letterario,
-Morse e SGA Minecraft/Monocraft: etichette decorative con testo semantico,
-laboratorio reversibile e recupero italiano. Nessuna conversione degli appunti.
+Views connected to catalogs: 1429 candidate messages for each
+natural language, Italian fallback, local BlockNote dictionaries, local dates/numbers,
+search plurals, and offline Arabic/CJK fonts. Translations are drafts:
+correct Portuguese terms remained in English; Chinese normalized with OpenCC.
+Klingon/Rihannsu: only verified lexicon and Italian for the rest; glossary with
+romanized script. Six-dot Italian Braille in literary subset,
+Morse and SGA Minecraft/Monocraft: decorative labels with semantic text,
+reversible laboratory and Italian recovery. No conversion of notes.
 
-Controlli eseguiti: 113 test frontend superati, TypeScript e lint superati.
-React Doctor corrente: 63 e nessun nuovo rilievo nelle modifiche; confronto
-ripetuto con lo stesso strumento sul commit M9 6ef5222: 61. I punteggi storici
-74/84 non sono comparabili con questa esecuzione/versione. Risolte le nuove
-segnalazioni su formatter e componenti, separando dialogo backup, immagini e job.
-Il dialogo backup usa ora dialog nativo; jsdom richiede uno shim nel solo test.
-Prime prove desktop: 13 lingue × 13 viste e axe EN/AR/JA senza violazioni rilevate.
-Da terminare: trascrizioni native, riavvio, ripristino, font/IME e build finale.
-Skill aggiunte alla verifica: systematic-debugging e react-doctor per regressioni;
-webapp-testing per ricognizione e prove browser, usando il runner Playwright JS
-esistente nel progetto. Revisione linguistica e prova assistiva reale non eseguite.
-### M10 — correzioni di accettazione e prove finali
+Checks performed: 113 frontend tests passed, TypeScript and lint passed.
+Current React Doctor: 63 and no new findings in changes; comparison
+repeated with the same tool on commit M9 6ef5222: 61. Historical scores
+74/84 are not comparable with this execution/version. Resolved new
+reports on formatter and components, separating backup dialog, images, and job.
+The backup dialog now uses native dialog; jsdom requires a shim in the test only.
+Primary desktop tests: 13 languages × 13 views and axe EN/AR/JA without detected violations.
+To finish: native transcriptions, restart, restoration, font/IME, and final build.
+Skills added to verification: systematic-debugging and react-doctor for regressions;
+webapp-testing for reconnaissance and browser tests, using the existing Playwright JS
+runner in the project. Linguistic revision and real assistive testing not performed.
+### M10 — acceptance corrections and final tests
 
-Corrette etichette principali e conteggi (fra cui Oggetti in tedesco), aggiunto
-lessico editoriale ripetibile in core-labels.json, normalizzazione/pruning
-cataloghi, frasi intere nella conferma restore e traduzione di stati backup/export
-e diagnostici pubblici conosciuti. Corretto il CSS del testo semantico nascosto:
-la scelta «solo trascrizione» funziona, conservando il nome accessibile.
-Dialogo restore centrato, scorrevole e leggibile nella finestra minima.
+Corrected main labels and counts (including Items in German), added
+repeatable editorial lexicon in core-labels.json, normalization/pruning
+catalogs, full sentences in restore confirmation and translation of backup/export statuses
+and known public diagnostics. Corrected CSS of hidden semantic text:
+the "transcription only" choice works, preserving the accessible name.
+Restore dialog centered, smooth, and readable in the minimum window.
 
-Prove: 113 frontend e 79 Rust PASS; typecheck/lint/format e clippy PASS;
-cataloghi 1427 chiavi naturali con parametri integri; React Doctor ultimo 68,
-nessun nuovo rilievo sulle modifiche (baseline M9 ripetuta: 61).
-Detector impeccable eseguito: nessun rilievo. Build desktop release PASS.
-Native su frontend compilato: matrice 13×13 PASS, tre trascrizioni e testo
-semantico nascosto PASS; axe impostazioni EN/AR/JA senza violazioni. Riavvio,
-backup/restore 015, Escape/focus del dialogo, preferenze corrotte recuperabili
-PASS. Backup creato in DE e ripristinato mantenendo EN: preferenza realmente
-esterna al backup; verificata anche l’assenza del JSON nell’archivio ZIP.
-Cinque font locali e Monocraft assente, Unicode Markdown/visuale, composizione
-simulata, ricerca CJK e UUID del primo blocco PASS. IME OS reale non provato.
-Nessuna campagna reale aperta e nessun host remoto contattato nei percorsi QA.
-Dettagli, script e limiti: docs/I18N.md. Revisione linguistica/assistiva aperta.
+Tests: 113 frontend and 79 Rust PASS; typecheck/lint/format and clippy PASS;
+1427 catalogs natural keys with intact parameters; React Doctor last 68,
+no new findings on changes (baseline M9 repeated: 61).
+Impeccable Detector executed: no findings. Desktop release build PASS.
+Native on frontend compiled: 13×13 matrix PASS, three transcriptions and hidden
+semantic text PASS; axe settings EN/AR/JA without violations. Restart,
+backup/restore 015, Escape/focus of the dialog, corrupted preferences recoverable
+PASS. Backup created in DE and restored maintaining EN: preference actually
+external to the backup; also verified the absence of the JSON in the ZIP archive.
+Five local fonts and Monocraft absent, Unicode Markdown/visual, composition
+simulated, CJK search and UUID of the first block PASS. Real OS IME not tested.
+No real campaign open and no remote host contacted in QA paths.
+Details, scripts and limits: docs/I18N.md. Linguistic/assistive review open.
 
-M13 implementata: Espruar/Dethek con font originali OFL, fallback semantico,
-preferenze v2 compatibili in lettura v1 e pacchetti reversibili versionati.
-37 test mirati frontend + 2 Node font/licenze + 6 Rust preferenze PASS;
-typecheck/lint PASS; React Doctor changed 100/100. QA nativo/distribuzione pendenti.
-Il refactor aggiuntivo DiceSceneFeedback risolve il rilievo rimasto nel commit M12:
-la prima estrazione DiceCast, da sola, non era stata sufficiente.
+M13 implemented: Espruar/Dethek with original OFL fonts, semantic fallback,
+v2 preferences compatible in v1 reading and reversible versioned packages.
+37 targeted frontend tests + 2 Node font/licenses + 6 Rust preferences PASS;
+typecheck/lint PASS; React Doctor changed 100/100. Native/distribution QA pending.
+The additional DiceSceneFeedback refactor resolves the finding remaining in commit M12:
+the first DiceCast extraction, alone, was not sufficient.
 
-M11 finale: i cinque ZIP validi sono in installers/Chronexus-0.2.0-Windows-x64-final;
-core 1972,7 MiB, volumi 1800/1800/1800/1806,4 MiB, tutti sotto il limite 2048.
-Installazione AI reale e ripetuta PASS, nessuna sovrascrittura. La vecchia prova
-fuori limite è archiviata sotto .tools, esclusa dalla consegna. Pubblicazione
-remota ancora da eseguire e verificare; non dichiarata conclusa in questo commit.
+M11 final: the five valid ZIPs are in installers/Chronexus-0.2.0-Windows-x64-final;
+core 1972,7 MiB, volumes 1800/1800/1800/1806,4 MiB, all below the 2048 limit.
+Real and repeated AI installation PASS, no overwriting. The old out-of-limit
+test is archived under .tools, excluded from delivery. Remote publication
+still to be executed and verified; not declared finished in this commit.

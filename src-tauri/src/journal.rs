@@ -29,15 +29,15 @@ pub struct Session {
 pub(crate) fn storage(error: rusqlite::Error) -> String {
     match error {
         rusqlite::Error::SqliteFailure(ref e, _) if e.code == rusqlite::ErrorCode::ConstraintViolation =>
-            "Operazione non valida: verifica che il numero di sessione sia unico nella campagna.".into(),
-        _ => "Impossibile accedere all'archivio. Verifica spazio e permessi, poi riprova. Gli appunti restano nell'editor.".into(),
+            "Invalid operation: check that the session number is unique in the campaign.".into(),
+        _ => "Cannot access the archive. Check space and permissions, then try again. The notes stay in the editor.".into(),
     }
 }
 
 pub(crate) fn title(value: &str) -> AppResult<&str> {
     let value = value.trim();
     if value.is_empty() || value.chars().count() > 200 || value.contains('\0') {
-        return Err("Inserisci un nome o titolo da 1 a 200 caratteri.".into());
+        return Err("Enter a name or title of 1 to 200 characters.".into());
     }
     Ok(value)
 }
@@ -45,7 +45,7 @@ pub(crate) fn title(value: &str) -> AppResult<&str> {
 pub(crate) fn identifier(id: &str) -> AppResult<()> {
     Uuid::parse_str(id)
         .map(|_| ())
-        .map_err(|_| "Identificatore non valido. Riapri la campagna.".into())
+        .map_err(|_| "Invalid identifier. Reopen the campaign.".into())
 }
 
 pub(crate) fn require_campaign(connection: &Connection, id: &str) -> AppResult<()> {
@@ -58,7 +58,7 @@ pub(crate) fn require_campaign(connection: &Connection, id: &str) -> AppResult<(
         )
         .map_err(storage)?;
     if !found {
-        return Err("Campagna non trovata. Ricarica l'archivio.".into());
+        return Err("Campaign not found. Reload the archive.".into());
     }
     Ok(())
 }
@@ -142,11 +142,11 @@ pub fn create_session(
     require_campaign(connection, campaign_id)?;
     let name = title(name)?;
     if !(1..=999999).contains(&sequence) {
-        return Err("Il numero di sessione deve essere compreso tra 1 e 999999.".into());
+        return Err("The session number must be between 1 and 999999.".into());
     }
     if let Some(date) = &played_on {
         if date.len() != 10 || chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d").is_err() {
-            return Err("Inserisci una data valida nel formato anno-mese-giorno.".into());
+            return Err("Enter a valid date in year-month-day format.".into());
         }
     }
     let id = Uuid::new_v4().to_string();
@@ -162,7 +162,7 @@ pub fn get_session(connection: &Connection, campaign_id: &str, id: &str) -> AppR
     identifier(campaign_id)?;
     identifier(id)?;
     connection.query_row("SELECT id,campaign_id,sequence,title,played_on,document,revision,updated_at FROM sessions WHERE campaign_id=?1 AND id=?2", params![campaign_id,id],session_row)
-        .optional().map_err(storage)?.ok_or_else(|| "Sessione non trovata in questa campagna.".into())
+        .optional().map_err(storage)?.ok_or_else(|| "Session not found in this campaign.".into())
 }
 
 // Validate the supported editor subset before replacing canonical user content.
@@ -172,10 +172,9 @@ pub(crate) fn empty_document() -> Value {
 
 pub fn validate_document(document: &Value) -> AppResult<()> {
     if document.to_string().len() > 2_000_000 {
-        return Err("Appunti troppo grandi (massimo 2 MB per sessione).".into());
+        return Err("Notes too large (up to 2 MB per session).".into());
     }
-    let invalid =
-        || "Formato degli appunti non valido o non supportato. Nessun dato sostituito.".to_string();
+    let invalid = || "Invalid or unsupported notes format. No data replaced.".to_string();
     if document.get("version").and_then(Value::as_u64) != Some(1) {
         return Err(invalid());
     }
@@ -267,7 +266,7 @@ pub fn save_document(
     let transaction = connection.unchecked_transaction().map_err(storage)?;
     let affected = transaction.execute("UPDATE sessions SET document=?1,revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?2 AND campaign_id=?3 AND revision=?4",params![document.to_string(),id,campaign_id,revision]).map_err(storage)?;
     if affected != 1 {
-        return Err("Salvataggio fermato: la sessione è stata modificata altrove o non appartiene alla campagna. Copia gli appunti prima di riaprire la sessione.".into());
+        return Err("Saving stopped: the session was changed elsewhere or does not belong to the campaign. Copy the notes before reopening the session.".into());
     }
     crate::knowledge::index_document(&transaction, campaign_id, Some(id), None, &document)?;
     crate::search::session(&transaction, campaign_id, id)?;

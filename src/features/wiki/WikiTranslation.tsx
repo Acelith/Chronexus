@@ -181,23 +181,23 @@ function TranslationView({
   return (
     <section
       className="wiki-translation"
-      aria-label={tr("Traduzione della voce wiki")}
+      aria-label={tr("Wiki entry translation")}
     >
       <p className="editor-hint">
         {supported
           ? tr(
-              "Traduzione locale in {0}. Richiede Ollama senza cloud e il modello selezionato già installato. Nessun testo viene inviato a servizi esterni; nessun download o cambio di AI automatico.",
+              "Local translation into {0}. Needs Ollama without cloud and the selected model already installed. No text is sent to external services; no automatic download or AI switch.",
               [localeInfo(locale).name],
             )
           : tr(
-              "Traduzione wiki non disponibile per questa lingua. Consulta l’originale.",
+              "Wiki translation not available for this language. Read the original.",
             )}
       </p>
       {supported ? (
         <label>
-          {tr("Modello per la traduzione")}
+          {tr("Translation model")}
           <select
-            aria-label={tr("Modello per la traduzione")}
+            aria-label={tr("Translation model")}
             value={model}
             onChange={(e) => onModelChange(e.target.value)}
           >
@@ -213,7 +213,7 @@ function TranslationView({
         <>
           <p role="status">
             {tr(
-              "Bozza automatica · {0} · {1}. Verifica sempre le regole sull’originale.",
+              "Automatic draft · {0} · {1}. Always check the rules against the original.",
               [localeInfo(locale).name, translation.model],
             )}
           </p>
@@ -227,19 +227,19 @@ function TranslationView({
       ) : null}
       {supported && !translation ? (
         <button disabled={busy || reading} onClick={() => void translate()}>
-          {tr("Traduci in {0}", [localeInfo(locale).name])}
+          {tr("Translate into {0}", [localeInfo(locale).name])}
         </button>
       ) : null}
       {supported && reading ? (
-        <p role="status">{tr("Lettura della traduzione salvata…")}</p>
+        <p role="status">{tr("Reading the saved translation…")}</p>
       ) : null}
       {busy ? (
         <div>
           <p role="status">
-            {tr("Traduzione sul dispositivo… L’originale resta consultabile.")}
+            {tr("Translating on the device… The original stays available.")}
           </p>
           <button onClick={() => void cancel()}>
-            {tr("Annulla traduzione")}
+            {tr("Cancel translation")}
           </button>
         </div>
       ) : null}
@@ -250,7 +250,7 @@ function TranslationView({
       ) : null}
       {translation ? (
         <details>
-          <summary>{tr("Mostra originale")}</summary>
+          <summary>{tr("Show original")}</summary>
           <div lang="en" dir="ltr">
             {children}
           </div>

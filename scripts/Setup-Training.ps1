@@ -9,7 +9,7 @@ if (!(Test-Path -LiteralPath $PythonPath -PathType Leaf)) { throw 'Specifica il 
 $version = & $PythonPath -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'
 if ($LASTEXITCODE -ne 0 -or $version -ne '3.12') { throw 'Il backend M8 verificato richiede Python 3.12.' }
 if (Test-Path -LiteralPath $trainingRoot) {
-    if ((Get-Item -LiteralPath $trainingRoot).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'La cartella training non può essere un collegamento.' }
+    if ((Get-Item -LiteralPath $trainingRoot).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'The training folder must not be a link.' }
 }
 New-Item -ItemType Directory -Force -Path $trainingRoot | Out-Null
 $venv = Join-Path $trainingRoot 'venv'
@@ -35,4 +35,4 @@ snapshot_download("google/gemma-4-12B-it", revision="707f0a3b8a3c7ad586ed01e27ea
 if ($LASTEXITCODE -ne 0) { throw 'Download checkpoint non completato; riesegui per riprendere.' }
 & $python -I -B (Join-Path $PSScriptRoot 'ai/train.py') --probe
 if ($LASTEXITCODE -ne 0) { throw 'Controllo backend non riuscito.' }
-Write-Output 'Ambiente locale preparato. Il riaddestramento viene avviato solo dal pulsante nelle impostazioni della campagna. Nessun servizio globale installato.'
+Write-Output 'Local environment prepared. Training starts only from the button in campaign settings. No system-wide service installed.'

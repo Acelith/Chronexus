@@ -58,8 +58,8 @@ const step = (name, data = {}) => {
     Object.keys(data).length ? JSON.stringify(data) : "",
   );
 };
-await page.getByRole("button", { name: "Impostazioni dell’app" }).click();
-const settings = page.getByRole("region", { name: "Fonti D&D / Wiki" });
+await page.getByRole("button", { name: "App settings" }).click();
+const settings = page.getByRole("region", { name: "D&D sources / Wiki" });
 
 if (phase === "check") {
   assert.equal(campaigns.length, 0, "check needs an empty profile");
@@ -76,23 +76,23 @@ if (phase === "check") {
 
   await call("create_campaign", { name: NAME });
   await page.reload();
-  await page.getByRole("button", { name: "Personaggio", exact: true }).click();
-  await page.getByRole("button", { name: "Crea personaggio" }).click();
-  await page.getByLabel("Nome del personaggio").fill("Oran di prova");
-  await page.getByRole("button", { name: "Salva personaggio" }).click();
+  await page.getByRole("button", { name: "Character", exact: true }).click();
+  await page.getByRole("button", { name: "Create character" }).click();
+  await page.getByLabel("Character name").fill("Oran di prova");
+  await page.getByRole("button", { name: "Save character" }).click();
   await expect(
     page.getByRole("heading", { name: "Oran di prova" }),
   ).toBeVisible();
 
-  await page.getByRole("button", { name: "Wiki D&D", exact: true }).click();
+  await page.getByRole("button", { name: "D&D Wiki", exact: true }).click();
   await expect(page.getByText(/Fonte attiva: Wikidot D&D 5e/)).toBeVisible();
-  await page.getByLabel("Nome nella wiki").fill("acid splash");
+  await page.getByLabel("Name in the wiki").fill("acid splash");
   const started = Date.now();
-  await page.getByRole("button", { name: "Cerca su Wikidot" }).click();
+  await page.getByRole("button", { name: "Search Wikidot" }).click();
   const hit = page.getByRole("button", { name: /^Acid Splash/ });
   await expect(hit).toBeVisible({ timeout: 30000 });
   await hit.click();
-  const article = page.getByRole("article", { name: "Voce wiki" });
+  const article = page.getByRole("article", { name: "Wiki entry" });
   await expect(
     article.getByText(/Fonte dichiarata: Player's Handbook/),
   ).toBeVisible({ timeout: 30000 });
@@ -111,9 +111,9 @@ if (phase === "check") {
   });
 
   await article
-    .getByRole("button", { name: "Prepara importazione nella scheda" })
+    .getByRole("button", { name: "Prepare import into the sheet" })
     .click();
-  const name = page.getByLabel("Nome della voce");
+  const name = page.getByLabel("Entry name");
   await expect(name).toHaveValue("Acid Splash");
   await expect(page.getByText(/Base Wikidot D&D 5e/)).toBeVisible();
   const before = await call("get_character", {
@@ -129,8 +129,8 @@ if (phase === "check") {
     0,
     "preview must not save",
   );
-  await page.getByRole("button", { name: "Salva voce" }).click();
-  await expect(page.getByText("Salvato sul computer.")).toBeVisible();
+  await page.getByRole("button", { name: "Save entry" }).click();
+  await expect(page.getByText("Saved on the computer.")).toBeVisible();
   const assets = await call("list_player_assets", {
     campaignId: before.campaignId,
     characterId: before.id,
@@ -147,22 +147,22 @@ if (phase === "check") {
     details: assets[0].input.details.castingTime,
   });
 
-  await page.getByRole("button", { name: "Wiki D&D", exact: true }).click();
-  await page.getByLabel("Nome nella wiki").fill("zzqq nessuna voce");
-  await page.getByRole("button", { name: "Cerca su Wikidot" }).click();
+  await page.getByRole("button", { name: "D&D Wiki", exact: true }).click();
+  await page.getByLabel("Name in the wiki").fill("zzqq nessuna voce");
+  await page.getByRole("button", { name: "Search Wikidot" }).click();
   const prompt = page.getByRole("alertdialog");
   await expect(prompt).toContainText(
-    "Wikidot non ha fornito le informazioni. Vuoi usare Open5e?",
+    "Wikidot did not provide the information. Do you want to use Open5e?",
   );
-  await prompt.getByRole("button", { name: "Resta su Wikidot" }).click();
+  await prompt.getByRole("button", { name: "Stay on Wikidot" }).click();
   await expect(prompt).toHaveCount(0);
   assert.equal(remote.filter((u) => u.includes("open5e")).length, 0);
   assert.equal((await call("get_wiki_provider")).explicit, false);
   step("refusal keeps Wikidot and sends nothing to Open5e");
 
-  await page.getByRole("button", { name: "Cerca su Wikidot" }).click();
+  await page.getByRole("button", { name: "Search Wikidot" }).click();
   await prompt
-    .getByRole("button", { name: "Usa Open5e e salva la scelta" })
+    .getByRole("button", { name: "Use Open5e and save the choice" })
     .click();
   await expect(page.getByText(/Fonte attiva: Open5e/)).toBeVisible();
   await expect
@@ -181,7 +181,7 @@ if (phase === "check") {
   await expect(page.getByRole("alertdialog")).toHaveCount(0);
   step("acceptance persists Open5e and repeats one search");
 
-  await page.getByRole("button", { name: "Impostazioni dell’app" }).click();
+  await page.getByRole("button", { name: "App settings" }).click();
   // The radio reflects the saved preference, so it turns checked after the write.
   const wikidotRadio = settings.getByRole("radio", { name: /Wikidot D&D 5e/ });
   await wikidotRadio.click();
@@ -191,15 +191,15 @@ if (phase === "check") {
   await expect(wikidotRadio).toBeChecked();
   const summary = await call("wiki_cache_summary");
   assert(summary.wikidot.entries >= 2, JSON.stringify(summary));
-  await settings.getByRole("button", { name: "Svuota cache offline…" }).click();
-  await settings.getByRole("button", { name: "Annulla" }).click();
+  await settings.getByRole("button", { name: "Clear offline cache…" }).click();
+  await settings.getByRole("button", { name: "Cancel" }).click();
   assert.equal(
     (await call("wiki_cache_summary")).wikidot.entries,
     summary.wikidot.entries,
   );
-  await settings.getByRole("button", { name: "Svuota cache offline…" }).click();
+  await settings.getByRole("button", { name: "Clear offline cache…" }).click();
   await settings
-    .getByRole("button", { name: "Svuota cache", exact: true })
+    .getByRole("button", { name: "Clear cache", exact: true })
     .click();
   await expect(
     settings.getByText("Cache svuotata: Wikidot D&D 5e."),
@@ -242,7 +242,7 @@ if (phase === "check") {
   });
   assert.equal(assets[0].input.details.catalogSource.provider, "wikidot");
   assert.equal((await call("wiki_cache_summary")).wikidot.entries, 0);
-  await page.getByRole("button", { name: "Incantesimi", exact: true }).click();
+  await page.getByRole("button", { name: "Spells", exact: true }).click();
   await expect(
     page.getByText("https://dnd5e.wikidot.com/spell:acid-splash"),
   ).toBeVisible();

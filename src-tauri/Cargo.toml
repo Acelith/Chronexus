@@ -1,9 +1,9 @@
 [package]
 name = "chronexus"
-version = "0.8.0"
-description = "Diario personale di campagne GDR, offline"
+version = "0.8.1"
+description = "Your offline RPG campaign journal"
 edition = "2021"
-license = "MIT"
+license = "Apache-2.0"
 
 [lib]
 name = "chronexus_lib"

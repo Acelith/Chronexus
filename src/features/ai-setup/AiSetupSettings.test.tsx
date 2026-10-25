@@ -52,31 +52,31 @@ test("non contatta nulla all’apertura e installa Ollama solo dopo conferma", a
   vi.mocked(aiSetupApi.status)
     .mockResolvedValueOnce(base)
     .mockResolvedValueOnce({ ...base, managedInstalled: true });
-  await user.click(
-    screen.getByRole("button", { name: "Controlla componenti" }),
-  );
+  await user.click(screen.getByRole("button", { name: "Check components" }));
   expect(await screen.findByText(/Synthetic GPU/)).toBeVisible();
   expect(
-    screen.getByRole("button", { name: "Scarica modello…" }),
+    screen.getByRole("button", { name: "Download model…" }),
   ).toBeDisabled();
-  await user.click(screen.getByRole("button", { name: "Installa Ollama…" }));
+  await user.click(screen.getByRole("button", { name: "Install Ollama…" }));
   const confirm = screen.getByRole("group", {
-    name: "Conferma installazione di Ollama",
+    name: "Confirm Ollama installation",
   });
   expect(confirm).toHaveTextContent(
     "github.com/ollama/ollama/releases/download/v0.40.10",
   );
   expect(confirm).toHaveTextContent("C:/synthetic/ai-runtime/ollama-0.40.10");
   expect(aiSetupApi.installRuntime).not.toHaveBeenCalled();
-  await user.click(screen.getByRole("button", { name: "Annulla" }));
+  await user.click(screen.getByRole("button", { name: "Cancel" }));
   expect(aiSetupApi.installRuntime).not.toHaveBeenCalled();
   vi.mocked(aiSetupApi.installRuntime).mockResolvedValue(undefined);
-  await user.click(screen.getByRole("button", { name: "Installa Ollama…" }));
-  await user.click(screen.getByRole("button", { name: "Scarica e installa" }));
+  await user.click(screen.getByRole("button", { name: "Install Ollama…" }));
+  await user.click(
+    screen.getByRole("button", { name: "Download and install" }),
+  );
   expect(
-    await screen.findByText(/Ollama installato e verificato/),
+    await screen.findByText(/Ollama installed and verified/),
   ).toBeVisible();
-  expect(screen.getByRole("button", { name: "Avvia Ollama" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Start Ollama" })).toBeEnabled();
 });
 test("scarica solo il modello scelto dopo conferma e mostra gli errori", async () => {
   const user = userEvent.setup();
@@ -88,21 +88,19 @@ test("scarica solo il modello scelto dopo conferma e mostra gli errori", async (
   };
   vi.mocked(aiSetupApi.status).mockResolvedValue(ready);
   render(<AiSetupSettings disabled={false} />);
+  await user.click(screen.getByRole("button", { name: "Check components" }));
   await user.click(
-    screen.getByRole("button", { name: "Controlla componenti" }),
+    await screen.findByRole("radio", { name: /Gemma 4 12B · Secondary/ }),
   );
-  await user.click(
-    await screen.findByRole("radio", { name: /Gemma 4 12B · Secondario/ }),
-  );
-  await user.click(screen.getByRole("button", { name: "Scarica modello…" }));
+  await user.click(screen.getByRole("button", { name: "Download model…" }));
   expect(
-    screen.getByRole("group", { name: "Conferma download del modello" }),
+    screen.getByRole("group", { name: "Confirm model download" }),
   ).toHaveTextContent("Gemma 4 12B");
   vi.mocked(aiSetupApi.pull).mockRejectedValueOnce(
     Error("Download del modello annullato."),
   );
-  await user.click(screen.getByRole("button", { name: "Scarica" }));
-  expect(await screen.findByRole("alert")).toHaveTextContent("annullato");
+  await user.click(screen.getByRole("button", { name: "Download" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("cancelled");
   expect(aiSetupApi.pull).toHaveBeenCalledWith(
     "secondary",
     expect.any(Function),
@@ -115,10 +113,12 @@ test("scarica solo il modello scelto dopo conferma e mostra gli errori", async (
     ...ready,
     models: [ready.models[0], { ...ready.models[1], state: "ready" }],
   });
-  await user.click(screen.getByRole("button", { name: "Scarica modello…" }));
-  await user.click(screen.getByRole("button", { name: "Scarica" }));
+  await user.click(screen.getByRole("button", { name: "Download model…" }));
+  await user.click(screen.getByRole("button", { name: "Download" }));
   await waitFor(() =>
-    expect(screen.getByText(/Gemma 4 12B è pronto/)).toBeVisible(),
+    expect(screen.getByText(/Gemma 4 12B is ready/)).toBeVisible(),
   );
-  expect(screen.getByText("Gemma 4 12B scaricato e verificato.")).toBeVisible();
+  expect(
+    screen.getByText("Gemma 4 12B downloaded and verified."),
+  ).toBeVisible();
 });

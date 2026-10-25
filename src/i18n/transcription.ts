@@ -157,11 +157,10 @@ export function transcriptionPacket(source: string, script: Script) {
   );
 }
 export function restoreTranscription(packet: string): string {
-  if (packet.length > 250_000)
-    throw Error("Pacchetto di trascrizione troppo grande.");
+  if (packet.length > 250_000) throw Error("Transcription package too large.");
   const p: unknown = JSON.parse(packet);
   if (!p || typeof p !== "object")
-    throw Error("Pacchetto di trascrizione non valido.");
+    throw Error("Invalid transcription package.");
   const v = p as Record<string, unknown>;
   if (
     v.format !== "chronexus-transcription" ||
@@ -178,7 +177,7 @@ export function restoreTranscription(packet: string): string {
     typeof v.encoded !== "string" ||
     transcribe(v.original, v.script as Script).text !== v.encoded
   )
-    throw Error("Pacchetto di trascrizione non valido o alterato.");
+    throw Error("Invalid or altered transcription package.");
   return v.original;
 }
 export function decodeMorse(source: string) {

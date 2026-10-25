@@ -38,7 +38,7 @@ test("preserva bozza e snapshot metadati durante un aggiornamento esterno", asyn
     onRecover: vi.fn(),
   };
   const view = render(<CodexWorkspace {...props} />);
-  await user.click(screen.getByRole("button", { name: "Modifica pagina" }));
+  await user.click(screen.getByRole("button", { name: "Edit page" }));
   const input = screen.getByDisplayValue("Titolo originale");
   await user.clear(input);
   await user.type(input, "Bozza locale");
@@ -50,7 +50,7 @@ test("preserva bozza e snapshot metadati durante un aggiornamento esterno", asyn
     />,
   );
   expect(screen.getByDisplayValue("Bozza locale")).toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Salva pagina" }));
+  await user.click(screen.getByRole("button", { name: "Save page" }));
   expect(onUpdate).toHaveBeenCalledWith(
     "page",
     { title: "Bozza locale", kind: "note", status: "active", aliases: [] },

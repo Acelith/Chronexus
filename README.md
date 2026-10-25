@@ -2,179 +2,163 @@
 
 <img src="assets/brand/chronexus-wordmark.webp" alt="Chronexus" width="520">
 
-**Il diario del giocatore di ruolo: offline, privato, tutto collegato.**
+**The tabletop player’s journal: offline, private, everything connected.**
 
-Annota le sessioni, tieni la scheda del personaggio e ritrova chi ti ha dato quella chiave,
-in quale sessione e per quale fazione, senza account e senza cloud.
+Write session notes, keep your character sheet and find out who gave you that key,
+in which session and for which faction, with no account and no cloud.
 
 [![Release](https://img.shields.io/gitea/v/release/acelith/Chronexus?gitea_url=https%3A%2F%2Fgithub.com&label=release&color=6c302b)](https://github.com/Acelith/Chronexus/releases)
-[![Licenza](https://img.shields.io/badge/licenza-Apache--2.0-354b3e)](LICENSE)
-[![Piattaforma](https://img.shields.io/badge/Windows-x64-241e17)](#download-e-installazione)
-[![Offline](https://img.shields.io/badge/dati-solo%20locali-b89b60)](#privacy-e-dati)
-[![Lingue](https://img.shields.io/badge/lingue-11%20%2B%20scritture-354b3e)](docs/I18N.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-354b3e)](LICENSE)
+[![Platform](https://img.shields.io/badge/Windows-x64-241e17)](#download-and-installation)
+[![Offline](https://img.shields.io/badge/data-local%20only-b89b60)](#privacy-and-data)
+[![Languages](https://img.shields.io/badge/languages-11%20%2B%20scripts-354b3e)](docs/I18N.md)
 
-[Scarica](#download-e-installazione) · [Funzionalità](#funzionalità) · [Guida](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [English](README.en.md)
+[Download](#download-and-installation) · [Features](#features) · [Guide](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [Italiano](README.it.md)
 
-<img src="docs/media/hero.webp" alt="Diario di una sessione con appunti, menzioni dei personaggi e barra laterale con il logo dell’araldo" width="900">
+<img src="docs/media/hero.webp" alt="Session journal with notes, character mentions and the herald logo in the sidebar" width="900">
 
 </div>
 
-## Cos’è Chronexus
+> [!NOTE]
+> The English-first changes are in source version 0.8.1. The latest published
+> installer is still 0.8.0; this change has not been published.
 
-Chronexus è un’applicazione desktop per chi **gioca** una campagna di ruolo, non
-per chi la dirige. Raccoglie in un solo archivio locale il diario delle sessioni, le
-pagine su personaggi, luoghi e fazioni, la scheda del personaggio, l’inventario e
-gli incantesimi, e collega tutto con riferimenti stabili.
+## What is Chronexus
 
-## Perché Chronexus
+Chronexus is a desktop app for people who **play** a role-playing campaign, not for
+the game master. It keeps session notes, pages about characters, places and
+factions, the character sheet, inventory and spells in one local archive, linked
+with stable references. The interface defaults to English and offers 11 languages. Italian remains available, and existing language choices are preserved.
 
-- **Dalla parte del giocatore.** Ciò che il tuo personaggio sa, sospetta o ha
-  sentito dire: niente segreti del master, niente fatti inventati.
-- **Una menzione non è un fatto.** Citare due personaggi nella stessa nota non li
-  rende alleati: le relazioni le dichiari tu, con fonte e certezza
-  (confermata, sospetta, smentita, sconosciuta).
-- **I tuoi dati restano tuoi.** Database locale, backup completi in un file
-  `.nodex`, nessun account, nessuna telemetria.
-- **Pensato per giocare.** Salvataggio automatico, scorciatoie da tastiera, tiradadi
-  e scheda a portata di clic durante la sessione.
+## Why Chronexus
 
-## Funzionalità
+- **The player’s point of view.** What your character knows, suspects or was told:
+  no GM secrets, no invented facts.
+- **A mention is not a fact.** Naming two characters in one note does not make them
+  allies: you declare relationships yourself, with source and certainty
+  (confirmed, suspected, disproven, unknown).
+- **Your data stays yours.** Local database, full `.nodex` backups, no account, no
+  telemetry.
+- **Built for the table.** Autosave, keyboard shortcuts, dice roller and sheet one
+  click away during play.
 
-| | Funzione | In breve |
+## Features
+
+| | Feature | In short |
 | --- | --- | --- |
-| <img src="docs/media/icons/book.svg" alt="" width="24"> | **Diario delle sessioni** | Editor visuale e Markdown, salvataggio automatico, menzioni `[[Nome]]` con collegamenti che sopravvivono alle rinomine |
-| <img src="docs/media/icons/books.svg" alt="" width="24"> | **Codex** | Pagine per PNG, luoghi, fazioni, missioni e oggetti, con alias, immagini e collegamenti in entrata |
-| <img src="docs/media/icons/graph.svg" alt="" width="24"> | **Grafo delle conoscenze** | Menzioni e relazioni dichiarate distinte, filtri per tipo, certezza e sessione, ritorno alla fonte |
-| <img src="docs/media/icons/helmet.svg" alt="" width="24"> | **Scheda, inventario e capacità** | Scheda manuale generica o D&D 5e 2014, provenienza degli oggetti, incantesimi e slot senza formule nascoste |
-| <img src="docs/media/icons/dice.svg" alt="" width="24"> | **Tiradadi** | d4–d100 combinati, storico per campagna, cerchio dei draghi animato e movimento ridotto |
-| <img src="docs/media/icons/scroll.svg" alt="" width="24"> | **Ricerca** | Testo completo su note, pagine, scheda e oggetti con apertura del blocco trovato (Ctrl/⌘ + K) |
-| <img src="docs/media/icons/wiki.svg" alt="" width="24"> | **Wiki D&D** | Wikidot o Open5e su richiesta, copie offline, traduzione locale nella lingua dell’app |
-| <img src="docs/media/icons/star.svg" alt="" width="24"> | **Assistente locale (facoltativo)** | Domande sugli appunti con citazioni, su GPU e senza cloud, con Qwen3.8-27B o Gemma 4 12B |
-| <img src="docs/media/icons/document.svg" alt="" width="24"> | **Lingue e scritture** | 11 lingue, arabo da destra a sinistra, Braille, Morse, Espruar, Dethek e altre scritture |
-| <img src="docs/media/icons/backup.svg" alt="" width="24"> | **Aggiornamenti firmati** | Controllo, download verificato e backup obbligatorio prima di installare, annunciati dall’araldo |
+| <img src="docs/media/icons/book.svg" alt="" width="24"> | **Session journal** | Visual and Markdown editor, autosave, `[[Name]]` mentions whose links survive renames |
+| <img src="docs/media/icons/books.svg" alt="" width="24"> | **Codex** | Pages for NPCs, places, factions, quests and items, with aliases, images and backlinks |
+| <img src="docs/media/icons/graph.svg" alt="" width="24"> | **Knowledge graph** | Mentions and declared relationships kept apart, filters by type, certainty and session, back to the source |
+| <img src="docs/media/icons/helmet.svg" alt="" width="24"> | **Sheet, inventory and abilities** | Generic or D&D 5e 2014 manual sheet, item provenance, spells and slots without hidden formulas |
+| <img src="docs/media/icons/dice.svg" alt="" width="24"> | **Dice roller** | Mixed d4–d100 rolls, per-campaign history, animated dragon circle with reduced motion |
+| <img src="docs/media/icons/scroll.svg" alt="" width="24"> | **Search** | Full text across notes, pages, sheet and items, opening the matching block (Ctrl/⌘ + K) |
+| <img src="docs/media/icons/wiki.svg" alt="" width="24"> | **D&D wiki** | Wikidot or Open5e on request, offline copies, local translation into the app language |
+| <img src="docs/media/icons/star.svg" alt="" width="24"> | **Local assistant (optional)** | Questions about your notes with citations, on the GPU and without cloud, using Qwen3.8-27B or Gemma 4 12B |
+| <img src="docs/media/icons/document.svg" alt="" width="24"> | **Languages and scripts** | 11 languages, right-to-left Arabic, Braille, Morse, Espruar, Dethek and more |
+| <img src="docs/media/icons/backup.svg" alt="" width="24"> | **Signed updates** | Check, verified download and mandatory backup before install, announced by the herald |
 
 <details>
-<summary><strong>Altre schermate</strong></summary>
+<summary><strong>More screenshots</strong></summary>
 
 <p align="center">
-<img src="docs/media/graph.webp" alt="Grafo con relazioni dichiarate e menzioni tra personaggi, luoghi e fazioni" width="440">
-<img src="docs/media/character.webp" alt="Scheda del personaggio con caratteristiche, risorse e inventario" width="440">
-<img src="docs/media/dice.webp" alt="Tiradadi con il cerchio dei draghi e lo storico dei tiri" width="440">
-<img src="docs/media/herald.webp" alt="Annuncio dell’araldo per una nuova versione" width="440">
+<img src="docs/media/graph.webp" alt="Graph with declared relationships and mentions between characters, places and factions" width="440">
+<img src="docs/media/character.webp" alt="Character sheet with abilities, resources and inventory" width="440">
+<img src="docs/media/dice.webp" alt="Dice roller with the dragon circle and roll history" width="440">
+<img src="docs/media/herald.webp" alt="Herald announcement for a new version" width="440">
 </p>
 
-<sub>Schermate da una campagna d’esempio inventata; l’annuncio mostra una versione d’esempio.</sub>
+<sub>Screenshots from an invented sample campaign; the announcement shows a sample version.</sub>
 
 </details>
 
-## Download e installazione
+## Download and installation
 
-| Metodo | Per chi | Come |
+| Method | For | How |
 | --- | --- | --- |
-| **Installer Windows x64** | Tutti | Scarica `Chronexus_<versione>_x64-setup.exe` dall’[ultima release](https://github.com/Acelith/Chronexus/releases) ed eseguilo |
-| **Aggiornamento dall’app** | Chi ha già la 0.4.0 o successiva | Impostazioni dell’app → Aggiornamenti dell’app |
-| **Dal sorgente** | Sviluppatori | Vedi [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) |
+| **Windows x64 installer** | Everyone | Download `Chronexus_<version>_x64-setup.exe` from the [latest release](https://github.com/Acelith/Chronexus/releases) and run it |
+| **In-app update** | Users of 0.4.0 or later | App settings → App updates |
+| **From source** | Developers | See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) |
 
-**Requisiti:** Windows 10/11 x64 con WebView2 (già presente nelle versioni recenti).
-Per l’assistente facoltativo serve una GPU NVIDIA; da **Impostazioni dell’app → AI
-locale: componenti** puoi installare Ollama e il modello senza usare il terminale.
+**Requirements:** Windows 10/11 x64 with WebView2 (already present on recent
+versions). The optional assistant needs an NVIDIA GPU; **App settings → Local AI:
+components** installs Ollama and the model without using a terminal.
 
-**Primo avvio:** crea una campagna, apri una sessione e scrivi. Digita `[[` per
-collegare un personaggio o un luogo, poi esplora **Codex** e **Grafo**.
+**First run:** create a campaign, open a session and write. Type `[[` to link a
+character or place, then explore **Codex** and **Graph**.
 
 > [!WARNING]
-> L’installer non ha una firma Authenticode di Windows: SmartScreen può chiedere
-> conferma. Gli aggiornamenti dall’app sono comunque verificati con una firma
-> crittografica dedicata. macOS e Linux non sono ancora verificati.
+> The installer has no Windows Authenticode signature, so SmartScreen may ask for
+> confirmation. In-app updates are still verified with a dedicated cryptographic
+> signature. macOS and Linux are not verified yet.
 
-## Aggiornamenti e backup
+## Updates and backups
 
-- **Backup e ripristino** crea un file `.nodex` con tutte le campagne e le
-  immagini, verificato con SHA-256; il ripristino mostra un’anteprima e conserva
-  una copia di sicurezza dei dati attuali.
-- **Backup periodici** (Impostazioni dell’app → Backup, disattivati finché non li
-  attivi): ogni giorno, ogni settimana o ogni N ore, solo con l’app aperta e
-  inattiva, nella cartella `Documenti/Chronexus/Backup periodici` o in una cartella
-  scelta da te. Chronexus conserva il numero di copie indicato ed elimina solo le
-  copie periodiche che ha creato e registrato.
-- Prima di ogni aggiornamento Chronexus crea e verifica un backup completo in
-  `Documenti/Chronexus/Backup aggiornamenti` (o nella cartella dati, con avviso, se i
-  Documenti non sono utilizzabili): se non riesce, l’installazione si ferma.
-- L’araldo annuncia le nuove versioni dopo un controllo leggero all’avvio, che puoi
-  disattivare. L’installazione parte solo quando la confermi.
+- **Backup and restore** writes a `.nodex` file with every campaign and image,
+  verified with SHA-256; restoring shows a preview and keeps a safety copy of the
+  current data.
+- **Periodic backups** (App settings → Backup, off until you enable them): daily,
+  weekly or every N hours, only while the app is open and idle, into
+  `Documents/Chronexus/Backup periodici` or a folder you pick. Chronexus keeps the
+  number of copies you choose and deletes only periodic copies it created and
+  registered.
+- Before every update Chronexus creates and verifies a full backup in
+  `Documents/Chronexus/Backup aggiornamenti` (or the data folder, with a notice, when
+  Documents is unusable): if it fails, the installation stops.
+- The herald announces new versions after a light startup check you can turn off.
+  Installation starts only after you confirm.
 
 > [!IMPORTANT]
-> I backup `.nodex` non sono cifrati. Conservali in un posto sicuro, soprattutto se
-> la cartella è sincronizzata con un servizio cloud.
+> `.nodex` backups are not encrypted. Keep them somewhere safe, especially if the
+> folder is synced to a cloud service.
 
-## Assistente locale
+## Local assistant
 
-Facoltativo e disattivato finché non lo abiliti per una campagna. Risponde in
-italiano usando solo gli appunti della campagna e le voci della wiki che approvi,
-con citazioni riapribili. Funziona sulla GPU tramite Ollama con il cloud
-disattivato e non modifica mai appunti, relazioni o scheda.
+Optional and off until you enable it for a campaign. It answers using only that
+campaign’s notes and the wiki entries you approve, with citations you can reopen.
+It runs on the GPU through Ollama with cloud disabled and never changes notes,
+relationships or the sheet.
 
 > [!NOTE]
-> Qwen3.8-27B e Gemma 4 12B sono modelli multilingue, **non** addestrati
-> specificamente su D&D: una citazione valida non garantisce che la risposta sia
-> corretta. Dettagli in [docs/AI_MODELS.md](docs/AI_MODELS.md).
+> Qwen3.8-27B and Gemma 4 12B are multilingual models, **not** trained on D&D: a
+> valid citation does not guarantee a correct answer. Details in
+> [docs/AI_MODELS.md](docs/AI_MODELS.md).
 
-## Privacy e dati
+## Privacy and data
 
-- Nessun account, nessuna telemetria, nessun caricamento delle campagne.
-- Le uniche richieste di rete partono da un tuo clic (wiki, catalogo SRD,
-  aggiornamenti, componenti AI) oppure dal controllo aggiornamenti all’avvio, che
-  contatta solo il canale delle release e si può disattivare.
-- Le richieste alle wiki contengono solo il termine o la pagina che cerchi.
-
-## Lingue
-
-Italiano (originale), inglese, tedesco, francese, spagnolo, portoghese brasiliano,
-giapponese, coreano, cinese semplificato, arabo e ticinese, più Klingon e Rihannsu
-parziali e scritture alternative. Le traduzioni sono bozze da revisionare: vedi
-[docs/I18N.md](docs/I18N.md). Appunti e fonti non vengono mai tradotti in automatico.
+- No account, no telemetry, no campaign uploads.
+- Network requests start from your click (wiki, SRD catalog, updates, AI
+  components) or from the startup update check, which only contacts the release
+  channel and can be turned off.
+- Wiki requests contain only the term or page you look up.
 
 ## Roadmap
 
-Le milestone consegnate, quelle aperte e i limiti ancora da verificare sono in
-[ROADMAP.md](ROADMAP.md); lo stato dettagliato e le prove eseguite in
+Delivered and open milestones, plus limits still to verify, are in
+[ROADMAP.md](ROADMAP.md); detailed status and the checks actually run in
 [docs/STATUS.md](docs/STATUS.md).
 
-## Sviluppo e contributi
+## Development and contributing
 
-Chronexus è scritto con Tauri 2, Rust, React e TypeScript, con SQLite locale.
-Prerequisiti, comandi e verifiche sono in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md);
-le regole del progetto in [AGENTS.md](AGENTS.md). Segnalazioni e proposte sono
-benvenute nelle [issue](https://github.com/Acelith/Chronexus/issues).
+Chronexus is built with Tauri 2, Rust, React and TypeScript on local SQLite.
+Prerequisites, commands and checks are in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md);
+project rules in [AGENTS.md](AGENTS.md). Reports and ideas are welcome in the
+[issues](https://github.com/Acelith/Chronexus/issues).
 
-<details>
-<summary><strong>Tecnologie</strong></summary>
+## Credits and licenses
 
-| Area | Strumenti |
-| --- | --- |
-| Desktop | Tauri 2, Rust |
-| Interfaccia | React 19, TypeScript, Vite, BlockNote, Cytoscape.js |
-| Dati | SQLite (rusqlite), backup ZIP con manifest SHA-256 |
-| AI locale | Ollama su loopback, Qwen3.8-27B, Gemma 4 12B, QLoRA facoltativo |
-
-</details>
-
-## Crediti e licenze
-
-- Codice di Chronexus: licenza **Apache-2.0**, vedi [LICENSE](LICENSE).
-- Font EB Garamond, Cinzel, Noto, Monocraft, Espruar e Dethek: SIL Open Font
-  License, testi in [assets/fonts](assets/fonts).
-- Catalogo SRD 5.1 di Wizards of the Coast tramite D&D 5e API, sotto CC BY 4.0;
-  wiki Open5e con licenze dichiarate per documento; pagine di dnd5e.wikidot.com con
-  la licenza indicata da ciascuna pagina. Nessun catalogo è incluso nel programma.
-- Logo, illustrazioni dell’araldo e dei draghi: asset originali del progetto, vedi
-  [assets/brand](assets/brand/README.md) e [assets/dice](assets/dice/README.md).
-- Dipendenze e relative licenze: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+- Chronexus code: **Apache-2.0**, see [LICENSE](LICENSE).
+- Fonts EB Garamond, Cinzel, Noto, Monocraft, Espruar and Dethek: SIL Open Font
+  License, texts in [assets/fonts](assets/fonts).
+- SRD 5.1 catalog by Wizards of the Coast via the D&D 5e API, under CC BY 4.0;
+  Open5e wiki with per-document licenses; dnd5e.wikidot.com pages under the license
+  each page declares. No catalog is bundled with the app.
+- Logo, herald and dragon artwork: original project assets, see
+  [assets/brand](assets/brand/README.md) and [assets/dice](assets/dice/README.md).
 
 <div align="center">
 
 <img src="assets/brand/chronexus-icon.webp" alt="" width="72">
 
-*Persone, luoghi, idee. Tutto è connesso.*
+*People, places, ideas. Everything is connected.*
 
 </div>

@@ -75,19 +75,19 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
         }
       : summary[scope]);
   const scopeName =
-    scope === "all" ? tr("tutte le cache wiki") : providerNames[scope];
+    scope === "all" ? tr("all wiki caches") : providerNames[scope];
   function close() {
     setConfirm(false);
   }
   return (
     <section
       className="language-settings wiki-settings"
-      aria-label={tr("Fonti D&D / Wiki")}
+      aria-label={tr("D&D sources / Wiki")}
     >
-      <h3>{tr("Fonti D&D / Wiki")}</h3>
+      <h3>{tr("D&D sources / Wiki")}</h3>
       <p>
         {tr(
-          "Scegli la fonte usata dalla Wiki D&D. Le richieste partono solo quando cerchi o apri una voce e non contengono dati delle campagne. Il catalogo SRD 2014 della scheda e gli incantesimi già salvati non cambiano.",
+          "Choose the source used by the D&D Wiki. Requests start only when you search or open an entry and contain no campaign data. The sheet's SRD 2014 catalog and spells already saved do not change.",
         )}
       </p>
       {error ? (
@@ -96,11 +96,11 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
         </p>
       ) : null}
       {!choice && !error ? (
-        <p role="status">{tr("Lettura delle impostazioni…")}</p>
+        <p role="status">{tr("Reading settings…")}</p>
       ) : null}
       {choice ? (
         <fieldset disabled={busy}>
-          <legend>{tr("Fonte della Wiki D&D")}</legend>
+          <legend>{tr("D&D Wiki source")}</legend>
           {(["wikidot", "open5e"] as const).map((provider) => (
             <label key={provider} className="wiki-provider-option">
               <input
@@ -113,7 +113,7 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
                     const saved = await wikiProviderApi.save(provider);
                     setChoice(saved);
                     announceWikiChange();
-                    return tr("Fonte wiki salvata: {0}.", [
+                    return tr("Wiki source saved: {0}.", [
                       providerNames[saved.provider],
                     ]);
                   })
@@ -121,33 +121,31 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
               />
               {provider === "wikidot"
                 ? tr(
-                    "Wikidot D&D 5e (predefinita) · pagine pubbliche di dnd5e.wikidot.com, edizione 2014; segnala Unearthed Arcana e homebrew",
+                    "Wikidot D&D 5e (default) · public pages of dnd5e.wikidot.com, 2014 edition; flags Unearthed Arcana and homebrew",
                   )
                 : tr(
-                    "Open5e · API pubblica multi-fonte con documento, edizione e licenze per ogni voce",
+                    "Open5e · public multi-source API with document, edition and license for each entry",
                   )}
             </label>
           ))}
           {!choice.explicit ? (
             <p className="muted">
-              {tr(
-                "Nessuna scelta salvata: è attiva la fonte predefinita Wikidot.",
-              )}
+              {tr("No choice saved: the default Wikidot source is active.")}
             </p>
           ) : null}
         </fieldset>
       ) : null}
-      <h4>{tr("Cache offline delle wiki")}</h4>
+      <h4>{tr("Offline wiki cache")}</h4>
       <p>
         {tr(
-          "Le voci consultate restano disponibili senza connessione. Svuotare la cache rimuove soltanto queste copie: campagne, appunti, immagini, incantesimi importati, backup e fonte scelta restano intatti.",
+          "Viewed entries stay available offline. Clearing the cache removes only these copies: campaigns, notes, images, imported spells, backups and the chosen source stay intact.",
         )}
       </p>
       {summary ? (
         <ul className="wiki-cache-summary">
           {(["wikidot", "open5e"] as const).map((p) => (
             <li key={p}>
-              {tr("{0} · voci in cache: {1} · {2} KB", [
+              {tr("{0} · cached entries: {1} · {2} KB", [
                 providerNames[p],
                 summary[p].entries,
                 size(summary[p].bytes),
@@ -158,7 +156,7 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
       ) : null}
       <div className="actions">
         <label>
-          {tr("Cache da svuotare")}
+          {tr("Cache to clear")}
           <select
             value={scope}
             disabled={busy || confirm}
@@ -166,7 +164,7 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
           >
             <option value="wikidot">{providerNames.wikidot}</option>
             <option value="open5e">{providerNames.open5e}</option>
-            <option value="all">{tr("Tutte le cache wiki")}</option>
+            <option value="all">{tr("All wiki caches")}</option>
           </select>
         </label>
         <button
@@ -177,11 +175,11 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
             setConfirm(true);
           }}
         >
-          {tr("Svuota cache offline…")}
+          {tr("Clear offline cache…")}
         </button>
       </div>
       {summary && !selected?.entries ? (
-        <p className="muted">{tr("La cache selezionata è già vuota.")}</p>
+        <p className="muted">{tr("The selected cache is already empty.")}</p>
       ) : null}
       {confirm && selected ? (
         <div
@@ -196,17 +194,17 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
             }
           }}
         >
-          <h4 id="wiki-clear-title">{tr("Svuotare {0}?", [scopeName])}</h4>
+          <h4 id="wiki-clear-title">{tr("Clear {0}?", [scopeName])}</h4>
           <p>
             {tr(
-              "Verranno eliminate {0} copie consultate ({1} KB). Non saranno più leggibili offline finché non le riapri online; nessun nuovo download parte automaticamente. Le richieste in corso vengono annullate.",
+              "{0} viewed copies ({1} KB) will be deleted. They will not be readable offline until you open them online again; no new download starts automatically. Requests in progress are cancelled.",
               [selected.entries, size(selected.bytes)],
             )}
           </p>
           {selected.aiSources ? (
             <p className="error">
               {tr(
-                "{0} fonti regole approvate nelle impostazioni AI delle campagne usano questa cache: per le nuove domande risulteranno non disponibili. Conversazioni e citazioni già salvate restano invariate.",
+                "{0} rules sources approved in the campaigns' AI settings use this cache: for new questions they will be unavailable. Conversations and citations already saved are unchanged.",
                 [selected.aiSources],
               )}
             </p>
@@ -222,19 +220,19 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
                   setSummary(next);
                   setConfirm(false);
                   announceWikiChange();
-                  return tr("Cache svuotata: {0}.", [scopeName]);
+                  return tr("Cache cleared: {0}.", [scopeName]);
                 })
               }
             >
-              {tr("Svuota cache")}
+              {tr("Clear cache")}
             </button>
             <button disabled={pending} onClick={close}>
-              {tr("Annulla")}
+              {tr("Cancel")}
             </button>
           </div>
         </div>
       ) : null}
-      <p role="status">{pending ? tr("Operazione in corso…") : notice}</p>
+      <p role="status">{pending ? tr("Operation in progress…") : notice}</p>
     </section>
   );
 }

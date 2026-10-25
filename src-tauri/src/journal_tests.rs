@@ -96,7 +96,7 @@ fn invalid_inputs_duplicates_and_write_failures_do_not_replace_notes() {
     assert!(save_document(&connection, &campaign.id, &session.id, 0, invalid).is_err());
     connection.pragma_update(None, "query_only", true).unwrap();
     let error = save_document(&connection, &campaign.id, &session.id, 0, document()).unwrap_err();
-    assert!(error.contains("permessi"));
+    assert!(error.contains("permissions"));
     assert_eq!(
         get_session(&connection, &campaign.id, &session.id)
             .unwrap()

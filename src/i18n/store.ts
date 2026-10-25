@@ -6,11 +6,13 @@ import {
   type Preferences,
   type Locale,
 } from "./locales";
+import english from "./catalogs/en.json";
 import italian from "./catalogs/it.json";
 type Catalog = Record<string, string>;
-const catalogs: Partial<Record<Locale, Catalog>> = { it: italian };
+// English is the source language. Italian stays bundled: it was the source
+// until 0.8.0, so saved labels and older backend messages may still use it.
+const catalogs: Partial<Record<Locale, Catalog>> = { en: english, it: italian };
 const loaders: Partial<Record<Locale, () => Promise<{ default: Catalog }>>> = {
-  en: () => import("./catalogs/en.json"),
   de: () => import("./catalogs/de.json"),
   fr: () => import("./catalogs/fr.json"),
   es: () => import("./catalogs/es.json"),
@@ -24,8 +26,12 @@ const loaders: Partial<Record<Locale, () => Promise<{ default: Catalog }>>> = {
   "art-x-rihan": () => import("./catalogs/art-x-rihan.json"),
 };
 const reverse = new Map(
+  Object.entries(english).map(([id, text]) => [text.trim(), id]),
+);
+const legacy = new Map(
   Object.entries(italian).map(([id, text]) => [text.trim(), id]),
 );
+const idFor = (text: string) => reverse.get(text) ?? legacy.get(text);
 let current: Preferences = { ...defaultPreferences };
 const listeners = new Set<() => void>();
 export function getPreferences() {
@@ -50,7 +56,7 @@ export async function loadLocale(locale: Locale) {
 }
 export function applyPreferences(preferences: Preferences) {
   if (!validPreferences(preferences))
-    throw Error("Preferenze linguistiche non valide.");
+    throw Error("Invalid language preferences.");
   current = { ...preferences };
   const info = localeInfo(current.locale);
   if (typeof document !== "undefined") {
@@ -65,10 +71,10 @@ export function catalogFor(locale: Locale): Catalog {
 }
 export function translationCoverage(locale = current.locale) {
   const catalog = catalogFor(locale);
-  const ids = Object.keys(italian);
+  const ids = Object.keys(english);
   return {
     translated:
-      locale === "it"
+      locale === "en"
         ? ids.length
         : ids.filter(
             (id) => typeof catalog[id] === "string" && catalog[id].length > 0,
@@ -80,9 +86,11 @@ export function translate(source: string, values: unknown[] = []): string {
   const leading = source.match(/^\s*/)?.[0] ?? "",
     trailing = source.match(/\s*$/)?.[0] ?? "";
   const raw = source.trim();
-  const id = reverse.get(raw);
+  const id = idFor(raw);
   const catalog = catalogFor(current.locale);
-  let message = id ? (catalog[id] ?? raw) : raw;
+  let message = id
+    ? (catalog[id] ?? english[id as keyof typeof english] ?? raw)
+    : raw;
   message = message.replace(/\{(\d+)\}/g, (token, index) => {
     if (Number(index) >= values.length) return token;
     const value = values[Number(index)];
@@ -117,7 +125,7 @@ export function date(
     typeof value === "string" || typeof value === "number"
       ? new Date(value)
       : value;
-  if (!Number.isFinite(parsed.getTime())) return tr("Data non indicata");
+  if (!Number.isFinite(parsed.getTime())) return tr("Date not given");
   const locale = localeInfo(current.locale).intl;
   const key = locale + JSON.stringify(options);
   let formatter = dateFormats.get(key);
@@ -146,7 +154,7 @@ export function localizeLabels<T extends object>(source: T): T {
     },
   });
 }
-const patterns = Object.entries(italian)
+const patterns = [...Object.entries(english), ...Object.entries(italian)]
   .filter(([, text]) => /\{\d+\}/.test(text))
   .map(([, text]) => {
     const indices: number[] = [];
@@ -163,7 +171,7 @@ const patterns = Object.entries(italian)
     return { source: text, indices, pattern: new RegExp("^" + escaped + "$") };
   });
 export function translateError(message: string) {
-  if (reverse.has(message.trim())) return tr(message);
+  if (idFor(message.trim())) return tr(message);
   for (const item of patterns) {
     const match = message.match(item.pattern);
     if (match) {

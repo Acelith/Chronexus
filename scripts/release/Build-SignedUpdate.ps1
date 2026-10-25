@@ -16,18 +16,18 @@ try {
     $publicKey = (Get-Content -LiteralPath "$resolvedKey.pub" -Raw).Trim()
     $configuration = Get-Content -LiteralPath 'src-tauri/tauri.conf.json' -Raw | ConvertFrom-Json
     if ($publicKey -ne $configuration.plugins.updater.pubkey) {
-        throw 'La chiave non corrisponde alla chiave pubblica incorporata in Chronexus.'
+        throw 'The key does not match the public key embedded in Chronexus.'
     }
     $protectedPassword = (Get-Content -LiteralPath $resolvedPassword -Raw).Trim() | ConvertTo-SecureString
     $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = [System.Net.NetworkCredential]::new('', $protectedPassword).Password
     if ($env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD.Length -lt 60) {
-        throw 'Password della chiave non disponibile: ripristina la copia protetta.'
+        throw 'Key password unavailable: restore the protected copy.'
     }
     $env:TAURI_SIGNING_PRIVATE_KEY = $resolvedKey
     & pnpm icons
-    if ($LASTEXITCODE -ne 0) { throw 'Generazione icone non riuscita.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Icon generation failed.' }
     & pnpm tauri build --bundles nsis
-    if ($LASTEXITCODE -ne 0) { throw 'Build firmata non riuscita. Nessun canale pubblico aggiornato.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Signed build failed. No public channel was updated.' }
 } finally {
     $env:TAURI_SIGNING_PRIVATE_KEY = $previousKey
     $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = $previousPassword

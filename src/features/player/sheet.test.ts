@@ -7,7 +7,7 @@ test("D&D labels remain manual, stable and do not overwrite existing statistics 
   data.stats = [
     {
       id: "keep",
-      label: "Forza",
+      label: "Strength",
       group: "ability",
       value: "18",
       modifier: "+4",

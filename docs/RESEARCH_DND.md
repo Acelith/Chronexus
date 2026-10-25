@@ -1,86 +1,86 @@
-# Fonti D&D e Skill — ricerca del 23 ottobre 2026
+# D&D and Skill Sources — search of 23 October 2026
 
-## API per la wiki
+## API for the wiki
 
-| Fonte | Verifica | Scelta |
+| Source | Verification | Choice |
 | --- | --- | --- |
-| [Open5e v2](https://open5e.com/api-docs/) | API REST pubblica con ricerca trasversale, creature, incantesimi, oggetti e documenti con edizione/editore/licenze | Aggiunta come wiki opzionale; fonte distinta per ogni voce |
-| [D&D 5e API](https://docs.dnd5eapi.co/introduction) | Catalogo SRD 2014 già integrato e modificabile nelle importazioni personali | Conservato; nessuna sostituzione degli incantesimi salvati |
-| [Wikidot](https://developer.wikidot.com/doc:api) | API XML-RPC autenticata della piattaforma, non un catalogo D&D pubblico equivalente verificato | M16: lettura HTML pubblica di dnd5e.wikidot.com, senza API/chiavi; fonte predefinita |
+| [Open5e v2](https://open5e.com/api-docs/) | Public REST API with cross-search, creatures, spells, items, and documents with edition/publisher/licenses | Added as optional wiki; distinct source for each entry |
+| [D&D 5e API](https://docs.dnd5eapi.co/introduction) | SRD Catalog 2014 already integrated and modifiable in personal imports | Preserved; no replacement of saved spells |
+| [Wikidot](https://developer.wikidot.com/doc:api) | Authenticated XML-RPC API of the platform, not an equivalent verified public D&D catalog | M16: public HTML reading of dnd5e.wikidot.com, without API/keys; default source |
 
-Prova reale: ricerca `magic missile`, apertura della voce SRD 5.1, documento
-`srd-2014`, licenze CC BY 4.0 e OGL dichiarate dall'API. Il catalogo Open5e
-comprende materiale di più editori: non significa accesso a tutti i manuali
-commerciali o equivalenza integrale con Wikidot. Testo prevalentemente inglese.
+Real test: search `magic missile`, opening the SRD entry 5.1, document
+`srd-2014`, CC BY 4.0 and OGL licenses declared by the API. The Open5e catalog
+includes material from multiple publishers: it does not mean access to all commercial
+manuals or full equivalence with Wikidot. Text predominantly in English.
 
-La wiki richiede un'azione esplicita. Solo query e ID pubblici vanno all'host
-`api.open5e.com`, con GET senza credenziali, redirect vietati, timeout 12 secondi
-e limite 2 MiB. Nessun documento della campagna inviato. Cache SQLite massima
-100 risposte, inclusa nel backup; vecchi contenuti visibili se il refresh fallisce.
-I risultati HTML evidenziati non vengono renderizzati; il testo è escapato.
-Consultare regole non crea conoscenze/relazioni nel grafo né sovrascrive incantesimi.
+The wiki requires an explicit action. Only public queries and IDs go to the host
+`api.open5e.com`, with GET without credentials, redirects forbidden, timeout 12 seconds
+and limit 2 MiB. No campaign document sent. Maximum SQLite cache
+100 responses, included in the backup; old content visible if refresh fails.
+Highlighted HTML results are not rendered; the text is escaped.
+Consulting rules does not create knowledge/relations in the graph nor overwrite spells.
 
-## Ricerca Skill
+## Skill Search
 
-Consultati [skills.sh](https://skills.sh/) e ricerche CLI
-`pnpm dlx skills find "webapp testing"` e `"graph visualization"`.
-Nessuna installazione globale; il pacchetto CLI è stato eseguito tramite dlx.
+Consulted [skills.sh](https://skills.sh/) and CLI searches
+`pnpm dlx skills find "webapp testing"` and `"graph visualization"`.
+No global installation; the CLI package was executed via dlx.
 
-- [webapp-testing di Anthropic](https://skills.sh/anthropics/skills/webapp-testing):
-  circa 186 mila installazioni indicate dal catalogo, repository ufficiale
-  con circa 183 mila stelle. SKILL.md letto dalla fonte GitHub; workflow Python
-  valutato, mentre l'automazione di questa app Tauri resta Playwright JS/CDP già
-  in uso. Non dichiarata come nuova Skill installata né come workflow applicato.
-- Risultati per grafi AntV G6/React Flow valutati per attinenza: richiedono stack
-  diversi da Cytoscape già presente; non adottati solo per il numero di installazioni.
-- Skill locali effettivamente lette/applicate: find-skills (ricerca e verifica),
-  frontend-design e ui-taste (direzione e critica visuale),
-  vercel-react-best-practices (caricamento differito). imagegen usata solo per
-  riferimento UI con dati fittizi; nessun dato privato inviato o asset generato
-  richiesto a runtime. Documentazione Skill e riferimento restano in .tools/.
-
-
-## Aggiornamento del 25 ottobre 2026 — Wikidot e nuova M16
-
-La ricerca successiva ha distinto l’API della piattaforma dallo scraping del sito
-D&D. [Documentazione XML-RPC](https://developer.wikidot.com/doc:api) e
-[metodi](https://www.wikidot.com/doc:api): endpoint autenticato, operazioni
-pages.select/get_meta/get_one; nell’indagine già svolta una lettura anonima ha
-restituito HTTP 401. Questo non prova se il sito D&D consenta API a un account
-specifico, che non è stato verificato con una chiave.
-
-La [pagina pubblica di esempio](https://dnd5e.wikidot.com/spell:acid-splash) è
-leggibile via HTML e contiene i campi dell’incantesimo. Il
-[robots.txt](https://dnd5e.wikidot.com/robots.txt) consultato nell’indagine non
-vietava genericamente quelle pagine; è un’osservazione datata, non un permesso
-permanente né una licenza di redistribuzione. Riverificare prima dello sviluppo.
-
-**M16 è solo pianificata:** adapter HTML, selettore Wikidot/Open5e nelle
-impostazioni dell’app, Wikidot predefinito, cache offline separata e importazioni
-esplicite con provenienza. Nessuna chiave API richiesta dal flusso HTML; nessuna
-lettura di contenuti privati o istruzione delle pagine da eseguire.
-La versione pubblica 0.4.0 continua a usare Open5e nella Wiki D&D e il catalogo
-SRD 2014 separato. Questa consegna non implementa scraping né modifica impostazioni.
-Le verifiche citate sopra appartengono all’indagine precedente, non a nuovi test
-eseguiti durante il riordino documentale. Criteri completi in ROADMAP.md, M16.
+- [webapp-testing by Anthropic](https://skills.sh/anthropics/skills/webapp-testing):
+  about 186 thousand installations indicated by the catalog, official repository
+  with about 183 thousand stars. SKILL.md read from GitHub source; Python workflow
+  evaluated, while the automation of this Tauri app remains Playwright JS/CDP already
+  in use. Not declared as a new installed Skill nor as an applied workflow.
+- Results for AntV G6/React Flow graphs evaluated for relevance: require stack
+  different from Cytoscape already present; not adopted solely due to the number of installations.
+- Local skills actually read/applied: find-skills (search and verification),
+  frontend-design and ui-taste (visual direction and critique),
+  vercel-react-best-practices (lazy loading). imagegen used only for
+  UI reference with dummy data; no private data sent or asset generated
+  requested at runtime. Skill documentation and reference remain in .tools/.
 
 
-### Verifica di implementazione M16 — 25 ottobre 2026
+## Update of October 25 2026 — Wikidot and new M16
 
-`robots.txt` ricontrollato: per tutti gli agenti vieta solo percorsi paginati
-`/*/p/*` e varianti, e blocca l’agente `voltron`; le pagine usate (`/spells`, `/`,
-`/lineage`, `/wondrous-items` e le singole voci) non sono vietate. Il piè di pagina
-dichiara «CC BY-SA 3.0 salvo diversa indicazione»: Chronexus mostra questa
-dichiarazione per ogni voce senza considerarla una licenza dei contenuti di gioco
-degli editori, e non ridistribuisce cataloghi. Il sito ospita regole 2014; le
-2024 sono su una wiki separata non usata. Struttura osservata: titolo in
-`.page-title`, contenuto in `#page-content`, incantesimi con «Source:», riga
-livello/scuola e paragrafo «Casting Time/Range/Components/Duration». Pagine reali
-salvate solo in una cartella temporanea per il test QA ignorato, mai in Git.
+The next search distinguished the platform's API from the scraping of the site
+D&D. [XML-RPC Documentation](https://developer.wikidot.com/doc:api) and
+[methods](https://www.wikidot.com/doc:api): authenticated endpoint, operations
+pages.select/get_meta/get_one; in the investigation already conducted, an anonymous reading
+returned HTTP 401. This does not prove if the D&D site allows APIs to a specific
+account, which was not verified with a key.
 
-Aggiornamento dei requisiti M16 (solo pianificazione): cache offline svuotabile
-per fonte o interamente, senza cancellare copie importate/dati delle campagne.
-Se Wikidot non restituisce informazioni utilizzabili, domanda esplicita prima
-del cambio a Open5e e della nuova ricerca; rifiuto/chiusura mantengono Wikidot.
-Un cambio accettato viene salvato nelle impostazioni. M15a, annunci epici degli
-aggiornamenti, precede ora M16 nell’ordine di esecuzione.
+The [public example page](https://dnd5e.wikidot.com/spell:acid-splash) is
+readable via HTML and contains the spell fields. The
+[robots.txt](https://dnd5e.wikidot.com/robots.txt) consulted in the investigation did not
+generically forbid those pages; it is a dated observation, not a permanent
+permission nor a redistribution license. Re-verify before development.
+
+**M16 is only planned:** HTML adapter, Wikidot/Open5e selector in the
+app settings, default Wikidot, separate offline cache, and imports
+explicit with provenance. No API key required by the HTML flow; no
+reading of private content or instruction of pages to be executed.
+The public version 0.4.0 continues to use Open5e in the D&D Wiki and the separate
+SRD 2014 catalog. This delivery does not implement scraping or modify settings.
+The verifications mentioned above belong to the previous investigation, not to new tests
+performed during the documentary reorganization. Complete criteria in ROADMAP.md, M16.
+
+
+### M16 Implementation Verification — 25 October 2026
+
+`robots.txt` rechecked: for all agents, only paginated paths are forbidden
+`/*/p/*` and variants, and agent `voltron` is blocked; the pages used (`/spells`, `/`,
+`/lineage`, `/wondrous-items` and individual entries) are not forbidden. The footer
+declares «CC BY-SA 3.0 unless otherwise indicated»: Chronexus shows this
+declaration for every entry without considering it a license for the game content
+of the publishers, and does not redistribute catalogs. The site hosts 2014 rules; the
+2024 are on a separate, unused wiki. Observed structure: title in
+`.page-title`, content in `#page-content`, spells with «Source:», level/
+school line and «Casting Time/Range/Components/Duration» paragraph. Real pages
+saved only in a temporary folder for the ignored QA test, never in Git.
+
+Update of M16 requirements (planning only): clearable offline cache
+by source or entirely, without deleting imported copies/campaign data.
+If Wikidot does not return usable information, an explicit question is asked before
+switching to Open5e and the new search; refusal/closure maintains Wikidot.
+An accepted change is saved in the settings. M15a, epic announcements of
+updates, now precedes M16 in the execution order.

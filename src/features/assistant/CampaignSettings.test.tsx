@@ -43,22 +43,22 @@ test("loads only campaign data and saves edition preferences before refresh", as
   vi.mocked(campaignAi.save).mockResolvedValue(initial.profile);
   vi.mocked(campaignAi.refresh).mockResolvedValue(initial);
   render(<CampaignSettings campaignId="campaign-a" name="La campagna" />);
-  await screen.findByText("Fonti e risorse");
+  await screen.findByText("Sources and resources");
   expect(campaignAi.get).toHaveBeenCalledWith("campaign-a");
   expect(assistantApi.probe).not.toHaveBeenCalled();
-  await user.selectOptions(screen.getByLabelText("Edizione D&D"), "5e-2024");
+  await user.selectOptions(screen.getByLabelText("D&D edition"), "5e-2024");
   expect(
-    screen.getByRole("button", { name: "Aggiorna conoscenze" }),
+    screen.getByRole("button", { name: "Refresh knowledge" }),
   ).toBeDisabled();
-  await user.click(screen.getByRole("button", { name: "Salva preferenze" }));
+  await user.click(screen.getByRole("button", { name: "Save preferences" }));
   await waitFor(() =>
     expect(campaignAi.save).toHaveBeenCalledWith(
       "campaign-a",
       expect.objectContaining({ edition: "5e-2024", ruleKeys: [] }),
     ),
   );
-  await user.click(screen.getByRole("button", { name: "Aggiorna conoscenze" }));
-  await screen.findByText(/I pesi del modello non sono stati riaddestrati/);
+  await user.click(screen.getByRole("button", { name: "Refresh knowledge" }));
+  await screen.findByText(/The model weights were not retrained/);
   expect(campaignAi.refresh).toHaveBeenCalledWith("campaign-a");
 });
 test("surfaces load errors without contacting Ollama", async () => {
@@ -70,13 +70,9 @@ test("surfaces load errors without contacting Ollama", async () => {
     "Archivio non disponibile",
   );
   expect(assistantApi.probe).not.toHaveBeenCalled();
-  expect(
-    screen.queryByText("Caricamento impostazioni…"),
-  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Loading settings…")).not.toBeInTheDocument();
   vi.mocked(campaignAi.get).mockResolvedValue(structuredClone(initial));
-  await userEvent.click(
-    screen.getByRole("button", { name: "Riprova impostazioni" }),
-  );
-  await screen.findByText("Fonti e risorse");
+  await userEvent.click(screen.getByRole("button", { name: "Retry settings" }));
+  await screen.findByText("Sources and resources");
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

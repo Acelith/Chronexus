@@ -1,4 +1,4 @@
-// M20: seeds the synthetic campaign «La Torre di Varek» in an EMPTY isolated
+// M20: seeds the synthetic campaign «Varek’s Tower» in an EMPTY isolated
 // debug profile (CDP 9224) and captures README screenshots into .tools/m20/.
 // Never run it on a personal archive: it refuses any existing campaign.
 import { chromium } from "@playwright/test";
@@ -22,17 +22,18 @@ assert.equal(
   0,
   "empty profile required",
 );
-const campaign = await call("create_campaign", { name: "La Torre di Varek" });
+assert.equal((await call("get_interface_preferences")).locale, "en");
+const campaign = await call("create_campaign", { name: "Varek’s Tower" });
 const c = campaign.id;
 const pages = {};
 for (const [key, title, kind, aliases] of [
-  ["varek", "Varek il Cartografo", "npc", ["Il Cartografo"]],
-  ["gilda", "Gilda dei Cartografi", "faction", []],
-  ["porto", "Porto di Sale", "place", []],
-  ["sigillo", "Sigillo d’ambra", "item", []],
-  ["mappa", "La mappa perduta", "quest", []],
-  ["ilenia", "Maestra Ilenia", "npc", []],
-  ["torre", "Torre di Varek", "place", []],
+  ["varek", "Varek the Cartographer", "npc", ["The Cartographer"]],
+  ["gilda", "Cartographers’ Guild", "faction", []],
+  ["porto", "Salt Harbor", "place", []],
+  ["sigillo", "Amber Seal", "item", []],
+  ["mappa", "The Lost Map", "quest", []],
+  ["ilenia", "Master Ilenia", "npc", []],
+  ["torre", "Varek’s Tower", "place", []],
 ])
   pages[key] = await call("create_page", {
     campaignId: c,
@@ -56,81 +57,77 @@ const block = (type, content, props = {}) => ({
 });
 const sessions = [
   [
-    "Arrivo al Porto di Sale",
+    "Arrival at Salt Harbor",
     [
-      block("heading", [text("Sbarco all’alba")], { level: 2 }),
+      block("heading", [text("Landing at dawn")], { level: 2 }),
       block("paragraph", [
-        text("Il traghetto ci lascia al "),
+        text("The ferry leaves us at "),
         mention("porto"),
         text(
-          ". Nella nebbia, un uomo con un astrolabio ci aspetta: si presenta come ",
+          ". In the mist, a man with an astrolabe is waiting: he introduces himself as ",
         ),
         mention("varek"),
         text("."),
       ]),
       block("paragraph", [
-        text("Dice di lavorare per la "),
+        text("He says he works for the "),
         mention("gilda"),
-        text(" e ci offre un passaggio fino alla sua "),
+        text(" and offers to take us to "),
         mention("torre"),
         text("."),
       ]),
       block("quote", [
-        text("«Chi disegna le mappe decide dove finisce il mondo.»"),
+        text("“Whoever draws the maps decides where the world ends.”"),
       ]),
     ],
   ],
   [
-    "La bottega del Cartografo",
+    "The Cartographer’s Workshop",
     [
-      block("heading", [text("Indizi raccolti")], { level: 2 }),
+      block("heading", [text("Clues gathered")], { level: 2 }),
       block("bulletListItem", [
-        text("Sul tavolo di "),
+        text("On the desk of "),
         mention("varek"),
-        text(" c’è una pergamena strappata: forse "),
+        text(" lies a torn parchment: perhaps "),
         mention("mappa"),
         text("."),
       ]),
       block("bulletListItem", [
-        text("Il sigillo in ceralacca porta lo stemma della "),
+        text("The wax seal bears the crest of the "),
         mention("gilda"),
         text("."),
       ]),
       block("bulletListItem", [
         mention("ilenia"),
-        text(" sospetta che Varek nasconda qualcosa."),
+        text(" suspects that Varek is hiding something."),
       ]),
-      block(
-        "checkListItem",
-        [text("Chiedere a Ilenia chi ha commissionato la mappa")],
-        { checked: false },
-      ),
+      block("checkListItem", [text("Ask Ilenia who commissioned the map")], {
+        checked: false,
+      }),
       block(
         "checkListItem",
         [
-          text("Cercare il "),
+          text("Find the "),
           mention("sigillo"),
-          text(" nei magazzini del porto"),
+          text(" in the harbor warehouses"),
         ],
         { checked: true },
       ),
       block("paragraph", [
-        bold("Da verificare: "),
-        text("Varek dice di non aver mai visto la mappa intera."),
+        bold("Unverified: "),
+        text("Varek claims he has never seen the complete map."),
       ]),
     ],
   ],
   [
-    "Il sigillo d’ambra",
+    "The Amber Seal",
     [
       block("paragraph", [
-        text("Nei magazzini del "),
+        text("In the warehouses at "),
         mention("porto"),
-        text(" troviamo il "),
+        text(" we find the "),
         mention("sigillo"),
-        text(
-          ". Ilenia ce lo affida in cambio della promessa di riportarle la ",
-        ),
+        text(". Ilenia entrusts it to us in exchange for a promise to return "),
         mention("mappa"),
         text("."),
       ]),
@@ -173,30 +170,30 @@ const rel = (from, to, label, certainty, evidence) =>
 await rel(
   "varek",
   "gilda",
-  "lavora per",
+  "works for",
   "confirmed",
-  "Lo dice lui stesso e il sigillo lo conferma.",
+  "He says so himself, and the seal supports his claim.",
 );
 await rel(
   "ilenia",
   "varek",
-  "sospetta di",
+  "suspects",
   "suspected",
-  "Ilenia lo ritiene reticente.",
+  "Ilenia thinks he is withholding information.",
 );
 await rel(
   "sigillo",
   "porto",
-  "custodito a",
+  "kept at",
   "confirmed",
-  "Trovato nei magazzini.",
+  "Found in the warehouses.",
 );
 await rel(
   "mappa",
   "torre",
-  "forse nascosta in",
+  "possibly hidden in",
   "unknown",
-  "Solo un’ipotesi del gruppo.",
+  "Only a hypothesis from the party.",
 );
 const stat = (label, value, modifier) => ({
   id: randomUUID(),
@@ -211,48 +208,48 @@ const character = await call("save_character", {
   id: null,
   revision: null,
   input: {
-    name: "Oran di Valmora",
+    name: "Oran of Valmora",
     systemId: "dnd5e-2014",
-    vocation: "Bardo",
-    ancestry: "Mezzelfo",
+    vocation: "Bard",
+    ancestry: "Half-elf",
     level: 5,
     experience: 6500,
     hpCurrent: 31,
     hpMaximum: 38,
     hpTemporary: 4,
     stats: [
-      stat("Forza", "10", "+0"),
-      stat("Destrezza", "14", "+2"),
-      stat("Costituzione", "13", "+1"),
-      stat("Intelligenza", "12", "+1"),
-      stat("Saggezza", "11", "+0"),
-      stat("Carisma", "17", "+3"),
+      stat("Strength", "10", "+0"),
+      stat("Dexterity", "14", "+2"),
+      stat("Constitution", "13", "+1"),
+      stat("Intelligence", "12", "+1"),
+      stat("Wisdom", "11", "+0"),
+      stat("Charisma", "17", "+3"),
     ],
     resources: [
       {
         id: randomUUID(),
-        label: "Ispirazione bardica",
+        label: "Bardic inspiration",
         kind: "resource",
         current: 2,
         maximum: 3,
       },
       {
         id: randomUUID(),
-        label: "Slot di 1° livello",
+        label: "1st-level slots",
         kind: "slot",
         current: 3,
         maximum: 4,
       },
       {
         id: randomUUID(),
-        label: "Slot di 2° livello",
+        label: "2nd-level slots",
         kind: "slot",
         current: 1,
         maximum: 3,
       },
     ],
     conditions: "",
-    notes: "Cerca la mappa perduta per conto di Maestra Ilenia.",
+    notes: "Searching for the lost map on behalf of Master Ilenia.",
     sheet: {
       fields: {},
       inspiration: true,
@@ -270,7 +267,7 @@ await call("save_player_asset", {
   input: {
     details: {
       kind: "item",
-      name: "Sigillo d’ambra",
+      name: "Amber Seal",
       quantity: 1,
       category: "Oggetto di missione",
       description: "Ceralacca ambrata con lo stemma della Gilda.",
@@ -288,7 +285,7 @@ await call("save_player_asset", {
       npcId: pages.ilenia.id,
       placeId: pages.porto.id,
       questId: pages.mappa.id,
-      provenanceNotes: "Affidato da Maestra Ilenia.",
+      provenanceNotes: "Affidato da Master Ilenia.",
     },
   },
 });
@@ -317,22 +314,22 @@ await cdp.send("Emulation.setEmulatedMedia", {
   features: [{ name: "prefers-reduced-motion", value: "reduce" }],
 });
 await page.reload();
-await page.getByRole("button", { name: "Diario", exact: true }).click();
+await page.getByRole("button", { name: "Journal", exact: true }).click();
 await page
   .locator(".session-list button")
-  .filter({ hasText: "La bottega del Cartografo" })
+  .filter({ hasText: "The Cartographer’s Workshop" })
   .click();
-await page.getByRole("toolbar", { name: "Comandi degli appunti" }).waitFor();
+await page.getByRole("toolbar", { name: "Note commands" }).waitFor();
 await page.waitForTimeout(800);
 await page.screenshot({ path: ".tools/m20/hero.png" });
-await page.getByRole("button", { name: "Grafo", exact: true }).click();
+await page.getByRole("button", { name: "Graph", exact: true }).click();
 await page.waitForTimeout(2500);
 await page.screenshot({ path: ".tools/m20/graph.png" });
-await page.getByRole("button", { name: "Personaggio", exact: true }).click();
-await page.getByRole("heading", { name: "Oran di Valmora" }).waitFor();
+await page.getByRole("button", { name: "Character", exact: true }).click();
+await page.getByRole("heading", { name: "Oran of Valmora" }).waitFor();
 await page.waitForTimeout(500);
 await page.screenshot({ path: ".tools/m20/character.png" });
-await page.getByRole("button", { name: "Tiradadi" }).click();
+await page.getByRole("button", { name: "Dice roller" }).click();
 await page.waitForTimeout(800);
 await page.screenshot({ path: ".tools/m20/dice.png" });
 await cdp.send("Emulation.clearDeviceMetricsOverride");

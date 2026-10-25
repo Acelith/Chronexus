@@ -31,12 +31,12 @@ export function preferredModel(models: Model[], previous = "") {
 }
 export function modelLabel(name: string) {
   if (name === PRIMARY_MODEL)
-    return `${policy.primary.label} · ${tr("Principale")}`;
+    return `${policy.primary.label} · ${tr("Primary")}`;
   if (name === SECONDARY_MODEL)
-    return `${policy.secondary.label} · ${tr("Secondario")}`;
+    return `${policy.secondary.label} · ${tr("Secondary")}`;
   return name;
 }
 export const retiredNotice =
-  "Il precedente modello Qwen è stato ritirato. Scegli e attiva un modello qualificato; cronologia e citazioni sono conservate.";
+  "The previous Qwen model has been retired. Choose and activate a qualified model; history and citations are kept.";
 export const modelGuidance =
-  "Qwen3.8-27B è la scelta principale, con esecuzione mista GPU/RAM. Gemma 4 12B è l’opzione secondaria più rapida. Nessun modello viene attivato o scaricato automaticamente.";
+  "Qwen3.8-27B is the primary choice, running on GPU and RAM together. Gemma 4 12B is the faster secondary option. No model is activated or downloaded automatically.";

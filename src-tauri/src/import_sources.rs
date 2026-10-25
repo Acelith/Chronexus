@@ -17,7 +17,7 @@ fn column(kind: &str) -> AppResult<&'static str> {
     match kind {
         "page" => Ok("page_id"),
         "session" => Ok("session_id"),
-        _ => Err("Tipo fonte importata non valido.".into()),
+        _ => Err("Invalid imported source type.".into()),
     }
 }
 fn validate(name: &str, content: &str) -> AppResult<()> {
@@ -31,7 +31,7 @@ fn validate(name: &str, content: &str) -> AppResult<()> {
         || content.len() > 2_000_000
         || content.contains('\0')
     {
-        return Err("Nome o contenuto della sorgente importata non valido (massimo 2 MB).".into());
+        return Err("Invalid name or content of the imported source (up to 2 MB).".into());
     }
     Ok(())
 }
@@ -77,7 +77,7 @@ pub fn add(
     validate(name, content)?;
     let field = column(kind)?;
     if get(c, campaign, kind, id)?.is_some() {
-        return Err("La sorgente originale è già registrata e non viene sovrascritta.".into());
+        return Err("The original source is already registered and is not overwritten.".into());
     }
     let table = if kind == "page" { "pages" } else { "sessions" };
     let found: bool = c
@@ -88,10 +88,10 @@ pub fn add(
         )
         .map_err(storage)?;
     if !found {
-        return Err("Documento non trovato nella campagna.".into());
+        return Err("Document not found in the campaign.".into());
     }
     c.execute(&format!("INSERT INTO import_sources(id,campaign_id,{field},name,content,sha256) VALUES(?1,?2,?3,?4,?5,?6)"),params![uuid::Uuid::new_v4().to_string(),campaign,id,name,content,format!("{:x}",Sha256::digest(content.as_bytes()))]).map_err(storage)?;
-    get(c, campaign, kind, id)?.ok_or("Sorgente importata non trovata.".into())
+    get(c, campaign, kind, id)?.ok_or("Imported source not found.".into())
 }
 pub fn all(c: &Connection, campaign: &str) -> AppResult<Vec<ImportSource>> {
     require_campaign(c, campaign)?;
@@ -113,7 +113,7 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
             identifier(&source.id)?;
             validate(&source.name, &source.content)?;
             if format!("{:x}", Sha256::digest(source.content.as_bytes())) != source.sha256 {
-                return Err("Checksum della sorgente importata incoerente.".into());
+                return Err("Inconsistent checksum of the imported source.".into());
             }
         }
     }

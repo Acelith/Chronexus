@@ -117,7 +117,7 @@ fn missing_reference_can_be_recovered_with_same_id_only_in_its_campaign() {
     assert_eq!(recovered.id, id);
     assert_eq!(recovered.status, "stub");
     assert_eq!(backlinks(&c, &a.id, &id).unwrap().len(), 2);
-    assert!(recover_page(&c, &a.id, &id, "Altro").is_err());
+    assert!(recover_page(&c, &a.id, &id, "Other").is_err());
 }
 #[test]
 fn plain_brackets_do_not_assert_links_and_invalid_mentions_are_rejected() {

@@ -1,2 +1,2 @@
 # M18: legacy Qwen3 4B distribution retired; published packages remain immutable.
-throw "Questa distribuzione Qwen3 4B è ritirata da M18. Usa scripts/Start-LocalAI.ps1 e il modello locale qualificato descritto in docs/AI_LOCAL.md. Nessun file è stato installato o scaricato."
+throw "This Qwen3 4B distribution was retired in M18. Use scripts/Start-LocalAI.ps1 and the qualified local model described in docs/AI_LOCAL.md. No file was installed or downloaded."

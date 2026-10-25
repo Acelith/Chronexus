@@ -25,7 +25,7 @@ fn input(from: &str, to: &str) -> RelationshipInput {
     }
 }
 fn doc(ids: &[&str]) -> serde_json::Value {
-    json!({"version":1,"blocks":[{"id":"evidence-block","type":"paragraph","props":{},"children":[],"content":ids.iter().map(|id|json!({"type":"pageMention","props":{"pageId":id,"label":"Nome"}})).collect::<Vec<_>>()}]})
+    json!({"version":1,"blocks":[{"id":"evidence-block","type":"paragraph","props":{},"children":[],"content":ids.iter().map(|id|json!({"type":"pageMention","props":{"pageId":id,"label":"Name"}})).collect::<Vec<_>>()}]})
 }
 fn page(c: &rusqlite::Connection, campaign: &str, title: &str) -> knowledge::Page {
     knowledge::create_page(c, campaign, title, "npc", "active", &[]).unwrap()
@@ -91,7 +91,7 @@ fn campaign_boundaries_and_source_validation_are_enforced() {
     let b = journal::create_campaign(&c, "B").unwrap();
     let v = page(&c, &a.id, "Varek");
     let g = page(&c, &a.id, "Gilda");
-    let foreign = page(&c, &b.id, "Altro");
+    let foreign = page(&c, &b.id, "Other");
     assert!(save_relationship(&c, &a.id, None, None, input(&v.id, &foreign.id)).is_err());
     let mut invalid = input(&v.id, &g.id);
     invalid.certainty = "maybe".into();

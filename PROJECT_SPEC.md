@@ -8,7 +8,7 @@ Core promise: "From an item in my inventory, find the session in which I acquire
 Operating principles:
 - Local-first/offline-first: all core operations work without Internet.
 - Windows, macOS, Linux distribution; installation should be understandable to a non-developer.
-- Italian default UI; M10 adds local language catalogs and writing modes. Follow docs/I18N.md; never translate or transcribe saved campaign content implicitly.
+- English default UI; M10 adds local language catalogs and writing modes. Follow docs/I18N.md; never translate or transcribe saved campaign content implicitly.
 - Easy to back up, export, restore and move to a different OS.
 - Clear evidence and uncertainty: player notes are a perspective, not omniscient truth.
 - Fast access during a live tabletop session; keyboard-friendly and autosaved.
@@ -173,7 +173,7 @@ Domain rules:
 ## 6. UX & accessibility
 - Visual language: restrained dark fantasy, not game-like clutter; good contrast, subtle accents, clear typography, resizable panes when appropriate.
 - Dedicated fast note entry during a session; character resource controls reachable without many clicks.
-- Empty states explain the next action; errors actionable and shown in Italian; confirmation for destructive actions.
+- Empty states explain the next action; errors actionable and shown in the selected interface language; confirmation for destructive actions.
 - Keyboard shortcuts for global search and new journal entry; do not interfere with text editor shortcuts.
 - Interaction must work using keyboard, with labels, focus order and color-independent meaning (especially certainty and graph legends).
 - Responsive desktop views, reasonable on smaller laptop screens; initial system dark theme and optional light later.
@@ -280,9 +280,9 @@ locale/script/showOriginal in atomic interface-preferences.json v2 (reads v1) ou
 campaign restore generations. SQLite remains 015 and backup formats are unchanged.
 Natural locales: it, en, de, fr, es, pt-BR, ja, ko, zh-Hans, ar, lmo-CH.
 Experimental romanized tlh and art-x-rihan use individually sourced vocabulary
-and explicit Italian fallback. Braille is an Italian uncontracted six-dot subset;
+and explicit English fallback. Braille is an Italian uncontracted six-dot subset;
 Morse and Minecraft SGA are writing modes, never fake language translations.
-Preserve ordinary semantic text and an always-readable Italian recovery action.
+Preserve ordinary semantic text and an always-readable English recovery action.
 
 Catalogs/fonts and BlockNote dictionaries are bundled offline. Parameterized UI
 messages, Intl dates/numbers/plurals, Arabic RTL/bidi and mixed CJK text must not

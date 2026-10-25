@@ -30,7 +30,7 @@ fn validate(player: &str, role: &str, status: &str) -> AppResult<()> {
         || role.contains('\0')
         || !["active", "former", "unknown"].contains(&status)
     {
-        return Err("Giocatore, ruolo o stato del membro non valido.".into());
+        return Err("Invalid player, role or member status.".into());
     }
     Ok(())
 }
@@ -54,7 +54,7 @@ pub fn list(c: &Connection, campaign: &str) -> AppResult<Vec<Member>> {
         .map(|(id, player_name, role, status, revision)| {
             validate(&player_name, &role, &status)?;
             if revision < 0 {
-                return Err("Revisione del membro non valida.".into());
+                return Err("Invalid member revision.".into());
             }
             Ok(Member {
                 page: knowledge::get_page(c, campaign, &id)?,
@@ -75,23 +75,23 @@ pub fn save(c: &Connection, campaign: &str, input: &MemberInput) -> AppResult<Me
         knowledge::get_page(&tx, campaign, id)?
     } else {
         if input.revision.is_some() {
-            return Err("Un nuovo membro non ha revisione.".into());
+            return Err("A new member has no revision.".into());
         }
         knowledge::create_page_in_transaction(&tx, campaign, &input.name, "npc", "active", &[])?
     };
     if input.revision.is_none() && page.kind != "npc" {
-        return Err("Scegli una pagina di tipo Personaggio.".into());
+        return Err("Choose a page of type Character.".into());
     }
     if let Some(revision) = input.revision {
-        if revision<0 || tx.execute("UPDATE party_members SET player_name=?1,role=?2,status=?3,revision=revision+1 WHERE campaign_id=?4 AND page_id=?5 AND revision=?6",params![input.player_name,input.role,input.status,campaign,page.id,revision]).map_err(storage)?!=1 {return Err("Il membro è stato modificato: ricarica il party prima di salvare.".into())}
+        if revision<0 || tx.execute("UPDATE party_members SET player_name=?1,role=?2,status=?3,revision=revision+1 WHERE campaign_id=?4 AND page_id=?5 AND revision=?6",params![input.player_name,input.role,input.status,campaign,page.id,revision]).map_err(storage)?!=1 {return Err("The member was changed: reload the party before saving.".into())}
     } else {
-        tx.execute("INSERT INTO party_members(campaign_id,page_id,player_name,role,status) VALUES(?1,?2,?3,?4,?5)",params![campaign,page.id,input.player_name,input.role,input.status]).map_err(|_|"Personaggio già presente nel party o salvataggio non riuscito.".to_string())?;
+        tx.execute("INSERT INTO party_members(campaign_id,page_id,player_name,role,status) VALUES(?1,?2,?3,?4,?5)",params![campaign,page.id,input.player_name,input.role,input.status]).map_err(|_|"Character already in the party or save failed.".to_string())?;
     }
     tx.commit().map_err(storage)?;
     list(c, campaign)?
         .into_iter()
         .find(|m| m.page.id == page.id)
-        .ok_or("Membro salvato non disponibile.".into())
+        .ok_or("Saved member not available.".into())
 }
 pub fn remove(c: &Connection, campaign: &str, id: &str, revision: i64) -> AppResult<()> {
     require_campaign(c, campaign)?;
@@ -103,7 +103,7 @@ pub fn remove(c: &Connection, campaign: &str, id: &str, revision: i64) -> AppRes
     .map_err(storage)?
         != 1
     {
-        return Err("Il membro è cambiato: ricarica il party.".into());
+        return Err("The member changed: reload the party.".into());
     }
     Ok(())
 }

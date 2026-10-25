@@ -2,14 +2,14 @@ import { localizeLabels } from "../../i18n/store";
 import { command, type JournalDocument } from "../journal/api";
 
 export const pageKinds = localizeLabels({
-  npc: "Personaggio",
-  place: "Luogo",
-  faction: "Fazione",
-  quest: "Missione",
-  item: "Oggetto",
-  event: "Evento",
-  lore: "Conoscenza",
-  note: "Nota",
+  npc: "Character",
+  place: "Place",
+  faction: "Faction",
+  quest: "Quest",
+  item: "Item",
+  event: "Event",
+  lore: "Knowledge",
+  note: "Note",
 } as const);
 export type PageKind = keyof typeof pageKinds;
 export interface PageMetadata {

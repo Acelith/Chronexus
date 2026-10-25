@@ -47,10 +47,10 @@ test("Qwen resta utilizzabile per inferenza ma non abilita QLoRA Gemma", async (
     />,
   );
   expect(
-    await screen.findByText(/riaddestramento è qualificato solo per Gemma/),
+    await screen.findByText(/training is qualified only for Gemma/),
   ).toBeVisible();
   expect(
-    screen.getByRole("button", { name: "Riaddestra sui nuovi dati" }),
+    screen.getByRole("button", { name: "Retrain on the new data" }),
   ).toBeDisabled();
   expect(trainingApi.start).not.toHaveBeenCalled();
 });
@@ -78,11 +78,11 @@ test("requires explicit confirmation and cancels before navigation without activ
     />,
   );
   await user.click(
-    await screen.findByRole("button", { name: "Riaddestra sui nuovi dati" }),
+    await screen.findByRole("button", { name: "Retrain on the new data" }),
   );
   expect(trainingApi.start).not.toHaveBeenCalled();
   await user.click(
-    screen.getByRole("button", { name: "Conferma riaddestramento locale" }),
+    screen.getByRole("button", { name: "Confirm local retraining" }),
   );
   expect(trainingApi.start).toHaveBeenCalledWith(
     "a",
@@ -100,7 +100,7 @@ test("requires explicit confirmation and cancels before navigation without activ
   expect(guard!.dirty()).toBe(true);
   const waiting = guard!.flush();
   await waitFor(() => expect(assistantApi.cancel).toHaveBeenCalled());
-  finish({ status: "cancelled", error: "Annullato" } as TrainingJob);
+  finish({ status: "cancelled", error: "Cancelled" } as TrainingJob);
   await waiting;
   expect(trainingApi.activate).not.toHaveBeenCalled();
 });
@@ -120,8 +120,8 @@ test("blocks training when backend is missing or documents are suspicious", asyn
     />,
   );
   expect(
-    await screen.findByRole("button", { name: "Riaddestra sui nuovi dati" }),
+    await screen.findByRole("button", { name: "Retrain on the new data" }),
   ).toBeDisabled();
-  expect(screen.getByRole("alert")).toHaveTextContent("possibili istruzioni");
+  expect(screen.getByRole("alert")).toHaveTextContent("possible instructions");
   expect(trainingApi.start).not.toHaveBeenCalled();
 });

@@ -42,27 +42,29 @@ pub struct History {
     pub next_cursor: Option<Cursor>,
 }
 fn invalid() -> String {
-    "Storico dadi non valido o incoerente. Nessun dato sostituito.".into()
+    "Invalid or inconsistent dice history. No data replaced.".into()
 }
 fn composition(input: &[Selection]) -> AppResult<Vec<Selection>> {
     if input.len() > SIDES.len() {
-        return Err("Scegli ogni tipo di dado una sola volta.".into());
+        return Err("Choose each die type only once.".into());
     }
     let mut selections = input.to_vec();
     selections.sort_by_key(|g| g.sides);
     if selections.windows(2).any(|w| w[0].sides == w[1].sides) {
-        return Err("Scegli ogni tipo di dado una sola volta.".into());
+        return Err("Choose each die type only once.".into());
     }
     if selections
         .iter()
         .any(|g| !SIDES.contains(&g.sides) || !(0..=MAX_PER_TYPE).contains(&g.quantity))
     {
-        return Err("Usa d4, d6, d8, d10, d12, d20 o d100 e quantità intere da 0 a 50.".into());
+        return Err(
+            "Use d4, d6, d8, d10, d12, d20 or d100 and whole quantities from 0 to 50.".into(),
+        );
     }
     selections.retain(|g| g.quantity > 0);
     let count: i64 = selections.iter().map(|g| g.quantity).sum();
     if !(1..=MAX_DICE).contains(&count) {
-        return Err("Seleziona da 1 a 100 dadi complessivi (massimo 50 per tipo).".into());
+        return Err("Select from 1 to 100 dice in total (up to 50 per type).".into());
     }
     Ok(selections)
 }
@@ -136,7 +138,7 @@ pub fn roll(c: &Connection, campaign: &str, id: &str, input: &[Selection]) -> Ap
     roll_with(c, campaign, id, input, &mut || {
         let mut bytes = [0; 4];
         getrandom::fill(&mut bytes).map_err(|_| {
-            "Il sistema non ha fornito casualità sicura. Nessun tiro registrato.".to_string()
+            "The system did not provide secure randomness. No roll recorded.".to_string()
         })?;
         Ok(u32::from_le_bytes(bytes))
     })
@@ -163,7 +165,7 @@ fn roll_with(
             .collect();
         if existing.campaign_id != campaign || previous != selections {
             return Err(
-                "Questo identificatore appartiene a un tiro diverso. Riapri il tiradadi e riprova."
+                "This identifier belongs to a different roll. Reopen the dice roller and try again."
                     .into(),
             );
         }

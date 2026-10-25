@@ -117,12 +117,12 @@ const fixture = await page.evaluate(async (phase) => {
   return { campaign };
 }, phase);
 await page.reload();
-await page.getByRole("button", { name: "Diario", exact: true }).click();
+await page.getByRole("button", { name: "Journal", exact: true }).click();
 await page
   .locator(".session-list button")
   .filter({ hasText: "Indizio del viandante" })
   .click();
-await page.getByRole("toolbar", { name: "Comandi degli appunti" }).waitFor();
+await page.getByRole("toolbar", { name: "Note commands" }).waitFor();
 await mkdir(".tools/ui-refresh", { recursive: true });
 if (phase === "check") {
   const windows = [];
@@ -149,7 +149,7 @@ if (phase === "check") {
   }
   await page.setViewportSize({ width: 1586, height: 992 });
   await page.getByRole("button", { name: "Markdown", exact: true }).click();
-  const source = page.getByRole("textbox", { name: "Codice Markdown" });
+  const source = page.getByRole("textbox", { name: "Markdown source" });
   const markdown = await source.inputValue();
   assert(markdown.includes("chronexus://page/"));
   await source.fill(
@@ -157,37 +157,35 @@ if (phase === "check") {
       "\n\n## Verifica Markdown\n\n- **Indizio persistente**\n- [x] Controllato\n",
   );
   await page
-    .getByRole("button", { name: "Applica e torna al visuale" })
+    .getByRole("button", { name: "Apply and return to visual mode" })
     .click();
-  await page.getByRole("button", { name: "Salva ora", exact: true }).click();
+  await page.getByRole("button", { name: "Save now", exact: true }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Salvato sul computer" }),
+    page.getByRole("status").filter({ hasText: "Saved on the computer" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Markdown", exact: true }).click();
   const good = await source.inputValue();
   await source.fill(good + "\n\n```js\nalert(1)\n```");
-  await page.getByRole("button", { name: "Grafo", exact: true }).click();
+  await page.getByRole("button", { name: "Graph", exact: true }).click();
   await expect(source).toBeVisible();
   await expect(page.getByRole("alert").first()).toBeVisible();
   await expect(source).toHaveValue(/```js/);
-  await page
-    .getByRole("button", { name: "Annulla modifiche Markdown" })
-    .click();
+  await page.getByRole("button", { name: "Discard Markdown changes" }).click();
   await page.getByRole("button", { name: "Codex", exact: true }).click();
   const codexScroll = await page
-    .getByRole("navigation", { name: "Pagine del Codex" })
+    .getByRole("navigation", { name: "Codex pages" })
     .evaluate((e) => {
       e.scrollTop = 900;
       return e.scrollTop;
     });
   assert(codexScroll > 0);
   await page
-    .getByRole("button", { name: "Impostazioni della campagna", exact: true })
+    .getByRole("button", { name: "Campaign settings", exact: true })
     .click();
   await expect(
     page
-      .getByRole("navigation", { name: "Viste della campagna" })
-      .getByRole("button", { name: "Impostazioni della campagna" }),
+      .getByRole("navigation", { name: "Campaign views" })
+      .getByRole("button", { name: "Campaign settings" }),
   ).toHaveCount(0);
   await writeFile(
     ".tools/ui-refresh/qa-windows.json",
@@ -208,7 +206,7 @@ assert.equal(original.props.textAlignment, "center");
 assert.equal(original.content[0].styles.underline, true);
 assert.equal(original.content[0].styles.backgroundColor, "yellow");
 assert.equal(original.content[1].type, "pageMention");
-await page.getByRole("button", { name: "Diario", exact: true }).click();
+await page.getByRole("button", { name: "Journal", exact: true }).click();
 await page
   .locator(".session-list button")
   .filter({ hasText: "Indizio del viandante" })

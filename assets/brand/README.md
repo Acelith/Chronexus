@@ -1,29 +1,29 @@
-# Logo di Chronexus (M21)
+# Logo in Chronexus (M21)
 
-Illustrazioni scelte dall’utente il 25 ottobre 2026: araldo con trombetta e
-stendardo. Generate esternamente dall’utente, senza dati di campagna. Integrate in M21:
-`assets/chronexus.svg` (sorgente di `pnpm icons`) è una copia di
-`chronexus-icon.svg`; la barra laterale usa `chronexus-logo.webp`; il README usa
-`chronexus-wordmark.webp` e `chronexus-icon.webp`.
+Illustrations chosen by the user on 25 October 2026: herald with trumpet and
+banner. Generated externally by the user, without campaign data. Integrate in M21:
+`assets/chronexus.svg` (source of `pnpm icons`) is a copy of
+`chronexus-icon.svg`; the sidebar uses `chronexus-logo.webp`; the README uses
+`chronexus-wordmark.webp` and `chronexus-icon.webp`.
 
-## Originali (non modificare)
+## Originals (do not modify)
 
-| File | Contenuto |
+| File | Content |
 | --- | --- |
-| `source/icon-original.webp` | Icona quadrata 1254×1254 su pergamena bordeaux, fondo nero agli angoli |
-| `source/wordmark-original.webp` | Marchio orizzontale araldo + «CHRONEXUS», 2000×667, alpha |
-| `source/logo-original.webp` | Logo verticale araldo sopra «CHRONEXUS», 1254×1254, alpha |
+| `source/icon-original.webp` | Square icon 1254×1254 on burgundy parchment, black background at corners |
+| `source/wordmark-original.webp` | Horizontal herald logo + «CHRONEXUS», 2000×667, alpha |
+| `source/logo-original.webp` | Vertical herald logo above «CHRONEXUS», 1254×1254, alpha |
 
-## Varianti preparate
+## Prepared variants
 
-| File | Uso previsto | Preparazione |
+| File | Intended use | Preparation |
 | --- | --- | --- |
-| `chronexus-icon.svg` | Sorgente di `pnpm icons` (finestra, barra applicazioni, installer) | Angoli arrotondati resi trasparenti (maschera con raggio 232 px), 1024×1024, PNG a 256 colori incorporato. `tauri icon` provato: genera tutte le dimensioni |
-| `chronexus-icon.webp` | Icona per documenti e README | 512×512, alpha |
-| `chronexus-logo.webp` | Logo verticale nella barra laterale | 640 px, alpha originale |
-| `chronexus-wordmark.webp` | Marchio orizzontale per README e pagine | 1400 px, alpha originale |
+| `chronexus-icon.svg` | Source of `pnpm icons` (window, taskbar, installer) | Rounded corners made transparent (mask with radius 232 px), 1024×1024, PNG at 256 colors embedded. `tauri icon` tested: generates all sizes |
+| `chronexus-icon.webp` | Icon for documents and README | 512×512, alpha |
+| `chronexus-logo.webp` | Vertical logo in the sidebar | 640 px, original alpha |
+| `chronexus-wordmark.webp` | Horizontal logo for README and pages | 1400 px, original alpha |
 
-Conversioni con ffmpeg 7.1.1. Per rigenerarle partire sempre da `source/`.
-A 16–32 px l’icona conserva la sagoma ma perde i dettagli: M21 valuta una variante
-semplificata per le dimensioni piccole. Il nome dell’app resta testo accessibile
-(`alt`/titolo), mai solo lettere disegnate.
+Conversions with ffmpeg 7.1.1. To regenerate, always start from `source/`.
+At 16–32 px, the icon retains the shape but loses details: M21 evaluates a simplified variant
+for small sizes. The app name remains accessible text
+(`alt`/title), never just drawn letters.

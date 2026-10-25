@@ -36,7 +36,7 @@ export function SheetEditor({
       <p className="muted">
         <Text
           source={
-            "Apri le sezioni che usi. Valori e unità di misura sono manuali; nessun calcolo o conversione automatica."
+            "Open the sections you use. Values and units are manual; nothing is calculated or converted automatically."
           }
         />
       </p>
@@ -57,21 +57,21 @@ export function SheetEditor({
               />
             ))}
           </div>
-          {section.title === "Combattimento e sensi" ? (
+          {section.title === "Combat and senses" ? (
             <div className="player-fields">
               <Flag
-                label={tr("Ispirazione")}
+                label={tr("Inspiration")}
                 value={value.inspiration}
                 onChange={(inspiration) => onChange({ ...value, inspiration })}
               />
               <NumberField
-                label={tr("Successi contro morte")}
+                label={tr("Death save successes")}
                 value={value.deathSuccesses}
                 max={3}
                 onChange={(n) => onChange({ ...value, deathSuccesses: n ?? 0 })}
               />
               <NumberField
-                label={tr("Fallimenti contro morte")}
+                label={tr("Death save failures")}
                 value={value.deathFailures}
                 max={3}
                 onChange={(n) => onChange({ ...value, deathFailures: n ?? 0 })}
@@ -82,23 +82,23 @@ export function SheetEditor({
       ))}
       <details>
         <summary>
-          <Text source={"Armi, attacchi e munizioni ("} />
+          <Text source={"Weapons, attacks and ammunition ("} />
           {value.attacks.length})
         </summary>
         {value.attacks.map((attack, index) => (
           <fieldset className="sheet-attack" key={attack.id}>
             <legend>
-              <Text source={"Attacco "} />
+              <Text source={"Attack "} />
               {index + 1}
             </legend>
             <div className="player-fields">
               {Object.entries({
-                name: tr("Arma o attacco"),
-                bonus: tr("Bonus attacco"),
-                damage: tr("Danno e tipo"),
-                range: tr("Gittata"),
-                weight: tr("Peso dell’arma"),
-                ammunition: tr("Munizioni"),
+                name: tr("Weapon or attack"),
+                bonus: tr("Attack bonus"),
+                damage: tr("Damage and type"),
+                range: tr("Range"),
+                weight: tr("Weapon weight"),
+                ammunition: tr("Ammunition"),
               }).map(([key, label]) => (
                 <TextField
                   key={key}
@@ -125,7 +125,7 @@ export function SheetEditor({
                 })
               }
             >
-              <Text source={"Rimuovi attacco "} />
+              <Text source={"Remove attack "} />
               {index + 1}
             </button>
           </fieldset>
@@ -151,7 +151,7 @@ export function SheetEditor({
             })
           }
         >
-          <Text source={"Aggiungi attacco"} />
+          <Text source={"Add attack"} />
         </button>
       </details>
     </div>
@@ -163,7 +163,7 @@ export function SheetSummary({ value }: { value: SheetDetails }) {
       {sheetSections.map((section) => (
         <details
           key={section.title}
-          open={section.title === "Combattimento e sensi"}
+          open={section.title === "Combat and senses"}
         >
           <summary>{section.title}</summary>
           <dl className="sheet-summary">
@@ -182,15 +182,15 @@ export function SheetSummary({ value }: { value: SheetDetails }) {
             (key) => value.fields[key as SheetField],
           ) ? (
             <p className="muted">
-              <Text source={"Nessun valore annotato in questa sezione."} />
+              <Text source={"No values noted in this section."} />
             </p>
           ) : null}
-          {section.title === "Combattimento e sensi" ? (
+          {section.title === "Combat and senses" ? (
             <p>
-              <Text source={"Ispirazione: "} />
-              {value.inspiration ? tr("sì") : "no"}{" "}
-              <Text source={" · Tiri contro morte: "} />
-              {value.deathSuccesses} <Text source={" successi / "} />
+              <Text source={"Inspiration: "} />
+              {value.inspiration ? tr("yes") : "no"}{" "}
+              <Text source={" · Death saves: "} />
+              {value.deathSuccesses} <Text source={" successes / "} />
               {value.deathFailures} <Text source={" fallimenti"} />
             </p>
           ) : null}
@@ -198,27 +198,27 @@ export function SheetSummary({ value }: { value: SheetDetails }) {
       ))}
       <details open={value.attacks.length > 0}>
         <summary>
-          <Text source={"Armi e munizioni ("} />
+          <Text source={"Weapons and ammunition ("} />
           {value.attacks.length})
         </summary>
         {value.attacks.map((a) => (
           <article className="sheet-attack" key={a.id}>
             <h5>{a.name}</h5>
             <p>
-              <Text source={"Attacco "} />
-              {a.bonus || "—"} <Text source={" · Danno "} />
-              {a.damage || "—"} <Text source={" · Gittata"} /> {a.range || "—"}
+              <Text source={"Attack "} />
+              {a.bonus || "—"} <Text source={" · Damage "} />
+              {a.damage || "—"} <Text source={" · Range"} /> {a.range || "—"}
             </p>
             <p>
-              <Text source={"Peso "} />
-              {a.weight || "—"} <Text source={" · Munizioni "} />
+              <Text source={"Weight "} />
+              {a.weight || "—"} <Text source={" · Ammunition "} />
               {a.ammunition || "—"}
             </p>
           </article>
         ))}
         {!value.attacks.length ? (
           <p className="muted">
-            <Text source={"Nessun attacco annotato."} />
+            <Text source={"No attacks noted."} />
           </p>
         ) : null}
       </details>

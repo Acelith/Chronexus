@@ -27,7 +27,7 @@ export default function ExportButton({
         onClick={() =>
           void run(async () => {
             setError("");
-            setStatus(tr("Esportazione…"));
+            setStatus(tr("Exporting…"));
             try {
               const receipt = await command<Receipt | null>("export_campaign", {
                 campaignId,
@@ -35,7 +35,7 @@ export default function ExportButton({
               setStatus(
                 receipt
                   ? tr(
-                      "Esportazione creata: {0} pagine, {1} sessioni, {2} immagini. {3}",
+                      "Export created: {0} pages, {1} sessions, {2} images. {3}",
                       [
                         receipt.pages,
                         receipt.sessions,
@@ -43,7 +43,7 @@ export default function ExportButton({
                         receipt.path,
                       ],
                     )
-                  : tr("Esportazione annullata."),
+                  : tr("Export cancelled."),
               );
             } catch (reason) {
               setError(errorMessage(reason));
@@ -52,7 +52,7 @@ export default function ExportButton({
           })
         }
       >
-        <Text source={"Esporta campagna"} />
+        <Text source={"Export campaign"} />
       </button>
       {status ? <p role="status">{status}</p> : null}
       {error ? (

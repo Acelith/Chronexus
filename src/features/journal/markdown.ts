@@ -28,22 +28,14 @@ export function validateMarkdown(source: string) {
   for (const match of source.matchAll(/\]\(([^\s)]*)/g)) {
     const href = match[1];
     if (href.startsWith("chronexus:") && !pageUrl.test(href))
-      throw Error(
-        tr(
-          "Collegamento Chronexus non valido: conserva l’UUID completo della pagina.",
-        ),
-      );
+      throw Error(tr("Invalid Chronexus link: keep the page's full UUID."));
     if (href && !/^(https?:|mailto:|#|chronexus:)/i.test(href))
-      throw Error(
-        tr("Usa link http, https, mailto o collegamenti Chronexus validi."),
-      );
+      throw Error(tr("Use valid http, https, mailto or Chronexus links."));
   }
   if (/<\/?[a-z][^>]*>/i.test(source))
-    throw Error(tr("HTML non supportato: il testo originale è conservato."));
+    throw Error(tr("HTML not supported: the original text is kept."));
   if (new TextEncoder().encode(source).length > 1_900_000)
-    throw Error(
-      tr("Markdown troppo grande. Riduci il testo prima di applicarlo."),
-    );
+    throw Error(tr("Markdown too large. Shorten the text before applying it."));
   // These block types are not in the persisted document schema. Never silently flatten them.
   if (
     /^\s*(```|~~~|<\/?[a-z!]|\|.*\||([-*_])(?:\s*\2){2,}\s*$)/im.test(source) ||
@@ -52,11 +44,11 @@ export function validateMarkdown(source: string) {
   )
     throw Error(
       tr(
-        "Tabelle, blocchi di codice, HTML, immagini e definizioni di link non sono supportati in questi appunti. Usa l’allegato immagini per le figure. Il testo originale è conservato: correggi il Markdown o annulla.",
+        "Tables, code blocks, HTML, images and link definitions are not supported in these notes. Use the image attachments for pictures. The original text is kept: fix the Markdown or cancel.",
       ),
     );
   if (/^#{4,6}\s/m.test(source))
-    throw Error(tr("Usa titoli di livello 1, 2 o 3."));
+    throw Error(tr("Use level 1, 2 or 3 headings."));
 }
 function signature(value: unknown): string {
   function clean(item: unknown): unknown {
@@ -106,13 +98,13 @@ export function restoreMarkdownBlocks(
           .map((t) => t.text)
           .join("");
         if (!label.trim() || label.length > 200)
-          throw Error(tr("Etichetta del collegamento alla pagina non valida."));
+          throw Error(tr("Invalid page link label."));
         return { type: "pageMention", props: { pageId: match[1], label } };
       }
       if (!/^(https?:|mailto:|#)/i.test(value.href))
         throw Error(
           tr(
-            "Link non supportato. Usa https, http, mailto o un collegamento di pagina Chronexus con UUID valido.",
+            "Unsupported link. Use https, http, mailto or a Chronexus page link with a valid UUID.",
           ),
         );
     }

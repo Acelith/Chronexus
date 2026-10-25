@@ -31,7 +31,7 @@ export function graphElements(data: GraphData): ElementDefinition[] {
     ...data.edges.map((edge) => ({
       data: {
         ...edge,
-        displayLabel: edge.kind === "mention" ? tr("menziona") : edge.label,
+        displayLabel: edge.kind === "mention" ? tr("mentions") : edge.label,
       },
     })),
   ];

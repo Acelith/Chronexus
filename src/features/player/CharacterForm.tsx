@@ -32,56 +32,54 @@ export default function CharacterForm({
   return (
     <form
       className="player-form"
-      aria-label={initial ? tr("Modifica personaggio") : tr("Crea personaggio")}
+      aria-label={initial ? tr("Edit character") : tr("Create character")}
       onSubmit={(e) => {
         e.preventDefault();
         void onSave(data);
       }}
     >
       <fieldset disabled={busy}>
-        <legend>
-          {initial ? tr("Modifica personaggio") : tr("Il tuo personaggio")}
-        </legend>
+        <legend>{initial ? tr("Edit character") : tr("Your character")}</legend>
         <p className="muted">
           <Text
             source={
-              "Valori manuali. Il regolamento è un’etichetta: Chronexus non calcola formule, riposi o avanzamenti."
+              "Manual values. The rules system is a label: Chronexus does not calculate formulas, rests or advancement."
             }
           />
         </p>
         <div className="player-fields">
           <TextField
-            label={tr("Nome del personaggio")}
+            label={tr("Character name")}
             autoFocus
             value={data.name}
             required
             onChange={(v) => update("name", v)}
           />
           <TextField
-            label={tr("Regolamento")}
+            label={tr("Rules system")}
             value={data.systemId}
             max={80}
             required
             onChange={(v) => update("systemId", v)}
           />
           <TextField
-            label={tr("Origine o specie")}
+            label={tr("Origin or species")}
             value={data.ancestry}
             onChange={(v) => update("ancestry", v)}
           />
           <TextField
-            label={tr("Classe o vocazione")}
+            label={tr("Class or calling")}
             value={data.vocation}
             onChange={(v) => update("vocation", v)}
           />
           <NumberField
-            label={tr("Livello (facoltativo)")}
+            label={tr("Level (optional)")}
             value={data.level}
             optional
             onChange={(v) => update("level", v)}
           />
           <NumberField
-            label={tr("Esperienza (facoltativa)")}
+            label={tr("Experience (optional)")}
             value={data.experience}
             optional
             onChange={(v) => update("experience", v)}
@@ -92,55 +90,55 @@ export default function CharacterForm({
           onChange={(v) => update("sheet", v)}
         />
         <h4>
-          <Text source={"Punti vita"} />
+          <Text source={"Hit points"} />
         </h4>
         <div className="player-fields">
           <NumberField
-            label={tr("PF massimi")}
+            label={tr("Maximum HP")}
             value={data.hpMaximum}
             onChange={(v) => update("hpMaximum", v ?? 0)}
           />
           <NumberField
-            label={tr("PF attuali")}
+            label={tr("Current HP")}
             value={data.hpCurrent}
             max={data.hpMaximum}
             onChange={(v) => update("hpCurrent", v ?? 0)}
           />
           <NumberField
-            label={tr("PF temporanei")}
+            label={tr("Temporary HP")}
             value={data.hpTemporary}
             onChange={(v) => update("hpTemporary", v ?? 0)}
           />
         </div>
         <h4>
-          <Text source={"Statistiche configurabili"} />
+          <Text source={"Configurable statistics"} />
         </h4>
         <button type="button" onClick={() => setData(dndPreset(data))}>
-          <Text source={"Aggiungi campi D&D 2014"} />
+          <Text source={"Add D&D 2014 fields"} />
         </button>
         <p className="muted">
           <Text
             source={
-              "Aggiunge le sei caratteristiche, i tiri salvezza e le abilità mancanti, senza modificare i valori già presenti."
+              "Adds the six ability scores, saving throws and missing skills without changing existing values."
             }
           />
         </p>
         <details open={data.stats.length < 5}>
           <summary>
-            <Text source={"Modifica statistiche ("} />
+            <Text source={"Edit statistics ("} />
             {data.stats.length})
           </summary>
           <p className="muted">
             <Text
               source={
-                "Aggiungi caratteristiche, abilità, tiri, difese e movimento con le etichette del tuo sistema."
+                "Add ability scores, skills, rolls, defenses and movement with your system's labels."
               }
             />
           </p>
           {data.stats.map((stat, index) => (
             <div className="player-edit-row" key={stat.id}>
               <TextField
-                label={tr("Statistica {0}: nome", [index + 1])}
+                label={tr("Statistic {0}: name", [index + 1])}
                 value={stat.label}
                 required
                 onChange={(v) =>
@@ -153,9 +151,9 @@ export default function CharacterForm({
                 }
               />
               <label>
-                <Text source={"Categoria"} />
+                <Text source={"Category"} />
                 <select
-                  aria-label={tr("Statistica {0}: categoria", [index + 1])}
+                  aria-label={tr("Statistic {0}: category", [index + 1])}
                   value={stat.group}
                   onChange={(e) =>
                     update(
@@ -179,7 +177,7 @@ export default function CharacterForm({
                 </select>
               </label>
               <TextField
-                label={tr("Statistica {0}: valore", [index + 1])}
+                label={tr("Statistic {0}: value", [index + 1])}
                 value={stat.value}
                 onChange={(v) =>
                   update(
@@ -199,12 +197,12 @@ export default function CharacterForm({
                   )
                 }
               >
-                <Text source={"Rimuovi statistica "} />
+                <Text source={"Remove statistic "} />
                 {index + 1}
               </button>
               {stat.group === "ability" ? (
                 <TextField
-                  label={tr("Statistica {0}: modificatore", [index + 1])}
+                  label={tr("Statistic {0}: modifier", [index + 1])}
                   value={stat.modifier ?? ""}
                   onChange={(modifier) =>
                     update(
@@ -218,9 +216,9 @@ export default function CharacterForm({
               ) : null}
               {stat.group === "skill" || stat.group === "save" ? (
                 <label>
-                  <Text source={"Competenza"} />
+                  <Text source={"Proficiency"} />
                   <select
-                    aria-label={tr("Statistica {0}: competenza", [index + 1])}
+                    aria-label={tr("Statistic {0}: proficiency", [index + 1])}
                     value={stat.training ?? "none"}
                     onChange={(e) =>
                       update(
@@ -262,11 +260,11 @@ export default function CharacterForm({
               ])
             }
           >
-            <Text source={"Aggiungi statistica"} />
+            <Text source={"Add statistic"} />
           </button>
         </details>
         <h4>
-          <Text source={"Risorse e slot"} />
+          <Text source={"Resources and slots"} />
         </h4>
         <button
           type="button"
@@ -276,7 +274,7 @@ export default function CharacterForm({
               ...data.resources,
               ...Array.from({ length: 9 }, (_, i) => ({
                 id: crypto.randomUUID(),
-                label: `Slot ${i + 1}° livello`,
+                label: `Level ${i + 1} slots`,
                 kind: "slot" as const,
                 current: 0,
                 maximum: 0,
@@ -286,12 +284,12 @@ export default function CharacterForm({
             ])
           }
         >
-          <Text source={"Aggiungi slot 1°–9°"} />
+          <Text source={"Add 1st–9th level slots"} />
         </button>
         {data.resources.map((resource, index) => (
           <div className="player-edit-row" key={resource.id}>
             <TextField
-              label={tr("Risorsa {0}: nome", [index + 1])}
+              label={tr("Resource {0}: name", [index + 1])}
               value={resource.label}
               required
               onChange={(v) =>
@@ -304,9 +302,9 @@ export default function CharacterForm({
               }
             />
             <label>
-              <Text source={"Tipo"} />
+              <Text source={"Type"} />
               <select
-                aria-label={tr("Risorsa {0}: tipo", [index + 1])}
+                aria-label={tr("Resource {0}: type", [index + 1])}
                 value={resource.kind}
                 onChange={(e) =>
                   update(
@@ -319,12 +317,12 @@ export default function CharacterForm({
                   )
                 }
               >
-                <option value="resource">{tr("Risorsa")}</option>
-                <option value="slot">{tr("Slot")}</option>
+                <option value="resource">{tr("Resource")}</option>
+                <option value="slot">{tr("Slots")}</option>
               </select>
             </label>
             <NumberField
-              label={tr("Risorsa {0}: massimo", [index + 1])}
+              label={tr("Resource {0}: maximum", [index + 1])}
               value={resource.maximum}
               onChange={(v) =>
                 update(
@@ -336,7 +334,7 @@ export default function CharacterForm({
               }
             />
             <NumberField
-              label={tr("Risorsa {0}: attuale", [index + 1])}
+              label={tr("Resource {0}: current", [index + 1])}
               value={resource.current}
               max={resource.maximum}
               onChange={(v) =>
@@ -357,7 +355,7 @@ export default function CharacterForm({
                 )
               }
             >
-              <Text source={"Rimuovi risorsa "} />
+              <Text source={"Remove resource "} />
               {index + 1}
             </button>
           </div>
@@ -378,17 +376,17 @@ export default function CharacterForm({
             ])
           }
         >
-          <Text source={"Aggiungi risorsa"} />
+          <Text source={"Add resource"} />
         </button>
         <TextField
-          label={tr("Condizioni")}
+          label={tr("Conditions")}
           value={data.conditions}
           max={2000}
           multiline
           onChange={(v) => update("conditions", v)}
         />
         <TextField
-          label={tr("Note del personaggio")}
+          label={tr("Character notes")}
           value={data.notes}
           max={16000}
           multiline
@@ -396,10 +394,10 @@ export default function CharacterForm({
         />
         <div className="actions">
           <button className="primary" disabled={!data.name.trim()}>
-            <Text source={"Salva personaggio"} />
+            <Text source={"Save character"} />
           </button>
           <button type="button" onClick={onCancel}>
-            <Text source={"Annulla modifiche"} />
+            <Text source={"Discard changes"} />
           </button>
         </div>
       </fieldset>

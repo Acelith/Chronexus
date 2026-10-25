@@ -47,7 +47,7 @@ fn backup_is_verified_restorable_and_includes_images_before_installer_runs() {
     let page = knowledge::create_page(
         &store.connection,
         &campaign.id,
-        "Mappa",
+        "Map",
         "place",
         "active",
         &[],
@@ -65,7 +65,7 @@ fn backup_is_verified_restorable_and_includes_images_before_installer_runs() {
             kind: "page".into(),
             id: page.id,
         },
-        "Mappa",
+        "Map",
         "map",
         png.into_inner(),
     )
@@ -201,7 +201,7 @@ async fn cancelled_download_stops_before_installation() {
         |_, _| {},
     )
     .await;
-    assert!(result.unwrap_err().contains("annullato"));
+    assert!(result.unwrap_err().contains("cancelled"));
 }
 
 #[test]
@@ -248,7 +248,9 @@ fn update_backup_goes_to_documents_with_receipt_or_blocks_installer() {
         Ok((r.path.clone(), n.map(str::to_string)))
     })
     .unwrap();
-    let folder = documents.join("Chronexus").join("Backup aggiornamenti");
+    let folder = documents
+        .join("Chronexus")
+        .join(crate::backup_folder::UPDATES);
     assert!(PathBuf::from(&path).starts_with(&folder) && notice.is_none());
     let receipt = fs::read_dir(&folder)
         .unwrap()
@@ -268,7 +270,7 @@ fn update_backup_goes_to_documents_with_receipt_or_blocks_installer() {
     })
     .unwrap();
     assert!(PathBuf::from(path).starts_with(store.root.join("update-backups")));
-    assert!(notice.unwrap().contains("cartella dati"));
+    assert!(notice.unwrap().contains("data folder"));
     // Both unusable: the installer is never reached.
     fs::remove_dir_all(store.root.join("update-backups")).unwrap();
     fs::write(store.root.join("update-backups"), "file").unwrap();

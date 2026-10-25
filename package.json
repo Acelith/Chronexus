@@ -1,7 +1,7 @@
 {
   "name": "chronexus",
   "private": true,
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "packageManager": "pnpm@11.25.0",
   "scripts": {
@@ -54,5 +54,7 @@
     "typescript-eslint": "^8.72.0",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
-  }
+  },
+  "description": "Your offline RPG campaign journal",
+  "license": "Apache-2.0"
 }

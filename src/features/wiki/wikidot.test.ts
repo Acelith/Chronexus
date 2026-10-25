@@ -58,5 +58,5 @@ test("refuses non-spell pages and oversized fields", () => {
       ...base,
       spell: { ...base.spell!, range: "x".repeat(201) },
     }),
-  ).toThrow("troppo lunga");
+  ).toThrow("too long");
 });

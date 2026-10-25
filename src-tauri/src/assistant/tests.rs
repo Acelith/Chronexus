@@ -85,7 +85,7 @@ fn retrieval_is_scoped_and_snapshots_survive_edits_and_deletion() {
 #[test]
 fn rules_require_explicit_cached_sources_and_one_edition() {
     let c = connection();
-    let a = journal::create_campaign(&c, "Regole").unwrap();
+    let a = journal::create_campaign(&c, "Rules").unwrap();
     for (key, ed) in [("entry/a", "5e-2014"), ("entry/b", "5e-2024")] {
         c.execute("INSERT INTO wiki_cache(key,payload,fetched_at) VALUES(?1,?2,0)",rusqlite::params![key,json!({"entry":{"name":"Regola di prova","desc":"Testo originale di prova"},"document":{"name":"Fonte test","gamesystem":{"key":ed}}}).to_string()]).unwrap();
     }

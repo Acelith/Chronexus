@@ -86,10 +86,12 @@ test("Wikidot è predefinito, non contatta la rete all’apertura e importa solo
   });
   const onImport = vi.fn();
   render(<WikiWorkspace onImportSpell={onImport} />);
-  expect(await screen.findByText(/Fonte attiva: Wikidot D&D 5e/)).toBeVisible();
+  expect(
+    await screen.findByText(/Active source: Wikidot D&D 5e/),
+  ).toBeVisible();
   expect(calls("wikidot_search")).toHaveLength(0);
-  await user.type(screen.getByLabelText("Nome nella wiki"), "light");
-  await user.click(screen.getByRole("button", { name: "Cerca su Wikidot" }));
+  await user.type(screen.getByLabelText("Name in the wiki"), "light");
+  await user.click(screen.getByRole("button", { name: "Search Wikidot" }));
   expect(calls("wikidot_search")[0][1]).toEqual({
     category: "spells",
     query: "light",
@@ -97,12 +99,10 @@ test("Wikidot è predefinito, non contatta la rete all’apertura e importa solo
   });
   await user.click(await screen.findByRole("button", { name: /Test Light/ }));
   expect(await screen.findByText("A synthetic light.")).toBeVisible();
-  expect(
-    screen.getByText(/Fonte dichiarata: Synthetic Handbook/),
-  ).toBeVisible();
+  expect(screen.getByText(/Declared source: Synthetic Handbook/)).toBeVisible();
   expect(onImport).not.toHaveBeenCalled();
   await user.click(
-    screen.getByRole("button", { name: "Prepara importazione nella scheda" }),
+    screen.getByRole("button", { name: "Prepare import into the sheet" }),
   );
   expect(onImport.mock.calls[0][0]).toMatchObject({
     name: "Test Light",
@@ -116,31 +116,29 @@ test("Wikidot è predefinito, non contatta la rete all’apertura e importa solo
 test("se Wikidot non risponde, rifiutare resta su Wikidot senza contattare Open5e", async () => {
   const user = userEvent.setup();
   handlers.wikidot_search = () => {
-    throw Error(
-      "Wikidot non raggiungibile. Controlla la connessione e riprova.",
-    );
+    throw Error("Wikidot not reachable. Check the connection and try again.");
   };
   render(<WikiWorkspace />);
-  await user.type(await screen.findByLabelText("Nome nella wiki"), "magic");
-  await user.click(screen.getByRole("button", { name: "Cerca su Wikidot" }));
+  await user.type(await screen.findByLabelText("Name in the wiki"), "magic");
+  await user.click(screen.getByRole("button", { name: "Search Wikidot" }));
   const dialog = await screen.findByRole("alertdialog");
   expect(dialog).toHaveTextContent(
-    "Wikidot non ha fornito le informazioni. Vuoi usare Open5e?",
+    "Wikidot did not provide the information. Do you want to use Open5e?",
   );
-  expect(dialog).toHaveTextContent("Wikidot non raggiungibile");
+  expect(dialog).toHaveTextContent("Wikidot not reachable");
   expect(
-    screen.getByRole("button", { name: "Usa Open5e e salva la scelta" }),
+    screen.getByRole("button", { name: "Use Open5e and save the choice" }),
   ).toHaveFocus();
-  await user.click(screen.getByRole("button", { name: "Resta su Wikidot" }));
+  await user.click(screen.getByRole("button", { name: "Stay on Wikidot" }));
   expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   expect(calls("save_wiki_provider")).toHaveLength(0);
   expect(calls("read_wiki_cache")).toHaveLength(0);
   expect(fetchMock).not.toHaveBeenCalled();
-  expect(screen.getByText(/Fonte attiva: Wikidot/)).toBeVisible();
+  expect(screen.getByText(/Active source: Wikidot/)).toBeVisible();
   // Escape is a refusal too, and a retry stays on Wikidot.
-  await user.click(screen.getByRole("button", { name: "Cerca su Wikidot" }));
+  await user.click(screen.getByRole("button", { name: "Search Wikidot" }));
   await screen.findByRole("alertdialog");
-  await user.click(screen.getByRole("button", { name: "Riprova su Wikidot" }));
+  await user.click(screen.getByRole("button", { name: "Try Wikidot again" }));
   await screen.findByRole("alertdialog");
   expect(calls("wikidot_search")).toHaveLength(3);
   await user.keyboard("{Escape}");
@@ -160,18 +158,18 @@ test("accettare salva Open5e e ripete una sola volta la ricerca, senza ciclo di 
   fetchMock.mockRejectedValue(Error("offline"));
   render(<WikiWorkspace />);
   await user.type(
-    await screen.findByLabelText("Nome nella wiki"),
+    await screen.findByLabelText("Name in the wiki"),
     "zzz unknown",
   );
-  await user.click(screen.getByRole("button", { name: "Cerca su Wikidot" }));
+  await user.click(screen.getByRole("button", { name: "Search Wikidot" }));
   expect(await screen.findByRole("alertdialog")).toHaveTextContent(
-    "Nessuna voce corrisponde",
+    "No entry matches",
   );
   await user.click(
-    screen.getByRole("button", { name: "Usa Open5e e salva la scelta" }),
+    screen.getByRole("button", { name: "Use Open5e and save the choice" }),
   );
   expect(calls("save_wiki_provider")[0][1]).toEqual({ provider: "open5e" });
-  expect(await screen.findByText(/Fonte attiva: Open5e/)).toBeVisible();
+  expect(await screen.findByText(/Active source: Open5e/)).toBeVisible();
   await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   expect(String(fetchMock.mock.calls[0][0])).toContain("query=zzz%20unknown");
   // Open5e failing too shows an error, never another provider proposal.

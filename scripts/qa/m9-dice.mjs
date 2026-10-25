@@ -97,7 +97,7 @@ async function all(campaignId) {
 }
 async function openDice() {
   await page.reload();
-  await page.getByRole("button", { name: "Tiradadi", exact: true }).click();
+  await page.getByRole("button", { name: "Dice roller", exact: true }).click();
   await page.locator(".dice-composer").waitFor();
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => document.fonts.ready);
@@ -125,7 +125,7 @@ async function compareDetails(roll) {
   await detail.locator("summary").click();
   for (const group of roll.groups) {
     const values = await detail
-      .getByRole("list", { name: `Risultati d${group.sides}`, exact: true })
+      .getByRole("list", { name: `d${group.sides} results`, exact: true })
       .getByRole("listitem")
       .allTextContents();
     assert.deepEqual(values.map(Number), group.values);
@@ -143,11 +143,13 @@ async function rollUi(selections, { capture = false, skip = false } = {}) {
   for (const selection of selections)
     await page
       .getByRole("spinbutton", {
-        name: `Quantità d${selection.sides}`,
+        name: `Number of d${selection.sides}`,
         exact: true,
       })
       .fill(String(selection.quantity));
-  await page.getByRole("button", { name: "Tira i dadi", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Roll the dice", exact: true })
+    .click();
   await expect
     .poll(() => page.locator(".dice-scene").getAttribute("data-roll-id"))
     .not.toBe(previous);
@@ -160,7 +162,7 @@ async function rollUi(selections, { capture = false, skip = false } = {}) {
   }
   if (skip)
     await page
-      .getByRole("button", { name: "Salta animazione", exact: true })
+      .getByRole("button", { name: "Skip animation", exact: true })
       .click();
   await expect(scene).toHaveAttribute("data-phase", "finished", {
     timeout: 6000,
@@ -174,7 +176,10 @@ async function rollUi(selections, { capture = false, skip = false } = {}) {
   );
   for (const sides of [4, 6, 8, 10, 12, 20, 100])
     await expect(
-      page.getByRole("spinbutton", { name: `Quantità d${sides}`, exact: true }),
+      page.getByRole("spinbutton", {
+        name: `Number of d${sides}`,
+        exact: true,
+      }),
     ).toHaveValue("0");
   const shown = await scene.locator(".thrown-die").evaluateAll((nodes) =>
     nodes.map((node) => ({
@@ -265,7 +270,7 @@ if (phase === "check") {
   const reduced = await rollUi([{ sides: 100, quantity: 1 }]);
   await expect(
     page.getByText(
-      "Movimento ridotto: risultati mostrati senza rotolamento, fiamme o scorrimento dei numeri.",
+      "Reduced motion: results shown without rolling, flames or scrolling numbers.",
       { exact: true },
     ),
   ).toBeVisible();
@@ -274,15 +279,17 @@ if (phase === "check") {
   await page
     .getByRole("spinbutton", { name: "Quantità d8", exact: true })
     .fill("2");
-  await page.getByRole("button", { name: "Tira i dadi", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Roll the dice", exact: true })
+    .click();
   await expect
     .poll(() => page.locator(".dice-scene").getAttribute("data-roll-id"))
     .not.toBe(reduced.id);
   const interrupted = await page
     .locator(".dice-scene")
     .getAttribute("data-roll-id");
-  await page.getByRole("button", { name: "Riepilogo", exact: true }).click();
-  await page.getByRole("button", { name: "Tiradadi", exact: true }).click();
+  await page.getByRole("button", { name: "Overview", exact: true }).click();
+  await page.getByRole("button", { name: "Dice roller", exact: true }).click();
   await page.locator(".dice-history-list").waitFor();
   assert((await all(campaign.id)).some((r) => r.id === interrupted));
   // Idempotent retry and invalid payloads exercise real commands, not a mock transport.
@@ -336,17 +343,17 @@ if (phase === "check") {
   for (
     let pages = 0;
     await page
-      .getByRole("button", { name: "Carica tiri precedenti", exact: true })
+      .getByRole("button", { name: "Load earlier rolls", exact: true })
       .count();
     pages++
   ) {
     assert(pages < 20);
     await page
-      .getByRole("button", { name: "Carica tiri precedenti", exact: true })
+      .getByRole("button", { name: "Load earlier rolls", exact: true })
       .click();
     await expect(
       page.getByRole("button", {
-        name: "Apertura dello storico…",
+        name: "Opening history…",
         exact: true,
       }),
     ).toHaveCount(0);
@@ -452,17 +459,17 @@ if (phase === "check") {
     });
     assert.equal((await all(campaign.id)).length, report.count + 1);
     await page
-      .getByRole("button", { name: "Backup e ripristino", exact: true })
+      .getByRole("button", { name: "Backup and restore", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "Seleziona backup", exact: true })
+      .getByRole("button", { name: "Select backup", exact: true })
       .click();
     await page.getByRole("alertdialog").waitFor();
     await page
-      .getByRole("button", { name: "Sostituisci archivio", exact: true })
+      .getByRole("button", { name: "Replace archive", exact: true })
       .click();
     await page
-      .getByRole("region", { name: "Ripristino completato", exact: true })
+      .getByRole("region", { name: "Restore completed", exact: true })
       .waitFor();
   }
   assert.equal((await all(campaign.id)).length, report.count);

@@ -1,112 +1,112 @@
-# Adattatori di regolamento
+# Adjustment Adapters
 
-M5 e la sua estensione salvano valori manuali. `systemId` è un'etichetta libera, non seleziona un motore
-di gioco. Scheda, risorse, inventario e capacità rimangono utilizzabili offline
-con qualunque etichetta. Nessun testo commerciale è incluso.
+M5 and its extension save manual values. `systemId` is a free label, it does not select a game
+sheet, resources, inventory, and capabilities remain usable offline
+with any label. No commercial text is included.
 
-Il contratto locale è `RulesetAdapter` in `src/features/player/rulesets.ts`:
+The local contract is `RulesetAdapter` in `src/features/player/rulesets.ts`:
 
-- `id`, `label` e `mode` descrivono l'adattatore.
-- `derive(character)` è una funzione pura: può proporre statistiche derivate da
-  una scheda letta come immutabile. Il risultato è separato dai valori manuali.
-- L'unico adattatore disponibile, `generic`, restituisce nessuna derivazione.
-  Un identificatore sconosciuto usa lo stesso comportamento manuale.
+- `id`, `label`, and `mode` describe the adapter.
+- `derive(character)` is a pure function: it can propose statistics derived from
+  a sheet read as immutable. The result is separated from manual values.
+- The only available adapter, `generic`, returns no derivation.
+  An unknown identifier uses the same manual behavior.
 
-Per aggiungere un adattatore futuro servono requisiti espliciti del sistema,
-licenza delle fonti, test delle formule e registrazione locale nel resolver.
-Non introdurre sostituzioni silenziose dei valori salvati o automazioni di
-riposo/consumo. L'unica eccezione di rete approvata è il catalogo SRD qui sotto,
-avviato esplicitamente dall'utente. La validazione di persistenza in Rust
-rimane obbligatoria anche con un adattatore frontend.
+To add a future adapter, explicit system requirements are needed,
+source licensing, formula testing, and local registration in the resolver.
+Do not introduce silent replacements of saved values or rest/consumption
+automations. The only approved network exception is the SRD catalog below,
+explicitly initiated by the user. Persistence validation in Rust
+remains mandatory even with a frontend adapter.
 
-I marcatori conosciuta/preparata sono indipendenti. Non consumano risorse quando
-cambiano e non verificano requisiti di classe, livello o preparazione. Risorse e
-slot sono contatori configurabili della scheda; PF e contatori usano interi
-da zero al massimo scelto, entro il limite tecnico di un milione.
+Known/prepared markers are independent. They do not consume resources when
+they change and do not verify class, level, or preparation requirements. Resources and
+slots are configurable sheet counters; PF and counters use integers
+from zero to the chosen maximum, within the technical limit of one million.
 
-La prima versione gestisce un personaggio per campagna. I suoi UUID e quelli
-di statistiche/risorse restano stabili durante le modifiche. Eventuali estensioni
-multi-personaggio dovranno migrare il vincolo, preservando proprietà e riferimenti.
+The first version handles one character per campaign. Its UUIDs and those
+of statistics/resources remain stable during changes. Any multi-character
+extensions must migrate the constraint, preserving properties and references.
 
-## Scheda ispirata al riferimento dell'utente
+## Sheet inspired by user reference
 
-Le quattro pagine del PDF guidano i campi di combattimento, identità/competenze,
-equipaggiamento/valori e magia. Non vengono copiati logo, grafica o testi personali.
-“Aggiungi campi D&D 2014” aggiunge solo le etichette mancanti di sei caratteristiche,
-sei tiri salvezza e diciotto abilità; conserva UUID e valori esistenti. Modificatori,
-competenza/maestria, armatura, iniziativa, dadi vita, ispirazione, tiri contro morte,
-resistenze, sensi, armi/munizioni, biografia, monete e magia sono manuali.
-“Aggiungi slot 1°–9°” inserisce contatori mancanti a zero; imposta tu i massimi.
-Collocazione degli oggetti libera; nessuna somma pesi, valuta o applicazione di bonus.
+The four pages of the PDF guide the combat fields, identity/skills,
+equipment/values, and magic. No logo, graphics, or personal texts are copied.
+“Add D&D fields 2014” only adds the missing labels of six characteristics,
+six saving throws, and eighteen skills; it preserves existing UUIDs and values. Modifiers,
+proficiency/mastery, armor, initiative, hit dice, inspiration, death saves,
+resistances, senses, weapons/ammo, biography, coins, and magic are manual.
+“Add slots 1°–9°” inserts missing counters at zero; set the maximums yourself.
+Free object placement; no weight sums, currency, or bonus application.
 
-## Catalogo D&D SRD 2014
+## D&D SRD Catalog 2014
 
-- Fonte: [D&D 5e API](https://docs.dnd5eapi.co/introduction), endpoint fisso
-  `https://www.dnd5eapi.co/api/2014/`. API pubblica GET-only, senza account.
-- [Lingue](https://docs.dnd5eapi.co/reference/multilingual): verifica reale del
-  23 ottobre 2026 su `/api/2014/locales`: fr-FR, pt-BR, ru; nessun italiano.
-  Interfaccia italiana e contenuti API in inglese; cercare nomi inglesi.
-- Aprire il catalogo non effettua rete. Cerca carica l'indice, il nome e livello
-  filtrano localmente; un clic carica il dettaglio. Aggiorna forza il GET online.
-  Il nome personalizzato digitato non viene inviato: solo categoria e indice SRD.
-- Timeout 10 secondi, 2 MiB/risposta, niente credenziali/redirect, CSP con un solo
-  host remoto. Testi resi come testo React, senza HTML remoto eseguito.
-- Rust valida e persiste le risposte in SQLite, con massimo 150 voci. Le copie
-  locali mostrano data e provenienza; aggiornamento fallito ripiega sulla copia
-  disponibile con avviso. Una voce mai consultata richiede connessione.
-- “Usa questi dati nel modulo” propone un incantesimo: nome, livello, scuola,
-  tempo, durata, portata, componenti, materiali, testo ai livelli superiori,
-  rituale e concentrazione. Poi Salva voce. Conosciuta/preparata restano manuali.
-- Da un incantesimo personalizzato puoi cercare lo stesso nome o cambiarlo nel
-  catalogo. Usare un risultato sostituisce i campi esplicitamente; preserva note,
-  marcatori e collegamenti del modulo. Puoi rinominare e modificare il risultato.
-  Nessuna ricerca automatica/riscrittura e nessun caricamento di homebrew nell'API.
-- Gli incantesimi salvati sono copie indipendenti dalla cache. Il riferimento
-  originale `catalogSource` rimane dopo le modifiche; provenienza di campagna e
-  fonte SRD sono distinti e non creano archi fattuali del grafo.
-- Migrazione 006 additiva e default per JSON M5. Backup include nuovi campi,
-  incantesimi e cache, conservando il formato `.nodex`; per leggerli serve schema
-  006 o successivo. I backup precedenti sono ancora ripristinabili.
+- Source: [D&D 5e API](https://docs.dnd5eapi.co/introduction), fixed endpoint
+  `https://www.dnd5eapi.co/api/2014/`. Public GET-only API, no account.
+- [Languages](https://docs.dnd5eapi.co/reference/multilingual): actual verification of
+  23 October 2026 on `/api/2014/locales`: fr-FR, pt-BR, ru; no Italian.
+  Italian interface and API content in English; search for English names.
+- Opening the catalog does not perform a network request. Search loads the index, and name and level
+  filter locally; a click loads the detail. Update forces the online GET.
+  The typed custom name is not sent: only category and SRD index.
+- Timeout 10 seconds, 2 MiB/response, no credentials/redirect, CSP with a single
+  remote host. Returned texts are React text, without executed remote HTML.
+- Rust validates and persists responses in SQLite, with a maximum of 150 entries. Local copies
+  show date and provenance; failed update falls back to the available copy
+  with a warning. An entry never consulted requires a connection.
+- “Use this data in the module” proposes a spell: name, level, school,
+  time, duration, range, components, materials, higher-level text,
+rituals and concentration. Then Save voice. Known/prepared remain manuals.
+- From a custom spell you can search for the same name or change it in the
+catalog. Using a result explicitly replaces fields; preserves notes,
+markers, and module links. You can rename and modify the result.
+No automatic search/rewriting and no homebrew loading in the API.
+- Saved spells are independent copies from the cache. The original reference
+`catalogSource` remains after changes; campaign provenance and
+SRD source are distinct and do not create factual arcs in the graph.
+- Additive and default 006 migration for JSON M5. Backup includes new fields,
+spells, and cache, preserving the `.nodex` format; to read them, schema
+006 or later is required. Previous backups are still restorable.
 
-## Fonti e attribuzione
+## Sources and attribution
 
-Il catalogo contiene il sottoinsieme SRD, non tutti i manuali commerciali.
-Il codice API è MIT; i dati sono materiale SRD. Si usa SRD 5.1 sotto CC BY 4.0,
-come consentito dalla [fonte Wizards](https://www.dndbeyond.com/srd) e dal
-[preambolo SRD 5.1](https://media.dndbeyond.com/compendium-images/srd/5.1/SRD_CC_v5.1.pdf).
-L'app mostra l'attribuzione prescritta e il riferimento originale in anteprima,
-nel modulo e nel dettaglio delle copie importate. Nessun catalogo viene incluso
-nel codice sorgente; il download è su richiesta. Le modifiche sono indicate come
-copie personali modificabili. Non confondere la licenza software con quella dei dati.
+The catalog contains the SRD subset, not all commercial manuals.
+The API code is MIT; the data is SRD material. SRD 5.1 is used under CC BY 4.0,
+as permitted by the [Wizards](https://www.dndbeyond.com/srd) source and the
+[SRD 5.1](https://media.dndbeyond.com/compendium-images/srd/5.1/SRD_CC_v5.1.pdf) preamble.
+The app shows the prescribed attribution and the original reference in preview,
+in the module and in the detail of imported copies. No catalog is included
+in the source code; download is upon request. Changes are indicated as
+editable personal copies. Do not confuse the software license with the data license.
 
-Skill applicate: PDF per lettura visiva/estrazione del riferimento; frontend-design
-per sezioni e gerarchia coerenti; vercel-react-best-practices per caricamento
-differito del compendio e filtri derivati senza richieste a ogni tasto.
+Skills applied: PDF for visual reading/reference extraction; frontend-design
+for coherent sections and hierarchy; vercel-react-best-practices for deferred loading
+of the compendium and derived filters without requests on every key.
 
-## Provenienza di immagini e schede importate
+## Provenance of images and imported sheets
 
-Le fotografie di Oran sono riferimenti privati conservati integralmente nei
-backup, non un ruleset. La trascrizione è parziale e manuale; i valori dubbi e
-quelli mancanti vanno verificati sulle foto. Nessuna formula o descrizione
-commerciale viene ricostruita. Gli incantesimi personali rimangono modificabili
-con la ricerca SRD esplicita disponibile; la conversione Logseq non invia dati
-all’API e non crea fatti nel grafo.
-
-
-## Wiki multi-fonte e futura AI
-
-Wiki D&D usa Open5e v2 per consultazione esplicita con fonte/edizione/licenze.
-Non converte una descrizione di regole in un fatto della campagna e non
-sovrascrive homebrew o importazioni SRD 2014 esistenti. Le risposte possono
-provenire da editori/edizioni differenti: restano voci separate, prevalentemente
-in inglese. La cache è locale, limitata e compresa nel backup schema 011.
-M7 è soltanto pianificata: modello specifico D&D da valutare, retrieval sulle
-fonti selezionate, edizioni separate e nessuna formula applicata automaticamente.
-Vedere docs/AI_LOCAL.md; nessun runtime o modello è stato eseguito.
+Oran's photographs are private references kept entirely in the
+backups, not a ruleset. The transcription is partial and manual; doubtful values and
+missing ones must be verified on the photos. No commercial formula or description
+is reconstructed. Personal spells remain editable
+with explicit SRD search available; the Logseq conversion does not send data
+to the API and does not create facts in the graph.
 
 
-### M10 — lingua dell’interfaccia e delle fonti
+## Multi-source Wiki and future AI
 
-Le etichette UI si localizzano; nomi/regole/importazioni, edizione e provenienza
-restano originali. Non tradurre query API, identificatori o valori persistiti dei
-preset per cambiare lingua. Scelte, bozze e limiti: I18N.md.
+D&D Wiki uses Open5e v2 for explicit consultation with source/edition/licenses.
+It does not convert a rules description into a campaign fact and does not
+overwrite existing homebrew or SRD 2014 imports. Responses can
+come from different publishers/editions: they remain separate entries, predominantly
+in English. The cache is local, limited, and compressed in the 011 schema backup.
+M7 is only planned: specific D&D model to be evaluated, retrieval on
+selected sources, separate editions, and no formula applied automatically.
+See docs/AI_LOCAL.md; no runtime or model has been executed.
+
+
+### M10 — interface and source language
+
+UI labels are localized; names/rules/imports, edition, and provenance
+remain original. Do not translate API queries, identifiers, or persisted values of the
+presets to change language. Choices, drafts, and limits: I18N.md.

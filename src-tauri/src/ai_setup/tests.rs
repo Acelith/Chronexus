@@ -129,7 +129,7 @@ async fn verified_archive_installs_atomically_and_bad_ones_leave_nothing() {
     )
     .await
     .unwrap_err();
-    assert!(error.contains("impronta"), "{error}");
+    assert!(error.contains("digest"), "{error}");
     worker.join().unwrap();
     assert!(!managed_installed(root.path()));
     assert_eq!(fs::read_dir(base_dir(root.path())).unwrap().count(), 0);
@@ -147,7 +147,7 @@ async fn verified_archive_installs_atomically_and_bad_ones_leave_nothing() {
     )
     .await
     .unwrap_err()
-    .contains("reindirizzato"));
+    .contains("redirected"));
     worker.join().unwrap();
     // Good archive with an allowed same-origin redirect.
     let (base, worker) = server(vec![
@@ -183,7 +183,7 @@ async fn verified_archive_installs_atomically_and_bad_ones_leave_nothing() {
     )
     .await
     .unwrap_err()
-    .contains("esiste già"));
+    .contains("already exists"));
     // Removal is limited to the receipt-backed managed folder.
     let state = State::default();
     remove_runtime(root.path(), &state).unwrap();
@@ -230,7 +230,7 @@ async fn hostile_archives_and_cancellation_are_rejected() {
     )
     .await
     .unwrap_err()
-    .contains("annullato"));
+    .contains("cancelled"));
     assert_eq!(fs::read_dir(base_dir(root.path())).unwrap().count(), 0);
 }
 fn show_for(digest: &str) -> Vec<u8> {
@@ -277,7 +277,7 @@ async fn pull_streams_progress_and_reports_ready_only_for_qualified_weights() {
     assert!(pull(&base, "primary", &CancellationToken::new(), |_| {})
         .await
         .unwrap_err()
-        .contains("qualificati"));
+        .contains("qualified"));
     worker.join().unwrap();
     // Cloud not disabled: no pull request is sent at all.
     let (base, worker) = server(vec![json_ok(
@@ -335,5 +335,5 @@ async fn status_never_downloads_and_handles_a_stopped_runtime() {
     assert!(start(root.path(), &State::default(), &base)
         .await
         .unwrap_err()
-        .contains("Installa"));
+        .contains("Install"));
 }

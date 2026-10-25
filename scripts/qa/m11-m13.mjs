@@ -50,7 +50,7 @@ const campaign =
   campaigns[0] ?? (await call("create_campaign", { name: "Collaudo M11-M13" }));
 await call("save_interface_preferences", { preferences: plain });
 await page.reload();
-await page.getByRole("button", { name: "Tiradadi", exact: true }).click();
+await page.getByRole("button", { name: "Dice roller", exact: true }).click();
 let saved = [];
 let before = null;
 do {
@@ -98,16 +98,16 @@ const mixed = await call("roll_dice", {
 });
 saved.push(mixed);
 await page.reload();
-await page.getByRole("button", { name: "Tiradadi", exact: true }).click();
+await page.getByRole("button", { name: "Dice roller", exact: true }).click();
 await expect(page.locator(".dice-history-list li").first()).toBeVisible();
 while (
   await page
-    .getByRole("button", { name: "Carica tiri precedenti", exact: true })
+    .getByRole("button", { name: "Load earlier rolls", exact: true })
     .count()
 ) {
   const count = await page.locator(".dice-history-list li").count();
   await page
-    .getByRole("button", { name: "Carica tiri precedenti", exact: true })
+    .getByRole("button", { name: "Load earlier rolls", exact: true })
     .click();
   await expect
     .poll(() => page.locator(".dice-history-list li").count())
@@ -117,7 +117,7 @@ async function review(roll) {
   const li = page.locator(`.dice-history-list li[data-roll-id="${roll.id}"]`);
   await li.locator("summary").click();
   await li
-    .getByRole("button", { name: "Mostra nel cerchio", exact: true })
+    .getByRole("button", { name: "Show in the circle", exact: true })
     .click();
   await expect(page.locator(".dice-scene")).toHaveAttribute(
     "data-roll-id",
@@ -133,7 +133,7 @@ for (const t of targets) {
   );
   await page
     .getByRole("button", {
-      name: "Rivedi animazione del tiro salvato",
+      name: "Replay the animation of the saved roll",
       exact: true,
     })
     .click();
@@ -153,7 +153,7 @@ for (const t of targets) {
     await page.screenshot({ path: `${out}/dragons-${t.outcome}.png` });
   }
   await page
-    .getByRole("button", { name: "Salta animazione", exact: true })
+    .getByRole("button", { name: "Skip animation", exact: true })
     .click();
   await expect(page.locator(".living-dragon")).toHaveCount(0);
   result.push({
@@ -172,7 +172,7 @@ await page.emulateMedia({ reducedMotion: "reduce" });
 await review(targets[0].roll);
 await page
   .getByRole("button", {
-    name: "Rivedi animazione del tiro salvato",
+    name: "Replay the animation of the saved roll",
     exact: true,
   })
   .click();
@@ -198,9 +198,7 @@ for (const r of saved)
 const dataHash = createHash("sha256")
   .update(JSON.stringify([...all].sort((a, b) => a.id.localeCompare(b.id))))
   .digest("hex");
-await page
-  .getByRole("button", { name: "Impostazioni dell’app", exact: true })
-  .click();
+await page.getByRole("button", { name: "App settings", exact: true }).click();
 const alphabet =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 !?";
 for (const script of ["espruar", "dethek"]) {
@@ -224,7 +222,7 @@ for (const script of ["espruar", "dethek"]) {
   );
   assert(loaded);
   await page
-    .getByRole("button", { name: "Prepara pacchetto reversibile", exact: true })
+    .getByRole("button", { name: "Prepare reversible package", exact: true })
     .click();
   const packet = await page
     .locator(".transcription-preview textarea")
@@ -235,7 +233,7 @@ for (const script of ["espruar", "dethek"]) {
   await selector.fill("changed");
   await page
     .getByRole("button", {
-      name: "Ripristina originale dal pacchetto",
+      name: "Restore original from package",
       exact: true,
     })
     .click();
@@ -249,9 +247,7 @@ assert.equal(
   JSON.stringify(axe.violations.map((v) => v.id)),
 );
 await page.reload();
-await page
-  .getByRole("button", { name: "Impostazioni dell’app", exact: true })
-  .click();
+await page.getByRole("button", { name: "App settings", exact: true }).click();
 await expect(page.locator(".language-settings select").nth(1)).toHaveValue(
   "dethek",
 );
@@ -260,9 +256,7 @@ await client.send("Network.enable");
 await client.send("Network.setCacheDisabled", { cacheDisabled: true });
 await page.route(/(Espruar|Dethek).*\.otf/, (r) => r.abort());
 await page.reload();
-await page
-  .getByRole("button", { name: "Impostazioni dell’app", exact: true })
-  .click();
+await page.getByRole("button", { name: "App settings", exact: true }).click();
 await page.locator(".transcription-preview textarea").first().fill("Oran");
 await expect(
   page.locator(".transcription-sample .script-original"),

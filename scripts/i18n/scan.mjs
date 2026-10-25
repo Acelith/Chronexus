@@ -1,6 +1,13 @@
 import ts from "typescript";
 import { readdir, readFile, writeFile, mkdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
+// Preserve published message IDs when changing the source language.
+const existing = JSON.parse(
+  await readFile("src/i18n/catalogs/en.json", "utf8"),
+);
+const stableIds = new Map(
+  Object.entries(existing).map(([id, text]) => [text.trim(), id]),
+);
 export function human(s) {
   s = s.trim().replace(/\{\d+\}/g, "x");
   return (
@@ -21,6 +28,7 @@ export function human(s) {
 }
 export function idFor(source) {
   return (
+    stableIds.get(source.trim()) ??
     "m_" + createHash("sha256").update(source.trim()).digest("hex").slice(0, 12)
   );
 }
@@ -88,7 +96,7 @@ if (
           "Ollama",
           "D&D 2014",
           "D&D 2024",
-          "menziona",
+          "mentions",
         ].includes(s))
     )
       return;
@@ -121,6 +129,7 @@ if (
     walk(ast);
   }
   // Error catalog candidates only; never change Rust or translate arbitrary campaign data.
+  // English is the source language: catalogs map these ids to other locales.
   async function rust(dir) {
     for (const e of await readdir(dir, { withFileTypes: true })) {
       const p = dir + "/" + e.name;
@@ -135,6 +144,13 @@ if (
           } catch {
             continue;
           }
+          // Model prompts and their answer sentinels are not interface text.
+          if (
+            /^(You are the assistant|Translate the supplied|Non risulta dalle fonti)/.test(
+              s,
+            )
+          )
+            continue;
           if (
             /^[A-ZÀ-ÿ][a-zà-ÿ]/.test(s) &&
             s.includes(" ") &&
@@ -159,7 +175,7 @@ if (
   await rust("src-tauri/src");
   await mkdir("src/i18n/catalogs", { recursive: true });
   await writeFile(
-    "src/i18n/catalogs/it.json",
+    "src/i18n/catalogs/en.json",
     JSON.stringify(
       Object.fromEntries(Object.entries(sources).sort()),
       null,
@@ -168,5 +184,5 @@ if (
   );
   await mkdir(".tools/m10", { recursive: true });
   await writeFile(".tools/m10/origins.json", JSON.stringify(origins, null, 2));
-  console.log(Object.keys(sources).length + " messaggi candidati");
+  console.log(Object.keys(sources).length + " candidate messages");
 }

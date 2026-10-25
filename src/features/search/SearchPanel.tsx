@@ -13,12 +13,12 @@ export interface SearchResult {
   updatedAt: string;
 }
 const kinds = localizeLabels({
-  session: "Sessioni",
-  page: "Pagine",
-  character: "Personaggio",
-  item: "Oggetti",
-  spell: "Incantesimi",
-  ability: "Capacità",
+  session: "Sessions",
+  page: "Pages",
+  character: "Character",
+  item: "Items",
+  spell: "Spells",
+  ability: "Abilities",
 });
 export default function SearchPanel({
   campaignId,
@@ -91,38 +91,38 @@ export default function SearchPanel({
         ref={dialog}
         role="dialog"
         aria-modal="true"
-        aria-label={tr("Cerca nella campagna")}
+        aria-label={tr("Search the campaign")}
         className="search-panel"
         onKeyDown={keyboard}
       >
         <header className="player-heading">
           <h2>
-            <Text source={"Cerca nella campagna"} />
+            <Text source={"Search the campaign"} />
           </h2>
           <button onClick={onClose}>
-            <Text source={"Chiudi ricerca"} />
+            <Text source={"Close search"} />
           </button>
         </header>
         <label>
-          <Text source={"Testo da cercare"} />
+          <Text source={"Text to search"} />
           <input
             autoFocus
             type="search"
             maxLength={200}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={tr("Un nome, una frase o una parte di parola")}
+            placeholder={tr("A name, a phrase or part of a word")}
           />
         </label>
         <div className="player-filters">
           <label>
-            <Text source={"Cerca in"} />
+            <Text source={"Search in"} />
             <select
-              aria-label={tr("Cerca in")}
+              aria-label={tr("Search in")}
               value={kind}
               onChange={(e) => setKind(e.target.value)}
             >
-              <option value="">{tr("Tutti i contenuti")}</option>
+              <option value="">{tr("All content")}</option>
               {Object.entries(kinds).map(([k, v]) => (
                 <option key={k} value={k}>
                   {v}
@@ -131,14 +131,14 @@ export default function SearchPanel({
             </select>
           </label>
           <label>
-            <Text source={"Ordine risultati"} />
+            <Text source={"Result order"} />
             <select
-              aria-label={tr("Ordine risultati")}
+              aria-label={tr("Result order")}
               value={sort}
               onChange={(e) => setSort(e.target.value)}
             >
-              <option value="relevance">{tr("Più pertinenti")}</option>
-              <option value="recent">{tr("Modificati di recente")}</option>
+              <option value="relevance">{tr("Most relevant")}</option>
+              <option value="recent">{tr("Recently changed")}</option>
             </select>
           </label>
         </div>
@@ -149,23 +149,21 @@ export default function SearchPanel({
         ) : null}
         <p role="status">
           {loading
-            ? tr("Ricerca…")
+            ? tr("Searching…")
             : query.trim()
               ? resultCount(results.length) +
                 (results.length === 100
-                  ? tr(" (limite raggiunto: restringi la ricerca)")
+                  ? tr(" (limit reached: narrow your search)")
                   : "")
               : tr(
-                  "Cerca negli appunti, nei titoli, negli alias e nei dati del personaggio. Tutto resta sul dispositivo.",
+                  "Search notes, titles, aliases and character data. Everything stays on the device.",
                 )}
         </p>
         <div className="search-results">
           {!loading && query.trim() && !results.length && !error ? (
             <p>
               <Text
-                source={
-                  "Nessun risultato. Prova meno parole o un filtro diverso."
-                }
+                source={"No results. Try fewer words or a different filter."}
               />
             </p>
           ) : null}
@@ -176,13 +174,13 @@ export default function SearchPanel({
             >
               <span>{kinds[r.kind]}</span>
               <strong>{r.title}</strong>
-              <p>{r.preview || tr("Apri il contenuto")}</p>
+              <p>{r.preview || tr("Open content")}</p>
             </button>
           ))}
         </div>
         <details>
           <summary>
-            <Text source={"Manutenzione ricerca"} />
+            <Text source={"Search maintenance"} />
           </summary>
           <button
             disabled={loading}
@@ -191,10 +189,7 @@ export default function SearchPanel({
               command<number>("rebuild_search_index")
                 .then((count) => {
                   setNotice(
-                    tr(
-                      "Indice ricostruito: {0} voci. Gli appunti sono conservati.",
-                      [count],
-                    ),
+                    tr("Index rebuilt: {0} entries. Notes are kept.", [count]),
                   );
                   setRefresh((v) => v + 1);
                 })
@@ -202,7 +197,7 @@ export default function SearchPanel({
                 .finally(() => setLoading(false));
             }}
           >
-            <Text source={"Ricostruisci indice locale"} />
+            <Text source={"Rebuild local index"} />
           </button>
           <p role="status">{notice}</p>
         </details>

@@ -27,9 +27,7 @@ export async function command<T>(
 ): Promise<T> {
   if (!isTauri())
     throw new Error(
-      tr(
-        "Avvia Chronexus come applicazione desktop per accedere al tuo archivio locale.",
-      ),
+      tr("Start Chronexus as a desktop app to access your local archive."),
     );
   try {
     return await invoke<T>(name, payload);
@@ -38,7 +36,7 @@ export async function command<T>(
       typeof error === "string"
         ? error
         : tr(
-            "Archivio non disponibile. Verifica spazio e permessi, poi riprova.",
+            "Archive not available. Check space and permissions, then try again.",
           ),
       { cause: error },
     );
@@ -77,5 +75,5 @@ export const api = {
 export function errorMessage(error: unknown): string {
   return error instanceof Error
     ? translateError(error.message)
-    : tr("Operazione non riuscita. Riprova.");
+    : tr("Operation failed. Try again.");
 }

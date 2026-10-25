@@ -53,27 +53,27 @@ export default function Dashboard({
   return (
     <section
       className="campaign-dashboard"
-      aria-label={tr("Riepilogo della campagna")}
+      aria-label={tr("Campaign overview")}
     >
       <h3>
-        <Text source={"Il punto della campagna"} />
+        <Text source={"Campaign status"} />
       </h3>
       <dl className="dashboard-ledger">
         <div>
           <dt>
-            <Text source={"Sessioni"} />
+            <Text source={"Sessions"} />
           </dt>
           <dd>{sessions.length}</dd>
         </div>
         <div>
           <dt>
-            <Text source={"Pagine del Codex"} />
+            <Text source={"Codex pages"} />
           </dt>
           <dd>{pages.length}</dd>
         </div>
         <div>
           <dt>
-            <Text source={"Bozze da completare"} />
+            <Text source={"Drafts to complete"} />
           </dt>
           <dd>{pages.filter((p) => p.status === "stub").length}</dd>
         </div>
@@ -81,7 +81,7 @@ export default function Dashboard({
       <div className="dashboard-columns">
         <section>
           <h4>
-            <Text source={"Riprendi il diario"} />
+            <Text source={"Continue the journal"} />
           </h4>
           {last ? (
             <>
@@ -90,7 +90,7 @@ export default function Dashboard({
                 onClick={() => onSession(last)}
               >
                 <span>
-                  <Text source={"Sessione "} />
+                  <Text source={"Session "} />
                   {last.sequence}
                   {last.playedOn ? tr(" · {0}", [last.playedOn]) : ""}
                 </span>
@@ -99,7 +99,7 @@ export default function Dashboard({
                   {blockOptions(last.document)
                     .find((b) => b.text.trim())
                     ?.text.slice(0, 240) ||
-                    tr("Gli appunti della sessione sono ancora vuoti.")}
+                    tr("The session notes are still empty.")}
                 </p>
               </button>
             </>
@@ -107,19 +107,19 @@ export default function Dashboard({
             <p>
               <Text
                 source={
-                  "Il diario è vuoto. Crea la prima sessione per iniziare a prendere appunti."
+                  "The journal is empty. Create the first session to start taking notes."
                 }
               />
             </p>
           )}
           <button onClick={onNewSession}>
-            <Text source={"Nuova sessione"} />
+            <Text source={"New session"} />
           </button>
           <p className="muted">
-            <Text source={"Scorciatoia: Ctrl/⌘ + Shift + N"} />
+            <Text source={"Shortcut: Ctrl/⌘ + Shift + N"} />
           </p>
           <h4>
-            <Text source={"Il tuo personaggio"} />
+            <Text source={"Your character"} />
           </h4>
           {error ? (
             <div role="alert">
@@ -130,12 +130,12 @@ export default function Dashboard({
                   setRefresh((n) => n + 1);
                 }}
               >
-                <Text source={"Riprova scheda"} />
+                <Text source={"Retry sheet"} />
               </button>
             </div>
           ) : loading ? (
             <p role="status">
-              <Text source={"Apertura scheda…"} />
+              <Text source={"Opening sheet…"} />
             </p>
           ) : (
             <>
@@ -145,20 +145,20 @@ export default function Dashboard({
                       character.data.name,
                       character.data.vocation || character.data.systemId,
                     ])
-                  : tr("Nessun personaggio creato per questa campagna.")}
+                  : tr("No character created for this campaign.")}
               </p>
               <button onClick={onCharacter}>
-                {character ? tr("Apri scheda") : tr("Crea la scheda")}
+                {character ? tr("Open sheet") : tr("Create the sheet")}
               </button>
             </>
           )}
         </section>
         <section>
           <h4>
-            <Text source={"Pagine aggiornate di recente"} />
+            <Text source={"Recently updated pages"} />
           </h4>
           {recent.length ? (
-            <nav className="dashboard-pages" aria-label={tr("Pagine recenti")}>
+            <nav className="dashboard-pages" aria-label={tr("Recent pages")}>
               {recent.map((page) => (
                 <button key={page.id} onClick={() => onPage(page)}>
                   <span>{pageKinds[page.kind]}</span>
@@ -170,7 +170,7 @@ export default function Dashboard({
             <p>
               <Text
                 source={
-                  "Il Codex è vuoto. Crea pagine o collegamenti [[ dal diario."
+                  "The Codex is empty. Create pages or [[ links from the journal."
                 }
               />
             </p>
@@ -178,7 +178,7 @@ export default function Dashboard({
           <p className="muted">
             <Text
               source={
-                "La ricerca Ctrl/⌘ + K trova anche le parole dentro gli appunti. Ritratti e mappe si aggiungono nelle immagini di ogni voce."
+                "The Ctrl/⌘ + K search also finds words inside notes. Portraits and maps are added in each entry's images."
               }
             />
           </p>

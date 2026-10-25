@@ -74,7 +74,7 @@ impl State {
     fn lock_inner(&self) -> AppResult<std::sync::MutexGuard<'_, Inner>> {
         self.inner
             .lock()
-            .map_err(|_| "Stato aggiornamenti non disponibile. Riavvia l’app.".into())
+            .map_err(|_| "Update status not available. Restart the app.".into())
     }
     fn pending(&self, id: &str) -> AppResult<Pending> {
         self.lock_inner()?
@@ -82,7 +82,7 @@ impl State {
             .as_ref()
             .filter(|p| p.offer.id == id)
             .cloned()
-            .ok_or("Aggiornamento scaduto: controlla nuovamente la versione disponibile.".into())
+            .ok_or("Update expired: check the available version again.".into())
     }
 }
 #[derive(Clone, Serialize)]
@@ -122,7 +122,7 @@ fn client() -> AppResult<reqwest::Client> {
         .timeout(Duration::from_secs(300))
         .user_agent("Chronexus-Updater")
         .build()
-        .map_err(|_| "Connessione agli aggiornamenti non disponibile.".into())
+        .map_err(|_| "Connection to the update server not available.".into())
 }
 #[tauri::command]
 pub fn get_update_settings(app: tauri::AppHandle) -> AppResult<Overview> {
@@ -145,7 +145,7 @@ pub fn save_update_settings(app: tauri::AppHandle, settings: Settings) -> AppRes
     let _gate = state
         .gate
         .try_lock()
-        .map_err(|_| "Attendi il completamento dell’aggiornamento in corso.")?;
+        .map_err(|_| "Wait for the update in progress to finish.")?;
     network::url(&settings.endpoint)?;
     safety::write_settings(&root(&app)?, &settings)?;
     state.lock_inner()?.pending = None;
@@ -157,7 +157,7 @@ pub async fn check_app_update(app: tauri::AppHandle) -> AppResult<Option<Offer>>
     let _gate = state
         .gate
         .try_lock()
-        .map_err(|_| "È già in corso un’operazione di aggiornamento.")?;
+        .map_err(|_| "An update operation is already running.")?;
     check(&app).await
 }
 fn now() -> chrono::DateTime<chrono::Utc> {
@@ -214,7 +214,7 @@ pub async fn startup_update_check(app: tauri::AppHandle) -> AppResult<Option<Ann
                 offer: Offer {
                     id: "qa-fixture".into(),
                     version,
-                    notes: "Collaudo sintetico M15a: nessun pacchetto reale.".into(),
+                    notes: "M15a synthetic test: no real package.".into(),
                 },
                 sound: prefs.sound,
             }),
@@ -270,33 +270,32 @@ async fn check(app: &tauri::AppHandle) -> AppResult<Option<Offer>> {
         ),
     )
     .await
-    .map_err(|_| "Il server degli aggiornamenti non risponde. Riprova più tardi.")??;
+    .map_err(|_| "The update server does not respond. Try again later.")??;
     let Some(raw) = raw else { return Ok(None) };
     let mut manifest: serde_json::Value = serde_json::from_slice(&raw)
-        .map_err(|_| "Il server non ha restituito un canale aggiornamenti valido.")?;
+        .map_err(|_| "The server did not return a valid update channel.")?;
     if let Some((url, version)) = network::manifest_asset(&manifest, &endpoint)? {
         let raw = tokio::time::timeout(
             Duration::from_secs(25),
             network::fetch(&client()?, url, MAX_MANIFEST, &cancel, |_, _| {}),
         )
         .await
-        .map_err(|_| "Il manifesto aggiornamenti non risponde.")??
-        .ok_or("Manifesto aggiornamenti assente nella release.")?;
-        manifest =
-            serde_json::from_slice(&raw).map_err(|_| "Manifesto aggiornamenti non valido.")?;
+        .map_err(|_| "The update manifest does not respond.")??
+        .ok_or("Update manifest missing from the release.")?;
+        manifest = serde_json::from_slice(&raw).map_err(|_| "Invalid update manifest.")?;
         if manifest["version"]
             .as_str()
             .map(|v| v.trim_start_matches('v'))
             != Some(version.trim_start_matches('v'))
         {
-            return Err("La versione del manifesto non corrisponde alla release Forgegit.".into());
+            return Err("The manifest version does not match the Forgegit release.".into());
         }
     }
     let exit_handle = app.clone();
     let updater = app
         .updater_builder()
         .endpoints(vec![endpoint.clone()])
-        .map_err(|_| "Endpoint aggiornamenti non valido.")?
+        .map_err(|_| "Invalid update endpoint.")?
         .restart_after_install(false)
         .on_before_exit(move || {
             if let Some(server) = exit_handle.try_state::<crate::automation::Server>() {
@@ -304,15 +303,15 @@ async fn check(app: &tauri::AppHandle) -> AppResult<Option<Offer>> {
             }
         })
         .build()
-        .map_err(|_| "Configurazione della firma aggiornamenti non valida.")?;
+        .map_err(|_| "Invalid update signature configuration.")?;
     let Some(update) = updater
         .restore_update(manifest)
-        .map_err(|_| "Manifesto non valido o aggiornamento non disponibile per questo sistema.")?
+        .map_err(|_| "Invalid manifest or no update available for this system.")?
     else {
         return Ok(None);
     };
     if update.version.contains('-') {
-        return Err("Il canale stabile non accetta versioni di anteprima.".into());
+        return Err("The stable channel does not accept preview versions.".into());
     }
     network::artifact(&endpoint, &update.download_url)?;
     let offer = Offer {
@@ -344,7 +343,7 @@ pub async fn download_app_update(
     let _gate = state
         .gate
         .try_lock()
-        .map_err(|_| "È già in corso un’operazione di aggiornamento.")?;
+        .map_err(|_| "An update operation is already running.")?;
     let pending = state.pending(&id)?;
     let download_client = client()?;
     let cancel = CancellationToken::new();
@@ -365,9 +364,9 @@ pub async fn download_app_update(
     )
     .await;
     state.lock_inner()?.cancel = None;
-    let bytes = result?.ok_or("Il server non ha fornito il pacchetto di aggiornamento.")?;
+    let bytes = result?.ok_or("The server did not provide the update package.")?;
     if cancel.is_cancelled() {
-        return Err("Download annullato. La versione installata non è cambiata.".into());
+        return Err("Download cancelled. The installed version has not changed.".into());
     }
     emit(
         &events,
@@ -377,14 +376,14 @@ pub async fn download_app_update(
         None,
     );
     pending.update.verify(&bytes).map_err(|_| {
-        "Firma del pacchetto non valida o versione firmata diversa: installazione bloccata."
+        "Invalid package signature or different signed version: installation blocked."
     })?;
     state
         .lock_inner()?
         .pending
         .as_mut()
         .filter(|p| p.offer.id == id)
-        .ok_or("Aggiornamento scaduto.")?
+        .ok_or("Update expired.")?
         .bytes = Some(Arc::new(bytes));
     emit(&events, "ready", 0, None, None);
     Ok(())
@@ -399,28 +398,28 @@ pub async fn install_app_update(
     let _gate = state
         .gate
         .try_lock()
-        .map_err(|_| "È già in corso un’operazione di aggiornamento.")?;
+        .map_err(|_| "An update operation is already running.")?;
     let pending = state.pending(&id)?;
     let bytes = pending
         .bytes
-        .ok_or("Scarica e verifica prima il pacchetto.")?;
+        .ok_or("Download and verify the package first.")?;
     // Holding the AI slot prevents new inference/training during snapshot and exit.
     let handle = app.clone();
     let documents = crate::backup_folder::commands::documents(&app);
     tauri::async_runtime::spawn_blocking(move || {
-        pending.update.verify(&bytes).map_err(|_| "Il pacchetto non supera la verifica della firma.")?;
+        pending.update.verify(&bytes).map_err(|_| "The package fails signature verification.")?;
         emit(&events, "backup", 0, None, None);
         handle.state::<Database>().with_store(|store| {
             // Match the existing Store -> AI order; never wait on the AI mutex.
             let ai = handle.state::<assistant::service::State>();
-            let slot = ai.running.try_lock().map_err(|_| "Attendi la conclusione dell’operazione AI prima di aggiornare.")?;
-            if slot.is_some() { return Err("Ferma la risposta o l’addestramento AI prima di installare l’aggiornamento.".into()) }
+            let slot = ai.running.try_lock().map_err(|_| "Wait for the AI operation to finish before updating.")?;
+            if slot.is_some() { return Err("Stop the AI answer or training before installing the update.".into()) }
             // Keep the same archive lock across the snapshot and installer handoff.
             safety::before_install(store, documents.as_deref(), &pending.offer.version, |receipt, notice| {
                 let _ = events.send(Progress { phase: "install".into(), downloaded: 0, total: None, backup_path: Some(receipt.path.clone()), backup_notice: notice.map(str::to_string) });
-                pending.update.install(bytes.as_slice()).map_err(|_| format!("Installazione non avviata. Backup conservato in {}. Riprova o usa l’installer firmato manualmente.", receipt.path))?;
+                pending.update.install(bytes.as_slice()).map_err(|_| format!("Installation not started. Backup kept in {}. Try again or use the signed installer manually.", receipt.path))?;
                 Ok(receipt.path.clone())
             })
         })
-    }).await.map_err(|_| "Aggiornamento interrotto. Controlla i backup prima di riprovare.".to_string())?
+    }).await.map_err(|_| "Update interrupted. Check your backups before trying again.".to_string())?
 }

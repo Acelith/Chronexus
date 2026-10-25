@@ -41,9 +41,9 @@ pub struct Job {
     pub error: String,
 }
 fn persist(c: &Connection, job: &Job) -> AppResult<Job> {
-    let changed=c.execute("INSERT INTO campaign_ai_training(id,campaign_id,payload) VALUES(?1,?2,?3) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload WHERE campaign_ai_training.campaign_id=excluded.campaign_id",params![job.id,job.campaign_id,serde_json::to_string(job).map_err(|_|"Stato addestramento non serializzabile.")?]).map_err(storage)?;
+    let changed=c.execute("INSERT INTO campaign_ai_training(id,campaign_id,payload) VALUES(?1,?2,?3) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload WHERE campaign_ai_training.campaign_id=excluded.campaign_id",params![job.id,job.campaign_id,serde_json::to_string(job).map_err(|_|"Training status cannot be serialized.")?]).map_err(storage)?;
     if changed != 1 {
-        return Err("Identità addestramento già appartenente a un'altra campagna.".into());
+        return Err("Training identity already belongs to another campaign.".into());
     }
     Ok(job.clone())
 }
@@ -60,9 +60,7 @@ pub fn all(c: &Connection, campaign: &str) -> AppResult<Vec<Job>> {
         .collect::<rusqlite::Result<Vec<_>>>()
         .map_err(storage)?;
     raw.into_iter()
-        .map(|s| {
-            serde_json::from_str(&s).map_err(|_| "Cronologia addestramento illeggibile.".into())
-        })
+        .map(|s| serde_json::from_str(&s).map_err(|_| "Training history unreadable.".into()))
         .collect()
 }
 pub fn history(c: &Connection, campaign: &str) -> AppResult<Vec<Job>> {
@@ -73,7 +71,7 @@ pub fn recover(c: &Connection) -> AppResult<()> {
         for mut j in all(c, &campaign.id)? {
             if j.status == "running" {
                 j.status = "interrupted".into();
-                j.error = "Operazione interrotta: il modello precedente resta attivo.".into();
+                j.error = "Operation interrupted: the previous model stays active.".into();
                 persist(c, &j)?;
             }
         }
@@ -90,24 +88,23 @@ pub fn model_owned(c: &Connection, campaign: Option<&str>, model: &str) -> AppRe
             .unwrap_or("")
             .trim_end_matches(":latest");
         identifier(id)?;
-        let campaign =
-            campaign.ok_or("Gli adapter possono essere attivati soltanto dalla loro campagna.")?;
+        let campaign = campaign.ok_or("Adapters can be activated only from their own campaign.")?;
         let raw: String = c
             .query_row(
                 "SELECT payload FROM campaign_ai_training WHERE id=?1 AND campaign_id=?2",
                 params![id, campaign],
                 |r| r.get(0),
             )
-            .map_err(|_| "Questo adapter non appartiene alla campagna.")?;
-        let j: Job = serde_json::from_str(&raw).map_err(|_| "Adapter illeggibile.")?;
+            .map_err(|_| "This adapter does not belong to the campaign.")?;
+        let j: Job = serde_json::from_str(&raw).map_err(|_| "Unreadable adapter.")?;
         if j.status != "ready" || j.model != model {
-            return Err("Adapter non validato per questa campagna.".into());
+            return Err("Adapter not validated for this campaign.".into());
         }
         let p = campaign::get(c, campaign)?;
         if j.policy_hash != policy(&p)
             || j.manifest != campaign::stamps(&campaign::snapshot(c, campaign, &p)?)
         {
-            return Err("Le fonti sono cambiate: riaddestra prima di attivare questo adapter oppure scegli il modello base.".into());
+            return Err("The sources changed: retrain before activating this adapter or choose the base model.".into());
         }
     }
     Ok(())
@@ -137,7 +134,7 @@ fn worker(app: &tauri::AppHandle) -> AppResult<PathBuf> {
         Ok(app
             .path()
             .resource_dir()
-            .map_err(|_| "Risorse addestramento mancanti.")?
+            .map_err(|_| "Training resources missing.")?
             .join("ai/train.py"))
     }
 }
@@ -148,18 +145,20 @@ fn hash_cancel(
     path: &Path,
     cancel: Option<&tokio::sync::watch::Receiver<bool>>,
 ) -> AppResult<String> {
-    let meta = fs::symlink_metadata(path).map_err(|_| "File AI locale mancante.")?;
+    let meta = fs::symlink_metadata(path).map_err(|_| "Local AI file missing.")?;
     if !meta.is_file() || meta.file_type().is_symlink() {
-        return Err("File AI simbolici o speciali non consentiti.".into());
+        return Err("Symbolic or special AI files are not allowed.".into());
     }
-    let mut f = fs::File::open(path).map_err(|_| "File AI non leggibile.")?;
+    let mut f = fs::File::open(path).map_err(|_| "AI file not readable.")?;
     let mut h = Sha256::new();
     let mut buf = [0u8; 65536];
     loop {
         if cancel.is_some_and(|c| *c.borrow()) {
-            return Err("Verifica pesi annullata.".into());
+            return Err("Weight check cancelled.".into());
         }
-        let n = f.read(&mut buf).map_err(|_| "Lettura pesi interrotta.")?;
+        let n = f
+            .read(&mut buf)
+            .map_err(|_| "Weight reading interrupted.")?;
         if n == 0 {
             break;
         }
@@ -173,7 +172,7 @@ async fn hash_large(
 ) -> AppResult<String> {
     tokio::task::spawn_blocking(move || hash_cancel(&path, Some(&cancel)))
         .await
-        .map_err(|_| "Verifica pesi interrotta.")?
+        .map_err(|_| "Weight check interrupted.")?
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -219,7 +218,7 @@ pub fn overview(c: &Connection, root: &Path, campaign: &str) -> AppResult<Overvi
         jobs,
         dataset_hash,
         dataset_bytes: serde_json::to_vec(&sources)
-            .map_err(|_| "Dataset non serializzabile.")?
+            .map_err(|_| "Dataset cannot be serialized.")?
             .len(),
         sources: sources.len(),
         blocked: sources
@@ -260,7 +259,7 @@ async fn execute(
     cancel: &mut tokio::sync::watch::Receiver<bool>,
     events: &Channel<Value>,
 ) -> AppResult<Value> {
-    fs::create_dir_all(out).map_err(|_| "Spazio o permessi insufficienti per l'addestramento.")?;
+    fs::create_dir_all(out).map_err(|_| "Not enough space or permissions for training.")?;
     let mut cmd = Command::new(python(home));
     cmd.arg("-I")
         .arg("-B")
@@ -276,11 +275,11 @@ async fn execute(
         .env("TRANSFORMERS_OFFLINE", "1")
         .env("HF_HUB_DISABLE_TELEMETRY", "1")
         .env("WANDB_DISABLED", "true");
-    let log = fs::File::create(out.join("worker.log"))
-        .map_err(|_| "Impossibile creare il registro locale.")?;
+    let log =
+        fs::File::create(out.join("worker.log")).map_err(|_| "Cannot create the local log.")?;
     cmd.stdin(Stdio::null())
         .stdout(Stdio::from(
-            log.try_clone().map_err(|_| "Registro non disponibile.")?,
+            log.try_clone().map_err(|_| "Log not available.")?,
         ))
         .stderr(Stdio::from(log));
     #[cfg(windows)]
@@ -288,7 +287,7 @@ async fn execute(
         use std::os::windows::process::CommandExt;
         cmd.creation_flags(0x08000000);
     }
-    let mut child=LocalChild(cmd.spawn().map_err(|_|"Backend QLoRA locale non disponibile. Prepara l'ambiente di addestramento; nessun download automatico.")?);
+    let mut child=LocalChild(cmd.spawn().map_err(|_|"Local QLoRA backend not available. Prepare the training environment; nothing is downloaded automatically.")?);
     let started = Instant::now();
     let mut last = String::new();
     loop {
@@ -296,8 +295,7 @@ async fn execute(
             let _ = child.kill();
             let _ = child.wait();
             return Err(
-                "Operazione annullata o oltre il limite di due ore. Modello attivo invariato."
-                    .into(),
+                "Operation cancelled or over the two-hour limit. Active model unchanged.".into(),
             );
         }
         let path = out.join("status.json");
@@ -313,23 +311,22 @@ async fn execute(
         }
         if let Some(status) = child
             .try_wait()
-            .map_err(|_| "Stato del processo di addestramento non disponibile.")?
+            .map_err(|_| "Training process status not available.")?
         {
             // Observe the final atomic status after process exit, even if the
             // publication raced with the preceding progress poll.
             let final_path = out.join("status.json");
             if fs::metadata(&final_path).is_ok_and(|m| m.len() <= 16384) {
-                last = fs::read_to_string(final_path).map_err(|_| "Esito finale non leggibile.")?;
+                last = fs::read_to_string(final_path).map_err(|_| "Final result unreadable.")?;
             }
-            let value: Value = serde_json::from_str(&last).map_err(|_| {
-                "Il backend non ha prodotto un esito valido; consulta il registro locale."
-            })?;
+            let value: Value = serde_json::from_str(&last)
+                .map_err(|_| "The backend did not produce a valid result; see the local log.")?;
             if !status.success() || value["phase"] != "complete" {
                 return Err(format!(
-                    "Addestramento non completato: {}",
+                    "Training not completed: {}",
                     value["message"]
                         .as_str()
-                        .unwrap_or("errore del backend; consulta worker.log")
+                        .unwrap_or("backend error; see worker.log")
                 ));
             }
             return Ok(value);
@@ -347,9 +344,9 @@ pub async fn start(
     identifier(&id)?;
     let state = app.state::<service::State>();
     let mut cancel = {
-        let mut g = state.running.lock().map_err(|_| "Stato AI occupato.")?;
+        let mut g = state.running.lock().map_err(|_| "AI status busy.")?;
         if g.is_some() {
-            return Err("Attendi o annulla l'operazione AI in corso.".into());
+            return Err("Wait for or cancel the AI operation in progress.".into());
         }
         let (tx, rx) = tokio::sync::watch::channel(false);
         *g = Some((id.clone(), tx));
@@ -372,14 +369,14 @@ async fn run(
     let db = app.state::<Database>();
     let (generation,root,p,sources,mut j)=db.with_store(|s|{
         let v=overview(&s.connection,&s.root,campaign)?;
-        if v.dataset_hash!=expected{return Err("Le fonti sono cambiate: ricarica l'anteprima prima di riaddestrare.".into());}
-        if !v.backend_installed{return Err("Backend QLoRA locale non installato. Consulta docs/AI_TRAINING.md; nessun training simulato.".into());}
-        if v.blocked>0{return Err("Alcuni estratti contengono possibili istruzioni al modello: escludili o separali dal testo narrativo prima di addestrare.".into());}
-        if v.sources==0{return Err("Nessun estratto approvato da addestrare.".into());}
+        if v.dataset_hash!=expected{return Err("The sources changed: reload the preview before retraining.".into());}
+        if !v.backend_installed{return Err("Local QLoRA backend not installed. See docs/AI_TRAINING.md; no simulated training.".into());}
+        if v.blocked>0{return Err("Some excerpts contain possible instructions to the model: exclude them or separate them from the narrative text before training.".into());}
+        if v.sources==0{return Err("No approved excerpts to train on.".into());}
         let exists:bool=s.connection.query_row("SELECT EXISTS(SELECT 1 FROM campaign_ai_training WHERE id=?1)",[id],|r|r.get(0)).map_err(storage)?;
-        if exists{return Err("Identità addestramento già usata: ricarica prima di riprovare.".into());}
+        if exists{return Err("Training identity already used: reload before trying again.".into());}
         let p=campaign::get(&s.connection,campaign)?;
-        if !p.settings.enabled || !(p.settings.model=="gemma4:12b" || p.settings.model.starts_with("chronexus-12b-")){return Err("Seleziona e attiva prima Gemma 4 12B nelle impostazioni della campagna.".into());}
+        if !p.settings.enabled || !(p.settings.model=="gemma4:12b" || p.settings.model.starts_with("chronexus-12b-")){return Err("Select and activate Gemma 4 12B in the campaign settings first.".into());}
         let sources=campaign::snapshot(&s.connection,campaign,&p)?;
         let created_at=s.connection.query_row("SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now')",[],|r|r.get(0)).map_err(storage)?;
         let j=Job{id:id.into(),campaign_id:campaign.into(),status:"running".into(),created_at,base_digest:String::new(),weight_digest:String::new(),model:format!("chronexus-12b-{id}:latest"),digest:String::new(),manifest:campaign::stamps(&sources),policy_hash:policy(&p),adapter:String::new(),adapter_hash:String::new(),config:String::new(),config_hash:String::new(),metrics:json!({}),error:String::new()};
@@ -393,14 +390,14 @@ async fn run(
             .models
             .iter()
             .find(|m| m.name == "gemma4:12b")
-            .ok_or("Gemma 4 12B locale non installato in Ollama.")?;
+            .ok_or("Local Gemma 4 12B not installed in Ollama.")?;
         j.base_digest = base.digest.clone();
         j.weight_digest = base
             .weight_digest
             .clone()
-            .ok_or("Pesi base non verificabili.")?;
+            .ok_or("Base weights cannot be verified.")?;
         if j.weight_digest != "bb722270d54346adc198f213851dbe0207e87c3ecf2a0aff4d92262726215391" {
-            return Err("I pesi Gemma installati differiscono dalla versione qualificata per QLoRA. Richiedono una nuova valutazione.".into());
+            return Err("The installed Gemma weights differ from the version qualified for QLoRA. A new evaluation is required.".into());
         }
         let show = runtime::post(
             &client,
@@ -413,23 +410,23 @@ async fn run(
             .as_str()
             .and_then(|s| s.lines().find_map(|l| l.strip_prefix("FROM ")))
             .map(|s| PathBuf::from(s.trim_matches(['\"', '\r', ' '])))
-            .ok_or("Percorso GGUF non disponibile.")?;
+            .ok_or("GGUF path unavailable.")?;
         if !gguf.is_absolute()
             || gguf.file_name().and_then(|s| s.to_str())
                 != Some(&format!("sha256-{}", j.weight_digest))
             || show.pointer("/details/family").and_then(Value::as_str) != Some("gemma4")
         {
-            return Err("Identità o percorso base Gemma non valido.".into());
+            return Err("Invalid Gemma base identity or path.".into());
         }
         if show
             .pointer("/model_info/gemma4.block_count")
             .and_then(Value::as_u64)
             != Some(48)
         {
-            return Err("Il modello non corrisponde a Gemma 4 12B.".into());
+            return Err("The model does not match Gemma 4 12B.".into());
         }
         if hash_large(gguf.clone(), cancel.clone()).await? != j.weight_digest {
-            return Err("I byte GGUF base non corrispondono all'impronta qualificata.".into());
+            return Err("The base GGUF bytes do not match the qualified digest.".into());
         }
         for model in [&p.settings.model, "gemma4:12b"] {
             runtime::post(
@@ -441,18 +438,18 @@ async fn run(
             .await?;
         }
         let work = root.join("jobs").join(id);
-        fs::create_dir_all(&work).map_err(|_| "Cartella addestramento non disponibile.")?;
+        fs::create_dir_all(&work).map_err(|_| "Training folder unavailable.")?;
         let input = work.join("input.json");
         fs::write(
             &input,
             serde_json::to_vec(&json!({"base":root.join("hf-base"),"sources":sources}))
-                .map_err(|_| "Dataset non serializzabile.")?,
+                .map_err(|_| "Dataset cannot be serialized.")?,
         )
-        .map_err(|_| "Dataset non salvabile.")?;
+        .map_err(|_| "Cannot save the dataset.")?;
         let output = work.join("train");
         j.metrics = execute(app, &root, &input, &output, false, cancel, events).await?;
         if *cancel.borrow() {
-            return Err("Addestramento annullato.".into());
+            return Err("Training cancelled.".into());
         }
         let adapter = output.join("adapter/adapter_model.safetensors");
         let config = output.join("adapter/adapter_config.json");
@@ -464,19 +461,19 @@ async fn run(
         j.adapter_hash = hash_file(&adapter)?;
         j.config_hash = hash_file(&config)?;
         let attachment_dir = generation.join("attachments").join(campaign);
-        fs::create_dir_all(&attachment_dir).map_err(|_| "Cartella adapter non disponibile.")?;
+        fs::create_dir_all(&attachment_dir).map_err(|_| "Adapter folder unavailable.")?;
         j.adapter = format!("attachments/{campaign}/{}.safetensors", Uuid::new_v4());
         j.config = format!("attachments/{campaign}/{}.json", Uuid::new_v4());
-        fs::copy(adapter, generation.join(&j.adapter)).map_err(|_| "Adapter non salvato.")?;
+        fs::copy(adapter, generation.join(&j.adapter)).map_err(|_| "Adapter not saved.")?;
         fs::copy(config, generation.join(&j.config))
-            .map_err(|_| "Configurazione adapter non salvata.")?;
+            .map_err(|_| "Adapter configuration not saved.")?;
         let merge_input = work.join("merge.json");
         fs::write(
             &merge_input,
             serde_json::to_vec(&json!({"gguf":gguf,"adapter":output.join("adapter")}))
-                .map_err(|_| "Configurazione merge non valida.")?,
+                .map_err(|_| "Invalid merge configuration.")?,
         )
-        .map_err(|_| "Configurazione merge non salvabile.")?;
+        .map_err(|_| "Cannot save the merge configuration.")?;
         let merged = work.join("merged");
         execute(app, &root, &merge_input, &merged, true, cancel, events).await?;
         let path = merged.join("model.gguf");
@@ -484,16 +481,16 @@ async fn run(
         // Upload only to fixed loopback; the runtime already confirmed cloud-off.
         let file = tokio::fs::File::open(&path)
             .await
-            .map_err(|_| "Pesi derivati non leggibili.")?;
+            .map_err(|_| "Cannot read derived weights.")?;
         let upload = client
             .post(format!("{}/api/blobs/sha256:{merged_hash}", runtime::BASE))
             .body(reqwest::Body::wrap_stream(
                 tokio_util::io::ReaderStream::with_capacity(file, 1048576),
             ))
             .send();
-        let response = tokio::select! {r=upload=>r.map_err(|_|"Importazione locale dei pesi interrotta.")?,_=cancel.changed()=>return Err("Importazione annullata.".into())};
+        let response = tokio::select! {r=upload=>r.map_err(|_|"Importazione locale dei pesi interrotta.")?,_=cancel.changed()=>return Err("Import cancelled.".into())};
         if !response.status().is_success() {
-            return Err("Importazione dei pesi nel runtime locale non riuscita.".into());
+            return Err("Failed to import weights into the local runtime.".into());
         }
         runtime::post(&client,runtime::BASE,"/api/create",json!({"model":j.model,"files":{"model.gguf":format!("sha256:{merged_hash}")},"stream":false})).await?;
         let validated = qualify(&client, &j.model).await?;
@@ -503,13 +500,13 @@ async fn run(
             .models
             .iter()
             .find(|m| m.name == j.model)
-            .ok_or("Modello derivato non trovato.")?
+            .ok_or("Derived model not found.")?
             .digest
             .clone();
         j.status = "ready".into();
         Ok::<(), String>(())
     };
-    let work = tokio::select! {r=work=>r,_=stop.changed()=>Err("Operazione annullata. Modello attivo invariato.".into())};
+    let work = tokio::select! {r=work=>r,_=stop.changed()=>Err("Operation cancelled. Active model unchanged.".into())};
     if let Err(e) = work {
         j.status = if *cancel.borrow() {
             "cancelled"
@@ -521,7 +518,7 @@ async fn run(
     }
     db.with_store(|s| {
         if s.directory != generation {
-            return Err("Archivio cambiato: nessun risultato scritto nel nuovo profilo.".into());
+            return Err("Archive changed: no result was written to the new profile.".into());
         }
         persist(&s.connection, &j)
     })
@@ -530,29 +527,27 @@ async fn qualify(client: &reqwest::Client, model: &str) -> AppResult<Value> {
     let mut results = vec![];
     for (question, text, keyword) in [
         (
-            "Cosa dice Mirna di custodire?",
-            "Mirna dice di custodire una chiave di ottone.",
-            "ottone",
+            "What does Mirna say she keeps?",
+            "Mirna says she keeps a brass key.",
+            "brass",
         ),
+        ("Where is Neral?", "Neral is in Portoluce.", "Portoluce"),
         (
-            "Dove si trova Neral?",
-            "Neral si trova a Portoluce.",
-            "Portoluce",
-        ),
-        (
-            "Quanti fratelli ha Mirna?",
-            "Mirna dice di custodire una chiave di ottone.",
-            "Non risulta",
+            "How many siblings does Mirna have?",
+            "Mirna says she keeps a brass key.",
+            "Not found",
         ),
     ] {
-        let r=runtime::post(client,runtime::BASE,"/api/chat",json!({"model":model,"stream":false,"think":false,"keep_alive":"2m","messages":[{"role":"system","content":service::system_prompt("campaign",None)},{"role":"user","content":json!({"question":question,"sources":[{"key":"S1","text":text}]}).to_string()}],"options":{"num_ctx":4096,"num_predict":150,"num_gpu":99,"temperature":0.0}})).await?;
+        let r=runtime::post(client,runtime::BASE,"/api/chat",json!({"model":model,"stream":false,"think":false,"keep_alive":"2m","messages":[{"role":"system","content":service::system_prompt("campaign",None,None)},{"role":"user","content":json!({"question":question,"sources":[{"key":"S1","text":text}]}).to_string()}],"options":{"num_ctx":4096,"num_predict":150,"num_gpu":99,"temperature":0.0}})).await?;
         let answer = r["message"]["content"]
             .as_str()
-            .ok_or("Validazione priva di risposta.")?;
+            .ok_or("Validation produced no answer.")?;
         if !answer.to_lowercase().contains(&keyword.to_lowercase())
-            || (keyword != "Non risulta" && !answer.contains("[S1]"))
+            || (keyword != "Not found" && !answer.contains("[S1]"))
         {
-            return Err("Il modello addestrato non supera la verifica di risposte/citazioni. Non è stato attivato.".into());
+            return Err(
+                "The trained model failed the answer/citation check. It was not activated.".into(),
+            );
         }
         results.push(json!({"question":question,"answer":answer}));
     }
@@ -561,7 +556,7 @@ async fn qualify(client: &reqwest::Client, model: &str) -> AppResult<Value> {
         rows.iter()
             .any(|r| r["name"] == model && r["size_vram"].as_u64().unwrap_or(0) > 0)
     }) {
-        return Err("Validazione GPU del modello addestrato non riuscita.".into());
+        return Err("GPU validation of the trained model failed.".into());
     }
     Ok(json!({"checks":results,"gpuConfirmed":true}))
 }
@@ -569,7 +564,7 @@ pub fn activate(c: &Connection, campaign: &str, id: &str) -> AppResult<campaign:
     let j = history(c, campaign)?
         .into_iter()
         .find(|j| j.id == id)
-        .ok_or("Addestramento non trovato.")?;
+        .ok_or("Training job not found.")?;
     model_owned(c, Some(campaign), &j.model)?;
     let mut p = campaign::get(c, campaign)?;
     p.settings = store::Settings {
@@ -588,9 +583,9 @@ pub async fn activate_with_restore(
     identifier(&id)?;
     let state = app.state::<service::State>();
     let mut cancel = {
-        let mut g = state.running.lock().map_err(|_| "Stato AI occupato.")?;
+        let mut g = state.running.lock().map_err(|_| "AI status busy.")?;
         if g.is_some() {
-            return Err("Attendi o annulla l'operazione AI in corso.".into());
+            return Err("Wait for or cancel the AI operation in progress.".into());
         }
         let (tx, rx) = tokio::sync::watch::channel(false);
         *g = Some((id.clone(), tx));
@@ -603,7 +598,7 @@ pub async fn activate_with_restore(
             let j = all(&s.connection, &campaign)?
                 .into_iter()
                 .find(|j| j.id == id)
-                .ok_or("Adapter non trovato nella campagna.")?;
+                .ok_or("Adapter not found in the campaign.")?;
             model_owned(&s.connection, Some(&campaign), &j.model)?;
             validate_files(&s.connection, &s.directory)?;
             Ok((s.directory.clone(), home(&s.root), j))
@@ -624,43 +619,42 @@ pub async fn activate_with_restore(
             .await?;
             runtime::check_local(&show)?;
             if runtime::weight_digest(&show).as_deref() != Some(&job.weight_digest) {
-                return Err("Installa gli stessi pesi base Gemma 4 12B usati nell'addestramento; nessun download automatico.".into());
+                return Err("Install the same Gemma 4 12B base weights used for training; no automatic download.".into());
             }
             let gguf = show["modelfile"]
                 .as_str()
                 .and_then(|s| s.lines().find_map(|l| l.strip_prefix("FROM ")))
                 .map(|s| PathBuf::from(s.trim_matches(['\"', '\r', ' '])))
-                .ok_or("Percorso GGUF mancante.")?;
+                .ok_or("GGUF path missing.")?;
             if !gguf.is_absolute()
                 || gguf.file_name().and_then(|s| s.to_str())
                     != Some(&format!("sha256-{}", job.weight_digest))
             {
-                return Err("Percorso dei pesi base non valido.".into());
+                return Err("Invalid base weights path.".into());
             }
             if hash_large(gguf.clone(), cancel.clone()).await? != job.weight_digest {
-                return Err("I byte GGUF base non corrispondono all'impronta salvata.".into());
+                return Err("The base GGUF bytes do not match the saved digest.".into());
             }
             let work = root.join("restored").join(Uuid::new_v4().to_string());
             let adapter = work.join("adapter");
-            fs::create_dir_all(&adapter)
-                .map_err(|_| "Cartella di ricostruzione non disponibile.")?;
+            fs::create_dir_all(&adapter).map_err(|_| "Rebuild folder unavailable.")?;
             fs::copy(
                 generation.join(&job.adapter),
                 adapter.join("adapter_model.safetensors"),
             )
-            .map_err(|_| "Adapter non leggibile.")?;
+            .map_err(|_| "Cannot read the adapter.")?;
             fs::copy(
                 generation.join(&job.config),
                 adapter.join("adapter_config.json"),
             )
-            .map_err(|_| "Configurazione adapter non leggibile.")?;
+            .map_err(|_| "Cannot read the adapter configuration.")?;
             let input = work.join("input.json");
             fs::write(
                 &input,
                 serde_json::to_vec(&json!({"gguf":gguf,"adapter":adapter}))
-                    .map_err(|_| "Configurazione non valida.")?,
+                    .map_err(|_| "Invalid configuration.")?,
             )
-            .map_err(|_| "Configurazione non salvabile.")?;
+            .map_err(|_| "Cannot save the configuration.")?;
             let out = work.join("merged");
             execute(
                 &app,
@@ -676,7 +670,7 @@ pub async fn activate_with_restore(
             let hash = hash_large(path.clone(), cancel.clone()).await?;
             let file = tokio::fs::File::open(path)
                 .await
-                .map_err(|_| "Pesi derivati mancanti.")?;
+                .map_err(|_| "Derived weights missing.")?;
             let r = client
                 .post(format!("{}/api/blobs/sha256:{hash}", runtime::BASE))
                 .body(reqwest::Body::wrap_stream(
@@ -684,9 +678,9 @@ pub async fn activate_with_restore(
                 ))
                 .send()
                 .await
-                .map_err(|_| "Importazione locale non riuscita.")?;
+                .map_err(|_| "Local import failed.")?;
             if !r.status().is_success() {
-                return Err("Importazione dei pesi ricostruiti non riuscita.".into());
+                return Err("Failed to import rebuilt weights.".into());
             }
             runtime::post(&client,runtime::BASE,"/api/create",json!({"model":job.model,"files":{"model.gguf":format!("sha256:{hash}")},"stream":false})).await?;
             job.metrics["restoreValidation"] = qualify(&client, &job.model).await?;
@@ -695,22 +689,22 @@ pub async fn activate_with_restore(
                 .models
                 .iter()
                 .find(|m| m.name == job.model)
-                .ok_or("Modello ricostruito mancante.")?
+                .ok_or("Rebuilt model missing.")?
                 .digest
                 .clone();
         }
         if *cancel.borrow() {
-            return Err("Attivazione annullata.".into());
+            return Err("Activation cancelled.".into());
         }
         db.with_store(|s| {
             if s.directory != generation {
-                return Err("Archivio cambiato: attivazione annullata.".into());
+                return Err("Archive changed: activation cancelled.".into());
             }
             persist(&s.connection, &job)?;
             activate(&s.connection, &campaign, &id)
         })
     };
-    let result = tokio::select! {r=work=>r,_=stop.changed()=>Err("Attivazione annullata. Modello precedente invariato.".into())};
+    let result = tokio::select! {r=work=>r,_=stop.changed()=>Err("Activation cancelled. Previous model unchanged.".into())};
     if let Ok(mut g) = state.running.lock() {
         *g = None;
     }
@@ -726,14 +720,14 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
                 || j.manifest.len() > 4000
                 || j.error.len() > 4000
             {
-                return Err("Cronologia addestramento non valida.".into());
+                return Err("Invalid training history.".into());
             }
             for path in [&j.adapter, &j.config] {
                 if !path.is_empty()
                     && (!crate::backup::attachment_path(path)
                         || !path.starts_with(&format!("attachments/{}/", campaign.id)))
                 {
-                    return Err("Percorso adapter non valido.".into());
+                    return Err("Invalid adapter path.".into());
                 }
             }
         }
@@ -746,9 +740,7 @@ pub fn validate_files(c: &Connection, directory: &Path) -> AppResult<()> {
             if j.status == "ready" {
                 for (path, hash) in [(&j.adapter, &j.adapter_hash), (&j.config, &j.config_hash)] {
                     if hash_file(&directory.join(path))? != *hash {
-                        return Err(
-                            "Adapter mancante o modificato: backup/ripristino fermato.".into()
-                        );
+                        return Err("Adapter missing or modified: backup/restore stopped.".into());
                     }
                 }
             }

@@ -4,20 +4,20 @@ import { emptyAsset, type AbilityDetails } from "../player/api";
 
 export const wikidotBase = "https://dnd5e.wikidot.com/";
 export const wikidotCategories = localizeLabels({
-  spells: "Incantesimi",
-  feats: "Talenti",
-  species: "Specie e lignaggi",
+  spells: "Spells",
+  feats: "Feats",
+  species: "Species and lineages",
   backgrounds: "Background",
-  classes: "Classi e sottoclassi",
-  items: "Oggetti magici",
+  classes: "Classes and subclasses",
+  items: "Magic items",
 } as const);
 export type WikidotCategory = keyof typeof wikidotCategories;
 export type Origin = "published" | "ua" | "homebrew" | "unspecified";
 export const originLabels: Record<Origin, string> = localizeLabels({
-  published: "Pubblicato (secondo la wiki)",
+  published: "Published (according to the wiki)",
   ua: "Unearthed Arcana (playtest)",
   homebrew: "Homebrew",
-  unspecified: "Origine non indicata",
+  unspecified: "Origin not given",
 });
 export interface IndexRow {
   page: string;
@@ -76,13 +76,13 @@ export interface Cached<T> {
   warning: string | null;
 }
 export const missingLabels: Record<string, string> = localizeLabels({
-  level: "Livello",
-  school: "Scuola",
-  castingTime: "Tempo di lancio",
-  range: "Gittata",
-  components: "Componenti",
-  duration: "Durata",
-  description: "Descrizione",
+  level: "Level",
+  school: "School",
+  castingTime: "Casting time",
+  range: "Range",
+  components: "Components",
+  duration: "Duration",
+  description: "Description",
 });
 /** Only the category and public page names reach Wikidot; the query stays local. */
 export const wikidotApi = {
@@ -95,14 +95,12 @@ export const wikidotApi = {
 export function spellFromWikidot(entry: Entry): AbilityDetails {
   const s = entry.spell;
   if (entry.category !== "spells" || !s)
-    throw Error(
-      tr("Solo gli incantesimi possono essere importati nella scheda."),
-    );
+    throw Error(tr("Only spells can be imported into the sheet."));
   const base = emptyAsset("spell", "dnd5e-2014").details as AbilityDetails;
   const description = [
     s.description ?? "",
-    s.higherLevels ? tr("A livelli superiori") + "\n" + s.higherLevels : "",
-    s.classes ? tr("Liste di incantesimi") + "\n" + s.classes : "",
+    s.higherLevels ? tr("At higher levels") + "\n" + s.higherLevels : "",
+    s.classes ? tr("Spell lists") + "\n" + s.classes : "",
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -134,7 +132,7 @@ export function spellFromWikidot(entry: Entry): AbilityDetails {
   )
     throw Error(
       tr(
-        "Voce troppo lunga per l’importazione. Puoi consultarla e creare una voce personalizzata.",
+        "Entry too long to import. You can read it and create a custom entry.",
       ),
     );
   return fields;

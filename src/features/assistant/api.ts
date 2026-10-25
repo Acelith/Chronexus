@@ -85,6 +85,8 @@ export const assistantApi = {
       mode: string;
       edition: string | null;
       ruleKeys: string[];
+      /** Interface locale: the assistant answers in this language. */
+      locale: string;
     },
     onEvent: (e: Event) => void,
   ) => {

@@ -9,23 +9,23 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
 fn value(data: impl Serialize) -> AppResult<Value> {
-    serde_json::to_value(data).map_err(|_| "Risposta non disponibile.".into())
+    serde_json::to_value(data).map_err(|_| "Answer not available.".into())
 }
 fn text<'a>(args: &'a Value, key: &str) -> AppResult<&'a str> {
     args.get(key)
         .and_then(Value::as_str)
-        .ok_or_else(|| format!("Parametro {key} non valido."))
+        .ok_or_else(|| format!("Invalid parameter {key}."))
 }
 fn number(args: &Value, key: &str) -> AppResult<i64> {
     args.get(key)
         .and_then(Value::as_i64)
-        .ok_or_else(|| format!("Parametro {key} non valido."))
+        .ok_or_else(|| format!("Invalid parameter {key}."))
 }
 fn optional_text<'a>(args: &'a Value, key: &str) -> AppResult<Option<&'a str>> {
     match args.get(key) {
         None | Some(Value::Null) => Ok(None),
         Some(Value::String(v)) => Ok(Some(v)),
-        _ => Err(format!("Parametro {key} non valido.")),
+        _ => Err(format!("Invalid parameter {key}.")),
     }
 }
 fn optional_revision(args: &Value) -> AppResult<Option<i64>> {
@@ -58,14 +58,14 @@ fn validate_schema(schema: &Value, value: &Value) -> AppResult<()> {
             .as_array()
             .is_some_and(|items| !items.contains(value))
     {
-        return Err("Tipo o valore di un parametro non valido.".into());
+        return Err("Invalid type or value of a parameter.".into());
     }
     if let Some(object) = value.as_object() {
         if let Some(properties) = schema["properties"].as_object() {
             if schema["additionalProperties"] == false
                 && object.keys().any(|key| !properties.contains_key(key))
             {
-                return Err("Parametro sconosciuto; operazione rifiutata.".into());
+                return Err("Unknown parameter; operation refused.".into());
             }
             for (key, value) in object {
                 if let Some(schema) = properties.get(key) {
@@ -77,7 +77,7 @@ fn validate_schema(schema: &Value, value: &Value) -> AppResult<()> {
             keys.iter()
                 .any(|key| key.as_str().is_none_or(|key| !object.contains_key(key)))
         }) {
-            return Err("Manca un parametro obbligatorio.".into());
+            return Err("A required parameter is missing.".into());
         }
     }
     if let (Some(items), Some(item_schema)) = (value.as_array(), schema.get("items")) {
@@ -120,7 +120,7 @@ fn summaries(c: &Connection, campaign: &str, args: &Value, pages: bool) -> AppRe
         .transpose()?
         .unwrap_or(0);
     if !(1..=100).contains(&limit) || !(0..=1_000_000).contains(&offset) {
-        return Err("Paginazione non valida.".into());
+        return Err("Invalid pagination.".into());
     }
     let sql = if pages {
         "SELECT id,title,kind,revision FROM pages WHERE campaign_id=?1 ORDER BY title,id LIMIT ?2 OFFSET ?3"
@@ -147,12 +147,12 @@ pub(super) fn call(
     let definition = catalog["tools"]
         .as_array()
         .and_then(|items| items.iter().find(|t| t["name"] == name))
-        .ok_or("Strumento non disponibile.")?;
+        .ok_or("Tool not available.")?;
     validate_args(definition, args)?;
     let writing = definition["annotations"]["readOnlyHint"] != true;
     if name == "chronexus_reference" {
         let mut reference: Value = serde_json::from_str(include_str!("reference.json"))
-            .map_err(|_| "Riferimento non disponibile.")?;
+            .map_err(|_| "Reference not available.")?;
         reference["sheetFields"] = json!(player::SHEET_FIELDS);
         return Ok((reference, false));
     }
@@ -187,7 +187,7 @@ pub(super) fn call(
             &serde_json::from_value::<Vec<String>>(
                 args.get("aliases").cloned().unwrap_or(json!([])),
             )
-            .map_err(|_| "Alias non validi.")?,
+            .map_err(|_| "Invalid aliases.")?,
         )?)?,
         "chronexus_update_page" => {
             let old = knowledge::get_page(c, campaign, text(args, "id")?)?;
@@ -195,19 +195,19 @@ pub(super) fn call(
                 != text(args, "etag")?
             {
                 return Err(
-                    "Pagina modificata altrove: rileggila prima di aggiornare i metadati.".into(),
+                    "Page changed elsewhere: reload it before updating the metadata.".into(),
                 );
             }
-            let patch = args["patch"].as_object().ok_or("Patch non valida.")?;
+            let patch = args["patch"].as_object().ok_or("Invalid patch.")?;
             if patch.is_empty()
                 || patch
                     .keys()
                     .any(|k| !["title", "kind", "status", "aliases"].contains(&k.as_str()))
             {
-                return Err("Patch dei metadati non valida.".into());
+                return Err("Invalid metadata patch.".into());
             }
             let aliases = if let Some(v) = patch.get("aliases") {
-                serde_json::from_value(v.clone()).map_err(|_| "Alias non validi.")?
+                serde_json::from_value(v.clone()).map_err(|_| "Invalid aliases.")?
             } else {
                 old.aliases
             };
@@ -228,14 +228,14 @@ pub(super) fn call(
             let mut document = match target {
                 "session" => journal::get_session(c, campaign, id)?.document,
                 "page" => knowledge::get_page(c, campaign, id)?.document,
-                _ => return Err("Destinazione degli appunti non valida.".into()),
+                _ => return Err("Invalid notes destination.".into()),
             };
             if name == "chronexus_append_note" {
                 let note = text(args, "text")?;
                 if note.trim().is_empty() || note.len() > 200_000 || note.contains('\0') {
-                    return Err("Appunto vuoto o troppo grande (massimo 200 KB).".into());
+                    return Err("Empty or too large note (up to 200 KB).".into());
                 }
-                document["blocks"].as_array_mut().ok_or("Documento non valido.")?.push(json!({"id":uuid::Uuid::new_v4().to_string(),"type":"paragraph","props":{},"content":[{"type":"text","text":note,"styles":{}}],"children":[]}));
+                document["blocks"].as_array_mut().ok_or("Invalid document.")?.push(json!({"id":uuid::Uuid::new_v4().to_string(),"type":"paragraph","props":{},"content":[{"type":"text","text":note,"styles":{}}],"children":[]}));
             } else {
                 document = args["document"].clone();
             }
@@ -251,24 +251,24 @@ pub(super) fn call(
         "chronexus_create_character" => {
             if player::get_character(c, campaign)?.is_some() {
                 return Err(
-                    "Scheda già presente: usa update_character con la revisione corrente.".into(),
+                    "Sheet already exists: use update_character with the current revision.".into(),
                 );
             }
-            let input=serde_json::from_value(json!({"name":text(args,"name")?,"systemId":optional_text(args,"systemId")?.unwrap_or("generic"),"ancestry":"","vocation":"","level":null,"experience":null,"hpCurrent":0,"hpMaximum":0,"hpTemporary":0,"stats":[],"resources":[],"conditions":"","notes":""})).map_err(|_|"Scheda non valida.")?;
+            let input=serde_json::from_value(json!({"name":text(args,"name")?,"systemId":optional_text(args,"systemId")?.unwrap_or("generic"),"ancestry":"","vocation":"","level":null,"experience":null,"hpCurrent":0,"hpMaximum":0,"hpTemporary":0,"stats":[],"resources":[],"conditions":"","notes":""})).map_err(|_|"Invalid sheet.")?;
             value(player::save_character(c, campaign, None, None, input)?)?
         }
         "chronexus_update_character" => {
-            let old = player::get_character(c, campaign)?.ok_or("Scheda non trovata.")?;
+            let old = player::get_character(c, campaign)?.ok_or("Sheet not found.")?;
             if old.id != text(args, "id")? {
-                return Err("Scheda non appartenente a questa campagna.".into());
+                return Err("Sheet does not belong to this campaign.".into());
             }
             let patch = args["patch"]
                 .as_object()
                 .filter(|p| !p.is_empty())
-                .ok_or("Patch vuota o non valida.")?;
+                .ok_or("Empty or invalid patch.")?;
             let mut input = value(old.data)?;
             if patch.keys().any(|key| input.get(key).is_none()) {
-                return Err("Campo della scheda sconosciuto.".into());
+                return Err("Unknown sheet field.".into());
             }
             merge(&mut input, &args["patch"]);
             value(player::save_character(
@@ -276,14 +276,14 @@ pub(super) fn call(
                 campaign,
                 Some(&old.id),
                 Some(number(args, "revision")?),
-                serde_json::from_value(input).map_err(|_| "Valori della scheda non validi.")?,
+                serde_json::from_value(input).map_err(|_| "Invalid sheet values.")?,
             )?)?
         }
         "chronexus_party" => value(party::list(c, campaign)?)?,
         "chronexus_save_party_member" => value(party::save(
             c,
             campaign,
-            &serde_json::from_value(args["input"].clone()).map_err(|_| "Membro non valido.")?,
+            &serde_json::from_value(args["input"].clone()).map_err(|_| "Invalid member.")?,
         )?)?,
         "chronexus_assets" => value(player::list_assets(
             c,
@@ -294,7 +294,7 @@ pub(super) fn call(
             let id = optional_text(args, "id")?;
             let revision = optional_revision(args)?;
             if id.is_some() != revision.is_some() {
-                return Err("Per aggiornare servono ID e revisione insieme.".into());
+                return Err("Updating needs both ID and revision.".into());
             }
             value(player::save_asset(
                 c,
@@ -303,10 +303,10 @@ pub(super) fn call(
                 id,
                 revision,
                 serde_json::from_value(args["input"].clone())
-                    .map_err(|_| "Oggetto o incantesimo non valido.")?,
+                    .map_err(|_| "Invalid item or spell.")?,
             )?)?
         }
-        _ => return Err("Strumento non disponibile.".into()),
+        _ => return Err("Tool not available.".into()),
     };
     Ok((result, writing))
 }

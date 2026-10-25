@@ -10,6 +10,6 @@ export const KnowledgeContext = createContext<KnowledgeLinks>({
   pages: [],
   open: () => {},
   create: async () => {
-    throw Error(tr("Seleziona una campagna prima di creare una pagina."));
+    throw Error(tr("Select a campaign before creating a page."));
   },
 });

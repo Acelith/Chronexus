@@ -4,19 +4,19 @@ import { command } from "../journal/api";
 import { emptyAsset, type AbilityDetails } from "./api";
 
 export const catalogCategories = localizeLabels({
-  spells: "Incantesimi",
-  classes: "Classi",
-  races: "Specie e razze",
-  equipment: "Equipaggiamento",
-  "magic-items": "Oggetti magici",
-  features: "Privilegi di classe",
-  traits: "Tratti",
-  skills: "Abilità",
-  conditions: "Condizioni",
-  rules: "Regole",
-  "rule-sections": "Sezioni delle regole",
+  spells: "Spells",
+  classes: "Classes",
+  races: "Species and races",
+  equipment: "Equipment",
+  "magic-items": "Magic items",
+  features: "Class features",
+  traits: "Traits",
+  skills: "Skills",
+  conditions: "Conditions",
+  rules: "Rules",
+  "rule-sections": "Rules sections",
   backgrounds: "Background",
-  feats: "Talenti",
+  feats: "Feats",
 } as const);
 export type CatalogCategory = keyof typeof catalogCategories;
 export const catalogBase = "https://www.dnd5eapi.co/api/2014/";
@@ -59,7 +59,7 @@ export function parseIndex(value: unknown): CatalogIndexEntry[] {
     !Array.isArray(value.results) ||
     value.results.length > 5000
   )
-    throw Error(tr("Indice del catalogo non valido."));
+    throw Error(tr("Invalid catalog index."));
   return value.results.map((row) => {
     if (
       !isRecord(row) ||
@@ -69,7 +69,7 @@ export function parseIndex(value: unknown): CatalogIndexEntry[] {
       !row.name.trim() ||
       row.name.length > 200
     )
-      throw Error(tr("Voce dell’indice non valida."));
+      throw Error(tr("Invalid index entry."));
     return {
       index: row.index,
       name: row.name,
@@ -85,7 +85,7 @@ export function parseDocument(path: string, value: unknown): CatalogDocument {
     !value.name.trim() ||
     value.name.length > 200
   )
-    throw Error(tr("La risposta non corrisponde alla voce richiesta."));
+    throw Error(tr("The answer does not match the requested entry."));
   return value as CatalogDocument;
 }
 async function fetchJson(path: string): Promise<unknown> {
@@ -102,12 +102,12 @@ async function fetchJson(path: string): Promise<unknown> {
     });
     if (!response.ok)
       throw Error(
-        tr("Il catalogo ha risposto con errore {0}. Riprova più tardi.", [
+        tr("The catalog answered with error {0}. Try again later.", [
           response.status,
         ]),
       );
     const reader = response.body?.getReader();
-    if (!reader) throw Error(tr("Risposta del catalogo vuota."));
+    if (!reader) throw Error(tr("Empty catalog response."));
     let size = 0;
     const chunks: Uint8Array[] = [];
     try {
@@ -117,7 +117,7 @@ async function fetchJson(path: string): Promise<unknown> {
         size += value.byteLength;
         if (size > 2 * 1024 * 1024) {
           await reader.cancel();
-          throw Error(tr("Risposta del catalogo troppo grande."));
+          throw Error(tr("Catalog response too large."));
         }
         chunks.push(value);
       }
@@ -139,8 +139,7 @@ export async function loadCatalog(
   path: string,
   refresh = false,
 ): Promise<CatalogResult> {
-  if (!validCatalogPath(path))
-    throw Error(tr("Percorso del catalogo non ammesso."));
+  if (!validCatalogPath(path)) throw Error(tr("Catalog path not allowed."));
   const validate = (value: unknown) =>
     path.includes("/") ? parseDocument(path, value) : parseIndex(value);
   const cached = await command<CacheEntry | null>("read_catalog_cache", {
@@ -157,12 +156,11 @@ export async function loadCatalog(
       return {
         ...cached,
         cached: true,
-        warning:
-          "Aggiornamento non riuscito. Stai consultando la copia locale.",
+        warning: "Refresh failed. You are viewing the local copy.",
       };
     const detail = error instanceof Error ? error.message : "";
     throw Error(
-      tr("Catalogo non disponibile. Controlla la connessione e riprova. {0}", [
+      tr("Catalog not available. Check the connection and try again. {0}", [
         detail,
       ]),
       { cause: error },
@@ -187,9 +185,9 @@ export function spellFromCatalog(doc: CatalogDocument): AbilityDetails {
   const description = [
     textContent(doc.desc),
     textContent(doc.higher_level)
-      ? "A livelli superiori\n" + textContent(doc.higher_level)
+      ? "At higher levels\n" + textContent(doc.higher_level)
       : "",
-    textContent(doc.material) ? "Materiali\n" + textContent(doc.material) : "",
+    textContent(doc.material) ? "Materials\n" + textContent(doc.material) : "",
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -220,7 +218,7 @@ export function spellFromCatalog(doc: CatalogDocument): AbilityDetails {
   )
     throw Error(
       tr(
-        "Voce troppo lunga per l’importazione. Puoi consultarla e creare una voce personalizzata.",
+        "Entry too long to import. You can read it and create a custom entry.",
       ),
     );
   return fields;

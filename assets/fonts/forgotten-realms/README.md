@@ -1,25 +1,25 @@
-# Espruar e Dethek — Pixel Sagas / Neale Davidson
+# Espruar and Dethek — Pixel Sagas / Neale Davidson
 
-Font originali regolari OTF, scaricati dagli archivi dell’autore il 24 ottobre
-2026. Gli archivi originali includono OFL 1.1 e Readme: copie presenti accanto a
-ciascun font. Non usare le etichette obsolete «personal use» dei mirror come
-licenza: fanno fede i file OFL inclusi negli archivi originali qui indicati.
+Regular OTF original fonts, downloaded from the author's archives on October 24
+2026. The original archives include OFL 1.1 and Readme: copies are present next to
+each font. Do not use the obsolete "personal use" labels from mirrors as
+license: the OFL files included in the original archives indicated here prevail.
 
 - Espruar: https://www.pixelsagas.com/?download=espruar
 - Dethek: https://www.pixelsagas.com/?download=dethek
-- Download e SHA-256 in metadata.json.
+- Download and SHA-256 in metadata.json.
 
-Nessun file font modificato; alias CSS per integrarli nell’app. Verificato il cmap
-OpenType: A–Z e a–z hanno glifi assegnati, 26 glifi distinti per le maiuscole.
-Le varianti minuscole/maiuscole appartengono al disegno del font e restano
-quelle originali. Legature automatiche disabilitate: resa lettera per lettera,
-non traduzione o grammatica elfica/nanica. Cifre e punteggiatura rimangono normali;
-unicode-range limita il font a U+0041–005A/U+0061–007A e rende gli altri caratteri
-con font ordinari. Non sostituire con rune di altre lingue.
+No font files modified; CSS aliases to integrate them into the app. OpenType cmap
+verified: A–Z and a–z have assigned glyphs, 26 distinct glyphs for uppercase.
+Lowercase/uppercase variants belong to the font design and remain
+the originals. Automatic ligatures disabled: letter-by-letter rendering,
+not elven/dwarven translation or grammar. Figures and punctuation remain normal;
+unicode-range limits the font to U+0041–005A/U+0061–007A and renders other characters
+with standard fonts. Do not replace with runes from other languages.
 
-Non esiste in questa implementazione una nuova codifica Unicode degli alfabeti:
-il testo della resa usa gli stessi codici ASCII e necessita del font indicato.
-Il pacchetto reversibile v2 registra scrittura e alphabetRevision=1, mantenendo
-l’originale. Preferenze v1 sono lette e aggiornate in memoria a v2; il file si
-aggiorna solo al salvataggio. Vecchie build possono richiedere recupero italiano
-per preferenze v2; documenti/SQLite 015/backup non cambiano.
+There is no new Unicode encoding of the alphabets in this implementation:
+the rendering text uses the same ASCII codes and requires the indicated font.
+The reversible package v2 records writing and alphabetRevision=1, maintaining
+the original. v1 preferences are read and updated in memory to v2; the file is
+updated only upon saving. Old builds may require Italian recovery
+for v2 preferences; documents/SQLite 015/backup do not change.

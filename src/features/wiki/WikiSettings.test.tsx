@@ -42,7 +42,7 @@ test("mostra il default Wikidot e salva una scelta esplicita senza campagna", as
   render(<WikiSettings disabled={false} />);
   expect(
     await screen.findByText(
-      /Nessuna scelta salvata: è attiva la fonte predefinita Wikidot/,
+      /No choice saved: the default Wikidot source is active/,
     ),
   ).toBeVisible();
   expect(screen.getByRole("radio", { name: /Wikidot D&D 5e/ })).toBeChecked();
@@ -50,23 +50,23 @@ test("mostra il default Wikidot e salva una scelta esplicita senza campagna", as
   expect(command).toHaveBeenCalledWith("save_wiki_provider", {
     provider: "open5e",
   });
-  expect(await screen.findByText("Fonte wiki salvata: Open5e.")).toBeVisible();
+  expect(await screen.findByText("Wiki source saved: Open5e.")).toBeVisible();
   expect(changed).toHaveBeenCalledTimes(1);
   window.removeEventListener(WIKI_CHANGED, changed);
 });
 test("svuotare la cache richiede conferma, avvisa sulle fonti AI e può essere annullato", async () => {
   const user = userEvent.setup();
   render(<WikiSettings disabled={false} />);
-  await screen.findByText(/Wikidot D&D 5e · voci in cache: 5/);
-  const open = screen.getByRole("button", { name: "Svuota cache offline…" });
+  await screen.findByText(/Wikidot D&D 5e · cached entries: 5/);
+  const open = screen.getByRole("button", { name: "Clear offline cache…" });
   await user.click(open);
   const dialog = screen.getByRole("alertdialog", {
-    name: "Svuotare Wikidot D&D 5e?",
+    name: "Clear Wikidot D&D 5e?",
   });
-  expect(dialog).toHaveTextContent("5 copie consultate");
-  expect(dialog).toHaveTextContent("2 fonti regole approvate");
-  expect(screen.getByRole("button", { name: "Svuota cache" })).toHaveFocus();
-  await user.click(screen.getByRole("button", { name: "Annulla" }));
+  expect(dialog).toHaveTextContent("5 viewed copies");
+  expect(dialog).toHaveTextContent("2 rules sources approved");
+  expect(screen.getByRole("button", { name: "Clear cache" })).toHaveFocus();
+  await user.click(screen.getByRole("button", { name: "Cancel" }));
   expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   expect(open).toHaveFocus();
   await user.click(open);
@@ -76,39 +76,39 @@ test("svuotare la cache richiede conferma, avvisa sulle fonti AI e può essere a
     vi.mocked(command).mock.calls.some(([n]) => n === "clear_wiki_cache"),
   ).toBe(false);
   await user.click(open);
-  await user.click(screen.getByRole("button", { name: "Svuota cache" }));
+  await user.click(screen.getByRole("button", { name: "Clear cache" }));
   expect(command).toHaveBeenCalledWith("clear_wiki_cache", {
     provider: "wikidot",
   });
   expect(
-    await screen.findByText("Cache svuotata: Wikidot D&D 5e."),
+    await screen.findByText("Cache cleared: Wikidot D&D 5e."),
   ).toBeVisible();
   await waitFor(() =>
     expect(
-      screen.getByRole("button", { name: "Svuota cache offline…" }),
+      screen.getByRole("button", { name: "Clear offline cache…" }),
     ).toBeDisabled(),
   );
-  expect(screen.getByText("La cache selezionata è già vuota.")).toBeVisible();
-  await user.selectOptions(screen.getByLabelText("Cache da svuotare"), "all");
   expect(
-    screen.getByRole("button", { name: "Svuota cache offline…" }),
+    screen.getByText("The selected cache is already empty."),
+  ).toBeVisible();
+  await user.selectOptions(screen.getByLabelText("Cache to clear"), "all");
+  expect(
+    screen.getByRole("button", { name: "Clear offline cache…" }),
   ).toBeEnabled();
 });
 test("un errore di svuotamento resta visibile e non cambia il riepilogo", async () => {
   const user = userEvent.setup();
   const base = vi.mocked(command).getMockImplementation()!;
   vi.mocked(command).mockImplementation(async (name, args) => {
-    if (name === "clear_wiki_cache") throw Error("Archivio occupato.");
+    if (name === "clear_wiki_cache") throw Error("Archive busy.");
     return base(name, args);
   });
   render(<WikiSettings disabled={false} />);
-  await screen.findByText(/Wikidot D&D 5e · voci in cache: 5/);
+  await screen.findByText(/Wikidot D&D 5e · cached entries: 5/);
   await user.click(
-    screen.getByRole("button", { name: "Svuota cache offline…" }),
+    screen.getByRole("button", { name: "Clear offline cache…" }),
   );
-  await user.click(screen.getByRole("button", { name: "Svuota cache" }));
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Archivio occupato.",
-  );
-  expect(screen.getByText(/Wikidot D&D 5e · voci in cache: 5/)).toBeVisible();
+  await user.click(screen.getByRole("button", { name: "Clear cache" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Archive busy.");
+  expect(screen.getByText(/Wikidot D&D 5e · cached entries: 5/)).toBeVisible();
 });

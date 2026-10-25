@@ -12,5 +12,5 @@ try {
         $env:Path = (Join-Path $cargoDirectory 'bin') + [IO.Path]::PathSeparator + $env:Path
     }
     & pnpm $Task
-    if ($LASTEXITCODE -ne 0) { throw "Comando $Task non riuscito (codice $LASTEXITCODE)." }
+    if ($LASTEXITCODE -ne 0) { throw "Command $Task failed (code $LASTEXITCODE)." }
 } finally { Pop-Location }

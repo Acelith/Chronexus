@@ -1,396 +1,416 @@
-# M18 — Policy unica, inferenza mista e migrazione non distruttiva
+# M26 — English source with stable legacy identities
 
-`src/ai-models.json` è compilato da Rust/TypeScript e letto dagli strumenti locali:
-identità, pesi approvati e parametri non divergono fra assistente e traduttore.
-Qwen3.8-27B Q4_K_M ufficiale richiede più di 16 GB: sulla RTX 4080 SUPER
-48 layer GPU/batch 256/contesto 8192 passano la qualifica; la configurazione
-99 layer causa pressione di memoria e latenza e viene esclusa. Gemma resta più
-rapida e secondaria, mai fallback automatico. Entrambe usano soltanto testo.
-Schema 018 disabilita scelte Qwen ritirate conservandone nome/digest/storia;
-validatori di archivio accettano le identità storiche, la policy live le rifiuta.
-Lo stesso vale per le traduzioni v1: conservate nel backup, mai attribuite al nuovo
-modello. QLoRA continua soltanto su Gemma perché il 27B non è qualificato per training.
+English becomes the source, default and fallback for new profiles, public docs,
+metadata and agent instructions. Explicit saved locales survive; pre-language
+archives retain Italian through a one-time preference outside restore generations.
+English and legacy Italian catalogs share stable message IDs. Only controlled
+interface text and diagnostics use translation lookup; campaign text and archived
+answers remain canonical data. New catalog entries may fall back to English in
+other locales, and coverage reports that honestly.
 
-# Decisioni
+Legacy app IDs, schema 018, backup paths and names remain stable. The assistant
+receives an allowlisted locale rather than interpolating an arbitrary language
+request. English is the fallback for missing/unsupported values. Training wrappers
+are English while original excerpts remain verbatim. No inference, training,
+download or campaign activation is introduced at startup.
 
-## Chronexus — rinomina compatibile
+Vitest excludes generated worktrees/installers/targets so current-source counts
+cannot include old checkout copies. Public screenshots use English synthetic
+fixtures only; the herald image is explicitly documented as a UI illustration.
 
-Nome pubblico, titolo finestra e pacchetti diventano Chronexus/chronexus.
-`it.nodex.desktop`, `nodex.sqlite3`, percorso interno del bundle `.nodex` e
-variabili debug `NODEX_*` restano stabili: cambiare questi identificatori
-separerebbe gli utenti dai dati esistenti. Nessuna migrazione necessaria per il
-solo cambio di nome. I backup M4 sono ancora leggibili.
+# M18 — Shared policy, mixed inference, and non-destructive migration
 
-## M5 — scheda generica e dati giocabili
+`src/ai-models.json` is compiled from Rust/TypeScript and read by local tools:
+identities, approved weights, and parameters do not diverge between assistant and translator.
+Official Qwen3.8-27B Q4_K_M requires more than 16 GB: on the RTX 4080 SUPER
+48 GPU/batch layer 256/context 8192 pass qualification; the configuration
+99 layer causes memory pressure and latency and is excluded. Gemma remains more
+rapid and secondary, never automatic fallback. Both use only text.
+018 schema disables withdrawn Qwen choices while preserving their name/digest/history;
+archive validators accept historical identities, the live policy rejects them.
+The same applies to v1 translations: preserved in backup, never attributed to the new
+model. QLoRA continues only on Gemma because the 27B is not qualified for training.
 
-- Migrazione 005 additiva: `characters` (un personaggio per campagna in questa
-  fase) e `player_assets` (oggetti, incantesimi e capacità discriminati per tipo).
-  UUID e revisioni proteggono aggiornamenti ed eliminazioni obsolete; FK composite
-  impediscono riferimenti a personaggi, pagine e sessioni di altre campagne.
-- La scheda JSON tipizzata conserva identità, sistema libero, PF, statistiche
-  configurabili, condizioni e risorse/slot con ID stabili. I valori delle statistiche
-  sono manuali; contatori interi da 0 al massimo esplicito, nessuna formula o riposo.
-- Gli asset conservano dettagli tipizzati in JSON e provenienza in colonne con FK,
-  senza copie sincronizzate delle stesse informazioni. Quantità zero non elimina
-  l'oggetto; preparato/conosciuto sono marcatori indipendenti, senza consumo implicito.
-- Provenienza sessione/blocco, PNG, luogo e missione; collegamento facoltativo a una
-  pagina Codex. Un blocco rimosso viene segnalato ma il riferimento resta; un cambio
-  successivo del tipo Codex non invalida il ruolo storico. Nessun arco fattuale è
-  inferito da inventario o provenienza.
-- Elenco migrazioni condiviso da apertura DB e validazione backup. I backup v1
-  includono ora conteggi personaggi/oggetti/capacità quando non nulli, con default
-  zero per manifest precedenti. DB 1–5 leggibili; schema 5 richiede Chronexus M5
-  o successivo per il recupero. Validazione M5 eseguita prima di pubblicare backup.
-- Tre viste React caricate su richiesta: Personaggio, Inventario, Capacità.
-  Moduli espliciti con guardie, contatori e marcatori con salvataggio immediato,
-  dettaglio della voce e ritorno contestuale dal Codex o dal diario.
-- Contratto locale `RulesetAdapter` con derivazione pura separata dai valori
-  manuali. Solo l'adattatore generico è disponibile; identificatori sconosciuti
-  hanno lo stesso comportamento manuale. Nessun regolamento commerciale scelto.
-  Dettagli in `docs/RULESETS.md`. Nessuna nuova dipendenza.
-- Palette esistente #101623/#161c28/#465268, testo #e7e8ed/#a9b4c7 e ottone
-  #d7b978; Georgia per titoli, Segoe UI per dati/controlli. Scheda leggibile,
-  contatori rapidi e dettaglio con provenienza prioritari rispetto a decorazioni.
-  Screenshot verificati a 1200 px, tre viste senza overflow a 760 px.
-- Helper delle anteprime blocco condiviso con il grafo in `knowledge/blocks.ts`,
-  senza dipendenze inverse sul canvas. Skill frontend-design e
-  vercel-react-best-practices applicate a gerarchia, caricamento differito e
-  stato derivato. QA desktop con Playwright, bridge Tauri e SQLite reali.
+# Decisions
 
-## M3 — Relazioni dichiarate e grafo
+## Chronexus — compatible renaming
 
-- Migrazione 004 additiva: relazioni direzionali separate dalle menzioni,
-  certezza esplicita, evidenza/note e fonte opzionale sessione/pagina/blocco.
-  Revisioni ottimistiche proteggono modifica ed eliminazione concorrenti.
-- I nodi includono pagine, sessioni e destinazioni mancanti. Una co-menzione
-  non genera mai un arco pagina→pagina; le menzioni mantengono la sorgente reale.
-- Confini di campagna validati e FK composite. Un blocco di fonte rimosso non
-  cancella la relazione: la fonte viene marcata non disponibile, evidenza conservata.
-- Vista inviata al client limitata a 150 nodi e 400 archi, con conteggi e avviso
-  di troncamento; metadati filtrati nel backend senza caricare i documenti nel grafo.
-- Profondità 1/2 sul vicinato non direzionale; frecce conservano la direzione.
-  Filtri tipo/ricerca rimuovono i nodi e i relativi archi; certezza riguarda solo
-  le relazioni dichiarate. Filtro sessione usa la fonte delle menzioni/relazioni.
-- Cytoscape.js 3.34.4, MIT, con tipi TypeScript inclusi, caricato solo nella vista
-  grafo. Nessuna estensione o servizio remoto. [API e stile](https://js.cytoscape.org/).
-- Disposizione iniziale circolare deterministica, senza animazioni, nodi spostabili
-  e controlli zoom/adatta. La disposizione è una vista temporanea, non una relazione
-  semantica né un dato canonico. Legenda, forme e testo evitano significati affidati
-  soltanto al colore; elenco accessibile alternativo con gli stessi nodi/archi.
-- Conferma esplicita e revisione corrente per eliminare una relazione; la conferma
-  gestisce Tab/Escape. Un form di relazione aperto blocca navigazione/chiusura,
-  senza simulare autosave su un'affermazione incompleta.
-- La CSP di sviluppo consente HTTP/WebSocket solo sul server locale Vite alla
-  porta 1420 per il refresh. La CSP release mantiene i collegamenti runtime locali
-  di Tauri e nessun accesso a servizi remoti.
-- Skill riutilizzate: frontend-design (layout, leggibilità e revisione screenshot),
-  vercel-react-best-practices (caricamento differito e ciclo di vita del canvas).
+Public name, window title, and packages become Chronexus/chronexus.
+`it.nodex.desktop`, `nodex.sqlite3`, internal bundle path `.nodex`, and
+debug variables `NODEX_*` remain stable: changing these identifiers
+would separate users from existing data. No migration is necessary for the
+name change only. M4 backups are still readable.
 
-## M2 — Pagine e menzioni esplicite
+## M5 — generic sheet and playable data
 
-- Migrazione 003 additiva: pagine Codex tipizzate, alias e indice delle menzioni.
-  Le sessioni M1 e i loro documenti rimangono intatti.
-- Il documento JSON contiene inline `pageMention` con `pageId` UUID e `label`
-  di ripiego. Il nome corrente si risolve per ID; rinominare conserva il vecchio
-  titolo come alias. Gli alias possono essere ambigui e richiedono scelta esplicita.
-- Scrittura del documento e sostituzione dell'indice avvengono nella stessa
-  transazione. Un record per sorgente/blocco/destinazione, anche per blocchi annidati.
-- I confini delle sorgenti sono vincolati da FK composite; ogni destinazione
-  esistente viene verificata dal backend. Le destinazioni assenti conservano
-  l'ID nell'indice per un recupero esplicito come bozza, senza creare duplicati.
-- Solo inline espliciti generano menzioni. Testo `[[...]]` non risolto e semplici
-  co-occorrenze non generano collegamenti né relazioni fattuali.
-- Nessuna nuova dipendenza. Skill React/design già lette riutilizzate per la UI;
-  livello Rust/SQLite implementato e verificato con strumenti ordinari.
-- L'editor condiviso tra sessioni e pagine usa l'inline custom BlockNote e il
-  menu `[[` (nessuna scansione automatica dei nomi nel testo). In caso di creazione
-  fallita ripristina il testo digitato; navigazione/chiusura attendono anche la
-  creazione in corso. Durante i cambi vista asincroni il documento è in sola lettura.
-- La menzione mostra il titolo corrente dal Codex della campagna, mantenendo
-  nel documento il label originale di ripiego. Il preview dei backlink è un
-  estratto della fonte, quindi può ancora riportare il nome usato all'epoca.
-- L'apertura di un backlink riposiziona il cursore e scorre al blocco per ID;
-  l'evidenziazione CSS non altera il DOM canonico gestito da ProseMirror.
-- API di riferimento: [inline custom BlockNote](https://www.blocknotejs.org/docs/features/custom-schemas/custom-inline-content)
-  e [menu suggerimenti](https://www.blocknotejs.org/docs/react/components/suggestion-menus).
+- Additive 005 migration: `characters` (one character per campaign in this
+  phase) and `player_assets` (items, spells, and abilities discriminated by type).
+  UUIDs and revisions protect against obsolete updates and deletions; composite FKs
+  prevent references to characters, pages, and sessions of other campaigns.
+- The typed JSON sheet preserves identities, free system, PF, configurable
+  statistics, conditions, and resources/slots with stable IDs. Statistics values
+  are manual; integer counters from 0 to explicit maximum, no formula or rest.
+- Assets preserve typed details in JSON and provenance in columns with FKs,
+  without synchronized copies of the same information. Zero quantity does not delete
+  the item; prepared/known are independent markers, without implicit consumption.
+- Session/block provenance, PNG, location, and mission; optional link to a
+  Codex page. A removed block is flagged but the reference remains; a subsequent
+  change of Codex type does not invalidate the historical role. No factual arc is
+  inferred from inventory or provenance.
+- Shared migration list from DB opening and backup validation. v1 backups
+  now include character/item/ability counts when not null, with default
+  zero for previous manifests. 1–5 DBs readable; 5 schema requires Chronexus M5
+  or later for recovery. M5 validation performed before publishing backups.
+- Three React views loaded on demand: Character, Inventory, Abilities.
+  Explicit modules with guards, counters, and markers with immediate saving,
+  item detail, and contextual return from the Codex or from the diary.
+- Local `RulesetAdapter` contract with pure derivation separated from manual
+  values. Only the generic adapter is available; unknown identifiers
+  have the same manual behavior. No commercial regulation chosen.
+  Details in `docs/RULESETS.md`. No new dependencies.
+- Existing palette #101623/#161c28/#465268, text #e7e8ed/#a9b4c7 and brass
+  #d7b978; Georgia for titles, Segoe UI for data/controls. Readable sheet,
+  fast counters and details with provenance prioritized over decorations.
+  Verified screenshots at 1200 px, three views without overflow at 760 px.
+- Shared block preview helper with the graph in `knowledge/blocks.ts`,
+  without inverse dependencies on the canvas. frontend-design and
+  vercel-react-best-practices applied to hierarchy, lazy loading, and
+  derived state. Desktop QA with Playwright, Tauri bridge, and real SQLite.
 
-## 2026-10-23 — Fondazione M0
+## M3 — Declared relations and graph
 
-- Rust possiede una connessione SQLite protetta da mutex, aperta nella directory
-  dati Tauri; React comunica tramite comandi stretti. Nessun plugin SQL/FS nel frontend.
-- SQLite incorporato tramite rusqlite (`bundled`, MIT), per comportamento coerente
-  senza installazione SQLite esterna. FK attive e timeout dei lock di 5 secondi.
-- Migrazioni additive e transazionali con `schema_migrations`. Non viene offerto
-  un downgrade automatico distruttivo; rollback mediante versione precedente e
-  snapshot a programma chiuso finché M4 non introduce backup consistenti.
-- Vite/React/TypeScript; TypeScript 6 perché typescript-eslint non supporta 7.
-  Dipendenze fissate nei lockfile. Tauri MIT/Apache-2.0, React/Vite MIT.
-- Design: ardesia #161c28, inchiostro #101623, bordo #303a4b, testo #e7e8ed,
-  testo secondario #a9b4c7, ottone #d7b978. Georgia per titoli, Segoe UI/system
-  per comandi. Sidebar archivio a sinistra, diario al centro; nessun dato fittizio.
-- Skill lette e applicate: frontend-design (palette, tipografia e struttura),
-  vercel-react-best-practices (stato derivato e caricamento differito editor).
+- 004 additive migration: directional relations separated from mentions,
+  explicit certainty, evidence/notes, and optional session/page/block source.
+  Optimistic revisions protect against concurrent modification and deletion.
+- Nodes include pages, sessions, and missing destinations. A co-mention
+  never generates a page→page arc; mentions maintain the actual source.
+- Validated campaign boundaries and composite FKs. A removed source block does not
+  delete the relation: the source is marked unavailable, evidence preserved.
+- View sent to client limited to 150 nodes and 400 arcs, with counts and
+  truncation warning; metadata filtered in the backend without loading documents into the graph.
+- 1/2 depth on non-directional neighborhood; arrows preserve direction.
+  Type/search filters remove nodes and related arcs; certainty concerns only
+  declared relations. Session filter uses the source of mentions/relations.
+- Cytoscape.js 3.34.4, MIT, with TypeScript types included, loaded only in the
+  graph view. No extensions or remote services. [API and style](https://js.cytoscape.org/).
+- Deterministic circular initial layout, no animations, movable nodes
+  and zoom/fit controls. The layout is a temporary view, not a semantic
+  relation or canonical data. Legend, shapes, and text avoid meanings relied
+  solely on color; accessible alternative list with the same nodes/arcs.
+- Explicit confirmation and current revision to delete a relation; confirmation
+  handles Tab/Escape. An open relation form blocks navigation/closing,
+  without simulating autosave on an incomplete statement.
+- Development CSP allows HTTP/WebSocket only on the local Vite server at
+  port 1420 for refresh. Release CSP maintains local Tauri runtime links
+  and no access to remote services.
+- Reused skills: frontend-design (layout, readability, and screenshot revision),
+  vercel-react-best-practices (lazy loading and canvas lifecycle).
 
-## 2026-10-23 — Persistenza M1
+## M2 — Pages and explicit mentions
 
-- Migrazione 002 aggiunge campagne/sessioni con UUID, vincoli, indice cronologico
-  per numero e documento JSON canonico versionato. Nessuna copia Markdown modificabile.
-- Ogni comando di sessione riceve la campagna e ne verifica i confini nel backend.
-- Revisioni ottimistiche impediscono sovrascritture da finestre/app concorrenti:
-  un conflitto blocca il salvataggio e invita a copiare gli appunti.
-- Documenti limitati a 2 MB, 10.000 blocchi e profondità 12; solo paragrafi,
-  titoli, elenchi e citazioni. Media e upload fuori scope.
-- Errori di apertura DB tornano al frontend: la finestra rimane disponibile
-  anche con directory non accessibile o schema più recente.
+- 003 additive migration: typed Codex pages, aliases, and mentions index.
+  M1 sessions and their documents remain intact.
+- The JSON document contains inline `pageMention` with `pageId` UUID and `label`
+  fallback. The current name resolves to ID; renaming preserves the old
+  title as an alias. Aliases can be ambiguous and require explicit choice.
+- Document writing and index replacement occur in the same
+  transaction. One record per source/block/destination, even for nested blocks.
+- Source boundaries are constrained by composite FKs; every existing destination
+  is verified by the backend. Missing destinations retain the
+  ID in the index for explicit retrieval as a draft, without creating duplicates.
+- Only explicit inlines generate mentions. Unresolved `[[...]]` text and simple
+  co-occurrences do not generate links or factual relations.
+- No new dependencies. React/design skills already read and reused for the UI;
+  Rust/SQLite level implemented and verified with standard tools.
+- The editor shared between sessions and pages uses the inline custom BlockNote and the
+  `[[` menu (no automatic scanning of names in the text). In case of failed creation
+  it restores the typed text; navigation/closing also wait for the
+  creation in progress. During asynchronous view changes, the document is read-only.
+- The mention shows the current title from the campaign Codex, keeping
+  the original fallback label in the document. The backlink preview is a
+  source excerpt, so it may still report the name used at the time.
+- Opening a backlink repositions the cursor and scrolls to the block by ID;
+  CSS highlighting does not alter the canonical DOM managed by ProseMirror.
+- Reference APIs: [inline custom BlockNote](https://www.blocknotejs.org/docs/features/custom-schemas/custom-inline-content)
+  and [suggestion menu](https://www.blocknotejs.org/docs/react/components/suggestion-menus).
 
-## 2026-10-23 — Editor e autosave M1
+## 2026-10-23 — Foundation M0
 
-- BlockNote 0.56 e Mantine 8.3.11: peer React 19 compatibili, verifica
-  `pnpm peers check` senza problemi. BlockNote MPL-2.0, Mantine MIT.
-- Schema ridotto ai blocchi testuali supportati; nessun upload, blocco media
-  o emoji picker con risorse esterne. Editor caricato solo aprendo una sessione.
-- Un writer ordinato per documento, debounce 500 ms e revisioni ricevute dal
-  backend. Il flush attende anche le modifiche arrivate durante una scrittura.
-- Navigazione e chiusura normale attendono il flush; errore visibile con riprova,
-  nessun cambio nota in caso di fallimento. Chiusura forzata non garantita.
-- Nessun pulsante di cancellazione/archiviazione in M1; non serve confermare
-  operazioni distruttive inesistenti. Archivio e selezione dei record sono reali.
-- `NODEX_DEV_DATA_DIR` solo debug consente smoke test isolati senza dati personali.
-  Lo smoke Playwright dialoga con Tauri/Rust/SQLite reali tramite WebView2.
-- Skill applicate: frontend-design (revisione visiva, palette e gerarchia),
-  vercel-react-best-practices (lazy loading e stato derivato). computer-use letta
-  per QA nativa; accesso finestra scaduto, prova effettiva tramite WebView locale.
+- Rust possesses a SQLite connection protected by a mutex, opened in the Tauri
+  data directory; React communicates via strict commands. No SQL/FS plugin in the frontend.
+- SQLite embedded via rusqlite (`bundled`, MIT), for consistent behavior
+  without external SQLite installation. Active FKs and lock timeouts of 5 seconds.
+- Additive and transactional migrations with `schema_migrations`. No
+  destructive automatic downgrade is offered; rollback via previous version and
+  snapshot at program close until M4 introduces consistent backups.
+- Vite/React/TypeScript; TypeScript 6 because typescript-eslint does not support 7.
+  Dependencies fixed in the lockfile. Tauri MIT/Apache-2.0, React/Vite MIT.
+- Design: slate #161c28, ink #101623, border #303a4b, text #e7e8ed,
+  secondary text #a9b4c7, brass #d7b978. Georgia for titles, Segoe UI/system
+  for commands. Archive sidebar on the left, diary in the center; no dummy data.
+- Read and applied skills: frontend-design (palette, typography, and structure),
+  vercel-react-best-practices (derived state and deferred editor loading).
 
-## M4 — backup portabile e attivazione del ripristino
+## 2026-10-23 — Persistence M1
 
-- Il bundle `.nodex` v1 salva **tutte le campagne**: snapshot tramite API backup
-  SQLite, `manifest.json`, SHA-256 di ogni payload e allegati gestiti. Nessuna
-  copia del DB aperto. ZIP/Deflate non cifrato; checksum per integrità, non firma.
-- Percorsi ammessi: `data/nodex.sqlite3` e
-  `attachments/<UUID campagna>/<UUID file>[.<estensione minuscola>]`. Nessuna
-  directory ZIP, duplicato, link simbolico o file extra. Limiti: 9998 allegati,
-  256 MiB/file, 512 MiB totali/ZIP e 2 MiB manifest. File mai sovrascritti.
-- Il ripristino verifica checksum, schema esatto delle migrazioni supportate,
-  integrity_check, foreign_key_check, documenti e confini delle campagne. Le
-  versioni DB 1–4 sono ammesse e migrate solo nella nuova copia; future respinte.
-- Prima dell'attivazione crea un `.nodex` preventivo in `backups/`; un errore
-  interrompe l'operazione. La nuova generazione è in `profiles/<UUID>/` e diventa
-  attiva tramite sostituzione atomica di `active-profile.json`. Il vecchio DB
-  resta intatto; senza puntatore gli archivi M0–M3 continuano nella cartella base.
-  Un lock OS esclusivo impedisce due processi sullo stesso archivio. I file sono
-  sincronizzati prima dell'attivazione, le directory anche su Unix. Un errore
-  di sincronizzazione successivo al commit è restituito come avviso esplicito.
-- Il backend sceglie i percorsi con tauri-plugin-dialog 2.8.3 (MIT/Apache-2.0,
-  Rust minimo 1.90); ZIP 9.0.5 (MIT), SHA2 0.10.9 e tempfile 3 (MIT/Apache-2.0).
-  Nessuna autorizzazione filesystem generale al frontend. Le operazioni pesanti
-  e i dialoghi bloccanti sono eseguiti fuori dal thread UI.
-- Non si aggiunge ancora un gestore allegati: M4 conserva i file già presenti
-  nel layout gestito, verificato con fixture nei test. Esportazione Markdown/JSON
-  e backup pianificati sono rinviati: M4 dà priorità al recupero manuale.
-- La copia dei payload inattivi, invece dello spostamento della cartella estratta,
-  tollera handle di directory Windows senza condivisione DELETE; ogni copia è
-  ricontrollata con SHA-256 prima di attivarla. Un test Windows riproduce il caso.
-- Il confronto schema comprende ogni oggetto con SQL dichiarato: non usa `LIKE`
-  sui nomi SQLite, perché il carattere `_` potrebbe nascondere trigger inattesi.
-  Nomi di allegati con punto finale o estensione vuota sono respinti per evitare
-  alias differenti fra Windows e Unix.
-- `NODEX_DEV_BACKUP_FILE` / `NODEX_DEV_RESTORE_FILE` predefiniscono solo il risultato
-  del selettore per QA ripetibile, richiedono `NODEX_DEV_DATA_DIR` esplicita e
-  percorsi assoluti. L'intero ramo è escluso dalle build release. Nessun comando
-  accetta percorsi filesystem da React.
-- Skill UI: frontend-design per gerarchia/palette esistenti e verifica screenshot;
-  vercel-react-best-practices per caricamento differito. computer-use ha aperto e
-  letto il selettore nativo; successivi input bloccati dallo strumento, quindi
-  il round trip desktop usa la scelta predefinita nel debug, con ZIP/DB reali.
+- 002 migration adds campaigns/sessions with UUID, constraints, chronological index
+  for number and versioned canonical JSON document. No editable Markdown copy.
+- Every session command receives the campaign and verifies its boundaries in the backend.
+- Optimistic revisions prevent overwrites from concurrent windows/apps:
+  a conflict blocks the save and invites copying the notes.
+- Documents limited to 2 MB, 10.000 blocks and depth 12; only paragraphs,
+  titles, lists, and quotes. Media and uploads are out of scope.
+- DB opening errors return to the frontend: the window remains available
+  even with inaccessible directory or newer schema.
 
-## Scheda estesa e catalogo opzionale (23 ottobre 2026)
+## 2026-10-23 — Editor and autosave M1
 
-- La richiesta di modificare M4 riguarda la scheda consegnata in M5. M4 mantiene
-  il recupero dati; l'estensione appartiene a M5, prima di M6.
-- Il PDF dell'utente è solo una fonte di campi e gerarchia. Nessuna copia di logo,
-  impaginazione o contenuti personali viene inserita nel repository. La scheda
-  resta generica, con campi manuali per combattimento, biografia, valori e magia;
-  un preset D&D aggiunge etichette, senza formule o valori inventati.
-- Migrazione 006 additiva: cache SQLite e confine di compatibilità per i nuovi
-  payload. I campi JSON aggiunti hanno default per leggere schede M5; UUID,
-  revisioni e fonti restano stabili. I backup precedenti restano ripristinabili;
-  una build precedente non deve aprire lo schema 006.
-- Eccezione di rete autorizzata: solo GET espliciti verso D&D 5e API, edizione
-  2014. Fetch frontend limitato all'host nella CSP; percorsi allowlist, timeout,
-  dimensioni limitate e nessun redirect. Ricerca per nome eseguita sugli indici
-  scaricati, senza inviare il testo digitato. Nessuna nuova dipendenza HTTP.
-- Cache Rust parametrizzata, massimo 150 risposte; un'importazione è una copia
-  personale indipendente con riferimento alla fonte, conservata nel backup.
-  Il catalogo non scrive nel grafo e non rende fatti le descrizioni di regole.
-  API di sola lettura: gli incantesimi personalizzati non vengono pubblicati.
-- Skill: PDF per estrazione e lettura visiva delle quattro pagine; frontend-design
-  e vercel-react-best-practices per interfaccia e caricamento del catalogo.
+- BlockNote 0.56 and Mantine 8.3.11: peer React 19 compatible, verification
+  `pnpm peers check` without issues. BlockNote MPL-2.0, Mantine MIT.
+- Schema reduced to supported text blocks; no uploads, media blocks
+  or emoji picker with external resources. Editor loaded only upon opening a session.
+- An ordered writer per document, debounce 500 ms and revisions received from
+  the backend. The flush also waits for changes arrived during a write.
+- Normal navigation and closing wait for the flush; visible error with retry,
+  no note change in case of failure. Forced closing is not guaranteed.
+- No deletion/archiving button in M1; no need to confirm
+  non-existent destructive operations. Archiving and record selection are real.
+- `NODEX_DEV_DATA_DIR` only debug allows isolated smoke tests without personal data.
+  The Playwright smoke test communicates with real Tauri/Rust/SQLite via WebView2.
+- Applied skills: frontend-design (visual review, palette, and hierarchy),
+  vercel-react-best-practices (lazy loading and derived state). computer-use reads
+  for native QA; window access expired, effective test via local WebView.
 
-## Ricerca e immagini M6
+## M4 — portable backup and restoration activation
 
-- Migrazione 007: righe di ricerca derivate dai documenti canonici e FTS5
-  external-content con trigger. Aggiornamenti nella transazione della nota/asset;
-  ricostruzione su migrazione e nella copia ripristinata, prima dell'attivazione.
-  Testo utente quotato, niente sintassi FTS/SQL arbitraria; risultati della sola
-  campagna selezionata con UUID e blocco fonte. Nessun servizio remoto.
-- Migrazione 008: proprietà immagini con FK composite per campagna/voce e file
-  UUID nel layout allegati M4. PNG/JPEG/WebP validati con image 0.25.10
-  (MIT/Apache-2.0, Rust >=1.88; toolchain locale 1.99) e base64 0.22.1
-  (MIT/Apache-2.0). Originali copiati senza ricompressione o perdita EXIF.
-- Limiti 20 MiB, 8192 px/lato, 32 milioni di pixel e memoria decoder limitata;
-  orientamento applicato solo alle anteprime. Lettura via IPC con ID, nessun
-  percorso esterno/HTML/SVG eseguibile o permesso filesystem generale al frontend.
-- Anteprime differite quando visibili; zoom dell'originale nel visualizzatore.
-  OperationContext riusa il flush editor e la guardia app per le mutazioni immagini.
-- File temporanei fuori dalla cartella allegati per non compromettere un backup
-  dopo un arresto improvviso. Pubblicazione con nuovo UUID senza sovrascritture;
-  metadati e SHA-256 verificati in backup/ripristino. Rimozione dalla voce o
-  eliminazione dell'asset scollega i metadati e conserva il file per recupero.
-  Pulizia fisica degli orfani rinviata e dichiarata nell'interfaccia.
-- Skill frontend-design e vercel-react-best-practices per gerarchia, tastiera,
-  caricamento differito e lettura visiva; nessuna Skill DB/testing disponibile.
+- The `.nodex` bundle v1 saves **all campaigns**: snapshot via backup API
+  SQLite, `manifest.json`, SHA-256 of each payload and managed attachments. No
+  copy of the open DB. ZIP/Deflate unencrypted; checksum for integrity, not signature.
+- Allowed paths: `data/nodex.sqlite3` and
+  `attachments/<UUID campagna>/<UUID file>[.<estensione minuscola>]`. No
+  ZIP directory, duplicate, symbolic link, or extra files. Limits: 9998 attachments,
+  256 MiB/file, 512 MiB total/ZIP and 2 MiB manifest. Files never overwritten.
+- Restoration verifies checksum, exact schema of supported migrations,
+  integrity_check, foreign_key_check, documents, and campaign boundaries. The
+  DB versions 1–4 are allowed and migrated only in the new copy; future ones rejected.
+- Before activation, create a preliminary `.nodex` in `backups/`; an error
+  interrupts the operation. The new generation is in `profiles/<UUID>/` and becomes
+  active via atomic replacement of `active-profile.json`. The old DB
+  remains intact; without a pointer, the M0–M3 archives continue in the base folder.
+  An exclusive OS lock prevents two processes on the same archive. Files are
+  synchronized before activation, and directories as well on Unix. A subsequent
+  synchronization error after the commit is returned as an explicit warning.
+- The backend selects paths with tauri-plugin-dialog 2.8.3 (MIT/Apache-2.0,
+  minimum Rust 1.90); ZIP 9.0.5 (MIT), SHA2 0.10.9 and tempfile 3 (MIT/Apache-2.0).
+  No general filesystem authorization to the frontend. Heavy operations
+  and blocking dialogs are executed outside the UI thread.
+- An attachments manager is not yet added: M4 preserves files already present
+  in the managed layout, verified with fixtures in tests. Markdown/JSON export
+  and planned backups are postponed: M4 prioritizes manual recovery.
+- Copying inactive payloads, instead of moving the extracted folder,
+  tolerates Windows directory handles without DELETE sharing; every copy is
+  re-checked with SHA-256 before activation. A Windows test reproduces the case.
+- Schema comparison includes every object with declared SQL: it does not use `LIKE`
+  on SQLite names, because the `_` character could hide unexpected triggers.
+  Attachment names with a trailing dot or empty extension are rejected to avoid
+  different aliases between Windows and Unix.
+- `NODEX_DEV_BACKUP_FILE` / `NODEX_DEV_RESTORE_FILE` predefine only the result
+  of the selector for repeatable QA, requiring explicit `NODEX_DEV_DATA_DIR` and
+  absolute paths. The entire branch is excluded from release builds. No command
+  accepts filesystem paths from React.
+- UI Skills: frontend-design for existing hierarchy/palette and screenshot verification;
+  vercel-react-best-practices for deferred loading. computer-use opened and
+  read the native selector; subsequent inputs blocked by the tool, so
+  the desktop round trip uses the default choice in debug, with real ZIP/DB.
 
-## Export e sorgenti Logseq M6
+## Extended sheet and optional catalog (23 October 2026)
 
-- Export ZIP con snapshot SQLite coerente, Markdown per UUID, JSON canonico,
-  immagini originali e manifest; nessuna nuova dipendenza e nessun reimport MVP.
-- Migrazione 009 additiva: sorgenti originali immutabili con FK composite e
-  checksum. Il marker `importedFrom` sopravvive all’autosave; la copia originale
-  è indipendente dal documento modificabile e viene verificata nel backup.
-- Conversione tramite IPC in profilo debug vuoto: sessioni nel Diario e pagine
-  indice nel Codex per preservare i vecchi riferimenti. Nessuna relazione
-  fattuale inferita, alias conflittuali mantenuti nel testo, nessun dato privato
-  versionato. Foto originali incluse; trascrizione parziale dichiarata.
-- Riepilogo e nuove viste caricati su richiesta. Installer NSIS Windows generato,
-  CI Windows/macOS/Linux predisposta; firma e QA installazione restano pendenti.
-- Skill frontend-design per gerarchia e leggibilità; vercel-react-best-practices
-  per composizione e caricamento differito. Nessuna Skill database/testing
-  specializzata disponibile: test Rust, frontend e WebView reali.
+- The request to modify M4 concerns the sheet delivered in M5. M4 maintains
+  data recovery; the extension belongs to M5, before M6.
+- The user's PDF is only a source of fields and hierarchy. No copy of logo,
+  layout, or personal content is inserted into the repository. The sheet
+  remains generic, with manual fields for combat, biography, values, and magic;
+  a D&D preset adds labels, without invented formulas or values.
+- Additive 006 migration: SQLite cache and compatibility boundary for new
+  payloads. Added JSON fields have defaults to read M5 sheets; UUID,
+  revisions, and sources remain stable. Previous backups remain restorable;
+  a previous build must not open the 006 schema.
+- Authorized network exception: only explicit GET towards D&D 5e API, edition
+  2014. Frontend fetch limited to the host in the CSP; allowlist paths, timeout,
+  limited sizes, and no redirects. Search by name performed on downloaded
+  indices, without sending the typed text. No new HTTP dependencies.
+- Parameterized Rust cache, maximum 150 responses; an import is an
+  independent personal copy with reference to the source, stored in the backup.
+  The catalog does not write to the graph and does not make rule descriptions facts.
+  Read-only API: custom spells are not published.
+- Skill: PDF for extraction and visual reading of the four pages; frontend-design
+  and vercel-react-best-practices for interface and catalog loading.
 
-## Restyling e grafo — estensione richiesta a M6
+## Search and images M6
 
-Direzione: codice medievale leggibile, pergamena #e6d8b8, inchiostro #30251d,
-cuoio #211a16, ottone #b99855, borgogna #6e302b e verde #354c3a. Cornice
-scura, area di lettura chiara, titoli Palatino/Georgia locali; nessun font remoto.
-Navigazione e semantica dei dati conservate. Riferimento visuale generato con
-dati fittizi in .tools/medieval-ui-target.png (1584x992), non asset dell'app.
-L'implementazione adatta proporzioni e controlli reali: nessuna pretesa pixel-perfect.
-Grafo con layout COSE integrato, sottoinsieme compatto di 18 nodi, espansione
-esplicita e dettaglio alla selezione; etichette degli archi solo in evidenza.
-Il sottoinsieme contiene esclusivamente nodi e archi esistenti, senza nuove
-relazioni inferite. Filtri in disclosure, elenco accessibile conservato.
-Skill: find-skills per ricerca CLI/catalogo, frontend-design e ui-taste per
-materiali/gerarchia e confronto visuale; imagegen per il solo riferimento fittizio.
-webapp-testing Anthropic consultata e valutata; automazione Tauri resta quella
-Playwright JS già in uso nel repository, senza installazioni globali.
+- 007 Migration: search lines derived from canonical documents and FTS5
+  external-content with trigger. Updates in the note/asset transaction;
+  reconstruction on migration and in the restored copy, before activation.
+  Quoted user text, no arbitrary FTS/SQL syntax; results from the only
+  selected campaign with UUID and source block. No remote service.
+- 008 Migration: image properties with composite FK for campaign/entry and file
+  UUID in the attached M4 layout. PNG/JPEG/WebP validated with image 0.25.10
+  (MIT/Apache-2.0, Rust >=1.88; local toolchain 1.99) and base64 0.22.1
+  (MIT/Apache-2.0). Originals copied without recompression or EXIF loss.
+- 20 MiB limits, 8192 px/side, 32 million pixels, and limited decoder memory;
+  orientation applied only to previews. Reading via IPC with ID, no
+  external/HTML/SVG executable path or general filesystem permission to the frontend.
+- Deferred previews when visible; zoom of the original in the viewer.
+  OperationContext reuses the editor flush and the app guard for image mutations.
+- Temporary files outside the attachments folder to not compromise a backup
+  after a sudden crash. Publication with new UUID without overwrites;
+  metadata and SHA-256 verified in backup/restoration. Removal from the entry or
+  deletion of the asset disconnects the metadata and keeps the file for recovery.
+  Physical cleaning of orphans deferred and declared in the interface.
+- frontend-design and vercel-react-best-practices skills for hierarchy, keyboard,
+  lazy loading, and visual reading; no DB/testing skills available.
 
-## Party — estensione M6
+## Export and Logseq sources M6
 
-Migrazione 010 additiva: elenco membri per UUID pagina, giocatore/ruolo liberi,
-stato e revisione per conflitti. Le conoscenze restano nel documento Codex,
-con menzioni, ricerca, immagini e autosave esistenti; nessuna scheda completa
-duplicata e nessuna relazione fattuale creata dall'appartenenza al party.
-La creazione del nuovo personaggio e della membership è atomica. Rimozione
-confermata scollega soltanto la membership, conservando pagina e immagini.
-Backup/ripristino include il party; export JSON e indice Markdown lo espongono.
-Il cambiamento del tipo pagina conserva la membership storica.
-Skill frontend-design per registro della compagnia e vercel-react-best-practices
-per vista/editor caricati su richiesta; test Rust e frontend per persistenza,
-conflitti, guardie e recupero degli errori.
+- ZIP Export with coherent SQLite snapshot, Markdown for UUID, canonical JSON,
+original images and manifests; no new dependencies and no MVP re-imports.
+- Additive 009 migration: original sources immutable with composite FK and
+checksum. The `importedFrom` marker survives autosave; the original copy
+is independent of the editable document and is verified in the backup.
+- Conversion via IPC into an empty debug profile: sessions in the Diary and index
+pages in the Codex to preserve old references. No factual relation
+inferred, conflicting aliases maintained in the text, no private data
+versioned. Original photos included; partial transcription declared.
+- Summary and new views loaded on request. Windows NSIS Installer generated,
+Windows/macOS/Linux CI prepared; signing and installation QA remain pending.
+- frontend-design skill for hierarchy and readability; vercel-react-best-practices
+for composition and lazy loading. No specialized database/testing
+skill available: Rust tests, frontend, and real WebView.
+
+## Restyling and graph — extension requested at M6
+
+Direction: readable medieval code, parchment #e6d8b8, ink #30251d,
+leather #211a16, brass #b99855, burgundy #6e302b and green #354c3a. Dark
+frame, light reading area, local Palatino/Georgia titles; no remote fonts.
+Navigation and data semantics preserved. Visual reference generated with
+dummy data in .tools/medieval-ui-target.png (1584x992), not an app asset.
+The implementation adapts proportions and real controls: no pixel-perfect claims.
+Graph with integrated COSE layout, compact subset of 18 nodes, explicit expansion
+and detail on selection; arc labels only in highlight.
+The subset contains exclusively existing nodes and arcs, without new
+inferred relations. Filters in disclosure, accessible list preserved.
+Skill: find-skills for CLI/catalog search, frontend-design and ui-taste for
+materials/hierarchy and visual comparison; imagegen for the dummy reference only.
+Anthropic webapp-testing consulted and evaluated; Tauri automation remains the
+Playwright JS already in use in the repository, without global installations.
+
+## Party — M6 extension
+
+Additive 010 migration: member list per page UUID, free player/role,
+status and revision for conflicts. Knowledge remains in the Codex document,
+with mentions, search, images and existing autosave; no complete record
+duplicated and no factual relation created by party membership.
+The creation of the new character and membership is atomic. Confirmed removal
+only disconnects the membership, preserving page and images.
+Backup/restore includes the party; JSON export and Markdown index expose them.
+The change of page type preserves the historical membership.
+frontend-design skill for company registry and vercel-react-best-practices
+for view/editor loaded on request; Rust and frontend tests for persistence,
+conflicts, guards and error recovery.
 
 ## Wiki Open5e M6
 
-Migrazione 011 additiva per cache wiki separata dal catalogo SRD 2014 personale.
-La ricerca pubblica paginata di Open5e non sostituisce gli asset locali e non
-crea fatti nel grafo. Testi e metadati di fonte conservati insieme; ogni voce
-resta distinta per documento/edizione. Limiti HTTP e cache applicati, refresh
-fallito mantiene la copia locale con avviso. CSP limitata al nuovo host approvato.
-Prove native: voce SRD reale, cache offline dopo riavvio, backup/restore e
-secondo riavvio con membro Party, appunti e immagine identici. Skill e fonti
-verificate in docs/RESEARCH_DND.md; nessuna dipendenza runtime aggiunta.
+Additive 011 migration for wiki cache separate from personal SRD 2014 catalog.
+Paginated public search of Open5e does not replace local assets and does not
+create facts in the graph. Source texts and metadata preserved together; each entry
+remains distinct per document/edition. HTTP and cache limits applied, failed
+refresh maintains the local copy with a warning. CSP limited to the new approved host.
+Native proofs: real SRD entry, offline cache after restart, backup/restore and
+second reboot with Party member, identical notes and image. Skills and sources
+verified in docs/RESEARCH_DND.md; no additional runtime dependencies.
 
 
-Controllo visuale finale M6: il layout organico può comprimere i nomi nelle
-zone dense di Speratia. La vista iniziale usa quindi una mappa ordinata con
-spazio calcolato anche per le etichette; il layout COSE rimane selezionabile.
-Nessuna relazione è dedotta dalla posizione spaziale. Riordinate solo le
-coordinate del canvas, non i dati o la membership.
+Final visual check M6: the organic layout can compress names in
+dense zones of Speratia. The initial view therefore uses an ordered map with
+calculated space even for labels; the COSE layout remains selectable.
+No relationship is deduced from spatial position. Reorder only the
+canvas coordinates, not the data or membership.
 
-## M7 — inferenza locale e scelta del modello
+## M7 — local inference and model selection
 
-Ollama portable isolato nel percorso ignorato `.tools/m7-runtime`, senza
-installazione di sistema. Adapter HTTP Rust fisso su 127.0.0.1:11434, senza
-proxy/redirect, verifica `/api/status` cloud disabilitato prima di ogni richiesta,
-digest manifest e pesi GGUF locali. Precaricamento senza appunti e verifica GPU;
-CPU esclusiva bloccata, caricamento misto dichiarato. Nessun tool del modello.
+Ollama portable isolated in the ignored path `.tools/m7-runtime`, without
+system installation. Rust HTTP Adapter fixed on 127.0.0.1:11434, without
+proxy/redirect, verify `/api/status` cloud disabled before each request,
+manifest digest and local GGUF weights. Preloading without notes and GPU verification;
+exclusive CPU locked, mixed loading declared. No model tools.
 
-Il candidato dnd-unified-1.5b Q4_K_M è stato realmente caricato interamente su
-GPU ma fallisce le prime domande italiane. L'utente ha esplicitamente scelto
-un modello multilingue più capace con fonti D&D locali e citazioni.
-Qwen3:4b-instruct Q4_K_M produce risposte dirette; Qwen3:4b standard esponeva
-ragionamento nel contenuto e non è il modello qualificato. Le licenze dei
-modelli sono dichiarate dagli autori; pesi non redistribuiti nel repository.
+The candidate dnd-unified-1.5b Q4_K_M was actually fully loaded onto
+GPU but fails the first Italian questions. The user explicitly chose
+a more capable multilingual model with local D&D sources and citations.
+Qwen3:4b-instruct Q4_K_M produces direct answers; Qwen3:4b standard exposed
+reasoning in the content and is not the qualified model. Model licenses are
+declared by the authors; weights not redistributed in the repository.
 
-Retrieval FTS5 per sola campagna e fonti regole selezionate per edizione;
-copie con ID/blocco/revisione/hash, limite di contesto conservativo. Cronologia
-non usata come nuova fonte. Migrazione 012 additiva, configurazione disattivata
-inizialmente, conversazioni cancellabili/esportabili/backuppate; pesi esclusi.
-Le citazioni verificano appartenenza e versione, non la verità semantica.
-Skill vercel-react-best-practices per caricamento differito e letture indipendenti.
+FTS5 Retrieval for campaign only and rule sources selected for edition;
+copies with ID/block/revision/hash, conservative context limit. History
+not used as a new source. Additive 012 migration, configuration initially
+disabled, conversations deletable/exportable/backed up; weights excluded.
+Citations verify belonging and version, not semantic truth.
+vercel-react-best-practices skill for lazy loading and independent reads.
 
-La valutazione reale ha mostrato che le istruzioni del solo prompt non bastano:
-il modello può ripetere un attacco o citare identificativi non forniti. Un gate
-lessicale prudente esclude prima dell'invio estratti con segnali espliciti di
-manipolazione, conservando le altre fonti pulite. Se tutte sono sospette, ferma
-la domanda e ne conserva le copie per revisione. Metriche tracciano esclusioni
-e possibile invio. Non è una classificazione infallibile; possibili falsi positivi.
-Nessun tool del modello, nessuna scrittura implicita nel mondo di gioco.
-
-
-## M8 — Adapter di campagna e copie GGUF derivate
-
-- Impostazioni AI per campagna (013), senza mutare le preferenze delle altre
-  campagne; migrazione conserva le scelte M7 già esplicite.
-- QLoRA locale su checkpoint Google Gemma 4 12B fissato, distinto dal retrieval.
-  Ricostruzione da snapshot corrente per evitare accumulo di note eliminate.
-- Ollama 0.40.10 non supporta più ADAPTER. Il worker applica l'adapter compatto
-  a copie GGUF, preservando i tensori non modificati e la base immutabile.
-  Gli adapter e la provenienza sono dati della campagna e vanno nei backup;
-  le copie di inferenza sono ricostruibili e restano fuori dagli archivi.
-- Nessuna attivazione implicita: validazione sintetica GPU/citazioni, selezione
-  esplicita e invalidazione se cambiano fonti o policy. Pesi aggiornati e loss
-  non dimostrano da soli una maggiore accuratezza delle risposte.
-- Backend Python isolato, non server aggiuntivo: worker distribuito con l'app,
-  caricamento offline senza remote code, annullamento e uscita se muore il parent.
-  Stato ed evidenze: docs/AI_TRAINING.md e docs/STATUS.md.
+The actual evaluation showed that prompt instructions alone are not enough:
+the model can repeat an attack or cite identifiers not provided. A prudent
+lexical gate excludes before sending extracts with explicit signs of
+manipulation, preserving other clean sources. If all are suspicious, stop
+the question and keep copies for revision. Metrics track exclusions
+and possible sending. It is not an infallible classification; possible false positives.
+No model tools, no implicit writing in the game world.
 
 
-## M10 — localizzazione senza mutazioni dei dati
+## M8 — Campaign Adapter and derived GGUF copies
 
-Preferenze globali JSON atomiche v1 fuori dalle generazioni backup; nessuna
-migrazione SQLite. Cataloghi locali con hash della sorgente italiana, fallback,
-parametri e dizionari editor; nessun modello AI o rete necessario per cambiare
-lingua. Nomi/preset salvati, UUID, Markdown e fonti non passano al traduttore.
-Le lingue di fantasia rimangono lessici parziali dichiarati: non inventare una
-traduzione integrale. Braille/Morse/SGA separati dalla lingua, originali semantici
-e pacchetto reversibile. Varianti/font/fonti/limiti e prove: I18N.md.
+- AI settings for campaign (013), without changing preferences of other
+  campaigns; migration preserves M7 choices already explicit.
+- Local QLoRA on fixed Google Gemma 4 12B checkpoint, distinct from retrieval.
+  Reconstruction from current snapshot to avoid accumulation of deleted notes.
+- Ollama 0.40.10 no longer supports ADAPTER. The worker applies the compact adapter
+  to GGUF copies, preserving unmodified tensors and the immutable base.
+  Adapters and provenance are campaign data and go into backups;
+  inference copies are reconstructible and remain outside the archives.
+- No implicit activation: synthetic GPU/citation validation, explicit selection
+  and invalidation if sources or policies change. Updated weights and loss
+  do not demonstrate by themselves greater accuracy of answers.
+- Isolated Python backend, not an additional server: worker distributed with the app,
+  offline loading without remote code, cancellation and exit if parent dies.
+Status and evidence: docs/AI_TRAINING.md and docs/STATUS.md.
 
-## M11–M13 — scritture versionate e pacchetti offline
 
-Le nuove scritture usano font originali OFL e codici ASCII legati alla revisione
-esplicita del font, non un alfabeto Unicode inventato. Preferenze v2 con upgrade
-conservativo v1 e pacchetti reversibili v2 per Espruar/Dethek; SQLite invariato.
+## M10 — localization without data mutations
 
-Gli estremi dei dadi sono una classificazione pura del risultato già persistito.
-Il replay rimonta la sola scena; non richiama RNG o salvataggio. Due attori SVG
-locali mantengono controllo su direzione, fiamme e movimento ridotto.
+Atomic v1 JSON global preferences outside backup generations; no
+SQLite migration. Local catalogs with Italian source hashes, fallback,
+parameters, and editor dictionaries; no AI model or network required to change
+language. Saved names/presets, UUIDs, Markdown, and sources do not pass to the translator.
+Fantasy languages remain declared partial lexicons: do not invent a
+complete translation. Braille/Morse/SGA separated from language, original semantics
+and reversible package. Variants/fonts/sources/limits and proofs: I18N.md.
 
-Forgejo 12.0.4 dell'origin consente ZIP fino a 2048 MiB: cinque archivi validi,
-non estensioni ZIP applicate a dati grezzi. Distribuire soltanto la closure GGUF
-ufficiale Windows del modello base Gemma 4 12B; escludere la variante opzionale
-MLX e qualsiasi dato/adattatore privato. Installazione in staging nuovo, verifica
-completa e spostamento finale; nessuna sovrascrittura di destinazioni diverse.
-Pubblicazione in bozza e checksum verificati via download prima di renderla finale.
+## M11–M13 — versioned writings and offline packages
+
+New writings use original OFL fonts and ASCII codes linked to the explicit font
+revision, not an invented Unicode alphabet. v2 preferences with conservative v1
+upgrades and v2 reversible packages for Espruar/Dethek; SQLite unchanged.
+
+Dice extremes are a pure classification of the already persisted result.
+The replay remounts only the scene; it does not recall RNG or saving. Two local SVG
+actors maintain control over direction, flames, and reduced movement.
+
+Forgejo 12.0.4 of the origin allows ZIP up to 2048 MiB: five valid archives,
+not ZIP extensions applied to raw data. Distribute only the official Windows GGUF
+closure of the Gemma 4 12B base model; exclude the optional
+MLX variant and any private data/adapter. New staging installation, complete
+verification, and final move; no overwriting of different destinations.
+Draft publication and checksums verified via download before rendering final.
 
 ## 2026-10-25 — M14: external automation over the running app
 
@@ -426,99 +446,99 @@ integration test targets; the app already embeds its own manifest. This fixes th
 loader failure without changing system DLLs or duplicating app resources.
 
 
-## 2026-10-25 — Registro cronologico e M16 pianificata
+## 2026-10-25 — Chronological log and planned M16
 
-Conservare gli ID storici M0–M15, già usati nei commit e nelle guide. Le estensioni
-fuori roadmap ricevono suffissi retrospettivi a/b/c/d e sono collocate nel loro
-punto reale di consegna; l’ordine è esplicito nella tabella, inclusa M11 dopo
-M12/M13. Non riscrivere tag/storia, spostare funzionalità già consegnate nel backlog
-o segnare come concluse le accettazioni ancora aperte.
+Preserve historical IDs M0–M15, already used in commits and guides. Extensions
+outside the roadmap receive retrospective suffixes a/b/c/d and are placed in their
+actual delivery point; the order is explicit in the table, including M11 after
+M12/M13. Do not rewrite tags/history, move already delivered features to the backlog
+or mark as completed the acceptances still open.
 
-Il selettore Wiki richiesto appartiene alla nuova M16 insieme allo scraping:
-Wikidot predefinito in futuro, Open5e alternativa esplicita, catalogo SRD distinto.
-La richiesta è di pianificazione: non cambiare prima la preferenza dell’app senza
-un provider Wikidot funzionante. La release attuale resta Open5e. Requisiti e
-criteri di accettazione in ROADMAP M16; nessun adapter, migrazione o UI aggiunti ora.
+The requested Wiki selector belongs to the new M16 along with scraping:
+Default Wikidot in the future, Open5e as an explicit alternative, distinct SRD catalog.
+The request is for planning: do not change the app preference first without
+a working Wikidot provider. The current release remains Open5e. Requirements and
+acceptance criteria in ROADMAP M16; no adapters, migrations, or UI added now.
 
 
-## 2026-10-25 — M15a: araldo come presentazione del flusso M15
+## 2026-10-25 — M15a: herald as presentation of the M15 flow
 
-- La politica (quando controllare, quando annunciare) è Rust puro e testato; il
-  controllo riusa la funzione M15 rifattorizzata, quindi firme, versioni stabili e
-  same-origin restano identici. Un fallimento automatico non mostra nulla.
-- Limiti: un controllo per sessione (AtomicBool) e al massimo ogni 20 ore,
-  registrato solo dopo un controllo riuscito; orologio all’indietro non blocca.
-  Rinvio di 3 giorni e «ignora» sono per versione: una più recente si annuncia.
-- File `update-announcements.json` separato: aggiungere campi a
-  `update-settings.json` (deny_unknown_fields) avrebbe rotto la lettura M15.
-- Il popup non installa: «Aggiorna» porta alle impostazioni e avvia il download
-  verificato; il backup obbligatorio resta legato al pulsante d’installazione.
-- Attesa di un’app inattiva lato frontend (guardie, dialoghi, campi di testo) più
-  un comando locale per AI/addestramento/aggiornamento in corso. Un `<select>` con
-  focus non conta come scrittura (bug trovato nel collaudo desktop).
-- Fanfara Web Audio invece di un file: nessuna licenza o asset audio, volume
-  basso, nessun nuovo tentativo se l’autoplay è bloccato.
-- Nessuna figura SVG disegnata a mano (craft-floor di impeccable): emblema
-  geometrico finché l’utente non fornisce le illustrazioni raster.
+- The policy (when to check, when to announce) is pure Rust and tested; the
+  check reuses the refactored M15 function, so signatures, stable versions, and
+  same-origin remain identical. An automatic failure shows nothing.
+- Limits: one check per session (AtomicBool) and at most every 20 hours,
+  recorded only after a successful check; backward clock does not block.
+  Delay of 3 days and «ignore» are for version: a newer one is announced.
+- Separate `update-announcements.json` file: adding fields to
+  `update-settings.json` (deny_unknown_fields) would have broken the M15 reading.
+- The popup does not install: «Update» leads to settings and starts the verified download
+  ; the mandatory backup remains linked to the installation button.
+- Waiting for an inactive app on the frontend side (guards, dialogs, text fields) plus
+  a local command for AI/training/update in progress. A `<select>` with
+  focus does not count as writing (bug found in desktop testing).
+- Web Audio fanfare instead of a file: no license or audio assets, low volume,
+  no new attempt if autoplay is blocked.
+- No hand-drawn SVG figures (craft-floor of impeccable): geometric emblem
+  until the user provides the raster illustrations.
 
-## 2026-10-25 — M16 implementata: adapter Wikidot, cache separata, epoch
+## 2026-10-25 — M16 implemented: Wikidot adapter, separate cache, epoch
 
-- L’utente ha chiesto di eseguire M16: precede M15a, che resta pianificata.
-- HTML Wikidot letto dal backend Rust, non dalla WebView: nessun nuovo host nella
-  CSP, controllo di redirect/dimensioni/tempi e nessun cookie. `scraper` 0.29 (ISC,
-  html5ever MIT/Apache, cssparser/selectors MPL-2.0 non modificati) senza feature
-  predefinite. Il risultato salvato è testo strutturato, mai l’HTML originale.
-- Si scarica l’indice della categoria e si filtra localmente: il termine digitato
-  non lascia il dispositivo. Una richiesta alla volta, ≥1,5 s fra le richieste,
-  nessun retry automatico (403/429 riportati come limitazione del sito).
-- Tabella `wikidot_cache` (migrazione 016) separata da `wiki_cache` Open5e, così
-  ogni fonte si svuota da sola senza mescolare chiavi o eviction. Backup schema 016
-  non apribili dalle versioni precedenti (stesso criterio delle migrazioni passate).
-- Preferenza `wiki-preferences.json` separata da `interface-preferences.json`: un
-  campo nuovo nel file v2 avrebbe fatto ricadere i client 0.4.0 nel recupero
-  italiano. File assente = Wikidot non esplicito; la ricevuta pre-aggiornamento
-  lo include. Il ripristino non tocca la cartella radice.
-- Epoch atomico della cache: ogni svuotamento lo incrementa e annulla le richieste
-  Wikidot; le scritture (anche Open5e dal frontend) che portano un epoch vecchio sono
-  rifiutate dentro il lock del database, quindi nulla ricompare dopo lo svuotamento.
-- `catalogSource.provider` opzionale e omesso per SRD: le voci esistenti mantengono
-  lo stesso JSON. Le chiavi AI `wikidot/<pagina>` usano edizione 5e-2014.
-- Cambio fonte: dialogo con focus sull’azione, Escape = rifiuto; solo l’accettazione
-  salva Open5e e ripete una volta la ricerca; un errore Open5e non riapre proposte.
+- The user asked to run M16: precedes M15a, which remains planned.
+- Wikidot HTML read by the Rust backend, not by the WebView: no new host in the
+  CSP, redirect/dimension/time checks and no cookies. `scraper` 0.29 (ISC,
+  html5ever MIT/Apache, cssparser/selectors MPL-2.0 unmodified) without pre-defined
+  features. The saved result is structured text, never the original HTML.
+- The category index is downloaded and filtered locally: the typed term
+  does not leave the device. One request at a time, ≥1,5 s between requests,
+  no automatic retry (403/429 reported as a site limitation).
+- Table `wikidot_cache` (migration 016) separated from `wiki_cache` Open5e, so
+  each source empties itself without mixing keys or eviction. Schema backup 016
+  not openable from previous versions (same criterion as past migrations).
+- Preference `wiki-preferences.json` separated from `interface-preferences.json`: a
+  the new field in the v2 file would have caused 0.4.0 clients to fall back into recovery
+  Italian. Missing file = Wikidot not explicit; the pre-update receipt
+  includes it. The restoration does not touch the root folder.
+- Atomic cache Epoch: every clear increments it and cancels Wikidot requests
+  writes (including Open5e from the frontend) that bring an old epoch are
+  rejected inside the database lock, so nothing reappears after the clear.
+- Optional `catalogSource.provider` and omitted for SRD: existing entries maintain
+  the same JSON. AI `wikidot/<pagina>` keys use edition 5e-2014.
+- Source change: dialogue with focus on action, Escape = rejection; only acceptance
+  saves Open5e and repeats the search once; an Open5e error does not reopen proposals.
 
-## 2026-10-25 — M15a prima di M16; cache eliminabile e cambio fonte su consenso
+## 2026-10-25 — M15a before M16; deletable cache and source change on consent
 
-Inserire M15a tra l’updater consegnato M15 e lo scraping pianificato M16, senza
-rinumerare Wikidot o gli ID storici. Il vassallo con trombetta e manifesto è una
-presentazione del flusso M15: non sostituisce firme, conferma utente o backup.
-Il controllo all’avvio è una futura estensione disattivabile dell’updater, non
-autorizzazione a richieste automatiche per wiki/AI o una funzione già implementata.
+Insert M15a between the delivered M15 updater and the planned M16 scraping, without
+renumbering Wikidot or historical IDs. The vassal with trumpet and manifesto is a
+presentation of the M15 flow: it does not replace signatures, user confirmation, or backup.
+The startup check is a future switchable extension of the updater, not
+authorization for automatic requests for wiki/AI or a function already implemented.
 
-La cancellazione cache M16 riguarda solo dati derivati della fonte, non copie
-salvate, note/immagini di campagna, preferenze o backup. Invalidare richieste
-pendenti evita che i dati appena eliminati ricompaiano senza una nuova richiesta.
-L’insuccesso Wikidot deve proporre un cambio fonte esplicito: consenso necessario
-prima di consultare Open5e; scelta persistente e visibile, nessun fallback silenzioso.
-Entrambe le modifiche restano di pianificazione; codice e versione invariati.
+The M16 cache deletion concerns only derived source data, not saved copies,
+campaign notes/images, preferences, or backups. Invalidating pending requests
+prevents newly deleted data from reappearing without a new request.
+Wikidot failure must propose an explicit source change: consent required
+before consulting Open5e; persistent and visible choice, no silent fallback.
+Both changes remain planned; code and version unchanged.
 
-## 25 ottobre 2026 — Traduzioni wiki derivate e locali (M17)
+## 25 October 2026 — Derived and local wiki translations (M17)
 
-La traduzione usa il Qwen3 4b-instruct già approvato, senza contesto o adapter
-di campagna, con prima inferenza esplicita e originale conservato. Una tabella
-separata nello Store (017) lega la bozza al provider, alla lingua e all’hash del
-contenuto con provenienza: non rende la traduzione una fonte canonica e permette
-backup, invalidazione e svuotamento senza riscrivere gli originali. Il blocco AI
-condiviso impedisce concorrenza con assistente, training e installazione updater.
-La sostituzione del modello appartiene alla qualifica M18.
+The translation uses the already approved Qwen3 4b-instruct, without campaign context or adapter,
+with first explicit inference and original preserved. A separate table
+in the Store (017) links the draft to the provider, language, and hash of the
+content with provenance: it does not make the translation a canonical source and allows
+backup, invalidation, and clearing without rewriting the originals. The shared AI block
+prevents concurrency with assistant, training, and updater installation.
+Model replacement belongs to qualification M18.
 
-## 25 ottobre 2026 — Server self-hosted in un repository separato (M24, pianificata)
+## 25 October 2026 — Self-hosted server in a separate repository (M24, planned)
 
-Per la campagna condivisa l’utente ha scelto un server Chronexus self-hosted al
-posto del peer-to-peer: un account unico per desktop e Android (M25), permessi per
-singolo elemento e disponibilità anche con gli altri dispositivi spenti. Il server
-sta in un repository esterno (proposto `acelith/Chronexus-Server`) perché ha cicli
-di rilascio, dipendenze, distribuzione (Docker) e superficie di sicurezza propri;
-l’app resta installabile e utilizzabile senza di esso. Il confine è un’API HTTP
-versionata con contratto pubblicato dal server; nessuna copia manuale di tipi o
-schema fra i repository. Hosting, registrazione e cifratura end-to-end restano da
-decidere all’avvio di M24.
+For the shared campaign, the user chose a self-hosted Chronexus server
+instead of peer-to-peer: a single account for desktop and Android (M25), permissions for
+single items, and availability even with other devices turned off. The server
+is in an external repository (proposed `acelith/Chronexus-Server`) because it has its own
+release cycles, dependencies, distribution (Docker), and security surface;
+the app remains installable and usable without it. The boundary is a versioned HTTP API
+with a contract published by the server; no manual copy of types or
+schemas between repositories. Hosting, registration, and end-to-end encryption remain to
+be decided at the start of M24.

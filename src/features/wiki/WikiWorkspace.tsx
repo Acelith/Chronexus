@@ -72,19 +72,17 @@ export default function WikiWorkspace({
   return (
     <section
       className="wiki-workspace"
-      aria-label={tr("Wiki Dungeons & Dragons")}
+      aria-label={tr("Dungeons & Dragons Wiki")}
     >
       <h3>
-        <Text source={"Biblioteca delle regole"} />
+        <Text source={"Rules library"} />
       </h3>
       {choice ? (
         <p className="wiki-provider">
-          {tr("Fonte attiva: {0}", [providerNames[choice.provider]])}
+          {tr("Active source: {0}", [providerNames[choice.provider]])}
           {" · "}
           <Text
-            source={
-              "Puoi cambiarla in Impostazioni dell’app → Fonti D&D / Wiki."
-            }
+            source={"You can change it in App settings → D&D sources / Wiki."}
           />
         </p>
       ) : null}
@@ -95,7 +93,7 @@ export default function WikiWorkspace({
       ) : null}
       {!choice && !error ? (
         <p role="status">
-          <Text source={"Lettura della fonte wiki…"} />
+          <Text source={"Reading the wiki source…"} />
         </p>
       ) : null}
       {choice?.provider === "wikidot" ? (
@@ -125,7 +123,7 @@ export default function WikiWorkspace({
           <h4 id="wiki-switch-title">
             <Text
               source={
-                "Wikidot non ha fornito le informazioni. Vuoi usare Open5e?"
+                "Wikidot did not provide the information. Do you want to use Open5e?"
               }
             />
           </h4>
@@ -133,11 +131,11 @@ export default function WikiWorkspace({
           <p>
             {prompt.query.trim().length >= 2
               ? tr(
-                  "Accettando, Open5e diventa la fonte salvata nelle impostazioni dell’app e la ricerca «{0}» viene ripetuta lì. Rifiutando resti su Wikidot e nessuna richiesta viene inviata a Open5e.",
+                  "If you accept, Open5e becomes the source saved in the app settings and the search «{0}» is repeated there. If you decline, you stay on Wikidot and no request is sent to Open5e.",
                   [prompt.query],
                 )
               : tr(
-                  "Accettando, Open5e diventa la fonte salvata nelle impostazioni dell’app. Rifiutando resti su Wikidot e nessuna richiesta viene inviata a Open5e.",
+                  "If you accept, Open5e becomes the source saved in the app settings. If you decline, you stay on Wikidot and no request is sent to Open5e.",
                 )}
           </p>
           <div className="actions">
@@ -147,7 +145,7 @@ export default function WikiWorkspace({
               disabled={saving}
               onClick={() => void switchToOpen5e()}
             >
-              <Text source={"Usa Open5e e salva la scelta"} />
+              <Text source={"Use Open5e and save the choice"} />
             </button>
             <button
               disabled={saving}
@@ -157,10 +155,10 @@ export default function WikiWorkspace({
                 retry();
               }}
             >
-              <Text source={"Riprova su Wikidot"} />
+              <Text source={"Try Wikidot again"} />
             </button>
             <button disabled={saving} onClick={() => setPrompt(null)}>
-              <Text source={"Resta su Wikidot"} />
+              <Text source={"Stay on Wikidot"} />
             </button>
           </div>
         </div>

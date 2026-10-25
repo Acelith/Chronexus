@@ -134,25 +134,25 @@ test("crea una relazione con certezza e blocco fonte senza trasformare menzioni"
   const user = userEvent.setup();
   renderGraph();
   await screen.findByText("Canvas di test");
-  await user.click(screen.getByRole("button", { name: "Nuova relazione" }));
-  expect(screen.getByLabelText("Certezza")).toHaveValue("unknown");
-  await user.type(screen.getByLabelText("Etichetta della relazione"), "accusa");
-  await user.selectOptions(screen.getByLabelText("Certezza"), "suspected");
+  await user.click(screen.getByRole("button", { name: "New relationship" }));
+  expect(screen.getByLabelText("Certainty")).toHaveValue("unknown");
+  await user.type(screen.getByLabelText("Relationship label"), "accusa");
+  await user.selectOptions(screen.getByLabelText("Certainty"), "suspected");
   await user.selectOptions(
-    screen.getByLabelText("Fonte (facoltativa)"),
+    screen.getByLabelText("Source (optional)"),
     "session:s",
   );
-  await user.selectOptions(screen.getByLabelText("Blocco della fonte"), "b");
+  await user.selectOptions(screen.getByLabelText("Source block"), "b");
   await user.type(
-    screen.getByLabelText("Evidenza o citazione"),
+    screen.getByLabelText("Evidence or quote"),
     "Una dichiarazione.",
   );
   await user.type(
-    screen.getByLabelText("Note sulla relazione"),
+    screen.getByLabelText("Relationship notes"),
     "Da verificare.",
   );
-  await user.click(screen.getByRole("button", { name: "Salva relazione" }));
-  await screen.findByText("Relazione salvata sul computer.");
+  await user.click(screen.getByRole("button", { name: "Save relationship" }));
+  await screen.findByText("Relationship saved on the computer.");
   expect(graphApi.save).toHaveBeenCalledWith(
     "a",
     {
@@ -168,7 +168,7 @@ test("crea una relazione con certezza e blocco fonte senza trasformare menzioni"
     },
     undefined,
   );
-  await user.click(screen.getByRole("button", { name: "Apri fonte" }));
+  await user.click(screen.getByRole("button", { name: "Open source" }));
   expect(onSource).toHaveBeenCalledWith(
     expect.objectContaining({ kind: "session", id: "s", blockId: "b" }),
   );
@@ -195,27 +195,23 @@ test("l'eliminazione richiede conferma e usa la revisione corrente", async () =>
   vi.mocked(graphApi.graph).mockResolvedValue(graph);
   renderGraph();
   await screen.findByText("Canvas di test");
+  await user.click(screen.getByText("Accessible list of nodes and links"));
+  await user.click(screen.getByRole("button", { name: /Relationship: Varek/ }));
   await user.click(
-    screen.getByText("Elenco accessibile di nodi e collegamenti"),
-  );
-  await user.click(screen.getByRole("button", { name: /Relazione: Varek/ }));
-  await user.click(
-    await screen.findByRole("button", { name: "Elimina relazione" }),
+    await screen.findByRole("button", { name: "Delete relationship" }),
   );
   expect(screen.getByRole("alertdialog")).toBeInTheDocument();
   expect(graphApi.remove).not.toHaveBeenCalled();
   await user.keyboard("{Escape}");
   expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Elimina relazione" }));
+  await user.click(screen.getByRole("button", { name: "Delete relationship" }));
   vi.mocked(graphApi.graph).mockResolvedValue(data);
   await user.click(
     within(screen.getByRole("alertdialog")).getByRole("button", {
-      name: "Conferma eliminazione",
+      name: "Confirm deletion",
     }),
   );
-  await screen.findByText(
-    "Relazione eliminata. Le menzioni negli appunti sono conservate.",
-  );
+  await screen.findByText("Relationship deleted. Mentions in notes are kept.");
   expect(graphApi.remove).toHaveBeenCalledExactlyOnceWith("a", record);
 });
 
@@ -223,21 +219,19 @@ test("una relazione aperta blocca la navigazione e conserva il form dopo errore"
   const user = userEvent.setup();
   renderGraph();
   await screen.findByText("Canvas di test");
-  await user.click(screen.getByRole("button", { name: "Nuova relazione" }));
-  await user.type(screen.getByLabelText("Etichetta della relazione"), "accusa");
+  await user.click(screen.getByRole("button", { name: "New relationship" }));
+  await user.type(screen.getByLabelText("Relationship label"), "accusa");
   const guard = register.mock.calls.at(-1)![0] as SaveGuard;
-  await expect(guard.flush()).rejects.toThrow("Salva o annulla");
+  await expect(guard.flush()).rejects.toThrow("Save or cancel");
   vi.mocked(graphApi.save).mockRejectedValue(
     new Error("Archivio non scrivibile"),
   );
-  await user.click(screen.getByRole("button", { name: "Salva relazione" }));
+  await user.click(screen.getByRole("button", { name: "Save relationship" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Archivio non scrivibile",
   );
-  expect(screen.getByLabelText("Etichetta della relazione")).toHaveValue(
-    "accusa",
-  );
-  await user.click(screen.getByRole("button", { name: "Annulla relazione" }));
+  expect(screen.getByLabelText("Relationship label")).toHaveValue("accusa");
+  await user.click(screen.getByRole("button", { name: "Cancel relationship" }));
   await expect(guard.flush()).resolves.toBeUndefined();
 });
 
@@ -251,16 +245,16 @@ test("applica filtri e vicinato solo alla conferma e segnala la vista limitata",
   });
   renderGraph();
   await screen.findByText("Canvas di test");
-  expect(screen.getByText(/Vista limitata a 150 nodi/)).toBeInTheDocument();
-  await user.selectOptions(screen.getByLabelText("Collegamenti"), "assertions");
+  expect(screen.getByText(/View limited to 150 nodes/)).toBeInTheDocument();
+  await user.selectOptions(screen.getByLabelText("Links"), "assertions");
   await user.selectOptions(
-    screen.getByLabelText("Certezza delle relazioni"),
+    screen.getByLabelText("Relationship certainty"),
     "suspected",
   );
-  await user.selectOptions(screen.getByLabelText("Nodo centrale"), "page:v");
-  await user.selectOptions(screen.getByLabelText("Profondità"), "2");
+  await user.selectOptions(screen.getByLabelText("Central node"), "page:v");
+  await user.selectOptions(screen.getByLabelText("Depth"), "2");
   expect(graphApi.graph).toHaveBeenCalledTimes(1);
-  await user.click(screen.getByRole("button", { name: "Applica filtri" }));
+  await user.click(screen.getByRole("button", { name: "Apply filters" }));
   await waitFor(() =>
     expect(graphApi.graph).toHaveBeenLastCalledWith("a", {
       ...defaultQuery,

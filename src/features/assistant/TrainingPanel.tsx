@@ -13,11 +13,11 @@ import { assistantApi } from "./api";
 import { errorMessage } from "../journal/api";
 import type { SaveGuard } from "../journal/Editor";
 const labels: Record<string, string> = localizeLabels({
-  running: "In corso",
-  ready: "Validato · disponibile per attivazione",
-  cancelled: "Annullato",
-  error: "Non riuscito",
-  interrupted: "Interrotto",
+  running: "In progress",
+  ready: "Validated · available for activation",
+  cancelled: "Cancelled",
+  error: "Failed",
+  interrupted: "Interrupted",
 });
 export default function TrainingPanel({
   campaignId,
@@ -85,7 +85,7 @@ export default function TrainingPanel({
     setNotice("");
     setProgress({
       phase: "preparing",
-      message: tr("Preparazione del dataset approvato…"),
+      message: tr("Preparing the approved dataset…"),
     });
     const promise = trainingApi
       .start(campaignId, id, overview.datasetHash, (p) => {
@@ -96,7 +96,7 @@ export default function TrainingPanel({
           setNotice(
             result.status === "ready"
               ? tr(
-                  "Addestramento e verifiche conclusi. Il modello precedente resta attivo finché scegli Attiva adapter.",
+                  "Training and checks finished. The previous model stays active until you choose Activate adapter.",
                 )
               : result.error,
           );
@@ -131,7 +131,7 @@ export default function TrainingPanel({
     setProgress({
       phase: "activating",
       message: tr(
-        "Verifica e attivazione adapter; ricostruzione locale se necessaria…",
+        "Checking and activating the adapter; rebuilding locally if needed…",
       ),
     });
     const promise = trainingApi
@@ -141,7 +141,7 @@ export default function TrainingPanel({
         if (mounted.current)
           setNotice(
             tr(
-              "Adapter attivato soltanto per questa campagna. Per tornare indietro scegli il modello base o un adapter precedente ancora compatibile con le fonti.",
+              "Adapter activated for this campaign only. To go back, choose the base model or an earlier adapter that is still compatible with the sources.",
             ),
           );
       })
@@ -160,12 +160,12 @@ export default function TrainingPanel({
   return (
     <fieldset className="training-panel">
       <legend>
-        <Text source={"Riaddestramento locale · Gemma 4 12B"} />
+        <Text source={"Local retraining · Gemma 4 12B"} />
       </legend>
       <p>
         <Text
           source={
-            "L'aggiornamento delle conoscenze non cambia i pesi. Questo comando esegue QLoRA sulla GPU: prepara un nuovo adapter da tutte le fonti attualmente approvate, includendo le correzioni, senza accumulare vecchi appunti esclusi."
+            "Refreshing knowledge does not change the weights. This command runs QLoRA on the GPU: it prepares a new adapter from all currently approved sources, including corrections, without accumulating old excluded notes."
           }
         />
       </p>
@@ -186,55 +186,52 @@ export default function TrainingPanel({
                 .catch((e) => setError(errorMessage(e)));
             }}
           >
-            <Text source={"Riprova stato addestramento"} />
+            <Text source={"Retry training status"} />
           </button>
         ) : (
           <p role="status">
-            <Text source={"Caricamento stato addestramento…"} />
+            <Text source={"Loading training status…"} />
           </p>
         )
       ) : (
         <>
           <p>
-            {overview.added} <Text source={" estratti nuovi · "} />
-            {overview.changed} <Text source={" modificati ·"} />{" "}
-            {overview.removed}{" "}
+            {overview.added} <Text source={" new excerpts · "} />
+            {overview.changed} <Text source={" changed ·"} /> {overview.removed}{" "}
             <Text
-              source={
-                " rimossi rispetto all'ultimo addestramento riuscito. Totale: "
-              }
+              source={" removed since the last successful training. Total: "}
             />
             {overview.sources} <Text source={" estratti."} />
           </p>
           <p>
-            <Text source={"Dimensione degli estratti: "} />
+            <Text source={"Excerpt size: "} />
             {Math.ceil(overview.datasetBytes / 1024)}{" "}
             <Text
               source={
-                "KiB. L'addestramento usa la GPU e include tutti gli estratti approvati. Se la selezione supera i limiti viene richiesta una riduzione, senza omettere dati automaticamente per abbreviare il lavoro."
+                "KiB. Training uses the GPU and includes all approved excerpts. If the selection exceeds the limits you are asked to reduce it; no data is dropped automatically to shorten the job."
               }
             />
           </p>
           <p>
-            <Text source={"Ultimo addestramento riuscito:"} />{" "}
+            <Text source={"Last successful training:"} />{" "}
             {overview.jobs.find((j) => j.status === "ready")?.createdAt
               ? new Date(
                   overview.jobs.find((j) => j.status === "ready")!.createdAt,
                 ).toLocaleString(localeInfo(getPreferences().locale).intl)
-              : tr("Mai eseguito")}
+              : tr("Never run")}
           </p>
           {!overview.backendInstalled && (
             <p>
               <Text
                 source={
-                  "Ambiente QLoRA non installato. Occorre la preparazione locale descritta in docs/AI_TRAINING.md; l'app non scarica dipendenze o modelli automaticamente."
+                  "QLoRA environment not installed. It needs the local setup described in docs/AI_TRAINING.md; the app never downloads dependencies or models automatically."
                 }
               />
             </p>
           )}
           {!overview.trainingSupported && (
             <p role="status">
-              <Text source="Il riaddestramento è qualificato solo per Gemma 4 12B. Per usarlo, scegli e attiva Gemma come opzione secondaria; Qwen3.8-27B resta disponibile per assistente e traduzioni." />
+              <Text source="Retraining is qualified only for Gemma 4 12B. To use it, choose and activate Gemma as the secondary option; Qwen3.8-27B stays available for the assistant and translations." />
             </p>
           )}
           {overview.blocked > 0 && (
@@ -242,7 +239,7 @@ export default function TrainingPanel({
               {overview.blocked}{" "}
               <Text
                 source={
-                  " estratti contengono possibili istruzioni al modello. Escludi o correggi queste fonti prima di addestrare."
+                  " excerpts contain possible instructions to the model. Exclude or fix these sources before training."
                 }
               />
             </p>
@@ -258,24 +255,24 @@ export default function TrainingPanel({
             }
             onClick={() => setConfirm(true)}
           >
-            <Text source={"Riaddestra sui nuovi dati"} />
+            <Text source={"Retrain on the new data"} />
           </button>
           {confirm && (
-            <div role="group" aria-label={tr("Conferma riaddestramento")}>
+            <div role="group" aria-label={tr("Confirm retraining")}>
               <p>
-                <Text source={"Verranno usati "} />
+                <Text source={"Will be used "} />
                 {overview.sources}{" "}
                 <Text
                   source={
-                    " estratti della sola campagna corrente. Nessun invio a servizi esterni. QLoRA modifica un adapter separato; i pesi base restano immutabili. Il lavoro può richiedere diversi minuti e molta VRAM. I pesi derivati per Ollama restano fuori dal backup; adapter e metadati sono inclusi. Il risultato dovrà superare le verifiche prima dell'attivazione esplicita."
+                    " excerpts from the current campaign only. Nothing is sent to external services. QLoRA changes a separate adapter; the base weights stay unchanged. The job can take several minutes and a lot of VRAM. Derived weights for Ollama stay outside the backup; adapters and metadata are included. The result must pass the checks before explicit activation."
                   }
                 />
               </p>
               <button disabled={disabled || running} onClick={start}>
-                <Text source={"Conferma riaddestramento locale"} />
+                <Text source={"Confirm local retraining"} />
               </button>
               <button onClick={() => setConfirm(false)}>
-                <Text source={"Torna alle impostazioni"} />
+                <Text source={"Back to settings"} />
               </button>
             </div>
           )}
@@ -283,31 +280,29 @@ export default function TrainingPanel({
             <div role="status">
               <p>
                 {systemMessage(progress?.message) ||
-                  tr("Operazione locale in corso…")}
+                  tr("Local operation in progress…")}
               </p>
               {progress?.step != null && progress.steps != null && (
                 <>
                   <progress value={progress.step} max={progress.steps} />
                   <p>
-                    <Text source={"Passaggio "} />
+                    <Text source={"Step "} />
                     {progress.step} <Text source={" di "} />
                     {progress.steps}
                   </p>
                 </>
               )}
               <button onClick={() => void cancel()}>
-                <Text source={"Annulla addestramento"} />
+                <Text source={"Cancel training"} />
               </button>
             </div>
           )}
           <h3>
-            <Text source={"Cronologia degli adapter"} />
+            <Text source={"Adapter history"} />
           </h3>
           {overview.jobs.length === 0 ? (
             <p>
-              <Text
-                source={"Nessun addestramento eseguito per questa campagna."}
-              />
+              <Text source={"No training run for this campaign."} />
             </p>
           ) : (
             overview.jobs.map((j) => (
@@ -348,12 +343,12 @@ function TrainingJob({
         <>
           <p>
             {j.model} <Text source={" · GPU: "} />
-            {String(j.metrics.gpu || tr("non indicata"))}{" "}
-            <Text source={"· passaggi: "} />
+            {String(j.metrics.gpu || tr("not given"))}{" "}
+            <Text source={"· steps: "} />
             {String(j.metrics.steps || 0)}
           </p>
           <button disabled={disabled} onClick={onActivate}>
-            <Text source={"Attiva adapter"} />
+            <Text source={"Activate adapter"} />
           </button>
         </>
       )}

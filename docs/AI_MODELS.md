@@ -1,14 +1,14 @@
-# Modelli locali correnti — M18
+# Current local models — M18
 
-Qwen3.8-27B è il modello principale per assistente, traduzione wiki e strumento
-locale di traduzione delle stringhe. Gemma 4 12B è l’opzione secondaria più rapida
-e rimane l’unica base qualificata per il training M8. Entrambi sono multilingui,
-non addestrati specificamente per D&D. Nessun servizio AI esterno viene chiamato.
+Qwen3.8-27B is the primary model for assistant, wiki translation, and tool
+string translation locale. Gemma 4 12B is the faster secondary option
+and remains the only qualified base for M8 training. Both are multilingual,
+not specifically trained for D&D. No external AI services are called.
 
-## Preparazione esplicita
+## Explicit Preparation
 
-Installa un runtime Ollama compatibile, avvialo con cloud disabilitato e scarica
-soltanto il modello scelto prima dell’uso offline:
+Install a compatible Ollama runtime, start it with cloud disabled, and download
+only the chosen model before offline use:
 
 ```powershell
 $env:OLLAMA_NO_CLOUD = '1'
@@ -20,101 +20,101 @@ ollama pull qwen3.8:27b-q4_K_M
 ollama pull gemma4:12b
 ```
 
-Il download del 27B qualificato comprende circa 17,74 GB di pesi/proiettore.
-Prevedere spazio anche per runtime, temporanei e dati; nessun peso è incluso
-nell’installer app, in Git o nei backup. Ollama verifica i blob scaricati;
-Chronexus controlla l’identità locale approvata prima di inviare il contesto.
-Se un tag cambia pesi, non è automaticamente approvato: occorre una nuova qualifica.
+The download of the qualified 27B includes approximately 17,74 GB of weights/projector.
+Allow space for runtime, temporary files, and data; no weights are included
+in the app installer, in Git, or in backups. Ollama verifies the downloaded blobs;
+Chronexus checks the approved local identity before sending the context.
+If a tag changes weights, it is not automatically approved: a new qualification is required.
 
-Nell’app premi **Controlla Ollama e GPU**, scegli il modello, conferma il consenso
-e attivalo per la campagna. Gemma già attiva rimane tale; non viene sostituita
-silenziosamente. Le vecchie scelte Qwen vengono disabilitate dalla migrazione
-018, lasciando nome, digest, conversazioni e citazioni intatti. I backup 017
-restano ripristinabili; uno schema 018 richiede questa versione o successiva.
+In the app, press **Check Ollama and GPU**, select the model, confirm consent
+and activate it for the campaign. Gemma already active remains so; it is not replaced
+silently. The old Qwen choices are disabled by the migration
+018, leaving name, digest, conversations, and citations intact. The 017 backups
+remain restorable; a 018 schema requires this version or later.
 
-La wiki ha un selettore indipendente, con Qwen principale e Gemma secondaria:
-serve sempre **Traduci** per generare. Nessun modello alternativo viene tentato
-automaticamente. Le copie già generate si leggono senza runtime. Le copie v1
-storiche restano nell’archivio, ma non vengono attribuite al nuovo modello.
+The wiki has an independent selector, with Qwen as primary and Gemma as secondary:
+**Translate** is always required to generate. No alternative model is attempted
+automatically. Already generated copies are read without runtime. Historical v1
+copies remain in the archive, but are not attributed to the new model.
 
-## Identità e provenienza
+## Identity and provenance
 
-Fonti verificate il 25 ottobre 2026: [checkpoint ufficiale Qwen](https://huggingface.co/Qwen/Qwen3.8-27B),
-[tag ufficiali Ollama](https://ollama.com/library/qwen3.8/tags).
-Licenza Qwen dichiarata Apache-2.0. Si usa il tag **non MTP**
-`qwen3.8:27b-q4_K_M`, solo testo, senza immagini/OCR né ragionamento esposto.
-La policy condivisa è `src/ai-models.json`; gli hash qualificati sono:
+Verified sources on October 25 2026: [official Qwen](https://huggingface.co/Qwen/Qwen3.8-27B) checkpoint,
+[official Ollama](https://ollama.com/library/qwen3.8/tags) tags.
+Qwen license declared Apache-2.0. The **non MTP** tag is used
+`qwen3.8:27b-q4_K_M`, text only, without images/OCR or exposed reasoning.
+The shared policy is `src/ai-models.json`; the qualified hashes are:
 
-| Modello | Identità | SHA-256 |
+| Model | Identity | SHA-256 |
 | --- | --- | --- |
-| Qwen3.8-27B | Manifest Ollama | `25b843619e944cd0ae6069f94ff4e5e26a16e109ccbc0a66a0f05979ed70098e` |
+| Qwen3.8-27B | Ollama Manifest | `25b843619e944cd0ae6069f94ff4e5e26a16e109ccbc0a66a0f05979ed70098e` |
 | Qwen3.8-27B | GGUF, 16.810.714.464 byte | `f5f1dd8920d417aac2718b0bda3403da274301efdd6760b4f0f4b864ff2ad57d` |
-| Qwen3.8-27B | Proiettore, 931.146.016 byte | `ac3714bfdddeca31351f2752bf1a63f266f4df87c0b68c895e44945ca704448e` |
-| Gemma 4 12B | Manifest Ollama | `6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b` |
+| Qwen3.8-27B | Projector, 931.146.016 byte | `ac3714bfdddeca31351f2752bf1a63f266f4df87c0b68c895e44945ca704448e` |
+| Gemma 4 12B | Ollama Manifest | `6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b` |
 | Gemma 4 12B | GGUF | `bb722270d54346adc198f213851dbe0207e87c3ecf2a0aff4d92262726215391` |
 
-Il GGUF Qwen è stato riletto e verificato anche indipendentemente con SHA-256.
-Provenienza/licenza Gemma e checkpoint QLoRA restano in [AI_TRAINING.md](AI_TRAINING.md).
-Qwen3.8-Max non è questo modello e non è supportato.
+The Qwen GGUF was reread and also independently verified with SHA-256.
+Gemma provenance/license and QLoRA checkpoint remain in [AI_TRAINING.md](AI_TRAINING.md).
+Qwen3.8-Max is not this model and is not supported.
 
-## Qualifica Windows effettiva
+## Actual Windows Qualification
 
-RTX 4080 SUPER 16 GB, RAM 61,6 GiB (circa 31 GiB liberi all’avvio), Ollama
-0.40.10. Con Q4_K_M, contesto 8192, batch 256 e **48 layer GPU**, il runtime
-riporta 17.628.533.879 byte caricati di cui 12.211.349.093 GPU: esecuzione
-**mista GPU/RAM**, mai presentata come interamente GPU. `nvidia-smi` misura
-circa 12,7 GB usati e 3,3 GB liberi durante la prova. Altri carichi riducono il
-margine. Configurazione 99 layer scartata: pressione di memoria e 105,104 s
-per una risposta breve; il confronto completo usa soltanto il profilo 48.
+RTX 4080 SUPER 16 GB, RAM 61,6 GiB (approx. 31 GiB free at startup), Ollama
+0.40.10. With Q4_K_M, context 8192, batch 256 and **48 GPU layer**, the runtime
+reports 17.628.533.879 bytes loaded of which 12.211.349.093 GPU: execution
+**mixed GPU/RAM**, never presented as entirely GPU. `nvidia-smi` measures
+approximately 12,7 GB used and 3,3 GB free during the test. Other loads reduce the
+margin. 99 layer configuration discarded: memory pressure and 105,104 s
+for a short response; the full comparison uses only the 48 profile.
 
-| Prova con fonti sintetiche identiche | Qwen 27B, 48 layer | Gemma 12B, 99 layer |
+| Test with identical synthetic sources | Qwen 27B, 48 layer | Gemma 12B, 99 layer |
 | --- | --- | --- |
-| 20 campagna, 10 regole/edizioni, 5 assenze | 35/35 | 35/35 |
-| Mediana risposta breve | 3,016 s | circa 0,27 s |
-| p95 risposta breve | 4,570 s | circa 0,51 s |
-| Caricamento con cache disco calda | 4,568 s | 4,439 s |
-| Benchmark completo tramite app | 40/40 | 40/40 |
+| 20 campaign, 10 rules/editions, 5 absences | 35/35 | 35/35 |
+| Median short response | 3,016 s | approximately 0,27 s |
+| p95 short response | 4,570 s | approximately 0,51 s |
+| Loading with hot disk cache | 4,568 s | 4,439 s |
+| Full benchmark via app | 40/40 | 40/40 |
 
-I cinque casi aggiuntivi di istruzioni malevole vengono bloccati dall’app prima
-dell’inferenza. Citazioni valide, separazione campagna/edizione e dati canonici
-invariati; nessun ragionamento esposto. Non è una valutazione generale delle
-conoscenze o una garanzia di correttezza delle regole. `/api/ps` di Gemma MTP
-riporta solo la componente draft: non usarlo come consumo VRAM totale.
+The five additional cases of malicious instructions are blocked by the app before
+inference. Valid citations, campaign/edition separation and canonical data
+unchanged; no reasoning exposed. It is not a general assessment of
+knowledge or a guarantee of rule correctness. `/api/ps` of Gemma MTP
+reports only the draft component: do not use it as total VRAM consumption.
 
-Traduzioni sintetiche Qwen italiano/tedesco/arabo: numeri, negazione e raggio
-conservati dopo una correzione del prompt (la prima resa araba confondeva raggio
-e diametro). Il controllo numerico non certifica il significato: tutte restano
-bozze. Gemma ha prodotto una prima risposta italiana con un numero aggiuntivo,
-correttamente rifiutata; nessun indebolimento del controllo. QA wiki nell’app:
-italiano, originale intatto, cache senza runtime, annullamento/cache clear e axe
-0 violazioni. Non equivale a una prova fisica senza rete/firewall.
+Synthetic translations Qwen Italian/German/Arabic: numbers, negation and radius
+preserved after a prompt correction (the first Arabic output confused radius
+and diameter). Numerical control does not certify meaning: all remain
+drafts. Gemma produced a first Italian response with an additional number,
+correctly refused; no weakening of control. QA wiki in the app:
+Italian, original intact, cache without runtime, cancellation/cache clear and axe
+0 violations. It does not equate to a physical test without network/firewall.
 
-## Ripetibilità e confini
+## Repeatability and boundaries
 
-`scripts/qa/local-ai-evaluation.mjs` usa profili sintetici vuoti isolati,
-`CHRONEXUS_AI_QA=isolated`, porta CDP 9227; per il confronto scegliere
-esplicitamente `CHRONEXUS_TEST_MODEL=gemma4:12b`. Il report esclude dati reali.
-`scripts/qa/m18-migration.mjs` ripristina soltanto il backup sintetico schema
-017 preparato nel collaudo e verifica disattivazione, storia/citazioni, consenso,
-Gemma conservata e abilitazione training. Fixture e report sono fuori Git.
+`scripts/qa/local-ai-evaluation.mjs` uses isolated empty synthetic profiles,
+`CHRONEXUS_AI_QA=isolated`, CDP port 9227; for comparison explicitly choose
+`CHRONEXUS_TEST_MODEL=gemma4:12b`. The report excludes real data.
+`scripts/qa/m18-migration.mjs` restores only the synthetic backup schema
+017 prepared in testing and verifies deactivation, history/citations, consent,
+Gemma preserved and training enablement. Fixtures and reports are outside Git.
 
-Loopback fisso, niente proxy/redirect/cloud fallback, preflight GPU prima del
-testo. CPU sola, runtime/modello assente, cloud non verificato o identità cambiata
-producono errore. In caso di memoria insufficiente non cambiare modello in
-automatico. Refresh retrieval rimane distinto dall’addestramento; QLoRA Qwen
-non qualificato. Altre GPU, macOS/Linux, installazione reale e prova fisica
-offline restano pendenti.
+Fixed loopback, no proxy/redirect/cloud fallback, GPU preflight before
+text. CPU only, runtime/model absent, cloud not verified or identity changed
+produce an error. In case of insufficient memory, do not change model
+automatically. Retrieval refresh remains distinct from training; QLoRA Qwen
+not qualified. Other GPUs, macOS/Linux, real installation and physical offline
+test remain pending.
 
 
-## Installazione guidata (M22)
+## Guided installation (M22)
 
-**Impostazioni dell’app → AI locale: componenti** permette, sempre dopo un clic:
-controllo dei componenti; installazione di Ollama 0.40.10 dall’archivio ufficiale
-GitHub con SHA-256 `d52aea2d323bdd324bf66a4b1226844aa5fb665cc5974fbcceceda1ce3d934eb`
-(1.586.229.413 byte) in `ai-runtime/ollama-0.40.10` della cartella dati; avvio e
-arresto del runtime gestito (si chiude con Chronexus, `OLLAMA_NO_CLOUD=1`, modelli in
-`ai-runtime/models`); download del solo modello scelto tramite il runtime attivo,
-dichiarato pronto solo con i pesi qualificati. Un runtime già attivo e senza cloud
-viene usato senza riavviarlo o riconfigurarlo. Installare non abilita l’assistente:
-la scelta resta nelle impostazioni della campagna. QLoRA resta su Gemma e i suoi
-componenti non sono scaricati qui.
+**App Settings → Local AI: components** allows, always after a click:
+component control; installation of Ollama 0.40.10 from the official
+GitHub with SHA-256 `d52aea2d323bdd324bf66a4b1226844aa5fb665cc5974fbcceceda1ce3d934eb`
+(1.586.229.413 bytes) in `ai-runtime/ollama-0.40.10` of the data folder; managed start and
+stop of the runtime (closes with Chronexus, `OLLAMA_NO_CLOUD=1`, models in
+`ai-runtime/models`); download of only the chosen model via the active runtime,
+declared ready only with qualified weights. A runtime already active and without cloud
+is used without restarting or reconfiguring it. Installing does not enable the assistant:
+the choice remains in the campaign settings. QLoRA remains on Gemma and its
+components are not downloaded here.

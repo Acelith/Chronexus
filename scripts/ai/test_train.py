@@ -19,7 +19,7 @@ class WorkerTests(unittest.TestCase):
         self.assertTrue(any("Informazione 72" in text for text in covered))
         with self.assertRaisesRegex(ValueError,"8000"):
             training_plan(rows*110)
-        with self.assertRaisesRegex(ValueError,"estratti approvati"):
+        with self.assertRaisesRegex(ValueError,"approved excerpts"):
             training_plan([])
 
     def test_long_sources_preserve_the_tail_in_token_windows(self):
@@ -32,13 +32,13 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual("".join(fragments),text)
     def test_missing_cuda_fails_before_loading_campaign_or_model(self):
         with patch("torch.cuda.is_available", return_value=False):
-            with self.assertRaisesRegex(RuntimeError,"GPU CUDA non disponibile"):
+            with self.assertRaisesRegex(RuntimeError,"CUDA GPU unavailable"):
                 train({},Path("unused"))
 
     def test_examples_preserve_claims_and_do_not_execute_document_text(self):
         rows = examples([{"title": "Mirna", "text": "Mirna dice di essere una maga."}])
         self.assertIn("dice di essere", rows[0][-1]["content"])
-        self.assertIn("restano da verificare", rows[0][-1]["content"])
+        self.assertIn("remain unverified", rows[0][-1]["content"])
         self.assertIn("[S1]", rows[0][-1]["content"])
         self.assertEqual(examples([{"title": "Vuoto", "text": "  "}]), [])
 

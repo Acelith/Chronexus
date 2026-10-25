@@ -155,7 +155,7 @@ function NoteEditor(props: Props) {
       const message =
         error instanceof Error
           ? error.message
-          : tr("Markdown non valido. Il testo è conservato.");
+          : tr("Invalid Markdown. The text is kept.");
       setSourceError(message);
       throw Error(message, { cause: error });
     }
@@ -209,7 +209,7 @@ function NoteEditor(props: Props) {
           reason instanceof Error
             ? reason.message
             : tr(
-                "Creazione non riuscita. Il nome è conservato come testo: riprova con [[.",
+                "Creation failed. The name is kept as text: try again with [[.",
               ),
         );
         throw reason;
@@ -230,13 +230,13 @@ function NoteEditor(props: Props) {
       query,
     ).map((page) => ({
       title: page.title,
-      subtext: `${pageKinds[page.kind]}${page.status === "stub" ? " · Bozza" : ""}${page.aliases.length ? ` · Alias: ${page.aliases.join(", ")}` : ""}`,
+      subtext: `${pageKinds[page.kind]}${page.status === "stub" ? " · Draft" : ""}${page.aliases.length ? ` · Aliases: ${page.aliases.join(", ")}` : ""}`,
       onItemClick: () => insertPage(page),
     }));
     if (canCreatePage(links.pages, query))
       items.push({
-        title: `Crea bozza «${title}»`,
-        subtext: tr("Nuova pagina nel Codex di questa campagna"),
+        title: `Create draft «${title}»`,
+        subtext: tr("New page in this campaign's Codex"),
         onItemClick: () => createLinkedPage(title),
       });
     return items;
@@ -269,7 +269,7 @@ function NoteEditor(props: Props) {
       ) : null}
       {linking ? (
         <p role="status">
-          <Text source={"Creazione pagina…"} />
+          <Text source={"Creating page…"} />
         </p>
       ) : null}
       <EditorModeBar
@@ -302,14 +302,14 @@ function NoteEditor(props: Props) {
           <p className="editor-hint">
             <Text
               source={
-                "Modifica titoli, elenchi, attività, citazioni, grassetto, corsivo e link. I collegamenti al Codex conservano l’UUID. Colori, sottolineatura e allineamento sono formati visuali: il Markdown standard non li rappresenta: restano nei blocchi non modificati. Tabelle, immagini e HTML non vengono convertiti."
+                "Edit headings, lists, tasks, quotes, bold, italic and links. Codex links keep their UUID. Colors, underline and alignment are visual formats that standard Markdown cannot represent: they stay in the unchanged blocks. Tables, images and HTML are not converted."
               }
             />
           </p>
           <textarea
             dir="auto"
             className="markdown-source"
-            aria-label={tr("Codice Markdown")}
+            aria-label={tr("Markdown source")}
             spellCheck={false}
             value={source}
             disabled={blocked}
@@ -372,7 +372,7 @@ class EditorBoundary extends Component<
         <p>{it.copyHint}</p>
         <textarea
           dir="auto"
-          aria-label={tr("Documento originale")}
+          aria-label={tr("Original document")}
           readOnly
           value={JSON.stringify(this.props.document, null, 2)}
         />

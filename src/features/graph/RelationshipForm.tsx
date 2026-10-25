@@ -48,7 +48,7 @@ export default function RelationshipForm({
   return (
     <form
       className="entry-form relationship-form"
-      aria-label={initial ? tr("Modifica relazione") : tr("Nuova relazione")}
+      aria-label={initial ? tr("Edit relationship") : tr("New relationship")}
       onSubmit={(event) => {
         event.preventDefault();
         void onSave({
@@ -65,20 +65,20 @@ export default function RelationshipForm({
       }}
     >
       <h3>
-        {initial ? tr("Modifica relazione") : tr("Nuova relazione dichiarata")}
+        {initial ? tr("Edit relationship") : tr("New declared relationship")}
       </h3>
       <p className="editor-hint">
         <Text
           source={
-            "Registra ciò che ritieni vero o sospetti. Questa relazione è distinta dalle citazioni negli appunti."
+            "Record what you believe is true or suspect. This relationship is separate from the quotes in your notes."
           }
         />
       </p>
       <div className="form-fields">
         <label>
-          <Text source={"Da pagina"} />
+          <Text source={"From page"} />
           <select
-            aria-label={tr("Da pagina")}
+            aria-label={tr("From page")}
             required
             value={from}
             onChange={(event) => setFrom(event.target.value)}
@@ -92,9 +92,9 @@ export default function RelationshipForm({
           </select>
         </label>
         <label>
-          <Text source={"A pagina"} />
+          <Text source={"At page"} />
           <select
-            aria-label={tr("A pagina")}
+            aria-label={tr("At page")}
             required
             value={to}
             onChange={(event) => setTo(event.target.value)}
@@ -109,7 +109,7 @@ export default function RelationshipForm({
         </label>
       </div>
       <label>
-        <Text source={"Etichetta della relazione"} />
+        <Text source={"Relationship label"} />
         <input
           autoFocus
           required
@@ -117,13 +117,13 @@ export default function RelationshipForm({
           value={label}
           onChange={(event) => setLabel(event.target.value)}
           disabled={busy}
-          placeholder={tr("es. accusa, appartiene a, cerca")}
+          placeholder={tr("e.g. accuses, belongs to, seeks")}
         />
       </label>
       <label>
-        <Text source={"Certezza"} />
+        <Text source={"Certainty"} />
         <select
-          aria-label={tr("Certezza")}
+          aria-label={tr("Certainty")}
           value={certainty}
           onChange={(event) => setCertainty(event.target.value as Certainty)}
           disabled={busy}
@@ -136,9 +136,9 @@ export default function RelationshipForm({
         </select>
       </label>
       <label>
-        <Text source={"Fonte (facoltativa)"} />
+        <Text source={"Source (optional)"} />
         <select
-          aria-label={tr("Fonte (facoltativa)")}
+          aria-label={tr("Source (optional)")}
           value={source}
           onChange={(event) => {
             setSource(event.target.value);
@@ -146,16 +146,16 @@ export default function RelationshipForm({
           }}
           disabled={busy}
         >
-          <option value="">{tr("Nessuna fonte selezionata")}</option>
-          <optgroup label={tr("Sessioni")}>
+          <option value="">{tr("No source selected")}</option>
+          <optgroup label={tr("Sessions")}>
             {sessions.map((session) => (
               <option key={session.id} value={`session:${session.id}`}>
-                {tr("Sessione ")}
+                {tr("Session ")}
                 {session.sequence}: {session.title}
               </option>
             ))}
           </optgroup>
-          <optgroup label={tr("Pagine")}>
+          <optgroup label={tr("Pages")}>
             {pages.map((page) => (
               <option key={page.id} value={`page:${page.id}`}>
                 {page.title}
@@ -165,16 +165,16 @@ export default function RelationshipForm({
         </select>
       </label>
       <label>
-        <Text source={"Blocco della fonte"} />
+        <Text source={"Source block"} />
         <select
-          aria-label={tr("Blocco della fonte")}
+          aria-label={tr("Source block")}
           value={block}
           disabled={!source || busy}
           onChange={(event) => setBlock(event.target.value)}
         >
-          <option value="">{tr("Intero documento")}</option>
+          <option value="">{tr("Whole document")}</option>
           {block && !blocks.some((item) => item.id === block) ? (
-            <option value={block}>{tr("Blocco non più disponibile")}</option>
+            <option value={block}>{tr("Block no longer available")}</option>
           ) : null}
           {blocks.map((item, index) => (
             <option key={item.id} value={item.id}>
@@ -184,7 +184,7 @@ export default function RelationshipForm({
         </select>
       </label>
       <label>
-        <Text source={"Evidenza o citazione"} />
+        <Text source={"Evidence or quote"} />
         <textarea
           rows={3}
           maxLength={4000}
@@ -194,7 +194,7 @@ export default function RelationshipForm({
         />
       </label>
       <label>
-        <Text source={"Note sulla relazione"} />
+        <Text source={"Relationship notes"} />
         <textarea
           rows={3}
           maxLength={4000}
@@ -208,10 +208,10 @@ export default function RelationshipForm({
           className="primary"
           disabled={busy || !from || !to || !label.trim()}
         >
-          <Text source={"Salva relazione"} />
+          <Text source={"Save relationship"} />
         </button>
         <button type="button" disabled={busy} onClick={onCancel}>
-          <Text source={"Annulla relazione"} />
+          <Text source={"Cancel relationship"} />
         </button>
       </div>
     </form>

@@ -1,176 +1,176 @@
-# Modelli correnti — M18, 25 ottobre 2026
+# Current Models — M18, 25 October 2026
 
-**Qwen3.8-27B è la prima scelta; Gemma 4 12B è secondaria.** Setup, digest,
-requisiti e misure reali in [AI_MODELS.md](AI_MODELS.md). Il vecchio Qwen3 4B
-non è più eseguibile/selezionabile nell’app: le sezioni M7 sotto sono evidenza
-storica, non istruzioni di rollback attuali. La migrazione 018 disabilita le
-vecchie scelte preservando risposte e citazioni. Nessuna attivazione automatica.
-Il launcher `scripts/Start-LocalAI.ps1` avvia soltanto il runtime già presente;
-il modello si prepara esplicitamente come descritto nella nuova guida.
+**Qwen3.8-27B is the first choice; Gemma 4 12B is secondary.** Setup, digest,
+requirements and real measurements in [AI_MODELS.md](AI_MODELS.md). The old Qwen3 4B
+is no longer executable/selectable in the app: the M7 sections below are historical
+evidence, not current rollback instructions. The 018 migration disables the
+old choices while preserving responses and citations. No automatic activation.
+The `scripts/Start-LocalAI.ps1` launcher only starts the already present runtime;
+the model is explicitly prepared as described in the new guide.
 
-# M7 — Assistente D&D locale sulla GPU
+# M7 — Local D&D Assistant on GPU
 
-> M8: Gemma 4 12B, impostazioni per campagna e training QLoRA sono documentati
-> in [AI_TRAINING.md](AI_TRAINING.md). Il profilo M7 Qwen descritto qui resta
-> solo come evidenza storica; M18 ritira quel rollback. Modello e fonti sono scelti per campagna.
+> M8: Gemma 4 12B, settings for campaign and QLoRA training are documented
+> in [AI_TRAINING.md](AI_TRAINING.md). The M7 Qwen profile described here remains
+> only as historical evidence; M18 withdraws that rollback. Model and sources are chosen for campaign.
 
-Stato: funzioni implementate e collaudate su Windows; accettazione fisica offline
-e piattaforme aggiuntive ancora da verificare. Configurazione disattivata
-inizialmente; l'app rimane utilizzabile senza Ollama. Risultati aggiornati in
-[STATUS.md](STATUS.md) e [QA.md](QA.md).
+Status: functions implemented and tested on Windows; physical offline acceptance
+and additional platforms still to be verified. Configuration initially disabled;
+the app remains usable without Ollama. Updated results in
+[STATUS.md](STATUS.md) and [QA.md](QA.md).
 
-## Scelta approvata del modello
+## Approved model choice
 
-Il candidato specifico D&D [dnd-unified-1.5b](https://huggingface.co/chendren/dnd-unified-1.5b),
-[GGUF Q4_K_M](https://huggingface.co/mradermacher/dnd-unified-1.5b-GGUF), è stato
-realmente caricato sulla RTX 4080 SUPER: 29/29 layer GPU, circa 999 MiB residenti,
-contesto 2048. SHA-256 pesi:
+The specific D&D candidate [dnd-unified-1.5b](https://huggingface.co/chendren/dnd-unified-1.5b),
+[GGUF Q4_K_M](https://huggingface.co/mradermacher/dnd-unified-1.5b-GGUF), was
+actually loaded on the RTX 4080 SUPER: 29/29 GPU layers, about 999 MiB resident,
+2048 context. SHA-256 weights:
 `3cc578dabc0e30a8e7d51d2b27d5e46f5abd118e16fe0e67123ea064fe17b77e`.
-Ha fallito tre prove italiane iniziali, ripetendo prompt/risposta senza concludere.
-La scheda dichiara Apache-2.0, inglese e dati 5e/3.5; metriche e provenienza dei
-suoi dataset non sono indipendentemente validate. Escluso dalla selezione UI.
+It failed three initial Italian tests, repeating prompt/response without concluding.
+The sheet declares Apache-2.0, English and 5e/3.5 data; metrics and provenance of
+its datasets are not independently validated. Excluded from UI selection.
 
-L'utente ha quindi **esplicitamente approvato un modello multilingue più capace
-con fonti D&D e campagna locali e citazioni**. Il modello scelto è
-[Qwen3:4b-instruct](https://ollama.com/library/qwen3:4b-instruct), basato su
+The user has therefore **explicitly approved a more capable multilingual model
+with D&D sources and local campaigns and citations**. The chosen model is
+[Qwen3:4b-instruct](https://ollama.com/library/qwen3:4b-instruct), based on
 [Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507).
-È multilingue, **non fine-tuned D&D**. Licenza Apache-2.0 dichiarata dai produttori;
-nessun peso redistribuito nel repository o nell'installer.
+It is multilingual, **not fine-tuned for D&D**. Apache-2.0 license declared by the manufacturers;
+no weights redistributed in the repository or in the installer.
 
-- Manifest Ollama: `0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0`.
-- SHA-256 pesi: `85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9`.
-- Quantizzazione Q4_K_M, circa 2,5 GB su disco; contesto app 8192, output 512 token.
-- Ollama portable 0.40.10; pacchetto ufficiale verificato con checksum di release.
-- RTX 4080 SUPER, 16.376 MiB, driver 621.01: `/api/ps` riporta
-  3.710.428.118 byte residenti **tutti in VRAM**, circa 3539 MiB a contesto 8192.
-  Hardware e consumo osservati sono dati di prova, non requisiti universali.
-- Qwen3:4b standard esponeva ragionamento invece di risposte dirette: usare la
-  variante **instruct**. Altri modelli selezionabili non sono qualificati da queste prove.
+- Ollama Manifest: `0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0`.
+- SHA-256 weights: `85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9`.
+- Q4_K_M Quantization, approximately 2,5 GB on disk; app context 8192, output 512 tokens.
+- Ollama portable 0.40.10; official package verified with release checksum.
+- RTX 4080 SUPER, 16.376 MiB, driver 621.01: `/api/ps` reports
+  3.710.428.118 bytes resident **all in VRAM**, approximately 3539 MiB at context 8192.
+  Hardware and observed consumption are test data, not universal requirements.
+- Qwen3:4b standard exhibited reasoning instead of direct answers: use the
+  **instruct** variant. Other selectable models are not qualified by these tests.
 
-## Avvio Windows
+## Windows Startup
 
-E' disponibile anche un pacchetto con i due installer e tutti i file AI nella
-cartella root `installers/Chronexus-0.1.0-Windows-x64/`; vedere [INSTALLERS.md](INSTALLERS.md).
-Contiene il wrapper manifest aggiornato da Ollama, con gli stessi pesi verificati.
-Su un archivio gia' configurato puo' essere necessario controllare e riattivare
-il modello, come previsto dalla verifica del digest; nessun cambio automatico.
+A package with the two installers and all AI files is also available in the
+root folder `installers/Chronexus-0.1.0-Windows-x64/`; see [INSTALLERS.md](INSTALLERS.md).
+It contains the wrapper manifest updated by Ollama, with the same verified weights.
+On an already configured archive, it may be necessary to check and reactivate
+the model, as expected by the digest verification; no automatic change.
 
-Il runtime e i pesi scaricati per questa sessione sono isolati in
-`.tools/m7-runtime`, esclusa da Git. Nessuna installazione globale, account o
-servizio cloud. Non spostare quella cartella se vuoi riutilizzarli.
+The runtime and weights downloaded for this session are isolated in
+`.tools/m7-runtime`, excluded from Git. No global installation, account or
+cloud service. Do not move that folder if you want to reuse them.
 
-1. Dal progetto, esegui `powershell -File scripts/Start-LocalAI.ps1`.
-   Lo script non installa né scarica software, non ferma servizi esistenti e
-   avvia Ollama nascosto con `OLLAMA_NO_CLOUD=1`, host loopback e pesi isolati.
-   Per un runtime diverso passa `-OllamaPath` e, se necessario, `-ModelsPath`.
-2. Avvia Chronexus (`pnpm desktop` nell'ambiente di sviluppo configurato).
-3. Apri una campagna → **Assistente locale** → **Controlla Ollama**.
-4. Scegli `qwen3:4b-instruct`, conferma il profilo multilingue con fonti locali
-   e premi **Attiva modello locale**. Il modello resta associato al digest.
-5. Scrivi una domanda con nomi/termini presenti negli appunti. In modalità
-   **Regole D&D locali**, scegli l'edizione e fino a sei voci già aperte nella Wiki.
+1. From the project, run `powershell -File scripts/Start-LocalAI.ps1`.
+   The script does not install or download software, does not stop existing services and
+   starts Ollama hidden with `OLLAMA_NO_CLOUD=1`, loopback host and isolated weights.
+   For a different runtime, pass `-OllamaPath` and, if necessary, `-ModelsPath`.
+2. Start Chronexus (`pnpm desktop` in the configured development environment).
+3. Open a campaign → **Local Assistant** → **Check Ollama**.
+4. Choose `qwen3:4b-instruct`, confirm the multilingual profile with local sources
+   and press **Activate local model**. The model remains associated with the digest.
+5. Write a question with names/terms present in the notes. In
+   **Local D&D Rules** mode, choose the edition and up to six items already open in the Wiki.
 
-Per una nuova macchina occorre installare un runtime compatibile e scaricare
-esplicitamente il modello, prima dell'uso offline. Con il portable di questa
-sessione, avviato come sopra, il comando è:
+For a new machine, a compatible runtime must be installed and the model explicitly
+downloaded before offline use. With the portable of this
+session, started as above, the command is:
 
 ```powershell
 $env:OLLAMA_HOST = '127.0.0.1:11434'
 & .tools/m7-runtime/ollama/ollama.exe pull qwen3:4b-instruct
 ```
 
-Su macOS/Linux impostare `OLLAMA_NO_CLOUD=1` e `OLLAMA_HOST=127.0.0.1:11434`
-prima di avviare `ollama serve`. Queste piattaforme non sono state provate qui.
-Runtime vecchi che non espongono lo stato cloud verificabile vengono rifiutati.
-Consulta la [configurazione ufficiale](https://docs.ollama.com/faq).
+On macOS/Linux, set `OLLAMA_NO_CLOUD=1` and `OLLAMA_HOST=127.0.0.1:11434`
+before starting `ollama serve`. These platforms have not been tested here.
+Old runtimes that do not expose verifiable cloud status are rejected.
+Consult the [official configuration](https://docs.ollama.com/faq).
 
-## Confini di sicurezza e qualità
+## Security and Quality Boundaries
 
-- Adapter Rust con host fisso `http://127.0.0.1:11434`, proxy e redirect esclusi.
-  React usa solo comandi Tauri: nessun nuovo host nella CSP, account o telemetria.
-- `/api/status` deve confermare cloud disabilitato; `/api/show` deve confermare
-  GGUF senza inoltro remoto e SHA-256 dei pesi; digest manifest fissato al consenso.
-- Precaricamento **senza appunti**, poi verifica `/api/ps`. CPU esclusiva bloccata
-  prima dell'invio delle fonti; GPU/CPU mista dichiarata. GPU non dedotta dal nome.
-- Una generazione alla volta, timeout, NDJSON limitato, cancellazione e salvataggi
-  parziali. Navigazione/chiusura annullano e attendono la conservazione della bozza.
-- Retrieval FTS5 della sola campagna: sessioni, pagine, Party, scheda e asset.
-  Nomi/alias noti restringono i risultati pertinenti; non sono inferenze nel grafo.
-  Fino a otto estratti di 1200 caratteri; riepilogo/blocco non duplicati come prove.
-  Prompt complessivo limitato conservativamente a 7000 byte, prima del runtime.
-- Non è una lettura integrale della campagna, un motore D&D o una ricerca semantica.
-  Con poche parole comuni o appunti non trovati può mancare una risposta presente
-  altrove. Riformulare con nomi e alias precisi e controllare gli estratti forniti.
-- Regole soltanto dalla cache Wiki selezionata: 5e-2014, 5e-2024, 3.5 separate.
-  Nessuna ricerca online automatica per rispondere, nessuna raccolta di manuali
-  commerciali. Testo ritagliato dichiarato dalla copia effettivamente fornita.
-- Fonti con ID stabile, blocco (anche Logseq), titolo, revisione e hash; copie
-  immutabili conservate con la risposta. Citazioni riaprono la fonte, distinguendo
-  versione attuale, modificata o mancante. Nessuna citazione a ID non forniti accettata.
-- Le istruzioni nei documenti sono dati, non comandi. Nessun tool o accesso del
-  modello a DB, file o shell. Non modifica mai appunti, relazioni, contatori o asset.
-- Un gate lessicale prudente esclude estratti con segnali espliciti di istruzioni
-  rivolte al modello prima dell'invio e ne mostra il numero. Le altre fonti pulite
-  restano utilizzabili; se tutte sono sospette la richiesta si ferma e conserva
-  le copie per revisione. Metadati registrano gli ID esclusi e l'invio del contesto.
-  Possibili falsi positivi e attacchi non riconosciuti: non è una difesa infallibile.
-- Il controllo delle citazioni è strutturale, **non verifica la verità**. Il modello
-  può essere prolisso, interpretare male un dubbio o citare una fonte poco pertinente.
-  Una risposta con errore resta una bozza non verificata, visibile per controllo.
+- Rust Adapter with fixed host `http://127.0.0.1:11434`, proxy and redirect excluded.
+  React uses only Tauri commands: no new host in the CSP, account or telemetry.
+- `/api/status` must confirm cloud disabled; `/api/show` must confirm
+  GGUF without remote forwarding and SHA-256 of the weights; manifest digest fixed to consensus.
+- Preloading **without notes**, then `/api/ps` verification. Exclusive CPU locked
+  before source submission; mixed GPU/CPU declared. GPU not inferred from name.
+- One generation at a time, timeout, limited NDJSON, cancellation and partial
+  saves. Navigation/closing cancel and wait for draft preservation.
+- FTS5 Retrieval of the campaign only: sessions, pages, Party, sheet and assets.
+  Known names/aliases restrict relevant results; they are not inferences in the graph.
+  Up to eight extracts of 1200 characters; summary/block not duplicated as evidence.
+  Overall prompt conservatively limited to 7000 bytes, before the runtime.
+- It is not a full reading of the campaign, a D&D engine, or a semantic search.
+  With a few common words or notes not found, a response present
+  elsewhere may be missing. Reformulate with precise names and aliases and check the provided extracts.
+- Rules only from the selected Wiki cache: 5e-2014, 5e-2024, 3.5 separate.
+  No automatic online search to answer, no collection of commercial
+  manuals. Clipped text declared from the copy actually provided.
+- Sources with stable ID, block (even Logseq), title, revision and hash; immutable
+  copies stored with the response. Citations reopen the source, distinguishing
+  current, modified, or missing version. No citation to non-provided IDs accepted.
+- Instructions in the documents are data, not commands. No tool or model access to
+  DB, file, or shell. Never modifies notes, relations, counters, or assets.
+- A prudent lexical gate excludes extracts with explicit instruction signals
+  directed at the model before submission and shows their number. Other clean sources
+  remain usable; if all are suspicious, the request stops and preserves
+  copies for review. Metadata records excluded IDs and context submission.
+  Possible false positives and unrecognized attacks: it is not an infallible defense.
+- Citation checking is structural, **does not verify truth**. The model
+  may be verbose, misinterpret a doubt, or cite a less relevant source.
+An error response remains an unverified draft, visible for inspection.
 
-## Persistenza e portabilità
+## Persistence and portability
 
-Migrazione 012 additiva: impostazioni e singole domande/risposte con fonti e metriche.
-Massimo 1000 risposte per campagna, cronologia paginata a 50; cancellazione esplicita.
-La cronologia non viene usata come fonte o memoria nascosta per nuove risposte.
-Riavvio recupera generazioni interrotte. Nessuna scrittura di risposte nel profilo
-attivato da un ripristino mentre una vecchia generazione è ancora in corso.
+Additive 012 migration: settings and individual questions/answers with sources and metrics.
+Maximum 1000 responses per campaign, paginated history at 50; explicit deletion.
+The history is not used as a source or hidden memory for new responses.
+Restart recovers interrupted generations. No writing of responses in the profile
+activated by a restore while an old generation is still in progress.
 
-Backup `.nodex`: include conversazioni, fonti, configurazione/digest nel DB e nel
-manifest; **esclude runtime e pesi**. Export ZIP: `assistantConversations` in JSON
-e Markdown per risposta, con copie/hash delle fonti. Vecchi backup migrati in copia;
-nuovi backup richiedono versione compatibile con schema 012. Identificatori legacy
-conservati. Mancanza del runtime non impedisce consultazione o ripristino delle note.
+`.nodex` Backup: includes conversations, sources, configuration/digest in the DB and in the
+manifest; **excludes runtime and weights**. ZIP Export: `assistantConversations` in JSON
+and Markdown per response, with copies/hashes of sources. Old backups migrated to copy;
+new backups require a version compatible with the 012 schema. Legacy identifiers
+preserved. Lack of runtime does not prevent consultation or restoration of notes.
 
-## Verifiche e ripetizione
+## Verifications and repetition
 
-Test Rust: isolamento campagne, nomi/alias, blocchi/rinomine, Party, edizioni,
-limiti, protocollo HTTP/redirect/cloud, citazioni non valide, persistenza, recovery,
-backup/restore ed export. Test React: consenso, nessun contatto runtime all'apertura,
-streaming/cancellazione/guardia, fonti cambiate ed eliminazione confermata.
+Rust Tests: campaign isolation, names/aliases, blocks/renames, Party, editions,
+limits, HTTP/redirect/cloud protocol, invalid citations, persistence, recovery,
+backup/restore and export. React Tests: consent, no runtime contact on opening,
+streaming/cancellation/guard, changed sources and confirmed deletion.
 
-Benchmark finale: 40/40 scenari con esito atteso, ossia 20 campagna, 10 regole
-originali di prova in conflitto fra edizioni e 5 domande senza risposta con
-inferenza GPU reale; 5 istruzioni malevole bloccate prima del modello. Dati canonici
-invariati. Non significa accuratezza universale: le prime prove senza gate hanno
-mostrato citazioni inventate, ripetizione degli attacchi e dubbi fuorvianti.
-Con contesto 8192: tempi osservati 365–3060 ms, media circa 1499 ms sulle 35
-domande dell'ultima esecuzione; carico GPU e primo avvio possono cambiarli.
-Verificati 63 test Rust, 55 React, cancellazione dopo token GPU e ripristino/riavvio
-di 90 conversazioni con fonti senza Ollama. Errori OOM/CPU simulati, non guasti fisici.
-`node scripts/qa/local-ai-evaluation.mjs` richiede `CHRONEXUS_AI_QA=isolated`, profilo
-debug **vuoto** `NODEX_DEV_DATA_DIR`, CDP 9223, Vite 1420 e Ollama configurato.
-Crea soltanto campagne fittizie; risultati in `.tools/m7-runtime`. I controlli di
-parole chiave sono una prima misura: revisionare anche risposte/citazioni; non
-scambiare una citazione formalmente valida per accuratezza semantica.
+Final Benchmark: 40/40 scenarios with expected outcome, namely 20 campaign, 10 original
+test rules in conflict between editions and 5 questions without response with
+real GPU inference; 5 malicious instructions blocked before the model. Canonical data
+unchanged. Does not mean universal accuracy: the first tests without gates have
+shown invented citations, repetition of attacks, and misleading doubts.
+With 8192 context: observed times 365–3060 ms, average about 1499 ms on the 35
+questions of the last execution; GPU load and first startup may change them.
+Verified 63 Rust tests, 55 React, cancellation after GPU token and restore/restart
+of 90 conversations with sources without Ollama. Simulated OOM/CPU errors, not physical faults.
+`node scripts/qa/local-ai-evaluation.mjs` requires `CHRONEXUS_AI_QA=isolated`, profile
+debug **empty** `NODEX_DEV_DATA_DIR`, CDP 9223, Vite 1420 and configured Ollama.
+Create only fictitious campaigns; results in `.tools/m7-runtime`. Keyword checks are a first
+measure: also review responses/citations; do not
+mistake a formally valid citation for semantic accuracy.
 
-La prova locale con cloud disabilitato, proxy esterni non raggiungibili e controllo
-delle connessioni non equivale a rete fisicamente scollegata o blocco firewall.
-Quest'ultima verifica e i pacchetti macOS/Linux restano da eseguire; non alterare
-la connettività del computer o i processi dell'utente per completare un test.
+Local testing with cloud disabled, external proxies unreachable, and connection
+checks is not equivalent to a physically disconnected network or firewall blocking.
+The latter verification and the macOS/Linux packages remain to be executed; do not alter
+computer connectivity or user processes to complete a test.
 
-Fonti primarie consultate il 23 ottobre 2026:
+Primary sources consulted on October 23 2026:
 [Ollama API](https://docs.ollama.com/api/introduction),
-[GPU e configurazione](https://docs.ollama.com/faq),
-[release portable](https://github.com/ollama/ollama/releases/tag/v0.40.10),
-[modello e licenza](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507).
+[GPU and configuration](https://docs.ollama.com/faq),
+[portable release](https://github.com/ollama/ollama/releases/tag/v0.40.10),
+[model and license](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507).
 
 
-### M10 — preferenze linguistiche globali
+### M10 — global linguistic preferences
 
-Il cambio della lingua UI non attiva Ollama/GPU, non invia appunti e non cambia il
-modello o le autorizzazioni della campagna. Controlli e diagnostici pubblici hanno
-cataloghi locali; domande, risposte, citazioni e fonti conservano i testi originali.
-Le bozze di traduzione dell’interfaccia sono state preparate su sole stringhe UI,
-non su dataset di campagna. Non confondere questo passaggio di sviluppo con un
-nuovo addestramento del modello D&D. Dettagli e limiti: I18N.md.
+Changing the UI language does not activate Ollama/GPU, does not send notes, and does not change the
+model or campaign permissions. Public checks and diagnostics have
+local catalogs; questions, answers, citations, and sources retain the original texts.
+Interface translation drafts were prepared on UI strings only,
+not on campaign datasets. Do not confuse this development step with a
+new training of the D&D model. Details and limits: I18N.md.

@@ -1,145 +1,145 @@
-# Canale pubblico — 0.8.0
+# Public channel — 0.8.0
 
-Release corrente: [0.8.0](https://github.com/Acelith/Chronexus/releases/tag/v0.8.0)
-(M19–M22), installer Windows x64 firmato. Da questa versione i backup prima
-dell’installazione vanno in `Documenti/Chronexus/Backup aggiornamenti` (vedi sotto).
-Upgrade installato 0.7.0 → 0.8.0 non ancora collaudato; la verifica di firma e
-download non equivale a un’installazione reale.
+Current release: [0.8.0](https://github.com/Acelith/Chronexus/releases/tag/v0.8.0)
+(M19–M22), signed Windows x64 installer. From this version, backups before
+installation go into `Documenti/Chronexus/Backup aggiornamenti` (see below).
+Installed upgrade 0.7.0 → 0.8.0 not yet tested; signature and
+download verification does not equate to a real installation.
 
-# M18 — 0.7.0 locale, canale pubblico invariato
+# M18 — Local 0.7.0, public channel unchanged
 
-Pacchetto Windows firmato updater compilato e firma reale verificata. L’utente
-ha chiesto di lasciare la pubblicazione dopo il rifiuto delle credenziali del
-primo push. Nessuna release 0.7.0 creata, canale pubblico ancora 0.6.0;
-non proporre la 0.7.0 come aggiornamento pubblicato. Dettagli in INSTALLERS.md.
+Signed Windows updater package compiled and real signature verified. The user
+asked to leave the publication after the rejection of the credentials of the
+first push. No 0.7.0 release created, public channel still 0.6.0;
+do not propose 0.7.0 as a published update. Details in INSTALLERS.md.
 
-Schema 018: vecchie scelte Qwen disabilitate senza perdita di cronologia,
-citazioni o adapter Gemma. Backup precedenti ripristinabili. Nessun modello è
-scaricato dall’updater; preparare il 27B separatamente e attivarlo esplicitamente.
-Il flusso firmato M15 e il backup obbligatorio prima dell’installazione restano
-invariati. Il checkpoint 0.6.0 sotto è storico; installazione personale non eseguita.
+018 Schema: old Qwen choices disabled without loss of history,
+citations, or Gemma adapters. Previous backups restorable. No model is
+downloaded by the updater; prepare the 27B separately and activate it explicitly.
+The signed M15 flow and the mandatory backup before installation remain
+unchanged. The 0.6.0 checkpoint below is historical; personal installation not performed.
 
-# Aggiornamenti interni — M15
+# Internal updates — M15
 
-Release corrente: [0.6.0 — M17](https://github.com/Acelith/Chronexus/releases/tag/v0.6.0),
-installer Windows x64 firmato e canale pubblico verificato. Schema 017: i backup
-pre-installazione includono anche la cache derivata delle traduzioni wiki, senza
-cambiare gli originali. Upgrade installato 0.5.0 → 0.6.0 non ancora collaudato;
-non confondere la verifica di firma/download con un’installazione reale.
+Current release: [0.6.0 — M17](https://github.com/Acelith/Chronexus/releases/tag/v0.6.0),
+signed Windows x64 installer and verified public channel. 017 Schema: pre-installation
+backups also include the derived cache of wiki translations, without
+changing the originals. Installed upgrade 0.5.0 → 0.6.0 not yet tested;
+do not confuse signature/download verification with a real installation.
 
-Da Chronexus 0.4.0, **Impostazioni dell’app → Aggiornamenti dell’app** permette di
-controllare, scaricare e installare una nuova versione. Il controllo è esplicito:
-nessuna richiesta all’avvio, nessun login, nessun invio delle campagne.
-Le versioni precedenti richiedono una prima installazione manuale della 0.4.0.
+From Chronexus 0.4.0, **App Settings → App Updates** allows you to
+check, download, and install a new version. The check is explicit:
+no request at startup, no login, no submission of campaigns.
+Previous versions require a first manual installation of the 0.4.0.
 
-## Flusso e backup obbligatorio
+## Mandatory flow and backup
 
-1. **Controlla aggiornamenti** mostra versione e note, oppure un errore utile
-   quando il server non è raggiungibile o il canale non è ancora pubblicato.
-2. **Scarica aggiornamento** scarica il solo installer dell’app, con avanzamento e
-   annullamento. La firma crittografica deve corrispondere alla chiave incorporata
-   e alla versione annunciata. Un pacchetto incompleto/manomesso non è installabile.
-3. **Crea backup e installa** crea e rilegge un `.nodex` di tutte le campagne,
-   immagini/allegati gestiti, fonti e adapter AI inclusi secondo il formato backup
-   esistente. Salva anche una ricevuta JSON con SHA-256 e preferenze d’interfaccia/
-   aggiornamento. Backup o ricevuta falliti **bloccano** l’installer.
-4. Su Windows il componente ufficiale Tauri avvia NSIS in modalità passiva e
-   chiude l’app. Riaprire Chronexus al termine. Non viene riattivato implicitamente
-   il bridge per assistenti esterni. Su altri sistemi il riavvio è manuale.
+1. **Check updates** shows version and notes, or a useful error
+   when the server is unreachable or the channel is not yet published.
+2. **Download update** downloads only the app installer, with progress and
+   cancellation. The cryptographic signature must match the embedded key
+   and the announced version. An incomplete/tampered package is not installable.
+3. **Create backup and install** creates and reads a `.nodex` of all campaigns,
+   managed images/attachments, sources, and AI adapters included according to the existing backup
+   format. Also saves a JSON receipt with SHA-256 and interface/update preferences.
+   Failed backup or receipt **blocks** the installer.
+4. On Windows, the official Tauri component starts NSIS in passive mode and
+   closes the app. Reopen Chronexus upon completion. The bridge for external
+   assistants is not implicitly reactivated. On other systems, restart is manual.
 
-Da M16 la ricevuta include anche `wikiPreferences` (fonte wiki scelta), se salvata.
+From M16, the receipt also includes `wikiPreferences` (wiki source choice), if saved.
 
-Da M19 i backup si trovano in `Documenti/Chronexus/Backup aggiornamenti`, creata
-al primo aggiornamento; la ricevuta include anche `backupPreferences`. Se i
-Documenti non esistono, la cartella è un link simbolico/giunzione o un file, o non
-è creabile, il backup va nella cartella dati, sottocartella `update-backups`, con
-un avviso nell’avanzamento: il backup non viene mai saltato e, se fallisce anche
-lì, l’installer non parte. I backup già presenti in `update-backups` restano dove
-sono; **Backup e ripristino** li elenca e offre una copia verificata con SHA-256
-nei Documenti senza cancellare l’originale. Il percorso compare nelle impostazioni. Hanno nomi unici e non vengono
-sovrascritti o eliminati automaticamente. Un nuovo tentativo d’installazione crea
-un nuovo backup. I pesi base/runtime AI restano installati separatamente e non
-vengono riscaricati né duplicati nel backup. SQLite resta **015**.
+From M19, backups are found in `Documenti/Chronexus/Backup aggiornamenti`, created
+at the first update; the receipt also includes `backupPreferences`. If the
+Documents do not exist, the folder is a symbolic link/junction or a file, or cannot
+be created, the backup goes into the data folder, `update-backups` subfolder, with
+a warning in the progress: the backup is never skipped and, if it fails even
+there, the installer does not start. Backups already present in `update-backups` remain where
+they are; **Backup and restore** lists them and offers a verified copy with SHA-256
+in Documents without deleting the original. The path appears in the settings. They have unique names and are not
+overwritten or automatically deleted. A new installation attempt creates
+a new backup. Base/runtime AI weights remain installed separately and are not
+redownloaded or duplicated in the backup. SQLite remains **015**.
 
-Il backup usa lo stesso Store attivo e mantiene il blocco fino alla consegna
-all’installer; nessun secondo writer SQLite. AI/addestramento in corso impediscono
-l’installazione. Le operazioni dall’interfaccia salvano l’editor prima di partire.
-Il collegamento MCP non espone comandi di aggiornamento. I backup precedenti
-restano disponibili anche quando l’avvio dell’installer fallisce.
+The backup uses the same active Store and maintains the lock until delivery
+to the installer; no second SQLite writer. Ongoing AI/training prevents
+installation. Operations from the interface save the editor before starting.
+The MCP connection does not expose update commands. Previous backups
+remain available even when the installer startup fails.
 
-Per recuperare i dati usare **Backup e ripristino** e scegliere il `.nodex` prima
-dell’aggiornamento. La ricevuta JSON affiancata conserva separatamente le preferenze
-UI; il ripristino `.nodex` continua a mantenere la lingua corrente. Non copiare un
-SQLite aperto e non tentare un downgrade automatico dopo migrazioni future.
+To recover data, use **Backup and restore** and choose the `.nodex` before
+the update. The adjacent JSON receipt separately preserves UI preferences;
+the `.nodex` restore continues to maintain the current language. Do not copy an
+open SQLite and do not attempt an automatic downgrade after future migrations.
 
-## Endpoint pubblico Forgegit o server proprio
+## Public Endpoint Forgegit or own server
 
-Endpoint predefinito, senza autenticazione:
+Default endpoint, without authentication:
 
 ```text
 https://api.github.com/repos/Acelith/Chronexus/releases/latest
 ```
 
-Il client legge la release stabile pubblicata, rifiuta bozze/anteprime e richiede
-un unico allegato `latest.json`. Scarica il manifesto dall’URL dell’allegato
-restituito dall’API e controlla che la versione coincida con il tag della release.
-Non usa la rotta GitHub `releases/latest/download`, assente in Forgejo 12.
-È possibile configurare anche l’URL diretto di un manifesto Tauri statico.
+The client reads the published stable release, rejects drafts/previews and requests
+a single `latest.json` attachment. Download the manifest from the attachment URL
+returned by the API and check that the version matches the release tag.
+It does not use the GitHub `releases/latest/download` route, absent in Forgejo 12.
+It is also possible to configure the direct URL of a static Tauri manifest.
 
-**Stato del 25 ottobre 2026:** [release 0.4.0 pubblicata](https://github.com/Acelith/Chronexus/releases/tag/v0.4.0),
-tre allegati con download anonimi e SHA-256 verificati; API latest e controllo
-nell’app funzionanti. L’installer iniziale è disponibile per il bootstrap manuale.
+**25 Status October 2026:** [release 0.4.0 published](https://github.com/Acelith/Chronexus/releases/tag/v0.4.0),
+three attachments with anonymous downloads and verified SHA-256; latest API and
+app checks working. The initial installer is available for manual bootstrap.
 
-Il repository è stato reso pubblico dall’utente: accesso anonimo verificato con
-HTTP 200 e `private:false`. Al momento della prima verifica nessuna release
-stabile risultava pubblicata (API latest 404); il repository pubblico da solo non
-crea un canale aggiornamenti. Non pubblicare la vecchia bozza incompleta v0.2.0
-per far apparire un aggiornamento. Pubblicare la nuova release solo dopo le prove
-sull’installer firmato e sui download anonimi.
+The repository was made public by the user: anonymous access verified with
+HTTP 200 and `private:false`. At the time of the first check, no stable release
+was found published (latest API 404); the public repository alone does not
+create an update channel. Do not publish the old incomplete draft v0.2.0
+to make an update appear. Publish the new release only after testing
+on the signed installer and on anonymous downloads.
 
-Sono consentiti HTTPS con certificati validi, senza credenziali/query/frammenti,
-e reindirizzamenti sullo stesso origin, massimo cinque. Manifesto massimo 1 MB,
-installer massimo 256 MiB; download limitato nel tempo, niente retry automatico.
-Nessun header di autenticazione viene generato. Un server alternativo deve usare
-la stessa chiave di firma di Chronexus e ospitare anche gli artefatti sul proprio
-origin; non basta sostituire l’URL con un pacchetto qualsiasi.
+HTTPS with valid certificates are allowed, without credentials/queries/fragments,
+and redirects on the same origin, maximum five. Maximum manifest 1 MB,
+maximum installer 256 MiB; time-limited download, no automatic retry.
+No authentication header is generated. An alternative server must use
+the same signing key as Chronexus and also host the artifacts on its own
+origin; replacing the URL with any package is not enough.
 
-## Compilare e pubblicare aggiornamenti firmati
+## Compile and publish signed updates
 
-Si usa `tauri-plugin-updater ~2.14.0` con `requireSignedVersion:true`: la versione
-è inclusa nel commento autenticato della firma. La chiave pubblica è nel config
-Tauri. La chiave privata è cifrata; la password casuale è protetta da Windows
-DPAPI per l’account che l’ha creata. Nessun segreto entra in Git o nei pacchetti.
+`tauri-plugin-updater ~2.14.0` is used with `requireSignedVersion:true`: the version
+is included in the authenticated signature comment. The public key is in the config
+Tauri. The private key is encrypted; the random password is protected by Windows
+DPAPI for the account that created it. No secrets enter Git or the packages.
 
-In questo workspace la coppia protetta è in `.tools/signing/` (ignorata da Git):
-`chronexus-update-protected.key`, relativa `.pub` e `password.dpapi`. **Conservarne
-una copia sicura e custodire la password in un gestore di password**: DPAPI è
-legato ad account/macchina, quindi copiare soltanto il blob su un altro PC non
-permette di recuperarlo. Non generare una nuova chiave a ogni build: chi ha già
-installato l’app si fida di quella pubblica incorporata. Il wrapper non crea,
-ruota o recupera chiavi e non ne stampa il contenuto.
+In this workspace, the protected pair is in `.tools/signing/` (ignored by Git):
+`chronexus-update-protected.key`, relative `.pub` and `password.dpapi`. **Keep a secure copy and store the
+password in a password manager**: DPAPI is
+linked to account/machine, so copying only the blob to another PC does not
+allow it to be recovered. Do not generate a new key at every build: those who have already
+installed the app trust the embedded public one. The wrapper does not create,
+rotate or recover keys and do not print the content.
 
 ```powershell
 # Toolchain Rust disponibile nel PATH; firma in memoria, password mai nei comandi
 ./scripts/release/Build-SignedUpdate.ps1
 ```
 
-Output Windows: `src-tauri/target/release/bundle/nsis/` con installer e `.exe.sig`.
-La firma updater non è una firma Authenticode Windows. macOS/Linux richiedono
-build/verifiche proprie e le firme di distribuzione previste dal sistema.
+Windows Output: `src-tauri/target/release/bundle/nsis/` with installer and `.exe.sig`.
+The updater signature is not a Windows Authenticode signature. macOS/Linux require
+build/own checks and the distribution signatures provided by the system.
 
-Generare `latest.json` per il solo target realmente costruito:
+Generate `latest.json` for the target actually built only:
 
 ```powershell
 python scripts/release/updater_manifest.py --version 0.4.0 --target windows-x86_64 --artifact "installers/Chronexus-0.4.0-Windows-x64/Chronexus_0.4.0_x64-setup.exe" --signature "installers/Chronexus-0.4.0-Windows-x64/Chronexus_0.4.0_x64-setup.exe.sig" --base-url "https://github.com/Acelith/Chronexus/releases/download/v0.4.0" --notes docs/releases/v0.4.0.md --output "installers/Chronexus-0.4.0-Windows-x64/latest.json"
 ```
 
-Il generatore non sostituisce file esistenti e non pubblica nulla. Verificare la
-firma del pacchetto reale con il test di integrazione dedicato, normalmente
-ignorato perché richiede artefatti locali; poi creare il tag annotato del sorgente
-compilato e una nuova release bozza con installer, `.sig` e `latest.json`.
-Prima di renderla stabile verificare download e hash; dopo la pubblicazione
-verificare anche gli URL anonimi e l’API latest. Non sovrascrivere tag o allegati.
+The generator does not replace existing files and does not publish anything. Verify the
+signature of the real package with the dedicated integration test, normally
+ignored because it requires local artifacts; then create the annotated tag of the source
+compiled and a new draft release with installer, `.sig` and `latest.json`.
+Before making it stable, verify download and hash; after publication
+also verify anonymous URLs and the latest API. Do not overwrite tags or attachments.
 
 ```powershell
 $env:CHRONEXUS_QA_UPDATE_MANIFEST = "PERCORSO_ASSOLUTO/latest.json"
@@ -147,62 +147,62 @@ $env:CHRONEXUS_QA_UPDATE_PACKAGE = "PERCORSO_ASSOLUTO/Chronexus_0.4.0_x64-setup.
 cargo test --manifest-path src-tauri/Cargo.toml --test updater_signature updates_signed_release_package_matches_production_key -- --ignored --exact
 ```
 
-La CI può costruire pacchetti non firmati per i controlli quando non riceve i
-segreti di release; tali pacchetti non devono entrare nel canale updater.
-I segreti del runner sono `TAURI_SIGNING_PRIVATE_KEY` e
-`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, mai variabili del client installato.
+The CI can build unsigned packages for checks when it does not receive the
+release secrets; such packages must not enter the updater channel.
+The runner secrets are `TAURI_SIGNING_PRIVATE_KEY` and
+`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, never variables of the installed client.
 
-## Verifiche e limiti
+## Checks and limits
 
-Test automatici: HTTPS/isolation, discovery Forgejo, dimensioni/annullamento,
-controlli crittografici e versione, backup verificato ripristinabile con immagini,
-blocco installer dopo errore backup e conservazione dopo errore installer,
-stati della schermata e cambio endpoint. Desktop Windows sintetico: impostazioni,
-versione, errore HTTP e chiusura ordinaria. Evidenze aggiornate in STATUS.md.
-Un aggiornamento reale da una versione pubblica precedente richiede la prima
-release firmata e una successiva versione; non confondere questi test con una
-prova di upgrade pubblico già eseguita. macOS/Linux e rollback applicativo non
-sono certificati da queste prove Windows.
+Automatic tests: HTTPS/isolation, Forgejo discovery, size/nullification,
+cryptographic and version checks, verified restorable backup with images,
+installer block after backup error and preservation after installer error,
+screen states and endpoint change. Synthetic Windows Desktop: settings,
+version, HTTP error and ordinary closure. Evidence updated in STATUS.md.
+A real update from a previous public version requires the first
+signed release and a subsequent version; do not confuse these tests with a
+public upgrade test already performed. macOS/Linux and application rollback are not
+certified by these Windows tests.
 
-Fonti: [Updater Tauri](https://v2.tauri.app/plugin/updater/) e
-[rotte Forgejo 12.0.4](https://codeberg.org/forgejo/forgejo/src/tag/v12.0.4/routers/web/web.go).
+Sources: [Updater Tauri](https://v2.tauri.app/plugin/updater/) and
+[Forgejo routes 12.0.4](https://codeberg.org/forgejo/forgejo/src/tag/v12.0.4/routers/web/web.go).
 
-Gli installer updater includono direttamente la licenza dell’app e le licenze/
-provenienze dei font e degli asset pubblici. Non dipendono da un ZIP esterno per
-conservarle durante aggiornamenti successivi.
+Updater installers directly include the app license and the licenses/
+provenance of fonts and public assets. They do not depend on an external ZIP to
+keep them during subsequent updates.
 
-### Pubblicazione riprendibile dei tre allegati updater
+### Resumable publication of the three updater attachments
 
-Dopo il test crittografico del pacchetto reale, creare il tag annotato `vVERSIONE`
-sul `sourceCommit` di package-report.json e pubblicare main/tag con Git ordinario.
-Il publisher controlla albero pulito, origin fisso, identità e permessi, versione,
-tag/commit remoto, hash e assenza di modifiche applicative dopo la compilazione.
-Non modifica release esistenti non riconosciute dalla sua ricevuta locale.
+After the cryptographic test of the real package, create the annotated tag `vVERSIONE`
+on the `sourceCommit` of package-report.json and publish main/tag with ordinary Git.
+The publisher checks clean tree, fixed origin, identity and permissions, version,
+remote tag/commit, hash and absence of application changes after compilation.
+Does not modify existing releases not recognized by its local receipt.
 
 ```powershell
-# Accesso di scrittura già configurato in Git per questo preciso repository;
+# Write access already configured in Git for this exact repository;
 # nessuna scansione di credenziali, file o variabili di altri servizi.
 python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --git-credentials
 # Dopo verifica di tutti e tre gli allegati nella bozza:
 python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --git-credentials --finalize
 ```
 
-Senza `--git-credentials` il programma richiede un token nel terminale, senza
-echo/salvataggio. Credenziale ordinaria Git usata soltanto sull’origin HTTPS
-Forgegit; nessun token nel client installato. La ricevuta locale contiene solo
-ID, versione, sorgente e URL degli allegati, e permette la ripresa senza duplicarli.
-La finalizzazione verifica anche download anonimi e API latest. Errori mantengono
-le prove locali; non cancellare o sovrascrivere la vecchia bozza M11.
+Without `--git-credentials`, the program requires a token in the terminal, without
+echo/saving. Ordinary Git credential used only on the Forgegit HTTPS origin;
+no token in the installed client. The local receipt contains only
+ID, version, source and URL of attachments, and allows resumption without duplicating them.
+Finalization also verifies anonymous downloads and latest API. Errors keep
+local proofs; do not delete or overwrite the old M11 draft.
 
 
-### M15a — annuncio dell’araldo (dalla versione successiva alla 0.4.0)
+### M15a — herald announcement (from the next version to the 0.4.0)
 
-Circa 6 secondi dopo l’avvio Chronexus esegue un controllo automatico leggero:
-uno per sessione e al massimo ogni 20 ore, solo verso il canale configurato qui.
-Si disattiva con **Controlla una volta all’avvio…**; il pulsante manuale resta.
-Se trova una versione più recente compatibile, appena l’app è inattiva compare
-l’araldo con il manifesto: **Aggiorna** apre questa sezione e avvia il download
-verificato; **Crea backup e installa** resta necessario. **Ricordamelo più tardi**
+About 6 seconds after startup, Chronexus performs a light automatic check:
+one per session and at most every 20 hours, only towards the channel configured here.
+It is disabled with **Check once at startup…**; the manual button remains.
+If it finds a more recent compatible version, as soon as the app is idle, the
+herald appears with the manifesto: **Update** opens this section and starts the verified download;
+**Create backup and install** remains necessary. **Remind me later**
 (o Escape) rimanda di 3 giorni quella versione, **Ignora questa versione** non la
 riannuncia. La trombetta si disattiva dall’annuncio o da qui. Preferenze in
 `update-announcements.json`, incluse nella ricevuta del backup pre-installazione.

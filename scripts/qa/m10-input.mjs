@@ -54,7 +54,7 @@ const ui = async (source) =>
 const click = async (source) =>
   page.getByRole("button", { name: await ui(source), exact: true }).click();
 const changeLocale = async (locale) => {
-  await click("Impostazioni dell’app");
+  await click("App settings");
   await page.locator(".language-settings select").first().selectOption(locale);
   await expect(page.locator("html")).toHaveAttribute("lang", locale);
   await expect(page.locator(".language-settings select").first()).toBeEnabled();
@@ -99,10 +99,10 @@ await expect(
 await page.screenshot({
   path: `out-font-missing.png`.replace("out-", out + "/"),
 });
-await click("Impostazioni dell’app");
+await click("App settings");
 await page
   .getByRole("button", {
-    name: "Italiano · Ripristina lingua e scrittura",
+    name: "English · Reset language and script",
     exact: true,
   })
   .click();
@@ -110,15 +110,15 @@ await expect(page.locator("html")).toHaveAttribute("lang", "it");
 await expect(page.locator("html")).toHaveAttribute("data-script", "standard");
 await page.unroute(/Monocraft.*\.ttf/);
 await client.send("Network.setCacheDisabled", { cacheDisabled: false });
-await click("Diario");
+await click("Journal");
 const session = (await call("list_sessions", { campaignId }))[0],
   originalBlock = session.document.blocks[0].id;
 await click("Markdown");
-const source = page.getByRole("textbox", { name: "Codice Markdown" });
+const source = page.getByRole("textbox", { name: "Markdown source" });
 const original = await source.inputValue();
 const marker = "\n\n日本語の入力 — العربية — café — e\u0301\n";
 await source.fill(original + marker);
-await click("Applica e torna al visuale");
+await click("Apply and return to visual mode");
 const editor = page.locator('.bn-editor[contenteditable="true"]');
 await expect(editor).toBeVisible();
 await editor.click();
@@ -141,7 +141,7 @@ assert(serialized.includes("العربية"));
 assert(serialized.includes("e\u0301"));
 for (const locale of ["ja", "ar"]) {
   await changeLocale(locale);
-  await click("Diario");
+  await click("Journal");
   await expect(editor).toContainText("入力テスト");
   assert.deepEqual((await call("list_sessions", { campaignId }))[0], saved);
   await page.screenshot({ path: `${out}/editor-${locale}.png` });

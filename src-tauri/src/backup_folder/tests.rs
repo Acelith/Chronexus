@@ -1,4 +1,19 @@
 use super::*;
+#[test]
+fn english_interface_keeps_backups_created_in_the_legacy_documents_folders_visible() {
+    let (dir, store) = store();
+    let documents = dir.path().join("Documents");
+    let old_folder = documents.join("Chronexus").join("Backup periodici");
+    fs::create_dir_all(&old_folder).unwrap();
+    let old_file = old_folder.join("manual-before-english.nodex");
+    backup::write_backup(&store.connection, &store.directory, &old_file).unwrap();
+    let listing = list(&store.root, Some(&documents)).unwrap();
+    assert!(listing
+        .backups
+        .iter()
+        .any(|entry| entry.name == "manual-before-english.nodex"));
+    assert!(old_file.exists());
+}
 use crate::{backup, images, journal, knowledge};
 
 fn store() -> (tempfile::TempDir, Store) {
@@ -104,12 +119,12 @@ fn unsafe_or_missing_destinations_record_an_actionable_error_without_writing() {
     enable(&store.root, 3);
     let missing = dir.path().join("non-esiste");
     let outcome = run(&store, Some(&missing), at(10)).unwrap();
-    assert!(outcome.error.unwrap().contains("non è disponibile"));
+    assert!(outcome.error.unwrap().contains("unavailable"));
     let documents = dir.path().join("Documenti");
     fs::create_dir(&documents).unwrap();
     fs::write(documents.join(APP_FOLDER), "file").unwrap();
     let outcome = run(&store, Some(&documents), at(12)).unwrap();
-    assert!(outcome.error.unwrap().contains("è un file"));
+    assert!(outcome.error.unwrap().contains("is a file"));
     let index = read_index(&store.root).unwrap();
     assert!(index.entries.is_empty() && index.last_error.is_some());
     assert_eq!(index.last_attempt, Some(at(12).to_rfc3339()));
@@ -132,10 +147,10 @@ fn junctions_and_symlinks_are_rejected() {
         .unwrap();
     assert!(status.status.success());
     let error = ensure(&documents, PERIODIC).unwrap_err();
-    assert!(error.contains("giunzione"), "{error}");
+    assert!(error.contains("junction"), "{error}");
     assert!(fs::read_dir(&elsewhere).unwrap().next().is_none());
     let (_, notice) = update_folder(&store.root, Some(&documents));
-    assert!(notice.unwrap().contains("cartella dati"));
+    assert!(notice.unwrap().contains("data folder"));
 }
 
 #[cfg(unix)]
@@ -149,7 +164,7 @@ fn symlinks_are_rejected() {
     std::os::unix::fs::symlink(&elsewhere, documents.join(APP_FOLDER)).unwrap();
     assert!(ensure(&documents, PERIODIC)
         .unwrap_err()
-        .contains("collegamento"));
+        .contains("symbolic link"));
 }
 
 #[test]
@@ -242,7 +257,7 @@ fn listing_and_resolution_accept_only_names_inside_known_folders() {
         "original kept"
     );
     let again = copy_legacy(&store.root, Some(&documents), "before-update-x.nodex");
-    assert!(again.unwrap_err().contains("nessun file sovrascritto"));
+    assert!(again.unwrap_err().contains("no file was overwritten"));
 }
 
 #[test]
@@ -254,7 +269,7 @@ fn periodic_backup_with_images_restores_and_preferences_survive_restore() {
     let page = knowledge::create_page(
         &store.connection,
         &campaign.id,
-        "Mappa",
+        "Map",
         "place",
         "active",
         &[],
@@ -272,7 +287,7 @@ fn periodic_backup_with_images_restores_and_preferences_survive_restore() {
             kind: "page".into(),
             id: page.id,
         },
-        "Mappa",
+        "Map",
         "map",
         png.into_inner(),
     )
@@ -305,7 +320,7 @@ fn update_folder_prefers_documents_and_falls_back_with_notice() {
     assert!(notice.is_none() && folder.is_dir());
     let (folder, notice) = update_folder(&store.root, Some(&dir.path().join("assenti")));
     assert_eq!(folder, store.root.join(LEGACY_UPDATES));
-    assert!(notice.unwrap().contains("non sono utilizzabili"));
+    assert!(notice.unwrap().contains("cannot be used"));
     assert_eq!(
         update_folder(&store.root, None).0,
         store.root.join(LEGACY_UPDATES)

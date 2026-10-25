@@ -21,8 +21,8 @@ assert(documents && path.isAbsolute(documents));
 const phase = process.argv[2];
 assert(["auto", "age", "restart"].includes(phase));
 const app = path.join(documents, "Chronexus");
-const periodic = path.join(app, "Backup periodici");
-const updates = path.join(app, "Backup aggiornamenti");
+const periodic = path.join(app, "Periodic backups");
+const updates = path.join(app, "Update backups");
 const indexFile = path.join(profile, "periodic-backups.json");
 const pass = (m) => console.log("PASS " + m);
 const periodicFiles = () =>
@@ -60,7 +60,7 @@ const waitFor = async (check, ms, what) => {
   throw new Error("timeout: " + what);
 };
 const settings = async () => {
-  await page.getByRole("button", { name: "Impostazioni dell’app" }).click();
+  await page.getByRole("button", { name: "App settings" }).click();
   const region = page.getByRole("region", { name: "Backup", exact: true });
   await region.locator("dl.backup-folder-status").waitFor();
   return region;
@@ -71,7 +71,9 @@ const png =
 
 if (phase === "auto") {
   assert.equal((await call("list_campaigns")).length, 0, "fresh profile");
-  const campaign = await call("create_campaign", { name: "Campagna periodica" });
+  const campaign = await call("create_campaign", {
+    name: "Campagna periodica",
+  });
   const map = await call("create_page", {
     campaignId: campaign.id,
     title: "Mappa del porto",
@@ -82,24 +84,20 @@ if (phase === "auto") {
   await call("add_image", {
     campaignId: campaign.id,
     target: { kind: "page", id: map.id },
-    caption: "Mappa",
+    caption: "Map",
     role: "map",
     dataBase64: png,
   });
   const region = await settings();
-  await expect(region.getByText("Backup periodici disattivati")).toBeVisible();
+  await expect(region.getByText("Periodic backups off")).toBeVisible();
   assert(!existsSync(app), "folder not created by opening settings");
   await region.getByRole("checkbox").check();
-  await region.getByLabel("Frequenza").selectOption("hours");
+  await region.getByLabel("Frequency").selectOption("hours");
   await region.getByLabel(/Ore tra un backup/).fill("2");
   await region.getByLabel(/Copie periodiche da conservare/).fill("2");
-  await region.getByRole("button", { name: "Salva pianificazione" }).click();
-  await expect(
-    region.getByText("Pianificazione dei backup salvata."),
-  ).toBeVisible();
-  await expect(
-    region.getByText("Al prossimo momento di inattività"),
-  ).toBeVisible();
+  await region.getByRole("button", { name: "Save schedule" }).click();
+  await expect(region.getByText("Backup schedule saved.")).toBeVisible();
+  await expect(region.getByText("At the next idle moment")).toBeVisible();
   pass("schedule saved from the settings without a campaign selected");
   // The user is typing: no backup while a text field has focus.
   await region.getByLabel(/Copie periodiche da conservare/).focus();
@@ -109,21 +107,21 @@ if (phase === "auto") {
   await page.evaluate(() => document.activeElement?.blur());
   await waitFor(() => periodicFiles().length === 1, 150_000, "auto backup");
   await expect(
-    page.getByText("Backup periodico creato e verificato."),
+    page.getByText("Periodic backup created and verified."),
   ).toBeVisible();
-  await expect(region.getByText("Nessuno finora")).toHaveCount(0);
+  await expect(region.getByText("None so far")).toHaveCount(0);
   pass("automatic periodic backup after idle: " + periodicFiles()[0]);
   copyFileSync(
     path.join(periodic, periodicFiles()[0]),
     path.join(periodic, "manuale.nodex"),
   );
-  await page.getByRole("button", { name: "Chiudi" }).click();
+  await page.getByRole("button", { name: "Close" }).click();
   for (let i = 0; i < 2; i++) {
     const known = periodicFiles().join();
-    await region.getByRole("button", { name: "Esegui backup ora" }).click();
+    await region.getByRole("button", { name: "Run backup now" }).click();
     await waitFor(() => periodicFiles().join() !== known, 60_000, "run now");
     await expect(
-      region.getByRole("button", { name: "Esegui backup ora" }),
+      region.getByRole("button", { name: "Run backup now" }),
     ).toBeEnabled();
   }
   assert.equal(periodicFiles().length, 2, "rotation keeps 2 copies");
@@ -140,9 +138,7 @@ if (phase === "auto") {
   const before = periodicFiles();
   const region = await settings();
   await expect(region.getByRole("checkbox")).toBeChecked();
-  await expect(
-    region.getByText("Al prossimo momento di inattività"),
-  ).toBeVisible();
+  await expect(region.getByText("At the next idle moment")).toBeVisible();
   pass("preferences persisted; overdue backup pending after restart");
   await waitFor(
     () => periodicFiles().join() !== before.join(),
@@ -152,24 +148,28 @@ if (phase === "auto") {
   assert.equal(periodicFiles().length, 2);
   pass("overdue periodic backup ran after restart once idle");
   await call("create_campaign", { name: "Dopo il backup" });
-  await page.getByRole("button", { name: "Backup e ripristino" }).click();
+  await page.getByRole("button", { name: "Backup and restore" }).click();
   const list = page.getByRole("region", {
-    name: "Backup nelle cartelle di Chronexus",
+    name: "Backups in the Chronexus folders",
   });
-  await list.getByRole("button", { name: "Aggiorna elenco" }).click();
-  await list.getByRole("button", { name: "Copia nei Documenti" }).click();
-  await expect(page.getByText(/L’originale resta nella cartella dati/)).toBeVisible();
+  await list.getByRole("button", { name: "Refresh list" }).click();
+  await list.getByRole("button", { name: "Copy to Documents" }).click();
+  await expect(
+    page.getByText(/L’originale resta nella cartella dati/),
+  ).toBeVisible();
   assert(existsSync(path.join(updates, "before-update-qa.nodex")));
-  assert(existsSync(path.join(profile, "update-backups", "before-update-qa.nodex")));
+  assert(
+    existsSync(path.join(profile, "update-backups", "before-update-qa.nodex")),
+  );
   pass("legacy update backup copied with SHA-256, original kept");
   const newest = periodicFiles().at(-1);
   await list
-    .getByRole("button", { name: `Verifica e ripristina ${newest}` })
+    .getByRole("button", { name: `Verify and restore ${newest}` })
     .click();
   const dialog = page.getByRole("alertdialog");
   await dialog.waitFor();
-  await dialog.getByRole("button", { name: "Sostituisci archivio" }).click();
-  await expect(page.getByText("Archivio ripristinato")).toBeVisible({
+  await dialog.getByRole("button", { name: "Replace archive" }).click();
+  await expect(page.getByText("Archive restored")).toBeVisible({
     timeout: 60_000,
   });
   const campaigns = await call("list_campaigns");

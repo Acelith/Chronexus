@@ -17,25 +17,19 @@ fn read_json(path: &Path) -> AppResult<Option<serde_json::Value>> {
     let meta = match fs::symlink_metadata(path) {
         Ok(m) => m,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
-        Err(_) => {
-            return Err(
-                "Impossibile leggere le preferenze da proteggere prima dell’aggiornamento.".into(),
-            )
-        }
+        Err(_) => return Err("Cannot read the preferences to protect before the update.".into()),
     };
     if !meta.is_file() || meta.file_type().is_symlink() || meta.len() > 16_384 {
-        return Err("File delle preferenze non valido: aggiornamento bloccato.".into());
+        return Err("Invalid preferences file: update blocked.".into());
     }
-    let bytes = fs::read(path).map_err(|_| "Preferenze non leggibili.")?;
-    serde_json::from_slice(&bytes).map(Some).map_err(|_| {
-        "Preferenze danneggiate: conserva i dati e correggile prima di aggiornare.".into()
-    })
+    let bytes = fs::read(path).map_err(|_| "Preferences not readable.")?;
+    serde_json::from_slice(&bytes)
+        .map(Some)
+        .map_err(|_| "Damaged preferences: keep your data and fix them before updating.".into())
 }
 pub fn read_settings(root: &Path) -> AppResult<Settings> {
     let settings = match read_json(&root.join(FILE))? {
-        Some(value) => {
-            serde_json::from_value(value).map_err(|_| "Preferenze aggiornamenti non valide.")?
-        }
+        Some(value) => serde_json::from_value(value).map_err(|_| "Invalid update preferences.")?,
         None => Settings {
             endpoint: DEFAULT_ENDPOINT.into(),
         },
@@ -46,17 +40,16 @@ pub fn read_settings(root: &Path) -> AppResult<Settings> {
 pub fn write_settings(root: &Path, settings: &Settings) -> AppResult<()> {
     let path = root.join(FILE);
     if fs::symlink_metadata(&path).is_ok_and(|m| !m.is_file() || m.file_type().is_symlink()) {
-        return Err("Destinazione preferenze aggiornamenti non sicura.".into());
+        return Err("Unsafe destination for the update preferences.".into());
     }
-    let mut f =
-        NamedTempFile::new_in(root).map_err(|_| "Impossibile salvare il canale aggiornamenti.")?;
+    let mut f = NamedTempFile::new_in(root).map_err(|_| "Cannot save the update channel.")?;
     serde_json::to_writer_pretty(f.as_file_mut(), settings)
-        .map_err(|_| "Preferenze aggiornamenti non serializzabili.")?;
+        .map_err(|_| "Update preferences cannot be serialized.")?;
     f.flush()
         .and_then(|_| f.as_file().sync_all())
-        .map_err(|_| "Preferenze aggiornamenti non salvate.")?;
+        .map_err(|_| "Update preferences not saved.")?;
     f.persist(path)
-        .map_err(|_| "Impossibile salvare il canale aggiornamenti.")?;
+        .map_err(|_| "Cannot save the update channel.")?;
     backup::sync_dir(root)
 }
 /// The installer callback is unreachable if snapshot creation or verification fails.
@@ -70,10 +63,10 @@ pub fn before_install<T>(
 ) -> AppResult<T> {
     let (directory, notice) = backup_folder::update_folder(&store.root, documents);
     fs::create_dir_all(&directory)
-        .map_err(|_| "Impossibile creare la cartella dei backup: installazione bloccata.")?;
-    let meta = fs::symlink_metadata(&directory).map_err(|_| "Cartella backup non leggibile.")?;
+        .map_err(|_| "Cannot create the backup folder: installation blocked.")?;
+    let meta = fs::symlink_metadata(&directory).map_err(|_| "Backup folder not readable.")?;
     if !meta.is_dir() || meta.file_type().is_symlink() {
-        return Err("Cartella backup non sicura: installazione bloccata.".into());
+        return Err("Unsafe backup folder: installation blocked.".into());
     }
     let preferences = read_json(&store.root.join("interface-preferences.json"))?;
     let settings = read_settings(&store.root)?;
@@ -90,13 +83,13 @@ pub fn before_install<T>(
         &directory.join(format!("{name}.nodex")),
     )?;
     let mut file = fs::File::open(&receipt.path)
-        .map_err(|_| "Backup creato ma non rileggibile: installazione bloccata.")?;
+        .map_err(|_| "Backup created but not readable again: installation blocked.")?;
     let mut hash = Sha256::new();
     let mut bytes = [0; 65536];
     loop {
         let n = file
             .read(&mut bytes)
-            .map_err(|_| "Backup non verificabile.")?;
+            .map_err(|_| "Backup cannot be verified.")?;
         if n == 0 {
             break;
         }
@@ -104,16 +97,16 @@ pub fn before_install<T>(
     }
     let record = json!({"format":"chronexus-update-backup","version":1,"fromVersion":env!("CARGO_PKG_VERSION"),"targetVersion":target,"backup":receipt.path,"sha256":format!("{:x}",hash.finalize()),"interfacePreferences":preferences,"updateSettings":settings,"wikiPreferences":wiki,"updateAnnouncements":announcements,"backupPreferences":backups});
     let mut sidecar = NamedTempFile::new_in(&directory)
-        .map_err(|_| "Backup creato ma ricevuta non salvabile: installazione bloccata.")?;
+        .map_err(|_| "Backup created but its receipt could not be saved: installation blocked.")?;
     serde_json::to_writer_pretty(sidecar.as_file_mut(), &record)
-        .map_err(|_| "Ricevuta backup non serializzabile.")?;
+        .map_err(|_| "Backup receipt cannot be serialized.")?;
     sidecar
         .as_file()
         .sync_all()
-        .map_err(|_| "Ricevuta backup non salvata.")?;
+        .map_err(|_| "Backup receipt not saved.")?;
     sidecar
         .persist_noclobber(directory.join(format!("{name}.json")))
-        .map_err(|_| "Ricevuta backup non salvata: installazione bloccata.")?;
+        .map_err(|_| "Backup receipt not saved: installation blocked.")?;
     backup::sync_dir(&directory)?;
     install(&receipt, notice.as_deref())
 }

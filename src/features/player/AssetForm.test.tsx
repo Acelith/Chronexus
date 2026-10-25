@@ -61,22 +61,20 @@ test("explicit template use preserves notes, flags and campaign links; draft rem
     />,
   );
   await user.click(
-    screen.getByRole("button", { name: "Cerca questo nome in D&D" }),
+    screen.getByRole("button", { name: "Search this name in D&D" }),
   );
   await screen.findByRole("button", { name: "Importa template prova" });
-  expect(screen.getByRole("button", { name: "Salva voce" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Save entry" })).toBeDisabled();
   await user.click(
     screen.getByRole("button", { name: "Importa template prova" }),
   );
   expect(onSave).not.toHaveBeenCalled();
-  expect(screen.getByLabelText("Nome della voce")).toHaveValue("Base SRD");
-  expect(screen.getByLabelText("Note della voce")).toHaveValue(
-    "Nota personale",
-  );
-  expect(screen.getByLabelText("Conosciuta")).toBeChecked();
-  await user.clear(screen.getByLabelText("Nome della voce"));
-  await user.type(screen.getByLabelText("Nome della voce"), "Variante mia");
-  await user.click(screen.getByRole("button", { name: "Salva voce" }));
+  expect(screen.getByLabelText("Entry name")).toHaveValue("Base SRD");
+  expect(screen.getByLabelText("Entry notes")).toHaveValue("Nota personale");
+  expect(screen.getByLabelText("Known")).toBeChecked();
+  await user.clear(screen.getByLabelText("Entry name"));
+  await user.type(screen.getByLabelText("Entry name"), "Variante mia");
+  await user.click(screen.getByRole("button", { name: "Save entry" }));
   expect(onSave).toHaveBeenCalledWith(
     expect.objectContaining({
       details: expect.objectContaining({
@@ -106,13 +104,11 @@ test("closing lookup leaves the personal draft intact", async () => {
     />,
   );
   await user.click(
-    screen.getByRole("button", { name: "Cerca questo nome in D&D" }),
+    screen.getByRole("button", { name: "Search this name in D&D" }),
   );
   await user.click(
     await screen.findByRole("button", { name: "Chiudi ricerca prova" }),
   );
-  expect(screen.getByLabelText("Nome della voce")).toHaveValue(
-    "Mio incantesimo",
-  );
-  expect(screen.getByRole("button", { name: "Salva voce" })).toBeEnabled();
+  expect(screen.getByLabelText("Entry name")).toHaveValue("Mio incantesimo");
+  expect(screen.getByRole("button", { name: "Save entry" })).toBeEnabled();
 });

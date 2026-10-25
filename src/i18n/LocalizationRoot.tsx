@@ -34,7 +34,7 @@ export default function LocalizationRoot({
               ? reason
               : reason instanceof Error
                 ? reason.message
-                : "Impossibile leggere le preferenze dell’interfaccia.",
+                : "Cannot read the interface preferences.",
           );
         }
       })
@@ -45,7 +45,7 @@ export default function LocalizationRoot({
       active = false;
     };
   }, []);
-  if (!ready) return <p role="status">{tr("Apertura archivio…")}</p>;
+  if (!ready) return <p role="status">{tr("Opening archive…")}</p>;
   return (
     <>
       {error && failedPreferences === preferences ? (

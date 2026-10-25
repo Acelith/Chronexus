@@ -45,7 +45,7 @@ const character: Character = {
     resources: [
       {
         id: "r1",
-        label: "Concentrazione",
+        label: "Concentration",
         kind: "resource",
         current: 1,
         maximum: 3,
@@ -139,20 +139,20 @@ test("crea una scheda generica con risorse e protegge un modulo che non si salva
   );
   const { user, getGuard } = setup();
   await user.click(
-    await screen.findByRole("button", { name: "Crea personaggio" }),
+    await screen.findByRole("button", { name: "Create character" }),
   );
-  expect(screen.getByLabelText("Nome del personaggio")).toHaveFocus();
-  await user.type(screen.getByLabelText("Nome del personaggio"), "Neme");
-  await user.click(screen.getByRole("button", { name: "Aggiungi risorsa" }));
-  await user.type(screen.getByLabelText("Risorsa 1: nome"), "Slot personali");
-  await user.selectOptions(screen.getByLabelText("Risorsa 1: tipo"), "slot");
-  await user.clear(screen.getByLabelText("Risorsa 1: massimo"));
-  await user.type(screen.getByLabelText("Risorsa 1: massimo"), "3");
-  await user.click(screen.getByRole("button", { name: "Salva personaggio" }));
+  expect(screen.getByLabelText("Character name")).toHaveFocus();
+  await user.type(screen.getByLabelText("Character name"), "Neme");
+  await user.click(screen.getByRole("button", { name: "Add resource" }));
+  await user.type(screen.getByLabelText("Resource 1: name"), "Slot personali");
+  await user.selectOptions(screen.getByLabelText("Resource 1: type"), "slot");
+  await user.clear(screen.getByLabelText("Resource 1: maximum"));
+  await user.type(screen.getByLabelText("Resource 1: maximum"), "3");
+  await user.click(screen.getByRole("button", { name: "Save character" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Disco non disponibile",
   );
-  expect(screen.getByLabelText("Nome del personaggio")).toHaveValue("Neme");
+  expect(screen.getByLabelText("Character name")).toHaveValue("Neme");
   expect(playerApi.saveCharacter).toHaveBeenCalledWith(
     "a",
     null,
@@ -160,8 +160,8 @@ test("crea una scheda generica con risorse e protegge un modulo che non si salva
       resources: [expect.objectContaining({ kind: "slot", maximum: 3 })],
     }),
   );
-  await expect(getGuard()?.flush()).rejects.toThrow("Salva o annulla");
-  await user.click(screen.getByRole("button", { name: "Annulla modifiche" }));
+  await expect(getGuard()?.flush()).rejects.toThrow("Save or cancel");
+  await user.click(screen.getByRole("button", { name: "Discard changes" }));
   expect(getGuard()?.dirty()).toBe(false);
 });
 test("contatori attendono la persistenza e mantengono il valore quando il salvataggio fallisce", async () => {
@@ -177,13 +177,13 @@ test("contatori attendono la persistenza e mantengono il valore quando il salvat
     .mockRejectedValueOnce(new Error("Contatore modificato altrove."));
   await user.click(
     await screen.findByRole("button", {
-      name: "Riduci Punti vita",
+      name: "Decrease Hit points",
     }),
   );
   expect(
-    screen.getByRole("button", { name: "Aumenta Concentrazione" }),
+    screen.getByRole("button", { name: "Increase Concentration" }),
   ).toBeDisabled();
-  await expect(getGuard()?.flush()).rejects.toThrow("Attendi");
+  await expect(getGuard()?.flush()).rejects.toThrow("Wait");
   resolve({
     ...character,
     revision: 1,
@@ -191,17 +191,17 @@ test("contatori attendono la persistenza e mantengono il valore quando il salvat
   });
   await waitFor(() =>
     expect(
-      screen.getByLabelText("Punti vita", { selector: "output" }),
+      screen.getByLabelText("Hit points", { selector: "output" }),
     ).toHaveTextContent("7 / 10"),
   );
   await user.click(
-    screen.getByRole("button", { name: "Aumenta Concentrazione" }),
+    screen.getByRole("button", { name: "Increase Concentration" }),
   );
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "modificato altrove",
   );
   expect(
-    screen.getByLabelText("Concentrazione", { selector: "output" }),
+    screen.getByLabelText("Concentration", { selector: "output" }),
   ).toHaveTextContent("1 / 3");
 });
 test("salva oggetto con PNG, sessione e blocco e apre i collegamenti della voce", async () => {
@@ -209,15 +209,13 @@ test("salva oggetto con PNG, sessione e blocco e apre i collegamenti della voce"
     async (_c, _pc, _initial, input) => ({ ...item, input }),
   );
   const { user, onPage, onSource } = setup("inventory");
-  await user.click(
-    await screen.findByRole("button", { name: "Aggiungi oggetto" }),
-  );
-  await user.type(screen.getByLabelText("Nome della voce"), "Chiave del ponte");
-  await user.selectOptions(screen.getByLabelText("PNG collegato"), "npc");
-  await user.selectOptions(screen.getByLabelText("Sessione fonte"), "s1");
-  await user.selectOptions(screen.getByLabelText("Blocco fonte"), "proof");
-  await user.click(screen.getByRole("button", { name: "Salva voce" }));
-  const detail = await screen.findByRole("article", { name: "Dettaglio voce" });
+  await user.click(await screen.findByRole("button", { name: "Add item" }));
+  await user.type(screen.getByLabelText("Entry name"), "Chiave del ponte");
+  await user.selectOptions(screen.getByLabelText("Linked NPC"), "npc");
+  await user.selectOptions(screen.getByLabelText("Source session"), "s1");
+  await user.selectOptions(screen.getByLabelText("Source block"), "proof");
+  await user.click(screen.getByRole("button", { name: "Save entry" }));
+  const detail = await screen.findByRole("article", { name: "Entry details" });
   expect(playerApi.saveAsset).toHaveBeenCalledWith(
     "a",
     "pc",
@@ -230,11 +228,11 @@ test("salva oggetto con PNG, sessione e blocco e apre i collegamenti della voce"
       }),
     }),
   );
-  await user.click(within(detail).getByRole("button", { name: "PNG: Varek" }));
+  await user.click(within(detail).getByRole("button", { name: "NPC: Varek" }));
   expect(onPage).toHaveBeenCalledWith("npc", "Varek", "key", "inventory");
   await user.click(
     within(detail).getByRole("button", {
-      name: "Apri sessione fonte al blocco",
+      name: "Open source session at block",
     }),
   );
   expect(onSource).toHaveBeenCalledWith(
@@ -247,19 +245,17 @@ test("elimina solo dopo conferma, Escape annulla e la richiesta usa la revisione
   vi.mocked(playerApi.assets).mockResolvedValue([item]);
   vi.mocked(playerApi.deleteAsset).mockResolvedValue();
   const { user } = setup("inventory");
-  await user.click(await screen.findByRole("button", { name: "Elimina voce" }));
-  const cancel = screen.getByRole("button", { name: "Annulla eliminazione" });
+  await user.click(await screen.findByRole("button", { name: "Delete entry" }));
+  const cancel = screen.getByRole("button", { name: "Cancel deletion" });
   expect(cancel).toHaveFocus();
   await user.keyboard("{Escape}");
   expect(vi.mocked(playerApi.deleteAsset)).not.toHaveBeenCalled();
-  expect(screen.getByRole("button", { name: "Elimina voce" })).toHaveFocus();
-  await user.click(screen.getByRole("button", { name: "Elimina voce" }));
-  await user.click(
-    screen.getByRole("button", { name: "Conferma eliminazione" }),
-  );
+  expect(screen.getByRole("button", { name: "Delete entry" })).toHaveFocus();
+  await user.click(screen.getByRole("button", { name: "Delete entry" }));
+  await user.click(screen.getByRole("button", { name: "Confirm deletion" }));
   await waitFor(() =>
     expect(
-      screen.queryByRole("article", { name: "Dettaglio voce" }),
+      screen.queryByRole("article", { name: "Entry details" }),
     ).not.toBeInTheDocument(),
   );
   expect(playerApi.deleteAsset).toHaveBeenCalledWith(item);
@@ -280,17 +276,17 @@ test("filtra capacità manuali e i marcatori non cambiano i contatori", async ()
     async (_c, _pc, initial, input) => ({ ...initial!, input, revision: 1 }),
   );
   const { user } = setup("abilities");
-  await screen.findByRole("article", { name: "Dettaglio voce" });
-  await user.selectOptions(screen.getByLabelText("Stato o tipo"), "known");
+  await screen.findByRole("article", { name: "Entry details" });
+  await user.selectOptions(screen.getByLabelText("Status or type"), "known");
   expect(screen.queryByRole("article")).not.toBeInTheDocument();
-  await user.selectOptions(screen.getByLabelText("Stato o tipo"), "prepared");
-  await user.type(screen.getByLabelText("Filtra per rango"), "Primo");
-  await user.click(screen.getByRole("button", { name: "Cambia conosciuta" }));
-  expect(await screen.findByText("Conosciuta · Preparata")).toBeInTheDocument();
+  await user.selectOptions(screen.getByLabelText("Status or type"), "prepared");
+  await user.type(screen.getByLabelText("Filter by level"), "Primo");
+  await user.click(screen.getByRole("button", { name: "Toggle known" }));
+  expect(await screen.findByText("Known · Prepared")).toBeInTheDocument();
   expect(playerApi.counter).not.toHaveBeenCalled();
-  await user.type(screen.getByLabelText("Cerca per nome"), "Assente");
+  await user.type(screen.getByLabelText("Search by name"), "Assente");
   expect(
-    await screen.findByText("Nessuna voce corrisponde ai filtri."),
+    await screen.findByText("No entries match the filters."),
   ).toBeInTheDocument();
 });
 test("errore lettura non mostra una falsa scheda vuota e consente riprova", async () => {
@@ -302,9 +298,9 @@ test("errore lettura non mostra una falsa scheda vuota e consente riprova", asyn
     "Archivio occupato",
   );
   expect(
-    screen.queryByRole("button", { name: "Crea personaggio" }),
+    screen.queryByRole("button", { name: "Create character" }),
   ).not.toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Ricarica scheda" }));
+  await user.click(screen.getByRole("button", { name: "Reload sheet" }));
   expect(
     await screen.findByRole("heading", { name: "Neme" }),
   ).toBeInTheDocument();
@@ -359,7 +355,7 @@ test("una voce Wikidot apre un modulo modificabile e si salva solo esplicitament
     />,
   );
   const user = userEvent.setup();
-  const name = await screen.findByLabelText("Nome della voce");
+  const name = await screen.findByLabelText("Entry name");
   expect(name).toHaveValue("Acid Splash");
   expect(
     screen.getByText("https://dnd5e.wikidot.com/spell:acid-splash"),
@@ -369,7 +365,7 @@ test("una voce Wikidot apre un modulo modificabile e si salva solo esplicitament
   expect(guard!.dirty()).toBe(true);
   await user.clear(name);
   await user.type(name, "Acid Splash personale");
-  await user.click(screen.getByRole("button", { name: "Salva voce" }));
+  await user.click(screen.getByRole("button", { name: "Save entry" }));
   await waitFor(() => expect(playerApi.saveAsset).toHaveBeenCalledTimes(1));
   const saved = vi.mocked(playerApi.saveAsset).mock.calls[0][3];
   expect(saved.details).toMatchObject({
@@ -394,7 +390,7 @@ test("senza personaggio l’importazione dalla wiki viene annullata con un avvis
     />,
   );
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Crea prima il personaggio",
+    "Create the character first",
   );
   expect(onDraftUsed).toHaveBeenCalledTimes(1);
   expect(playerApi.saveAsset).not.toHaveBeenCalled();

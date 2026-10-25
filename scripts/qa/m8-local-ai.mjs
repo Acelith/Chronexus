@@ -164,11 +164,11 @@ if (phase === "seed") {
   await p.reload();
   await p.getByRole("button", { name: a.name, exact: true }).click();
   await p
-    .getByRole("button", { name: "Impostazioni della campagna", exact: true })
+    .getByRole("button", { name: "Campaign settings", exact: true })
     .click();
   await expect(
     p.getByRole("heading", {
-      name: "Impostazioni della campagna",
+      name: "Campaign settings",
       exact: true,
     }),
   ).toBeVisible();
@@ -214,7 +214,7 @@ if (phase === "seed") {
       },
     );
   const prior = await ask("Di quale colore è il mantello di Arven?");
-  assert(prior.answer.startsWith("Non risulta dalle fonti disponibili"));
+  assert(prior.answer.startsWith("Not found in the available sources"));
   const page = await ipc("create_page", {
     campaignId: state.a.id,
     title: "Arven",
@@ -248,22 +248,22 @@ if (phase === "seed") {
   await p.reload();
   await p.getByRole("button", { name: state.a.name, exact: true }).click();
   await p
-    .getByRole("button", { name: "Impostazioni della campagna", exact: true })
+    .getByRole("button", { name: "Campaign settings", exact: true })
     .click();
   const button = p.getByRole("button", {
-    name: "Riaddestra sui nuovi dati",
+    name: "Retrain on the new data",
     exact: true,
   });
   await expect(button).toBeEnabled();
   await button.click();
   await p
     .getByRole("button", {
-      name: "Conferma riaddestramento locale",
+      name: "Confirm local retraining",
       exact: true,
     })
     .click();
   await expect(
-    p.getByRole("button", { name: "Annulla addestramento", exact: true }),
+    p.getByRole("button", { name: "Cancel training", exact: true }),
   ).toBeVisible();
   await p.screenshot({ path: ".tools/m8/training-start.png" });
   console.log("Training started through campaign settings");
@@ -296,7 +296,7 @@ if (phase === "seed") {
   assert.equal(job.metrics.weightsChanged, true);
   assert(job.metrics.peakGpuBytes > 0);
   await p
-    .getByRole("button", { name: "Attiva adapter", exact: true })
+    .getByRole("button", { name: "Activate adapter", exact: true })
     .first()
     .click();
   await expect(
@@ -626,7 +626,7 @@ if (phase === "seed") {
   await p.reload();
   await p.getByRole("button", { name: state.a.name, exact: true }).click();
   await p
-    .getByRole("button", { name: "Impostazioni della campagna", exact: true })
+    .getByRole("button", { name: "Campaign settings", exact: true })
     .click();
   await p.setViewportSize({ width: 900, height: 850 });
   await p.screenshot({

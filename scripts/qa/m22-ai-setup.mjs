@@ -17,17 +17,17 @@ const page = browser
   .pages()
   .find((p) => p.url().includes("1420"));
 assert(page);
-await page.getByRole("button", { name: "Impostazioni dell’app" }).click();
-const region = page.getByRole("region", { name: "AI locale: componenti" });
+await page.getByRole("button", { name: "App settings" }).click();
+const region = page.getByRole("region", { name: "Local AI: components" });
 const check = () =>
-  region.getByRole("button", { name: "Controlla componenti" }).click();
+  region.getByRole("button", { name: "Check components" }).click();
 const pass = (m) => console.log("PASS " + m);
 await check();
 await region.locator("dl.ai-setup-status").waitFor();
 if (phase === "install") {
   assert(!existsSync(path.join(profile, "ai-runtime")), "fresh profile");
-  await region.getByRole("button", { name: "Installa Ollama…" }).click();
-  await region.getByRole("button", { name: "Scarica e installa" }).click();
+  await region.getByRole("button", { name: "Install Ollama…" }).click();
+  await region.getByRole("button", { name: "Download and install" }).click();
   const started = Date.now();
   await expect(region.getByText(/Ollama installato e verificato/)).toBeVisible({
     timeout: 30 * 60_000,
@@ -35,21 +35,21 @@ if (phase === "install") {
   const entries = readdirSync(path.join(profile, "ai-runtime"));
   assert.deepEqual(entries, ["ollama-0.40.10"], "no partial files left");
   pass(`install ${Math.round((Date.now() - started) / 1000)} s`);
-  await region.getByRole("button", { name: "Avvia Ollama" }).click();
+  await region.getByRole("button", { name: "Start Ollama" }).click();
   await expect(
     region.getByText(/cloud disabilitato · versione 0.40.10/),
   ).toBeVisible({ timeout: 60_000 });
   await expect(region.getByText(/avviato da Chronexus/)).toBeVisible();
   pass("managed runtime started with cloud disabled");
-  await region.getByRole("button", { name: "Arresta Ollama" }).click();
+  await region.getByRole("button", { name: "Stop Ollama" }).click();
   await expect(
     region.getByText(/Installato da Chronexus, non avviato/),
   ).toBeVisible({ timeout: 30_000 });
   pass("managed runtime stopped");
 } else {
   await expect(region.getByText(/cloud disabilitato/)).toBeVisible();
-  await region.getByRole("button", { name: "Scarica modello…" }).click();
-  await region.getByRole("button", { name: "Scarica", exact: true }).click();
+  await region.getByRole("button", { name: "Download model…" }).click();
+  await region.getByRole("button", { name: "Download", exact: true }).click();
   await expect(region.getByText(/scaricato e verificato/)).toBeVisible({
     timeout: 10 * 60_000,
   });

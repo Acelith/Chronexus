@@ -23,10 +23,10 @@ const MAX_ENTRIES: usize = 10_000;
 const MAX_MANIFEST: u64 = 2 * 1024 * 1024;
 
 fn io(error: impl std::fmt::Display) -> String {
-    format!("Backup non completato: {error}. Verifica spazio, permessi e disponibilità della cartella, poi riprova.")
+    format!("Backup not completed: {error}. Check space, permissions and folder availability, then try again.")
 }
 fn invalid(detail: &str) -> String {
-    format!("Backup non valido: {detail}. L'archivio corrente non è stato sostituito.")
+    format!("Invalid backup: {detail}. The current archive was not replaced.")
 }
 pub(crate) fn sync_dir(path: &Path) -> AppResult<()> {
     #[cfg(unix)]
@@ -61,7 +61,7 @@ fn allowed_path(name: &str) -> bool {
 fn regular_file(path: &Path) -> AppResult<()> {
     let meta = fs::symlink_metadata(path).map_err(io)?;
     if !meta.is_file() || meta.file_type().is_symlink() {
-        return Err(invalid("file simbolico o speciale non consentito"));
+        return Err(invalid("symbolic or special file not allowed"));
     }
     Ok(())
 }
@@ -234,9 +234,7 @@ fn schema(connection: &Connection) -> AppResult<Vec<(String, String, String)>> {
 
 fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if !(1..=db::LATEST_SCHEMA).contains(&expected_version) {
-        return Err(invalid(
-            "versione database non supportata; aggiorna Chronexus",
-        ));
+        return Err(invalid("unsupported database version; update Chronexus"));
     }
     let connection = Connection::open_with_flags(
         path,
@@ -248,9 +246,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
         .map_err(journal::storage)?;
     let integrity: String = connection
         .query_row("PRAGMA integrity_check", [], |r| r.get(0))
-        .map_err(|_| invalid("integrità SQLite compromessa"))?;
+        .map_err(|_| invalid("SQLite integrity compromised"))?;
     if integrity != "ok" || version(&connection)? != expected_version {
-        return Err(invalid("integrità o versione del database incoerente"));
+        return Err(invalid("inconsistent database integrity or version"));
     }
     let expected = Connection::open_in_memory().map_err(journal::storage)?;
     for migration in db::MIGRATIONS.into_iter().take(expected_version as usize) {
@@ -351,7 +349,7 @@ fn attachments(directory: &Path, connection: &Connection) -> AppResult<Vec<(Stri
         .file_type()
         .is_symlink()
     {
-        return Err(invalid("cartella allegati simbolica"));
+        return Err(invalid("symbolic attachment folder"));
     }
     let campaign_ids: BTreeSet<_> = journal::list_campaigns(connection)?
         .into_iter()
@@ -365,13 +363,13 @@ fn attachments(directory: &Path, connection: &Connection) -> AppResult<Vec<(Stri
             || !canonical_id(&id)
             || !campaign_ids.contains(&id)
         {
-            return Err(invalid("cartella allegati non associata a una campagna"));
+            return Err(invalid("attachment folder not associated with a campaign"));
         }
         for file in fs::read_dir(campaign.path()).map_err(io)? {
             let file = file.map_err(io)?;
             let name = format!("attachments/{id}/{}", file.file_name().to_string_lossy());
             if !attachment_path(&name) {
-                return Err(invalid("nome allegato non portabile"));
+                return Err(invalid("non-portable attachment name"));
             }
             regular_file(&file.path())?;
             files.push((name, file.path()));
@@ -392,11 +390,11 @@ pub fn write_backup(
     if !destination.is_absolute()
         || destination.extension().and_then(|e| e.to_str()) != Some("nodex")
     {
-        return Err("Scegli un percorso assoluto con estensione .nodex.".into());
+        return Err("Choose an absolute path with the .nodex extension.".into());
     }
     let parent = destination
         .parent()
-        .ok_or_else(|| invalid("destinazione mancante"))?;
+        .ok_or_else(|| invalid("destination missing"))?;
     let workspace = tempfile::tempdir_in(parent).map_err(io)?;
     let snapshot = workspace.path().join("snapshot.sqlite3");
     connection
@@ -438,7 +436,7 @@ pub fn write_backup(
     };
     let manifest_json = serde_json::to_vec_pretty(&manifest).map_err(io)?;
     if manifest_json.len() as u64 > MAX_MANIFEST {
-        return Err(invalid("manifest troppo grande"));
+        return Err(invalid("manifest too large"));
     }
     let mut output = NamedTempFile::new_in(parent).map_err(io)?;
     {
@@ -460,7 +458,7 @@ pub fn write_backup(
     let verified = prepare_restore(output.path(), parent)?;
     drop(verified);
     // Never silently overwrite: atomic no-clobber publish, even after a dialog race.
-    output.persist_noclobber(destination).map_err(|_|"Il file esiste già o non è scrivibile. Scegli un nuovo nome: nessun backup esistente viene sovrascritto.".to_string())?;
+    output.persist_noclobber(destination).map_err(|_|"The file already exists or is not writable. Choose a new name: no existing backup is overwritten.".to_string())?;
     sync_dir(parent)?;
     Ok(BackupReceipt {
         path: destination.display().to_string(),
@@ -471,12 +469,12 @@ pub fn write_backup(
 pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<PreparedRestore> {
     regular_file(source)?;
     if fs::metadata(source).map_err(io)?.len() > MAX_TOTAL {
-        return Err(invalid("archivio oltre 512 MiB"));
+        return Err(invalid("archive exceeds 512 MiB"));
     }
     let mut zip = ZipArchive::new(File::open(source).map_err(io)?)
         .map_err(|_| invalid("ZIP illeggibile o incompleto"))?;
     if zip.len() < 2 || zip.len() > MAX_ENTRIES {
-        return Err(invalid("numero di file non consentito"));
+        return Err(invalid("file count not allowed"));
     }
     let mut names = BTreeSet::new();
     for index in 0..zip.len() {
@@ -489,9 +487,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
             || !names.insert(name)
             || file.size() > MAX_FILE
         {
-            return Err(invalid(
-                "percorso, duplicato, file speciale o dimensione non consentiti",
-            ));
+            return Err(invalid("path, duplicate, special file or size not allowed"));
         }
     }
     let manifest: Manifest = {
@@ -499,7 +495,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
             .by_name("manifest.json")
             .map_err(|_| invalid("manifest assente"))?;
         if file.size() > MAX_MANIFEST {
-            return Err(invalid("manifest troppo grande"));
+            return Err(invalid("manifest too large"));
         }
         serde_json::from_reader(file.take(MAX_MANIFEST + 1))
             .map_err(|_| invalid("manifest illeggibile"))?
@@ -509,7 +505,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
         || manifest.app_version.len() > 50
         || chrono::DateTime::parse_from_rfc3339(&manifest.created_at).is_err()
     {
-        return Err(invalid("formato o metadati non supportati"));
+        return Err(invalid("unsupported format or metadata"));
     }
     let mut declared = BTreeSet::from(["manifest.json".to_string()]);
     let mut total = 0_u64;
@@ -527,11 +523,11 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
                 .bytes()
                 .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
         {
-            return Err(invalid("elenco file o checksum non valido"));
+            return Err(invalid("invalid file list or checksum"));
         }
     }
     if names != declared || !declared.contains(DB_ENTRY) {
-        return Err(invalid("file mancanti o non dichiarati"));
+        return Err(invalid("missing or undeclared files"));
     }
     let directory = tempfile::tempdir_in(staging_parent).map_err(io)?;
     for entry in &manifest.files {
@@ -546,9 +542,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
             std::io::copy(&mut (&mut file).take(entry.size + 1), &mut output).map_err(io)?;
         output.sync_all().map_err(io)?;
         if written != entry.size || checksum(&path)?.1 != entry.sha256 {
-            return Err(invalid(
-                "checksum non corrispondente: file alterato o danneggiato",
-            ));
+            return Err(invalid("checksum mismatch: file altered or damaged"));
         }
     }
     // Flush directory entries bottom-up before the staged tree can become active.
@@ -587,7 +581,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
         manifest.schema_version,
     )?;
     if actual != manifest.counts {
-        return Err(invalid("conteggi del manifest non corrispondenti"));
+        return Err(invalid("manifest counts do not match"));
     }
     // Validate campaign attachment ownership, also for archives assembled externally.
     if manifest.schema_version >= 2 {
@@ -622,7 +616,7 @@ impl Store {
             .truncate(false)
             .open(root.join("archive.lock"))
             .map_err(io)?;
-        lock.try_lock().map_err(|_|"Questo archivio è già aperto in un'altra finestra Chronexus. Chiudila prima di continuare.".to_string())?;
+        lock.try_lock().map_err(|_|"This archive is already open in another Chronexus window. Close it before continuing.".to_string())?;
         let pointer = root.join("active-profile.json");
         let directory = if pointer.exists() {
             let value: String =
@@ -632,11 +626,11 @@ impl Store {
                     )
                 })?;
             if !canonical_id(&value) {
-                return Err(invalid("selettore del profilo non valido"));
+                return Err(invalid("invalid profile selector"));
             }
             let directory = root.join("profiles").join(value);
             if !directory.join("nodex.sqlite3").is_file() {
-                return Err(invalid("profilo attivo mancante"));
+                return Err(invalid("active profile missing"));
             }
             directory
         } else {
@@ -668,12 +662,12 @@ impl Store {
     }
     pub fn restore(&mut self, token: &str) -> AppResult<RestoreReceipt> {
         if self.pending.as_ref().is_none_or(|p| p.token != token) {
-            return Err("La verifica è scaduta. Seleziona nuovamente il backup.".into());
+            return Err("The verification expired. Select the backup again.".into());
         }
         let prepared = self
             .pending
             .take()
-            .ok_or_else(|| invalid("verifica mancante"))?;
+            .ok_or_else(|| invalid("verification missing"))?;
         let safety_dir = self.root.join("backups");
         fs::create_dir_all(&safety_dir).map_err(io)?;
         let safety_path = safety_dir.join(format!("prima-del-ripristino-{}.nodex", Uuid::new_v4()));
@@ -695,7 +689,7 @@ impl Store {
             });
             let parent = target
                 .parent()
-                .ok_or_else(|| invalid("destinazione mancante"))?;
+                .ok_or_else(|| invalid("destination missing"))?;
             fs::create_dir_all(parent).map_err(io)?;
             let mut output = File::create_new(&target).map_err(io)?;
             std::io::copy(
@@ -705,7 +699,7 @@ impl Store {
             .map_err(io)?;
             output.sync_all().map_err(io)?;
             if checksum(&target)? != (entry.size, entry.sha256.clone()) {
-                return Err(invalid("copia del payload non integra"));
+                return Err(invalid("payload copy failed integrity verification"));
             }
             sync_dir(parent)?;
         }
@@ -733,7 +727,7 @@ impl Store {
         self.directory = next;
         // A directory sync failure here cannot be reported as a cancelled restore.
         let durability_warning = sync_dir(&self.root).err();
-        Ok(RestoreReceipt {safety_path:safety_path.display().to_string(),counts:prepared.manifest.counts,warning:durability_warning.map(|_|"Ripristino applicato, ma il sistema non ha confermato la sincronizzazione della cartella su disco. Conserva la copia preventiva e verifica dopo il riavvio.".into())})
+        Ok(RestoreReceipt {safety_path:safety_path.display().to_string(),counts:prepared.manifest.counts,warning:durability_warning.map(|_|"Restore applied, but the system did not confirm the folder was synced to disk. Keep the safety copy and check after restarting.".into())})
     }
 }
 

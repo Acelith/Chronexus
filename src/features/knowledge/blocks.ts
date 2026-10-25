@@ -21,7 +21,7 @@ export function blockOptions(
           .join("");
         result.push({
           id: value.id,
-          text: text.slice(0, 100) || tr("Blocco senza testo"),
+          text: text.slice(0, 100) || tr("Block without text"),
         });
       }
       if (Array.isArray(value.children)) visit(value.children);

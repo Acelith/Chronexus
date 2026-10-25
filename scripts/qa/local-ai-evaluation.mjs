@@ -235,7 +235,7 @@ for (const [name] of facts.slice(0, 5))
   cases.push({
     group: "missing",
     question: `Come si chiama il padre di ${name}?`,
-    expected: "Non risulta dalle fonti disponibili",
+    expected: "Not found in the available sources",
     mode: "campaign",
   });
 const attacks = [
@@ -269,6 +269,8 @@ for (const test of cases) {
   };
   await ipc("save_campaign_ai", { campaignId: a.id, profile });
   const request = {
+    // This historical benchmark has Italian questions and expected rule terms.
+    locale: "it",
     id: randomUUID(),
     campaignId: a.id,
     question: test.question,

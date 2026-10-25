@@ -65,7 +65,7 @@ try {
             $p=Safe-Path $target $f.path
             if ((Get-Item -LiteralPath $p).Length -ne $f.size -or (Hash $p) -ne $f.sha256) { throw 'Installazione esistente diversa: nessuna sovrascrittura.' }
         }
-        Write-Output 'AI già installata e verificata.'; exit 0
+        Write-Output 'AI already installed and verified.'; exit 0
     }
     $stage=$target+'.install-'+[Guid]::NewGuid().ToString('N')
     New-Item -ItemType Directory -Path $stage | Out-Null
@@ -96,5 +96,5 @@ try {
     if ((Hash $weight) -ne $bundle.weight.sha256 -or (Get-Item -LiteralPath $weight).Length -ne $bundle.weight.size) { throw 'Pesi ricostruiti non validi.' }
     [IO.File]::Copy($manifest,(Join-Path $stage 'bundle.json'),$false)
     [IO.Directory]::Move($stage,$target)
-    Write-Output "AI installata e verificata in $target. Avvia Start-AI.ps1; nessun download o modifica alle campagne."
+    Write-Output "AI installed and verified in $target. Run Start-AI.ps1; no downloads or campaign changes."
 } catch { Write-Error $_; exit 1 }

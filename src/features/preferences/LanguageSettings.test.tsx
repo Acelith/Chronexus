@@ -17,10 +17,7 @@ it("cambia lingua subito, salva e permette recupero italiano in ogni scrittura",
   const user = userEvent.setup();
   vi.mocked(preferencesApi.save).mockImplementation(async (p) => p);
   render(<LanguageSettings />);
-  await user.selectOptions(
-    screen.getByLabelText("Lingua dell’interfaccia"),
-    "ar",
-  );
+  await user.selectOptions(screen.getByLabelText("Interface language"), "ar");
   await waitFor(() => expect(document.documentElement.dir).toBe("rtl"));
   expect(getPreferences().locale).toBe("ar");
   expect(preferencesApi.save).toHaveBeenCalledWith(
@@ -28,7 +25,7 @@ it("cambia lingua subito, salva e permette recupero italiano in ogni scrittura",
   );
   await user.click(
     screen.getByRole("button", {
-      name: "Italiano · Ripristina lingua e scrittura",
+      name: "English · Reset language and script",
     }),
   );
   await waitFor(() => expect(document.documentElement.dir).toBe("ltr"));
@@ -38,12 +35,9 @@ it("salvataggio fallito conserva lingua precedente e presenta errore", async () 
   const user = userEvent.setup();
   vi.mocked(preferencesApi.save).mockRejectedValue(Error("Disco pieno"));
   render(<LanguageSettings />);
-  await user.selectOptions(
-    screen.getByLabelText("Lingua dell’interfaccia"),
-    "en",
-  );
+  await user.selectOptions(screen.getByLabelText("Interface language"), "it");
   expect(await screen.findByRole("alert")).toHaveTextContent("Disco pieno");
-  expect(getPreferences().locale).toBe("it");
+  expect(getPreferences().locale).toBe("en");
 });
 it("i glifi sono decorativi, il comando ha nome semantico ordinario", () => {
   applyPreferences({
@@ -82,13 +76,10 @@ it.each(["espruar", "dethek"] as const)(
     const user = userEvent.setup();
     vi.mocked(preferencesApi.save).mockImplementation(async (p) => p);
     render(<LanguageSettings />);
-    const field = screen.getByLabelText("Testo da trascrivere");
+    const field = screen.getByLabelText("Text to transcribe");
     await user.clear(field);
     await user.type(field, "Oran 100 日本語");
-    await user.selectOptions(
-      screen.getByLabelText("Modalità di scrittura"),
-      script,
-    );
+    await user.selectOptions(screen.getByLabelText("Script mode"), script);
     await waitFor(() => expect(getPreferences().script).toBe(script));
     expect(getPreferences().version).toBe(2);
     expect(field).toHaveValue("Oran 100 日本語");
@@ -97,7 +88,7 @@ it.each(["espruar", "dethek"] as const)(
     );
     await user.click(
       screen.getByRole("button", {
-        name: "Italiano · Ripristina lingua e scrittura",
+        name: "English · Reset language and script",
       }),
     );
     await waitFor(() => expect(getPreferences()).toEqual(defaultPreferences));

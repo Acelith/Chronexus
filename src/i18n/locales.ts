@@ -1,6 +1,6 @@
 export const locales = [
-  { id: "it", name: "Italiano", intl: "it-CH", dir: "ltr" },
   { id: "en", name: "English", intl: "en-GB", dir: "ltr" },
+  { id: "it", name: "Italiano", intl: "it-CH", dir: "ltr" },
   { id: "de", name: "Deutsch", intl: "de-CH", dir: "ltr" },
   { id: "fr", name: "Français", intl: "fr-CH", dir: "ltr" },
   { id: "es", name: "Español", intl: "es-ES", dir: "ltr" },
@@ -11,12 +11,12 @@ export const locales = [
   { id: "ar", name: "العربية", intl: "ar", dir: "rtl" },
   {
     id: "lmo-CH",
-    name: "Ticines · dialetto ticinese",
+    name: "Ticines · Ticinese Lombard",
     intl: "it-CH",
     dir: "ltr",
   },
   { id: "tlh", name: "tlhIngan Hol · Klingon", intl: "en-GB", dir: "ltr" },
-  { id: "art-x-rihan", name: "Rihannsu · Romulano", intl: "en-GB", dir: "ltr" },
+  { id: "art-x-rihan", name: "Rihannsu · Romulan", intl: "en-GB", dir: "ltr" },
 ] as const;
 export type Locale = (typeof locales)[number]["id"];
 export type Script =
@@ -29,7 +29,7 @@ export interface Preferences {
 }
 export const defaultPreferences: Preferences = {
   version: 2,
-  locale: "it",
+  locale: "en",
   script: "standard",
   showOriginal: true,
 };

@@ -45,7 +45,7 @@ export default function NodePortrait({
   return (
     <div className="node-medallion">
       {portrait.pageId === pageId && portrait.url ? (
-        <img src={portrait.url} alt={tr("Ritratto allegato alla voce")} />
+        <img src={portrait.url} alt={tr("Portrait attached to the entry")} />
       ) : (
         <Icon name={kindIcons[kind] ?? "star"} />
       )}

@@ -13,9 +13,9 @@ test("export reports cancellation and failures truthfully", async () => {
     .mockResolvedValueOnce(null)
     .mockRejectedValueOnce(Error("Disco non disponibile"));
   render(<ExportButton campaignId="campaign" busy={false} />);
-  await user.click(screen.getByRole("button", { name: "Esporta campagna" }));
-  expect(await screen.findByRole("status")).toHaveTextContent("annullata");
-  await user.click(screen.getByRole("button", { name: "Esporta campagna" }));
+  await user.click(screen.getByRole("button", { name: "Export campaign" }));
+  expect(await screen.findByRole("status")).toHaveTextContent("cancelled");
+  await user.click(screen.getByRole("button", { name: "Export campaign" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Disco non disponibile",
   );

@@ -24,7 +24,7 @@ fn append_preserves_blocks_and_rejects_stale_revision_and_other_campaign() {
     let c = db::open(&path).unwrap();
     let campaign = journal::create_campaign(&c, "Test automation").unwrap();
     let p = policy(&campaign.id);
-    let s = journal::create_session(&c, &campaign.id, 1, "Sessione", None).unwrap();
+    let s = journal::create_session(&c, &campaign.id, 1, "Session", None).unwrap();
     let old = s.document["blocks"][0].clone();
     let args = json!({"campaignId":campaign.id,"target":"session","id":s.id,"revision":0,"text":"Oran sostiene: [[NON una relazione fattuale]] 日本語"});
     let saved = execute(&c, &p, "append_note", args.clone());

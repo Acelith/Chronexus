@@ -1,28 +1,28 @@
-# Illustrazioni dell’araldo (M15a)
+# Herald Illustrations (M15a)
 
-Stato: **installate il 25 ottobre 2026**. Illustrazioni fornite dall’utente
-(generate esternamente a partire dai prompt qui sotto, senza dati di campagna) e
-convertite localmente con ffmpeg: `herald.webp` 630×840 con alpha originale (113 KB);
-`manifesto.webp` 1200×857, sfondo bianco reso trasparente con colorkey (94 KB).
-Originali non conservati nel repository. Se un file viene rimosso, impostare la
-voce a `null` in `heraldArt.ts`: torna l’emblema geometrico SVG (trombetta con
-stendardo). Nessuna immagine viene scaricata a runtime.
+Status: **installed on 25 October 2026**. Illustrations provided by the user
+(generated externally from the prompts below, without campaign data) and
+converted locally with ffmpeg: `herald.webp` 630×840 with original alpha (113 KB);
+`manifesto.webp` 1200×857, white background rendered transparent with colorkey (94 KB).
+Originals are not stored in the repository. If a file is removed, set the
+entry to `null` in `heraldArt.ts`: the geometric SVG emblem (trumpet with
+banner) returns. No images are downloaded at runtime.
 
-## File attesi
+## Expected Files
 
-| File | Contenuto | Formato |
+| File | Content | Format |
 | --- | --- | --- |
-| `herald.webp` | Vassallo/araldo a figura intera che suona la trombetta, rivolto a destra | WebP con alpha, circa 768×1024, ≤ 300 KB |
-| `manifesto.webp` | Pergamena srotolata vuota, sfondo del testo dell’annuncio | WebP, circa 1400×1000, ≤ 300 KB, area centrale chiara e uniforme |
+| `herald.webp` | Full-figure vassal/herald playing a trumpet, facing right | WebP with alpha, approx. 768×1024, ≤ 300 KB |
+| `manifesto.webp` | Empty unrolled scroll, background for the announcement text | WebP, approx. 1400×1000, ≤ 300 KB, clear and uniform central area |
 
-Per attivarli impostare in `src/features/updates/heraldArt.ts`:
+To activate them, set in `src/features/updates/heraldArt.ts`:
 
 ```ts
 herald: new URL("../../../assets/herald/herald.webp", import.meta.url).href,
 manifesto: new URL("../../../assets/herald/manifesto.webp", import.meta.url).href,
 ```
 
-## Prompt suggeriti
+## Suggested Prompts
 
 **herald.webp**
 
@@ -39,15 +39,15 @@ manifesto: new URL("../../../assets/herald/manifesto.webp", import.meta.url).hre
 **manifesto.webp**
 
 > Top-down flat view of an unrolled blank parchment scroll, ivory parchment
-> (#ead9b1) with subtle fibres and soft age stains toward the edges, rolled ends
-> top and bottom with slight shadow, thin double burgundy (#6c302b) ruled border.
-> The central area must be clean, even and light for overlaid text. No writing,
-> no letters, no seals, no logos. Flat lighting, no perspective distortion.
+["> (#ead9b1) with subtle fibres and soft age stains toward the edges, rolled ends"
+"> top and bottom with slight shadow, thin double burgundy (#6c302b) ruled border.
+"> The central area must be clean, even and light for overlaid text. No writing,
+"> no letters, no seals, no logos. Flat lighting, no perspective distortion.
 
 ## Vincoli
 
-- Nessun testo rasterizzato: titolo, versione, note e pulsanti restano testo HTML.
-- Nessun dato di campagna nei prompt. Conservare qui la fonte/strumento usato,
-  la data e le eventuali licenze; gli originali fuori dal repository.
-- Dopo l’inserimento verificare contrasto del testo sulla pergamena (≥ 4.5:1),
-  movimento ridotto e finestra stretta con `scripts/qa/m15a-herald.mjs`.
+[- No rasterized text: title, version, notes and buttons remain HTML text.]
+- No campaign data in the prompts. Keep the source/tool used here,
+  the date and any licenses; originals outside the repository.
+- After insertion, verify text contrast on the parchment (≥ 4.5:1),
+  reduced movement and narrow window with `scripts/qa/m15a-herald.mjs`.

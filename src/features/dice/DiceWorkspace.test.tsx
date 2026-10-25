@@ -94,7 +94,7 @@ test("tiro misto azzera tutte le quantità e rende visibili risultati e storico 
     expect(screen.getByLabelText(t.quantity(sides))).toHaveValue(0);
   await screen.findByText(t.readResult(136));
   const history = screen.getByRole("complementary", { name: t.history });
-  await user.click(within(history).getByLabelText(/^Tiro del/));
+  await user.click(within(history).getByLabelText(/^Roll of/));
   expect(
     within(history).getByRole("list", { name: t.results(100) }),
   ).toHaveTextContent("100");
@@ -199,7 +199,7 @@ test("storico paginato si recupera da un errore e non duplica righe", async () =
   expect(
     within(
       screen.getByRole("complementary", { name: t.history }),
-    ).getAllByLabelText(/^Tiro del/),
+    ).getAllByLabelText(/^Roll of/),
   ).toHaveLength(2);
 });
 test("timeline di 2,5 secondi e salto non cambiano il risultato", async () => {
@@ -252,14 +252,14 @@ test("il tiro è registrato ma lo storico non anticipa il risultato prima della 
   expect(diceApi.roll).toHaveBeenCalledTimes(1);
   expect(screen.getByText(t.awaitingReveal)).toBeInTheDocument();
   const history = screen.getByRole("complementary", { name: t.history });
-  expect(within(history).queryByLabelText(/^Tiro del/)).not.toBeInTheDocument();
+  expect(within(history).queryByLabelText(/^Roll of/)).not.toBeInTheDocument();
   expect(
     screen.queryByText(t.saved + " · " + t.details),
   ).not.toBeInTheDocument();
   act(() => vi.advanceTimersByTime(2500));
   expect(screen.queryByText(t.awaitingReveal)).not.toBeInTheDocument();
-  expect(within(history).getByLabelText(/^Tiro del/)).toHaveAccessibleName(
-    /Totale 136/,
+  expect(within(history).getByLabelText(/^Roll of/)).toHaveAccessibleName(
+    /Total 136/,
   );
 });
 

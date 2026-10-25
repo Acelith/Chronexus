@@ -96,7 +96,7 @@ const ui = async (source) => {
 const click = async (source) =>
   page.getByRole("button", { name: await ui(source), exact: true }).click();
 const openPreferences = async () => {
-  await click("Impostazioni dell’app");
+  await click("App settings");
   await page.locator(".language-settings").waitFor();
 };
 const selectLocale = async (locale) => {
@@ -181,7 +181,7 @@ if (!campaign) {
     stats: [
       {
         id: randomUUID(),
-        label: "Forza",
+        label: "Strength",
         value: "10",
         modifier: "0",
         training: "none",
@@ -241,7 +241,7 @@ if (phase === "recovery") {
   await openPreferences();
   await page
     .getByRole("button", {
-      name: "Italiano · Ripristina lingua e scrittura",
+      name: "English · Reset language and script",
       exact: true,
     })
     .click();
@@ -279,22 +279,22 @@ if (phase === "restart") {
   assert(preview);
   assert.equal(preview.manifest.schema_version, 15);
   await call("cancel_restore");
-  await click("Backup e ripristino");
-  await click("Seleziona backup");
+  await click("Backup and restore");
+  await click("Select backup");
   await expect(page.getByRole("alertdialog")).toBeVisible();
   await expect(page.locator(".backup-status")).toHaveText(
-    await ui("Backup verificato. Conferma o annulla il ripristino."),
+    await ui("Backup verified. Confirm or cancel the restore."),
   );
   await page.keyboard.press("Escape");
   await expect(page.getByRole("alertdialog")).toHaveCount(0);
   assert.deepEqual(await snapshot(), expected.data);
-  await click("Seleziona backup");
+  await click("Select backup");
   await expect(page.getByRole("alertdialog")).toBeVisible();
   await expect(page.locator(".backup-status")).toHaveText(
-    await ui("Backup verificato. Conferma o annulla il ripristino."),
+    await ui("Backup verified. Confirm or cancel the restore."),
   );
   await page.screenshot({ path: `${out}/restore-confirmation-en.png` });
-  await click("Sostituisci archivio");
+  await click("Replace archive");
   await expect(page.getByRole("alertdialog")).toHaveCount(0);
   await expect(page.locator(".backup-receipt")).toBeVisible();
   assert.deepEqual(await snapshot(), expected.data);
@@ -332,19 +332,19 @@ await page.reload();
 await expect(page.locator(".campaign-picker select")).toHaveValue(campaign.id);
 const initial = await snapshot();
 const views = [
-  "Riepilogo",
-  "Diario",
+  "Overview",
+  "Journal",
   "Codex",
-  "Grafo",
+  "Graph",
   "Party",
-  "Personaggio",
-  "Inventario",
-  "Incantesimi",
-  "Wiki D&D",
-  "Impostazioni della campagna",
-  "Assistente locale",
-  "Tiradadi",
-  "Backup e ripristino",
+  "Character",
+  "Inventory",
+  "Spells",
+  "D&D Wiki",
+  "Campaign settings",
+  "Local assistant",
+  "Dice roller",
+  "Backup and restore",
 ];
 const report = [];
 for (const locale of Object.keys(catalogs)) {
@@ -352,7 +352,7 @@ for (const locale of Object.keys(catalogs)) {
   for (const view of views) {
     console.log("VIEW", locale, view);
     await click(view);
-    if (view === "Backup e ripristino")
+    if (view === "Backup and restore")
       await page.locator(".backup-workspace").waitFor();
     else await expect(page.locator(".workspace-content")).toBeVisible();
     await page.waitForLoadState("networkidle");
@@ -362,7 +362,7 @@ for (const locale of Object.keys(catalogs)) {
     );
     assert.equal(
       await page.locator(".campaign-picker select").inputValue(),
-      view === "Backup e ripristino" ? "" : campaign.id,
+      view === "Backup and restore" ? "" : campaign.id,
     );
     const overflow = await page.evaluate(
       () =>
@@ -402,11 +402,11 @@ for (const script of ["braille", "morse", "galactic"]) {
   if (script === "morse")
     await expect(
       page
-        .getByRole("button", { name: "Diario", exact: true })
+        .getByRole("button", { name: "Journal", exact: true })
         .locator(".sr-only"),
     ).toHaveCSS("position", "absolute");
   await page
-    .getByRole("button", { name: "Prepara pacchetto reversibile", exact: true })
+    .getByRole("button", { name: "Prepare reversible package", exact: true })
     .click();
   const packet = await page
     .locator(".transcription-preview textarea")
@@ -415,14 +415,14 @@ for (const script of ["braille", "morse", "galactic"]) {
   assert.equal(JSON.parse(packet).original, "Chronexus 100");
   await page
     .getByRole("button", {
-      name: "Ripristina originale dal pacchetto",
+      name: "Restore original from package",
       exact: true,
     })
     .click();
   await page.screenshot({ path: `${out}/script-${script}.png` });
   await page
     .getByRole("button", {
-      name: "Italiano · Ripristina lingua e scrittura",
+      name: "English · Reset language and script",
       exact: true,
     })
     .click();

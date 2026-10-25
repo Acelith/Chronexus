@@ -13,7 +13,7 @@ export interface RulesetAdapter {
 export const manualAdapter: RulesetAdapter = {
   id: "generic",
   get label() {
-    return tr("Valori manuali");
+    return tr("Manual values");
   },
   mode: "manual",
   derive: () => [],

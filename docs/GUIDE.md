@@ -1,287 +1,287 @@
-# Guida all’uso di Chronexus
+# Chronexus User Guide
 
-Guida dettagliata delle funzioni, spostata dal README in M20 senza modifiche di contenuto. Per installazione e panoramica vedi il [README](../README.md); per lo stato reale e i limiti [STATUS.md](STATUS.md).
+Detailed guide of functions, moved from the README to M20 without content changes. For installation and overview see [README](../README.md); for real status and limits [STATUS.md](STATUS.md).
 
-## Lingue e scritture
+## Languages and Scripts
 
-Nel menu sinistro, **Impostazioni dell’app → Lingua e scrittura**: 11 lingue
-naturali, Klingon/Rihannsu sperimentali e cinque rese visuali (Braille, Morse,
-Galattico di Minecraft, Espruar e Dethek). Cambio immediato, scelta persistente, font e cataloghi
-locali. Appunti, schede, citazioni e backup mantengono i dati originali.
-Le traduzioni sono bozze da revisionare; le lingue inventate hanno fallback
-italiano. Il pulsante **Italiano · Ripristina lingua e scrittura** resta leggibile.
-Dettagli, fonti, limiti e manutenzione: [docs/I18N.md](I18N.md).
+In the left menu, **App Settings → Language and Script**: 11 natural
+languages, experimental Klingon/Rihannsu, and five visual renderings (Braille, Morse,
+Minecraft Galactic, Espruar, and Dethek). Immediate change, persistent choice, fonts, and local catalogs
+Notes, cards, quotes, and backups maintain the original data.
+Translations are drafts to be reviewed; invented languages have an Italian fallback
+The **Italian · Restore language and script** button remains readable.
+Details, sources, limits, and maintenance: [docs/I18N.md](I18N.md).
 
-## Funzioni M0–M5
+## M0–M5 Functions
 
-La scheda è stata ampliata sul riferimento PDF dell'utente: sezioni manuali per
-combattimento/sensi, identità e competenze, storia/aspetto, armi/munizioni,
-denaro/carico e magia. “Aggiungi campi D&D 2014” inserisce caratteristiche,
-tiri e abilità mancanti senza riscrivere i tuoi valori. Competenza/maestria,
-modificatori e tiri contro morte sono manuali. “Aggiungi slot 1°–9°” crea slot
-a zero: scegli tu massimi e disponibilità. Non sono implementate formule automatiche.
+The sheet was expanded based on the user's PDF reference: manual sections for
+combat/senses, identity and skills, history/appearance, weapons/ammo,
+money/load, and magic. “Add D&D fields 2014” inserts missing characteristics,
+rolls, and abilities without rewriting your values. Skill/proficiency,
+modifiers, and death saves are manual. “Add slots 1°–9°” creates slots
+at zero: you choose the maximums and availability. No automatic formulas are implemented.
 
-Da Personaggio, Inventario o Capacità usa **Cerca in D&D**, scegli categoria e
-nome inglese e premi **Cerca nell’API**. Puoi consultare incantesimi, classi,
-specie, equipaggiamento, oggetti magici, privilegi, tratti, abilità, condizioni e
-regole SRD 2014. L'API non contiene tutti i manuali commerciali e non offre
-l'italiano al momento della verifica. Il nome viene filtrato sul dispositivo.
+From Character, Inventory, or Capabilities, use **Search in D&D**, choose category and
+English name, and press **Search in API**. You can consult spells, classes,
+species, equipment, magic items, privileges, traits, abilities, conditions, and
+SRD rules 2014. The API does not contain all commercial manuals and does not offer
+Italian at the time of verification. The name is filtered on the device.
 
-Apri un incantesimo, scegli **Usa questi dati nel modulo**, personalizza e premi
-**Salva voce**. La fonte originale resta visibile anche dopo una rinomina.
-**Aggiungi incantesimo** continua a creare voci interamente tue; dal modulo puoi
-anche **Cercare questo nome in D&D** e usare un risultato come base, mantenendo
-note, marcatori e collegamenti. I contenuti personalizzati restano locali:
-l'API è di sola lettura e non li pubblica.
+Open a spell, choose **Use this data in the module**, customize, and press
+**Save entry**. The original source remains visible even after renaming.
+**Add spell** continues to create entirely your own entries; from the module you can
+also **Search this name in D&D** and use a result as a base, maintaining
+notes, markers, and links. Custom content remains local:
+the API is read-only and does not publish them.
 
-La rete è facoltativa e si attiva solo con un'azione nel catalogo. Fino a
-150 risposte scaricate sono conservate in SQLite con data; le voci salvate nel
-grimorio sono copie indipendenti. Le copie consultate funzionano offline dopo
-riavvio; una voce nuova richiede connessione. **Aggiorna** cerca una versione
-online e segnala eventuale uso della copia locale. Backup e ripristino comprendono
-scheda estesa, fonti e cache. Nessun PDF, appunto o scheda personale viene inviato.
-Dettagli tecnici e attribuzione: [docs/RULESETS.md](RULESETS.md).
+The network is optional and is activated only with an action in the catalog. Up to
+150 downloaded responses are stored in SQLite with a date; entries saved in the
+grimoire are independent copies. Consulted copies work offline after
+reboot; a new entry requires a connection. **Update** searches for an
+online version and reports any use of the local copy. Backup and restoration include
+extended sheet, sources, and cache. No PDF, note, or personal sheet is sent.
+Technical details and attribution: [docs/RULESETS.md](RULESETS.md).
 
-- Creazione, selezione e rinomina di campagne indipendenti.
-- Sessioni ordinate per numero, con titolo e data reale facoltativa.
-- Editor BlockNote italiano: paragrafi, titoli, elenchi, checklist, citazioni,
-  grassetto/corsivo. Il menu `/` elenca i blocchi disponibili.
-- Salvataggio automatico dopo 500 ms, stato visibile, pulsante «Salva ora» e
-  riprova. Cambio nota/campagna e chiusura normale attendono la persistenza.
-  Un errore impedisce la navigazione e conserva gli appunti nell'editor.
-- Codex con pagine tipizzate, titolo, alias, bozza/attiva e appunti a blocchi.
-- Menu `[[`: scrivi un nome e scegli una pagina esistente o «Crea bozza» con
-  mouse, frecce e Invio. Anche `[[Nome]]` resta testo finché non scegli un risultato.
-  I riferimenti confermati conservano UUID stabili e sopravvivono alle rinomine.
-- Backlink da sessioni e pagine, raggruppati per fonte con anteprima e apertura
-  del blocco di origine. Il vecchio titolo rimane un alias dopo una rinomina.
-- Alias ambigui presentati come risultati distinti; riferimenti mancanti
-  recuperabili esplicitamente come bozze con lo stesso ID.
-- Grafo Cytoscape con nodi pagina/sessione, menzioni tratteggiate e relazioni
-  dichiarate continue. Frecce, etichetta e certezza ne esplicitano il significato.
-- Creazione/modifica di relazioni direzionali con certezza confermata, sospetta,
-  smentita o sconosciuta; fonte facoltativa sessione/pagina/blocco, evidenza e note.
-  Le relazioni richiedono «Salva relazione»; un form aperto blocca la navigazione
-  finché non viene salvato o annullato.
-- Filtri per tipo di nodo, menzioni/relazioni, certezza, titolo/alias, sessione
-  fonte e vicinato a 1–2 passaggi. Vista limitata a 150 nodi e 400 collegamenti,
-  con avviso e conteggi quando occorre restringere i filtri.
-- Clic sui nodi per aprire il documento, sui collegamenti per vedere fonte/evidenza;
-  elenco accessibile equivalente per l'uso da tastiera.
-- Le relazioni possono essere eliminate solo dopo conferma; pagine, appunti e
-  menzioni rimangono conservati. Cancellazione/archiviazione delle pagine
-  non sono ancora presenti.
-- Backup manuale `.nodex` dell'intero archivio e ripristino con anteprima,
-  verifica integrità, conferma e copia preventiva dei dati correnti.
-- Un personaggio per campagna con identità, regolamento libero, livello/esperienza
-  facoltativi, PF attuali/massimi/temporanei, condizioni e note. Statistiche,
-  abilità, tiri, difese e movimento sono valori configurabili manualmente.
-- Risorse e slot personali con massimo scelto, comandi +/− e persistenza di ogni
-  variazione. Nessuna formula di regolamento, riposo o consumo automatico.
-- Inventario con quantità (anche zero), categoria, peso/valore liberi,
-  equipaggiamento, consumabili, descrizione e note. Modifica ed eliminazione
-  confermata; gli appunti e le pagine collegate non vengono cancellati.
-- Provenienza degli oggetti: sessione/blocco, PNG, luogo e missione della campagna,
-  con note e pagina Codex facoltativa. Apertura della fonte e ritorno alla voce
-  selezionata. Nomi modificati nel Codex non cambiano gli UUID dei collegamenti.
-- Incantesimi/capacità con testo personale, sistema, rango, scuola/tradizione,
-  attivazione/durata/portata/componenti e marcatori conosciuta/preparata indipendenti.
-  Filtri per nome, rango, stato/tipo e collegamenti a Codex/sessione.
+- Creation, selection, and renaming of independent campaigns.
+- Sessions ordered by number, with title and optional real date.
+- Italian BlockNote editor: paragraphs, titles, lists, checklists, quotes,
+  bold/italics. The `/` menu lists available blocks.
+- Auto-save after 500 ms, visible status, "Save now" button, and
+  retry. Changing note/campaign and normal closing wait for persistence.
+  An error prevents navigation and preserves notes in the editor.
+- Codex with typed pages, title, alias, draft/active, and block notes.
+- `[[` Menu: write a name and choose an existing page or "Create draft" with
+  mouse, arrows, and Enter. Even `[[Nome]]` remains text until you choose a result.
+  Confirmed references maintain stable UUIDs and survive renames.
+- Backlinks from sessions and pages, grouped by source with preview and opening
+of the source block. The old title remains an alias after a rename.
+- Ambiguous aliases presented as distinct results; missing references
+recoverable explicitly as drafts with the same ID.
+- Cytoscape graph with page/session nodes, dashed mentions and declared
+continuous relations. Arrows, labels, and certainty clarify their meaning.
+- Creation/modification of directional relations with confirmed, suspected,
+refuted, or unknown certainty; optional session/page/block source, evidence, and notes.
+  Relations require «Save relation»; an open form locks navigation
+until it is saved or canceled.
+- Filters for node type, mentions/relations, certainty, title/alias, source
+session, and neighborhood of 1–2 steps. View limited to 150 nodes and 400 links,
+with warning and counts when filters need to be narrowed.
+- Click on nodes to open the document, on links to see source/evidence;
+  accessible equivalent list for keyboard use.
+- Relations can be deleted only after confirmation; pages, notes, and
+mentions remain preserved. Deletion/archiving of pages
+are not yet present.
+- Manual `.nodex` backup of the entire archive and restoration with preview,
+integrity check, confirmation, and preventive copy of current data.
+- One character per campaign with identity, free regulation, optional
+level/experience, current/max/temporary PF, conditions, and notes. Statistics,
+skills, rolls, defenses, and movement are manually configurable values.
+- Personal resources and slots with chosen maximum, +/- commands, and persistence of every
+variation. No regulation formula, rest, or automatic consumption.
+- Inventory with quantity (even zero), category, free weight/value,
+equipment, consumables, description, and notes. Confirmed modification and deletion;
+linked notes and pages are not deleted.
+- Item provenance: session/block, PNG, location, and campaign mission,
+with notes and optional Codex page. Opening the source and returning to the
+selected entry. Names modified in the Codex do not change the link UUIDs.
+- Spells/abilities with personal text, system, rank, school/tradition,
+activation/duration/range/components, and independent known/prepared markers.
+  Filters for name, rank, status/type, and links to Codex/session.
 
-La chiusura forzata del processo o un'interruzione elettrica possono perdere
-le modifiche che non hanno ancora raggiunto SQLite. Attendere «Salvato sul computer».
-Una sola istanza può aprire lo stesso archivio; il lock viene rilasciato dal
-sistema anche alla chiusura forzata. Le revisioni continuano a impedire scritture
-obsolete, senza fusione automatica degli appunti.
+Forced process closure or a power outage may result in the loss of
+changes that have not yet reached SQLite. Wait for «Saved to computer».
+Only one instance can open the same archive; the lock is released by the
+system even upon forced closure. Revisions continue to prevent obsolete
+writes, without automatic merging of notes.
 
-## Personaggio, inventario e capacità
+## Character, inventory, and abilities
 
-Apri una campagna e scegli **Personaggio → Crea personaggio**. Inserisci solo i
-valori utili al tuo sistema; da **Modifica personaggio** aggiungi statistiche e
-risorse/slot. I moduli usano **Salva personaggio** / **Salva voce** espliciti;
-non sono autosalvati. Navigazione e chiusura attendono la fine di una scrittura
-e richiedono di salvare o annullare un modulo aperto. Un errore conserva il modulo.
-I comandi rapidi +/−, equipaggiamento e marcatori delle capacità salvano subito.
+Open a campaign and choose **Character → Create character**. Enter only the
+values useful to your system; from **Edit character** add statistics and
+resources/slots. Modules use explicit **Save character** / **Save entry**;
+they are not autosaved. Navigation and closure wait for the end of a write
+and require saving or canceling an open module. An error preserves the module.
+Quick commands +/−, equipment, and ability markers save immediately.
 
-Da **Inventario → Aggiungi oggetto**, annota nome e quantità. Per registrare una
-chiave ricevuta da Varek nella Sessione 12, seleziona il PNG, la sessione e il
-blocco fonte già presenti nella campagna. Se necessario crea prima le pagine
-nel Codex, con tipo PNG/luogo/missione. Dal dettaglio dell'oggetto apri la fonte;
-**Torna alla voce del personaggio** riapre l'oggetto selezionato.
+From **Inventory → Add item**, note the name and quantity. To record a
+key received from Varek in Session 12, select the NPC, the session, and the
+source block already present in the campaign. If necessary, create the pages
+in the Codex first, with PNG/location/mission type. From the item detail, open the source;
+**Return to character entry** reopens the selected item.
 
-Un blocco eliminato dagli appunti non cancella la provenienza: viene segnalato
-come mancante e si può aprire l'intera sessione. I collegamenti di provenienza
-non producono relazioni fattuali nel grafo. In **Capacità** scrivi il tuo testo:
-non sono inclusi cataloghi commerciali. Nessun marcatore consuma PF, risorse o slot.
-Il contratto per adattatori futuri è documentato in [docs/RULESETS.md](RULESETS.md).
+A block deleted from the notes does not delete the provenance: it is flagged
+as missing and the entire session can be opened. Provenance links
+do not produce factual relations in the graph. In **Abilities**, write your text:
+commercial catalogs are not included. No marker consumes PF, resources, or slots.
+The contract for future adapters is documented in [docs/RULESETS.md](RULESETS.md).
 
-## Backup e recupero
+## Backup and recovery
 
-1. Apri **Backup e ripristino** nella barra laterale. Chronexus attende il salvataggio
-   degli appunti; se fallisce, rimane nell'editor e segnala l'errore.
-2. **Crea backup** apre il selettore del sistema. Scegli un nuovo nome con
-   estensione `.nodex`, anche su disco esterno o unità di rete montata. Un file
-   esistente viene sempre rifiutato, anche se il selettore ne propone la sostituzione.
-3. Attendi **Backup creato e verificato** e controlla percorso e conteggi.
-   Include **tutte le campagne**, personaggi, risorse, oggetti/capacità, documenti,
-   UUID, menzioni, relazioni e allegati
-   nella cartella gestita. Non include file esterni semplicemente citati nelle note.
-4. Per recuperare su un altro computer o su un profilo nuovo: **Seleziona backup**,
-   controlla data e conteggi, poi **Sostituisci archivio**. Tutte le campagne correnti
-   sono sostituite; non è un'importazione o fusione. **Annulla ripristino** o Escape
-   conservano l'archivio corrente.
-5. Prima di applicare il ripristino, Chronexus salva un backup in `backups/` nella
-   cartella dati. Il percorso completo compare nella ricevuta. Per tornare indietro,
-   seleziona quel `.nodex` nello stesso flusso. Se la copia preventiva fallisce,
-   il ripristino viene interrotto.
+1. Open **Backup and restore** in the sidebar. Chronexus awaits the saving
+   of notes; if it fails, it remains in the editor and reports the error.
+2. **Create backup** opens the system selector. Choose a new name with
+   extension `.nodex`, even on an external disk or mounted network drive. An
+   existing file is always rejected, even if the selector proposes its replacement.
+3. Wait for **Backup created and verified** and check path and counts.
+   Includes **all campaigns**, characters, resources, items/abilities, documents,
+   UUIDs, mentions, relations, and attachments
+   in the managed folder. Does not include external files simply cited in the notes.
+4. To recover on another computer or a new profile: **Select backup**,
+   check date and counts, then **Replace archive**. All current campaigns
+   are replaced; it is not an import or merge. **Cancel restore** or Escape
+   preserve the current archive.
+5. Before applying the restore, Chronexus saves a backup in `backups/` in the
+   data folder. The full path appears in the receipt. To go back,
+   select that `.nodex` in the same flow. If the preventive copy fails,
+   the restore is interrupted.
 
-ZIP/Deflate con manifest v1 e SHA-256 per ogni file; snapshot tramite API SQLite,
-controlli di integrità e riferimenti, blocco di percorsi ostili e file alterati.
-**Non è cifrato né firmato**: conserva copie private e usa backup di provenienza
-fidata. Limiti iniziali: 256 MiB per file, 512 MiB complessivi e 9998 allegati.
-L’esportazione ZIP Markdown/JSON è disponibile da **Esporta campagna**; comprende
-immagini, fonti originali importate e manifest SHA-256. Il ripristino autorevole
-usa il `.nodex`; il reimport dell’export e i backup automatici restano futuri.
+ZIP/Deflate with manifest v1 and SHA-256 for each file; snapshot via SQLite API,
+integrity checks and references, blocking of hostile paths and altered files.
+**Not encrypted or signed**: keep private copies and use backups from
+trusted provenance. Initial limits: 256 MiB per file, 512 MiB total, and 9998 attachments.
+Markdown/JSON ZIP export is available from **Export campaign**; it includes
+images, imported original sources, and SHA-256 manifest. Authoritative restore
+uses `.nodex`; re-import of the export and automatic backups remain future.
 
-Da **Immagini della voce** nelle pagine Codex, nella scheda e negli oggetti puoi
-aggiungere PNG/JPEG/WebP con didascalia e ruolo, visualizzarli e ingrandirli. Per
-una mappa usa una pagina Luogo e il ruolo Mappa. Sono copie locali reali incluse
-nel backup, senza dipendere dal percorso originale. Limiti: 20 MiB, 8192 pixel
-per lato, 32 milioni di pixel. Rimuovere il collegamento conserva il file per
-recupero; gli originali mancanti o corrotti impediscono il backup.
+From **Entry images** in Codex pages, in the sheet, and in items you can
+add PNG/JPEG/WebP with caption and role, view them, and enlarge them. For
+a map, use a Location page and the Map role. These are real local copies included
+in the backup, without depending on the original path. Limits: 20 MiB, 8192 pixels
+per side, 32 million pixels. Removing the link keeps the file for
+recovery; missing or corrupted originals prevent the backup.
 
-Conserva spazio per ZIP, estrazione e nuova copia dei dati. Vecchie generazioni e
-copie preventive non vengono eliminate automaticamente. I backup con schema 005
-richiedono una versione che supporti lo schema corrispondente (005 per M5,
-006 per scheda estesa e catalogo, 011 per M6, sorgenti Logseq, Party e wiki); i backup precedenti (schemi 1–10) restano
-recuperabili e vengono aggiornati in copia. Esistono ancora archivi `.nodex`
-con il vecchio nome: non occorre rinominarli. Gli eseguibili M0–M3 ignorano
-il selettore di profilo introdotto da M4.
-Se il database corrente è talmente danneggiato da impedire l'apertura, il ripristino
-in quella cartella è bloccato: a Chronexus chiuso conserva **l'intera cartella dati**
-separatamente, poi avvia su una cartella dati vuota e seleziona un backup valido.
+Keep space for ZIP, extraction, and new copy of the data. Old generations and
+preventive copies are not automatically deleted. Backups with schema 005
+require a version that supports the corresponding schema (005 for M5,
+006 per extended sheet and catalog, 011 for M6, Logseq sources, Party and wiki); previous backups (1–10 schemas) remain
+recoverable and are updated in copy. Archives `.nodex`
+with the old name still exist: there is no need to rename them. M0–M3 executables ignore
+the profile selector introduced by M4.
+If the current database is so damaged that it prevents opening, the restoration
+in that folder is blocked: with Chronexus closed, keep **the entire data folder**
+separately, then start on an empty data folder and select a valid backup.
 
-Una menzione indica soltanto che una pagina è citata negli appunti: non crea
-alleanze, accuse o altre relazioni fattuali: queste vengono dichiarate manualmente
-nel grafo, con certezza e fonte esplicite. La ricerca del Codex riguarda titoli e alias; la ricerca globale
-nel testo è disponibile da **Cerca** o Ctrl/⌘K, con filtri e apertura del blocco
-fonte. Ctrl/⌘ShiftN crea una sessione. **Riepilogo** apre le voci recenti.
+A mention only indicates that a page is cited in the notes: it does not create
+alliances, accusations, or other factual relations: these are declared manually
+in the graph, with certainty and explicit sources. Codex search concerns titles and aliases; global search
+in the text is available via **Search** or Ctrl/⌘K, with filters and source block opening.
+Ctrl/⌘ShiftN creates a session. **Summary** opens recent entries.
 
-Prove desktop ripetibili e matrice delle verifiche: [docs/QA.md](QA.md).
+Repeatable desktop tests and verification matrix: [docs/QA.md](QA.md).
 
-## Grafo, Party e wiki
+## Graph, Party and wiki
 
-L'aspetto usa pergamena, cuoio scuro, ottone e titoli serif locali; la navigazione
-rimane ordinaria. Il grafo parte da una mappa leggibile di massimo 18 nodi;
-**Mostra tutti i nodi**, **Disposizione → Organica** e i filtri permettono di
-esplorare altri insiemi. Seleziona un nodo per evidenziare i collegamenti e
-aprire la voce o esplorarne i vicini. Il limite dati della vista rimane
-150 nodi/400 archi; l'elenco accessibile conserva tutte le fonti restituite.
+The appearance uses parchment, dark leather, brass, and local serif titles; navigation
+remains ordinary. The graph starts from a readable map of a maximum of 18 nodes;
+**Show all nodes**, **Layout → Organic**, and the filters allow you to
+explore other sets. Select a node to highlight connections and
+open the entry or explore its neighbors. The view data limit remains
+150 nodes/400 edges; the accessible list keeps all returned sources.
 
-Da **Party → Aggiungi membro** crea un personaggio o collega una pagina del
-Codex esistente, aggiungi giocatore/ruolo/presenza e scrivi in **Quello che so**.
-Gli appunti si salvano automaticamente nella stessa pagina del Codex e sono
-ricercabili. Le immagini usano gli allegati esistenti e sono incluse nel backup.
-Rimuovere dal party conserva pagina, appunti e immagini. Il party non crea
-schede giocabili complete aggiuntive o relazioni fattuali implicite.
+From **Party → Add member** create a character or link an existing Codex page,
+add player/role/presence and write in **What I know**.
+Notes are automatically saved on the same Codex page and are
+searchable. Images use existing attachments and are included in the backup.
+Removing from the party preserves the page, notes, and images. The party does not create
+additional complete playable sheets or implicit factual relationships.
 
-**Wiki D&D (M16).** In **Impostazioni dell’app → Fonti D&D / Wiki** scegli
-**Wikidot D&D 5e** (predefinita) oppure **Open5e**; la scelta è globale e non cambia
-con il ripristino delle campagne. Con Wikidot scegli una categoria (incantesimi,
-talenti, specie, background, classi, oggetti magici) e premi **Cerca su Wikidot**:
-Chronexus scarica l’indice pubblico della categoria e filtra il nome sul
-dispositivo, poi apri una voce. Il testo è mostrato come testo semplice con fonte
-dichiarata, origine (pubblicato, Unearthed Arcana, homebrew), URL e licenza della
-pagina; i campi non riconosciuti sono segnalati, non inventati. Per un incantesimo,
-**Prepara importazione nella scheda** apre il modulo in Incantesimi: si salva solo
-con **Salva voce**. Se Wikidot non fornisce informazioni, Chronexus chiede se usare
-Open5e: solo accettando la scelta viene salvata e la ricerca ripetuta lì.
-**Svuota cache offline** elimina le copie consultate di una fonte o di entrambe,
-dopo conferma; campagne, incantesimi importati, immagini, backup e scelta restano.
+**D&D Wiki (M16).** In **Settings → D&D Sources / Wiki** choose
+**Wikidot D&D 5e** (default) or **Open5e**; the choice is global and does not change
+with campaign restoration. With Wikidot, choose a category (spells,
+talents, species, backgrounds, classes, magic items) and press **Search on Wikidot**:
+Chronexus downloads the public index of the category and filters the name on the
+device, then opens an entry. The text is displayed as plain text with declared
+source, origin (published, Unearthed Arcana, homebrew), URL, and license of the
+page; unrecognized fields are flagged, not invented. For a spell,
+**Prepare import in sheet** opens the module in Spells: it is saved only
+with **Save entry**. If Wikidot does not provide information, Chronexus asks if you want to use
+Open5e: only by accepting the choice is it saved and the search repeated there.
+**Clear offline cache** deletes the viewed copies of a source or both,
+after confirmation; campaigns, imported spells, images, backups, and choices remain.
 
-**Open5e** consulta [Open5e v2](https://open5e.com/api-docs/), accanto al catalogo
-SRD personale esistente. Cerca termini inglesi, apri una voce e controlla fonte,
-edizione e licenze; le risposte consultate rimangono in SQLite e nel backup.
-La ricerca invia solo il termine esplicitamente digitato; nessun appunto viene
-caricato. **Aggiorna online** è esplicito; un fallimento mantiene la copia
-locale con avviso. Cache limitata a 100 risposte: le meno recenti possono essere
-sostituite. Fonti e copertura non equivalgono a tutti i manuali commerciali.
-Ricerca API/Skill: [docs/RESEARCH_DND.md](RESEARCH_DND.md).
+**Open5e** consults [Open5e v2](https://open5e.com/api-docs/), next to the existing personal
+SRD catalog. Search for English terms, open an entry, and check source,
+edition, and licenses; the consulted answers remain in SQLite and in the backup.
+The search sends only the explicitly typed term; no notes are
+uploaded. **Update online** is explicit; a failure keeps the local copy
+with a warning. Cache limited to 100 answers: the least recent can be
+replaced. Sources and coverage do not equate to all commercial manuals.
+API/Skill Search: [docs/RESEARCH_DND.md](RESEARCH_DND.md).
 
-## Assistente locale M7
+## Local Assistant M7
 
-La sezione **Assistente locale** interroga gli appunti della campagna e le voci
-D&D già salvate nella Wiki, separate per edizione. Risposte italiane con fonti
-riapribili, streaming, annullamento e cronologia conservata nei backup/export.
-Non modifica appunti, relazioni, scheda o inventario.
+The **Local Assistant** section queries the campaign notes and the D&D
+entries already saved in the Wiki, separated by edition. Italian answers with
+reopenable sources, streaming, undo, and history preserved in backups/exports.
+Does not modify notes, relationships, sheet, or inventory.
 
-Modello provato: **Qwen3:4b-instruct**, multilingue con fonti locali, scelto
-esplicitamente dopo le prove insufficienti del candidato specifico D&D.
-Non è fine-tuned su D&D; citazioni e risposte richiedono verifica del giocatore.
-Ollama e i pesi sono separati dall'installer e dai backup; nessun download o
-inferenza automatica all'avvio. L'app funziona anche senza runtime.
+Tested model: **Qwen3:4b-instruct**, multilingual with local sources, explicitly chosen
+after insufficient tests of the specific D&D candidate.
+It is not fine-tuned on D&D; citations and answers require player verification.
+Ollama and the weights are separate from the installer and backups; no automatic download or
+inference at startup. The app also works without the runtime.
 
-Nel progetto di questa sessione, avvia `powershell -File scripts/Start-LocalAI.ps1`,
-poi Chronexus, una campagna → **Assistente locale** → **Controlla Ollama** →
-`qwen3:4b-instruct` → conferma il profilo multilingue → **Attiva modello locale**.
-Il runtime deve confermare cloud disabilitato e GPU disponibile; CPU esclusiva
-bloccata prima di inviare gli appunti. Nessun ripiego su cloud.
+In this session's project, start `powershell -File scripts/Start-LocalAI.ps1`,
+then Chronexus, a campaign → **Local Assistant** → **Check Ollama** →
+`qwen3:4b-instruct` → confirm the multilingual profile → **Activate local model**.
+The runtime must confirm cloud is disabled and GPU is available; exclusive CPU
+is locked before sending notes. No fallback to cloud.
 
-Setup su nuove macchine, identità del modello, collaudi e limiti:
-[docs/AI_LOCAL.md](AI_LOCAL.md). La ricerca è lessicale e usa estratti
-limitati: nomi/alias precisi aiutano. Una citazione valida non garantisce verità.
+Setup on new machines, model identity, testing, and limits:
+[docs/AI_LOCAL.md](AI_LOCAL.md). The search is lexical and uses limited extracts
+precise names/aliases help. A valid citation does not guarantee truth.
 
 
-## M8 — Gemma e riaddestramento della campagna
+## M8 — Gemma and campaign retraining
 
-Dal menu **Impostazioni della campagna → AI locale** si scelgono Gemma 4 12B,
-edizione e fonti locali. **Riaddestra sui nuovi dati** esegue QLoRA sulla GPU
-e prepara un adapter; **Attiva adapter** lo applica soltanto dopo le verifiche
-e una scelta esplicita. **Aggiorna conoscenze** aggiorna invece la ricerca,
-senza modificare i pesi. Adapter e provenienza sono inclusi nei backup, pesi
-base e copie GGUF derivate restano fuori. Nessuna modifica automatica ai fatti.
+From the **Campaign Settings → Local AI** menu, choose Gemma 4 12B,
+edition, and local sources. **Retrain on new data** performs QLoRA on the GPU
+and prepares an adapter; **Activate adapter** applies it only after verification
+and an explicit choice. **Update knowledge** updates the search instead,
+without modifying weights. Adapters and provenance are included in backups, weights
+base and derived GGUF copies remain outside. No automatic modification of facts.
 
-Su questo computer il backend è preparato. Per avviare Ollama usare
-`powershell -File scripts/Start-LocalAI.ps1`, poi aprire Chronexus aggiornato
-o eseguire `pnpm desktop` con l'ambiente Rust configurato sopra. Per il setup
-su un altro computer, requisiti e limiti: [docs/AI_TRAINING.md](AI_TRAINING.md).
-Installer app M8: `installers/Chronexus-M8-Windows-x64/` (non firmato, generazione
-verificata; installazione M8 non ripetuta). Il pacchetto completo M7 resta distinto.
+On this computer, the backend is prepared. To start Ollama use
+`powershell -File scripts/Start-LocalAI.ps1`, then open the updated Chronexus
+or run `pnpm desktop` with the Rust environment configured above. For the setup
+on another computer, requirements and limits: [docs/AI_TRAINING.md](AI_TRAINING.md).
+M8 app installer: `installers/Chronexus-M8-Windows-x64/` (unsigned, generation
+verified; M8 installation not repeated). The complete M7 package remains distinct.
 
-Verifiche M8: 69 test Rust, 59 frontend e 5 worker Python, build desktop/NSIS e
-training reale RTX 4080 SUPER con 74 estratti/74 passaggi. Restano offline fisico
-e altre piattaforme. M9, il tiradadi, è ora operativa su Windows. La prossima milestone funzionale è M10, il multilingua.
+M8 Verifications: 69 Rust test, 59 frontend and 5 Python worker, desktop/NSIS build and
+actual training RTX 4080 SUPER with 74 extracted/74 steps. Physical offline
+and other platforms remain. M9, the tiradadi, is now operational on Windows. The next functional milestone is M10, the multilingual.
 
 ## Tiradadi — M9
 
-Dal menu sinistro della campagna apri **Tiradadi**: d4, d6, d8, d10, d12, d20 e
-d100, quantità indipendenti e tiri misti. Fino a 50 per tipo/100 dadi per tiro;
-selezione azzerata dopo la conferma, storico SQLite per campagna incluso nei backup.
-Cerchio dei draghi e rivelazione slot rapida, saltabile e con movimento ridotto.
-La scena mostra fino a 14 dadi; tutti i valori restano nel dettaglio.
+From the left menu of the campaign, open **Tiradadi**: d4, d6, d8, d10, d12, d20 and
+d100, independent quantities and mixed rolls. Up to 50 per type/100 dice per roll;
+selection reset after confirmation, SQLite history for campaign included in backups.
+Dragon's circle and quick slot revelation, skippable and with reduced movement.
+The scene shows up to 14 dice; all values remain in the detail.
 
-Guida, compatibilità schema 015 e prove: [docs/DICE.md](DICE.md).
-Per avviare su Windows dalla cartella corrente: `./scripts/Dev.ps1`;
-eseguibile aggiornato in `src-tauri/target/release/chronexus.exe`.
-L’installer precedente non è stato rigenerato in questa milestone.
+Guide, schema compatibility 015 and tests: [docs/DICE.md](DICE.md).
+To start on Windows from the current folder: `./scripts/Dev.ps1`;
+updated executable in `src-tauri/target/release/chronexus.exe`.
+The previous installer was not regenerated in this milestone.
 
 
-## Aggiornamenti interni (0.4.0)
+## Internal Updates (0.4.0)
 
-In **Impostazioni dell’app → Aggiornamenti dell’app** sono disponibili controllo,
-download e installazione con backup verificato obbligatorio. Nessun login client;
-endpoint Forgegit pubblico o manifesto HTTPS configurabile. Le versioni precedenti
-richiedono una prima installazione manuale. Procedura: [docs/UPDATES.md](UPDATES.md).
+In **App Settings → App Updates**, check,
+download and installation with mandatory verified backup are available. No client login;
+public Forgegit endpoint or configurable HTTPS manifest. Previous versions
+require a first manual installation. Procedure: [docs/UPDATES.md](UPDATES.md).
 
-**Araldo (M15a, dopo la 0.4.0).** All’avvio Chronexus controlla una volta il canale
-aggiornamenti (al massimo ogni 20 ore; disattivabile nella stessa sezione). Se esiste
-una nuova versione, quando l’app è inattiva un araldo con trombetta presenta il
-manifesto: **Aggiorna** avvia il download verificato, **Ricordamelo più tardi**
-rimanda di 3 giorni, **Ignora questa versione** non la riannuncia. L’installazione
-richiede sempre **Crea backup e installa**. Suono disattivabile.
+**Herald (M15a, after 0.4.0).** At startup, Chronexus checks the update channel
+once (at most every 20 hours; can be disabled in the same section). If a new version
+exists, when the app is inactive, a herald with a trumpet presents the
+manifest: **Update** starts the verified download, **Remind me later**
+postpones by 3 days, **Ignore this version** does not announce it again. Installation
+always requires **Create backup and install**. Sound can be disabled.
 
-`pnpm package:desktop` produce ora artefatti updater firmati e richiede la chiave
-privata del manutentore, che non è nel repository. Per una build locale non
-destinata al canale aggiornamenti, usare `pnpm icons` e
+`pnpm package:desktop` now produces signed updater artifacts and requires the
+maintainer's private key, which is not in the repository. For a local build not
+intended for the update channel, use `pnpm icons` and
 `pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'`.
-Non pubblicare quella build come aggiornamento firmato.
+Do not publish that build as a signed update.

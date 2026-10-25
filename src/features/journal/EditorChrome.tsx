@@ -23,7 +23,7 @@ export function EditorSaveBar({
   return (
     <div className="save-bar">
       <span role="status" className={`save-state ${state.kind}`}>
-        {sourceDirty ? tr("Markdown da applicare e salvare") : status}
+        {sourceDirty ? tr("Markdown to apply and save") : status}
       </span>
       <button
         type="button"
@@ -60,7 +60,7 @@ export function EditorModeBar({
     <div
       className="editor-command-bar"
       role="toolbar"
-      aria-label={tr("Comandi degli appunti")}
+      aria-label={tr("Note commands")}
     >
       <div className="editor-mode">
         <button
@@ -69,7 +69,7 @@ export function EditorModeBar({
           disabled={disabled}
           onClick={onVisual}
         >
-          <Text source={"Visuale"} />
+          <Text source={"Visual"} />
         </button>
         <button
           type="button"
@@ -89,10 +89,10 @@ export function EditorModeBar({
             disabled={disabled || !dirty}
             onClick={onVisual}
           >
-            <Text source={"Applica e torna al visuale"} />
+            <Text source={"Apply and return to visual mode"} />
           </button>
           <button type="button" disabled={disabled} onClick={onDiscard}>
-            <Text source={"Annulla modifiche Markdown"} />
+            <Text source={"Discard Markdown changes"} />
           </button>
         </>
       )}

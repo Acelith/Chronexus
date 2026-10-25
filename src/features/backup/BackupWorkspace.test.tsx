@@ -62,14 +62,14 @@ test("crea backup con ricevuta e gestisce annullamento ed errore di destinazione
     .mockRejectedValueOnce(
       new Error("Il file esiste già. Scegli un nuovo nome."),
     );
-  const button = screen.getByRole("button", { name: "Crea backup" });
+  const button = screen.getByRole("button", { name: "Create backup" });
   await user.click(button);
-  const receipt = await screen.findByRole("region", { name: "Backup creato" });
+  const receipt = await screen.findByRole("region", { name: "Backup created" });
   expect(within(receipt).getByText("E:/copie/nuovo.nodex")).toBeInTheDocument();
-  expect(within(receipt).getByText("Allegati")).toBeInTheDocument();
+  expect(within(receipt).getByText("Attachments")).toBeInTheDocument();
   await user.click(button);
   expect(
-    await screen.findByText("Backup annullato. Nessun file creato."),
+    await screen.findByText("Backup cancelled. No file created."),
   ).toBeInTheDocument();
   await user.click(button);
   expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -83,11 +83,11 @@ test("il selettore annullato e il backup danneggiato non propongono ripristini",
     .mockRejectedValueOnce(
       new Error("Backup non valido: checksum non corrispondente."),
     );
-  await user.click(screen.getByRole("button", { name: "Seleziona backup" }));
+  await user.click(screen.getByRole("button", { name: "Select backup" }));
   expect(
-    await screen.findByText("Selezione annullata. Archivio invariato."),
+    await screen.findByText("Selection cancelled. Archive unchanged."),
   ).toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Seleziona backup" }));
+  await user.click(screen.getByRole("button", { name: "Select backup" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("checksum");
   expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   expect(backupApi.restore).not.toHaveBeenCalled();
@@ -96,21 +96,19 @@ test("il selettore annullato e il backup danneggiato non propongono ripristini",
 test("anteprima verificata richiede conferma, protegge navigazione e gestisce Tab ed Escape", async () => {
   const { user, getGuard } = setup();
   vi.mocked(backupApi.inspect).mockResolvedValue(preview);
-  await user.click(screen.getByRole("button", { name: "Seleziona backup" }));
+  await user.click(screen.getByRole("button", { name: "Select backup" }));
   const dialog = await screen.findByRole("alertdialog");
-  expect(dialog).toHaveTextContent(
-    "Tutte le campagne attuali saranno sostituite",
-  );
+  expect(dialog).toHaveTextContent("All current campaigns will be replaced");
   expect(dialog).toHaveTextContent("campagne.nodex");
   const cancel = within(dialog).getByRole("button", {
-    name: "Annulla ripristino",
+    name: "Cancel restore",
   });
   expect(cancel).toHaveFocus();
   expect(getGuard()?.dirty()).toBe(true);
-  await expect(getGuard()?.flush()).rejects.toThrow("Conferma o annulla");
+  await expect(getGuard()?.flush()).rejects.toThrow("Confirm or cancel");
   await user.tab({ shift: true });
   expect(
-    within(dialog).getByRole("button", { name: "Sostituisci archivio" }),
+    within(dialog).getByRole("button", { name: "Replace archive" }),
   ).toHaveFocus();
   await user.tab();
   expect(cancel).toHaveFocus();
@@ -120,9 +118,7 @@ test("anteprima verificata richiede conferma, protegge navigazione e gestisce Ta
   );
   expect(backupApi.cancel).toHaveBeenCalledOnce();
   expect(backupApi.restore).not.toHaveBeenCalled();
-  expect(
-    screen.getByRole("button", { name: "Seleziona backup" }),
-  ).toHaveFocus();
+  expect(screen.getByRole("button", { name: "Select backup" })).toHaveFocus();
   expect(getGuard()?.dirty()).toBe(false);
 });
 test("ripristina solo il token verificato, aggiorna campagne e mostra la copia preventiva", async () => {
@@ -133,12 +129,12 @@ test("ripristina solo il token verificato, aggiorna campagne e mostra la copia p
     counts,
     warning: "Controlla la sincronizzazione su disco.",
   });
-  await user.click(screen.getByRole("button", { name: "Seleziona backup" }));
+  await user.click(screen.getByRole("button", { name: "Select backup" }));
   await user.click(
-    await screen.findByRole("button", { name: "Sostituisci archivio" }),
+    await screen.findByRole("button", { name: "Replace archive" }),
   );
   const receipt = await screen.findByRole("region", {
-    name: "Ripristino completato",
+    name: "Restore completed",
   });
   expect(backupApi.restore).toHaveBeenCalledWith("verified-token");
   expect(onRestored).toHaveBeenCalledOnce();
@@ -159,14 +155,12 @@ test("blocca altre operazioni durante il lavoro e richiede nuova verifica dopo e
         reject = rejectPromise;
       }),
   );
-  await user.click(screen.getByRole("button", { name: "Seleziona backup" }));
+  await user.click(screen.getByRole("button", { name: "Select backup" }));
   await user.click(
-    await screen.findByRole("button", { name: "Sostituisci archivio" }),
+    await screen.findByRole("button", { name: "Replace archive" }),
   );
-  expect(
-    screen.getByRole("button", { name: "Annulla ripristino" }),
-  ).toBeDisabled();
-  await expect(getGuard()?.flush()).rejects.toThrow("Attendi");
+  expect(screen.getByRole("button", { name: "Cancel restore" })).toBeDisabled();
+  await expect(getGuard()?.flush()).rejects.toThrow("Wait");
   reject(
     new Error("Copia preventiva non disponibile. Archivio corrente invariato."),
   );
@@ -175,9 +169,7 @@ test("blocca altre operazioni durante il lavoro e richiede nuova verifica dopo e
   );
   expect(onRestored).not.toHaveBeenCalled();
   expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: "Seleziona backup" }),
-  ).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Select backup" })).toBeEnabled();
 });
 test("elenca i backup delle cartelle, ripristina con verifica e copia quelli legacy", async () => {
   const listed = {
@@ -216,16 +208,16 @@ test("elenca i backup delle cartelle, ripristina con verifica e copia quelli leg
   );
   const { user } = setup();
   const region = await screen.findByRole("region", {
-    name: "Backup nelle cartelle di Chronexus",
+    name: "Backups in the Chronexus folders",
   });
   expect(within(region).getByText(/giunzione/)).toBeInTheDocument();
   expect(
-    within(region).getByText(/Periodico · Documenti · Backup periodici/),
+    within(region).getByText(/Periodic · Documents · Periodic backups/),
   ).toBeInTheDocument();
   expect(within(region).getByText(/2\.0 MiB/)).toBeInTheDocument();
   expect(within(region).getByText(/· 1 KiB/)).toBeInTheDocument();
   const copy = within(region).getAllByRole("button", {
-    name: "Copia nei Documenti",
+    name: "Copy to Documents",
   });
   expect(copy).toHaveLength(1);
   await user.click(copy[0]);
@@ -233,11 +225,11 @@ test("elenca i backup delle cartelle, ripristina con verifica e copia quelli leg
     "before-update-x.nodex",
   );
   expect(
-    await screen.findByText(/L’originale resta nella cartella dati/),
+    await screen.findByText(/The original stays in the data folder/),
   ).toBeInTheDocument();
   await user.click(
     within(region).getByRole("button", {
-      name: "Verifica e ripristina chronexus-periodico-20261025T100000Z-abcd1234.nodex",
+      name: "Verify and restore chronexus-periodico-20261025T100000Z-abcd1234.nodex",
     }),
   );
   expect(backupFolderApi.inspect).toHaveBeenCalledWith(
@@ -251,8 +243,6 @@ test("elenca i backup delle cartelle, ripristina con verifica e copia quelli leg
 test("mostra lo stato vuoto dell’elenco", async () => {
   setup();
   expect(
-    await screen.findByText(
-      "Nessun backup nelle cartelle di Chronexus per ora.",
-    ),
+    await screen.findByText("No backups in the Chronexus folders yet."),
   ).toBeInTheDocument();
 });

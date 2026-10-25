@@ -44,7 +44,7 @@ export default function CodexWorkspace(props: Props) {
     <section className="codex-workspace" aria-label={tr("Codex")}>
       <div className="codex-toolbar">
         <label>
-          <Text source={"Cerca titolo o alias"} />
+          <Text source={"Search title or alias"} />
           <input
             type="search"
             value={query}
@@ -56,7 +56,7 @@ export default function CodexWorkspace(props: Props) {
           disabled={props.busy}
           onClick={() => setForm("create")}
         >
-          <Text source={"Nuova pagina"} />
+          <Text source={"New page"} />
         </button>
       </div>
       {form === "create" ? (
@@ -69,7 +69,7 @@ export default function CodexWorkspace(props: Props) {
         />
       ) : null}
       <div className="journal-layout">
-        <nav className="session-list" aria-label={tr("Pagine del Codex")}>
+        <nav className="session-list" aria-label={tr("Codex pages")}>
           {matchingPages(props.pages, query).map((item) => (
             <button
               key={item.id}
@@ -82,12 +82,12 @@ export default function CodexWorkspace(props: Props) {
             >
               <span>
                 {pageKinds[item.kind]}
-                {item.status === "stub" ? tr(" · Bozza") : ""}
+                {item.status === "stub" ? tr(" · Draft") : ""}
               </span>
               <strong>{item.title}</strong>
               {item.aliases.length ? (
                 <span>
-                  <Text source={"Alias: "} />
+                  <Text source={"Aliases: "} />
                   {item.aliases.join(", ")}
                 </span>
               ) : null}
@@ -96,9 +96,9 @@ export default function CodexWorkspace(props: Props) {
           {!matchingPages(props.pages, query).length ? (
             <p className="editor-hint">
               {props.pages.length
-                ? tr("Nessuna pagina corrisponde alla ricerca.")
+                ? tr("No page matches the search.")
                 : tr(
-                    "Il Codex è vuoto. Crea una pagina o scrivi [[ nel diario.",
+                    "The Codex is empty. Create a page or type [[ in the journal.",
                   )}
             </p>
           ) : null}
@@ -110,18 +110,18 @@ export default function CodexWorkspace(props: Props) {
                 <p>
                   {pageKinds[page.kind]} ·{" "}
                   {page.status === "stub"
-                    ? tr("Bozza da completare")
-                    : tr("Pagina attiva")}
+                    ? tr("Draft to complete")
+                    : tr("Active page")}
                 </p>
                 <h3>{page.title}</h3>
                 {page.aliases.length ? (
                   <p>
-                    <Text source={"Alias: "} />
+                    <Text source={"Aliases: "} />
                     {page.aliases.join(", ")}
                   </p>
                 ) : null}
                 <button disabled={props.busy} onClick={() => setForm("edit")}>
-                  <Text source={"Modifica pagina"} />
+                  <Text source={"Edit page"} />
                 </button>
               </header>
               {form === "edit" ? (
@@ -142,7 +142,7 @@ export default function CodexWorkspace(props: Props) {
               <Suspense
                 fallback={
                   <p role="status">
-                    <Text source={"Apertura editor…"} />
+                    <Text source={"Opening editor…"} />
                   </p>
                 }
               >
@@ -158,7 +158,7 @@ export default function CodexWorkspace(props: Props) {
               <Suspense
                 fallback={
                   <p role="status">
-                    <Text source={"Apertura immagini…"} />
+                    <Text source={"Opening images…"} />
                   </p>
                 }
               >
@@ -197,12 +197,12 @@ export default function CodexWorkspace(props: Props) {
           ) : (
             <section className="empty">
               <h3>
-                <Text source={"Le conoscenze della tua campagna"} />
+                <Text source={"Your campaign's knowledge"} />
               </h3>
               <p>
                 <Text
                   source={
-                    "Scegli una pagina o creane una nuova. I collegamenti conservano la fonte, senza trasformare un sospetto in un fatto."
+                    "Choose a page or create a new one. Links keep their source, without turning a suspicion into a fact."
                   }
                 />
               </p>
@@ -246,7 +246,7 @@ function PageForm({
   return (
     <form
       className="entry-form"
-      aria-label={initial ? tr("Modifica pagina") : tr("Nuova pagina")}
+      aria-label={initial ? tr("Edit page") : tr("New page")}
       onSubmit={(event) => {
         event.preventDefault();
         void onSave(
@@ -264,7 +264,7 @@ function PageForm({
       }}
     >
       <label>
-        <Text source={"Titolo della pagina"} />
+        <Text source={"Page title"} />
         <input
           autoFocus
           required
@@ -276,9 +276,9 @@ function PageForm({
       </label>
       <div className="form-fields">
         <label>
-          <Text source={"Tipo"} />
+          <Text source={"Type"} />
           <select
-            aria-label={tr("Tipo")}
+            aria-label={tr("Type")}
             value={kind}
             onChange={(event) =>
               setKind(event.target.value as PageMetadata["kind"])
@@ -293,22 +293,22 @@ function PageForm({
           </select>
         </label>
         <label>
-          <Text source={"Stato"} />
+          <Text source={"Status"} />
           <select
-            aria-label={tr("Stato")}
+            aria-label={tr("Status")}
             value={status}
             onChange={(event) =>
               setStatus(event.target.value as PageMetadata["status"])
             }
             disabled={busy}
           >
-            <option value="active">{tr("Attiva")}</option>
-            <option value="stub">{tr("Bozza")}</option>
+            <option value="active">{tr("Activate")}</option>
+            <option value="stub">{tr("Draft")}</option>
           </select>
         </label>
       </div>
       <label>
-        <Text source={"Alias (uno per riga, massimo 20)"} />
+        <Text source={"Aliases (one per line, up to 20)"} />
         <textarea
           rows={3}
           value={aliases}
@@ -319,16 +319,16 @@ function PageForm({
       <p className="editor-hint">
         <Text
           source={
-            "Gli alias condivisi vengono mostrati come risultati distinti: scegli sempre la pagina corretta."
+            "Shared aliases are shown as separate results: always choose the right page."
           }
         />
       </p>
       <div className="actions">
         <button className="primary" disabled={busy || !title.trim()}>
-          {initial ? tr("Salva pagina") : tr("Crea pagina")}
+          {initial ? tr("Save page") : tr("Create page")}
         </button>
         <button type="button" disabled={busy} onClick={onCancel}>
-          <Text source={"Annulla"} />
+          <Text source={"Cancel"} />
         </button>
       </div>
     </form>
@@ -347,12 +347,12 @@ function MissingPage({
   return (
     <section className="empty">
       <h3>
-        <Text source={"Pagina mancante"} />
+        <Text source={"Missing page"} />
       </h3>
       <p>
         <Text
           source={
-            "Il riferimento conserva il suo ID. Puoi recuperare una bozza senza cambiare i collegamenti negli appunti. Se il titolo è già usato, scegli un nome distinto."
+            "The reference keeps its ID. You can recover a draft without changing the links in your notes. If the title is already used, choose a different name."
           }
         />
       </p>
@@ -363,7 +363,7 @@ function MissingPage({
         }}
       >
         <label>
-          <Text source={"Titolo da recuperare"} />
+          <Text source={"Title to recover"} />
           <input
             required
             maxLength={200}
@@ -372,7 +372,7 @@ function MissingPage({
           />
         </label>
         <button disabled={busy || !title.trim()}>
-          <Text source={"Recupera bozza"} />
+          <Text source={"Recover draft"} />
         </button>
       </form>
     </section>
@@ -415,29 +415,26 @@ function Backlinks({
     groups.set(key, [...(groups.get(key) ?? []), link]);
   }
   return (
-    <section
-      className="backlinks"
-      aria-label={tr("Riferimenti a questa pagina")}
-    >
+    <section className="backlinks" aria-label={tr("References to this page")}>
       <h4>
-        <Text source={"Riferimenti a questa pagina"} />
+        <Text source={"References to this page"} />
       </h4>
       {error ? (
         <div role="alert" className="error">
           {error}
           <button onClick={() => setRetry((value) => value + 1)}>
-            <Text source={"Riprova backlink"} />
+            <Text source={"Retry backlinks"} />
           </button>
         </div>
       ) : links === null ? (
         <p role="status">
-          <Text source={"Caricamento riferimenti…"} />
+          <Text source={"Loading references…"} />
         </p>
       ) : !links.length ? (
         <p className="editor-hint">
           <Text
             source={
-              "Nessuna sessione o pagina la menziona ancora. Scrivi [[ e selezionala nei tuoi appunti."
+              "No session or page mentions it yet. Type [[ and select it in your notes."
             }
           />
         </p>
@@ -446,8 +443,8 @@ function Backlinks({
         <div key={key}>
           <h5>
             {items[0].sourceKind === "session"
-              ? tr("Sessione {0}", [items[0].sequence])
-              : tr("Pagina")}
+              ? tr("Session {0}", [items[0].sequence])
+              : tr("Page")}
             : {items[0].sourceTitle}
           </h5>
           {items.map((link) => (
@@ -456,9 +453,9 @@ function Backlinks({
               disabled={busy}
               onClick={() => onOpen(link)}
             >
-              <span>{link.preview || tr("Blocco senza testo")}</span>
+              <span>{link.preview || tr("Block without text")}</span>
               <small>
-                <Text source={"Apri il blocco di origine"} />
+                <Text source={"Open the source block"} />
               </small>
             </button>
           ))}

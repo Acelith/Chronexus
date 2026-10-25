@@ -1,57 +1,57 @@
-# Chronexus — GUI del riferimento
-## Autorità e superficie
-Modalità Operate. Riferimento vincolante: .tools/ui-refresh/reference.png, allegato dall'utente il 24 ottobre 2026. La revisione riproduce composizione, materiali, cornici, tipografia e gerarchia; il contenuto rimane quello della campagna selezionata.
-## Composizione
-Al riferimento 1586×992: costa sinistra scura larga circa 270 px; marchio con rosa dei venti, selettore campagna, azioni e paesaggio inciso al piede. Area destra a pergamena; titolo campagna in alto, data reale e menu azioni compatto; sotto, navigazione con icone. Le impostazioni e l'assistente stanno nella costa sinistra, senza aggiungere voci alla barra del riferimento.
-Grafo: titolo e sottotitolo, filtri orizzontali, mappa con cornice e dettaglio a destra, comandi di zoom sotto. Etichette sempre leggibili e distinte da menzioni/relazioni.
-## Materiali e colori
-Pergamena avorio #ead9b1, inchiostro #321d13, pelle #241e17, ottone #b89b60, bordeaux #6c302b, verde #354b3e. Texture reali discrete, nessun testo rasterizzato nei controlli. Cornici sottili e angoli decorati.
-## Tipografia
-EB Garamond per testo e titoli, Cinzel per il marchio; font locali con licenza OFL. Titolo campagna 46–52 px, titolo superficie 34–40 px, testo 18–21 px, controlli 17–19 px. Dimensioni adattate alle finestre compatte senza cambiare il linguaggio grafico.
-## Interazione
-Finestra occupata al 100%, intestazione e menu fermi. Scroll indipendente per elenchi sessioni/pagine e per documento. Editor con barra permanente, dialoghi etichettati, modalità Markdown esplicita e recupero degli errori. Nessun cambio silenzioso dei collegamenti UUID.
-## Asset e vincoli
-Icone SVG coerenti, rose dei venti e cornici geometriche; texture e incisione come asset separati. La grafica non incorpora nomi, pulsanti o risultati fittizi. Nessuna dipendenza remota a runtime.
+# Chronexus — Reference GUI
+## Authority and Surface
+Operate Mode. Binding reference: .tools/ui-refresh/reference.png, attached by the user on October 24 2026. The revision reproduces composition, materials, frames, typography, and hierarchy; the content remains that of the selected campaign.
+## Composition
+At reference 1586×992: dark left coast approximately 270 px wide; brand with compass rose, campaign selector, actions, and landscape engraved at the foot. Right area in parchment; campaign title at the top, real date, and compact actions menu; below, navigation with icons. Settings and the assistant are on the left coast, without adding items to the reference bar.
+Graph: title and subtitle, horizontal filters, framed map with detail on the right, zoom commands below. Labels always legible and distinct from mentions/relations.
+## Materials and Colors
+Ivory parchment #ead9b1, ink #321d13, leather #241e17, brass #b89b60, burgundy #6c302b, green #354b3e. Discrete real textures, no rasterized text in controls. Thin frames and decorated corners.
+## Typography
+EB Garamond for text and titles, Cinzel for the brand; local fonts with OFL license. Campaign title 46–52 px, surface title 34–40 px, text 18–21 px, controls 17–19 px. Dimensions adapted to compact windows without changing the graphic language.
+## Interaction
+Window occupied at 100%, header and menu fixed. Independent scroll for session/page lists and for the document. Editor with permanent bar, labeled dialogues, explicit Markdown mode, and error recovery. No silent changes to UUID links.
+## Assets and Constraints
+Coherent SVG icons, compass roses, and geometric frames; textures and engraving as separate assets. The graphics do not incorporate names, buttons, or fictitious results. No remote dependencies at runtime.
 
-## Tiradadi M9 — Operate con momento scenico
+## Tiradadi M9 — Operate with scenic moment
 
-Pannello dedicato dal menu sinistro. Su desktop, compositore verticale con sette
-geometrie a sinistra, cerchio bronzeo dei draghi al centro e cronache a destra.
-Su finestre compatte lo storico passa sotto e il compositore diventa una griglia.
-Le illustrazioni originali dei draghi/fiamme sono separate dai dadi SVG e dai
-valori: numeri grandi avorio, pietra scura e tipo esplicito incluso d100.
-Un solo momento animato: rotolamento, atterraggio, fuoco, rivelazione e conteggio
-slot in 2,5 secondi indipendenti dal numero di dadi. Le fiamme precedono i numeri,
-non coprono i risultati finali; movimento ridotto mostra direttamente il risultato.
-Al massimo 14 dadi nella scena, distribuiti su tutti i tipi selezionati; il dettaglio
-semantico conserva e rende leggibili tutti i valori, anche su 100 dadi.
-
-
-## M10 — lingue e scritture
-
-Conservare pergamena, ornamenti e tipografia latina del riferimento. Le lingue
-araba/CJK usano font Noto locali leggibili, senza richiedere servizi font remoti.
-L’arabo specchia la disposizione e isola i dati misti; testi delle campagne e
-citazioni restano originali. Nessuna traduzione mediante riscrittura del DOM.
-SGA usa Monocraft OFL, non glifi di lingue reali spacciati per l’alfabeto Minecraft.
-Glifi decorativi aria-hidden e testo semantico, recupero italiano sempre normale;
-font assente o carattere non rappresentabile conservano il testo leggibile.
-La casella «mostra anche il testo ordinario» governa solo le etichette controllate.
-Dialoghi critici, dati e menu nativi restano ordinari. Dettagli: docs/I18N.md.
-
-## M15a — araldo degli aggiornamenti
-
-L’unico momento animato fuori dal tiradadi: araldo a sinistra che sovrappone la
-pergamena del manifesto (cornice doppia bordeaux), ~1,5 s, saltabile e statico con
-movimento ridotto. Testo, versione, note e pulsanti sempre HTML. Finché mancano le
-illustrazioni raster (`assets/herald/`) si usa l’emblema geometrico trombetta e
-stendardo, mai una figura disegnata a mano in SVG. Su finestre strette l’emblema
-passa sopra il manifesto.
+Dedicated panel from the left menu. On desktop, vertical composer with seven
+geometries on the left, bronze dragon circle in the center, and chronicles on the right.
+On compact windows, the history moves below and the composer becomes a grid.
+The original illustrations of dragons/flames are separate from the SVG dice and from the
+values: large ivory numbers, dark stone, and explicit type including d100.
+A single animated moment: rolling, landing, fire, revelation, and counting of
+slots in 2,5 seconds independent of the number of dice. Flames precede the numbers,
+do not cover the final results; reduced movement directly shows the result.
+Maximum 14 dice in the scene, distributed across all selected types; the semantic detail
+preserves and renders all values legible, even on 100 dice.
 
 
-## M21 — Logo dell’araldo
+## M10 — Languages and Scripts
 
-La barra laterale mostra il logo verticale dell’araldo al posto della rosa dei venti
-e del nome composto; il titolo resta «Chronexus» come testo alternativo. L’icona
-dell’app usa la stessa illustrazione su cuoio bordeaux. Originali e varianti in
-`assets/brand/`; nessun altro testo dell’interfaccia viene rasterizzato.
+Preserve parchment, ornaments, and Latin typography of the reference. Arabic/CJK languages
+use legible local Noto fonts, without requiring remote font services.
+Arabic mirrors the layout and isolates mixed data; campaign texts and
+quotes remain original. No translation via DOM rewriting.
+SGA uses Monocraft OFL, not real language glyphs masquerading as the Minecraft alphabet.
+aria-hidden decorative glyphs and semantic text, English recovery always ordinary;
+missing font or unrepresentable character preserve the legible text.
+The "show ordinary text too" box governs only the controlled labels.
+Critical dialogues, data, and native menus remain ordinary. Details: docs/I18N.md.
+
+## M15a — Update Herald
+
+The only animated moment outside the tiradadi: herald on the left overlapping the
+manifesto parchment (double burgundy frame), ~1,5 s, skippable and static with
+reduced movement. Text, version, notes, and buttons always HTML. Until raster
+illustrations (`assets/herald/`) are missing, the geometric trumpet and
+standard emblem are used, never a hand-drawn figure in SVG. On narrow windows, the emblem
+moves over the manifesto.
+
+
+## M21 — Herald Logo
+
+The sidebar shows the vertical herald logo instead of the compass rose
+and the compound name; the title remains "Chronexus" as alternative text. The app
+icon uses the same illustration on burgundy leather. Originals and variants in
+`assets/brand/`; no other interface text is rasterized.

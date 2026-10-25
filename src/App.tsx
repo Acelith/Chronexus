@@ -350,7 +350,7 @@ export function App() {
   function openSearch() {
     if (!campaignId || busy || backupOpen) return;
     if (form) {
-      setError(tr("Completa o annulla il modulo aperto prima di cercare."));
+      setError(tr("Complete or cancel the open form before searching."));
       return;
     }
     void run(async () => setSearchOpen(true));
@@ -441,7 +441,7 @@ export function App() {
   }
   const createLinkedPage = useCallback(
     async (title: string) => {
-      if (!campaignId) throw Error(tr("Seleziona una campagna."));
+      if (!campaignId) throw Error(tr("Select a campaign."));
       const saved = await knowledgeApi.create(campaignId, {
         title,
         kind: "note",
@@ -500,12 +500,10 @@ export function App() {
         >
           <p>
             {periodic.outcome.error
-              ? tr("Backup periodico non riuscito: {0}", [
-                  periodic.outcome.error,
-                ])
-              : tr("Backup periodico creato e verificato.")}
+              ? tr("Periodic backup failed: {0}", [periodic.outcome.error])
+              : tr("Periodic backup created and verified.")}
           </p>
-          <button onClick={periodic.dismiss}>{tr("Chiudi")}</button>
+          <button onClick={periodic.dismiss}>{tr("Close")}</button>
         </div>
       ) : null}
       {herald.announcement ? (
@@ -541,23 +539,23 @@ export function App() {
                 <img className="brand-logo" src={brandLogo} alt={it.appName} />
               </h1>
               <p>
-                <Text source={"Le tue storie vivono"} />
+                <Text source={"Your stories live on"} />
               </p>
             </div>
             <nav className="sidebar-menu" aria-label={it.campaigns}>
               <label className="campaign-picker">
-                <Text source={"Campagna attuale"} />
+                <Text source={"Current campaign"} />
                 <select
-                  aria-label={tr("Campagna attuale")}
+                  aria-label={tr("Current campaign")}
                   value={backupOpen ? "" : (campaignId ?? "")}
                   disabled={busy || loading}
                   onChange={(e) => selectCampaign(e.target.value)}
                 >
                   {backupOpen ? (
-                    <option value="">{tr("Seleziona campagna")}</option>
+                    <option value="">{tr("Select campaign")}</option>
                   ) : null}
                   {!campaigns.length ? (
-                    <option value="">{tr("Nessuna campagna")}</option>
+                    <option value="">{tr("No campaign")}</option>
                   ) : null}
                   {campaigns.map((item) => (
                     <option key={item.id} value={item.id}>
@@ -589,7 +587,7 @@ export function App() {
                 }}
               >
                 <Icon name="backup" />
-                <Text source={"Backup e ripristino"} />
+                <Text source={"Backup and restore"} />
               </button>
               {campaign ? (
                 <>
@@ -607,7 +605,7 @@ export function App() {
                     }}
                   >
                     <Icon name="settings" />
-                    <Text source={"Impostazioni della campagna"} />
+                    <Text source={"Campaign settings"} />
                   </button>
                   <button
                     disabled={busy}
@@ -623,7 +621,7 @@ export function App() {
                     }}
                   >
                     <Icon name="star" />
-                    <Text source={"Assistente locale"} />
+                    <Text source={"Local assistant"} />
                   </button>
                 </>
               ) : null}
@@ -642,7 +640,7 @@ export function App() {
                   }}
                 >
                   <Icon name="dice" />
-                  <Text source={"Tiradadi"} />
+                  <Text source={"Dice roller"} />
                 </button>
               ) : null}
               <button
@@ -659,7 +657,7 @@ export function App() {
                 }}
               >
                 <Icon name="settings" />
-                {tr("Impostazioni dell’app")}
+                {tr("App settings")}
               </button>
             </nav>
             <div className="local-mark">
@@ -668,9 +666,9 @@ export function App() {
                 alt=""
               />
               <p>
-                <Text source={"Persone, luoghi, idee."} />
+                <Text source={"People, places, ideas."} />
                 <br />
-                <Text source={"Tutto è connesso."} />
+                <Text source={"Everything is connected."} />
               </p>
               <span aria-hidden="true">— ◈ —</span>
             </div>
@@ -680,7 +678,7 @@ export function App() {
               <Suspense
                 fallback={
                   <p role="status">
-                    <Text source={"Apertura ricerca…"} />
+                    <Text source={"Opening search…"} />
                   </p>
                 }
               >
@@ -699,7 +697,7 @@ export function App() {
                 <p>{error}</p>
                 {campaigns.length ? (
                   <button type="button" onClick={() => setError("")}>
-                    <Text source={"Chiudi messaggio"} />
+                    <Text source={"Close message"} />
                   </button>
                 ) : null}
                 {!campaigns.length ? (
@@ -720,7 +718,7 @@ export function App() {
               <Suspense
                 fallback={
                   <p role="status">
-                    <Text source={"Apertura backup…"} />
+                    <Text source={"Opening backup…"} />
                   </p>
                 }
               >
@@ -740,7 +738,7 @@ export function App() {
                   <div>
                     <h2>
                       {view === "preferences"
-                        ? tr("Impostazioni dell’app")
+                        ? tr("App settings")
                         : (campaign?.name ?? it.emptyCampaigns)}
                     </h2>
                   </div>
@@ -749,7 +747,7 @@ export function App() {
                       Number.isFinite(Date.parse(item.updatedAt)),
                     ) ? (
                       <>
-                        <Text source={"Ultima modifica:"} />{" "}
+                        <Text source={"Last changed:"} />{" "}
                         <time>
                           {modifiedDateFormat.format(
                             new Date(
@@ -766,9 +764,7 @@ export function App() {
                   </span>
                   {campaign ? (
                     <details className="campaign-actions">
-                      <summary aria-label={tr("Azioni della campagna")}>
-                        •••
-                      </summary>
+                      <summary aria-label={tr("Campaign actions")}>•••</summary>
                       <div className="actions">
                         <button
                           ref={searchButton}
@@ -776,7 +772,7 @@ export function App() {
                           onClick={openSearch}
                           title={tr("Ctrl+K / ⌘K")}
                         >
-                          <Text source={"Cerca nella campagna"} />
+                          <Text source={"Search the campaign"} />
                         </button>
                         <Suspense fallback={null}>
                           <ExportButton
@@ -807,10 +803,7 @@ export function App() {
                   ) : null}
                 </header>
                 {campaign ? (
-                  <nav
-                    className="view-tabs"
-                    aria-label={tr("Viste della campagna")}
-                  >
+                  <nav className="view-tabs" aria-label={tr("Campaign views")}>
                     <button
                       aria-current={view === "overview" ? "page" : undefined}
                       disabled={busy}
@@ -822,7 +815,7 @@ export function App() {
                       }
                     >
                       <Icon name="document" />
-                      <Text source={"Riepilogo"} />
+                      <Text source={"Overview"} />
                     </button>
                     <button
                       aria-current={view === "journal" ? "page" : undefined}
@@ -836,7 +829,7 @@ export function App() {
                       }}
                     >
                       <Icon name="book" />
-                      <Text source={"Diario"} />
+                      <Text source={"Journal"} />
                     </button>
                     <button
                       aria-current={view === "codex" ? "page" : undefined}
@@ -865,7 +858,7 @@ export function App() {
                       }}
                     >
                       <Icon name="graph" />
-                      <Text source={"Grafo"} />
+                      <Text source={"Graph"} />
                     </button>
                     <button
                       aria-current={view === "party" ? "page" : undefined}
@@ -882,9 +875,9 @@ export function App() {
                     </button>
                     {(
                       [
-                        ["character", tr("Personaggio")],
-                        ["inventory", tr("Inventario")],
-                        ["abilities", tr("Incantesimi")],
+                        ["character", tr("Character")],
+                        ["inventory", tr("Inventory")],
+                        ["abilities", tr("Spells")],
                       ] as const
                     ).map(([id, label]) => (
                       <button
@@ -922,7 +915,7 @@ export function App() {
                       }
                     >
                       <Icon name="wiki" />
-                      <Text source={"Wiki D&D"} />
+                      <Text source={"D&D Wiki"} />
                     </button>
                   </nav>
                 ) : null}
@@ -939,7 +932,7 @@ export function App() {
                         });
                       }}
                     >
-                      <Text source={"Torna alla voce del personaggio"} />
+                      <Text source={"Back to the character entry"} />
                     </button>
                   ) : null}
                   {form === "campaign" || form === "rename" ? (
@@ -986,7 +979,7 @@ export function App() {
                     <Suspense
                       fallback={
                         <p role="status">
-                          <Text source={"Apertura Codex…"} />
+                          <Text source={"Opening Codex…"} />
                         </p>
                       }
                     >
@@ -1011,9 +1004,7 @@ export function App() {
                   ) : null}
                   {view === "preferences" ? (
                     <Suspense
-                      fallback={
-                        <p role="status">{tr("Apertura impostazioni…")}</p>
-                      }
+                      fallback={<p role="status">{tr("Opening settings…")}</p>}
                     >
                       <>
                         <UpdateSettings
@@ -1033,7 +1024,7 @@ export function App() {
                     <Suspense
                       fallback={
                         <p role="status">
-                          <Text source={"Apertura tiradadi…"} />
+                          <Text source={"Opening dice roller…"} />
                         </p>
                       }
                     >
@@ -1049,7 +1040,7 @@ export function App() {
                     <Suspense
                       fallback={
                         <p role="status">
-                          <Text source={"Apertura impostazioni…"} />
+                          <Text source={"Opening settings…"} />
                         </p>
                       }
                     >
@@ -1065,7 +1056,7 @@ export function App() {
                     <Suspense
                       fallback={
                         <p role="status">
-                          <Text source={"Apertura assistente…"} />
+                          <Text source={"Opening assistant…"} />
                         </p>
                       }
                     >
@@ -1081,7 +1072,7 @@ export function App() {
                     <Suspense
                       fallback={
                         <p role="status">
-                          <Text source={"Apertura wiki…"} />
+                          <Text source={"Opening wiki…"} />
                         </p>
                       }
                     >
@@ -1101,7 +1092,7 @@ export function App() {
                     <Suspense
                       fallback={
                         <p role="status">
-                          <Text source={"Apertura party…"} />
+                          <Text source={"Opening party…"} />
                         </p>
                       }
                     >
@@ -1120,7 +1111,7 @@ export function App() {
                     <Suspense
                       fallback={
                         <p role="status">
-                          <Text source={"Apertura riepilogo…"} />
+                          <Text source={"Opening overview…"} />
                         </p>
                       }
                     >
@@ -1153,7 +1144,7 @@ export function App() {
                     <Suspense
                       fallback={
                         <p role="status">
-                          <Text source={"Apertura grafo…"} />
+                          <Text source={"Opening graph…"} />
                         </p>
                       }
                     >
@@ -1176,7 +1167,7 @@ export function App() {
                     <Suspense
                       fallback={
                         <p role="status">
-                          <Text source={"Apertura personaggio…"} />
+                          <Text source={"Opening character…"} />
                         </p>
                       }
                     >
@@ -1242,7 +1233,7 @@ export function App() {
                             }}
                           >
                             <span className="session-number">
-                              <Text source={"Sessione "} />
+                              <Text source={"Session "} />
                               {item.sequence}
                             </span>
                             <strong>{item.title}</strong>
@@ -1255,7 +1246,7 @@ export function App() {
                           <>
                             <header className="note-header">
                               <p>
-                                <Text source={"Sessione "} />
+                                <Text source={"Session "} />
                                 {session.sequence}{" "}
                                 <span aria-hidden="true">/</span>{" "}
                                 {formatDate(session.playedOn)}

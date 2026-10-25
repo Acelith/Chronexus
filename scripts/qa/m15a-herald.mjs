@@ -64,7 +64,7 @@ if (phase === "fixture") {
     [],
   );
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Aggiorna" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Refresh" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   await expect.poll(async () => (await prefs())?.remind?.version).toBe("0.5.0");
@@ -94,7 +94,7 @@ if (phase === "fixture") {
   await page.waitForTimeout(6000);
   await expect(dialog).toHaveCount(0);
   pass("real channel checked once, current version: silent", p);
-  await page.getByRole("button", { name: "Impostazioni dell’app" }).click();
+  await page.getByRole("button", { name: "App settings" }).click();
   const box = page.getByRole("checkbox", {
     name: /Controlla una volta all’avvio/,
   });

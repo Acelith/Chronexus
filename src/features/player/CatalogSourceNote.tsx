@@ -15,14 +15,14 @@ export default function CatalogSourceNote({
     return (
       <aside className="catalog-license">
         <p>
-          <Text source={"Base Wikidot D&D 5e:"} /> {source.name}{" "}
-          <Text source={" · copia personale modificabile."} />
+          <Text source={"Wikidot D&D 5e base:"} /> {source.name}{" "}
+          <Text source={" · editable personal copy."} />
         </p>
         <p>{wikidotBase + source.path}</p>
         <p>
           <Text
             source={
-              "Testo copiato da una pagina pubblica della wiki su tua richiesta. La pagina dichiara la propria licenza; i contenuti di gioco possono appartenere ai rispettivi editori. Verifica i diritti prima di ridistribuirli."
+              "Text copied from a public wiki page at your request. The page states its own license; game content may belong to its publishers. Check the rights before redistributing it."
             }
           />
         </p>
@@ -31,8 +31,8 @@ export default function CatalogSourceNote({
   return (
     <aside className="catalog-license">
       <p>
-        <Text source={compact ? "Base SRD 2014:" : "Base: "} /> {source.name}
-        {compact ? <Text source={" · copia personale modificabile."} /> : null}
+        <Text source={compact ? "SRD 2014 base:" : "Base: "} /> {source.name}
+        {compact ? <Text source={" · editable personal copy."} /> : null}
       </p>
       <p>{catalogBase + source.path}</p>
       <p>{srdAttribution}</p>

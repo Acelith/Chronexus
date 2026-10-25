@@ -56,14 +56,14 @@ fn source_document(
     let sql = match kind {
         "session" => "SELECT document FROM sessions WHERE campaign_id=?1 AND id=?2",
         "page" => "SELECT document FROM pages WHERE campaign_id=?1 AND id=?2",
-        _ => return Err("Tipo di fonte non valido.".into()),
+        _ => return Err("Invalid source type.".into()),
     };
     let raw: Option<String> = connection
         .query_row(sql, params![campaign_id, id], |r| r.get(0))
         .optional()
         .map_err(storage)?;
-    serde_json::from_str(&raw.ok_or("Fonte non trovata in questa campagna.")?)
-        .map_err(|_| "Documento della fonte non leggibile.".into())
+    serde_json::from_str(&raw.ok_or("Source not found in this campaign.")?)
+        .map_err(|_| "Source document unreadable.".into())
 }
 fn validate(
     connection: &Connection,
@@ -77,25 +77,25 @@ fn validate(
         || input.label.chars().count() > 100
         || input.label.contains('\0')
     {
-        return Err("Descrivi la relazione con un'etichetta da 1 a 100 caratteri.".into());
+        return Err("Describe the relationship with a label of 1 to 100 characters.".into());
     }
     if !CERTAINTIES.contains(&input.certainty.as_str()) {
-        return Err("Scegli una certezza valida per la relazione.".into());
+        return Err("Choose a valid certainty for the relationship.".into());
     }
     if input.evidence.chars().count() > 4000 || input.notes.chars().count() > 4000 {
-        return Err("Evidenza e note possono contenere al massimo 4000 caratteri ciascuna.".into());
+        return Err("Evidence and notes can hold up to 4000 characters each.".into());
     }
     match (&input.source_kind, &input.source_id) {
         (Some(kind), Some(id)) => {
             let document = source_document(connection, campaign_id, kind, id)?;
             if let Some(block) = &input.source_block_id {
                 if !block_exists(&document, block) {
-                    return Err("Blocco della fonte non trovato. Seleziona un blocco attuale o rimuovi il riferimento al blocco.".into());
+                    return Err("Source block not found. Select a current block or remove the block reference.".into());
                 }
             }
         }
         (None, None) if input.source_block_id.is_none() => {}
-        _ => return Err("Seleziona una fonte completa oppure rimuovi il riferimento.".into()),
+        _ => return Err("Select a complete source or remove the reference.".into()),
     }
     Ok(())
 }
@@ -131,7 +131,7 @@ pub fn get_relationship(
 ) -> AppResult<Relationship> {
     identifier(campaign_id)?;
     identifier(id)?;
-    let mut relationship=connection.query_row("SELECT id,campaign_id,from_page_id,to_page_id,label,certainty,source_session_id,source_page_id,source_block_id,evidence,notes,revision FROM relationships WHERE campaign_id=?1 AND id=?2",params![campaign_id,id],row_relationship).optional().map_err(storage)?.ok_or("Relazione non trovata in questa campagna.")?;
+    let mut relationship=connection.query_row("SELECT id,campaign_id,from_page_id,to_page_id,label,certainty,source_session_id,source_page_id,source_block_id,evidence,notes,revision FROM relationships WHERE campaign_id=?1 AND id=?2",params![campaign_id,id],row_relationship).optional().map_err(storage)?.ok_or("Relationship not found in this campaign.")?;
     if let (Some(kind), Some(id)) = (
         &relationship.input.source_kind,
         &relationship.input.source_id,
@@ -168,11 +168,11 @@ pub fn save_relationship(
         .as_deref()
         .filter(|_| input.source_kind.as_deref() == Some("page"));
     if id.is_some() {
-        let revision = revision.ok_or("Revisione mancante. Riapri la relazione.")?;
+        let revision = revision.ok_or("Missing revision. Reopen the relationship.")?;
         let affected=transaction.execute("UPDATE relationships SET from_page_id=?1,to_page_id=?2,label=?3,certainty=?4,source_session_id=?5,source_page_id=?6,source_block_id=?7,evidence=?8,notes=?9,revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE campaign_id=?10 AND id=?11 AND revision=?12",params![input.from_page_id,input.to_page_id,input.label.trim(),input.certainty,source_session,source_page,input.source_block_id,input.evidence,input.notes,campaign_id,chosen,revision]).map_err(storage)?;
         if affected != 1 {
             return Err(
-                "Relazione modificata altrove o non trovata. Riaprila prima di salvare.".into(),
+                "Relationship changed elsewhere or not found. Reopen it before saving.".into(),
             );
         }
     } else {
@@ -197,7 +197,7 @@ pub fn delete_relationship(
         .map_err(storage)?;
     if count != 1 {
         return Err(
-            "Relazione modificata altrove o non trovata. Riaprila prima di eliminarla.".into(),
+            "Relationship changed elsewhere or not found. Reopen it before deleting it.".into(),
         );
     }
     Ok(())
@@ -262,9 +262,9 @@ pub fn graph(
 ) -> AppResult<GraphData> {
     require_campaign(connection, campaign_id)?;
     if let Some(focus) = &query.focus_id {
-        let (kind, id) = focus.split_once(':').ok_or("Nodo centrale non valido.")?;
+        let (kind, id) = focus.split_once(':').ok_or("Invalid central node.")?;
         if !["page", "session"].contains(&kind) {
-            return Err("Nodo centrale non valido.".into());
+            return Err("Invalid central node.".into());
         }
         identifier(id)?;
     }
@@ -276,7 +276,7 @@ pub fn graph(
             .as_ref()
             .is_some_and(|c| !CERTAINTIES.contains(&c.as_str()))
     {
-        return Err("Filtri del grafo non validi.".into());
+        return Err("Invalid graph filters.".into());
     }
     if query.kind.as_ref().is_some_and(|k| {
         ![
@@ -285,7 +285,7 @@ pub fn graph(
         ]
         .contains(&k.as_str())
     }) {
-        return Err("Tipo di nodo non valido.".into());
+        return Err("Invalid node type.".into());
     }
     let transaction = connection.unchecked_transaction().map_err(storage)?;
     let mut nodes = BTreeMap::new();
@@ -332,7 +332,7 @@ pub fn graph(
             .map_err(storage)?
         {
             let (id, title, sequence) = row.map_err(storage)?;
-            let title = format!("Sessione {sequence}: {title}");
+            let title = format!("Session {sequence}: {title}");
             let key = format!("session:{id}");
             nodes.insert(
                 key.clone(),
@@ -350,7 +350,7 @@ pub fn graph(
     if let Some(session) = &query.session_id {
         identifier(session)?;
         if !nodes.contains_key(&format!("session:{session}")) {
-            return Err("Sessione filtro non trovata in questa campagna.".into());
+            return Err("Filter session not found in this campaign.".into());
         }
     }
     let provenance = |kind: &str, id: &str, block_id: Option<String>| SourceRef {
@@ -359,7 +359,7 @@ pub fn graph(
         title: nodes
             .get(&format!("{kind}:{id}"))
             .map(|n| n.title.clone())
-            .unwrap_or_else(|| "Fonte non disponibile".into()),
+            .unwrap_or_else(|| "Source not available".into()),
         block_id,
     };
     let mut edges = vec![];
@@ -432,7 +432,7 @@ pub fn graph(
                 source: format!("{kind}:{id}"),
                 target: format!("page:{target}"),
                 kind: "mention".into(),
-                label: "menziona".into(),
+                label: "mentions".into(),
                 certainty: None,
                 relationship_id: None,
                 provenance: Some(provenance(kind, &id, Some(block))),
@@ -448,10 +448,10 @@ pub fn graph(
                 GraphNode {
                     id: edge.target.clone(),
                     entity_id: id,
-                    title: "Pagina mancante".into(),
+                    title: "Missing page".into(),
                     kind: "missing".into(),
                     missing: true,
-                    search: "pagina mancante".into(),
+                    search: "missing page".into(),
                 },
             );
         }
@@ -466,7 +466,7 @@ pub fn graph(
     let mut visible: HashSet<String> = eligible;
     if let Some(focus) = &query.focus_id {
         if !nodes.contains_key(focus) {
-            return Err("Nodo centrale non trovato in questa campagna.".into());
+            return Err("Central node not found in this campaign.".into());
         }
         visible = HashSet::from([focus.clone()]);
         let mut frontier = visible.clone();

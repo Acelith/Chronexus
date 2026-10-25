@@ -21,6 +21,7 @@ mod tests;
 pub const PREFERENCES: &str = "backup-preferences.json";
 pub const INDEX: &str = "periodic-backups.json";
 pub const APP_FOLDER: &str = "Chronexus";
+// Existing backup paths are storage identifiers, independent of UI language.
 pub const PERIODIC: &str = "Backup periodici";
 pub const UPDATES: &str = "Backup aggiornamenti";
 pub const LEGACY_UPDATES: &str = "update-backups";
@@ -114,7 +115,7 @@ fn time(value: &Option<String>) -> Option<DateTime<Utc>> {
 fn validate(p: &Preferences) -> AppResult<()> {
     if p.version != 1 || !HOURS.contains(&p.hours) || !KEEP.contains(&p.keep) {
         return Err(format!(
-            "Preferenze backup non valide: intervallo tra {} e {} ore, da {} a {} copie.",
+            "Invalid backup preferences: interval between {} and {} hours, from {} to {} copies.",
             HOURS.start(),
             HOURS.end(),
             KEEP.start(),
@@ -125,7 +126,7 @@ fn validate(p: &Preferences) -> AppResult<()> {
         .as_deref()
         .is_some_and(|d| d.len() > 4096 || !Path::new(d).is_absolute())
     {
-        return Err("Cartella backup personalizzata non valida.".into());
+        return Err("Invalid custom backup folder.".into());
     }
     Ok(())
 }
@@ -134,23 +135,21 @@ fn read_file(root: &Path, file: &str, limit: u64) -> AppResult<Option<Vec<u8>>> 
     let meta = match fs::symlink_metadata(&path) {
         Ok(m) => m,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
-        Err(_) => return Err(format!("Impossibile leggere {file}. Verifica i permessi.")),
+        Err(_) => return Err(format!("Cannot read {file}. Check permissions.")),
     };
     if !meta.is_file() || is_link(&meta) || meta.len() > limit {
-        return Err(format!(
-            "{file} non è un file valido: correggilo o spostalo."
-        ));
+        return Err(format!("{file} is not a valid file: correct or move it."));
     }
     fs::read(path)
         .map(Some)
-        .map_err(|_| format!("Impossibile leggere {file}. Verifica i permessi."))
+        .map_err(|_| format!("Cannot read {file}. Check permissions."))
 }
 fn write_file<T: Serialize>(root: &Path, file: &str, value: &T) -> AppResult<()> {
     let path = root.join(file);
     if fs::symlink_metadata(&path).is_ok_and(|m| !m.is_file() || is_link(&m)) {
-        return Err(format!("{file}: destinazione non sicura."));
+        return Err(format!("{file}: unsafe destination."));
     }
-    let failed = || format!("Impossibile salvare {file}. Verifica spazio e permessi.");
+    let failed = || format!("Cannot save {file}. Check space and permissions.");
     let mut next = NamedTempFile::new_in(root).map_err(|_| failed())?;
     serde_json::to_writer_pretty(next.as_file_mut(), value).map_err(|_| failed())?;
     next.flush()
@@ -164,7 +163,7 @@ pub fn read_preferences(root: &Path) -> AppResult<Preferences> {
         return Ok(Preferences::default());
     };
     let value: Preferences = serde_json::from_slice(&bytes).map_err(|_| {
-        "Preferenze backup danneggiate: salvale di nuovo dalle impostazioni.".to_string()
+        "Backup preferences damaged: save them again from the settings.".to_string()
     })?;
     validate(&value)?;
     Ok(value)
@@ -207,11 +206,10 @@ pub fn read_index(root: &Path) -> AppResult<Index> {
         return Ok(Index::default());
     };
     let index: Index = serde_json::from_slice(&bytes).map_err(|_| {
-        "Indice dei backup periodici danneggiato: nessun file viene eliminato finché non è corretto."
-            .to_string()
+        "Periodic backup index damaged: no file is deleted until it is fixed.".to_string()
     })?;
     if index.version != 1 || index.entries.len() > MAX_INDEX_ENTRIES {
-        return Err("Indice dei backup periodici non supportato.".into());
+        return Err("Unsupported periodic backup index.".into());
     }
     Ok(index)
 }
@@ -260,10 +258,10 @@ fn safe_dir(path: &Path, create: bool) -> AppResult<bool> {
     let name = shown(path);
     match fs::symlink_metadata(path) {
         Ok(meta) if is_link(&meta) => Err(format!(
-            "{name} è un collegamento simbolico o una giunzione: per sicurezza Chronexus non lo usa. Sostituiscilo con una cartella normale."
+            "{name} is a symbolic link or junction: Chronexus does not use it for safety. Replace it with a regular folder."
         )),
         Ok(meta) if !meta.is_dir() => Err(format!(
-            "{name} è un file, non una cartella: rinominalo o scegli un’altra destinazione."
+            "{name} is a file, not a folder: rename it or choose another destination."
         )),
         Ok(_) => Ok(true),
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
@@ -274,11 +272,11 @@ fn safe_dir(path: &Path, create: bool) -> AppResult<bool> {
                 Ok(()) => Ok(true),
                 Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => safe_dir(path, false),
                 Err(e) => Err(format!(
-                    "Impossibile creare {name}: {e}. Verifica permessi e spazio libero."
+                    "Cannot create {name}: {e}. Check permissions and free space."
                 )),
             }
         }
-        Err(e) => Err(format!("Impossibile accedere a {name}: {e}. Verifica i permessi.")),
+        Err(e) => Err(format!("Cannot access {name}: {e}. Check permissions.")),
     }
 }
 fn documents_base(documents: &Path) -> AppResult<()> {
@@ -286,7 +284,7 @@ fn documents_base(documents: &Path) -> AppResult<()> {
     match fs::metadata(documents) {
         Ok(m) if m.is_dir() => Ok(()),
         _ => Err(format!(
-            "La cartella Documenti {} non è disponibile.",
+            "The Documents folder {} is unavailable.",
             shown(documents)
         )),
     }
@@ -302,11 +300,11 @@ pub fn ensure(documents: &Path, sub: &str) -> AppResult<PathBuf> {
 }
 pub fn custom_folder(folder: &Path) -> AppResult<PathBuf> {
     if !folder.is_absolute() {
-        return Err("Scegli la cartella con la finestra di sistema.".into());
+        return Err("Choose the folder using the system dialog.".into());
     }
     if !safe_dir(folder, false)? {
         return Err(format!(
-            "La cartella {} non esiste più: scegline un’altra.",
+            "The folder {} no longer exists: choose another one.",
             shown(folder)
         ));
     }
@@ -335,10 +333,9 @@ fn periodic_folder(p: &Preferences, documents: Option<&Path>) -> AppResult<PathB
     match (&p.destination, documents) {
         (Some(custom), _) => custom_folder(Path::new(custom)),
         (None, Some(documents)) => ensure(documents, PERIODIC),
-        (None, None) => Err(
-            "Cartella Documenti non disponibile: scegli una cartella per i backup periodici."
-                .into(),
-        ),
+        (None, None) => {
+            Err("Documents folder unavailable: choose a folder for periodic backups.".into())
+        }
     }
 }
 fn planned_periodic(p: &Preferences, documents: Option<&Path>) -> Option<PathBuf> {
@@ -354,11 +351,11 @@ pub fn update_folder(root: &Path, documents: Option<&Path>) -> (PathBuf, Option<
     let problem = match documents.map(|d| ensure(d, UPDATES)) {
         Some(Ok(folder)) => return (folder, None),
         Some(Err(e)) => e,
-        None => "cartella Documenti non disponibile".into(),
+        None => "Documents folder unavailable".into(),
     };
     let fallback = root.join(LEGACY_UPDATES);
     let notice = format!(
-        "Backup di aggiornamento salvato nella cartella dati di Chronexus ({}) perché i Documenti non sono utilizzabili: {problem}",
+        "Update backup saved in the Chronexus data folder ({}) because Documents cannot be used: {problem}",
         shown(&fallback)
     );
     (fallback, Some(notice))
@@ -368,14 +365,14 @@ pub fn planned_update_folder(documents: Option<&Path>) -> Option<PathBuf> {
 }
 
 pub fn sha256(path: &Path) -> AppResult<(u64, String)> {
-    let mut file = File::open(path).map_err(|_| "Backup non rileggibile.".to_string())?;
+    let mut file = File::open(path).map_err(|_| "Cannot reread the backup.".to_string())?;
     let mut hash = Sha256::new();
     let mut bytes = [0; 65536];
     let mut size = 0u64;
     loop {
         let n = file
             .read(&mut bytes)
-            .map_err(|_| "Backup non verificabile.".to_string())?;
+            .map_err(|_| "Backup cannot be verified.".to_string())?;
         if n == 0 {
             break;
         }
@@ -562,7 +559,7 @@ fn located(root: &Path, documents: Option<&Path>, location: Location) -> AppResu
         .into_iter()
         .find(|(l, _)| *l == location)
         .map(|(_, path)| path)
-        .ok_or_else(|| "Cartella backup non disponibile.".to_string())
+        .ok_or_else(|| "Backup folder unavailable.".to_string())
 }
 /// Lists without creating anything; unsafe folders are reported, not read.
 pub fn list(root: &Path, documents: Option<&Path>) -> AppResult<Listing> {
@@ -657,7 +654,7 @@ fn plain_name(name: &str, extension: &str) -> AppResult<()> {
         || name.contains(['/', '\\', ':', '\0'])
         || name.starts_with('.')
     {
-        return Err("Nome del backup non valido.".into());
+        return Err("Invalid backup name.".into());
     }
     Ok(())
 }
@@ -671,13 +668,13 @@ pub fn resolve(
     plain_name(name, ".nodex")?;
     let folder = located(root, documents, location)?;
     if !safe_dir(&folder, false)? {
-        return Err("La cartella del backup non esiste più.".into());
+        return Err("The backup folder no longer exists.".into());
     }
     let path = folder.join(name);
     match fs::symlink_metadata(&path) {
         Ok(m) if m.is_file() && !is_link(&m) => Ok(path),
-        Ok(_) => Err("Il backup selezionato non è un file normale.".into()),
-        Err(_) => Err("Il backup selezionato non esiste più. Aggiorna l’elenco.".into()),
+        Ok(_) => Err("The selected backup is not a regular file.".into()),
+        Err(_) => Err("The selected backup no longer exists. Refresh the list.".into()),
     }
 }
 /// Folder to show in the file manager; Documents subfolders are created now.
@@ -690,36 +687,36 @@ pub fn open_target(
         (Location::Periodic, Some(d)) => ensure(d, PERIODIC),
         (Location::Updates, Some(d)) => ensure(d, UPDATES),
         (Location::Periodic | Location::Updates, None) => {
-            Err("Cartella Documenti non disponibile.".into())
+            Err("Documents folder unavailable.".into())
         }
         _ => {
             let folder = located(root, documents, location)?;
             if safe_dir(&folder, false)? {
                 Ok(folder)
             } else {
-                Err("La cartella non esiste ancora.".into())
+                Err("The folder does not exist yet.".into())
             }
         }
     }
 }
 fn copy_verified(source: &Path, target: &Path) -> AppResult<String> {
-    let folder = target.parent().ok_or("Destinazione mancante.")?;
+    let folder = target.parent().ok_or("Missing destination.")?;
     let mut temp = NamedTempFile::new_in(folder)
-        .map_err(|e| format!("Copia non riuscita: {e}. Verifica spazio e permessi."))?;
+        .map_err(|e| format!("Copy failed: {e}. Check space and permissions."))?;
     std::io::copy(
-        &mut File::open(source).map_err(|_| "Backup originale non leggibile.".to_string())?,
+        &mut File::open(source).map_err(|_| "Cannot read the original backup.".to_string())?,
         temp.as_file_mut(),
     )
-    .map_err(|e| format!("Copia non riuscita: {e}. Verifica spazio e permessi."))?;
+    .map_err(|e| format!("Copy failed: {e}. Check space and permissions."))?;
     temp.as_file()
         .sync_all()
-        .map_err(|_| "Copia non salvata.".to_string())?;
+        .map_err(|_| "Copy not saved.".to_string())?;
     let (expected, copied) = (sha256(source)?, sha256(temp.path())?);
     if expected != copied {
-        return Err("La copia non corrisponde all’originale: annullata.".into());
+        return Err("The copy does not match the original: cancelled.".into());
     }
     temp.persist_noclobber(target).map_err(|_| {
-        "Esiste già un file con questo nome nella destinazione: nessun file sovrascritto."
+        "A file with this name already exists at the destination: no file was overwritten."
             .to_string()
     })?;
     Ok(copied.1)
@@ -728,7 +725,7 @@ fn copy_verified(source: &Path, target: &Path) -> AppResult<String> {
 /// SHA-256. The original in the data folder is never removed.
 pub fn copy_legacy(root: &Path, documents: Option<&Path>, name: &str) -> AppResult<String> {
     let source = resolve(root, documents, Location::Legacy, name)?;
-    let documents = documents.ok_or("Cartella Documenti non disponibile.")?;
+    let documents = documents.ok_or("Documents folder unavailable.")?;
     let folder = ensure(documents, UPDATES)?;
     let target = folder.join(name);
     copy_verified(&source, &target)?;

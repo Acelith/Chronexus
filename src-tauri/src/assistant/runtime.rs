@@ -31,12 +31,12 @@ pub fn client() -> AppResult<Client> {
         .timeout(Duration::from_secs(120))
         .pool_max_idle_per_host(0)
         .build()
-        .map_err(|_| "Impossibile preparare la connessione AI locale.".into())
+        .map_err(|_| "Cannot prepare the local AI connection.".into())
 }
 pub async fn json_response(mut response: Response) -> AppResult<Value> {
     if !response.status().is_success() {
         return Err(format!(
-            "Runtime AI locale: risposta {}. Verifica modello e configurazione.",
+            "Local AI runtime: response {}. Check model and configuration.",
             response.status().as_u16()
         ));
     }
@@ -44,14 +44,14 @@ pub async fn json_response(mut response: Response) -> AppResult<Value> {
     while let Some(chunk) = response
         .chunk()
         .await
-        .map_err(|_| "Connessione AI locale interrotta.")?
+        .map_err(|_| "Local AI connection interrupted.")?
     {
         if data.len() + chunk.len() > 1_048_576 {
-            return Err("Risposta del runtime AI oltre il limite.".into());
+            return Err("AI runtime response over the limit.".into());
         }
         data.extend_from_slice(&chunk)
     }
-    serde_json::from_slice(&data).map_err(|_| "Risposta del runtime AI non valida.".into())
+    serde_json::from_slice(&data).map_err(|_| "Invalid AI runtime response.".into())
 }
 pub async fn get(client: &Client, base: &str, path: &str) -> AppResult<Value> {
     json_response(
@@ -60,7 +60,7 @@ pub async fn get(client: &Client, base: &str, path: &str) -> AppResult<Value> {
             .send()
             .await
             .map_err(|_| {
-                "Ollama non disponibile su questo computer. Avvialo in modalità locale senza cloud."
+                "Ollama not available on this computer. Start it in local mode without cloud."
             })?,
     )
     .await
@@ -72,13 +72,13 @@ pub async fn post(client: &Client, base: &str, path: &str, payload: Value) -> Ap
             .json(&payload)
             .send()
             .await
-            .map_err(|_| "Richiesta al runtime AI locale non riuscita.")?,
+            .map_err(|_| "Request to the local AI runtime failed.")?,
     )
     .await
 }
 pub fn check_cloud(status: &Value) -> AppResult<()> {
     if status.pointer("/cloud/disabled").and_then(Value::as_bool) != Some(true) {
-        return Err("Il runtime non conferma il cloud disabilitato. Imposta OLLAMA_NO_CLOUD=1 e riavvia Ollama; nessun appunto è stato inviato.".into());
+        return Err("The runtime does not confirm that the cloud is disabled. Set OLLAMA_NO_CLOUD=1 and restart Ollama; no notes were sent.".into());
     }
     Ok(())
 }
@@ -92,7 +92,7 @@ pub fn check_model_name(name: &str) -> AppResult<()> {
         || name.contains("cloud")
         || name.contains("/")
     {
-        return Err("Scegli un modello locale installato, senza riferimenti cloud o URL.".into());
+        return Err("Choose an installed local model, without cloud references or URLs.".into());
     }
     Ok(())
 }
@@ -103,13 +103,12 @@ pub fn check_local(show: &Value) -> AppResult<()> {
             .is_some_and(|v| !v.is_null() && v.as_str() != Some(""))
         {
             return Err(
-                "Questo modello inoltra richieste a un servizio remoto e non può essere usato."
-                    .into(),
+                "This model forwards requests to a remote service and cannot be used.".into(),
             );
         }
     }
     if show.pointer("/details/format").and_then(Value::as_str) != Some("gguf") {
-        return Err("Questa versione richiede un modello GGUF locale verificabile.".into());
+        return Err("This version needs a verifiable local GGUF model.".into());
     }
     Ok(())
 }
@@ -126,19 +125,17 @@ pub async fn probe_at(client: &Client, base: &str) -> AppResult<Runtime> {
     check_cloud(&get(client, base, "/api/status").await?)?;
     let version = get(client, base, "/api/version").await?["version"]
         .as_str()
-        .ok_or("Versione del runtime mancante.")?
+        .ok_or("Runtime version missing.")?
         .to_string();
     let tags = get(client, base, "/api/tags").await?;
-    let rows = tags["models"]
-        .as_array()
-        .ok_or("Elenco modelli non valido.")?;
+    let rows = tags["models"].as_array().ok_or("Invalid model list.")?;
     if rows.len() > 100 {
-        return Err("Troppi modelli nel runtime; questa versione ne gestisce fino a 100.".into());
+        return Err("Too many models in the runtime; this version supports up to 100.".into());
     }
     let resident = get(client, base, "/api/ps").await?;
     let mut models = Vec::new();
     for row in rows {
-        let name = row["name"].as_str().ok_or("Modello privo di nome.")?;
+        let name = row["name"].as_str().ok_or("Model name missing.")?;
         if check_model_name(name).is_err() {
             continue;
         }
@@ -148,7 +145,7 @@ pub async fn probe_at(client: &Client, base: &str) -> AppResult<Runtime> {
         }
         let digest = row["digest"]
             .as_str()
-            .ok_or("Identità del modello mancante.")?
+            .ok_or("Model identity missing.")?
             .to_string();
         if digest.len() != 64 || !digest.bytes().all(|b| b.is_ascii_hexdigit()) {
             continue;
@@ -166,7 +163,7 @@ pub async fn probe_at(client: &Client, base: &str) -> AppResult<Runtime> {
             digest,
             quantization: show["details"]["quantization_level"]
                 .as_str()
-                .unwrap_or("non indicata")
+                .unwrap_or("not given")
                 .into(),
             dnd_specialized: weight.as_deref() == Some(DND_WEIGHT),
             weight_digest: weight,
@@ -257,6 +254,6 @@ mod tests {
         assert!(get(&client().unwrap(), &base, "/api/status")
             .await
             .unwrap_err()
-            .contains("non disponibile"));
+            .contains("not available"));
     }
 }

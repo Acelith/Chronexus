@@ -44,7 +44,7 @@ fn adapters_cannot_cross_campaigns_or_override_corrected_sources() {
     knowledge::save_page_document(&c,&a.id,&page.id,0,json!({"version":1,"blocks":[{"id":"new-block","type":"paragraph","props":{},"content":[{"type":"text","text":"La porta è verde.","styles":{}}],"children":[]}]})).unwrap();
     assert!(model_owned(&c, Some(&a.id), &j.model)
         .unwrap_err()
-        .contains("fonti sono cambiate"));
+        .contains("sources changed"));
 }
 #[test]
 fn recovery_marks_jobs_interrupted_without_changing_active_model() {

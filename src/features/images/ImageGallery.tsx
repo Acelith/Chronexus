@@ -26,10 +26,10 @@ export interface Attachment {
   createdAt: string;
 }
 const roleLabels = localizeLabels({
-  portrait: "Ritratto",
-  map: "Mappa",
-  image: "Immagine",
-  reference: "Riferimento",
+  portrait: "Portrait",
+  map: "Map",
+  image: "Image",
+  reference: "Reference",
 });
 export default function ImageGallery({
   campaignId,
@@ -103,13 +103,13 @@ export default function ImageGallery({
   async function add(selected: File) {
     await perform(async () => {
       if (selected.size > 20 * 1024 * 1024)
-        throw Error(tr("Immagine troppo grande: massimo 20 MiB."));
+        throw Error(tr("Image too large: up to 20 MiB."));
       const encoded = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () =>
           resolve(String(reader.result).split(",")[1] ?? "");
         reader.onerror = () =>
-          reject(Error(tr("Impossibile leggere il file scelto.")));
+          reject(Error(tr("Cannot read the chosen file.")));
         reader.readAsDataURL(selected);
       });
       const saved = await command<Attachment>("add_image", {
@@ -122,7 +122,7 @@ export default function ImageGallery({
       setImages((rows) => [...rows, saved]);
       setCaption("");
       setNotice(
-        tr("Immagine copiata nell’archivio e inclusa nei prossimi backup."),
+        tr("Image copied into the archive and included in the next backups."),
       );
     });
     if (file.current) file.current.value = "";
@@ -162,34 +162,30 @@ export default function ImageGallery({
       });
       setImages((rows) => rows.filter((i) => i.id !== remove.id));
       close();
-      setNotice(
-        tr(
-          "Collegamento immagine rimosso. Il file è conservato nell’archivio.",
-        ),
-      );
+      setNotice(tr("Image link removed. The file is kept in the archive."));
     });
   }
   return (
     <section
       className="image-gallery"
-      aria-label={tr("Immagini della voce")}
+      aria-label={tr("Entry images")}
       aria-busy={disabled}
     >
       <details open={images.length > 0}>
         <summary>
-          <Text source={"Immagini ("} />
+          <Text source={"Images ("} />
           {images.length})
         </summary>
         <p className="muted">
           <Text
             source={
-              "Aggiungi un ritratto, una mappa o un’immagine. PNG, JPEG e WebP, massimo 20 MiB e 8192 px per lato. Copie locali incluse nel backup."
+              "Add a portrait, a map or an image. PNG, JPEG and WebP, up to 20 MiB and 8192 px per side. Local copies are included in the backup."
             }
           />
         </p>
         <div className="player-fields">
           <label>
-            <Text source={"Didascalia immagine"} />
+            <Text source={"Image caption"} />
             <input
               value={caption}
               maxLength={200}
@@ -198,9 +194,9 @@ export default function ImageGallery({
             />
           </label>
           <label>
-            <Text source={"Tipo immagine"} />
+            <Text source={"Image type"} />
             <select
-              aria-label={tr("Tipo immagine")}
+              aria-label={tr("Image type")}
               value={role}
               disabled={disabled}
               onChange={(e) => setRole(e.target.value as Attachment["role"])}
@@ -214,7 +210,7 @@ export default function ImageGallery({
           </label>
         </div>
         <label className="image-file">
-          <Text source={"Aggiungi immagine"} />
+          <Text source={"Add image"} />
           <input
             ref={file}
             type="file"
@@ -228,11 +224,11 @@ export default function ImageGallery({
         </label>
         {loading ? (
           <p role="status">
-            <Text source={"Apertura immagini…"} />
+            <Text source={"Opening images…"} />
           </p>
         ) : !images.length ? (
           <p>
-            <Text source={"Nessuna immagine aggiunta."} />
+            <Text source={"No images added."} />
           </p>
         ) : null}
         {error ? (
@@ -245,12 +241,12 @@ export default function ImageGallery({
                 setRefresh((v) => v + 1);
               }}
             >
-              <Text source={"Ricarica immagini"} />
+              <Text source={"Reload images"} />
             </button>
           </div>
         ) : null}
         <p role="status">
-          {pending ? tr("Operazione immagine in corso…") : notice}
+          {pending ? tr("Image operation in progress…") : notice}
         </p>
         <div className="image-grid">
           {images.map((image) => (
@@ -352,12 +348,12 @@ function ImageCard({
       <button
         disabled={disabled}
         onClick={(e) => onOpen(e.currentTarget)}
-        aria-label={tr("Apri immagine: {0}", [image.caption])}
+        aria-label={tr("Open image: {0}", [image.caption])}
       >
         {url ? (
           <img src={url} alt={image.caption} loading="lazy" />
         ) : (
-          <span>{error || tr("Anteprima immagine…")}</span>
+          <span>{error || tr("Loading image preview…")}</span>
         )}
       </button>
       <figcaption>
@@ -368,7 +364,7 @@ function ImageCard({
         </small>
       </figcaption>
       <button disabled={disabled} onClick={(e) => onRemove(e.currentTarget)}>
-        <Text source={"Rimuovi dalla voce"} />
+        <Text source={"Remove from the entry"} />
       </button>
     </figure>
   );
@@ -402,27 +398,25 @@ function ImageDialog({
         ref={modal}
         role="dialog"
         aria-modal="true"
-        aria-label={
-          viewer ? viewer.image.caption : tr("Rimuovi collegamento immagine")
-        }
+        aria-label={viewer ? viewer.image.caption : tr("Remove image link")}
         onKeyDown={keyboard}
       >
         <button autoFocus onClick={close}>
-          <Text source={"Chiudi immagine"} />
+          <Text source={"Close image"} />
         </button>
         {viewer ? (
           <>
             <h3>{viewer.image.caption}</h3>
             <label>
-              <Text source={"Ingrandimento immagine"} />
+              <Text source={"Image zoom"} />
               <select
-                aria-label={tr("Ingrandimento immagine")}
+                aria-label={tr("Image zoom")}
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
               >
                 {[50, 100, 150, 200, 300].map((n) => (
                   <option key={n} value={n}>
-                    {n === 100 ? tr("Adatta alla finestra") : tr("{0}%", [n])}
+                    {n === 100 ? tr("Fit to window") : tr("{0}%", [n])}
                   </option>
                 ))}
               </select>
@@ -443,18 +437,18 @@ function ImageDialog({
         ) : remove ? (
           <>
             <h3>
-              <Text source={"Rimuovere "} />
-              {remove.caption} <Text source={" dalla voce?"} />
+              <Text source={"Remove "} />
+              {remove.caption} <Text source={" from the entry?"} />
             </h3>
             <p>
               <Text
                 source={
-                  "Il file rimane nell’archivio per il recupero e continua a essere incluso nei backup. Le note sono conservate."
+                  "The file stays in the archive for recovery and is still included in backups. Notes are kept."
                 }
               />
             </p>
             <button disabled={disabled} onClick={onDetach}>
-              <Text source={"Rimuovi collegamento"} />
+              <Text source={"Remove link"} />
             </button>
           </>
         ) : null}

@@ -11,10 +11,10 @@ test("composizione mista valida e limiti espliciti", () => {
     { sides: 20, quantity: 2 },
     { sides: 100, quantity: 1 },
   ]);
-  expect(() => selections(emptyQuantities())).toThrow("almeno un dado");
+  expect(() => selections(emptyQuantities())).toThrow("at least one die");
   for (const value of ["-1", "1.5", "51", "NaN"]) {
     expect(() => selections({ ...emptyQuantities(), 6: value })).toThrow(
-      "quantità intere",
+      "whole quantities",
     );
   }
   expect(() =>

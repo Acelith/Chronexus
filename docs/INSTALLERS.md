@@ -1,159 +1,159 @@
 # Release 0.8.0 — M19, M20, M21, M22
 
-Installer NSIS Windows x64 compilato dal commit `c540c2d` (tag annotato `v0.8.0`),
-firmato updater e verificato con la chiave di produzione
-(`updates_signed_release_package_matches_production_key`). Dimensione 33.072.040
-byte, SHA-256 `0079f8b8509836e006ad42d37338212593c25b9719119b1e49f2961bbb4d6b3a`.
-Pubblicata il 25 ottobre 2026 con `publish_app_update.py`: installer, `.sig` e
-`latest.json` riscaricati con hash verificati, anche in forma anonima; API latest
-= v0.8.0. Solo app, **nessun peso AI**. Build eseguita con un `pnpm.cmd`
-temporaneo che inoltra a `npm run` (pnpm non installato su questa macchina).
-Installazione/upgrade reale non eseguiti.
+NSIS Windows x64 Installer compiled from commit `c540c2d` (annotated tag `v0.8.0`),
+updater signed and verified with the production key
+(`updates_signed_release_package_matches_production_key`). Size 33.072.040
+bytes, SHA-256 `0079f8b8509836e006ad42d37338212593c25b9719119b1e49f2961bbb4d6b3a`.
+Published on October 25 2026 with `publish_app_update.py`: installer, `.sig` and
+`latest.json` redownloaded with verified hashes, also in anonymous form; latest
+= v0.8.0. App only, **no AI weights**. Build executed with a `pnpm.cmd`
+temporary that forwards to `npm run` (pnpm not installed on this machine).
+Actual installation/upgrade not performed.
 
-# Consegna locale M18 — 0.7.0
+# Local Delivery M18 — 0.7.0
 
-Installer NSIS Windows x64 compilato dal commit `2052df7`, firmato updater e
-verificato con la chiave di produzione. Percorso locale:
+NSIS Windows x64 Installer compiled from commit `2052df7`, updater signed and
+verified with the production key. Local path:
 `installers/Chronexus-0.7.0-Windows-x64/Chronexus_0.7.0_x64-setup.exe`.
-Dimensione 32.630.931 byte, SHA-256
+Size 32.630.931 bytes, SHA-256
 `69b9ef340f43f177b266c99ce1f9e1eac9320fdf3229ff1500106389350e270e`.
-Pubblicazione sospesa su richiesta dell’utente dopo il rifiuto delle credenziali
-del primo push; nessuna release 0.7.0 creata. Nessuna installazione eseguita.
-La release pubblica resta la 0.6.0. Non riprendere la pubblicazione implicitamente.
+Publication suspended at user request after rejection of credentials
+of the first push; no release 0.7.0 created. No installation performed.
+The public release remains 0.6.0. Do not resume publication implicitly.
 
-L’installer contiene l’app e lo schema 018, **nessun peso AI**. Il modello
-principale è Qwen3.8-27B; Gemma 4 12B è opzionale e secondaria. Preparazione
-manuale, requisiti, SHA-256 e uso offline in [AI_MODELS.md](AI_MODELS.md).
-Gli script M7 `Build-OfflineInstallers.ps1` e `scripts/distribution/` sono
-ritirati e rifiutano nuove build del vecchio Qwen. Le sezioni sotto e i pacchetti
-già pubblicati sono storici. `scripts/release/package.py` conserva il bundle
-Gemma solo su richiesta esplicita con `--secondary-gemma`; non è il pacchetto
-principale e non distribuisce il 27B. Non sovrascrivere release esistenti.
+The installer contains the app and the 018 schema, **no AI weights**. The main
+model is Qwen3.8-27B; Gemma 4 12B is optional and secondary. Manual
+preparation, requirements, SHA-256 and offline use in [AI_MODELS.md](AI_MODELS.md).
+The M7 `Build-OfflineInstallers.ps1` and `scripts/distribution/` scripts are
+withdrawn and reject new builds of the old Qwen. The sections below and the packages
+already published are historical. `scripts/release/package.py` keeps the Gemma bundle
+only upon explicit request with `--secondary-gemma`; it is not the main package
+and does not distribute the 27B. Do not overwrite existing releases.
 
-# Installer Windows con AI locale
+# Windows Installer with local AI
 
-## Aggiornamento M17 — 25 ottobre 2026
+## Update M17 — October 25 2026
 
 [Chronexus 0.6.0](https://github.com/Acelith/Chronexus/releases/tag/v0.6.0)
-include la traduzione locale della wiki. Installer app Windows x64 firmato updater,
-schema 017 additivo. Pacchetto locale in `installers/Chronexus-0.6.0-Windows-x64/`.
-Firma reale e download anonimi verificati, nessuna installazione personale
-eseguita. Runtime e Qwen3 4b-instruct restano separati; le copie già tradotte si
-leggono senza runtime. Questo è il checkpoint storico M17. Dettagli in WIKI_TRANSLATION.md
-e STATUS.md; i pacchetti/release precedenti non sono stati sovrascritti.
+includes the local translation of the wiki. Windows x64 app Installer signed updater,
+additive 017 schema. Local package in `installers/Chronexus-0.6.0-Windows-x64/`.
+Actual signature and anonymous downloads verified, no personal installation
+performed. Runtime and Qwen3 4b-instruct remain separate; already translated copies are
+read without runtime. This is historical checkpoint M17. Details in WIKI_TRANSLATION.md
+and STATUS.md; previous packages/releases were not overwritten.
 
-## Politica Forgegit — pianificata con M11
+## Forgegit Policy — planned with M11
 
-Destinazione verificata di `origin`: `https://github.com/Acelith/Chronexus.git`,
-repository dell’utente. Per le future milestone implementate e verificate,
-l’utente autorizza come procedura standard la pubblicazione del codice e delle
-release versionate con pacchetti app e, quando previsto, AI locale. Non serve
-richiedere nuovamente questa autorizzazione ordinaria, salvo istruzioni contrarie.
+Verified destination of `origin`: `https://github.com/Acelith/Chronexus.git`,
+user repository. For future milestones implemented and verified,
+the user authorizes as standard procedure the publication of the code and the
+versioned releases with app packages and, when specified, local AI. There is no
+need to request this ordinary authorization again, unless instructed otherwise.
 
-Prima di pubblicare: verificare capacità/API/autenticazione del server, limiti
-per runtime/pesi AI, licenze, versione/tag coerenti, build/test reali, checksum e
-note di rilascio. Escludere dati privati e segreti; non sostituire release/tag/asset
-esistenti e non usare force-push. Verificare download/checksum dopo l’upload e
-riportare errori o pubblicazioni parziali con precisione. Non inventare pacchetti
-per piattaforme non collaudate né usare una destinazione alternativa non autorizzata.
+Before publishing: verify server capacity/API/authentication, limits
+for runtime/AI weights, licenses, consistent version/tag, actual build/test, checksum and
+release notes. Exclude private and secret data; do not replace existing release/tag/asset
+and do not use force-push. Verify download/checksum after upload and
+report errors or partial publications accurately. Do not invent packages
+for untested platforms nor use an unauthorized alternative destination.
 
-**Autorizzazione successiva dell’utente:** implementare tutte e tre le milestone;
-completare prima M12 e M13, quindi compilare e pubblicare con M11 alla fine.
-Il precedente divieto riguardava la sola pianificazione ed è superato da questa
-istruzione. Non pubblicare artefatti intermedi o dichiarare riusciti upload non verificati.
+**Next user authorization:** implement all three milestones;
+complete M12 and M13 first, then compile and publish with M11 at the end.
+The previous prohibition concerned only planning and is superseded by this
+instruction. Do not publish intermediate artifacts or declare unverified uploads successful.
 
-## Aggiornamento M8 — 24 ottobre 2026
+## Update M8 — October 24 2026
 
-Il nuovo installer **dell'app** è in `installers/Chronexus-M8-Windows-x64/`.
-Generazione NSIS verificata; installazione M8 non ripetuta.
-Dimensione installer M8: 4.664.266 byte; SHA-256
+The new **app** installer is in `installers/Chronexus-M8-Windows-x64/`.
+Verified NSIS generation; M8 installation not repeated.
+M8 installer size: 4.664.266 byte; SHA-256
 `e59a7cae39c01d0875f74e19c4c651030fe5733ee778e98126c056a8c5061bcf`.
-Copia nella root e worker di rilascio confrontati con gli artefatti finali.
- Include il worker
-aggiornato, non i checkpoint o l'ambiente Python/CUDA. Il backend su questo
-computer è stato preparato e verificato separatamente. Per un altro computer
-seguire [AI_TRAINING.md](AI_TRAINING.md), senza presumere che il pacchetto Qwen
-M7 contenga Gemma o il training.
+Copy to root and release worker compared with final artifacts.
+ Include the updated worker
+not the checkpoints or the Python/CUDA environment. The backend on this
+computer has been prepared and verified separately. For another computer
+follow [AI_TRAINING.md](AI_TRAINING.md), without assuming that the Qwen
+M7 package contains Gemma or the training.
 
-Il pacchetto completo descritto di seguito resta la distribuzione **M7** e
-non è stato sovrascritto. Conservare un backup prima di migrare: le vecchie
-build non leggono uno schema SQLite più recente.
+The complete package described below remains the **M7** distribution and
+was not overwritten. Keep a backup before migrating: old
+builds do not read a newer SQLite schema.
 
-## Distribuzione M7 precedente
+## Previous M7 distribution
 
-Output nella root: `installers/Chronexus-0.1.0-Windows-x64/`.
-La cartella generata e' esclusa da Git: contiene circa 4,5 GiB di runtime e pesi,
-nessun database, backup, campagna o modello sperimentale.
+Output in root: `installers/Chronexus-0.1.0-Windows-x64/`.
+The generated folder is excluded from Git: it contains approximately 4,5 GiB of runtime and weights,
+no database, backup, campaign, or experimental model.
 
-1. `Chronexus_0.1.0_x64-setup.exe`: installa l'app, stessa build verificata M7.
-2. `Chronexus_AI_locale_x64-setup.exe`: verifica/copia Ollama 0.40.10 e soltanto
-   Qwen3:4b-instruct Q4_K_M per il singolo utente. Non separarlo dalla cartella `AI`.
-3. Menu Start → Chronexus → Avvia AI locale; poi apri Chronexus e nella campagna
-   Assistente locale → Controlla Ollama → modello → consenso → Attiva.
+1. `Chronexus_0.1.0_x64-setup.exe`: install the app, same verified M7 build.
+2. `Chronexus_AI_locale_x64-setup.exe`: verify/copy Ollama 0.40.10 and only
+   Qwen3:4b-instruct Q4_K_M for the single user. Do not separate it from the `AI` folder.
+3. Start Menu → Chronexus → Launch local AI; then open Chronexus and in the local
+   Assistant campaign → Check Ollama → model → consent → Activate.
 
-Il pacchetto AI e' completo per l'uso senza download. Non installa driver GPU,
-WebView2 o servizi di sistema; non abilita cloud o avvio automatico. Serve spazio
-aggiuntivo circa pari al pacchetto. Nessuna modifica alle campagne dell'app.
-Installer non firmati; macOS/Linux non prodotti su questo ambiente Windows.
+The AI package is complete for use without download. It does not install GPU drivers,
+WebView2 or system services; it does not enable cloud or auto-start. Additional space
+approximately equal to the package is required. No changes to app campaigns.
+Unsigned installers; macOS/Linux were not produced on this Windows environment.
 
-Manifest con SHA-256 di ogni file in `AI/bundle.json`, checksum dei due EXE in
-`SHA256SUMS.txt`, istruzioni immediate in `LEGGIMI.txt`. Licenze upstream incluse:
-Ollama MIT, Qwen Apache-2.0 e avvisi dei componenti del runtime.
+Manifest with SHA-256 of each file in `AI/bundle.json`, checksum of the two EXEs in
+`SHA256SUMS.txt`, immediate instructions in `LEGGIMI.txt`. Upstream licenses included:
+Ollama MIT, Qwen Apache-2.0 and runtime component notices.
 
-L'AI e' copiata in una cartella per utente/versione. Non sovrascrive file estranei
-o modificati; la ripetizione dello stesso pacchetto e' idempotente. Se un errore
-di disco/permessi interrompe la copia, una cartella parziale senza manifest non
-viene adottata automaticamente: scegliere una cartella nuova. Per rimuovere l'AI,
-chiudere il suo runtime e rimuovere solo quella cartella e il suo collegamento
-dal menu Start, conservando eventuali modelli personali desiderati.
+The AI is copied into a per-user/version folder. It does not overwrite foreign
+or modified files; repeating the same package is idempotent. If a disk/permission error
+interrupts the copy, a partial folder without a manifest is not
+automatically adopted: choose a new folder. To remove the AI,
+close its runtime and remove only that folder and its shortcut
+from the Start menu, keeping any desired personal models.
 
-Ollama puo' arricchire il manifest locale: il digest verificato del wrapper e'
-`6214d088d3846e16c9fe00adcbabdbfddc61ce4a70daacc46cb2310c38603054`, con manifest
-originale `0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0`.
-I pesi restano gli stessi, SHA-256
+Ollama can enrich the local manifest: the verified digest of the wrapper is
+`6214d088d3846e16c9fe00adcbabdbfddc61ce4a70daacc46cb2310c38603054`, with original manifest
+`0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0`.
+The weights remain the same, SHA-256
 `85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9`.
-L'avviatore verifica entrambe le identita' note, pesi GGUF, assenza di inoltro e
-cloud disabilitato. Se Chronexus aveva fissato il vecchio digest, controllare e
-riattivare il modello: l'app non cambia automaticamente l'identita' configurata.
+The launcher verifies both known identities, GGUF weights, absence of forwarding and
+disabled cloud. If Chronexus had fixed the old digest, check and
+reactivate the model: the app does not automatically change the configured identity.
 
-## Rigenerazione
+## Regeneration
 
-Prerequisiti locali: build NSIS Chronexus, portable Ollama/pesi verificati in
-`.tools/m7-runtime`, licenza ufficiale `OLLAMA_LICENSE` di quella release e
-NSIS del toolchain Tauri. Nessun download automatico nello script.
+Local prerequisites: Chronexus NSIS build, portable Ollama/verified weights in
+`.tools/m7-runtime`, official `OLLAMA_LICENSE` license of that release and
+NSIS of the Tauri toolchain. No automatic downloads in the script.
 
 ```powershell
 ./scripts/Build-OfflineInstallers.ps1
 ```
 
-Rifiuta output esistenti; `-OutputDirectory` consente una nuova cartella dentro
-il repository. Copia tutti i file del runtime e soltanto i blob referenziati dal
-manifest selezionato, verificandone gli hash. Include licenze e avviatori.
-Non legge cartelle delle campagne. Per compilare prima l'app: `pnpm package:desktop`
-nell'ambiente Rust configurato descritto nel README.
+Reject existing outputs; `-OutputDirectory` allows a new folder inside
+the repository. Copy all runtime files and only the blobs referenced by the
+selected manifest, verifying their hashes. Include licenses and launchers.
+Does not read campaign folders. To compile the app first: `pnpm package:desktop`
+in the configured Rust environment described in the README.
 
-## Verifiche
+## Verifications
 
-- Compilazione NSIS AI e copia dell'installer app: riuscite.
-- Sei scenari `powershell -File scripts/distribution/Test-AIInstaller.ps1`:
-  percorso con spazi, ripetizione, file modificato, dati estranei, checksum
-  errato e traversal. Le verifiche precedono qualsiasi copia; nessun overwrite.
-- Installazione silenziosa AI `/S /TEST /D=<profilo isolato>` provata realmente;
-  `/TEST` omette soltanto il collegamento del menu Start.
-- Runtime copiato: stato cloud disabilitato, modello e pesi verificati; inferenza
-  GPU reale di prova. La sandbox iniziale negava accessi al runtime, percio' il
-  collaudo e' stato ripetuto nel normale contesto utente Windows.
-- Hash .NET nello script di copia, indipendenti dall'autoload `Get-FileHash` di
-  PowerShell avviato da NSIS. Installer richiede Windows x64 e usa PowerShell 64 bit.
-- Nessun nuovo test delle funzioni React/Rust: non sono state modificate.
-  Wizard/collegamento interattivi e piattaforme diverse non verificati qui.
+- AI NSIS compilation and app installer copy: successful.
+- Six `powershell -File scripts/distribution/Test-AIInstaller.ps1` scenarios:
+  path with spaces, repetition, modified file, foreign data, incorrect checksum
+  and traversal. Verifications precede any copy; no overwrite.
+- Silent installation AI `/S /TEST /D=<profilo isolato>` actually tested;
+  `/TEST` only omits the Start menu link.
+- Copied runtime: cloud status disabled, model and weights verified; inference
+  on real GPU tested. The initial sandbox denied runtime access, therefore the
+  test was repeated in the normal Windows user context.
+- .NET Hash in the copy script, independent from the `Get-FileHash` autoload of
+  PowerShell launched from NSIS. Installer requires Windows x64 and uses 64 bit PowerShell.
+- No new testing of React/Rust functions: they were not modified.
+  Interactive Wizard/links and different platforms are not verified here.
 
-## M11 — procedura 0.2.0 Windows x64
+## M11 — 0.2.0 Windows x64 procedure
 
-La procedura corrente è `scripts/release/package.py`, non lo script M7/Qwen
-storico. Versioni package.json, Cargo.toml/lock e tauri.conf.json coerenti;
-identificativo storage invariato. Costruire con toolchain relativa tramite Dev.ps1
-oppure configurare CARGO_HOME/RUSTUP_HOME del progetto e usare:
+The current procedure is `scripts/release/package.py`, not the M7/Qwen
+historical script. package.json, Cargo.toml/lock and tauri.conf.json versions consistent;
+storage identifier unchanged. Build with relative toolchain via Dev.ps1
+or configure the project's CARGO_HOME/RUSTUP_HOME and use:
 
 ```powershell
 pnpm exec tauri build --bundles nsis
@@ -161,71 +161,71 @@ C:/Python315/python.exe scripts/release/package.py installers/Chronexus-0.2.0-Wi
 C:/Python315/python.exe -m unittest discover -s scripts/release -p 'test_*.py'
 ```
 
-Lo script richiede una directory nuova, verifica i blob ufficiali GGUF Gemma 4 e
-produce cinque ZIP app/AI validi sotto 2048 MiB: core app/runtime/componenti e quattro
-volumi del peso principale (il quarto include anche il proiettore). Ogni file ha
-SHA-256 e dimensione; `AI/bundle.json` guida l'installatore PowerShell offline.
-Non estrarre i volumi manualmente. Licenze app/font e runtime/modello incluse;
-nessuna scansione delle cartelle campagne o dei profili di addestramento.
+The script requires a new directory, verifies official Gemma 4 GGUF blobs and
+produces five valid app/AI ZIPs under 2048 MiB: core app/runtime/components and four
+main weight volumes (the fourth also includes the projector). Each file has
+SHA-256 and size; `AI/bundle.json` guides the offline PowerShell installer.
+Do not extract volumes manually. app/font and runtime/model licenses included;
+no scanning of campaign folders or training profiles.
 
-`forgejo_release.py` riceve l'autorizzazione soltanto in RAM da una sessione
-interattiva; non cerca credenziali nel sistema e non le scrive. Destinazione fissa
-origin dell'utente. Richiede albero pulito, tag annotato/versione/commit remoto
-coerenti e report checksum. Crea bozza, carica sei allegati (incluso il pacchetto leggero solo app), scarica/verifica
-ciascuno, poi pubblica. Non sovrascrive tag/release/allegati altrui. Una ricevuta
-locale ignorata permette di riconoscere una bozza della stessa esecuzione; su
-errore interrompere, non cancellare o presentare una release parziale come conclusa.
+`forgejo_release.py` receives authorization only in RAM from an
+interactive session; it does not search for credentials in the system and does not write them. Fixed destination
+user origin. Requires a clean tree, consistent annotated/version/remote commit tags
+and checksum reports. Create draft, upload six attachments (including the app-only light package), download/verify
+each, then publish. Do not overwrite others' tags/releases/attachments. A local receipt
+ignored allows recognizing a draft of the same execution; on
+error, stop, do not delete or present a partial release as finished.
 
-Le prove effettive e i limiti della versione sono in `docs/releases/v0.2.0.md`.
-SHA256SUMS.txt e package-report.json rimangono con i pacchetti locali; i sei
-checksum sono riportati anche nel corpo della release. Token/password non devono
-mai entrare in file di piano, ricevute, log, argomenti di processo o Git.
-
-
-### Esito del primo rilascio remoto
-
-Tag v0.2.0 e codice pubblicati; bozza id 2 e pacchetto solo app caricato con
-download/checksum verificato. Upload grandi interrotti dal servizio (HTTP 502,
-297 MB/235 s nel secondo tentativo); non è un problema di credenziali. Non
-pubblicare la bozza incompleta. I cinque pacchetti AI locali sono integri.
-Attendere una verifica/correzione del gateway prima di un altro invio lungo.
-`MAX_FILES=5` indica gli allegati per singolo upload, non impone cinque asset per
-release; il sesto pacchetto rende l'app scaricabile senza i pesi AI.
-
-Il tag identifica il sorgente effettivamente compilato. Le successive correzioni
-ai soli strumenti/documenti possono avanzare main senza riscrivere quel tag:
-il piano locale registra `commit` compilato e `publicationCommit`. Il validatore
-rifiuta qualunque modifica applicativa successiva al tag; in quel caso servono
-nuova build e nuova versione. Nessun tag o allegato esistente viene sovrascritto.
+Actual evidence and version limits are in `docs/releases/v0.2.0.md`.
+SHA256SUMS.txt and package-report.json remain with local packages; the six
+checksums are also reported in the release body. Tokens/passwords must never
+enter plan files, receipts, logs, process arguments, or Git.
 
 
-### Ripresa LAN esplicitamente autorizzata
+### Outcome of the first remote release
 
-L’utente ha indicato `http://192.168.162.26:3000` per questa ripresa. È il solo
-endpoint alternativo ammesso e deve essere selezionato esplicitamente mediante
-`publish(authorization, base_url=LOCAL_BASE, finalize=False)`. Confrontare repository
-(id/nome/permessi) e bozza con il sito canonico prima di qualsiasi scrittura.
-L’origin Git resta HTTPS pubblico; nessuna sostituzione del tag del sorgente compilato.
+Tag v0.2.0 and code published; draft id 2 and app-only package uploaded with
+verified download/checksum. Large uploads interrupted by service (HTTP 502,
+297 MB/235 s on the second attempt); it is not a credentials issue. Do not
+publish the incomplete draft. The five local AI packages are intact.
+Wait for gateway verification/correction before another long upload.
+`MAX_FILES=5` indicates attachments for single upload, does not mandate five assets for
+release; the sixth package makes the app downloadable without the AI weights.
 
-Il client non segue redirect e non invia l’autorizzazione ad altri host. Gli URL
-canonici `/attachments/<id>` sono riscritti soltanto verso il preciso endpoint
-locale selezionato, per il download SHA-256 dei medesimi allegati. Le verifiche
-completate vengono registrate con ID/dimensione/hash/trasporto nella ricevuta locale;
-un asset già presente ma non riconosciuto dalla ricevuta non viene sovrascritto.
-
-Usare prima `finalize=False` per completare upload e download mantenendo la bozza;
-aggiornare le note con le prove effettive e poi finalizzare. Controllare l’insieme
-esatto degli allegati prima di rendere pubblica la release. I test della ripresa
-sono 18; nessuna modifica al binario o ai dati dell’app richiede una nuova build.
-
-### Aggiornamenti dell’app 0.4.0
-
-Il canale updater usa il solo installer firmato con `.sig` e `latest.json`, senza
-ridistribuire a ogni versione i pesi AI della M11. Compilazione protetta e procedure
-sono in docs/UPDATES.md; i pacchetti precedenti e la bozza v0.2.0 restano distinti.
+The tag identifies the actually compiled source. Subsequent corrections
+to tools/documents only can advance main without rewriting that tag:
+the local plan records `commit` compiled and `publicationCommit`. The validator
+rejects any application modification after the tag; in that case, a
+new build and new version are required. No existing tag or attachment is overwritten.
 
 
-0.4.0 pubblicata il 25 ottobre 2026: release id 3, installer app-only firmato
-updater, .sig e latest.json. Tutti e tre riscaricati senza login con hash verificati;
-API latest confermata dall’app desktop sintetica. Sorgente compilato d75f5f3.
-La bozza id 2/v0.2.0 non è stata modificata e non è diventata una release completa.
+### LAN resumption explicitly authorized
+
+The user indicated `http://192.168.162.26:3000` for this resumption. It is the only
+allowed alternative endpoint and must be explicitly selected via
+`publish(authorization, base_url=LOCAL_BASE, finalize=False)`. Compare repository
+(id/name/permissions) and draft with the canonical site before any writing.
+The Git origin remains public HTTPS; no replacement of the compiled source tag.
+
+The client does not follow redirects and does not send authorization to other hosts. The canonical
+URLs `/attachments/<id>` are rewritten only towards the precise endpoint
+of the selected locale, for the SHA-256 download of the same attachments. Completed
+verifications are recorded with ID/size/hash/transport in the local receipt;
+an asset already present but not recognized by the receipt is not overwritten.
+
+Use `finalize=False` first to complete upload and download while maintaining the draft;
+update the notes with the actual evidence and then finalize. Check the exact set
+of attachments before making the release public. The resume tests
+are 18; no modification to the binary or app data requires a new build.
+
+### App Updates 0.4.0
+
+The updater channel uses only the installer signed with `.sig` and `latest.json`, without
+redistributing the M11 AI weights in every version. Protected compilation and procedures
+are in docs/UPDATES.md; previous packages and the v0.2.0 draft remain distinct.
+
+
+0.4.0 published on 25 October 2026: release id 3, app-only installer signed
+updater, .sig and latest.json. All three downloaded without login with verified hashes;
+latest API confirmed by the synthetic desktop app. Compiled source d75f5f3.
+The draft id 2/v0.2.0 was not modified and did not become a complete release.

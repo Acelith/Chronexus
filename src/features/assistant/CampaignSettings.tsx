@@ -19,12 +19,12 @@ import type { SaveGuard } from "../journal/Editor";
 import { errorMessage } from "../journal/api";
 
 const kinds: Record<string, string> = localizeLabels({
-  page: "Codex e party",
-  session: "Diario delle sessioni",
-  character: "Scheda del personaggio",
-  item: "Oggetti",
-  spell: "Incantesimi",
-  ability: "Capacità",
+  page: "Codex and party",
+  session: "Session journal",
+  character: "Character sheet",
+  item: "Items",
+  spell: "Spells",
+  ability: "Abilities",
 });
 export default function CampaignSettings({
   campaignId,
@@ -107,12 +107,10 @@ export default function CampaignSettings({
         <div>
           <p className="eyebrow">{name}</p>
           <h2>
-            <Text source={"Impostazioni della campagna"} />
+            <Text source={"Campaign settings"} />
           </h2>
           <p>
-            <Text
-              source={"Le preferenze valgono soltanto per questa campagna."}
-            />
+            <Text source={"These preferences apply to this campaign only."} />
           </p>
         </div>
       </header>
@@ -125,11 +123,11 @@ export default function CampaignSettings({
       {!draft || !view ? (
         error ? (
           <button disabled={busy} onClick={() => void run(reload)}>
-            <Text source={"Riprova impostazioni"} />
+            <Text source={"Retry settings"} />
           </button>
         ) : (
           <p role="status">
-            <Text source={"Caricamento impostazioni…"} />
+            <Text source={"Loading settings…"} />
           </p>
         )
       ) : (
@@ -139,25 +137,25 @@ export default function CampaignSettings({
               {view.sourceError}{" "}
               <Text
                 source={
-                  " Riduci i tipi di fonti incluse e salva le preferenze."
+                  " Reduce the types of included sources and save the preferences."
                 }
               />
             </p>
           )}
           <fieldset disabled={busy || trainingActive}>
             <legend>
-              <Text source={"AI locale · modello"} />
+              <Text source={"Local AI · model"} />
             </legend>
             <p>
-              {draft.settings.enabled ? tr("Attiva") : tr("Disattivata")} ·{" "}
-              {draft.settings.model || tr("Nessun modello scelto")}
+              {draft.settings.enabled ? tr("Activate") : tr("Disabled")} ·{" "}
+              {draft.settings.model || tr("No model chosen")}
             </p>
             {retiredQwen(draft.settings.model) ? (
               <p role="status">{tr(retiredNotice)}</p>
             ) : null}
             {draft.settings.digest && (
               <p className="muted">
-                <Text source={"Identità: "} />
+                <Text source={"Identity: "} />
                 {draft.settings.digest}
               </p>
             )}
@@ -173,28 +171,28 @@ export default function CampaignSettings({
                 })
               }
             >
-              <Text source={"Controlla Ollama e GPU"} />
+              <Text source={"Check Ollama and GPU"} />
             </button>
             {runtime && (
               <>
                 <p>
                   <Text source={"Ollama "} />
                   {runtime.version}{" "}
-                  <Text source={" · cloud disabilitato verificato"} />
+                  <Text source={" · cloud disabled, verified"} />
                 </p>
                 <label>
-                  <Text source={"Modello locale"} />
+                  <Text source={"Local model"} />
                   <select
-                    aria-label={tr("Modello locale")}
+                    aria-label={tr("Local model")}
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
                   >
-                    <option value="">{tr("Scegli un modello")}</option>
+                    <option value="">{tr("Choose a model")}</option>
                     {usableModels(runtime.models).map((m) => (
                       <option key={m.digest} value={m.name}>
                         {modelLabel(m.name)} · {m.quantization} ·{" "}
                         {Math.round(m.gpuBytes / 1048576)}{" "}
-                        {tr(" MiB GPU caricati")}
+                        {tr(" MiB loaded on the GPU")}
                       </option>
                     ))}
                   </select>
@@ -207,7 +205,7 @@ export default function CampaignSettings({
                   />
                   <Text
                     source={
-                      "Confermo l'uso di un modello multilingue con fonti locali, non specializzato D&D."
+                      "I confirm using a multilingual model with local sources, not specialized in D&D."
                     }
                   />
                 </label>
@@ -224,13 +222,13 @@ export default function CampaignSettings({
                       await reload();
                       setNotice(
                         tr(
-                          "Modello attivato per questa campagna. La GPU sarà verificata prima di inviare gli appunti.",
+                          "Model activated for this campaign. The GPU will be checked before sending notes.",
                         ),
                       );
                     })
                   }
                 >
-                  <Text source={"Attiva modello per la campagna"} />
+                  <Text source={"Activate model for the campaign"} />
                 </button>
               </>
             )}
@@ -243,7 +241,7 @@ export default function CampaignSettings({
                 })
               }
             >
-              <Text source={"Disattiva AI della campagna"} />
+              <Text source={"Disable campaign AI"} />
             </button>
           </fieldset>
           <form
@@ -252,16 +250,16 @@ export default function CampaignSettings({
               void run(async () => {
                 await campaignAi.save(campaignId, draft);
                 await reload();
-                setNotice(tr("Preferenze della campagna salvate."));
+                setNotice(tr("Campaign preferences saved."));
               });
             }}
           >
             <fieldset disabled={busy || trainingActive}>
               <legend>
-                <Text source={"Fonti e risorse"} />
+                <Text source={"Sources and resources"} />
               </legend>
               <label>
-                <Text source={"Edizione D&D"} />
+                <Text source={"D&D edition"} />
                 <select
                   value={draft.edition}
                   onChange={(e) =>
@@ -274,7 +272,7 @@ export default function CampaignSettings({
                 </select>
               </label>
               <label>
-                <Text source={"Contesto massimo"} />
+                <Text source={"Maximum context"} />
                 <select
                   value={draft.context}
                   onChange={(e) => patch({ context: Number(e.target.value) })}
@@ -287,7 +285,7 @@ export default function CampaignSettings({
                 </select>
               </label>
               <label>
-                <Text source={"Lunghezza massima risposta"} />
+                <Text source={"Maximum answer length"} />
                 <input
                   type="number"
                   min={128}
@@ -299,7 +297,7 @@ export default function CampaignSettings({
               <p>
                 <Text
                   source={
-                    "Un contesto maggiore richiede più VRAM. Il runtime e la GPU fisica sono condivisi; queste preferenze non ne cambiano le impostazioni globali."
+                    "A larger context needs more VRAM. The runtime and the physical GPU are shared; these preferences do not change their global settings."
                   }
                 />
               </p>
@@ -320,21 +318,19 @@ export default function CampaignSettings({
                 </label>
               ))}
               <h3>
-                <Text source={"Regole locali approvate"} />
+                <Text source={"Approved local rules"} />
               </h3>
               <p>
                 <Text
                   source={
-                    "Fino a sei voci della stessa edizione, già consultate nella Wiki."
+                    "Up to six entries of the same edition, already viewed in the Wiki."
                   }
                 />
               </p>
               {rules.length === 0 ? (
                 <p>
                   <Text
-                    source={
-                      "Nessuna voce locale disponibile per questa edizione."
-                    }
+                    source={"No local entries available for this edition."}
                   />
                 </p>
               ) : (
@@ -360,13 +356,13 @@ export default function CampaignSettings({
                 ))
               )}
               <button type="submit" disabled={!dirty}>
-                <Text source={"Salva preferenze"} />
+                <Text source={"Save preferences"} />
               </button>
               {dirty && (
                 <p role="status">
                   <Text
                     source={
-                      "Salva le preferenze prima di aggiornare le conoscenze o cambiare modello."
+                      "Save the preferences before refreshing knowledge or changing model."
                     }
                   />
                 </p>
@@ -375,24 +371,20 @@ export default function CampaignSettings({
           </form>
           <fieldset disabled={busy || dirty || trainingActive}>
             <legend>
-              <Text source={"Conoscenze locali"} />
+              <Text source={"Local knowledge"} />
             </legend>
             <p>
-              <Text source={"Ultimo aggiornamento:"} />{" "}
+              <Text source={"Last refresh:"} />{" "}
               {view.profile.indexedAt
                 ? new Date(view.profile.indexedAt).toLocaleString(
                     localeInfo(getPreferences().locale).intl,
                   )
-                : tr("Mai eseguito")}
+                : tr("Never run")}
             </p>
             <p>
-              {view.added} <Text source={" estratti nuovi · "} />
-              {view.changed} <Text source={" modificati ·"} /> {view.removed}{" "}
-              <Text
-                source={
-                  " rimossi rispetto all'ultimo aggiornamento delle conoscenze."
-                }
-              />
+              {view.added} <Text source={" new excerpts · "} />
+              {view.changed} <Text source={" changed ·"} /> {view.removed}{" "}
+              <Text source={" removed since the last knowledge refresh."} />
             </p>
             <button
               onClick={() =>
@@ -402,23 +394,23 @@ export default function CampaignSettings({
                   setDraft(v.profile);
                   setNotice(
                     tr(
-                      "Conoscenze aggiornate. I pesi del modello non sono stati riaddestrati.",
+                      "Knowledge refreshed. The model weights were not retrained.",
                     ),
                   );
                 })
               }
             >
-              <Text source={"Aggiorna conoscenze"} />
+              <Text source={"Refresh knowledge"} />
             </button>
             <details>
               <summary>
-                <Text source={"Anteprima delle fonti incluse ("} />
-                {view.sources.length} <Text source={" estratti)"} />
+                <Text source={"Preview of the included sources ("} />
+                {view.sources.length} <Text source={" excerpts)"} />
               </summary>
               <p>
                 <Text
                   source={
-                    "Estratti della campagna selezionata; le conversazioni AI e le fotografie non sono dati di addestramento."
+                    "Excerpts from the selected campaign; AI conversations and photos are not training data."
                   }
                 />
               </p>
@@ -434,14 +426,14 @@ export default function CampaignSettings({
                         })
                       }
                     >
-                      <Text source={"Escludi questa fonte"} />
+                      <Text source={"Exclude this source"} />
                     </button>
                   )}
                 </article>
               ))}
               {view.sources.length > 100 && (
                 <p>
-                  <Text source={"Anteprima limitata ai primi 100 estratti."} />
+                  <Text source={"Preview limited to the first 100 excerpts."} />
                 </p>
               )}
             </details>
@@ -459,7 +451,7 @@ export default function CampaignSettings({
               disabled={busy || trainingActive}
               onClick={() => patch({ excludedIds: [] })}
             >
-              <Text source={"Riammetti le fonti escluse ("} />
+              <Text source={"Readmit excluded sources ("} />
               {draft.excludedIds.length})
             </button>
           )}

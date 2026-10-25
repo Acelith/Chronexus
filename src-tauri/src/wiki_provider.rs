@@ -20,7 +20,7 @@ pub struct WikiChoice {
 }
 fn validate(p: &WikiPreferences) -> AppResult<()> {
     if p.version != 1 || !PROVIDERS.contains(&p.provider.as_str()) {
-        return Err("Fonte wiki non supportata. Scegli Wikidot D&D oppure Open5e.".into());
+        return Err("Unsupported wiki source. Choose Wikidot D&D or Open5e.".into());
     }
     Ok(())
 }
@@ -34,18 +34,14 @@ pub fn read(root: &Path) -> AppResult<WikiChoice> {
                 explicit: false,
             })
         }
-        Err(_) => {
-            return Err("Impossibile leggere la fonte wiki scelta. Verifica i permessi.".into())
-        }
+        Err(_) => return Err("Cannot read the chosen wiki source. Check permissions.".into()),
     };
     if !meta.is_file() || meta.file_type().is_symlink() || meta.len() > 1024 {
-        return Err(
-            "Preferenza della fonte wiki danneggiata. Sceglila di nuovo nelle impostazioni.".into(),
-        );
+        return Err("Wiki source preference damaged. Choose it again in the settings.".into());
     }
-    let bytes = fs::read(&path).map_err(|_| "Impossibile leggere la fonte wiki scelta.")?;
+    let bytes = fs::read(&path).map_err(|_| "Cannot read the chosen wiki source.")?;
     let value: WikiPreferences = serde_json::from_slice(&bytes).map_err(|_| {
-        "Preferenza della fonte wiki danneggiata. Sceglila di nuovo nelle impostazioni.".to_string()
+        "Wiki source preference damaged. Choose it again in the settings.".to_string()
     })?;
     validate(&value)?;
     Ok(WikiChoice {
@@ -61,18 +57,16 @@ pub fn save(root: &Path, provider: &str) -> AppResult<WikiChoice> {
     validate(&value)?;
     let path = root.join(FILE);
     if fs::symlink_metadata(&path).is_ok_and(|m| !m.is_file() || m.file_type().is_symlink()) {
-        return Err("Destinazione della preferenza wiki non sicura.".into());
+        return Err("Unsafe destination for the wiki preference.".into());
     }
     let mut next = NamedTempFile::new_in(root)
-        .map_err(|_| "Impossibile salvare la fonte wiki. Verifica spazio e permessi.")?;
-    let bytes =
-        serde_json::to_vec_pretty(&value).map_err(|_| "Preferenza della fonte wiki non valida.")?;
+        .map_err(|_| "Cannot save the wiki source. Check space and permissions.")?;
+    let bytes = serde_json::to_vec_pretty(&value).map_err(|_| "Invalid wiki source preference.")?;
     next.write_all(&bytes)
         .and_then(|_| next.as_file().sync_all())
-        .map_err(|_| "Impossibile salvare la fonte wiki. Verifica spazio e permessi.")?;
-    next.persist(path).map_err(|_| {
-        "Impossibile confermare la fonte wiki. La scelta precedente è conservata.".to_string()
-    })?;
+        .map_err(|_| "Cannot save the wiki source. Check space and permissions.")?;
+    next.persist(path)
+        .map_err(|_| "Cannot confirm the wiki source. The previous choice is kept.".to_string())?;
     read(root)
 }
 #[cfg(test)]

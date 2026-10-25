@@ -53,7 +53,7 @@ impl CatalogSource {
             || self.name.chars().count() > 200
             || self.name.contains('\0')
         {
-            return Err("Riferimento alla fonte dell’incantesimo non valido.".into());
+            return Err("Invalid reference to the spell source.".into());
         }
         Ok(())
     }
@@ -66,7 +66,7 @@ pub struct CacheEntry {
 }
 fn validate(path: &str, value: &Value) -> AppResult<()> {
     if !valid_path(path) || !value.is_object() || value.to_string().len() > 2 * 1024 * 1024 {
-        return Err("Risposta del catalogo non valida o troppo grande.".into());
+        return Err("Invalid or too large catalog response.".into());
     }
     if let Some((_, index)) = path.split_once('/') {
         if value.get("index").and_then(Value::as_str) != Some(index)
@@ -75,20 +75,20 @@ fn validate(path: &str, value: &Value) -> AppResult<()> {
                 .and_then(Value::as_str)
                 .is_none_or(|s| s.is_empty() || s.chars().count() > 200)
         {
-            return Err("La risposta non corrisponde alla voce richiesta.".into());
+            return Err("The answer does not match the requested entry.".into());
         }
     } else if value
         .get("results")
         .and_then(Value::as_array)
         .is_none_or(|r| r.len() > 5000)
     {
-        return Err("Indice del catalogo non valido.".into());
+        return Err("Invalid catalog index.".into());
     }
     Ok(())
 }
 pub fn read(c: &Connection, path: &str) -> AppResult<Option<CacheEntry>> {
     if !valid_path(path) {
-        return Err("Percorso del catalogo non ammesso.".into());
+        return Err("Catalog path not allowed.".into());
     }
     let raw: Option<(String, String)> = c
         .query_row(
@@ -99,8 +99,7 @@ pub fn read(c: &Connection, path: &str) -> AppResult<Option<CacheEntry>> {
         .optional()
         .map_err(storage)?;
     raw.map(|(raw, fetched_at)| {
-        let payload =
-            serde_json::from_str(&raw).map_err(|_| "Copia locale del catalogo illeggibile.")?;
+        let payload = serde_json::from_str(&raw).map_err(|_| "Local catalog copy unreadable.")?;
         validate(path, &payload)?;
         Ok(CacheEntry {
             payload,
@@ -115,7 +114,7 @@ pub fn store(c: &Connection, path: &str, payload: Value) -> AppResult<CacheEntry
     tx.execute("INSERT INTO catalog_cache(path,payload) VALUES(?1,?2) ON CONFLICT(path) DO UPDATE SET payload=excluded.payload,fetched_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')",params![path,payload.to_string()]).map_err(storage)?;
     // This is a disposable cache; imported user assets are independent copies.
     tx.execute("DELETE FROM catalog_cache WHERE path IN (SELECT path FROM catalog_cache WHERE path<>?1 ORDER BY fetched_at DESC,path LIMIT -1 OFFSET 149)", [path]).map_err(storage)?;
-    let entry = read(&tx, path)?.ok_or("Copia locale non disponibile.")?;
+    let entry = read(&tx, path)?.ok_or("Local copy not available.")?;
     tx.commit().map_err(storage)?;
     Ok(entry)
 }
@@ -128,7 +127,7 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
         .map_err(storage)?;
     for entry in entries {
         let (path, raw) = entry.map_err(storage)?;
-        let value = serde_json::from_str(&raw).map_err(|_| "Catalogo nel backup illeggibile.")?;
+        let value = serde_json::from_str(&raw).map_err(|_| "Catalog in the backup unreadable.")?;
         validate(&path, &value)?;
     }
     Ok(())

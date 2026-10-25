@@ -15,12 +15,12 @@ fn valid_key(key: &str) -> bool {
 }
 fn validate(key: &str, v: &Value) -> AppResult<()> {
     if !valid_key(key) || v.to_string().len() > 2 * 1024 * 1024 || !v.is_object() {
-        return Err("Risposta wiki non valida o troppo grande.".into());
+        return Err("Invalid or too large wiki response.".into());
     }
     if key.starts_with("search/") {
-        let rows = v["results"].as_array().ok_or("Elenco wiki non valido.")?;
+        let rows = v["results"].as_array().ok_or("Invalid wiki list.")?;
         if rows.len() > 20 || !v["count"].is_u64() {
-            return Err("Elenco wiki fuori limite.".into());
+            return Err("Wiki list over its limit.".into());
         }
         for r in rows {
             if r["object_name"]
@@ -29,7 +29,7 @@ fn validate(key: &str, v: &Value) -> AppResult<()> {
                 || r["object_pk"].as_str().is_none_or(|s| s.len() > 200)
                 || !r["document"].is_object()
             {
-                return Err("Voce wiki non valida.".into());
+                return Err("Invalid wiki entry.".into());
             }
         }
     } else {
@@ -39,14 +39,14 @@ fn validate(key: &str, v: &Value) -> AppResult<()> {
             || !v["document"].is_object()
             || v["document"]["key"] != v["entry"]["document"]["key"]
         {
-            return Err("Dettaglio wiki non corrispondente alla fonte.".into());
+            return Err("Wiki details do not match the source.".into());
         }
     }
     Ok(())
 }
 pub fn read(c: &Connection, key: &str) -> AppResult<Option<Entry>> {
     if !valid_key(key) {
-        return Err("Richiesta wiki non valida.".into());
+        return Err("Invalid wiki request.".into());
     }
     let r: Option<(String, String)> = c
         .query_row(
@@ -57,7 +57,7 @@ pub fn read(c: &Connection, key: &str) -> AppResult<Option<Entry>> {
         .optional()
         .map_err(storage)?;
     r.map(|(raw, fetched_at)| {
-        let payload = serde_json::from_str(&raw).map_err(|_| "Copia wiki illeggibile.")?;
+        let payload = serde_json::from_str(&raw).map_err(|_| "Wiki copy unreadable.")?;
         validate(key, &payload)?;
         Ok(Entry {
             payload,
@@ -71,7 +71,7 @@ pub fn store(c: &Connection, key: &str, payload: Value) -> AppResult<Entry> {
     let tx = c.unchecked_transaction().map_err(storage)?;
     tx.execute("INSERT INTO wiki_cache(key,payload) VALUES(?1,?2) ON CONFLICT(key) DO UPDATE SET payload=excluded.payload,fetched_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')",params![key,payload.to_string()]).map_err(storage)?;
     tx.execute("DELETE FROM wiki_cache WHERE key IN (SELECT key FROM wiki_cache WHERE key<>?1 ORDER BY fetched_at DESC,key LIMIT -1 OFFSET 99)",[key]).map_err(storage)?;
-    let entry = read(&tx, key)?.ok_or("Copia wiki non disponibile.")?;
+    let entry = read(&tx, key)?.ok_or("Wiki copy not available.")?;
     tx.commit().map_err(storage)?;
     Ok(entry)
 }
@@ -85,10 +85,10 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
         .collect::<rusqlite::Result<Vec<_>>>()
         .map_err(storage)?;
     if rows.len() > 100 {
-        return Err("Cache wiki fuori limite.".into());
+        return Err("Wiki cache over its limit.".into());
     }
     for (key, raw) in rows {
-        let v = serde_json::from_str(&raw).map_err(|_| "Cache wiki illeggibile.")?;
+        let v = serde_json::from_str(&raw).map_err(|_| "Wiki cache unreadable.")?;
         validate(&key, &v)?;
     }
     Ok(())

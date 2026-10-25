@@ -79,7 +79,7 @@ pub fn index_path(category: &str) -> AppResult<&'static str> {
         .iter()
         .find(|(c, _, _)| *c == category)
         .map(|(_, p, _)| *p)
-        .ok_or_else(|| "Categoria Wikidot non supportata.".into())
+        .ok_or_else(|| "Unsupported Wikidot category.".into())
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", rename_all = "camelCase")]
@@ -195,7 +195,7 @@ fn validate_entry(page: &str, e: &Entry) -> AppResult<()> {
         || e.missing.len() > 10
         || (e.spell.is_some() != (e.category == "spells"))
     {
-        return Err("Voce Wikidot non valida o non corrispondente alla pagina richiesta.".into());
+        return Err("Wikidot entry invalid or not matching the requested page.".into());
     }
     Ok(())
 }
@@ -214,24 +214,24 @@ fn validate_index(category: &str, i: &Index) -> AppResult<()> {
                 || !origin_ok(&r.origin)
         })
     {
-        return Err("Indice Wikidot non valido.".into());
+        return Err("Invalid Wikidot index.".into());
     }
     Ok(())
 }
 fn validate(key: &str, v: &Value) -> AppResult<()> {
     if v.to_string().len() > LIMIT {
-        return Err("Copia Wikidot troppo grande.".into());
+        return Err("Wikidot copy too large.".into());
     }
     if let Some(category) = key.strip_prefix("index/") {
         let i: Index =
-            serde_json::from_value(v.clone()).map_err(|_| "Indice Wikidot illeggibile.")?;
+            serde_json::from_value(v.clone()).map_err(|_| "Wikidot index unreadable.")?;
         validate_index(category, &i)
     } else if let Some(page) = key.strip_prefix("entry/") {
         let e: Entry =
-            serde_json::from_value(v.clone()).map_err(|_| "Voce Wikidot illeggibile.")?;
+            serde_json::from_value(v.clone()).map_err(|_| "Wikidot entry unreadable.")?;
         validate_entry(page, &e)
     } else {
-        Err("Chiave cache Wikidot non valida.".into())
+        Err("Invalid Wikidot cache key.".into())
     }
 }
 pub fn read_raw(c: &Connection, key: &str) -> AppResult<Option<(Value, String)>> {
@@ -244,7 +244,7 @@ pub fn read_raw(c: &Connection, key: &str) -> AppResult<Option<(Value, String)>>
         .optional()
         .map_err(storage)?;
     row.map(|(raw, at)| {
-        let v: Value = serde_json::from_str(&raw).map_err(|_| "Copia Wikidot illeggibile.")?;
+        let v: Value = serde_json::from_str(&raw).map_err(|_| "Wikidot copy unreadable.")?;
         validate(key, &v)?;
         Ok((v, at))
     })
@@ -254,7 +254,7 @@ pub fn read_entry(c: &Connection, page: &str) -> AppResult<Option<(Entry, String
     read_raw(c, &format!("entry/{page}"))?
         .map(|(v, at)| {
             Ok((
-                serde_json::from_value(v).map_err(|_| "Voce Wikidot illeggibile.")?,
+                serde_json::from_value(v).map_err(|_| "Wikidot entry unreadable.")?,
                 at,
             ))
         })
@@ -265,7 +265,7 @@ pub fn read_index(c: &Connection, category: &str) -> AppResult<Option<(Index, St
     read_raw(c, &format!("index/{category}"))?
         .map(|(v, at)| {
             Ok((
-                serde_json::from_value(v).map_err(|_| "Indice Wikidot illeggibile.")?,
+                serde_json::from_value(v).map_err(|_| "Wikidot index unreadable.")?,
                 at,
             ))
         })
@@ -298,10 +298,10 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
         .collect::<rusqlite::Result<Vec<_>>>()
         .map_err(storage)?;
     if rows.len() as i64 > MAX_ENTRIES + CATEGORIES.len() as i64 {
-        return Err("Cache Wikidot fuori limite.".into());
+        return Err("Wikidot cache over its limit.".into());
     }
     for (key, raw) in rows {
-        let v = serde_json::from_str(&raw).map_err(|_| "Cache Wikidot illeggibile.")?;
+        let v = serde_json::from_str(&raw).map_err(|_| "Wikidot cache unreadable.")?;
         validate(&key, &v)?;
     }
     Ok(())
@@ -390,14 +390,14 @@ pub fn client() -> AppResult<Client> {
             " (personal offline campaign journal; explicit single-page lookup)"
         ))
         .build()
-        .map_err(|_| "Connessione a Wikidot non disponibile.".into())
+        .map_err(|_| "Connection to Wikidot not available.".into())
 }
 fn status_error(code: u16) -> String {
     match code {
-        404 | 410 => "Wikidot non ha questa pagina (HTTP 404).".into(),
-        403 | 429 => format!("Wikidot ha rifiutato o limitato la richiesta (HTTP {code}). Attendi prima di riprovare: non vengono fatti nuovi tentativi automatici."),
-        500..=599 => format!("Wikidot non è disponibile in questo momento (HTTP {code})."),
-        _ => format!("Risposta Wikidot inattesa (HTTP {code})."),
+        404 | 410 => "Wikidot does not have this page (HTTP 404).".into(),
+        403 | 429 => format!("Wikidot refused or rate-limited the request (HTTP {code}). Wait before trying again: no automatic retries are made."),
+        500..=599 => format!("Wikidot is not available right now (HTTP {code})."),
+        _ => format!("Unexpected Wikidot response (HTTP {code})."),
     }
 }
 /// GET one allowlisted page. `base` is fixed to BASE outside tests.
@@ -412,18 +412,18 @@ pub async fn fetch(
         || category_of(path).is_some()
         || CATEGORIES.iter().any(|(_, p, _)| *p == path))
     {
-        return Err("Pagina Wikidot non ammessa.".into());
+        return Err("Wikidot page not allowed.".into());
     }
     let mut gate = tokio::select! {
         biased;
-        _ = token.cancelled() => return Err("Richiesta Wikidot annullata.".into()),
+        _ = token.cancelled() => return Err("Wikidot request cancelled.".into()),
         g = state.gate.lock() => g,
     };
     if let Some(last) = *gate {
         let wait = state.interval.saturating_sub(last.elapsed());
         tokio::select! {
             biased;
-            _ = token.cancelled() => return Err("Richiesta Wikidot annullata.".into()),
+            _ = token.cancelled() => return Err("Wikidot request cancelled.".into()),
             _ = tokio::time::sleep(wait) => {}
         }
     }
@@ -441,12 +441,12 @@ async fn request(
     let mut url = Url::parse(&format!("{base}{path}"))
         .ok()
         .filter(|u| u.origin() == base.origin())
-        .ok_or("Pagina Wikidot non ammessa.")?;
+        .ok_or("Wikidot page not allowed.")?;
     for _ in 0..3 {
         let response = tokio::select! {
             biased;
-            _ = token.cancelled() => return Err("Richiesta Wikidot annullata.".into()),
-            r = client.get(url.clone()).header(reqwest::header::ACCEPT, "text/html").send() => r.map_err(|_| "Wikidot non raggiungibile. Controlla la connessione e riprova.")?,
+            _ = token.cancelled() => return Err("Wikidot request cancelled.".into()),
+            r = client.get(url.clone()).header(reqwest::header::ACCEPT, "text/html").send() => r.map_err(|_| "Wikidot not reachable. Check the connection and try again.")?,
         };
         let status = response.status();
         if status.is_redirection() {
@@ -455,7 +455,7 @@ async fn request(
                 .get(reqwest::header::LOCATION)
                 .and_then(|v| v.to_str().ok())
                 .and_then(|l| url.join(l).ok())
-                .ok_or("Reindirizzamento Wikidot non valido.")?;
+                .ok_or("Invalid Wikidot redirect.")?;
             let page = next.path().trim_start_matches('/');
             if next.origin() != base.origin()
                 || next.query().is_some()
@@ -463,10 +463,7 @@ async fn request(
                     || category_of(page).is_some()
                     || CATEGORIES.iter().any(|(_, p, _)| *p == page))
             {
-                return Err(
-                    "Reindirizzamento fuori dalle pagine Wikidot ammesse: richiesta interrotta."
-                        .into(),
-                );
+                return Err("Redirect outside the allowed Wikidot pages: request stopped.".into());
             }
             url = next;
             continue;
@@ -480,28 +477,28 @@ async fn request(
             .and_then(|v| v.to_str().ok())
             .is_some_and(|v| v.to_ascii_lowercase().starts_with("text/html"));
         if !html {
-            return Err("Wikidot non ha restituito una pagina HTML.".into());
+            return Err("Wikidot did not return an HTML page.".into());
         }
         if response.content_length().is_some_and(|n| n > LIMIT as u64) {
-            return Err("Pagina Wikidot oltre il limite di 2 MiB.".into());
+            return Err("Wikidot page over the 2 MiB limit.".into());
         }
         let mut response = response;
         let mut bytes = Vec::new();
         loop {
             let chunk = tokio::select! {
                 biased;
-                _ = token.cancelled() => return Err("Richiesta Wikidot annullata.".into()),
-                c = response.chunk() => c.map_err(|_| "Download della pagina Wikidot interrotto.")?,
+                _ = token.cancelled() => return Err("Wikidot request cancelled.".into()),
+                c = response.chunk() => c.map_err(|_| "Wikidot page download interrupted.")?,
             };
             let Some(chunk) = chunk else { break };
             if chunk.len() > LIMIT.saturating_sub(bytes.len()) {
-                return Err("Pagina Wikidot oltre il limite di 2 MiB.".into());
+                return Err("Wikidot page over the 2 MiB limit.".into());
             }
             bytes.extend_from_slice(&chunk);
         }
-        return String::from_utf8(bytes).map_err(|_| "Pagina Wikidot non decodificabile.".into());
+        return String::from_utf8(bytes).map_err(|_| "Wikidot page cannot be decoded.".into());
     }
-    Err("Troppi reindirizzamenti Wikidot.".into())
+    Err("Too many Wikidot redirects.".into())
 }
 pub fn base() -> Url {
     Url::parse(BASE).expect("static Wikidot base")
@@ -529,7 +526,7 @@ pub async fn fetch_entry(
     token: &CancellationToken,
 ) -> AppResult<Entry> {
     if category_of(page).is_none() {
-        return Err("Pagina Wikidot non ammessa.".into());
+        return Err("Wikidot page not allowed.".into());
     }
     let html = fetch(client, state, base, page, token).await?;
     parse::entry(&html, page)
@@ -633,7 +630,7 @@ pub fn clear(c: &Connection, provider: &str) -> AppResult<CacheSummary> {
             tx.execute("DELETE FROM wikidot_cache", [])
                 .map_err(storage)?;
         }
-        _ => return Err("Scegli quale cache wiki svuotare.".into()),
+        _ => return Err("Choose which wiki cache to clear.".into()),
     }
     tx.commit().map_err(storage)?;
     summary(c)

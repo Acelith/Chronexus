@@ -63,25 +63,25 @@ assert.equal(gemma.enabled, true);
 assert.equal(gemma.model, policy.secondary.name);
 await page.reload();
 await page
-  .getByLabel("Campagna attuale", { exact: true })
+  .getByLabel("Current campaign", { exact: true })
   .selectOption(legacy.campaign.id);
 await page
-  .getByRole("button", { name: "Impostazioni della campagna", exact: true })
+  .getByRole("button", { name: "Campaign settings", exact: true })
   .click();
 await expect(
   page.getByText(/Il precedente modello Qwen è stato ritirato/),
 ).toBeVisible();
 await page
-  .getByRole("button", { name: "Controlla Ollama e GPU", exact: true })
+  .getByRole("button", { name: "Check Ollama and GPU", exact: true })
   .click();
-const picker = page.getByLabel("Modello locale", { exact: true });
+const picker = page.getByLabel("Local model", { exact: true });
 await expect(picker).toHaveValue(policy.primary.name);
 const choices = await picker.locator("option").allTextContents();
 assert.match(choices[1], /Qwen3.8-27B.*Principale/);
 assert.match(choices[2], /Gemma 4 12B.*Secondario/);
 assert(choices.every((t) => !t.includes("qwen3:4b")));
 const activate = page.getByRole("button", {
-  name: "Attiva modello per la campagna",
+  name: "Activate model for the campaign",
   exact: true,
 });
 await expect(activate).toBeDisabled();
@@ -101,7 +101,7 @@ assert.equal(
   false,
 );
 await expect(
-  page.getByRole("button", { name: "Riaddestra sui nuovi dati", exact: true }),
+  page.getByRole("button", { name: "Retrain on the new data", exact: true }),
 ).toBeDisabled();
 const a11y = await new AxeBuilder({ page })
   .include(".campaign-settings")

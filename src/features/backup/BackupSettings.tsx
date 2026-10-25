@@ -15,20 +15,17 @@ const when = (value: string | null, empty: string) =>
     ? formatDateTime(value, { dateStyle: "medium", timeStyle: "short" })
     : empty;
 export function outcomeMessage(outcome: PeriodicOutcome) {
-  if (outcome.error)
-    return tr("Backup periodico non riuscito: {0}", [outcome.error]);
-  let message = tr("Backup periodico creato e verificato.");
+  if (outcome.error) return tr("Periodic backup failed: {0}", [outcome.error]);
+  let message = tr("Periodic backup created and verified.");
   if (outcome.removed)
     message +=
-      " " +
-      tr("Copie periodiche precedenti eliminate: {0}.", [outcome.removed]);
+      " " + tr("Older periodic copies deleted: {0}.", [outcome.removed]);
   if (outcome.keptUnverified)
     message +=
       " " +
-      tr(
-        "{0} copie modificate fuori da Chronexus sono state lasciate intatte.",
-        [outcome.keptUnverified],
-      );
+      tr("{0} copies changed outside Chronexus were left untouched.", [
+        outcome.keptUnverified,
+      ]);
   return message;
 }
 /** M19: global backup folder and periodic schedule; available without a campaign. */
@@ -92,7 +89,7 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
       <h3>{tr("Backup")}</h3>
       <p>
         {tr(
-          "Chronexus può salvare copie verificate di tutte le campagne, con immagini e allegati, nella cartella Chronexus dei tuoi Documenti. La cartella viene creata solo al primo backup.",
+          "Chronexus can save verified copies of all campaigns, with images and attachments, in the Chronexus folder in your Documents. The folder is created only at the first backup.",
         )}
       </p>
       {error ? (
@@ -101,65 +98,63 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
         </p>
       ) : null}
       <p role="status" className="muted">
-        {pending ? tr("Operazione sui backup in corso…") : notice}
+        {pending ? tr("Backup operation in progress…") : notice}
       </p>
       {!status && !error ? (
-        <p role="status">{tr("Lettura delle impostazioni…")}</p>
+        <p role="status">{tr("Reading settings…")}</p>
       ) : null}
       {status && draft ? (
         <>
           <dl className="ai-setup-status backup-folder-status">
             <div>
-              <dt>{tr("Backup periodici")}</dt>
+              <dt>{tr("Periodic backups")}</dt>
               <dd>
-                <bdi>{status.periodicFolder ?? tr("Non disponibile")}</bdi>
+                <bdi>{status.periodicFolder ?? tr("Not available")}</bdi>
                 {status.preferences.destination
-                  ? ` · ${tr("cartella scelta da te")}`
+                  ? ` · ${tr("folder chosen by you")}`
                   : ""}
               </dd>
             </div>
             <div>
-              <dt>{tr("Backup aggiornamenti")}</dt>
+              <dt>{tr("Update backups")}</dt>
               <dd>
-                <bdi>
-                  {status.updatesFolder ?? tr("Cartella dati di Chronexus")}
-                </bdi>
+                <bdi>{status.updatesFolder ?? tr("Chronexus data folder")}</bdi>
               </dd>
             </div>
             <div>
-              <dt>{tr("Ultimo backup periodico")}</dt>
-              <dd>{when(status.lastSuccess, tr("Nessuno finora"))}</dd>
+              <dt>{tr("Last periodic backup")}</dt>
+              <dd>{when(status.lastSuccess, tr("None so far"))}</dd>
             </div>
             <div>
-              <dt>{tr("Prossimo backup")}</dt>
+              <dt>{tr("Next backup")}</dt>
               <dd>
                 {!status.preferences.enabled
-                  ? tr("Backup periodici disattivati")
+                  ? tr("Periodic backups off")
                   : status.dueNow
-                    ? tr("Al prossimo momento di inattività")
+                    ? tr("At the next idle moment")
                     : when(status.nextDue, "—")}
               </dd>
             </div>
             <div>
-              <dt>{tr("Copie registrate")}</dt>
+              <dt>{tr("Registered copies")}</dt>
               <dd>{status.registered}</dd>
             </div>
           </dl>
           {status.lastError ? (
             <p className="error backup-last-error">
-              {tr("Ultimo tentativo non riuscito ({0}): {1}", [
+              {tr("Last attempt failed ({0}): {1}", [
                 when(status.lastAttempt, "—"),
                 status.lastError,
               ])}{" "}
               {tr(
-                "Chronexus riproverà al prossimo intervallo; puoi anche scegliere un’altra cartella o eseguire un backup ora.",
+                "Chronexus will try again at the next interval; you can also choose another folder or run a backup now.",
               )}
             </p>
           ) : null}
           {status.cloudSynced ? (
             <p className="backup-cloud-warning" role="note">
               {tr(
-                "Attenzione: la cartella sembra sincronizzata con un servizio cloud (per esempio OneDrive). I file .nodex non sono cifrati e verrebbero caricati online insieme alle campagne.",
+                "Warning: the folder seems to be synced with a cloud service (for example OneDrive). .nodex files are not encrypted and would be uploaded online together with your campaigns.",
               )}
             </p>
           ) : null}
@@ -169,12 +164,12 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
               event.preventDefault();
               void perform(async () => {
                 adopt(await backupFolderApi.saveSchedule(draft));
-                return tr("Pianificazione dei backup salvata.");
+                return tr("Backup schedule saved.");
               });
             }}
           >
             <fieldset disabled={busy}>
-              <legend>{tr("Backup periodici")}</legend>
+              <legend>{tr("Periodic backups")}</legend>
               <label className="language-checkbox">
                 <input
                   type="checkbox"
@@ -183,12 +178,10 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
                     setDraft({ ...draft, enabled: e.target.checked })
                   }
                 />
-                {tr(
-                  "Crea backup periodici mentre Chronexus è aperto e inattivo",
-                )}
+                {tr("Create periodic backups while Chronexus is open and idle")}
               </label>
               <label>
-                {tr("Frequenza")}
+                {tr("Frequency")}
                 <select
                   value={draft.frequency}
                   onChange={(e) =>
@@ -198,14 +191,14 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
                     })
                   }
                 >
-                  <option value="daily">{tr("Ogni giorno")}</option>
-                  <option value="weekly">{tr("Ogni settimana")}</option>
-                  <option value="hours">{tr("Ogni N ore")}</option>
+                  <option value="daily">{tr("Every day")}</option>
+                  <option value="weekly">{tr("Every week")}</option>
+                  <option value="hours">{tr("Every N hours")}</option>
                 </select>
               </label>
               {draft.frequency === "hours" ? (
                 <label>
-                  {tr("Ore tra un backup e il successivo (2–72)")}
+                  {tr("Hours between backups (2–72)")}
                   <input
                     type="number"
                     min={2}
@@ -219,7 +212,7 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
                 </label>
               ) : null}
               <label>
-                {tr("Copie periodiche da conservare (1–60)")}
+                {tr("Periodic copies to keep (1–60)")}
                 <input
                   type="number"
                   min={1}
@@ -233,12 +226,12 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
               </label>
               <p className="muted">
                 {tr(
-                  "Il backup parte solo quando non stai scrivendo e non sono in corso salvataggi, ripristini, aggiornamenti o operazioni AI. Dopo un nuovo backup verificato Chronexus elimina solo le copie periodiche più vecchie che ha creato e registrato; backup manuali, copie di sicurezza e backup di aggiornamento non vengono mai toccati.",
+                  "The backup starts only when you are not writing and no save, restore, update or AI operation is running. After a new verified backup Chronexus deletes only the oldest periodic copies it created and registered; manual backups, safety copies and update backups are never touched.",
                 )}
               </p>
               <div className="actions">
                 <button className="primary" type="submit" disabled={!changed}>
-                  {tr("Salva pianificazione")}
+                  {tr("Save schedule")}
                 </button>
               </div>
             </fieldset>
@@ -255,22 +248,22 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
                 })
               }
             >
-              {tr("Esegui backup ora")}
+              {tr("Run backup now")}
             </button>
             <button
               disabled={busy}
               onClick={() =>
                 void perform(async () => {
                   const next = await backupFolderApi.chooseDestination();
-                  if (!next) return tr("Nessuna cartella scelta.");
+                  if (!next) return tr("No folder chosen.");
                   adopt(next);
                   return tr(
-                    "Cartella dei backup periodici cambiata. I backup già creati restano dove sono.",
+                    "Periodic backup folder changed. Backups already created stay where they are.",
                   );
                 })
               }
             >
-              {tr("Scegli un’altra cartella…")}
+              {tr("Choose another folder…")}
             </button>
             {status.preferences.destination ? (
               <button
@@ -279,12 +272,12 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
                   void perform(async () => {
                     adopt(await backupFolderApi.resetDestination());
                     return tr(
-                      "I prossimi backup periodici andranno nei Documenti. I backup già creati restano dove sono.",
+                      "The next periodic backups will go to Documents. Backups already created stay where they are.",
                     );
                   })
                 }
               >
-                {tr("Usa la cartella Documenti")}
+                {tr("Use the Documents folder")}
               </button>
             ) : null}
             <button
@@ -294,16 +287,16 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
                   const path = await backupFolderApi.open(
                     status.preferences.destination ? "custom" : "periodic",
                   );
-                  return tr("Cartella aperta: {0}", [path]);
+                  return tr("Folder opened: {0}", [path]);
                 })
               }
             >
-              {tr("Apri cartella dei backup")}
+              {tr("Open backup folder")}
             </button>
           </div>
           <p className="muted">
             {tr(
-              "Le preferenze dei backup valgono per tutte le campagne, restano invariate dopo un ripristino e sono incluse nella ricevuta dei backup di aggiornamento.",
+              "Backup preferences apply to all campaigns, stay unchanged after a restore and are included in the update backup receipt.",
             )}
           </p>
         </>

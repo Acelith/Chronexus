@@ -30,11 +30,27 @@ impl Default for Preferences {
     fn default() -> Self {
         Self {
             version: 2,
-            locale: "it".into(),
+            locale: "en".into(),
             script: "standard".into(),
             show_original: true,
         }
     }
+}
+/// English is the default from 0.8.1. An archive created by an earlier
+/// version without an explicit choice was shown in Italian: keep it that way
+/// by saving Italian once. A fresh install, or any saved choice, is untouched.
+pub fn keep_legacy_italian(root: &Path, archive_existed: bool) -> AppResult<()> {
+    if !archive_existed || root.join(FILE).exists() {
+        return Ok(());
+    }
+    save(
+        root,
+        Preferences {
+            locale: "it".into(),
+            ..Preferences::default()
+        },
+    )
+    .map(|_| ())
 }
 fn validate(p: &Preferences) -> AppResult<()> {
     if p.version != 2
@@ -44,9 +60,7 @@ fn validate(p: &Preferences) -> AppResult<()> {
         ]
         .contains(&p.script.as_str())
     {
-        return Err(
-            "Preferenze linguistiche non supportate. Scegli una lingua disponibile.".into(),
-        );
+        return Err("Unsupported language preferences. Choose an available language.".into());
     }
     Ok(())
 }
@@ -64,34 +78,59 @@ pub fn read(root: &Path) -> AppResult<Preferences> {
     let bytes = match fs::read(path) {
         Ok(bytes) => bytes,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Preferences::default()),
-        Err(_) => return Err(
-            "Impossibile leggere le preferenze dell’interfaccia. Verifica i permessi e riprova."
-                .into(),
-        ),
+        Err(_) => {
+            return Err(
+                "Cannot read the interface preferences. Check permissions and try again.".into(),
+            )
+        }
     };
     if bytes.len() > 4096 {
-        return Err("Preferenze dell’interfaccia danneggiate. Puoi ripristinare l’italiano dalle impostazioni.".into());
+        return Err(
+            "Interface preferences damaged. You can reset to English from the settings.".into(),
+        );
     }
-    let value:Preferences=serde_json::from_slice(&bytes).map_err(|_|"Preferenze dell’interfaccia danneggiate. Puoi ripristinare l’italiano dalle impostazioni.".to_string())?;
+    let value: Preferences = serde_json::from_slice(&bytes).map_err(|_| {
+        "Interface preferences damaged. You can reset to English from the settings.".to_string()
+    })?;
     upgrade(value)
 }
 pub fn save(root: &Path, value: Preferences) -> AppResult<Preferences> {
     let value = upgrade(value)?;
     let mut next = NamedTempFile::new_in(root)
-        .map_err(|_| "Impossibile salvare la lingua. Verifica spazio e permessi.".to_string())?;
+        .map_err(|_| "Cannot save the language. Check space and permissions.".to_string())?;
     let bytes = serde_json::to_vec_pretty(&value)
-        .map_err(|_| "Preferenze linguistiche non valide.".to_string())?;
+        .map_err(|_| "Invalid language preferences.".to_string())?;
     next.write_all(&bytes)
         .and_then(|_| next.as_file().sync_all())
-        .map_err(|_| "Impossibile salvare la lingua. Verifica spazio e permessi.".to_string())?;
+        .map_err(|_| "Cannot save the language. Check space and permissions.".to_string())?;
     next.persist(root.join(FILE)).map_err(|_| {
-        "Impossibile confermare le preferenze. La lingua precedente è conservata.".to_string()
+        "Cannot confirm the preferences. The previous language is kept.".to_string()
     })?;
     Ok(value)
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn legacy_archives_keep_italian_and_fresh_installs_start_in_english() {
+        let fresh = tempfile::tempdir().unwrap();
+        keep_legacy_italian(fresh.path(), false).unwrap();
+        assert_eq!(read(fresh.path()).unwrap().locale, "en");
+        let legacy = tempfile::tempdir().unwrap();
+        keep_legacy_italian(legacy.path(), true).unwrap();
+        assert_eq!(read(legacy.path()).unwrap().locale, "it");
+        let chosen = tempfile::tempdir().unwrap();
+        save(
+            chosen.path(),
+            Preferences {
+                locale: "de".into(),
+                ..Preferences::default()
+            },
+        )
+        .unwrap();
+        keep_legacy_italian(chosen.path(), true).unwrap();
+        assert_eq!(read(chosen.path()).unwrap().locale, "de");
+    }
     #[test]
     fn default_round_trip_and_recovery() {
         let d = tempfile::tempdir().unwrap();

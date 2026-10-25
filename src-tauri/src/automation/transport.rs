@@ -38,30 +38,28 @@ impl Config {
                 "--automation-write" => write = true,
                 "--automation-campaign" => {
                     if campaign.is_some() {
-                        return Err("Campagna duplicata nei parametri automation.".into());
+                        return Err("Duplicate campaign in the automation parameters.".into());
                     }
                     let id = args
                         .next()
-                        .ok_or("Manca l'UUID della campagna automation.")?;
+                        .ok_or("The automation campaign UUID is missing.")?;
                     journal::identifier(&id)?;
                     campaign = Some(id);
                 }
                 other if other.starts_with("--automation") => {
-                    return Err("Parametro automation sconosciuto.".into())
+                    return Err("Unknown automation parameter.".into())
                 }
                 _ => {}
             }
         }
         if !enabled {
             if write || campaign.is_some() {
-                return Err(
-                    "Aggiungi --automation per abilitare esplicitamente il collegamento.".into(),
-                );
+                return Err("Add --automation to enable the bridge explicitly.".into());
             }
             return Ok(None);
         }
         if write && campaign.is_none() {
-            return Err("La scrittura automation richiede --automation-campaign UUID.".into());
+            return Err("Automation writes require --automation-campaign UUID.".into());
         }
         Ok(Some(Self {
             policy: Policy { campaign, write },
@@ -99,35 +97,32 @@ impl Server {
         changed: Arc<dyn Fn(String) + Send + Sync>,
     ) -> AppResult<Self> {
         if let Some(id) = &config.policy.campaign {
-            journal::require_campaign(
-                &store.lock().map_err(|_| "Archivio occupato.")?.connection,
-                id,
-            )?;
+            journal::require_campaign(&store.lock().map_err(|_| "Archive busy.")?.connection, id)?;
         }
         let path = root.join(DISCOVERY);
         if let Ok(meta) = fs::symlink_metadata(&path) {
             if !meta.is_file() || meta.file_type().is_symlink() || meta.len() > 16_384 {
-                return Err("File di collegamento automation non sicuro.".into());
+                return Err("Unsafe automation bridge file.".into());
             }
             let previous: Discovery = serde_json::from_slice(
-                &fs::read(&path).map_err(|_| "File automation non leggibile.")?,
+                &fs::read(&path).map_err(|_| "Automation file not readable.")?,
             )
-            .map_err(|_| "File automation sconosciuto: non viene sovrascritto.")?;
+            .map_err(|_| "Unknown automation file: it will not be overwritten.")?;
             if previous.format != "chronexus-automation" {
-                return Err("File automation sconosciuto: non viene sovrascritto.".into());
+                return Err("Unknown automation file: it will not be overwritten.".into());
             }
         }
-        let listener = TcpListener::bind("127.0.0.1:0")
-            .map_err(|_| "Porta locale automation non disponibile.")?;
+        let listener =
+            TcpListener::bind("127.0.0.1:0").map_err(|_| "Local automation port not available.")?;
         listener
             .set_nonblocking(true)
-            .map_err(|_| "Collegamento automation non disponibile.")?;
+            .map_err(|_| "Automation bridge not available.")?;
         let host = listener
             .local_addr()
-            .map_err(|_| "Indirizzo automation non disponibile.")?
+            .map_err(|_| "Automation address not available.")?
             .to_string();
         let mut bytes = [0u8; 32];
-        getrandom::fill(&mut bytes).map_err(|_| "Impossibile generare il segreto automation.")?;
+        getrandom::fill(&mut bytes).map_err(|_| "Cannot generate the automation secret.")?;
         let token = bytes
             .iter()
             .map(|byte| format!("{byte:02x}"))
@@ -142,12 +137,12 @@ impl Server {
             app_version: env!("CARGO_PKG_VERSION").into(),
         };
         let raw = serde_json::to_vec_pretty(&discovery)
-            .map_err(|_| "Configurazione automation non disponibile.")?;
-        let mut file = NamedTempFile::new_in(root)
-            .map_err(|_| "Impossibile creare il collegamento automation.")?;
+            .map_err(|_| "Automation configuration not available.")?;
+        let mut file =
+            NamedTempFile::new_in(root).map_err(|_| "Cannot create the automation bridge.")?;
         file.write_all(&raw)
             .and_then(|_| file.as_file().sync_all())
-            .map_err(|_| "Impossibile salvare il collegamento automation.")?;
+            .map_err(|_| "Cannot save the automation bridge.")?;
         let stop = Arc::new(AtomicBool::new(false));
         let worker_stop = Arc::clone(&stop);
         let worker_token = token.clone();
@@ -174,7 +169,7 @@ impl Server {
                     }
                 }
             })
-            .map_err(|_| "Impossibile avviare il collegamento automation.")?;
+            .map_err(|_| "Cannot start the automation bridge.")?;
         let server = Self {
             stop,
             worker: Mutex::new(Some(worker)),
@@ -183,7 +178,7 @@ impl Server {
         };
         if file.persist(&server.path).is_err() {
             server.stop.store(true, Ordering::Relaxed);
-            return Err("Impossibile pubblicare il collegamento automation.".into());
+            return Err("Cannot publish the automation bridge.".into());
         }
         // The file contains a per-launch capability; it is outside SQLite and campaign backups.
         Ok(server)
@@ -215,7 +210,7 @@ fn response(stream: &mut TcpStream, status: u16, body: Value) -> std::io::Result
     let bytes = serde_json::to_vec(&body)?;
     let bytes = if bytes.len() > MAX_REPLY {
         serde_json::to_vec(
-            &json!({"error":"Risposta troppo grande. Leggi meno dati; una scrittura potrebbe essere già confermata."}),
+            &json!({"error":"Answer too large. Read less data; a write may already be confirmed."}),
         )?
     } else {
         bytes
@@ -314,13 +309,13 @@ fn serve(
             return response(
                 stream,
                 status,
-                json!({"error":"Richiesta automation rifiutata."}),
+                json!({"error":"Automation request refused."}),
             )
         }
     };
     let request: Request = match serde_json::from_slice(&raw) {
         Ok(v) => v,
-        Err(_) => return response(stream, 400, json!({"error":"Richiesta JSON non valida."})),
+        Err(_) => return response(stream, 400, json!({"error":"Invalid JSON request."})),
     };
     if request.tool == "describe" {
         return response(
@@ -332,7 +327,10 @@ fn serve(
             },
         );
     }
-    let outcome=match store.try_lock(){Ok(store)=>domain::call(&store.connection,policy,&request.tool,&request.arguments),Err(_)=>Err("Archivio occupato: ripeti la lettura più tardi; non ripetere automaticamente una scrittura.".into())};
+    let outcome = match store.try_lock() {
+        Ok(store) => domain::call(&store.connection, policy, &request.tool, &request.arguments),
+        Err(_) => Err("Archive busy: read again later; never repeat a write automatically.".into()),
+    };
     match outcome {
         Ok((result, writing)) => {
             if writing {

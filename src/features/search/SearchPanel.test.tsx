@@ -27,7 +27,7 @@ test("search uses campaign filters and opens an exact source block; keyboard clo
   render(
     <SearchPanel campaignId="campaign-a" onSelect={select} onClose={close} />,
   );
-  await user.type(screen.getByLabelText("Testo da cercare"), "chiave");
+  await user.type(screen.getByLabelText("Text to search"), "chiave");
   await screen.findByRole("button", { name: /La torre/ });
   await waitFor(() =>
     expect(command).toHaveBeenLastCalledWith("search_campaign", {
@@ -48,13 +48,11 @@ test("search errors retain input and rebuild failures are visible", async () => 
   const user = userEvent.setup();
   vi.mocked(command).mockRejectedValue(Error("Archivio occupato"));
   render(<SearchPanel campaignId="a" onSelect={vi.fn()} onClose={vi.fn()} />);
-  await user.type(screen.getByLabelText("Testo da cercare"), "memoria");
+  await user.type(screen.getByLabelText("Text to search"), "memoria");
   await screen.findByRole("alert");
-  expect(screen.getByLabelText("Testo da cercare")).toHaveValue("memoria");
-  await user.click(screen.getByText("Manutenzione ricerca"));
-  await user.click(
-    screen.getByRole("button", { name: "Ricostruisci indice locale" }),
-  );
+  expect(screen.getByLabelText("Text to search")).toHaveValue("memoria");
+  await user.click(screen.getByText("Search maintenance"));
+  await user.click(screen.getByRole("button", { name: "Rebuild local index" }));
   await waitFor(() =>
     expect(command).toHaveBeenLastCalledWith("rebuild_search_index"),
   );

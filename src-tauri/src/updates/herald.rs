@@ -66,7 +66,7 @@ fn validate(a: &Announcements) -> AppResult<()> {
             .as_ref()
             .is_some_and(|r| !version_ok(&r.version) || time(&r.until).is_none())
     {
-        return Err("Preferenze degli annunci di aggiornamento non valide.".into());
+        return Err("Invalid update announcement preferences.".into());
     }
     Ok(())
 }
@@ -75,16 +75,14 @@ pub fn read(root: &Path) -> AppResult<Announcements> {
     let meta = match fs::symlink_metadata(&path) {
         Ok(m) => m,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Announcements::default()),
-        Err(_) => return Err("Impossibile leggere le preferenze degli annunci.".into()),
+        Err(_) => return Err("Cannot read the announcement preferences.".into()),
     };
     if !meta.is_file() || meta.file_type().is_symlink() || meta.len() > 4096 {
-        return Err(
-            "Preferenze degli annunci danneggiate. Salvale di nuovo dalle impostazioni.".into(),
-        );
+        return Err("Announcement preferences damaged. Save them again from the settings.".into());
     }
-    let bytes = fs::read(&path).map_err(|_| "Impossibile leggere le preferenze degli annunci.")?;
+    let bytes = fs::read(&path).map_err(|_| "Cannot read the announcement preferences.")?;
     let value: Announcements = serde_json::from_slice(&bytes).map_err(|_| {
-        "Preferenze degli annunci danneggiate. Salvale di nuovo dalle impostazioni.".to_string()
+        "Announcement preferences damaged. Save them again from the settings.".to_string()
     })?;
     validate(&value)?;
     Ok(value)
@@ -93,16 +91,17 @@ pub fn write(root: &Path, value: &Announcements) -> AppResult<()> {
     validate(value)?;
     let path = root.join(FILE);
     if fs::symlink_metadata(&path).is_ok_and(|m| !m.is_file() || m.file_type().is_symlink()) {
-        return Err("Destinazione delle preferenze degli annunci non sicura.".into());
+        return Err("Unsafe destination for the announcement preferences.".into());
     }
-    let mut next = NamedTempFile::new_in(root)
-        .map_err(|_| "Impossibile salvare le preferenze degli annunci.")?;
-    let bytes = serde_json::to_vec_pretty(value).map_err(|_| "Preferenze non serializzabili.")?;
+    let mut next =
+        NamedTempFile::new_in(root).map_err(|_| "Cannot save the announcement preferences.")?;
+    let bytes =
+        serde_json::to_vec_pretty(value).map_err(|_| "Preferences cannot be serialized.")?;
     next.write_all(&bytes)
         .and_then(|_| next.as_file().sync_all())
-        .map_err(|_| "Impossibile salvare le preferenze degli annunci.")?;
+        .map_err(|_| "Cannot save the announcement preferences.")?;
     next.persist(path)
-        .map_err(|_| "Impossibile confermare le preferenze degli annunci.")?;
+        .map_err(|_| "Cannot confirm the announcement preferences.")?;
     Ok(())
 }
 pub fn settings(a: &Announcements) -> HeraldSettings {
@@ -138,7 +137,7 @@ pub fn record_choice(
     now: DateTime<Utc>,
 ) -> AppResult<()> {
     if !version_ok(version) {
-        return Err("Versione dell’annuncio non valida.".into());
+        return Err("Invalid announcement version.".into());
     }
     match choice {
         "later" => {
@@ -151,7 +150,7 @@ pub fn record_choice(
             a.dismissed = Some(version.into());
             a.remind = None;
         }
-        _ => return Err("Scelta dell’annuncio non valida.".into()),
+        _ => return Err("Invalid announcement choice.".into()),
     }
     Ok(())
 }

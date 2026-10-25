@@ -55,12 +55,12 @@ test("l’offerta scelta dall’araldo scarica e verifica, ma non installa da so
   );
   expect(used).toHaveBeenCalledTimes(1);
   expect(
-    await screen.findByRole("button", { name: "Crea backup e installa" }),
+    await screen.findByRole("button", { name: "Create backup and install" }),
   ).toBeInTheDocument();
   expect(updatesApi.install).not.toHaveBeenCalled();
   expect(updatesApi.check).not.toHaveBeenCalled();
   await user.click(
-    screen.getByRole("checkbox", { name: /Controlla una volta all’avvio/ }),
+    screen.getByRole("checkbox", { name: /Check once at startup/ }),
   );
   expect(heraldApi.save).toHaveBeenCalledWith({
     startupCheck: false,
@@ -84,55 +84,49 @@ test("legge solo impostazioni locali e controlla il server su richiesta", async 
   expect(await screen.findByText("0.4.0")).toBeInTheDocument();
   expect(updatesApi.check).not.toHaveBeenCalled();
   vi.mocked(updatesApi.check).mockResolvedValue(null);
-  await user.click(
-    screen.getByRole("button", { name: "Controlla aggiornamenti" }),
-  );
+  await user.click(screen.getByRole("button", { name: "Check for updates" }));
   expect(
-    await screen.findByText(/Nessuna nuova versione disponibile/),
+    await screen.findByText(/No new version available/),
   ).toBeInTheDocument();
   expect(
-    screen.queryByRole("button", { name: "Crea backup e installa" }),
+    screen.queryByRole("button", { name: "Create backup and install" }),
   ).not.toBeInTheDocument();
 });
 test("permette installazione soltanto dopo download verificato e conserva errore backup", async () => {
   const user = userEvent.setup();
   render(<UpdateSettings busy={false} run={run} />);
   await user.click(
-    await screen.findByRole("button", { name: "Controlla aggiornamenti" }),
+    await screen.findByRole("button", { name: "Check for updates" }),
   );
   expect(await screen.findByText(offer.notes)).toBeInTheDocument();
   expect(
-    screen.queryByRole("button", { name: "Crea backup e installa" }),
+    screen.queryByRole("button", { name: "Create backup and install" }),
   ).not.toBeInTheDocument();
-  await user.click(
-    screen.getByRole("button", { name: "Scarica aggiornamento" }),
-  );
+  await user.click(screen.getByRole("button", { name: "Download update" }));
   vi.mocked(updatesApi.install).mockRejectedValue(
     Error("Backup non riuscito: disco pieno."),
   );
   await user.click(
-    await screen.findByRole("button", { name: "Crea backup e installa" }),
+    await screen.findByRole("button", { name: "Create backup and install" }),
   );
   expect(await screen.findByRole("alert")).toHaveTextContent("disco pieno");
   expect(
-    screen.getByRole("button", { name: "Crea backup e installa" }),
+    screen.getByRole("button", { name: "Create backup and install" }),
   ).toBeInTheDocument();
 });
-test("firma non valida impedisce di proporre installazione", async () => {
+test("firma Invalid impedisce di proporre installazione", async () => {
   const user = userEvent.setup();
-  vi.mocked(updatesApi.download).mockRejectedValue(Error("Firma non valida"));
+  vi.mocked(updatesApi.download).mockRejectedValue(Error("Firma Invalid"));
   render(<UpdateSettings busy={false} run={run} />);
   await user.click(
-    await screen.findByRole("button", { name: "Controlla aggiornamenti" }),
+    await screen.findByRole("button", { name: "Check for updates" }),
   );
   await user.click(
-    await screen.findByRole("button", { name: "Scarica aggiornamento" }),
+    await screen.findByRole("button", { name: "Download update" }),
   );
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Firma non valida",
-  );
+  expect(await screen.findByRole("alert")).toHaveTextContent("Firma Invalid");
   expect(
-    screen.queryByRole("button", { name: "Crea backup e installa" }),
+    screen.queryByRole("button", { name: "Create backup and install" }),
   ).not.toBeInTheDocument();
   expect(updatesApi.install).not.toHaveBeenCalled();
 });
@@ -149,15 +143,15 @@ test("annulla un download e blocca le operazioni concorrenti", async () => {
   });
   render(<UpdateSettings busy={false} run={run} />);
   await user.click(
-    await screen.findByRole("button", { name: "Controlla aggiornamenti" }),
+    await screen.findByRole("button", { name: "Check for updates" }),
   );
   await user.click(
-    await screen.findByRole("button", { name: "Scarica aggiornamento" }),
+    await screen.findByRole("button", { name: "Download update" }),
   );
   expect(
-    screen.getByRole("button", { name: "Controlla aggiornamenti" }),
+    screen.getByRole("button", { name: "Check for updates" }),
   ).toBeDisabled();
-  await user.click(screen.getByRole("button", { name: "Annulla download" }));
+  await user.click(screen.getByRole("button", { name: "Cancel download" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("annullato");
   expect(updatesApi.cancel).toHaveBeenCalledOnce();
 });
@@ -165,26 +159,24 @@ test("un nuovo canale deve essere salvato e invalida l’offerta precedente", as
   const user = userEvent.setup();
   render(<UpdateSettings busy={false} run={run} />);
   await user.click(
-    await screen.findByRole("button", { name: "Controlla aggiornamenti" }),
+    await screen.findByRole("button", { name: "Check for updates" }),
   );
-  await user.click(screen.getByText("Server degli aggiornamenti"));
+  await user.click(screen.getByText("Update server"));
   const input = screen.getByRole("textbox", {
-    name: "Indirizzo del canale aggiornamenti",
+    name: "Update channel address",
   });
   await user.clear(input);
   await user.type(input, "https://other.example/latest.json");
   expect(
-    screen.getByRole("button", { name: "Controlla aggiornamenti" }),
+    screen.getByRole("button", { name: "Check for updates" }),
   ).toBeDisabled();
   vi.mocked(updatesApi.save).mockResolvedValue({
     endpoint: "https://other.example/latest.json",
   });
-  await user.click(
-    screen.getByRole("button", { name: "Salva canale aggiornamenti" }),
-  );
+  await user.click(screen.getByRole("button", { name: "Save update channel" }));
   await waitFor(() =>
     expect(
-      screen.queryByRole("button", { name: "Scarica aggiornamento" }),
+      screen.queryByRole("button", { name: "Download update" }),
     ).not.toBeInTheDocument(),
   );
   expect(updatesApi.save).toHaveBeenCalledWith({

@@ -41,7 +41,7 @@ fn owner(c: &Connection, campaign: &str, target: &ImageTarget) -> AppResult<()> 
         "page" => "pages",
         "character" => "characters",
         "asset" => "player_assets",
-        _ => return Err("Destinazione immagine non valida.".into()),
+        _ => return Err("Invalid image destination.".into()),
     };
     let found: bool = c
         .query_row(
@@ -51,22 +51,20 @@ fn owner(c: &Connection, campaign: &str, target: &ImageTarget) -> AppResult<()> 
         )
         .map_err(storage)?;
     if !found {
-        return Err("La voce non appartiene alla campagna selezionata.".into());
+        return Err("The entry does not belong to the selected campaign.".into());
     }
     Ok(())
 }
 fn decode(bytes: &[u8]) -> AppResult<(DynamicImage, ImageFormat)> {
     if bytes.is_empty() || bytes.len() > MAX_BYTES {
-        return Err("Immagine troppo grande o vuota: massimo 20 MiB.".into());
+        return Err("Image too large or empty: up to 20 MiB.".into());
     }
     let mut reader = ImageReader::new(Cursor::new(bytes))
         .with_guessed_format()
-        .map_err(|_| "Formato immagine illeggibile.")?;
-    let format = reader
-        .format()
-        .ok_or("Scegli un'immagine PNG, JPEG o WebP.")?;
+        .map_err(|_| "Unreadable image format.")?;
+    let format = reader.format().ok_or("Choose a PNG, JPEG or WebP image.")?;
     if ![ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP].contains(&format) {
-        return Err("Sono supportati PNG, JPEG e WebP; SVG e GIF non sono importati.".into());
+        return Err("PNG, JPEG and WebP are supported; SVG and GIF are not imported.".into());
     }
     let mut limits = image::Limits::default();
     limits.max_image_width = Some(8192);
@@ -75,16 +73,16 @@ fn decode(bytes: &[u8]) -> AppResult<(DynamicImage, ImageFormat)> {
     reader.limits(limits);
     let mut decoder = reader
         .into_decoder()
-        .map_err(|_| "Immagine danneggiata o troppo grande.")?;
+        .map_err(|_| "Damaged or too large image.")?;
     let (w, h) = decoder.dimensions();
     if u64::from(w) * u64::from(h) > 32_000_000 {
-        return Err("Massimo 32 milioni di pixel per immagine.".into());
+        return Err("Up to 32 million pixels per image.".into());
     }
     let orientation = decoder
         .orientation()
         .unwrap_or(image::metadata::Orientation::NoTransforms);
     let mut image = DynamicImage::from_decoder(decoder)
-        .map_err(|_| "Immagine danneggiata o memoria necessaria eccessiva.")?;
+        .map_err(|_| "Damaged image or too much memory needed.")?;
     image.apply_orientation(orientation);
     Ok((image, format))
 }
@@ -111,7 +109,7 @@ fn column(target: &ImageTarget) -> AppResult<&'static str> {
         "page" => Ok("page_id"),
         "character" => Ok("character_id"),
         "asset" => Ok("asset_id"),
-        _ => Err("Destinazione immagine non valida.".into()),
+        _ => Err("Invalid image destination.".into()),
     }
 }
 pub fn list(c: &Connection, campaign: &str, target: &ImageTarget) -> AppResult<Vec<Attachment>> {
@@ -147,28 +145,24 @@ fn get(c: &Connection, campaign: &str, id: &str) -> AppResult<Attachment> {
         params![campaign, id],
         row,
     )
-    .map_err(|_| "Immagine non trovata nella campagna.".into())
+    .map_err(|_| "Image not found in the campaign.".into())
 }
 fn directory(root: &Path, campaign: &str) -> AppResult<PathBuf> {
     identifier(campaign)?;
-    let canonical = fs::canonicalize(root).map_err(|_| "Cartella archivio non accessibile.")?;
+    let canonical = fs::canonicalize(root).map_err(|_| "Archive folder not accessible.")?;
     let mut parent = canonical;
     for component in ["attachments", campaign] {
         let path = parent.join(component);
         if !path.exists() {
-            fs::create_dir(&path).map_err(|_| {
-                "Impossibile creare la cartella immagini: verifica spazio e permessi."
-            })?;
+            fs::create_dir(&path)
+                .map_err(|_| "Cannot create the images folder: check space and permissions.")?;
         }
-        let metadata =
-            fs::symlink_metadata(&path).map_err(|_| "Cartella immagini non accessibile.")?;
+        let metadata = fs::symlink_metadata(&path).map_err(|_| "Image folder not accessible.")?;
         if metadata.file_type().is_symlink()
             || !metadata.is_dir()
-            || fs::canonicalize(&path).map_err(|_| "Percorso immagini non leggibile.")? != path
+            || fs::canonicalize(&path).map_err(|_| "Images path not readable.")? != path
         {
-            return Err(
-                "La cartella immagini contiene un collegamento esterno non ammesso.".into(),
-            );
+            return Err("The images folder contains a forbidden external link.".into());
         }
         parent = path;
     }
@@ -186,10 +180,10 @@ pub fn add(
     owner(c, campaign, target)?;
     let caption = title(caption)?;
     if !["portrait", "map", "image", "reference"].contains(&role) {
-        return Err("Tipo immagine non valido.".into());
+        return Err("Invalid image type.".into());
     }
     if list(c, campaign, target)?.len() >= 100 {
-        return Err("Massimo 100 immagini per voce.".into());
+        return Err("Up to 100 images per entry.".into());
     }
     let (image, format) = decode(&bytes)?;
     let extension = if format == ImageFormat::Jpeg {
@@ -203,15 +197,15 @@ pub fn add(
     let filename = format!("{id}.{extension}");
     let parent = directory(root, campaign)?;
     let mut temporary =
-        tempfile::NamedTempFile::new_in(root).map_err(|_| "Impossibile copiare l'immagine.")?;
+        tempfile::NamedTempFile::new_in(root).map_err(|_| "Cannot copy the image.")?;
     temporary
         .write_all(&bytes)
         .and_then(|_| temporary.as_file().sync_all())
-        .map_err(|_| "Copia immagine fallita: verifica spazio e permessi.")?;
+        .map_err(|_| "Image copy failed: check space and permissions.")?;
     let path = parent.join(&filename);
     temporary
         .persist_noclobber(&path)
-        .map_err(|_| "Impossibile salvare la copia dell'immagine.")?;
+        .map_err(|_| "Cannot save the image copy.")?;
     let tx = c.unchecked_transaction().map_err(storage)?;
     let field = column(target)?;
     let result=tx.execute(&format!("INSERT INTO image_attachments(id,campaign_id,{field},caption,role,filename,width,height,size,sha256) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)"),params![id,campaign,target.id,caption,role,filename,image.width(),image.height(),bytes.len() as i64,format!("{:x}",Sha256::digest(&bytes))]).map_err(storage).and_then(|_|tx.commit().map_err(storage));
@@ -226,25 +220,23 @@ pub fn bytes(root: &Path, attachment: &Attachment) -> AppResult<Vec<u8>> {
     if !["png", "jpg", "webp"].contains(&ext)
         || attachment.filename != format!("{}.{}", attachment.id, ext)
     {
-        return Err("Nome dell'immagine non valido.".into());
+        return Err("Invalid image name.".into());
     }
     let path = directory(root, &attachment.campaign_id)?.join(&attachment.filename);
     let metadata = fs::symlink_metadata(&path)
-        .map_err(|_| "File immagine mancante. Recuperalo dal backup.")?;
+        .map_err(|_| "Image file missing. Recover it from the backup.")?;
     if !metadata.is_file() || metadata.file_type().is_symlink() || metadata.len() > MAX_BYTES as u64
     {
-        return Err("File immagine non valido.".into());
+        return Err("Invalid image file.".into());
     }
     let mut data = vec![];
     fs::File::open(&path)
         .and_then(|file| file.take(MAX_BYTES as u64 + 1).read_to_end(&mut data))
-        .map_err(|_| "Immagine non leggibile.")?;
+        .map_err(|_| "Image not readable.")?;
     if data.len() as u64 != attachment.size
         || format!("{:x}", Sha256::digest(&data)) != attachment.sha256
     {
-        return Err(
-            "Immagine modificata o danneggiata. Recupera la copia originale dal backup.".into(),
-        );
+        return Err("Image changed or damaged. Recover the original copy from the backup.".into());
     }
     Ok(data)
 }
@@ -263,7 +255,7 @@ pub fn read(
         image
             .thumbnail(480, 320)
             .write_to(&mut out, ImageFormat::Png)
-            .map_err(|_| "Anteprima non disponibile.")?;
+            .map_err(|_| "Preview not available.")?;
         (out.into_inner(), "image/png")
     } else {
         let ext = attachment.filename.rsplit('.').next().unwrap();
@@ -314,7 +306,7 @@ pub fn validate_files(c: &Connection, root: &Path) -> AppResult<()> {
             let data = bytes(root, &image)?;
             let (decoded, _) = decode(&data)?;
             if decoded.width() != image.width || decoded.height() != image.height {
-                return Err("Dimensioni dell'immagine incoerenti nel backup.".into());
+                return Err("Inconsistent image dimensions in the backup.".into());
             }
         }
     }

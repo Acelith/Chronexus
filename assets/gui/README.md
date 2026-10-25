@@ -1,7 +1,7 @@
-# Materiali della GUI
+# GUI Materials
 
-materials.png: atlante cuoio/pergamena. castle.png: incisione del castello.
-Asset originali generati con imagegen il 24 ottobre 2026 a partire dal riferimento
-GUI fornito dall’utente, senza dati della campagna. Inclusi nel pacchetto offline.
-Le icone e la rosa dei venti sono geometrie SVG in src/components/Ornaments.tsx.
-I font EB Garamond e Cinzel provengono da google/fonts (OFL, testi in assets/fonts).
+materials.png: leather/parchment atlas. castle.png: castle engraving.
+Original assets generated with imagegen on October 24 2026 based on the
+GUI provided by the user, without campaign data. Included in the offline package.
+The icons and the compass rose are SVG geometries in src/components/Ornaments.tsx.
+The EB Garamond and Cinzel fonts come from google/fonts (OFL, texts in assets/fonts).
