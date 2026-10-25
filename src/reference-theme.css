@@ -897,6 +897,15 @@ textarea {
   font-weight: 500;
   letter-spacing: 1px;
 }
+/* M21: the herald logo replaces the compass and the typed name. */
+.brand-logo {
+  display: block;
+  width: 100%;
+  max-width: 196px;
+  height: auto;
+  margin: 0 auto;
+  filter: drop-shadow(0 6px 10px #0009);
+}
 .shell > aside {
   background-image:
     linear-gradient(#241e1770, #241e1770), url("../assets/gui/materials.png");
@@ -982,6 +991,9 @@ aside.graph-detail {
 @media (max-width: 900px) {
   .shell > aside .brand h1 {
     font-size: 21px;
+  }
+  .brand-logo {
+    max-width: 132px;
   }
   aside.graph-detail {
     padding: 10px;

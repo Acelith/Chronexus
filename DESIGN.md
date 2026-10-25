@@ -47,3 +47,11 @@ movimento ridotto. Testo, versione, note e pulsanti sempre HTML. Finché mancano
 illustrazioni raster (`assets/herald/`) si usa l’emblema geometrico trombetta e
 stendardo, mai una figura disegnata a mano in SVG. Su finestre strette l’emblema
 passa sopra il manifesto.
+
+
+## M21 — Logo dell’araldo
+
+La barra laterale mostra il logo verticale dell’araldo al posto della rosa dei venti
+e del nome composto; il titolo resta «Chronexus» come testo alternativo. L’icona
+dell’app usa la stessa illustrazione su cuoio bordeaux. Originali e varianti in
+`assets/brand/`; nessun altro testo dell’interfaccia viene rasterizzato.

@@ -3,7 +3,12 @@ import { localeInfo } from "./i18n/locales";
 import { getPreferences } from "./i18n/store";
 import { Text } from "./i18n/Text";
 import { usePreferences, tr } from "./i18n/store";
-import { Icon, Compass } from "./components/Ornaments";
+import { Icon } from "./components/Ornaments";
+// M21: herald logo chosen by the user (assets/brand/README.md); the name stays in alt.
+const brandLogo = new URL(
+  "../assets/brand/chronexus-logo.webp",
+  import.meta.url,
+).href;
 import {
   lazy,
   Suspense,
@@ -509,8 +514,9 @@ export function App() {
         <div className="shell" aria-busy={busy || loading}>
           <aside>
             <div className="brand">
-              <Compass />
-              <h1>{it.appName}</h1>
+              <h1>
+                <img className="brand-logo" src={brandLogo} alt={it.appName} />
+              </h1>
               <p>
                 <Text source={"Le tue storie vivono"} />
               </p>

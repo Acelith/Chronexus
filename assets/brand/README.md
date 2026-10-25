@@ -1,9 +1,10 @@
-# Logo di Chronexus — da integrare (M21)
+# Logo di Chronexus (M21)
 
 Illustrazioni scelte dall’utente il 25 ottobre 2026: araldo con trombetta e
-stendardo. Generate esternamente dall’utente, senza dati di campagna. **Non ancora
-usate dall’app**: l’integrazione è la milestone M21 in ROADMAP, la prima da
-eseguire. Fino ad allora icona e barra laterale restano quelle attuali.
+stendardo. Generate esternamente dall’utente, senza dati di campagna. Integrate in M21:
+`assets/chronexus.svg` (sorgente di `pnpm icons`) è una copia di
+`chronexus-icon.svg`; la barra laterale usa `chronexus-logo.webp`; il README usa
+`chronexus-wordmark.webp` e `chronexus-icon.webp`.
 
 ## Originali (non modificare)
 
