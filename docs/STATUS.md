@@ -1,3 +1,56 @@
+# Stato Chronexus — 25 ottobre 2026 (M21, M22, M20)
+
+Eseguite su richiesta dell’utente; M19 spostata in fondo alla roadmap. Versione
+sorgente 0.7.0, nessuna release nuova, nessun push.
+
+**M22 — AI locale dalle impostazioni.** Impostazioni dell’app → AI locale:
+componenti. «Controlla componenti» (solo su clic): Ollama, cloud bloccato, GPU via
+`nvidia-smi`, spazio libero, stato di Qwen3.8-27B e Gemma 4 12B rispetto ai pesi
+qualificati. «Installa Ollama…» scarica Ollama 0.40.10 dal solo URL ufficiale
+GitHub (redirect ammessi solo verso gli host asset di GitHub), verifica dimensione e
+SHA-256 `d52aea2d…` (confrontato con il `sha256sum.txt` ufficiale), estrae in una
+cartella temporanea con controllo dei percorsi e la attiva solo a verifica conclusa
+(`ai-runtime/ollama-0.40.10` nella cartella dati, fuori da backup e Git). Avvio e
+arresto espliciti; il runtime gestito si chiude con Chronexus, non tocca runtime
+esistenti né porte occupate e richiede il cloud disabilitato. «Scarica modello…»
+chiede al runtime attivo il solo modello scelto e lo dichiara pronto solo se il
+digest dei pesi coincide con la policy M18. Rimozione limitata al runtime gestito.
+
+**M21 — Identità visiva.** Icona dell’app dall’araldo (`assets/chronexus.svg` =
+`assets/brand/chronexus-icon.svg`, generazione `pnpm icons` provata), logo verticale
+nella barra laterale con titolo accessibile «Chronexus».
+
+**M20 — README.** README italiano e inglese con intestazione, badge veri, tabella
+funzioni con icone del progetto, installazione, avvisi, crediti e licenza Apache-2.0
+del file LICENSE. Contenuti tecnici spostati senza perdite in `docs/GUIDE.md` e
+`docs/DEVELOPMENT.md`. Cinque schermate WebP da campagna sintetica (circa 0,5 MB).
+
+Verifiche realmente eseguite:
+- `cargo test`: 122 test, inclusi 5 nuovi M22 (download/hash/redirect, archivi
+  ostili, annullamento, pull con verifica pesi, stato senza rete); 10 esecuzioni
+  complete senza fallimenti M22 dopo aver corretto un keep-alive nel server finto
+  del test. `transport_auth…` (MCP) fallisce in modo intermittente anche da solo e
+  anche sul commit HEAD pulito: instabilità preesistente. clippy e fmt PASS.
+- `pnpm test` 326 PASS; lint, typecheck, format, i18n:check e build PASS.
+- Desktop Windows debug, profili isolati: `scripts/qa/m22-ai-setup.mjs install`
+  reale (download ufficiale 1,59 GB, verifica ed estrazione in 128 s, avvio con
+  cloud disabilitato, arresto, nessun file parziale); pull reale di Gemma 4 12B già
+  presente nel runtime di sviluppo: ricontrollo del registro e pesi verificati
+  «Pronto» in 2 s. Logo a 1440/1200/760 px, axe 0 violazioni su barra laterale e
+  pannello AI. Schermate README da `scripts/qa/m20-readme-media.mjs`.
+
+Limiti: download completo dei 17,7 GB di Qwen3.8-27B tramite interfaccia non
+ripetuto; installazione guidata solo Windows x64; resa del README su Forgejo da
+verificare dopo il push (API markdown non anonima); `Cargo.toml` dichiara MIT mentre
+`LICENSE` è Apache-2.0: incoerenza segnalata all’utente, non modificata; nuove
+stringhe con fallback italiano; macOS/Linux non provati.
+
+Skill: frontend-design e impeccable (craft-floor) per README, icone SVG del progetto
+al posto delle emoji e composizione del logo; accessibility per pannello AI e nome
+del logo; react-testing per i test; imagegen non necessaria (immagini dell’utente).
+
+Prossima e unica milestone pianificata: M19.
+
 # Pianificazione — 25 ottobre 2026: M22 assieme ai loghi M21
 
 Aggiunta M22: installazione guidata di Ollama e modelli da Impostazioni dell’app,

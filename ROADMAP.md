@@ -56,11 +56,11 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 27 | M16 | Scraping Wikidot, scelta fonte e cache eliminabile | 25/10/2026 | `2fbf17a → 923516f` | Windows; altri OS aperti |
 | 28 | M15a | Annuncio epico degli aggiornamenti: vassallo, trombetta e manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
 | 29 | M17 | Traduzione locale della wiki nella lingua dell’app | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, revisione linguistica aperta |
-| 30 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | Pianificata, **prima** | — | Da eseguire prima di ogni altra milestone aperta |
-| 31 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Implementata Windows | 018 | Qualifica e confronto reali, Gemma secondaria; altri OS pendenti |
-| 32 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata | — | Dopo M21 |
-| 33 | M20 | README di qualità con immagini, guida rapida e crediti | Pianificata | — | Dopo M21 (usa i suoi loghi) |
-| 34 | M22 | Installazione guidata di Ollama e modelli dalle impostazioni | Pianificata | — | Assieme ai loghi M21, prima di M19/M20 |
+| 30 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Implementata Windows | 018 | Qualifica e confronto reali, Gemma secondaria; altri OS pendenti |
+| 31 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | 25/10/2026 | vedi STATUS | Windows; non ancora in una release |
+| 32 | M22 | Installazione guidata di Ollama e modelli dalle impostazioni | 25/10/2026 | vedi STATUS | Windows; non ancora in una release |
+| 33 | M20 | README di qualità con immagini, guida rapida e crediti | 25/10/2026 | vedi STATUS | Resa Forgejo da verificare dopo il push |
+| 34 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata, **ultima** | — | Spostata in fondo su istruzione dell’utente |
 
 
 ## M0 - Foundation and real local database
@@ -949,9 +949,15 @@ M18 è stata successivamente implementata; vedere la sua sezione e STATUS.
   copia offline, origine immutata e accessibilità. macOS/Linux e revisione
   madrelingua/assistiva restano da verificare. Evidenze in `docs/STATUS.md`.
 
-## M21 — Nuova identità visiva: logo dell’araldo, icona e marchio (pianificata, prima)
+## M21 — Nuova identità visiva: logo dell’araldo, icona e marchio (operativa Windows)
 
-**Stato:** richiesta il 25 ottobre 2026; non implementata. Su istruzione esplicita
+**Stato aggiornato:** implementata il 25 ottobre 2026 assieme a M22: icona generata
+dall’araldo con angoli trasparenti, logo verticale nella barra laterale con nome
+accessibile, marchio e icona nel README (M20). Evidenze in docs/STATUS.md.
+La variante semplificata per 16–32 px non è stata creata: a 32 px la sagoma resta
+riconoscibile. Nessuna release la contiene ancora.
+
+**Stato originale:** richiesta il 25 ottobre 2026; non implementata. Su istruzione esplicita
 dell’utente è **la prima fase da eseguire, assieme a M22**, prima di M19/M20.
 M18 è nel frattempo completata su Windows. Le immagini scelte sono salvate
 in `assets/brand/` (originali in `assets/brand/source/`, varianti preparate e
@@ -998,9 +1004,16 @@ milestone rimangono distinte e verificabili; questa aggiunta è solo pianificazi
   lettore di schermo), test e lint invariati; versioni di piattaforma dichiarate
   solo se provate. Pubblicazione secondo la regola delle release solo su richiesta.
 
-## M22 — Installazione di Ollama e modelli dalle impostazioni (pianificata con M21)
+## M22 — Installazione di Ollama e modelli dalle impostazioni (operativa Windows)
 
-**Stato:** richiesta il 25 ottobre 2026; non implementata. Da sviluppare assieme
+**Stato aggiornato:** implementata il 25 ottobre 2026. Impostazioni dell’app → AI
+locale: componenti; runtime gestito Ollama 0.40.10 (archivio ufficiale con SHA-256
+fissato), avvio/arresto espliciti legati alla vita dell’app, download dei modelli
+qualificati tramite il runtime attivo con verifica dei pesi M18. Collaudo reale di
+installazione/avvio/arresto e verifica di un modello già presente; download completo
+di 17,7 GB non ripetuto. Evidenze in docs/STATUS.md.
+
+**Stato originale:** richiesta il 25 ottobre 2026; non implementata. Da sviluppare assieme
 alla milestone dei loghi **M21**, prima di M19/M20. Obiettivo: preparare l’AI
 locale direttamente da **Impostazioni dell’app → AI locale**, senza richiedere
 all’utente comandi nel terminale. L’app resta interamente utilizzabile senza AI.
@@ -1143,7 +1156,9 @@ famiglia, **Qwen3.8-27B**, eseguito in locale. Non chiamarlo Qwen3.8-Max né D&D
 - Runtime assente, modello mancante, CPU sola, memoria insufficiente e cloud attivo
   producono errori chiari senza inviare appunti. Test Rust/frontend e QA desktop.
 
-## M19 — Cartella backup nei Documenti, backup periodici e di aggiornamento (pianificata)
+## M19 — Cartella backup nei Documenti, backup periodici e di aggiornamento (pianificata, ultima)
+
+**Ordine:** su istruzione dell’utente del 25 ottobre 2026 è l’ultima milestone.
 
 **Stato:** richiesta il 25 ottobre 2026; non implementata. Oggi i backup manuali
 vanno dove sceglie l’utente, le copie preventive del ripristino in `backups/` e i
@@ -1215,9 +1230,15 @@ dell’app; non esistono backup periodici automatici.
 - Preferenze persistenti dopo riavvio e non alterate dal ripristino; interfaccia
   italiana, tastiera, stati vuoti/errore. Piattaforme dichiarate solo se provate.
 
-## M20 — Presentazione del progetto: README di qualità (pianificata)
+## M20 — Presentazione del progetto: README di qualità (consegnata, resa da verificare)
 
-**Stato:** richiesta il 25 ottobre 2026; non implementata. L’attuale `README.md`
+**Stato aggiornato:** README italiano e `README.en.md` riscritti, guida utente e
+sviluppo spostate senza perdite in `docs/GUIDE.md` e `docs/DEVELOPMENT.md`,
+schermate da campagna sintetica in `docs/media/`. La resa reale su github.com
+(callout, `<details>`, allineamenti) si verifica dopo il push: l’API markdown di
+Forgejo richiede autenticazione.
+
+**Stato originale:** richiesta il 25 ottobre 2026; non implementata. L’attuale `README.md`
 mescola guida utente, cronologia delle milestone e note da sviluppatore. Obiettivo:
 una pagina del repository al livello dei progetti indicati dall’utente come
 riferimento (ApolloShell, AdventureLog, Uptime Kuma, Gogs, Seerr,
@@ -1284,11 +1305,12 @@ astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
   di Wikidot; M16 è inclusa nella release 0.5.0.
 - **M15a:** illustrazioni incluse nella 0.5.0; restano upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
-- **Prossima fase (istruzione dell’utente): M21 e M22 insieme** (logo
-  dell’araldo, icona/marchio e installazione guidata Ollama/modelli nelle
-  impostazioni), poi M19 (backup nei Documenti) e M20 (README di qualità).
-  M18 è implementata su Windows; altre GPU/OS e prova fisica offline pendenti.
-  Implementare solo su richiesta; i residui sopra restano aperti.
+- **M21/M22/M20:** consegnate su Windows il 25 ottobre 2026, non ancora in una
+  release; restano resa del README su Forgejo, download completo reale di un modello
+  da 17,7 GB tramite l’interfaccia, macOS/Linux.
+- **Unica milestone pianificata: M19** (backup nei Documenti), spostata in fondo su
+  istruzione dell’utente. M18 è implementata su Windows; altre GPU/OS e prova fisica
+  offline pendenti. Implementare solo su richiesta; i residui sopra restano aperti.
 
 ## Fuori dal perimetro attuale
 

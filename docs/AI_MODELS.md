@@ -104,3 +104,17 @@ producono errore. In caso di memoria insufficiente non cambiare modello in
 automatico. Refresh retrieval rimane distinto dall’addestramento; QLoRA Qwen
 non qualificato. Altre GPU, macOS/Linux, installazione reale e prova fisica
 offline restano pendenti.
+
+
+## Installazione guidata (M22)
+
+**Impostazioni dell’app → AI locale: componenti** permette, sempre dopo un clic:
+controllo dei componenti; installazione di Ollama 0.40.10 dall’archivio ufficiale
+GitHub con SHA-256 `d52aea2d323bdd324bf66a4b1226844aa5fb665cc5974fbcceceda1ce3d934eb`
+(1.586.229.413 byte) in `ai-runtime/ollama-0.40.10` della cartella dati; avvio e
+arresto del runtime gestito (si chiude con Chronexus, `OLLAMA_NO_CLOUD=1`, modelli in
+`ai-runtime/models`); download del solo modello scelto tramite il runtime attivo,
+dichiarato pronto solo con i pesi qualificati. Un runtime già attivo e senza cloud
+viene usato senza riavviarlo o riconfigurarlo. Installare non abilita l’assistente:
+la scelta resta nelle impostazioni della campagna. QLoRA resta su Gemma e i suoi
+componenti non sono scaricati qui.

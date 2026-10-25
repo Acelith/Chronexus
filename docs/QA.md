@@ -438,3 +438,19 @@ usa `NODEX_DEV_DATA_DIR` e `WEBVIEW2_USER_DATA_FOLDER` assoluti sotto `.tools/m1
 3. `real`: profilo nuovo senza fixture: controllo reale del canale pubblico; con
    0.4.0 corrente non deve comparire nulla. Disattiva poi il controllo all’avvio.
 4. `optout`: riapri lo stesso profilo: nessuna richiesta automatica.
+
+
+## Collaudo M22 — AI locale dalle impostazioni
+
+Profilo debug vuoto, CDP 9224, `CHRONEXUS_AI_SETUP_QA=isolated` e lo stesso
+`NODEX_DEV_DATA_DIR` per lo script. `node scripts/qa/m22-ai-setup.mjs install`
+scarica davvero l’archivio ufficiale (circa 1,6 GB) nella cartella del profilo,
+lo avvia e lo arresta. `pull` richiede un runtime locale senza cloud già attivo con
+il modello qualificato presente e verifica il percorso di download senza scaricare
+17,7 GB.
+
+## Collaudo M20 — immagini del README
+
+Profilo debug vuoto, CDP 9224, `CHRONEXUS_README_QA=isolated`, poi
+`node scripts/qa/m20-readme-media.mjs`: crea la campagna inventata «La Torre di
+Varek» e salva le schermate in `.tools/m20/`; convertirle in WebP in `docs/media/`.

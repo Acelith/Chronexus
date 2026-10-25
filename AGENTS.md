@@ -264,3 +264,11 @@ never send campaign data. Installing components does not activate campaign AI
 or download QLoRA checkpoints. This planning request does not authorize running
 installers now. See ROADMAP M22 for scope and acceptance. Publication remains
 stopped until a new user request.
+
+M21 and M22 are implemented on Windows (not yet released); M20 README is delivered
+with Forgejo rendering to verify after a push. M19 is the last planned milestone.
+M22 setup: only the pinned official Ollama 0.40.10 archive and SHA-256, GitHub
+asset hosts for redirects, managed copy under the app data `ai-runtime` folder,
+explicit start/stop tied to the app, model pulls limited to the M18 policy and
+verified by weight digest. Never overwrite or stop a runtime Chronexus did not start.
+README screenshots come only from synthetic campaigns (scripts/qa/m20-readme-media.mjs).
