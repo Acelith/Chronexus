@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import "./herald.css";
 import { tr } from "../../i18n/store";
 import { errorMessage } from "../journal/api";
 import {
+  heraldApi,
   updatesApi,
+  type HeraldSettings,
   type UpdateOffer,
   type UpdateOverview,
   type UpdateProgress,
@@ -10,8 +13,16 @@ import {
 interface Props {
   busy: boolean;
   run: (action: () => Promise<void>) => Promise<unknown>;
+  /** Offer accepted from the herald: download starts, install stays explicit. */
+  initialOffer?: UpdateOffer | null;
+  onHandoffUsed?: () => void;
 }
-export default function UpdateSettings({ busy, run }: Props) {
+export default function UpdateSettings({
+  busy,
+  run,
+  initialOffer,
+  onHandoffUsed,
+}: Props) {
   const [overview, setOverview] = useState<UpdateOverview | null>(null);
   const [endpoint, setEndpoint] = useState("");
   const [offer, setOffer] = useState<UpdateOffer | null>(null);
@@ -37,6 +48,36 @@ export default function UpdateSettings({ busy, run }: Props) {
       active = false;
     };
   }, []);
+  const [herald, setHerald] = useState<HeraldSettings | null>(null);
+  useEffect(() => {
+    let active = true;
+    heraldApi
+      .settings()
+      .then((value) => {
+        if (active) setHerald(value);
+      })
+      .catch((reason) => {
+        if (active) setError(errorMessage(reason));
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+  const handoff = useRef<string | null>(null);
+  useEffect(() => {
+    if (!initialOffer || busy || handoff.current === initialOffer.id) return;
+    handoff.current = initialOffer.id;
+    onHandoffUsed?.();
+    // The user already chose «Aggiorna» in the herald: start the verified download.
+    void perform("download", async () => {
+      setOffer(initialOffer);
+      setReady(false);
+      setProgress(null);
+      await updatesApi.download(initialOffer.id, setProgress);
+      setReady(true);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialOffer, busy]);
   async function perform(phase: string, action: () => Promise<void>) {
     if (pending || busy) return;
     setPending(phase);
@@ -211,6 +252,42 @@ export default function UpdateSettings({ busy, run }: Props) {
                 </p>
               ) : null}
             </div>
+          ) : null}
+          {herald ? (
+            <fieldset className="herald-settings" disabled={disabled}>
+              <legend>{tr("Annuncio delle nuove versioni")}</legend>
+              {(
+                [
+                  [
+                    "startupCheck",
+                    tr(
+                      "Controlla una volta all’avvio (al massimo ogni 20 ore) e annuncia le nuove versioni con l’araldo",
+                    ),
+                  ],
+                  ["sound", tr("Suona la trombetta quando appare l’araldo")],
+                ] as const
+              ).map(([key, label]) => (
+                <label key={key} className="checkbox-row">
+                  <input
+                    type="checkbox"
+                    checked={herald[key]}
+                    onChange={(event) => {
+                      const next = { ...herald, [key]: event.target.checked };
+                      void perform("herald", async () => {
+                        setHerald(await heraldApi.save(next));
+                        setNotice(tr("Preferenze dell’annuncio salvate."));
+                      });
+                    }}
+                  />
+                  {label}
+                </label>
+              ))}
+              <p className="muted">
+                {tr(
+                  "Il controllo automatico contatta solo il canale aggiornamenti, mai le wiki o i modelli AI, e non invia dati delle campagne. Il controllo manuale resta sempre disponibile.",
+                )}
+              </p>
+            </fieldset>
           ) : null}
           <p>
             {tr(

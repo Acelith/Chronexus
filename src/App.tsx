@@ -35,6 +35,8 @@ import type { GraphNode, SourceRef } from "./features/graph/api";
 import type { AbilityDetails, PlayerView } from "./features/player/api";
 import type { SearchResult } from "./features/search/SearchPanel";
 import { OperationContext } from "./operations";
+import { heraldApi, type UpdateOffer } from "./features/updates/api";
+import { useStartupHerald } from "./features/updates/useStartupHerald";
 const SearchPanel = lazy(() => import("./features/search/SearchPanel"));
 
 const Editor = lazy(() => import("./features/journal/Editor"));
@@ -54,6 +56,9 @@ const AssistantWorkspace = lazy(
 const DiceWorkspace = lazy(() => import("./features/dice/DiceWorkspace"));
 const UpdateSettings = lazy(() => import("./features/updates/UpdateSettings"));
 const WikiSettings = lazy(() => import("./features/wiki/WikiSettings"));
+const HeraldAnnouncement = lazy(
+  () => import("./features/updates/HeraldAnnouncement"),
+);
 const LanguageSettings = lazy(
   () => import("./features/preferences/LanguageSettings"),
 );
@@ -139,6 +144,21 @@ export function App() {
     return true;
   }, [campaignId, canRefreshExternal]);
   useExternalUpdates(campaignId, canRefreshExternal, refreshExternal);
+  /** Update offer chosen from the herald, handed to the M15 settings flow. */
+  const [updateHandoff, setUpdateHandoff] = useState<UpdateOffer | null>(null);
+  // The herald waits for an idle app: no save, form, restore or dirty draft.
+  const heraldCanShow = useCallback(
+    () =>
+      !loading &&
+      !busy &&
+      !operation.current &&
+      !backupOpen &&
+      !searchOpen &&
+      !form &&
+      !guard.current?.dirty(),
+    [loading, busy, backupOpen, searchOpen, form],
+  );
+  const herald = useStartupHerald(heraldCanShow);
   const campaign = campaigns.find((item) => item.id === campaignId);
   const session = sessions.find((item) => item.id === sessionId);
   const register = useCallback((value: SaveGuard | null) => {
@@ -457,6 +477,29 @@ export function App() {
   }
   return (
     <OperationContext.Provider value={run}>
+      {herald.announcement ? (
+        <Suspense fallback={null}>
+          <HeraldAnnouncement
+            announcement={herald.announcement}
+            onLater={() => herald.close("later")}
+            onDismiss={() => herald.close("dismiss")}
+            onSound={async (sound) => {
+              const current = await heraldApi.settings();
+              await heraldApi.save({ ...current, sound });
+            }}
+            onUpdate={() => {
+              const offer = herald.announcement!.offer;
+              herald.close(null);
+              void run(async () => {
+                setUpdateHandoff(offer);
+                setBackupOpen(false);
+                setForm(null);
+                setView("preferences");
+              });
+            }}
+          />
+        </Suspense>
+      ) : null}
       <KnowledgeContext.Provider
         value={{ pages, open: openPage, create: createLinkedPage }}
       >
@@ -941,7 +984,12 @@ export function App() {
                       }
                     >
                       <>
-                        <UpdateSettings busy={busy} run={run} />
+                        <UpdateSettings
+                          busy={busy}
+                          run={run}
+                          initialOffer={updateHandoff}
+                          onHandoffUsed={() => setUpdateHandoff(null)}
+                        />
                         <LanguageSettings disabled={busy} />
                         <WikiSettings disabled={busy} />
                       </>

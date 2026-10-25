@@ -1,0 +1,221 @@
+/* M15a herald: the app's one announcement moment. Palette from DESIGN.md. */
+.herald-settings {
+  border: 1px solid #b89b60;
+  padding: 14px 18px;
+  margin: 18px 0;
+  display: grid;
+  gap: 10px;
+}
+.herald-settings label.checkbox-row {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+}
+.herald-settings input[type="checkbox"] {
+  width: auto;
+  flex: none;
+  margin-top: 5px;
+}
+dialog.herald {
+  width: min(880px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  color: #321d13;
+}
+dialog.herald::backdrop {
+  background: #241e17b3;
+}
+dialog.herald[open] {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  align-items: center;
+}
+.herald-stage {
+  position: relative;
+  z-index: 1;
+  margin-right: -36px;
+  transform-origin: 70% 80%;
+  animation: herald-arrive 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.herald-figure {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 18px 24px #241e1788);
+}
+.herald-emblem {
+  display: block;
+  width: 100%;
+  /* Mouthpiece toward the manifesto, bell raised away from it. */
+  transform: scaleX(-1);
+  filter: drop-shadow(0 14px 18px #241e1766);
+}
+.herald-trumpet {
+  transform-origin: 34px 98px;
+  animation: trumpet-raise 600ms 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.trumpet-bell,
+.trumpet-tube,
+.trumpet-mouth {
+  fill: #b89b60;
+  stroke: #5a4322;
+  stroke-width: 2;
+}
+.trumpet-loop {
+  fill: none;
+  stroke: #8a7040;
+  stroke-width: 4;
+}
+.herald-pennant path:first-child {
+  fill: #6c302b;
+  stroke: #3d1a16;
+  stroke-width: 2;
+}
+.herald-pennant {
+  transform-origin: 84px 100px;
+  animation: pennant-sway 900ms 900ms ease-in-out 2 alternate;
+}
+.pennant-mark {
+  fill: #ead9b1;
+}
+.herald-waves path {
+  fill: none;
+  stroke: #b89b60;
+  stroke-width: 5;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: wave 700ms 1000ms ease-out both;
+}
+.herald-waves path + path {
+  animation-delay: 1150ms;
+}
+.herald-manifesto {
+  position: relative;
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 36px 40px 28px 64px;
+  background: #ead9b1 center / cover no-repeat;
+  border: 3px double #6c302b;
+  box-shadow: 0 28px 70px #241e1799;
+  animation: manifesto-unroll 650ms 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.herald-manifesto h2 {
+  margin: 0 0 8px;
+  font-size: 34px;
+  line-height: 1.15;
+}
+.herald-manifesto h2:focus {
+  outline: none;
+}
+.herald-manifesto h2:focus-visible {
+  outline: 2px solid #6c302b;
+  outline-offset: 4px;
+}
+.herald-manifesto h3 {
+  margin: 20px 0 6px;
+  font-size: 20px;
+}
+.herald-notes {
+  max-height: 11rem;
+  background: #f4e6c799;
+  border: 1px solid #b89b60;
+  padding: 10px 12px;
+}
+.herald-safety {
+  font-size: 16px;
+}
+.herald-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+.herald-controls button {
+  font-size: 15px;
+}
+.herald-still .herald-stage,
+.herald-still .herald-trumpet,
+.herald-still .herald-pennant,
+.herald-still .herald-manifesto {
+  animation: none;
+}
+.herald-still .herald-trumpet {
+  transform: rotate(-14deg);
+}
+.herald-still .herald-waves path {
+  animation: none;
+  opacity: 0.85;
+}
+@keyframes herald-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+}
+@keyframes trumpet-raise {
+  from {
+    transform: rotate(18deg);
+  }
+  to {
+    transform: rotate(-14deg);
+  }
+}
+@keyframes pennant-sway {
+  to {
+    transform: rotate(5deg);
+  }
+}
+@keyframes wave {
+  0% {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.85;
+    transform: none;
+  }
+}
+@keyframes manifesto-unroll {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@media (max-width: 760px) {
+  dialog.herald[open] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .herald-stage {
+    width: 140px;
+    margin: 0 auto -28px;
+  }
+  .herald-manifesto {
+    padding: 36px 20px 20px;
+  }
+  .herald-manifesto h2 {
+    font-size: 27px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .herald-stage,
+  .herald-trumpet,
+  .herald-pennant,
+  .herald-manifesto,
+  .herald-waves path {
+    animation: none;
+  }
+  .herald-trumpet {
+    transform: rotate(-14deg);
+  }
+  .herald-waves path {
+    opacity: 0.85;
+  }
+}

@@ -36,3 +36,22 @@ export const updatesApi = {
   },
   cancel: () => command<void>("cancel_app_update"),
 };
+export interface HeraldSettings {
+  startupCheck: boolean;
+  sound: boolean;
+}
+export interface Announcement {
+  offer: UpdateOffer;
+  sound: boolean;
+}
+export type HeraldChoice = "later" | "dismiss";
+/** M15a: announcement policy lives in Rust; installing still uses updatesApi. */
+export const heraldApi = {
+  settings: () => command<HeraldSettings>("get_herald_settings"),
+  save: (settings: HeraldSettings) =>
+    command<HeraldSettings>("save_herald_settings", { settings }),
+  startupCheck: () => command<Announcement | null>("startup_update_check"),
+  record: (version: string, choice: HeraldChoice) =>
+    command<void>("record_update_announcement", { version, choice }),
+  blocked: () => command<boolean>("update_announcement_blocked"),
+};

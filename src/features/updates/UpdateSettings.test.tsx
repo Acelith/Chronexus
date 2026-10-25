@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, test, vi } from "vitest";
 import UpdateSettings from "./UpdateSettings";
-import { updatesApi } from "./api";
+import { heraldApi, updatesApi } from "./api";
 vi.mock("./api", () => ({
   updatesApi: {
     overview: vi.fn(),
@@ -12,6 +12,7 @@ vi.mock("./api", () => ({
     install: vi.fn(),
     cancel: vi.fn(),
   },
+  heraldApi: { settings: vi.fn(), save: vi.fn() },
 }));
 const overview = {
   settings: { endpoint: "https://git.example/latest.json" },
@@ -29,6 +30,53 @@ beforeEach(() => {
   vi.mocked(updatesApi.overview).mockResolvedValue(overview);
   vi.mocked(updatesApi.check).mockResolvedValue(offer);
   vi.mocked(updatesApi.download).mockResolvedValue(undefined);
+  vi.mocked(heraldApi.settings).mockResolvedValue({
+    startupCheck: true,
+    sound: true,
+  });
+  vi.mocked(heraldApi.save).mockImplementation(async (s) => s);
+});
+test("l’offerta scelta dall’araldo scarica e verifica, ma non installa da sola", async () => {
+  const user = userEvent.setup();
+  const used = vi.fn();
+  render(
+    <UpdateSettings
+      busy={false}
+      run={run}
+      initialOffer={offer}
+      onHandoffUsed={used}
+    />,
+  );
+  await waitFor(() =>
+    expect(updatesApi.download).toHaveBeenCalledWith(
+      "update-1",
+      expect.any(Function),
+    ),
+  );
+  expect(used).toHaveBeenCalledTimes(1);
+  expect(
+    await screen.findByRole("button", { name: "Crea backup e installa" }),
+  ).toBeInTheDocument();
+  expect(updatesApi.install).not.toHaveBeenCalled();
+  expect(updatesApi.check).not.toHaveBeenCalled();
+  await user.click(
+    screen.getByRole("checkbox", { name: /Controlla una volta all’avvio/ }),
+  );
+  expect(heraldApi.save).toHaveBeenCalledWith({
+    startupCheck: false,
+    sound: true,
+  });
+});
+test("durante un’altra operazione l’offerta dell’araldo aspetta", async () => {
+  const { rerender } = render(
+    <UpdateSettings busy run={run} initialOffer={offer} />,
+  );
+  await screen.findByText("0.4.0");
+  expect(updatesApi.download).not.toHaveBeenCalled();
+  rerender(<UpdateSettings busy={false} run={run} initialOffer={offer} />);
+  await waitFor(() => expect(updatesApi.download).toHaveBeenCalledTimes(1));
+  rerender(<UpdateSettings busy={false} run={run} initialOffer={offer} />);
+  expect(updatesApi.download).toHaveBeenCalledTimes(1);
 });
 test("legge solo impostazioni locali e controlla il server su richiesta", async () => {
   const user = userEvent.setup();

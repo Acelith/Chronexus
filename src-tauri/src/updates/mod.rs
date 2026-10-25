@@ -1,4 +1,5 @@
 //! Explicit, signed application updates. Never exposed through automation tools.
+pub mod herald;
 mod network;
 mod safety;
 #[cfg(test)]
@@ -59,6 +60,7 @@ struct Inner {
 pub struct State {
     gate: tokio::sync::Mutex<()>,
     inner: Mutex<Inner>,
+    automatic_checked: std::sync::atomic::AtomicBool,
 }
 impl State {
     pub fn shutdown(&self) {
@@ -147,8 +149,106 @@ pub async fn check_app_update(app: tauri::AppHandle) -> AppResult<Option<Offer>>
         .gate
         .try_lock()
         .map_err(|_| "È già in corso un’operazione di aggiornamento.")?;
+    check(&app).await
+}
+fn now() -> chrono::DateTime<chrono::Utc> {
+    chrono::DateTime::<chrono::Utc>::from(std::time::SystemTime::now())
+}
+#[tauri::command]
+pub fn get_herald_settings(app: tauri::AppHandle) -> AppResult<herald::HeraldSettings> {
+    Ok(herald::settings(&herald::read(&root(&app)?)?))
+}
+#[tauri::command]
+pub fn save_herald_settings(
+    app: tauri::AppHandle,
+    settings: herald::HeraldSettings,
+) -> AppResult<herald::HeraldSettings> {
+    let root = root(&app)?;
+    let mut value = herald::read(&root).unwrap_or_default();
+    value.startup_check = settings.startup_check;
+    value.sound = settings.sound;
+    herald::write(&root, &value)?;
+    Ok(herald::settings(&value))
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Announcement {
+    pub offer: Offer,
+    pub sound: bool,
+}
+/// The only automatic network request of the app: one bounded check per session
+/// and per interval, never when disabled. Failures stay silent: no false alarm.
+#[tauri::command]
+pub async fn startup_update_check(app: tauri::AppHandle) -> AppResult<Option<Announcement>> {
+    let state = app.state::<State>();
+    if state
+        .automatic_checked
+        .swap(true, std::sync::atomic::Ordering::SeqCst)
+    {
+        return Ok(None);
+    }
+    let root = root(&app)?;
+    let mut prefs = herald::read(&root)?;
+    if !herald::should_check(&prefs, now()) {
+        return Ok(None);
+    }
+    // Debug-only QA fixture on an isolated profile; absent from release builds.
+    #[cfg(debug_assertions)]
+    if let (Ok(version), Some(_)) = (
+        std::env::var("NODEX_DEV_HERALD_VERSION"),
+        std::env::var_os("NODEX_DEV_DATA_DIR"),
+    ) {
+        herald::record_check(&mut prefs, now());
+        herald::write(&root, &prefs)?;
+        return Ok(
+            herald::should_announce(&prefs, &version, now()).then(|| Announcement {
+                offer: Offer {
+                    id: "qa-fixture".into(),
+                    version,
+                    notes: "Collaudo sintetico M15a: nessun pacchetto reale.".into(),
+                },
+                sound: prefs.sound,
+            }),
+        );
+    }
+    let Ok(_gate) = state.gate.try_lock() else {
+        return Ok(None);
+    };
+    let found = match check(&app).await {
+        Ok(found) => found,
+        Err(_) => return Ok(None),
+    };
+    herald::record_check(&mut prefs, now());
+    herald::write(&root, &prefs)?;
+    Ok(found
+        .filter(|offer| herald::should_announce(&prefs, &offer.version, now()))
+        .map(|offer| Announcement {
+            offer,
+            sound: prefs.sound,
+        }))
+}
+#[tauri::command]
+pub fn record_update_announcement(
+    app: tauri::AppHandle,
+    version: String,
+    choice: String,
+) -> AppResult<()> {
+    let root = root(&app)?;
+    let mut prefs = herald::read(&root)?;
+    herald::record_choice(&mut prefs, &version, &choice, now())?;
+    herald::write(&root, &prefs)
+}
+/// Local only: lets the herald wait while AI, training or an update is running.
+#[tauri::command]
+pub fn update_announcement_blocked(app: tauri::AppHandle) -> AppResult<bool> {
+    let state = app.state::<State>();
+    let updating = state.gate.try_lock().is_err();
+    Ok(updating || assistant::service::busy(&app.state::<assistant::service::State>())?)
+}
+async fn check(app: &tauri::AppHandle) -> AppResult<Option<Offer>> {
+    let state = app.state::<State>();
     state.lock_inner()?.pending = None;
-    let endpoint = network::url(&safety::read_settings(&root(&app)?)?.endpoint)?;
+    let endpoint = network::url(&safety::read_settings(&root(app)?)?.endpoint)?;
     let cancel = CancellationToken::new();
     let raw = tokio::time::timeout(
         Duration::from_secs(25),
