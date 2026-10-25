@@ -1,3 +1,15 @@
+# Release 0.8.0 — M19, M20, M21, M22
+
+Installer NSIS Windows x64 compilato dal commit `c540c2d` (tag annotato `v0.8.0`),
+firmato updater e verificato con la chiave di produzione
+(`updates_signed_release_package_matches_production_key`). Dimensione 33.072.040
+byte, SHA-256 `0079f8b8509836e006ad42d37338212593c25b9719119b1e49f2961bbb4d6b3a`.
+Pubblicata il 25 ottobre 2026 con `publish_app_update.py`: installer, `.sig` e
+`latest.json` riscaricati con hash verificati, anche in forma anonima; API latest
+= v0.8.0. Solo app, **nessun peso AI**. Build eseguita con un `pnpm.cmd`
+temporaneo che inoltra a `npm run` (pnpm non installato su questa macchina).
+Installazione/upgrade reale non eseguiti.
+
 # Consegna locale M18 — 0.7.0
 
 Installer NSIS Windows x64 compilato dal commit `2052df7`, firmato updater e

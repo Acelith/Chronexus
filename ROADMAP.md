@@ -60,7 +60,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 31 | M21 | Nuova identità visiva: logo dell’araldo, icona dell’app e marchio | 25/10/2026 | `467ca7b` | Windows; non ancora in una release |
 | 32 | M22 | Installazione guidata di Ollama e modelli dalle impostazioni | 25/10/2026 | `54a6b42` | Windows; non ancora in una release |
 | 33 | M20 | README di qualità con immagini, guida rapida e crediti | 25/10/2026 | `d1d1e89` | Resa verificata su github.com |
-| 34 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Consegnata su Windows, non rilasciata | — | Spostata in fondo su istruzione dell’utente; eseguita il 25 ottobre 2026 |
+| 34 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Consegnata su Windows, release 0.8.0 | — | Spostata in fondo su istruzione dell’utente; eseguita il 25 ottobre 2026 |
 
 
 ## M0 - Foundation and real local database
@@ -1310,10 +1310,10 @@ astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
   di Wikidot; M16 è inclusa nella release 0.5.0.
 - **M15a:** illustrazioni incluse nella 0.5.0; restano upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
-- **M21/M22/M20:** consegnate su Windows il 25 ottobre 2026, non ancora in una
-  release; restano download completo reale di un modello
+- **M21/M22/M20:** consegnate su Windows il 25 ottobre 2026, incluse nella
+  release 0.8.0; restano download completo reale di un modello
   da 17,7 GB tramite l’interfaccia, macOS/Linux.
-- **M19:** consegnata su Windows il 25 ottobre 2026, non in una release; restano
+- **M19–M22:** pubblicate nella release 0.8.0 il 25 ottobre 2026. Per M19 restano
   macOS/Linux, prove fisiche di disco pieno/sola lettura/Documenti reindirizzati e
   un aggiornamento reale con backup nei Documenti. Nessuna milestone pianificata
   aperta. M18 è implementata su Windows; altre GPU/OS e prova fisica

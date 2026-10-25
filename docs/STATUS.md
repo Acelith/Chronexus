@@ -1,3 +1,17 @@
+# Stato Chronexus — 25 ottobre 2026 (release 0.8.0)
+
+Pubblicata la release [0.8.0](https://github.com/Acelith/Chronexus/releases/tag/v0.8.0)
+con M19, M20, M21 e M22. Sorgente compilato `c540c2d`, tag annotato `v0.8.0`,
+`main` su origin. Installer NSIS Windows x64 compilato dal commit `c540c2d` (tag annotato `v0.8.0`),
+firmato updater e verificato con la chiave di produzione
+(`updates_signed_release_package_matches_production_key`). Dimensione 33.072.040
+byte, SHA-256 `0079f8b8509836e006ad42d37338212593c25b9719119b1e49f2961bbb4d6b3a`.
+Verifiche prima della build: 134 test Rust (`--test-threads=1`), clippy
+`-D warnings`, 332 test frontend, tsc, eslint, controllo cataloghi, 27 test Python
+degli script di rilascio. Bozza con tre allegati caricati e riscaricati, poi
+finalizzata: download anonimi e API `releases/latest` = v0.8.0 verificati.
+Non eseguiti: installazione o upgrade reale, macOS/Linux.
+
 # Stato Chronexus — 25 ottobre 2026 (M19)
 
 **M19 — Backup nei Documenti, periodici e di aggiornamento.** Consegnata su

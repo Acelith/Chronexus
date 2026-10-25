@@ -1,3 +1,11 @@
+# Canale pubblico — 0.8.0
+
+Release corrente: [0.8.0](https://github.com/Acelith/Chronexus/releases/tag/v0.8.0)
+(M19–M22), installer Windows x64 firmato. Da questa versione i backup prima
+dell’installazione vanno in `Documenti/Chronexus/Backup aggiornamenti` (vedi sotto).
+Upgrade installato 0.7.0 → 0.8.0 non ancora collaudato; la verifica di firma e
+download non equivale a un’installazione reale.
+
 # M18 — 0.7.0 locale, canale pubblico invariato
 
 Pacchetto Windows firmato updater compilato e firma reale verificata. L’utente
