@@ -27,7 +27,10 @@ test("wiki cache works offline and explicit refresh reports fallback", async () 
   expect((await search("Sample", 1, true)).warning).toContain("copia locale");
 });
 test("wiki explicit search is bounded, credential-free and cached; storage failures remain errors", async () => {
-  vi.mocked(command).mockResolvedValueOnce(null).mockResolvedValueOnce(cached);
+  vi.mocked(command)
+    .mockResolvedValueOnce(null)
+    .mockResolvedValueOnce(7)
+    .mockResolvedValueOnce(cached);
   fetchMock.mockImplementation(
     async () => new Response(JSON.stringify(payload)),
   );
@@ -43,9 +46,11 @@ test("wiki explicit search is bounded, credential-free and cached; storage failu
   expect(command).toHaveBeenLastCalledWith("store_wiki_cache", {
     key: "search/sample/1",
     payload,
+    epoch: 7,
   });
   vi.mocked(command)
     .mockResolvedValueOnce(null)
+    .mockResolvedValueOnce(7)
     .mockRejectedValueOnce(Error("Disco pieno"));
   await expect(search("Sample")).rejects.toThrow("Disco pieno");
 });

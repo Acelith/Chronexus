@@ -106,9 +106,15 @@ async function cached<T>(
   const old = await command<Cache<T> | null>("read_wiki_cache", { key });
   if (old && !refresh) return old;
   try {
+    // A cache clear while this request is pending makes the backend refuse the copy.
+    const epoch = await command<number>("wiki_cache_epoch");
     const payload = await load();
     if (!validate(payload)) throw Error(tr("Risposta wiki non valida."));
-    return await command<Cache<T>>("store_wiki_cache", { key, payload });
+    return await command<Cache<T>>("store_wiki_cache", {
+      key,
+      payload,
+      epoch,
+    });
   } catch (e) {
     if (old)
       return {

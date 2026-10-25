@@ -1,93 +1,74 @@
-import { systemMessage } from "../../i18n/store";
-import { localeInfo } from "../../i18n/locales";
-import { getPreferences } from "../../i18n/store";
+import { useEffect, useRef, useState } from "react";
+import { systemMessage, tr } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
-import { localizeLabels, tr } from "../../i18n/store";
-import { useRef, useState } from "react";
 import { errorMessage } from "../journal/api";
+import type { AbilityDetails } from "../player/api";
+import Open5eWiki from "./Open5eWiki";
+import WikidotWiki, { type Unavailable } from "./WikidotWiki";
 import {
-  category,
-  detail,
-  plain,
-  search,
-  type Hit,
-  type Detail,
-  type Results,
-  type Answer,
-} from "./api";
-const labels: Record<string, string> = localizeLabels({
-  level: "Livello",
-  school: "Scuola",
-  casting_time: "Tempo di lancio",
-  duration: "Durata",
-  range_text: "Gittata",
-  concentration: "Concentrazione",
-  ritual: "Rituale",
-  higher_level: "Ai livelli superiori",
-  classes: "Classi",
-  armor_class: "Classe armatura",
-  hit_points: "Punti ferita",
-  challenge_rating_decimal: "Grado sfida",
-  actions: "Azioni",
-  traits: "Tratti",
-  reactions: "Reazioni",
-  strength: "Forza",
-  dexterity: "Destrezza",
-  constitution: "Costituzione",
-  intelligence: "Intelligenza",
-  wisdom: "Saggezza",
-  charisma: "Carisma",
-  size: "Taglia",
-  type: "Tipo",
-});
-export default function WikiWorkspace() {
-  const [query, setQuery] = useState(""),
-    [results, setResults] = useState<Answer<Results> | null>(null),
-    [selected, setSelected] = useState<Hit | null>(null),
-    [entry, setEntry] = useState<Answer<Detail> | null>(null),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
-    [page, setPage] = useState(1),
-    [usedQuery, setUsedQuery] = useState(""),
-    [filter, setFilter] = useState("");
-  const version = useRef(0);
-  async function find(p = 1, refresh = false) {
-    const id = ++version.current;
-    setBusy(true);
-    setError("");
-    setSelected(null);
-    setEntry(null);
+  providerNames,
+  WIKI_CHANGED,
+  wikiProviderApi,
+  type WikiChoice,
+} from "./provider";
+
+/**
+ * Shows the globally selected wiki. A Wikidot failure only proposes Open5e:
+ * nothing is sent to Open5e and nothing is saved unless the user accepts.
+ */
+export default function WikiWorkspace({
+  onImportSpell,
+}: {
+  onImportSpell?: (spell: AbilityDetails) => void;
+}) {
+  const [choice, setChoice] = useState<WikiChoice | null>(null);
+  const [error, setError] = useState("");
+  const [prompt, setPrompt] = useState<Unavailable | null>(null);
+  const [handoff, setHandoff] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [generation, setGeneration] = useState(0);
+  const accept = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    let active = true;
+    const load = () =>
+      wikiProviderApi
+        .get()
+        .then((value) => {
+          if (!active) return;
+          setChoice(value);
+          setError("");
+          // Remount the views: cleared caches or another provider invalidate them.
+          setGeneration((g) => g + 1);
+        })
+        .catch((reason) => {
+          if (active) setError(errorMessage(reason));
+        });
+    void load();
+    window.addEventListener(WIKI_CHANGED, load);
+    return () => {
+      active = false;
+      window.removeEventListener(WIKI_CHANGED, load);
+    };
+  }, []);
+  useEffect(() => {
+    if (prompt) accept.current?.focus();
+  }, [prompt]);
+  async function switchToOpen5e() {
+    if (!prompt || saving) return;
+    setSaving(true);
     try {
-      const r = await search(p === 1 ? query : usedQuery, p, refresh);
-      if (id === version.current) {
-        setResults(r);
-        setPage(p);
-        setUsedQuery(p === 1 ? query : usedQuery);
-      }
-    } catch (e) {
-      if (id === version.current) setError(errorMessage(e));
+      const saved = await wikiProviderApi.save("open5e");
+      // One consented search is repeated on Open5e; no further automatic requests.
+      setHandoff(prompt.query);
+      setPrompt(null);
+      setChoice(saved);
+    } catch (reason) {
+      setError(errorMessage(reason));
+      setPrompt(null);
     } finally {
-      if (id === version.current) setBusy(false);
+      setSaving(false);
     }
   }
-  async function open(hit: Hit, refresh = false) {
-    const id = ++version.current;
-    setSelected(hit);
-    setEntry(null);
-    setBusy(true);
-    setError("");
-    try {
-      const r = await detail(hit, refresh);
-      if (id === version.current) setEntry(r);
-    } catch (e) {
-      if (id === version.current) setError(errorMessage(e));
-    } finally {
-      if (id === version.current) setBusy(false);
-    }
-  }
-  const kinds = [
-    ...new Set(results?.payload.results.map((r) => r.object_model) ?? []),
-  ];
   return (
     <section
       className="wiki-workspace"
@@ -96,203 +77,93 @@ export default function WikiWorkspace() {
       <h3>
         <Text source={"Biblioteca delle regole"} />
       </h3>
-      <p>
-        <Text
-          source={
-            "Open5e · regole, incantesimi, creature e oggetti da più fonti."
-          }
-        />
-      </p>
-      <p className="editor-hint">
-        <Text
-          source={
-            "I contenuti sono prevalentemente in inglese. Cerca un termine di regole, ad esempio “magic missile”. Solo quando premi Cerca o apri una voce, il termine o l'identificativo viene inviato a Open5e. Le pagine consultate rimangono disponibili offline; nessun appunto della campagna viene inviato."
-          }
-        />
-      </p>
-      <form
-        className="wiki-search"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void find();
-        }}
-      >
-        <label>
-          <Text source={"Termine nella wiki"} />
-          <input
-            type="search"
-            minLength={2}
-            maxLength={100}
-            required
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </label>
-        <button className="primary" disabled={busy}>
-          <Text source={"Cerca nella wiki"} />
-        </button>
-        {results ? (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void find(1, true)}
-          >
-            <Text source={"Aggiorna ricerca online"} />
-          </button>
-        ) : null}
-      </form>
-      {busy ? (
-        <p role="status">
-          <Text source={"Consultazione wiki…"} />
-        </p>
-      ) : null}
-      {error ? (
-        <p role="alert" className="error">
-          {error}{" "}
+      {choice ? (
+        <p className="wiki-provider">
+          {tr("Fonte attiva: {0}", [providerNames[choice.provider]])}
+          {" · "}
           <Text
             source={
-              " Riprova con la stessa ricerca; le copie già consultate rimangono locali."
+              "Puoi cambiarla in Impostazioni dell’app → Fonti D&D / Wiki."
             }
           />
         </p>
       ) : null}
-      {results?.warning ? (
-        <p role="status">{systemMessage(results.warning)}</p>
+      {error ? (
+        <p role="alert" className="error">
+          {systemMessage(error)}
+        </p>
       ) : null}
-      {results ? (
-        <>
-          <div className="wiki-results-heading">
-            <p>
-              {results.payload.count} <Text source={" risultati per “"} />
-              {usedQuery}
-              <Text source={"” · pagina"} /> {page}
-            </p>
-            <label>
-              <Text source={"Tipo nella pagina"} />
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              >
-                <option value="">{tr("Tutti i tipi")}</option>
-                {kinds.map((k) => (
-                  <option key={k}>{k}</option>
-                ))}
-              </select>
-            </label>
+      {!choice && !error ? (
+        <p role="status">
+          <Text source={"Lettura della fonte wiki…"} />
+        </p>
+      ) : null}
+      {choice?.provider === "wikidot" ? (
+        <WikidotWiki
+          key={`wikidot:${generation}`}
+          onUnavailable={setPrompt}
+          onImportSpell={onImportSpell}
+        />
+      ) : null}
+      {choice?.provider === "open5e" ? (
+        <Open5eWiki key={`open5e:${generation}`} initialQuery={handoff} />
+      ) : null}
+      {prompt ? (
+        <div
+          className="wiki-confirm"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="wiki-switch-title"
+          aria-describedby="wiki-switch-reason"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              e.preventDefault();
+              setPrompt(null);
+            }
+          }}
+        >
+          <h4 id="wiki-switch-title">
+            <Text
+              source={
+                "Wikidot non ha fornito le informazioni. Vuoi usare Open5e?"
+              }
+            />
+          </h4>
+          <p id="wiki-switch-reason">{systemMessage(prompt.reason)}</p>
+          <p>
+            {prompt.query.trim().length >= 2
+              ? tr(
+                  "Accettando, Open5e diventa la fonte salvata nelle impostazioni dell’app e la ricerca «{0}» viene ripetuta lì. Rifiutando resti su Wikidot e nessuna richiesta viene inviata a Open5e.",
+                  [prompt.query],
+                )
+              : tr(
+                  "Accettando, Open5e diventa la fonte salvata nelle impostazioni dell’app. Rifiutando resti su Wikidot e nessuna richiesta viene inviata a Open5e.",
+                )}
+          </p>
+          <div className="actions">
+            <button
+              ref={accept}
+              className="primary"
+              disabled={saving}
+              onClick={() => void switchToOpen5e()}
+            >
+              <Text source={"Usa Open5e e salva la scelta"} />
+            </button>
+            <button
+              disabled={saving}
+              onClick={() => {
+                const retry = prompt.retry;
+                setPrompt(null);
+                retry();
+              }}
+            >
+              <Text source={"Riprova su Wikidot"} />
+            </button>
+            <button disabled={saving} onClick={() => setPrompt(null)}>
+              <Text source={"Resta su Wikidot"} />
+            </button>
           </div>
-          <div className="wiki-layout">
-            <div className="wiki-results">
-              {results.payload.results
-                .filter((h) => !filter || h.object_model === filter)
-                .map((hit) => (
-                  <button
-                    key={`${hit.route}${hit.object_pk}`}
-                    disabled={busy || !category(hit)}
-                    aria-current={
-                      selected?.object_pk === hit.object_pk ? "page" : undefined
-                    }
-                    onClick={() => void open(hit)}
-                  >
-                    <strong>{hit.object_name}</strong>
-                    <span>
-                      {hit.object_model} · {hit.document.name}
-                    </span>
-                    <p>{hit.text?.slice(0, 180)}</p>
-                  </button>
-                ))}
-              {!results.payload.results.length ? (
-                <p>
-                  <Text
-                    source={
-                      "Nessuna voce trovata. Prova il nome inglese o un termine più breve."
-                    }
-                  />
-                </p>
-              ) : null}
-              <div className="actions">
-                <button
-                  disabled={busy || page <= 1}
-                  onClick={() => void find(page - 1)}
-                >
-                  <Text source={"Pagina precedente"} />
-                </button>
-                <button
-                  disabled={
-                    busy || page >= 100 || page * 20 >= results.payload.count
-                  }
-                  onClick={() => void find(page + 1)}
-                >
-                  <Text source={"Pagina successiva"} />
-                </button>
-              </div>
-            </div>
-            <article className="wiki-entry" aria-label={tr("Voce wiki")}>
-              {entry ? (
-                <>
-                  <h4>{entry.payload.entry.name}</h4>
-                  <p>
-                    {entry.payload.document.name} ·{" "}
-                    {plain(entry.payload.document.gamesystem)}
-                  </p>
-                  <p className="wiki-license">
-                    <Text source={"Licenze dichiarate:"} />{" "}
-                    {entry.payload.document.licenses
-                      ?.map((l) => l.name)
-                      .join("; ") || tr("Non indicate dalla fonte")}
-                    <br />
-                    <Text source={"Fornitore: Open5e · "} />
-                    {entry.payload.document.key}
-                    <br />
-                    <Text source={"Copia locale del"} />{" "}
-                    {new Date(entry.fetchedAt).toLocaleString(
-                      localeInfo(getPreferences().locale).intl,
-                    )}
-                  </p>
-                  {entry.warning ? (
-                    <p role="status">{systemMessage(entry.warning)}</p>
-                  ) : null}
-                  <p className="wiki-prose">{entry.payload.entry.desc}</p>
-                  <dl>
-                    {Object.entries(entry.payload.entry)
-                      .filter(
-                        ([k, v]) =>
-                          ![
-                            "name",
-                            "key",
-                            "desc",
-                            "document",
-                            "crossreferences",
-                          ].includes(k) &&
-                          v !== null &&
-                          v !== "" &&
-                          (!Array.isArray(v) || v.length),
-                      )
-                      .map(([k, v]) => (
-                        <div key={k}>
-                          <dt>{labels[k] ?? k.replaceAll("_", " ")}</dt>
-                          <dd>{plain(v)}</dd>
-                        </div>
-                      ))}
-                  </dl>
-                  <button
-                    disabled={busy || !selected}
-                    onClick={() => selected && void open(selected, true)}
-                  >
-                    <Text source={"Aggiorna voce online"} />
-                  </button>
-                </>
-              ) : (
-                <p>
-                  <Text
-                    source={
-                      "Apri una voce per leggere il testo completo, la fonte e l’edizione. Le regole di editori o edizioni diverse restano separate."
-                    }
-                  />
-                </p>
-              )}
-            </article>
-          </div>
-        </>
+        </div>
       ) : null}
     </section>
   );

@@ -32,7 +32,7 @@ import {
 } from "./features/knowledge/api";
 import { KnowledgeContext } from "./features/knowledge/context";
 import type { GraphNode, SourceRef } from "./features/graph/api";
-import type { PlayerView } from "./features/player/api";
+import type { AbilityDetails, PlayerView } from "./features/player/api";
 import type { SearchResult } from "./features/search/SearchPanel";
 import { OperationContext } from "./operations";
 const SearchPanel = lazy(() => import("./features/search/SearchPanel"));
@@ -53,6 +53,7 @@ const AssistantWorkspace = lazy(
 );
 const DiceWorkspace = lazy(() => import("./features/dice/DiceWorkspace"));
 const UpdateSettings = lazy(() => import("./features/updates/UpdateSettings"));
+const WikiSettings = lazy(() => import("./features/wiki/WikiSettings"));
 const LanguageSettings = lazy(
   () => import("./features/preferences/LanguageSettings"),
 );
@@ -98,6 +99,8 @@ export function App() {
     view: PlayerView;
     assetId: string;
   } | null>(null);
+  /** Spell prepared in the wiki, waiting to open as an unsaved form. */
+  const [wikiDraft, setWikiDraft] = useState<AbilityDetails | null>(null);
   const [focusBlock, setFocusBlock] = useState<string | undefined>();
   const [form, setForm] = useState<"campaign" | "rename" | "session" | null>(
     null,
@@ -940,6 +943,7 @@ export function App() {
                       <>
                         <UpdateSettings busy={busy} run={run} />
                         <LanguageSettings disabled={busy} />
+                        <WikiSettings disabled={busy} />
                       </>
                     </Suspense>
                   ) : null}
@@ -999,7 +1003,16 @@ export function App() {
                         </p>
                       }
                     >
-                      <WikiWorkspace />
+                      <WikiWorkspace
+                        onImportSpell={(spell) =>
+                          void run(async () => {
+                            setWikiDraft(spell);
+                            setPlayerReturn(null);
+                            setView("abilities");
+                            setForm(null);
+                          })
+                        }
+                      />
                     </Suspense>
                   ) : null}
                   {campaign && view === "party" ? (
@@ -1098,6 +1111,8 @@ export function App() {
                             ? playerReturn.assetId
                             : undefined
                         }
+                        initialDraft={view === "abilities" ? wikiDraft : null}
+                        onDraftUsed={() => setWikiDraft(null)}
                         onPage={(id, title, assetId, view) => {
                           setPlayerReturn({ view, assetId });
                           openPage(id, title);

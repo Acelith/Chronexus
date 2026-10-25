@@ -12,7 +12,7 @@ import {
   type AssetLinks,
 } from "./api";
 import { Flag, NumberField, TextField } from "./fields";
-import { catalogBase, srdAttribution } from "./catalog";
+import CatalogSourceNote from "./CatalogSourceNote";
 const DndCatalog = lazy(() => import("./DndCatalog"));
 
 export default function AssetForm({
@@ -354,21 +354,7 @@ export default function AssetForm({
           </div>
         </fieldset>
         {details.kind !== "item" && details.catalogSource ? (
-          <aside className="catalog-license">
-            <p>
-              <Text source={"Base: "} />
-              {details.catalogSource.name} ·{" "}
-              {catalogBase + details.catalogSource.path}
-            </p>
-            <p>{srdAttribution}</p>
-            <p>
-              <Text
-                source={
-                  "SRD 5.1: https://dnd.wizards.com/resources/systems-reference-document · CC BY 4.0: https://creativecommons.org/licenses/by/4.0/"
-                }
-              />
-            </p>
-          </aside>
+          <CatalogSourceNote source={details.catalogSource} />
         ) : null}
       </form>
     </>

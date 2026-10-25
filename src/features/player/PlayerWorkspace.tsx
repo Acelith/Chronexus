@@ -13,8 +13,10 @@ import { errorMessage, type Session } from "../journal/api";
 import type { KnowledgePage } from "../knowledge/api";
 import type { SourceRef } from "../graph/api";
 import {
+  emptyLinks,
   playerApi,
   statGroups,
+  type AbilityDetails,
   type Asset,
   type AssetDetails,
   type AssetInput,
@@ -28,7 +30,7 @@ import CharacterForm from "./CharacterForm";
 import AssetForm from "./AssetForm";
 import { emptySheet, trainingLabels } from "./sheet";
 import { SheetSummary } from "./SheetSections";
-import { catalogBase, srdAttribution } from "./catalog";
+import CatalogSourceNote from "./CatalogSourceNote";
 const DndCatalog = lazy(() => import("./DndCatalog"));
 const ImageGallery = lazy(() => import("../images/ImageGallery"));
 
@@ -48,6 +50,9 @@ interface Props {
   sessions: Session[];
   busy?: boolean;
   initialSelection?: string;
+  /** Spell prepared from the wiki: opens as an unsaved, editable form. */
+  initialDraft?: AbilityDetails | null;
+  onDraftUsed?: () => void;
   register: (guard: SaveGuard | null) => void;
   onPage: (
     id: string,
@@ -64,6 +69,8 @@ export default function PlayerWorkspace({
   sessions,
   busy = false,
   initialSelection,
+  initialDraft,
+  onDraftUsed,
   register,
   onPage,
   onSource,
@@ -74,7 +81,18 @@ export default function PlayerWorkspace({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [refresh, setRefresh] = useState(0);
-  const [editor, setEditor] = useState<EditState>(null);
+  const [editor, setEditor] = useState<EditState>(() =>
+    initialDraft
+      ? {
+          type: "asset",
+          initial: null,
+          kind: "spell",
+          draft: { details: initialDraft, links: emptyLinks() },
+        }
+      : null,
+  );
+  const draftOnMount = useRef(initialDraft ?? null);
+  const draftUsed = useRef(onDraftUsed);
   const [pending, setPending] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(
     initialSelection ?? null,
@@ -84,7 +102,7 @@ export default function PlayerWorkspace({
   const [rank, setRank] = useState("");
   const [status, setStatus] = useState("all");
   const [catalogOpen, setCatalogOpen] = useState(false);
-  const dirty = useRef(false);
+  const dirty = useRef(initialDraft != null);
   const operation = useRef(false);
   const deleteButton = useRef<HTMLButtonElement>(null);
   function edit(value: EditState) {
@@ -125,6 +143,19 @@ export default function PlayerWorkspace({
           setCharacter(sheet);
           setAssets(items);
           setError("");
+          if (draftOnMount.current) {
+            draftOnMount.current = null;
+            draftUsed.current?.();
+            if (!sheet) {
+              dirty.current = false;
+              setEditor(null);
+              setError(
+                tr(
+                  "Crea prima il personaggio, poi ripeti l’importazione dalla wiki. Nessun incantesimo è stato salvato.",
+                ),
+              );
+            }
+          }
         }
       })
       .catch((reason) => {
@@ -737,18 +768,10 @@ export default function PlayerWorkspace({
                           : ""}
                       </p>
                       {selected.input.details.catalogSource ? (
-                        <aside className="catalog-license">
-                          <p>
-                            <Text source={"Base SRD 2014:"} />{" "}
-                            {selected.input.details.catalogSource.name}{" "}
-                            <Text source={" · copia personale modificabile."} />
-                          </p>
-                          <p>
-                            {catalogBase +
-                              selected.input.details.catalogSource.path}
-                          </p>
-                          <p>{srdAttribution}</p>
-                        </aside>
+                        <CatalogSourceNote
+                          source={selected.input.details.catalogSource}
+                          compact
+                        />
                       ) : null}
                       <dl className="ability-metadata">
                         {[

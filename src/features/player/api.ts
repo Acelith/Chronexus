@@ -61,7 +61,12 @@ export interface ItemDetails {
   notes: string;
 }
 export interface AbilityDetails {
-  catalogSource?: { path: string; name: string } | null;
+  catalogSource?: {
+    path: string;
+    name: string;
+    /** Absent for the D&D 5e API SRD catalog. */
+    provider?: "wikidot";
+  } | null;
   ritual?: boolean;
   concentration?: boolean;
   kind: "spell" | "ability";

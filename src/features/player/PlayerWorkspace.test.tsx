@@ -6,6 +6,7 @@ import {
   emptyCharacter,
   emptyAsset,
   playerApi,
+  type AbilityDetails,
   type Character,
   type Asset,
   type PlayerView,
@@ -314,4 +315,87 @@ test("adattatori generico e sconosciuto preservano statistiche manuali senza der
     expect(adapter.mode).toBe("manual");
     expect(adapter.derive(character.data)).toEqual([]);
   }
+});
+const wikiSpell = {
+  ...(emptyAsset("spell", "dnd5e-2014").details as AbilityDetails),
+  name: "Acid Splash",
+  rank: "0",
+  description: "Original English text.",
+  catalogSource: {
+    path: "spell:acid-splash",
+    name: "Acid Splash",
+    provider: "wikidot" as const,
+  },
+};
+test("una voce Wikidot apre un modulo modificabile e si salva solo esplicitamente", async () => {
+  vi.mocked(playerApi.character).mockResolvedValue(character);
+  vi.mocked(playerApi.assets).mockResolvedValue([]);
+  vi.mocked(playerApi.saveAsset).mockImplementation(
+    async (_c, _pc, _initial, input) =>
+      ({
+        id: "new",
+        campaignId: "a",
+        characterId: "pc",
+        input,
+        revision: 0,
+        sourceAvailable: true,
+      }) as Asset,
+  );
+  const onDraftUsed = vi.fn();
+  let guard: SaveGuard | null = null;
+  render(
+    <PlayerWorkspace
+      campaignId="a"
+      view="abilities"
+      pages={[page]}
+      sessions={[session]}
+      initialDraft={wikiSpell}
+      onDraftUsed={onDraftUsed}
+      register={(g) => {
+        guard = g;
+      }}
+      onPage={vi.fn()}
+      onSource={vi.fn()}
+    />,
+  );
+  const user = userEvent.setup();
+  const name = await screen.findByLabelText("Nome della voce");
+  expect(name).toHaveValue("Acid Splash");
+  expect(
+    screen.getByText("https://dnd5e.wikidot.com/spell:acid-splash"),
+  ).toBeInTheDocument();
+  await waitFor(() => expect(onDraftUsed).toHaveBeenCalledTimes(1));
+  expect(playerApi.saveAsset).not.toHaveBeenCalled();
+  expect(guard!.dirty()).toBe(true);
+  await user.clear(name);
+  await user.type(name, "Acid Splash personale");
+  await user.click(screen.getByRole("button", { name: "Salva voce" }));
+  await waitFor(() => expect(playerApi.saveAsset).toHaveBeenCalledTimes(1));
+  const saved = vi.mocked(playerApi.saveAsset).mock.calls[0][3];
+  expect(saved.details).toMatchObject({
+    name: "Acid Splash personale",
+    catalogSource: { provider: "wikidot", path: "spell:acid-splash" },
+  });
+});
+test("senza personaggio l’importazione dalla wiki viene annullata con un avviso", async () => {
+  vi.mocked(playerApi.character).mockResolvedValue(null);
+  const onDraftUsed = vi.fn();
+  render(
+    <PlayerWorkspace
+      campaignId="a"
+      view="abilities"
+      pages={[]}
+      sessions={[]}
+      initialDraft={wikiSpell}
+      onDraftUsed={onDraftUsed}
+      register={vi.fn()}
+      onPage={vi.fn()}
+      onSource={vi.fn()}
+    />,
+  );
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Crea prima il personaggio",
+  );
+  expect(onDraftUsed).toHaveBeenCalledTimes(1);
+  expect(playerApi.saveAsset).not.toHaveBeenCalled();
 });

@@ -1913,6 +1913,53 @@ textarea::placeholder {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+.wiki-provider {
+  font-size: 15px;
+  color: #65553e;
+}
+.wiki-confirm {
+  background: #f4e6c7;
+  border: 2px solid #6e302b;
+  padding: 24px;
+  margin: 20px 0;
+}
+.wiki-confirm h4 {
+  margin-top: 0;
+}
+.wiki-table {
+  overflow-x: auto;
+  margin: 12px 0;
+}
+.wiki-table table {
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.wiki-table td {
+  border: 1px solid #bca77c;
+  padding: 6px 10px;
+  vertical-align: top;
+}
+.wiki-settings fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 12px;
+  display: grid;
+  gap: 10px;
+}
+.wiki-settings label.wiki-provider-option {
+  display: flex;
+  gap: 12px;
+  align-items: start;
+  font-size: inherit;
+}
+.wiki-settings .wiki-provider-option input {
+  width: auto;
+  flex: none;
+  margin-top: 5px;
+}
+.wiki-cache-summary {
+  margin: 8px 0 16px;
+}
 
 .update-notes {
   white-space: pre-wrap;
