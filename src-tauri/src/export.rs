@@ -251,12 +251,21 @@ pub fn write_export(
             source.content.as_bytes().to_vec(),
         ));
     }
-    if assets.iter().any(|asset| match &asset.input.details {
-        player::AssetDetails::Spell { fields } | player::AssetDetails::Ability { fields } => {
-            fields.catalog_source.is_some()
-        }
-        _ => false,
-    }) {
+    let provider_used = |wanted: Option<&str>| {
+        assets.iter().any(|asset| match &asset.input.details {
+            player::AssetDetails::Spell { fields } | player::AssetDetails::Ability { fields } => {
+                fields
+                    .catalog_source
+                    .as_ref()
+                    .is_some_and(|s| s.provider.as_deref() == wanted)
+            }
+            _ => false,
+        })
+    };
+    if provider_used(Some("wikidot")) {
+        files.push(("SOURCES-WIKIDOT.txt".into(), b"Entries whose catalogSource.provider is \"wikidot\" started from public pages of https://dnd5e.wikidot.com/ (page URL: https://dnd5e.wikidot.com/ followed by catalogSource.path). They were copied by explicit personal request and can include personal modifications. Each page declares its own license; the site footer states CC BY-SA 3.0 unless otherwise stated. Underlying game material can belong to its publishers: verify rights before redistributing.\n".to_vec()));
+    }
+    if provider_used(None) {
         files.push(("LICENSE-SRD.txt".into(),b"This work includes material taken from the System Reference Document 5.1 (\"SRD 5.1\") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.\n\nImported spell entries can include personal modifications; catalogSource identifies their original entry. Data provider: D&D 5e API (5e-bits).\n".to_vec()));
     }
     for image in &pictures {

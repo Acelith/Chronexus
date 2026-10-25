@@ -120,6 +120,7 @@ fn legacy_sheet_defaults_and_expanded_validation_preserve_saved_data() {
         fields.catalog_source = Some(crate::catalog::CatalogSource {
             path: "spells/acid-arrow".into(),
             name: "Acid Arrow".into(),
+            provider: None,
         });
         fields.ritual = true;
     }
@@ -128,6 +129,31 @@ fn legacy_sheet_defaults_and_expanded_validation_preserve_saved_data() {
         serde_json::to_value(saved.input).unwrap(),
         serde_json::to_value(&imported).unwrap()
     );
+    // SRD sources keep their previous JSON shape; Wikidot ones name the provider.
+    let srd = serde_json::to_value(&imported).unwrap();
+    assert!(srd["details"]["catalogSource"].get("provider").is_none());
+    let mut wikidot = imported.clone();
+    if let AssetDetails::Spell { fields } = &mut wikidot.details {
+        fields.catalog_source = Some(crate::catalog::CatalogSource {
+            path: "spell:acid-splash".into(),
+            name: "Acid Splash".into(),
+            provider: Some("wikidot".into()),
+        });
+    }
+    save_asset(&c, &campaign.id, &id, None, None, wikidot.clone()).unwrap();
+    for (path, provider) in [
+        ("spells/acid-arrow", "wikidot"),
+        ("spell:acid-splash", "open5e"),
+        ("feat:alert", "wikidot"),
+        ("spell:../x", "wikidot"),
+    ] {
+        if let AssetDetails::Spell { fields } = &mut wikidot.details {
+            let s = fields.catalog_source.as_mut().unwrap();
+            s.path = path.into();
+            s.provider = Some(provider.into());
+        }
+        assert!(save_asset(&c, &campaign.id, &id, None, None, wikidot.clone()).is_err());
+    }
     if let AssetDetails::Spell { fields } = &mut imported.details {
         fields.catalog_source.as_mut().unwrap().path = "https://evil.test".into();
     }

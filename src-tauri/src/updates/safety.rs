@@ -73,6 +73,7 @@ pub fn before_install<T>(
     }
     let preferences = read_json(&store.root.join("interface-preferences.json"))?;
     let settings = read_settings(&store.root)?;
+    let wiki = read_json(&store.root.join(crate::wiki_provider::FILE))?;
     let stamp = chrono::DateTime::<chrono::Utc>::from(std::time::SystemTime::now())
         .format("%Y%m%dT%H%M%SZ")
         .to_string();
@@ -95,7 +96,7 @@ pub fn before_install<T>(
         }
         hash.update(&bytes[..n]);
     }
-    let record = json!({"format":"chronexus-update-backup","version":1,"fromVersion":env!("CARGO_PKG_VERSION"),"targetVersion":target,"backup":receipt.path,"sha256":format!("{:x}",hash.finalize()),"interfacePreferences":preferences,"updateSettings":settings});
+    let record = json!({"format":"chronexus-update-backup","version":1,"fromVersion":env!("CARGO_PKG_VERSION"),"targetVersion":target,"backup":receipt.path,"sha256":format!("{:x}",hash.finalize()),"interfacePreferences":preferences,"updateSettings":settings,"wikiPreferences":wiki});
     let mut sidecar = NamedTempFile::new_in(&directory)
         .map_err(|_| "Backup creato ma ricevuta non salvabile: installazione bloccata.")?;
     serde_json::to_writer_pretty(sidecar.as_file_mut(), &record)

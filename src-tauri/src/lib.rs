@@ -36,6 +36,8 @@ mod search;
 mod search_tests;
 mod updates;
 mod wiki;
+mod wiki_provider;
+mod wikidot;
 use journal::{AppResult, Campaign, Session};
 use std::sync::{Arc, Mutex};
 use tauri::Emitter;
@@ -555,10 +557,162 @@ fn read_wiki_cache(db: tauri::State<Database>, key: String) -> AppResult<Option<
 #[tauri::command]
 fn store_wiki_cache(
     db: tauri::State<Database>,
+    state: tauri::State<wikidot::State>,
     key: String,
     payload: serde_json::Value,
+    epoch: Option<u64>,
 ) -> AppResult<wiki::Entry> {
-    db.with(|c| wiki::store(c, &key, payload))
+    db.with(|c| {
+        // A clear that happened while the request was pending wins over its result.
+        if epoch.is_some_and(|e| e != state.epoch()) {
+            return Err(CACHE_CLEARED.into());
+        }
+        wiki::store(c, &key, payload)
+    })
+}
+const CACHE_CLEARED: &str =
+    "La cache wiki è stata svuotata durante la richiesta: la copia non è stata salvata.";
+#[tauri::command]
+fn wiki_cache_epoch(state: tauri::State<wikidot::State>) -> u64 {
+    state.epoch()
+}
+#[tauri::command]
+fn get_wiki_provider(db: tauri::State<Database>) -> AppResult<wiki_provider::WikiChoice> {
+    db.with_store(|store| wiki_provider::read(&store.root))
+}
+#[tauri::command]
+fn save_wiki_provider(
+    db: tauri::State<Database>,
+    provider: String,
+) -> AppResult<wiki_provider::WikiChoice> {
+    db.with_store(|store| wiki_provider::save(&store.root, &provider))
+}
+#[tauri::command]
+fn wiki_cache_summary(db: tauri::State<Database>) -> AppResult<wikidot::CacheSummary> {
+    db.with(wikidot::summary)
+}
+#[tauri::command]
+fn clear_wiki_cache(
+    db: tauri::State<Database>,
+    state: tauri::State<wikidot::State>,
+    provider: String,
+) -> AppResult<wikidot::CacheSummary> {
+    if !["open5e", "wikidot", "all"].contains(&provider.as_str()) {
+        return Err("Scegli quale cache wiki svuotare.".into());
+    }
+    state.invalidate();
+    db.with(|c| wikidot::clear(c, &provider))
+}
+#[tauri::command]
+fn cancel_wikidot(state: tauri::State<wikidot::State>) {
+    state.cancel();
+}
+/// Cached copy first; network only when missing or explicitly refreshed.
+async fn wikidot_load<T: serde::Serialize + serde::de::DeserializeOwned>(
+    db: &Database,
+    state: &wikidot::State,
+    key: String,
+    refresh: bool,
+    load: impl std::future::Future<Output = AppResult<T>>,
+) -> AppResult<wikidot::Cached<T>> {
+    let old = db.with(|c| wikidot::read_raw(c, &key))?;
+    let decode = |v: serde_json::Value| -> AppResult<T> {
+        serde_json::from_value(v).map_err(|_| "Copia Wikidot illeggibile.".into())
+    };
+    if let (Some((value, at)), false) = (&old, refresh) {
+        return Ok(wikidot::Cached {
+            payload: decode(value.clone())?,
+            fetched_at: at.clone(),
+            cached: true,
+            warning: None,
+        });
+    }
+    let epoch = state.epoch();
+    match load.await {
+        Ok(fresh) => {
+            let value = serde_json::to_value(&fresh).map_err(|_| "Copia Wikidot non valida.")?;
+            let at = db.with(|c| {
+                if state.epoch() != epoch {
+                    return Err(CACHE_CLEARED.into());
+                }
+                wikidot::store(c, &key, &value)
+            })?;
+            Ok(wikidot::Cached {
+                payload: fresh,
+                fetched_at: at,
+                cached: false,
+                warning: None,
+            })
+        }
+        Err(error) => match old {
+            Some((value, at)) => Ok(wikidot::Cached {
+                payload: decode(value)?,
+                fetched_at: at,
+                cached: true,
+                warning: Some(format!(
+                    "{error} Aggiornamento non riuscito: stai leggendo la copia locale."
+                )),
+            }),
+            None => Err(error),
+        },
+    }
+}
+#[tauri::command]
+async fn wikidot_search(
+    db: tauri::State<'_, Database>,
+    state: tauri::State<'_, wikidot::State>,
+    category: String,
+    query: String,
+    refresh: bool,
+) -> AppResult<wikidot::SearchResult> {
+    wikidot::index_path(&category)?;
+    if query.chars().count() > 100 || query.contains('\0') {
+        return Err("Inserisci al massimo 100 caratteri.".into());
+    }
+    let token = state.token();
+    let client = wikidot::client()?;
+    let base = wikidot::base();
+    let index = wikidot_load(
+        &db,
+        &state,
+        format!("index/{category}"),
+        refresh,
+        wikidot::fetch_index(&client, &state, &base, &category, &token),
+    )
+    .await?;
+    let (total, rows) = wikidot::filter(&index.payload, &query);
+    Ok(wikidot::SearchResult {
+        category,
+        url: index.payload.url,
+        fetched_at: index.fetched_at,
+        cached: index.cached,
+        warning: index.warning,
+        index_size: index.payload.rows.len(),
+        total,
+        rows,
+    })
+}
+#[tauri::command]
+async fn wikidot_entry(
+    db: tauri::State<'_, Database>,
+    state: tauri::State<'_, wikidot::State>,
+    page: String,
+    refresh: bool,
+) -> AppResult<wikidot::Cached<wikidot::Entry>> {
+    if wikidot::category_of(&page).is_none() {
+        return Err("Pagina Wikidot non ammessa.".into());
+    }
+    let token = state.token();
+    let client = wikidot::client()?;
+    let base = wikidot::base();
+    wikidot_load(
+        &db,
+        &state,
+        format!("entry/{page}"),
+        refresh,
+        wikidot::fetch_entry(&client, &state, &base, &page, &token),
+    )
+    .await
 }
 #[tauri::command]
 async fn probe_local_ai() -> AppResult<assistant::runtime::Runtime> {
@@ -733,7 +887,18 @@ fn list_ai_rule_sources(
     db: tauri::State<Database>,
     edition: String,
 ) -> AppResult<serde_json::Value> {
-    db.with(|c|{let mut q=c.prepare("SELECT key,payload FROM wiki_cache WHERE key LIKE 'entry/%' ORDER BY fetched_at DESC").map_err(journal::storage)?;let rows=q.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(journal::storage)?.collect::<rusqlite::Result<Vec<_>>>().map_err(journal::storage)?;let mut out=Vec::new();for (key,raw) in rows{let value:serde_json::Value=serde_json::from_str(&raw).map_err(|_|"Fonte wiki illeggibile.")?;if value["document"]["gamesystem"]["key"].as_str()==Some(&edition){out.push(serde_json::json!({"key":key,"title":value["entry"]["name"],"document":value["document"]["name"]}))}}Ok(serde_json::json!(out))})
+    db.with(|c|{let mut q=c.prepare("SELECT key,payload FROM wiki_cache WHERE key LIKE 'entry/%' ORDER BY fetched_at DESC").map_err(journal::storage)?;let rows=q.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(journal::storage)?.collect::<rusqlite::Result<Vec<_>>>().map_err(journal::storage)?;let mut out=Vec::new();for (key,raw) in rows{let value:serde_json::Value=serde_json::from_str(&raw).map_err(|_|"Fonte wiki illeggibile.")?;if value["document"]["gamesystem"]["key"].as_str()==Some(&edition){out.push(serde_json::json!({"key":key,"title":value["entry"]["name"],"document":value["document"]["name"]}))}}
+        if edition == wikidot::EDITION {
+            let mut q = c.prepare("SELECT substr(key,7) FROM wikidot_cache WHERE key LIKE 'entry/%' ORDER BY fetched_at DESC").map_err(journal::storage)?;
+            let pages = q.query_map([], |r| r.get::<_, String>(0)).map_err(journal::storage)?.collect::<rusqlite::Result<Vec<_>>>().map_err(journal::storage)?;
+            for page in pages {
+                if let Some((e, _)) = wikidot::read_entry(c, &page)? {
+                    let document = format!("Wikidot D&D 5e · {}", e.source.as_deref().unwrap_or("fonte non indicata"));
+                    out.push(serde_json::json!({"key":format!("wikidot/{page}"),"title":e.title,"document":document}));
+                }
+            }
+        }
+        Ok(serde_json::json!(out))})
 }
 pub fn run() {
     let application = tauri::Builder::default()
@@ -741,6 +906,7 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(updates::State::default())
         .manage(assistant::service::State::default())
+        .manage(wikidot::State::default())
         .setup(|app| {
             // Keep the window usable when initialization fails so the UI can explain recovery.
             let connection = (|| -> Result<_, Box<dyn std::error::Error>> {
@@ -771,7 +937,7 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![updates::get_update_settings,updates::save_update_settings,updates::check_app_update,updates::download_app_update,updates::cancel_app_update,updates::install_app_update,get_interface_preferences,save_interface_preferences,roll_dice,list_dice_rolls,get_training_overview,start_campaign_training,activate_campaign_training,get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
+        .invoke_handler(tauri::generate_handler![updates::get_update_settings,updates::save_update_settings,updates::check_app_update,updates::download_app_update,updates::cancel_app_update,updates::install_app_update,get_interface_preferences,save_interface_preferences,roll_dice,list_dice_rolls,get_training_overview,start_campaign_training,activate_campaign_training,get_campaign_ai,save_campaign_ai,refresh_campaign_ai,get_ai_settings,configure_local_ai,ask_local_ai,cancel_local_ai,list_ai_history,delete_ai_turn,check_ai_source,list_ai_rule_sources,probe_local_ai,read_wiki_cache,store_wiki_cache,wiki_cache_epoch,get_wiki_provider,save_wiki_provider,wiki_cache_summary,clear_wiki_cache,cancel_wikidot,wikidot_search,wikidot_entry,list_party,save_party_member,remove_party_member,list_campaigns,create_campaign,rename_campaign,list_sessions,create_session,save_document,list_pages,create_page,update_page,save_page_document,get_backlinks,recover_page,get_graph,get_relationship,save_relationship,delete_relationship,create_backup,inspect_backup,restore_backup,cancel_restore,get_character,save_character,change_character_counter,list_player_assets,save_player_asset,delete_player_asset,get_import_source,add_import_source,export_campaign,list_images,add_image,read_image,detach_image,search_campaign,rebuild_search_index,read_catalog_cache,store_catalog_cache])
         .build(tauri::generate_context!())
         .expect("Impossibile avviare la finestra Chronexus.");
     application.run(|app, event| {
@@ -782,4 +948,48 @@ pub fn run() {
             }
         }
     });
+}
+#[cfg(test)]
+mod wiki_load_tests {
+    use super::*;
+    fn entry(page: &str) -> wikidot::Entry {
+        let html = r#"<div class="page-title"><span>T</span></div><div id="page-content"><p>Source: S</p><p>Text</p></div>"#;
+        wikidot::parse::entry(html, page).unwrap()
+    }
+    #[tokio::test]
+    async fn pending_result_is_not_cached_after_a_clear_and_cache_wins_offline() {
+        let dir = tempfile::tempdir().unwrap();
+        let db = Database(Ok(Arc::new(Mutex::new(
+            backup::Store::open(dir.path()).unwrap(),
+        ))));
+        let state = wikidot::State::default();
+        let key = "entry/feat:alert".to_string();
+        // The clear happens while the network request is still pending.
+        let late = async {
+            state.invalidate();
+            Ok(entry("feat:alert"))
+        };
+        let error = wikidot_load(&db, &state, key.clone(), false, late)
+            .await
+            .unwrap_err();
+        assert_eq!(error, CACHE_CLEARED);
+        assert!(db.with(|c| wikidot::read_raw(c, &key)).unwrap().is_none());
+        let fresh = wikidot_load(&db, &state, key.clone(), false, async {
+            Ok(entry("feat:alert"))
+        })
+        .await
+        .unwrap();
+        assert!(!fresh.cached);
+        // Cached copies answer without touching the network; failed refresh falls back visibly.
+        let unused = async { Err::<wikidot::Entry, String>("network must not run".into()) };
+        assert!(
+            wikidot_load(&db, &state, key.clone(), false, unused)
+                .await
+                .unwrap()
+                .cached
+        );
+        let offline = async { Err::<wikidot::Entry, String>("Wikidot non raggiungibile.".into()) };
+        let stale = wikidot_load(&db, &state, key, true, offline).await.unwrap();
+        assert!(stale.cached && stale.warning.unwrap().contains("copia locale"));
+    }
 }

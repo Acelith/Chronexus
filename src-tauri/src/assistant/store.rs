@@ -146,6 +146,27 @@ pub fn canonical(
 ) -> AppResult<Option<Source>> {
     require_campaign(c, campaign)?;
     if kind == "wiki" {
+        if let Some(page) = id.strip_prefix("wikidot/") {
+            if crate::wikidot::category_of(page).is_none() {
+                return Err("Identità fonte regole non valida.".into());
+            }
+            return crate::wikidot::read_entry(c, page)?
+                .map(|(e, _)| {
+                    let text = crop(&crate::wikidot::plain_text(&e));
+                    Ok(Source {
+                        key: String::new(),
+                        kind: kind.into(),
+                        source_id: id.into(),
+                        block_id: None,
+                        title: e.title.clone(),
+                        revision: 0,
+                        hash: hash(&text),
+                        text,
+                        edition: Some(e.edition),
+                    })
+                })
+                .transpose();
+        }
         let raw: Option<String> = c
             .query_row(
                 "SELECT payload FROM wiki_cache WHERE key=?1 AND key LIKE 'entry/%'",
@@ -530,7 +551,9 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
                         ]
                         .contains(&s.kind.as_str())
                         || (s.kind == "wiki"
-                            && (!s.source_id.starts_with("entry/") || s.source_id.len() > 500))
+                            && (!(s.source_id.starts_with("entry/")
+                                || s.source_id.starts_with("wikidot/"))
+                                || s.source_id.len() > 500))
                     {
                         return Err("Identità della fonte AI non valida.".into());
                     }

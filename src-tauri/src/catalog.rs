@@ -34,16 +34,26 @@ pub fn valid_path(path: &str) -> bool {
 pub struct CatalogSource {
     pub path: String,
     pub name: String,
+    /// Absent for the D&D 5e API SRD catalog; "wikidot" for a public wiki page.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub provider: Option<String>,
 }
 impl CatalogSource {
     pub fn validate(&self) -> AppResult<()> {
-        if !valid_path(&self.path)
-            || !self.path.starts_with("spells/")
+        let path_ok = match self.provider.as_deref() {
+            None => valid_path(&self.path) && self.path.starts_with("spells/"),
+            Some("wikidot") => {
+                self.path.starts_with("spell:")
+                    && crate::wikidot::category_of(&self.path) == Some("spells")
+            }
+            Some(_) => false,
+        };
+        if !path_ok
             || self.name.trim().is_empty()
             || self.name.chars().count() > 200
             || self.name.contains('\0')
         {
-            return Err("Riferimento al catalogo SRD 2014 non valido.".into());
+            return Err("Riferimento alla fonte dell’incantesimo non valido.".into());
         }
         Ok(())
     }

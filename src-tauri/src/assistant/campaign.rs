@@ -86,7 +86,10 @@ pub fn validate(p: &Profile) -> AppResult<()> {
         identifier(id)?;
     }
     for key in &p.rule_keys {
-        if !key.starts_with("entry/") || key.len() > 200 || key.contains("..") {
+        let wikidot = key
+            .strip_prefix("wikidot/")
+            .is_some_and(|p| crate::wikidot::category_of(p).is_some());
+        if !(key.starts_with("entry/") || wikidot) || key.len() > 200 || key.contains("..") {
             return Err("Identità fonte regole non valida.".into());
         }
     }
