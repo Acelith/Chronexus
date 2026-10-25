@@ -16,6 +16,8 @@ istanza, può averlo migrato allo schema 016 (additivo) e aver scritto
 `update-announcements.json`. Non verificato: la lettura della cartella personale è
 stata negata dal sistema di permessi. Se la 0.4.0 installata segnala uno schema
 più recente, installare la 0.5.0 pubblicata (dati conservati).
+Esito: l’utente ha confermato che la 0.4.0 installata si apre normalmente, quindi
+l’archivio personale non è stato migrato a 016.
 
 # Dettagli della build 0.5.0
 
