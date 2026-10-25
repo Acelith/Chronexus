@@ -1,3 +1,15 @@
+# Release 0.5.0 — 25 ottobre 2026 (in pubblicazione)
+
+Su richiesta dell’utente: illustrazioni dell’araldo integrate (daed026), versione
+0.5.0 (deef244, sorgente compilato, tag annotato `v0.5.0`). Build NSIS firmata
+updater: `installers/Chronexus-0.5.0-Windows-x64/` (fuori Git), setup 32.558.794
+byte, SHA-256 d854b0e8768d980ce3b1d288c12261b23b1d253537da33f503044142e5ca2e51;
+`.sig`, `latest.json`, SHA256SUMS, report e LEGGIMI. Test crittografico ignorato
+eseguito: firma valida con la chiave di produzione, copia manomessa rifiutata.
+Test degli script di rilascio 26 PASS (test M11 della versione reso generico).
+Installer non installato su questo computer per non toccare l’installazione
+personale; upgrade reale 0.4.0 → 0.5.0 dal client non ancora provato.
+
 # Stato Chronexus — 25 ottobre 2026 (M15a)
 
 ## M15a — Araldo degli aggiornamenti: operativa Windows (illustrazioni da fornire)

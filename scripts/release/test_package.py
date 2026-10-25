@@ -4,7 +4,7 @@ from pathlib import Path
 spec=importlib.util.spec_from_file_location('package',Path(__file__).with_name('package.py'))
 m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 class PackageTests(unittest.TestCase):
- def test_versions_agree(self): self.assertEqual(m.versions(),'0.2.0')
+ def test_versions_agree(self): self.assertEqual(m.versions(),m.json.loads((m.ROOT/'package.json').read_text())['version'])
  def test_digest_stream(self):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/'x';p.write_bytes(b'abc')
