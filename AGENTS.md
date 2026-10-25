@@ -248,6 +248,19 @@ Never switch models silently.
 
 The user-chosen herald logos live in `assets/brand/` (originals in
 `assets/brand/source/`, never overwrite them). M21 (app icon, sidebar logo,
-wordmark) is the first milestone to execute, before M18, M19, M20 and any other
-open milestone, unless the user changes the order. Keep the app name as
+wordmark) and planned M22 AI setup form the next phase, before M19/M20;
+M18 is already implemented. Keep the app name as
 accessible text; do not change the legacy app identifier for branding.
+
+## Planned M22 — explicit AI setup alongside M21
+
+M22 is planned, not implemented: app settings will guide explicit installation
+of Ollama and the qualified M18 models, alongside the M21 logos, before M19/M20.
+Qwen3.8-27B is primary; Gemma remains an optional secondary download. Preserve
+existing runtime installations and campaign choices. No startup downloads,
+inference, cloud fallback or implicit system services. Setup downloads require
+explicit user action, official allowlisted sources and verified integrity;
+never send campaign data. Installing components does not activate campaign AI
+or download QLoRA checkpoints. This planning request does not authorize running
+installers now. See ROADMAP M22 for scope and acceptance. Publication remains
+stopped until a new user request.

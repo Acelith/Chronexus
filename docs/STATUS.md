@@ -1,3 +1,15 @@
+# Pianificazione — 25 ottobre 2026: M22 assieme ai loghi M21
+
+Aggiunta M22: installazione guidata di Ollama e modelli da Impostazioni dell’app,
+nella stessa prossima fase dei loghi M21, prima di M19/M20. Qwen3.8-27B principale,
+Gemma secondaria facoltativa; stato componenti, requisiti/spazio/licenze,
+download espliciti con avanzamento/annullamento e verifica integrità. Runtime
+preesistenti e attivazione delle campagne preservati, nessun cloud o setup
+automatico. QLoRA escluso dal download ordinario. Solo pianificazione: codice,
+versione, schema e pacchetto 0.7.0 invariati; nessuna compilazione/installazione
+o pubblicazione. Verifica documentale e `git diff --check`, test app non eseguiti
+per questa modifica solo documentale. Dettagli e accettazione in ROADMAP M22.
+
 # Stato Chronexus — 25 ottobre 2026: M18
 
 Implementata Windows, versione 0.7.0 compilata e consegnata localmente. Qwen3.8-27B ufficiale

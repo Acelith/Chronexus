@@ -60,6 +60,7 @@ successivi sono indicati nello stato, senza fingere che siano avvenuti prima.
 | 31 | M18 | Sostituzione dei modelli Qwen con Qwen3.8-27B locale | Implementata Windows | 018 | Qualifica e confronto reali, Gemma secondaria; altri OS pendenti |
 | 32 | M19 | Cartella backup nei Documenti, backup periodici e di aggiornamento | Pianificata | — | Dopo M21 |
 | 33 | M20 | README di qualità con immagini, guida rapida e crediti | Pianificata | — | Dopo M21 (usa i suoi loghi) |
+| 34 | M22 | Installazione guidata di Ollama e modelli dalle impostazioni | Pianificata | — | Assieme ai loghi M21, prima di M19/M20 |
 
 
 ## M0 - Foundation and real local database
@@ -951,11 +952,14 @@ M18 è stata successivamente implementata; vedere la sua sezione e STATUS.
 ## M21 — Nuova identità visiva: logo dell’araldo, icona e marchio (pianificata, prima)
 
 **Stato:** richiesta il 25 ottobre 2026; non implementata. Su istruzione esplicita
-dell’utente è **la prima milestone da eseguire**: M18, M19, M20 e ogni altra
-milestone non completata o in corso vengono dopo. Le immagini scelte sono salvate
+dell’utente è **la prima fase da eseguire, assieme a M22**, prima di M19/M20.
+M18 è nel frattempo completata su Windows. Le immagini scelte sono salvate
 in `assets/brand/` (originali in `assets/brand/source/`, varianti preparate e
 provenienza in `assets/brand/README.md`) e restano la fonte per gli aggiornamenti
 futuri del marchio. L’ID M21 segue gli ID già usati; l’ordine è nel registro.
+La richiesta successiva affianca **M22** a questa consegna: loghi e preparazione
+dell’AI dalle impostazioni formano la prossima fase, prima di M19/M20. Le due
+milestone rimangono distinte e verificabili; questa aggiunta è solo pianificazione.
 
 ### M21.1 — Icona dell’applicazione
 
@@ -993,6 +997,78 @@ futuri del marchio. L’ID M21 segue gli ID già usati; l’ordine è nel regist
 - Barra laterale a 1586×992, 1200×800 e 760×540, accessibilità del nome (axe e
   lettore di schermo), test e lint invariati; versioni di piattaforma dichiarate
   solo se provate. Pubblicazione secondo la regola delle release solo su richiesta.
+
+## M22 — Installazione di Ollama e modelli dalle impostazioni (pianificata con M21)
+
+**Stato:** richiesta il 25 ottobre 2026; non implementata. Da sviluppare assieme
+alla milestone dei loghi **M21**, prima di M19/M20. Obiettivo: preparare l’AI
+locale direttamente da **Impostazioni dell’app → AI locale**, senza richiedere
+all’utente comandi nel terminale. L’app resta interamente utilizzabile senza AI.
+Questa pianificazione non avvia download, installazioni, compilazioni o pubblicazioni.
+
+### M22.1 — Stato e scelta dei componenti
+
+- Mostrare separatamente stato di Ollama, blocco cloud verificato, GPU, modelli
+  presenti e spazio disponibile. Nessuna richiesta al runtime all’apertura:
+  rilevamento tramite azione esplicita **Controlla componenti**.
+- Proporre **Qwen3.8-27B · Principale** come modello previsto per assistente e
+  traduzioni; **Gemma 4 12B · Secondario** come alternativa facoltativa, non
+  scaricare entrambi per impostazione predefinita. Riutilizzare la policy M18.
+- Prima del download mostrare dimensioni effettive, spazio necessario, requisiti
+  GPU/RAM, destinazione, provenienza e licenza. Dichiarare il caricamento misto
+  del 27B e distinguere modello assente, incompatibile o con pesi non qualificati.
+- Riconoscere un’installazione Ollama esistente: non sovrascriverla, riconfigurarla
+  o arrestarla implicitamente. Porta occupata o cloud non disabilitato richiedono
+  un messaggio e un intervento esplicito, senza ripiego su servizi esterni.
+
+### M22.2 — Installazione guidata e verificata
+
+- Azioni distinte **Installa Ollama** e **Scarica modello**; consenso esplicito,
+  avanzamento in byte/percentuale quando disponibile, annullamento e nuovo
+  tentativo manuale. Errori di rete/spazio/permessi lasciano l’app utilizzabile.
+- Verificare versione compatibile, distribuzione ufficiale e licenza del runtime
+  prima dell’implementazione. Preferire una copia gestita per utente quando
+  supportata; eventuali permessi di sistema devono essere dichiarati prima di
+  avviare l’installer. Niente script remoti eseguiti o comandi arbitrari.
+- Download solo dopo clic, da host/percorsi ufficiali esplicitamente ammessi,
+  con limiti, timeout e gestione dei redirect verificata. Controllare integrità
+  del runtime e manifest/digest GGUF qualificati M18 prima di dichiarare «Pronto».
+  File parziali non sono componenti installati; nessuna attivazione incompleta.
+- L’eventuale uso di Ollama per scaricare i pesi resta una procedura di setup
+  esplicita, distinta dall’adapter di inferenza a loopback fisso. Non inviare
+  campagne, note, fotografie, PDF o conversazioni nelle richieste di setup.
+- Pesanti download, cartelle e ricevute dei componenti restano fuori Git e dai
+  backup delle campagne. Gestione/rimozione riguarda soltanto componenti posseduti
+  da Chronexus e richiede conferma; mai cancellare runtime o pesi preesistenti.
+
+### M22.3 — Collegamento con assistente e wiki
+
+- Conclusa l’installazione, verificare runtime locale senza cloud e GPU; indicare
+  chiaramente **Pronto**, **Da verificare** o l’errore effettivo. Nessuna inferenza
+  di prova con contenuti della campagna e nessun avvio automatico al lancio dell’app.
+- Offrire un’azione esplicita per avviare il runtime gestito e spiegare quando
+  rimane in esecuzione; nessun servizio o avvio automatico di sistema implicito.
+- Rimandare alla scelta/attivazione esplicita nelle impostazioni della campagna e
+  al pulsante di traduzione della wiki. Installare i componenti non abilita l’AI,
+  non cambia il modello di una campagna e non avvia generazioni o training.
+- QLoRA resta Gemma-only: checkpoint e worker di addestramento non sono inclusi
+  nel setup ordinario e non vengono scaricati in automatico. Nessuna reinstallazione
+  dei vecchi Qwen ritirati o sostituzione silenziosa del modello scelto.
+
+### Accettazione M22
+
+- Profilo pulito: installazione runtime e solo modello scelto, integrità verificata,
+  avvio esplicito, prima risposta/traduzione e successivo riuso senza download.
+- Runtime preesistente intatto, modello già presente, porta occupata, cloud attivo,
+  CPU sola/GPU insufficiente, spazio insufficiente, permessi negati, rete assente,
+  risposta/redirect non ammessi, checksum errato, annullamento e riavvio dopo
+  interruzione. Nessun componente parziale dichiarato pronto o dato personale inviato.
+- Campagne/modelli attivi e backup invariati; annullamento non cancella pesi
+  preesistenti. Stati vuoti/caricamento/errore, tastiera, accessibilità e lingue.
+- Test mirati Rust/frontend e collaudo reale su profilo isolato. Windows per primo;
+  macOS/Linux e installazioni di sistema dichiarate verificate solo se provate.
+  Aggiornare guide AI/installer/STATUS; pubblicazione solo su nuova richiesta,
+  rispettando l’istruzione corrente di non pubblicare la 0.7.0.
 
 ## M18 — Sostituzione dei modelli Qwen con Qwen3.8-27B locale (implementata Windows)
 
@@ -1208,8 +1284,9 @@ astro-bento-portfolio, Win-Debloat-Tools, Sherlock), fedele allo stato reale.
   di Wikidot; M16 è inclusa nella release 0.5.0.
 - **M15a:** illustrazioni incluse nella 0.5.0; restano upgrade reale
   dal popup fra due release firmate, ascolto della fanfara su più sistemi.
-- **Ordine delle prossime milestone (istruzione dell’utente): prima M21** (logo
-  dell’araldo, icona e marchio), poi M19 (backup nei Documenti) e M20 (README di qualità).
+- **Prossima fase (istruzione dell’utente): M21 e M22 insieme** (logo
+  dell’araldo, icona/marchio e installazione guidata Ollama/modelli nelle
+  impostazioni), poi M19 (backup nei Documenti) e M20 (README di qualità).
   M18 è implementata su Windows; altre GPU/OS e prova fisica offline pendenti.
   Implementare solo su richiesta; i residui sopra restano aperti.
 
