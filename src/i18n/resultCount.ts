@@ -20,7 +20,6 @@ const forms: Record<string, Forms> = {
     many: "{0} نتيجة",
     other: "{0} نتيجة",
   },
-  "lmo-CH": { other: "{0} risultaa" },
 };
 const rules = new Map(locales.map((l) => [l.id, new Intl.PluralRules(l.intl)]));
 export function resultCount(count: number) {

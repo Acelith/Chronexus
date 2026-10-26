@@ -25,7 +25,6 @@ pub fn language(locale: &str) -> AppResult<&'static str> {
         "ko" => Ok("Korean"),
         "zh-Hans" => Ok("Simplified Chinese"),
         "ar" => Ok("Arabic"),
-        "lmo-CH" => Ok("Ticinese Lombard (Swiss Italian dialect; draft)"),
         _ => Err("Wiki translation not available for this language. Read the original.".into()),
     }
 }
@@ -120,8 +119,13 @@ fn source(c: &Connection, provider: &str, key: &str) -> AppResult<(String, Vec<B
     );
     Ok((title, blocks, hash))
 }
+/// Locales removed in M23: their saved copies stay valid in archives and
+/// backups, but new translations are never produced for them.
+const RETIRED_LOCALES: [&str; 1] = ["lmo-CH"];
 fn validate(t: &Translation) -> AppResult<()> {
-    language(&t.locale)?;
+    if !RETIRED_LOCALES.contains(&t.locale.as_str()) {
+        language(&t.locale)?;
+    }
     let historical = t.model == "qwen3:4b-instruct" && t.revision == "wiki-translation-v1";
     let current = models::base(&t.model).is_ok() && t.revision == REVISION;
     if !(historical || current)

@@ -110,11 +110,10 @@ function TranslationView({
   const [error, setError] = useState("");
   const active = useRef(true);
   const request = useRef<string | null>(null);
-  const supported = !["tlh", "art-x-rihan"].includes(locale);
   const original = locale === "en";
   useEffect(() => {
     active.current = true;
-    if (supported && !original) {
+    if (!original) {
       void command<Translation | null>("read_wiki_translation", {
         provider,
         key: sourceKey,
@@ -138,7 +137,7 @@ function TranslationView({
           () => undefined,
         );
     };
-  }, [provider, sourceKey, locale, model, supported, original]);
+  }, [provider, sourceKey, locale, model, original]);
   async function translate() {
     if (busy || request.current) return;
     const id = crypto.randomUUID();
@@ -184,16 +183,12 @@ function TranslationView({
       aria-label={tr("Wiki entry translation")}
     >
       <p className="editor-hint">
-        {supported
-          ? tr(
-              "Local translation into {0}. Needs Ollama without cloud and the selected model already installed. No text is sent to external services; no automatic download or AI switch.",
-              [localeInfo(locale).name],
-            )
-          : tr(
-              "Wiki translation not available for this language. Read the original.",
-            )}
+        {tr(
+          "Local translation into {0}. Needs Ollama without cloud and the selected model already installed. No text is sent to external services; no automatic download or AI switch.",
+          [localeInfo(locale).name],
+        )}
       </p>
-      {supported ? (
+      {
         <label>
           {tr("Translation model")}
           <select
@@ -208,7 +203,7 @@ function TranslationView({
             ))}
           </select>
         </label>
-      ) : null}
+      }
       {translation ? (
         <>
           <p role="status">
@@ -225,12 +220,12 @@ function TranslationView({
           </div>
         </>
       ) : null}
-      {supported && !translation ? (
+      {!translation ? (
         <button disabled={busy || reading} onClick={() => void translate()}>
           {tr("Translate into {0}", [localeInfo(locale).name])}
         </button>
       ) : null}
-      {supported && reading ? (
+      {reading ? (
         <p role="status">{tr("Reading the saved translation…")}</p>
       ) : null}
       {busy ? (

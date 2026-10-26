@@ -80,9 +80,6 @@ for (const locale of [
   "ko",
   "zh-Hans",
   "ar",
-  "lmo-CH",
-  "tlh",
-  "art-x-rihan",
 ])
   catalogs[locale] = JSON.parse(
     await readFile(`src/i18n/catalogs/${locale}.json`, "utf8"),

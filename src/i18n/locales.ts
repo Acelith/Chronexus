@@ -9,14 +9,6 @@ export const locales = [
   { id: "ko", name: "한국어", intl: "ko-KR", dir: "ltr" },
   { id: "zh-Hans", name: "简体中文", intl: "zh-CN", dir: "ltr" },
   { id: "ar", name: "العربية", intl: "ar", dir: "rtl" },
-  {
-    id: "lmo-CH",
-    name: "Ticines · Ticinese Lombard",
-    intl: "it-CH",
-    dir: "ltr",
-  },
-  { id: "tlh", name: "tlhIngan Hol · Klingon", intl: "en-GB", dir: "ltr" },
-  { id: "art-x-rihan", name: "Rihannsu · Romulan", intl: "en-GB", dir: "ltr" },
 ] as const;
 export type Locale = (typeof locales)[number]["id"];
 export type Script =

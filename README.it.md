@@ -130,8 +130,7 @@ disattivato e non modifica mai appunti, relazioni o scheda.
 ## Lingue
 
 Italiano (originale), inglese, tedesco, francese, spagnolo, portoghese brasiliano,
-giapponese, coreano, cinese semplificato, arabo e ticinese, più Klingon e Rihannsu
-parziali e scritture alternative. Le traduzioni sono bozze da revisionare: vedi
+giapponese, coreano, cinese semplificato e arabo, più scritture alternative. Le traduzioni sono bozze da revisionare: vedi
 [docs/I18N.md](docs/I18N.md). Appunti e fonti non vengono mai tradotti in automatico.
 
 ## Roadmap

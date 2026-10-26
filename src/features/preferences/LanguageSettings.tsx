@@ -1,4 +1,3 @@
-import { lexicons } from "../../i18n/lexicons";
 import TranscriptionPreview from "./TranscriptionPreview";
 import { useState } from "react";
 import {
@@ -125,9 +124,7 @@ export default function LanguageSettings({
       {preferences.locale !== "it" ? (
         <p className="language-review">
           {tr(
-            preferences.locale === "tlh" || preferences.locale === "art-x-rihan"
-              ? "Experimental vocabulary: terms without a verified equivalent stay in English. It is not a certified complete translation."
-              : "Translation prepared automatically and awaiting review. Missing strings stay in English. Ticinese uses general forms, without claiming a single spelling.",
+            "Translation prepared automatically and awaiting review. Missing strings stay in English.",
           )}
         </p>
       ) : null}
@@ -136,24 +133,6 @@ export default function LanguageSettings({
           "Braille, Morse and Galactic are renderings of the text, not languages. The semantic text stays available to assistive technologies.",
         )}
       </p>
-      {lexicons[preferences.locale] ? (
-        <details className="language-lexicon">
-          <summary>{tr("Verified lexicon · romanized spelling")}</summary>
-          <p>
-            {tr(
-              "These terms are a lexical reference, not complete sentences. Actions without a verified translation stay in English.",
-            )}
-          </p>
-          <dl>
-            {lexicons[preferences.locale].map(([source, word]) => (
-              <div key={source}>
-                <dt lang="en">{source}</dt>
-                <dd lang={preferences.locale}>{word}</dd>
-              </div>
-            ))}
-          </dl>
-        </details>
-      ) : null}
       <TranscriptionPreview />
       <button
         type="button"

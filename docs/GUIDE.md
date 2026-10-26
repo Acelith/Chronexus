@@ -4,11 +4,11 @@ Detailed guide of functions, moved from the README to M20 without content change
 
 ## Languages and Scripts
 
-In the left menu, **App Settings → Language and Script**: 11 natural
-languages, experimental Klingon/Rihannsu, and five visual renderings (Braille, Morse,
+In the left menu, **App Settings → Language and Script**: 10 natural
+languages and five visual renderings (Braille, Morse,
 Minecraft Galactic, Espruar, and Dethek). Immediate change, persistent choice, fonts, and local catalogs
 Notes, cards, quotes, and backups maintain the original data.
-Translations are drafts to be reviewed; invented languages have an Italian fallback
+Translations are drafts to be reviewed; missing strings fall back to English
 The **Italian · Restore language and script** button remains readable.
 Details, sources, limits, and maintenance: [docs/I18N.md](I18N.md).
 

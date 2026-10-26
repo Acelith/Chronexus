@@ -11,7 +11,7 @@ in which session and for which faction, with no account and no cloud.
 [![License](https://img.shields.io/badge/license-Apache--2.0-354b3e)](LICENSE)
 [![Platform](https://img.shields.io/badge/Windows-x64-241e17)](#download-and-installation)
 [![Offline](https://img.shields.io/badge/data-local%20only-b89b60)](#privacy-and-data)
-[![Languages](https://img.shields.io/badge/languages-11%20%2B%20scripts-354b3e)](docs/I18N.md)
+[![Languages](https://img.shields.io/badge/languages-10%20%2B%20scripts-354b3e)](docs/I18N.md)
 
 [Download](#download-and-installation) · [Features](#features) · [Guide](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [Italiano](README.it.md)
 
@@ -28,7 +28,7 @@ in which session and for which faction, with no account and no cloud.
 Chronexus is a desktop app for people who **play** a role-playing campaign, not for
 the game master. It keeps session notes, pages about characters, places and
 factions, the character sheet, inventory and spells in one local archive, linked
-with stable references. The interface defaults to English and offers 11 languages. Italian remains available, and existing language choices are preserved.
+with stable references. The interface defaults to English and offers 10 languages. Italian remains available, and existing language choices are preserved.
 
 ## Why Chronexus
 
@@ -54,7 +54,7 @@ with stable references. The interface defaults to English and offers 11 language
 | <img src="docs/media/icons/scroll.svg" alt="" width="24"> | **Search** | Full text across notes, pages, sheet and items, opening the matching block (Ctrl/⌘ + K) |
 | <img src="docs/media/icons/wiki.svg" alt="" width="24"> | **D&D wiki** | Wikidot or Open5e on request, offline copies, local translation into the app language |
 | <img src="docs/media/icons/star.svg" alt="" width="24"> | **Local assistant (optional)** | Questions about your notes with citations, on the GPU and without cloud, using Qwen3.8-27B or Gemma 4 12B |
-| <img src="docs/media/icons/document.svg" alt="" width="24"> | **Languages and scripts** | 11 languages, right-to-left Arabic, Braille, Morse, Espruar, Dethek and more |
+| <img src="docs/media/icons/document.svg" alt="" width="24"> | **Languages and scripts** | 10 languages, right-to-left Arabic, Braille, Morse, Espruar, Dethek and more |
 | <img src="docs/media/icons/backup.svg" alt="" width="24"> | **Signed updates** | Check, verified download and mandatory backup before install, announced by the herald |
 
 <details>

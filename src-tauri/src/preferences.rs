@@ -3,21 +3,12 @@ use crate::json_file::{self, ReadError};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 const FILE: &str = "interface-preferences.json";
-const LOCALES: [&str; 13] = [
-    "it",
-    "en",
-    "de",
-    "fr",
-    "es",
-    "pt-BR",
-    "ja",
-    "ko",
-    "zh-Hans",
-    "ar",
-    "lmo-CH",
-    "tlh",
-    "art-x-rihan",
+const LOCALES: [&str; 10] = [
+    "it", "en", "de", "fr", "es", "pt-BR", "ja", "ko", "zh-Hans", "ar",
 ];
+/// Options removed in M23. Ticinese readers continue in Italian; the fantasy
+/// vocabularies already fell back to English for most text.
+const RETIRED: [(&str, &str); 3] = [("lmo-CH", "it"), ("tlh", "en"), ("art-x-rihan", "en")];
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Preferences {
@@ -65,6 +56,9 @@ fn validate(p: &Preferences) -> AppResult<()> {
     Ok(())
 }
 fn upgrade(mut value: Preferences) -> AppResult<Preferences> {
+    if let Some((_, replacement)) = RETIRED.iter().find(|(old, _)| *old == value.locale) {
+        value.locale = (*replacement).into();
+    }
     if value.version == 1
         && ["standard", "braille", "morse", "galactic"].contains(&value.script.as_str())
     {
@@ -172,6 +166,25 @@ mod tests {
         save(root.path(), current).unwrap();
         let saved: Preferences = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
         assert_eq!(saved.version, 2);
+    }
+    #[test]
+    fn retired_locales_move_to_italian_or_english_keeping_other_choices() {
+        let root = tempfile::tempdir().unwrap();
+        for (old, new) in [("lmo-CH", "it"), ("tlh", "en"), ("art-x-rihan", "en")] {
+            let text = format!(
+                r#"{{"version":2,"locale":"{old}","script":"braille","showOriginal":false}}"#
+            );
+            fs::write(root.path().join(FILE), &text).unwrap();
+            let current = read(root.path()).unwrap();
+            assert_eq!(
+                (current.locale.as_str(), current.script.as_str()),
+                (new, "braille")
+            );
+            assert!(!current.show_original);
+            assert_eq!(fs::read_to_string(root.path().join(FILE)).unwrap(), text);
+            let saved = save(root.path(), current).unwrap();
+            assert_eq!(saved.locale, new);
+        }
     }
     #[test]
     fn rejects_new_alphabets_mislabeled_as_v1_and_unknown_future_versions() {

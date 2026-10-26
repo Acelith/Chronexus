@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 CAT=ROOT/'src/i18n/catalogs'
 SOURCE=json.loads((CAT/'en.json').read_text(encoding='utf-8'))
-LANGUAGES={'it':'Italian','de':'German','fr':'French','es':'Spanish','pt-BR':'Brazilian Portuguese','ja':'Japanese','ko':'Korean','zh-Hans':'Simplified Chinese','ar':'Modern Standard Arabic','lmo-CH':'Ticinese Swiss Lombard, draft for native review'}
+LANGUAGES={'it':'Italian','de':'German','fr':'French','es':'Spanish','pt-BR':'Brazilian Portuguese','ja':'Japanese','ko':'Korean','zh-Hans':'Simplified Chinese','ar':'Modern Standard Arabic'}
 POLICY=json.loads((ROOT/'src/ai-models.json').read_text(encoding='utf-8'))
 MODEL=os.environ.get('CHRONEXUS_TRANSLATION_MODEL',POLICY['primary']['name'])
 SPEC=next((s for s in POLICY.values() if s['name']==MODEL),None)
@@ -40,7 +40,6 @@ def request(items,language):
  indexes={str(i):source for i,(_,source) in enumerate(items)}
  schema={'type':'object','properties':{k:{'type':'string'}for k in indexes},'required':list(indexes),'additionalProperties':False}
  instruction=f'Translate English desktop RPG companion UI strings into {language}. Return ONLY a JSON object with the SAME numeric keys. Keep all placeholders such as {{0}} and {{1}} EXACTLY unchanged. Preserve meaning, actions, punctuation and whitespace significance. Do not add facts or explanations. Preserve Chronexus, Nodex, D&D, Markdown, JSON, SQLite, UUID, Ollama, Gemma, Qwen, LoRA, QLoRA, SRD, URLs, API names, dice d4/d6/d8/d10/d12/d20/d100 and technical filenames. Translate labels, errors and help naturally and consistently. Names of companies/models and keyboard shortcuts stay unchanged. This is app UI, not campaign content.'
- if language.startswith('Ticinese'):instruction+=' Use general Ticinese forms (Gionta, impostazion, session, personagg, incantesim) consistently; do not merely repeat standard Italian. There is no claim of a single certified orthography.'
  payload={'model':MODEL,'messages':[{'role':'system','content':instruction},{'role':'user','content':json.dumps(indexes,ensure_ascii=False,separators=(',',':'))}],'format':schema,'stream':False,'think':False,'keep_alive':'20m','options':{'temperature':0,'num_ctx':8192,'num_predict':6000,'num_gpu':SPEC['gpuLayers'],'num_batch':SPEC['batch']}}
  data=local_json('/api/chat',payload)
  if data.get('done_reason')=='length':raise ValueError('Incomplete translation')

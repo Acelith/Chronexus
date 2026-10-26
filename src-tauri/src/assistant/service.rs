@@ -94,14 +94,13 @@ const NOT_FOUND: [&str; 2] = [
     "Not found in the available sources",
     "Non risulta dalle fonti disponibili",
 ];
-/// Answers follow the interface language; fantasy locales answer in English.
+/// Answers follow the interface language; unsupported locales answer in English.
 fn answer_language(locale: Option<&str>) -> (&'static str, &'static str) {
     match locale {
-        Some("it" | "lmo-CH") => ("Italian", NOT_FOUND[1]),
+        Some("it") => ("Italian", NOT_FOUND[1]),
         Some(code) => (
             crate::wiki_translation::language(code)
                 .ok()
-                .filter(|_| code != "lmo-CH")
                 .unwrap_or("English"),
             NOT_FOUND[0],
         ),

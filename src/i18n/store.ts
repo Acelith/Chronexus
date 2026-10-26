@@ -21,9 +21,6 @@ const loaders: Partial<Record<Locale, () => Promise<{ default: Catalog }>>> = {
   ko: () => import("./catalogs/ko.json"),
   "zh-Hans": () => import("./catalogs/zh-Hans.json"),
   ar: () => import("./catalogs/ar.json"),
-  "lmo-CH": () => import("./catalogs/lmo-CH.json"),
-  tlh: () => import("./catalogs/tlh.json"),
-  "art-x-rihan": () => import("./catalogs/art-x-rihan.json"),
 };
 const reverse = new Map(
   Object.entries(english).map(([id, text]) => [text.trim(), id]),

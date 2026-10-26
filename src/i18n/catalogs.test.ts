@@ -18,7 +18,7 @@ import { spellFromCatalog } from "../features/player/catalog";
 import { editorDictionary } from "./editorLocale";
 afterEach(() => applyPreferences(defaultPreferences));
 describe("local catalogs", () => {
-  it.each(locales.filter((l) => !["en", "tlh", "art-x-rihan"].includes(l.id)))(
+  it.each(locales.filter((l) => l.id !== "en"))(
     "$id: available translations preserve placeholders and report actual coverage",
     async ({ id }) => {
       await loadLocale(id);
@@ -70,18 +70,6 @@ describe("local catalogs", () => {
     );
     expect(editorDictionary()).not.toEqual({});
   });
-  it.each(["tlh", "art-x-rihan"] as const)(
-    "%s reports partial coverage and falls back to English",
-    async (locale) => {
-      await loadLocale(locale);
-      applyPreferences({ ...defaultPreferences, locale });
-      expect(translationCoverage().translated).toBeGreaterThan(0);
-      expect(translationCoverage().translated).toBeLessThan(
-        translationCoverage().total,
-      );
-      expect(tr("Opening archive…")).toBe("Opening archive…");
-    },
-  );
 });
 
 it("localizes Arabic plurals and preserves graph URIs and names", async () => {

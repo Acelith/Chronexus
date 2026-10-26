@@ -31,10 +31,10 @@ and original title remain visible; no equivalence between editions is inferred.
 Checks reject incomplete responses and altered numerical sequences, but do not
 certify negations, units, terminology, or rule interpretation.
 
-Natural languages of the app are available. English preserves the original;
-Ticinese requires native speaker revision like the M10 catalogs. Klingon and
-Romulan declare fallback; Morse, Braille, SGA, Espruar, and Dethek remain
-interface scripts and not destinations for rule translations.
+Natural languages of the app are available. English preserves the original.
+Saved Ticinese copies from before M23 stay in the archive but are not produced
+any more; Morse, Braille, SGA, Espruar, and Dethek remain interface scripts and
+not destinations for rule translations.
 
 Spell importing continues to use original data, opening the
 existing editable module. No translation rewrites saved spells,

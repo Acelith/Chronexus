@@ -20,12 +20,15 @@ describe("interface stays separate from campaign content", () => {
     expect(tr("New campaign")).toBe("Nuova campagna");
   });
   it("falls back to English and preserves unknown campaign content", async () => {
-    await loadLocale("art-x-rihan");
-    applyPreferences({ ...defaultPreferences, locale: "art-x-rihan" });
+    await loadLocale("ko");
+    applyPreferences({ ...defaultPreferences, locale: "ko" });
     const note = "Oran: 日本語 العربية [[Speratia]] {99}";
     expect(tr(note)).toBe(note);
     expect(translateError(note)).toBe(note);
-    expect(tr("Number of d{0}", [100])).toBe("Number of d100");
+    // Messages missing from a catalogue stay English, with parameters filled.
+    expect(tr("Uncatalogued source message d{0}", [100])).toBe(
+      "Uncatalogued source message d100",
+    );
   });
   it("updates language and direction without changing parameter values", () => {
     applyPreferences({ ...defaultPreferences, locale: "ar" });

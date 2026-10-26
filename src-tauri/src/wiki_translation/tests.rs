@@ -85,6 +85,8 @@ fn model_output_rejects_missing_rows_changed_numbers_and_truncation() {
     }
     assert!(language("tlh").is_err());
     assert!(language("art-x-rihan").is_err());
+    // Removed in M23: no new translations, while archived copies stay valid.
+    assert!(language("lmo-CH").is_err());
     assert!(language("it;execute").is_err());
 }
 #[test]
@@ -219,4 +221,30 @@ fn wikidot_translation_keeps_provenance_and_separate_provider_cache() {
         )
         .unwrap();
     assert_eq!(n, 0);
+}
+
+#[test]
+fn retired_ticinese_copies_still_back_up_and_restore() {
+    let d = tempfile::tempdir().unwrap();
+    let mut archive = backup::Store::open(&d.path().join("profile")).unwrap();
+    journal::create_campaign(&archive.connection, "Ticinese archive").unwrap();
+    seed(&archive.connection);
+    let mut old = translation(&archive.connection);
+    old.locale = "lmo-CH".into();
+    let raw = serde_json::to_string(&old).unwrap();
+    archive.connection.execute("INSERT INTO wiki_translations(provider,source_key,locale,source_hash,payload) VALUES('open5e','entry/spells/test','lmo-CH',?1,?2)",params![old.source_hash,raw]).unwrap();
+    validate_archive(&archive.connection).unwrap();
+    let file = d.path().join("ticinese.nodex");
+    backup::write_backup(&archive.connection, &archive.directory, &file).unwrap();
+    let preview = archive.prepare(&file).unwrap();
+    archive.restore(&preview.token).unwrap();
+    let kept: i64 = archive
+        .connection
+        .query_row(
+            "SELECT COUNT(*) FROM wiki_translations WHERE locale='lmo-CH'",
+            [],
+            |r| r.get(0),
+        )
+        .unwrap();
+    assert_eq!(kept, 1);
 }

@@ -216,21 +216,6 @@
     animation: none;
   }
 }
-.language-lexicon {
-  margin-block: 18px;
-}
-.language-lexicon dl {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-}
-.language-lexicon dt {
-  font-size: 0.9em;
-}
-.language-lexicon dd {
-  margin: 4px 0;
-  font-weight: bold;
-}
 .restore-confirmation::backdrop {
   background: rgb(30 20 12 / 65%);
 }

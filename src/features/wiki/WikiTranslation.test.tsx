@@ -162,16 +162,6 @@ test("missing model shows an error, preserves the original and allows retry", as
   expect(button).toBeEnabled();
   expect(screen.getByText("A light for 1 minute.")).toBeVisible();
 });
-test.each(["tlh", "art-x-rihan"] as const)(
-  "%s: explicit fallback without translator calls",
-  (locale) => {
-    applyPreferences({ ...defaultPreferences, locale });
-    render(view());
-    expect(screen.getByText(/Wiki translation not available/)).toBeVisible();
-    expect(command).not.toHaveBeenCalled();
-  },
-);
-
 test("English default shows the original without inference or cache requests", () => {
   applyPreferences(defaultPreferences);
   render(view());
