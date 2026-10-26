@@ -170,9 +170,7 @@ try {
       if (resolve(name)) continue;
       const candidates = aliases.get(normalizeName(name));
       if (candidates?.size > 1) {
-        report.warnings.push(
-          `Ambiguous reference preserved as text: ${name}`,
-        );
+        report.warnings.push(`Ambiguous reference preserved as text: ${name}`);
         continue;
       }
       if (!name || name.length > 200) {
