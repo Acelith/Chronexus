@@ -1,3 +1,19 @@
+# Chronexus status — 26 October 2026: M23 audit, first pass
+
+First M23 pass on macOS; report in docs/AUDIT.md. Fixed: MCP bridge replies lost on
+refusal and refused slow clients on macOS (RST on close, inherited non-blocking
+sockets); platform-specific Ollama test fixture; misleading constraint error; i18n
+scanner losing Rust messages after raw strings; leftover Italian diagnostics; four
+duplicated JSON preference helpers unified in `json_file.rs`; N+1 alias queries in
+`list_pages` (15.2 → 4.4 ms for 3 000 pages). No schema, format or identifier change.
+
+Validation (macOS): Rust 140 pass / 0 fail (8 runs), Clippy, rustfmt, Vitest 172,
+TypeScript, ESLint, Prettier, i18n check, MCP stdio 5/5, scanner 2/2, vite build.
+Not run: Windows/Linux, desktop GUI, dependency audits. Open: async DB commands
+(main-thread blocking), catalogue regeneration review, lib.rs/App.tsx split.
+Commits: fa27012, 08e7195, 8bf6b75, 4ca1cc8, fee0dd2, 2419419 (one per topic);
+not published.
+
 # Chronexus status — 26 October 2026: English source and tooling completion
 
 Completed the M26 language sweep beyond the visible interface: renamed the internal
