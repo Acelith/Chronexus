@@ -13,7 +13,7 @@ in which session and for which faction, with no account and no cloud.
 [![Offline](https://img.shields.io/badge/data-local%20only-b89b60)](#privacy-and-data)
 [![Languages](https://img.shields.io/badge/languages-10%20%2B%20scripts-354b3e)](docs/I18N.md)
 
-[Download](#download-and-installation) · [Features](#features) · [Guide](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [Italiano](README.it.md)
+[Download](#download-and-installation) · [Features](#features) · [Play together](#play-together-chronexus-server-optional) · [Guide](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [Italiano](README.it.md)
 
 <img src="docs/media/hero.webp" alt="Session journal with notes, character mentions and the herald logo in the sidebar" width="900">
 
@@ -66,6 +66,7 @@ with stable references. The interface defaults to English and offers 10 language
 | <img src="docs/media/icons/star.svg" alt="" width="24"> | **Local assistant (optional)** | Questions about your notes with citations, on the GPU and without cloud, using Qwen3.8-27B or Gemma 4 12B |
 | <img src="docs/media/icons/document.svg" alt="" width="24"> | **Languages and scripts** | 10 languages, right-to-left Arabic, Braille, Morse, Espruar, Dethek and more |
 | <img src="docs/media/icons/backup.svg" alt="" width="24"> | **Signed updates** | Check, verified download and mandatory backup before install, announced by the herald |
+| <img src="docs/media/icons/party.svg" alt="" width="24"> | **Shared campaigns (optional)** | With your own [Chronexus Server](#play-together-chronexus-server-optional): sync your devices and share chosen pages with your party |
 
 <details>
 <summary><strong>More screenshots</strong></summary>
@@ -134,9 +135,39 @@ relationships or the sheet.
 > valid citation does not guarantee a correct answer. Details in
 > [docs/AI_MODELS.md](docs/AI_MODELS.md).
 
+## Play together: Chronexus Server (optional)
+
+Chronexus is complete on its own. When your group wants more, the companion
+**[Chronexus Server](https://github.com/Acelith/Chronexus-Server)** is a small service that **you host**
+(a home server, a NAS or a cheap VPS, with Docker Compose):
+
+- **Your campaign on every device.** Turn on synchronization for a campaign and
+  each autosave also reaches your server. Offline edits wait and resume later.
+- **Share only what you choose.** Every page, session, relationship, party member,
+  sheet section or image stays private until you share it. Your party sees it
+  read-only, with your name, its source and its certainty: a shared claim never
+  becomes a campaign fact.
+- **Real conflicts, no silent overwrites.** If two people edit the same item, both
+  versions stay visible and you decide.
+- **Invitation-only accounts on your own infrastructure.** Roles (owner, player,
+  reader), revocable devices, verified server backups and recovery.
+
+Connect from **App settings → Campaign sharing**, then pick what to share from each
+campaign's **Sharing** view. Without a server nothing changes: no account, no
+network, everything stays local.
+
+> [!NOTE]
+> The server is in active development: its features are implemented and tested in
+> source, but **no server release has been published yet**; you can build it with
+> Docker Compose by following the
+> [installation guide](https://github.com/Acelith/Chronexus-Server/blob/main/docs/INSTALLATION.md).
+> Data is protected by HTTPS but is **not end-to-end encrypted**: the server
+> operator can read what you upload. Android access is planned.
+
 ## Privacy and data
 
-- No account, no telemetry, no campaign uploads.
+- No account, no telemetry, no campaign uploads, unless you connect your own
+  Chronexus Server and choose what to send to it.
 - Network requests start from your click (wiki, SRD catalog, updates, AI
   components) or from the startup update check, which only contacts the release
   channel and can be turned off.

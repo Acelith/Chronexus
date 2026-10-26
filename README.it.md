@@ -13,7 +13,7 @@ in quale sessione e per quale fazione, senza account e senza cloud.
 [![Offline](https://img.shields.io/badge/dati-solo%20locali-b89b60)](#privacy-e-dati)
 [![Lingue](https://img.shields.io/badge/lingue-11%20%2B%20scritture-354b3e)](docs/I18N.md)
 
-[Scarica](#download-e-installazione) · [Funzionalità](#funzionalità) · [Guida](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [English](README.md)
+[Scarica](#download-e-installazione) · [Funzionalità](#funzionalità) · [Giocare insieme](#giocare-insieme-chronexus-server-facoltativo) · [Guida](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [English](README.md)
 
 <img src="docs/media/hero.webp" alt="Diario di una sessione con appunti, menzioni dei personaggi e barra laterale con il logo dell’araldo" width="900">
 
@@ -62,6 +62,7 @@ gli incantesimi, e collega tutto con riferimenti stabili.
 | <img src="docs/media/icons/star.svg" alt="" width="24"> | **Assistente locale (facoltativo)** | Domande sugli appunti con citazioni, su GPU e senza cloud, con Qwen3.8-27B o Gemma 4 12B |
 | <img src="docs/media/icons/document.svg" alt="" width="24"> | **Lingue e scritture** | 11 lingue, arabo da destra a sinistra, Braille, Morse, Espruar, Dethek e altre scritture |
 | <img src="docs/media/icons/backup.svg" alt="" width="24"> | **Aggiornamenti firmati** | Controllo, download verificato e backup obbligatorio prima di installare, annunciati dall’araldo |
+| <img src="docs/media/icons/party.svg" alt="" width="24"> | **Campagne condivise (facoltative)** | Con il tuo [Chronexus Server](#giocare-insieme-chronexus-server-facoltativo): sincronizza i tuoi dispositivi e condividi con il gruppo solo le pagine che scegli |
 
 <details>
 <summary><strong>Altre schermate</strong></summary>
@@ -129,9 +130,41 @@ disattivato e non modifica mai appunti, relazioni o scheda.
 > specificamente su D&D: una citazione valida non garantisce che la risposta sia
 > corretta. Dettagli in [docs/AI_MODELS.md](docs/AI_MODELS.md).
 
+## Giocare insieme: Chronexus Server (facoltativo)
+
+Chronexus è completo da solo. Quando il gruppo vuole di più, il compagno
+**[Chronexus Server](https://github.com/Acelith/Chronexus-Server)** è un piccolo servizio che **ospiti tu**
+(un server di casa, un NAS o un VPS economico, con Docker Compose):
+
+- **La tua campagna su ogni dispositivo.** Attiva la sincronizzazione per una
+  campagna e ogni salvataggio automatico arriva anche al tuo server. Le modifiche
+  fatte offline aspettano e ripartono quando torna la connessione.
+- **Condividi solo ciò che scegli.** Ogni pagina, sessione, relazione, membro del
+  gruppo, sezione della scheda o immagine resta privata finché non la condividi.
+  Il gruppo la vede in sola lettura, con il tuo nome, la fonte e il grado di
+  certezza: un'affermazione condivisa non diventa mai un fatto della campagna.
+- **Conflitti veri, nessuna sovrascrittura silenziosa.** Se due persone modificano
+  lo stesso elemento, entrambe le versioni restano visibili e decidi tu.
+- **Account solo su invito, sulla tua infrastruttura.** Ruoli (proprietario,
+  giocatore, lettore), dispositivi revocabili, backup del server verificati e
+  ripristino.
+
+Collegati da **Impostazioni dell’app → Condivisione delle campagne**, poi scegli cosa
+condividere dalla vista **Condivisione** di ogni campagna. Senza server non cambia
+nulla: nessun account, nessuna rete, tutto resta in locale.
+
+> [!NOTE]
+> Il server è in sviluppo attivo: le funzioni sono implementate e testate nel
+> codice sorgente, ma **non è ancora stata pubblicata una release del server**; puoi
+> compilarlo con Docker Compose seguendo la
+> [guida di installazione](https://github.com/Acelith/Chronexus-Server/blob/main/docs/INSTALLATION.md).
+> I dati sono protetti da HTTPS ma **non sono cifrati end-to-end**: chi gestisce il
+> server può leggere ciò che carichi. L'accesso da Android è pianificato.
+
 ## Privacy e dati
 
-- Nessun account, nessuna telemetria, nessun caricamento delle campagne.
+- Nessun account, nessuna telemetria, nessun caricamento delle campagne, a meno che
+  tu non colleghi il tuo Chronexus Server e scelga cosa inviargli.
 - Le uniche richieste di rete partono da un tuo clic (wiki, catalogo SRD,
   aggiornamenti, componenti AI) oppure dal controllo aggiornamenti all’avvio, che
   contatta solo il canale delle release e si può disattivare.
