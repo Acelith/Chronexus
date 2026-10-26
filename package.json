@@ -21,7 +21,8 @@
     "package:desktop": "pnpm icons && tauri build",
     "i18n:scan": "node scripts/i18n/scan.mjs",
     "i18n:normalize": "node scripts/i18n/prepare-catalogs.mjs",
-    "i18n:check": "node scripts/i18n/prepare-catalogs.mjs --check && vitest run src/i18n/catalogs.test.ts"
+    "i18n:audit": "node scripts/i18n/audit.mjs",
+    "i18n:check": "node --test scripts/i18n/test_*.mjs && node scripts/i18n/prepare-catalogs.mjs --check && vitest run src/i18n/catalogs.test.ts && node scripts/i18n/audit.mjs"
   },
   "dependencies": {
     "@blocknote/core": "^0.56.0",

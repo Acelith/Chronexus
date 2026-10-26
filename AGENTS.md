@@ -305,6 +305,32 @@ only be `shared`, as read-only projections; the full sheet, AI data and preferen
 replicated.
 ## English-first internationalization (M26)
 
+### Mandatory localization gate for EVERY interface change
+
+For **every** UI change, including layout-only changes, labels, icons/tooltips,
+accessible names, empty/loading/error/confirmation states, backend messages shown
+in the UI, and installer screens, verify localization before declaring completion.
+This is mandatory, not an optional final polish task.
+
+- Review every added/changed visible string and dynamic label in all ten supported
+  natural languages. Update English source and the nine translation catalogs in
+  the same change, preserving stable IDs and parameters. English fallback is not
+  evidence that a translation was completed; never fill missing entries with
+  copied English just to satisfy a check.
+- Run `pnpm i18n:check` (read-only UI/installer audit, catalog checks and regression
+  tests), plus relevant component checks in English, Italian and affected locales.
+  Verify long labels and RTL when layout or controls change. `i18n:scan` only
+  generates candidates; it is not a localization acceptance check.
+- Manually review dynamic strings, raw JSX text, enum display labels, dialogs,
+  notifications and native installer languages that static extraction cannot fully
+  prove. Localize display labels without changing persisted values or campaign text.
+- Report the actual result and remaining gaps in the checkpoint/commit. Existing
+  untranslated strings are blockers to a claim of complete localization, never a
+  reason to silently waive the check. Do not hide failures, weaken the gate or
+  refresh a baseline to make untranslated new UI pass.
+
+See `docs/I18N.md` and `docs/I18N_AUDIT.md` for the workflow and current evidence.
+
 English is the source and fallback language for new profiles, developer-facing
 diagnostics, app metadata, assistant prompts and agent documentation. Keep
 message IDs, database keys, legacy backup folder names, original notes and

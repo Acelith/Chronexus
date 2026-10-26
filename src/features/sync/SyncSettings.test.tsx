@@ -79,6 +79,47 @@ test("nothing is contacted until the user verifies a server, then invites create
   expect(await screen.findByText(/Signed out/)).toBeVisible();
 });
 
+test("Italian account deletion confirmation is localized without changing account data", async () => {
+  const { applyPreferences } = await import("../../i18n/store");
+  const { defaultPreferences } = await import("../../i18n/locales");
+  applyPreferences({ ...defaultPreferences, locale: "it" });
+  vi.mocked(command).mockImplementation(async (name: string) => {
+    if (name === "sync_account") return signed as never;
+    throw Error(`Unexpected command: ${name}`);
+  });
+  const view = render(<SyncSettings disabled={false} />);
+  try {
+    const user = userEvent.setup();
+    expect(
+      await screen.findByRole("heading", { name: "Campagne sul server" }),
+    ).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Elimina il mio account dal server" }),
+    );
+    const dialog = screen.getByRole("alertdialog", {
+      name: "Elimina il mio account",
+    });
+    expect(
+      within(dialog).getByText(
+        /Le tue campagne rimangono su questo dispositivo/,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole("button", {
+        name: "Elimina definitivamente il mio account",
+      }),
+    ).toBeInTheDocument();
+    expect(signed.username).toBe("gina");
+    expect(command).not.toHaveBeenCalledWith(
+      "sync_delete_account",
+      expect.anything(),
+    );
+  } finally {
+    view.unmount();
+    applyPreferences(defaultPreferences);
+  }
+});
+
 test("deleting the account needs the password and says that campaigns stay on this device", async () => {
   const user = userEvent.setup();
   vi.mocked(command).mockImplementation(

@@ -11,6 +11,9 @@ $previousKey = $env:TAURI_SIGNING_PRIVATE_KEY
 $previousPassword = $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD
 try {
     Set-Location -LiteralPath $projectRoot
+    # Fail before reading signing material or building an untranslated release.
+    & pnpm i18n:check
+    if ($LASTEXITCODE -ne 0) { throw 'Localization checks failed. No installer was built or signed.' }
     $resolvedKey = (Resolve-Path -LiteralPath $KeyFile).Path
     $resolvedPassword = (Resolve-Path -LiteralPath $PasswordFile).Path
     $publicKey = (Get-Content -LiteralPath "$resolvedKey.pub" -Raw).Trim()

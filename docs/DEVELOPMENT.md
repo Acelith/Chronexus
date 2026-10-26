@@ -59,11 +59,21 @@ base Python was removed, recreate the environment following `AI_LOCAL.md`.
 pnpm lint
 pnpm format:check
 pnpm typecheck
+pnpm i18n:check
 pnpm test
 pnpm test:rust
 pnpm build
 pnpm build:desktop
 ```
+
+Localization review is mandatory for **every interface change**, including layout,
+accessibility labels, dialogs, native installers and displayed backend errors.
+Run the strict check, update all affected catalogs and inspect the changed views
+in English, Italian and affected locales/RTL. English fallback does not count as a
+completed translation. `pnpm i18n:audit` reports missing UI messages and installer
+languages without writing files; `--json` provides the detailed inventory.
+See [I18N.md](I18N.md) and the actual [audit findings](I18N_AUDIT.md). CI and the
+signed-release wrapper stop when this gate fails, before building/signing.
 
 The desktop build produces the local executable without an installer. Distribution
 and the Windows/macOS/Linux matrix are planned for M6.

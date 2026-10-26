@@ -1,3 +1,33 @@
+# Chronexus status — 26 October 2026: mandatory localization gate and audit
+
+- AGENTS.md, I18N.md and DEVELOPMENT.md now require localization review on EVERY
+  interface change, including layout/accessibility/confirmation states and native
+  installers. CI and the signed-release wrapper run the stricter `i18n:check`.
+- New read-only audit checks 1,303 explicit UI messages, all nine translation catalogs,
+  stable English source registration, parameters and the ten native installer languages.
+  Detailed findings: docs/I18N_AUDIT.md. No baseline reset or copied-English bypass.
+- Corrected 95 Italian translations, uncatalogued short labels/Italian source fragments,
+  the herald startup checkbox in all nine translations and server role display labels.
+  Italian explicit-UI gaps 64 -> 0; unregistered sources 15 -> 0 (s/d are invariant symbols).
+- The full localization gate intentionally FAILS (exit 1): 267 UI messages remain
+  untranslated in each of the other eight catalogs; NSIS remains Italian-only.
+  Signing wrapper tested to stop BEFORE reading keys/building. Do not claim complete
+  localization or publish a replacement installer from this incomplete inventory.
+- Also fixed a genuine localization bug: translated combat section titles caused
+  inspiration/death-save controls and summary to disappear. Match the stable field
+  key instead; the new Italian test failed before the fix and now passes.
+- Executed: 7 scanner/audit regressions; 182 frontend tests; targeted locale/sharing/
+  updates 31 tests; TypeScript, ESLint, Vite build, catalog normalization passed.
+  React Doctor changed scope: no diagnostics, score 83 before/after the combat fix.
+  Changed-file formatting passed; full format check finds 78 unchanged files, documented
+  separately from the localization gate.
+  Fresh native layout/RTL/installer and Rust tests not rerun; no Rust/domain/schema change.
+- Skills: systematic-debugging for the permissive old check; react-testing for localized
+  confirmations/catalog regressions; react-doctor for changed React diagnostics.
+- Source maintenance only, no version bump/new app release; public 0.9.2 remains immutable.
+  Localization blockers above precede another signed build. Next functional roadmap
+  milestone remains M25 deployment/TLS acceptance, followed by M27 Android.
+
 # Chronexus status — 26 October 2026: 0.9.2 installer branding published
 
 - NSIS now uses the existing Chronexus herald/wordmark: leather/brass/burgundy

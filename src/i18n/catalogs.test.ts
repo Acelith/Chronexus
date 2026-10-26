@@ -17,6 +17,21 @@ import { emptyCharacter } from "../features/player/api";
 import { spellFromCatalog } from "../features/player/catalog";
 import { editorDictionary } from "./editorLocale";
 afterEach(() => applyPreferences(defaultPreferences));
+
+it("localizes the revised startup policy and server role labels in all selectable translations", async () => {
+  const { roleText } = await import("../features/sync/labels");
+  const source =
+    "Check once at every startup and announce new versions with the herald";
+  for (const locale of locales.filter((entry) => entry.id !== "en")) {
+    await loadLocale(locale.id);
+    applyPreferences({ ...defaultPreferences, locale: locale.id });
+    expect(tr(source), locale.id).not.toBe(source);
+    expect(roleText("owner"), locale.id).not.toBe("Campaign owner");
+    expect(roleText("reader"), locale.id).not.toBe("Read-only member");
+    // Role identifiers remain protocol data, never overwritten by the display label.
+    expect(roleText("unknown-role")).toBe("unknown-role");
+  }
+});
 describe("local catalogs", () => {
   it.each(locales.filter((l) => l.id !== "en"))(
     "$id: available translations preserve placeholders and report actual coverage",

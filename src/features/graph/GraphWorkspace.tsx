@@ -369,10 +369,10 @@ export default function GraphWorkspace({
                     }
                   >
                     <option value={1}>
-                      <Text source={"1 passaggio"} />
+                      <Text source={"1 step"} />
                     </option>
                     <option value={2}>
-                      <Text source={"2 passaggi"} />
+                      <Text source={"2 steps"} />
                     </option>
                   </select>
                 </label>

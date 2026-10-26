@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { tr } from "../../i18n/store";
 import { usePendingAction } from "../../usePendingAction";
 import { syncApi, type RemoteCampaign, type SyncAccount } from "./api";
+import { roleText } from "./labels";
 
 /** M24: sharing server and account; nothing is contacted without a click. */
 export default function SyncSettings({
@@ -251,7 +252,7 @@ export default function SyncSettings({
                     {onServer.map((remote) => (
                       <li key={remote.id}>
                         <span dir="auto">{remote.name}</span>{" "}
-                        <span className="muted">· {remote.role}</span>{" "}
+                        <span className="muted">· {roleText(remote.role)}</span>{" "}
                         <button
                           disabled={busy}
                           onClick={() =>

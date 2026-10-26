@@ -201,7 +201,7 @@ export default function TrainingPanel({
             <Text
               source={" removed since the last successful training. Total: "}
             />
-            {overview.sources} <Text source={" estratti."} />
+            {overview.sources} <Text source={" excerpts."} />
           </p>
           <p>
             <Text source={"Excerpt size: "} />
@@ -287,7 +287,7 @@ export default function TrainingPanel({
                   <progress value={progress.step} max={progress.steps} />
                   <p>
                     <Text source={"Step "} />
-                    {progress.step} <Text source={" di "} />
+                    {progress.step} <Text source={" of "} />
                     {progress.steps}
                   </p>
                 </>
@@ -336,7 +336,7 @@ function TrainingJob({
         {new Date(j.createdAt).toLocaleString(
           localeInfo(getPreferences().locale).intl,
         )}{" "}
-        · {j.manifest.length} <Text source={" estratti"} />
+        · {j.manifest.length} <Text source={" excerpts"} />
       </p>
       {j.error && <p className="error">{systemMessage(j.error)}</p>}
       {j.status === "ready" && (

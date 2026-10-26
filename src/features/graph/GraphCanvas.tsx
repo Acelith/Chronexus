@@ -152,7 +152,7 @@ export default function GraphCanvas({
             </select>
           </label>
           <span>
-            {visible.nodes.length} <Text source={" di "} />
+            {visible.nodes.length} <Text source={" of "} />
             {data.nodes.length} <Text source={" nodes · drag to pan"} />
           </span>
           {data.nodes.length > 18 ? (

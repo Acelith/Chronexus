@@ -16,6 +16,7 @@ import {
   projectionKinds,
 } from "./api";
 import { stateText } from "./SyncStatusBadge";
+import { roleText } from "./labels";
 
 const kindLabels = (): Record<SharedKind, string> => ({
   page: tr("Codex pages"),
@@ -188,7 +189,7 @@ export default function CampaignSharing({
           <p>
             {tr("Linked to {0} as {1}. Last synchronization: {2}.", [
               link.server,
-              link.role,
+              roleText(link.role),
               link.syncedAt ?? tr("never"),
             ])}
           </p>

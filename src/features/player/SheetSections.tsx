@@ -57,7 +57,7 @@ export function SheetEditor({
               />
             ))}
           </div>
-          {section.title === "Combat and senses" ? (
+          {"armorClass" in section.fields ? (
             <div className="player-fields">
               <Flag
                 label={tr("Inspiration")}
@@ -161,10 +161,7 @@ export function SheetSummary({ value }: { value: SheetDetails }) {
   return (
     <div className="sheet-sections">
       {sheetSections.map((section) => (
-        <details
-          key={section.title}
-          open={section.title === "Combat and senses"}
-        >
+        <details key={section.title} open={"armorClass" in section.fields}>
           <summary>{section.title}</summary>
           <dl className="sheet-summary">
             {Object.entries(section.fields)
@@ -185,13 +182,13 @@ export function SheetSummary({ value }: { value: SheetDetails }) {
               <Text source={"No values noted in this section."} />
             </p>
           ) : null}
-          {section.title === "Combat and senses" ? (
+          {"armorClass" in section.fields ? (
             <p>
               <Text source={"Inspiration: "} />
-              {value.inspiration ? tr("yes") : "no"}{" "}
+              {value.inspiration ? tr("Yes") : tr("No")}{" "}
               <Text source={" · Death saves: "} />
               {value.deathSuccesses} <Text source={" successes / "} />
-              {value.deathFailures} <Text source={" fallimenti"} />
+              {value.deathFailures} <Text source={" failures"} />
             </p>
           ) : null}
         </details>
