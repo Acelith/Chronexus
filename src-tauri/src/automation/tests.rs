@@ -208,6 +208,53 @@ fn transport_auth_origin_scoping_cleanup_and_live_store() {
 }
 
 #[test]
+fn slow_clients_are_served_and_refused_bodies_do_not_truncate_replies() {
+    let root = tempfile::tempdir().unwrap();
+    let store = backup::Store::open(root.path()).unwrap();
+    let camp = journal::create_campaign(&store.connection, "Test").unwrap();
+    let server = Server::start(
+        root.path(),
+        Config {
+            policy: policy(&camp.id),
+        },
+        Arc::new(Mutex::new(store)),
+        Arc::new(|_| {}),
+    )
+    .unwrap();
+    let discovery: Value =
+        serde_json::from_slice(&std::fs::read(root.path().join(transport::DISCOVERY)).unwrap())
+            .unwrap();
+    let endpoint = discovery["endpoint"].as_str().unwrap();
+    let token = discovery["token"].as_str().unwrap();
+    let host = endpoint
+        .strip_prefix("http://")
+        .unwrap()
+        .strip_suffix("/automation")
+        .unwrap();
+    // The listener polls in non-blocking mode; an accepted connection whose
+    // header has not arrived yet must still be read in blocking mode.
+    let mut stream = TcpStream::connect(host).unwrap();
+    stream
+        .set_read_timeout(Some(std::time::Duration::from_secs(3)))
+        .unwrap();
+    std::thread::sleep(std::time::Duration::from_millis(150));
+    let body = r#"{"tool":"describe","arguments":{}}"#;
+    write!(stream,"POST /automation HTTP/1.1\r\nHost: {host}\r\nAuthorization: Bearer {token}\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",body.len()).unwrap();
+    let mut raw = String::new();
+    let _ = stream.read_to_string(&mut raw);
+    assert!(raw.starts_with("HTTP/1.1 200"), "{raw}");
+    // Refused before the body is read: the complete reply must still arrive.
+    for _ in 0..20 {
+        let raw = post(endpoint, "wrong", &"x".repeat(64 * 1024), "");
+        assert!(raw.starts_with("HTTP/1.1 401"), "{raw}");
+        assert!(
+            raw.ends_with(r#"{"error":"Automation request refused."}"#),
+            "{raw}"
+        );
+    }
+    drop(server);
+}
+#[test]
 fn reference_templates_create_real_assets_and_stale_gui_metadata_cannot_overwrite() {
     let d = tempfile::tempdir().unwrap();
     let c = db::open(&d.path().join("test.sqlite3")).unwrap();

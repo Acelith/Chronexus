@@ -215,8 +215,24 @@ fn response(stream: &mut TcpStream, status: u16, body: Value) -> std::io::Result
     } else {
         bytes
     };
-    write!(stream,"HTTP/1.1 {status} Result\r\nContent-Type: application/json\r\nContent-Length: {}\r\nCache-Control: no-store\r\nConnection: close\r\n\r\n",bytes.len())?;
-    stream.write_all(&bytes)
+    let mut reply = format!("HTTP/1.1 {status} Result\r\nContent-Type: application/json\r\nContent-Length: {}\r\nCache-Control: no-store\r\nConnection: close\r\n\r\n",bytes.len()).into_bytes();
+    reply.extend_from_slice(&bytes);
+    stream.write_all(&reply)?;
+    stream.flush()?;
+    // Closing with unread request bytes (a refused body) makes the kernel send
+    // RST, which can discard the reply before the client reads it. Half-close and
+    // drain a bounded amount first.
+    let _ = stream.shutdown(std::net::Shutdown::Write);
+    let mut sink = [0u8; 8192];
+    let mut drained = 0;
+    let deadline = Instant::now() + Duration::from_secs(2);
+    while drained < MAX_BODY && Instant::now() < deadline {
+        match stream.read(&mut sink) {
+            Ok(0) | Err(_) => break,
+            Ok(count) => drained += count,
+        }
+    }
+    Ok(())
 }
 fn secret_equal(a: &str, b: &str) -> bool {
     let mut difference = a.len() ^ b.len();
@@ -301,6 +317,10 @@ fn serve(
     store: &Arc<Mutex<Store>>,
     changed: &Arc<dyn Fn(String) + Send + Sync>,
 ) -> std::io::Result<()> {
+    // BSD/macOS sockets inherit O_NONBLOCK from the polling listener; without
+    // this a request whose header has not arrived yet reads WouldBlock and is
+    // refused before authentication.
+    stream.set_nonblocking(false)?;
     stream.set_read_timeout(Some(Duration::from_secs(1)))?;
     stream.set_write_timeout(Some(Duration::from_secs(1)))?;
     let raw = match read_request(stream, host, token) {
