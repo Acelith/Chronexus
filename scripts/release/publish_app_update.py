@@ -1,6 +1,12 @@
 """Publish a verified app-only updater release to the fixed Chronexus Forgejo origin.
 No credential discovery: an interactive token or explicitly selected Git credential
 helper supplies authorization in memory, exclusively for this repository/host.
+
+Publication is single-writer: a lock file guards the package folder, and the release
+is re-listed before every upload and before finalizing, so a second publisher (here or
+on another machine) is detected instead of duplicating assets. The production-key
+signature test must pass on the exact local bytes before anything is sent. The receipt
+records whether the release is still a draft or already public.
 """
 from __future__ import annotations
 import argparse
@@ -22,6 +28,10 @@ BASE = "https://github.com"
 API = "/api/v1/repos/acelith/Chronexus"
 ORIGIN = BASE + "/acelith/Chronexus.git"
 MAX_PACKAGE = 256 * 1024 * 1024
+
+class PublicationError(ValueError):
+    """A failure whose message states exactly what is public and what is not."""
+
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs): return None
@@ -89,6 +99,65 @@ def validate(folder):
     return folder, report
 
 
+def verify_signature(folder, report):
+    """Run the production-key updater test on the exact local package bytes."""
+    installer = next(folder / a["name"] for a in report["assets"] if a["name"].endswith(".exe"))
+    env = os.environ.copy()
+    env.update(CHRONEXUS_QA_UPDATE_MANIFEST=str(folder / "latest.json"), CHRONEXUS_QA_UPDATE_PACKAGE=str(installer))
+    command = [os.environ.get("CARGO", "cargo"), "test", "--manifest-path", str(ROOT / "src-tauri" / "Cargo.toml"), "--test", "updater_signature", "updates_signed_release_package_matches_production_key", "--", "--ignored", "--exact"]
+    try:
+        result = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True)
+    except OSError:
+        raise ValueError("Cargo not found: the production-key signature test is required before publishing (set CARGO)") from None
+    if result.returncode or "1 passed" not in result.stdout:
+        raise ValueError("Production-key signature verification failed; nothing was published")
+    # Bind the result to the bytes that will be uploaded.
+    for a in report["assets"]:
+        if sha(folder / a["name"]) != a["sha256"]:
+            raise ValueError("Local signed artifact changed during verification")
+
+
+class PublishLock:
+    """Exclusive lock for one package folder on this machine."""
+
+    def __init__(self, folder):
+        self.path = folder / ".publish.lock"
+
+    def __enter__(self):
+        try:
+            fd = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            raise ValueError(f"Another publication of this package is running, or one was interrupted: check, then delete {self.path.name}") from None
+        with os.fdopen(fd, "w") as stream:
+            stream.write(str(os.getpid()))
+        return self
+
+    def __exit__(self, *exc):
+        self.path.unlink(missing_ok=True)
+
+
+def check_assets(client, release_id, receipt, expected_names, complete):
+    """Re-list the release: every attachment must be one we uploaded, at most once."""
+    assets = client.api(f"{API}/releases/{release_id}/assets")
+    names = [a["name"] for a in assets]
+    known = {int(v["id"]) for v in receipt["assets"].values()}
+    if len(names) != len(set(names)) or any(int(a["id"]) not in known for a in assets):
+        raise ValueError("Duplicate or unrecognized release attachments: another publisher may be running. The release stays a draft; remove the extra attachments by hand")
+    if complete and sorted(names) != sorted(expected_names):
+        raise ValueError("The release attachments are not exactly the expected set; the release stays a draft")
+    return set(names)
+
+
+def single_draft(client, tag, release_id):
+    same = [r for r in client.api(f"{API}/releases?limit=50") if r.get("tag_name") == tag]
+    if [int(r["id"]) for r in same] != [release_id]:
+        raise ValueError(f"More than one release exists for {tag}: another publisher may be running. Nothing was made public")
+
+
+def save(receipt_path, receipt):
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
+
+
 class Client:
     def __init__(self, authorization):
         self.authorization = authorization
@@ -129,6 +198,12 @@ class Client:
 
 def publish(authorization, directory, finalize=False):
     folder, report=validate(directory)
+    verify_signature(folder, report)
+    with PublishLock(folder):
+        return _publish(authorization, folder, report, finalize)
+
+
+def _publish(authorization, folder, report, finalize):
     client=Client(authorization)
     repository=client.api(API)
     if repository.get("full_name")!="acelith/Chronexus" or repository.get("private") or not repository.get("permissions",{}).get("push"): raise ValueError("Public owned repository with write access required")
@@ -147,33 +222,52 @@ def publish(authorization, directory, finalize=False):
         notes=(ROOT/f"docs/releases/{tag}.md").read_text(encoding="utf-8")
         notes+=f"\n\nSorgente compilato: `{report['sourceCommit']}`.\n\nSHA-256:\n\n"+"\n".join(f"- `{a['name']}`: `{a['sha256']}`" for a in report["assets"])
         release=client.api(API+"/releases","POST",{"tag_name":tag,"target_commitish":report["sourceCommit"],"name":"Chronexus "+version,"body":notes,"draft":True,"prerelease":False})
-        receipt={"version":version,"sourceCommit":report["sourceCommit"],"releaseId":release["id"],"assets":{}}
-        receipt_path.write_text(json.dumps(receipt,indent=2)+"\n")
+        receipt={"version":version,"sourceCommit":report["sourceCommit"],"releaseId":release["id"],"state":"draft","assets":{}}
+        save(receipt_path,receipt)
     release_id=int(release["id"])
-    assets=client.api(f"{API}/releases/{release_id}/assets")
-    known={int(v["id"]) for v in receipt["assets"].values()}
-    if any(int(a["id"]) not in known for a in assets): raise ValueError("Unrecognized release attachments; nothing is overwritten")
+    expected_names=[a["name"] for a in report["assets"]]
+    if release.get("draft"):
+        single_draft(client,tag,release_id)
     for expected in report["assets"]:
         name=expected["name"]
         if name not in receipt["assets"]:
+            # Re-list right before each upload: a concurrent publisher shows up here.
+            if name in check_assets(client,release_id,receipt,expected_names,False):
+                raise ValueError(f"{name} was attached by someone else: another publisher may be running. The release stays a draft")
             uploaded=client.upload(release_id,folder/name)
             if uploaded.get("name")!=name or uploaded.get("size")!=expected["size"]: raise ValueError("Unexpected upload response")
             receipt["assets"][name]={"id":uploaded["id"],"url":allowed_download(uploaded["browser_download_url"])}
-            receipt_path.write_text(json.dumps(receipt,indent=2)+"\n")
+            save(receipt_path,receipt)
         client.verify(receipt["assets"][name]["url"],expected)
         print("Verified draft asset: "+name,flush=True)
-    if finalize:
-        if release.get("draft"):
+    check_assets(client,release_id,receipt,expected_names,True)
+    if not finalize:
+        print("Draft prepared and verified", f"{BASE}/acelith/Chronexus/releases/tag/{tag}",flush=True)
+        return receipt
+    if release.get("draft"):
+        single_draft(client,tag,release_id)
+        receipt["state"]="publishing"
+        save(receipt_path,receipt)
+        try:
             release=client.api(f"{API}/releases/{release_id}","PATCH",{"draft":False})
-        # Verify anonymous access to every asset, the static route and the stable API.
+        except (urllib.error.HTTPError,urllib.error.URLError,OSError) as error:
+            raise PublicationError(f"The request to make the release public failed ({error}). It may or may not be public now: check {BASE}/acelith/Chronexus/releases/tag/{tag}, then run --finalize again. Nothing was deleted") from None
+    receipt["state"]="public-unverified"
+    save(receipt_path,receipt)
+    # Anonymous access is only provable once public. A failure here leaves the release
+    # public; it is reported as such and can be retried, never rolled back by deletion.
+    try:
         for expected in report["assets"]: client.verify(receipt["assets"][expected["name"]]["url"],expected,anonymous=True)
         client.verify(f"{BASE}/acelith/Chronexus/releases/download/{tag}/latest.json",next(a for a in report["assets"] if a["name"]=="latest.json"),anonymous=True)
         public=urllib.request.build_opener(NoRedirect())
         with public.open(BASE+API+"/releases/latest",timeout=30) as response: latest=json.load(response)
         if latest.get("id")!=release_id or latest.get("draft") or latest.get("prerelease"): raise ValueError("Public stable channel mismatch")
-        receipt["published"]=True
-        receipt_path.write_text(json.dumps(receipt,indent=2)+"\n")
-    print("Published and verified" if finalize else "Draft prepared and verified", f"{BASE}/acelith/Chronexus/releases/tag/{tag}",flush=True)
+    except (ValueError,urllib.error.URLError,OSError) as error:
+        raise PublicationError(f"The release is PUBLIC, but its public verification failed: {error}. Nothing was deleted; run --finalize again to retry the verification") from None
+    receipt["state"]="published"
+    receipt["published"]=True
+    save(receipt_path,receipt)
+    print("Published and verified", f"{BASE}/acelith/Chronexus/releases/tag/{tag}",flush=True)
     return receipt
 
 
@@ -188,5 +282,7 @@ def main():
 
 if __name__=="__main__":
     try: main()
-    except urllib.error.HTTPError as error: raise SystemExit(f"Forgejo HTTP {error.code}; draft preserved, no credentials logged")
+    # Failures after the release became public are PublicationErrors with their own message;
+    # any HTTP error that reaches this point happened while the release was still a draft.
+    except urllib.error.HTTPError as error: raise SystemExit(f"Forgejo HTTP {error.code}; the release was not made public by this run, no credentials logged")
     except (ValueError,subprocess.CalledProcessError) as error: raise SystemExit(str(error) if isinstance(error,ValueError) else "Git validation failed; no credentials logged")

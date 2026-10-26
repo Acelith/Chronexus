@@ -191,6 +191,17 @@ The publisher checks clean tree, fixed origin, identity and permissions, version
 remote tag/commit, hash and absence of application changes after compilation.
 Does not modify existing releases not recognized by its local receipt.
 
+The publisher also runs the production-key signature test itself on the exact local
+files and re-checks their hashes afterwards; without Cargo (or `CARGO` pointing to it)
+it refuses to publish. Publication is **single-writer**: a `.publish.lock` in the
+package folder blocks a second run on this machine, and the release is re-listed
+before every upload, before and after finalizing, so a second publisher elsewhere
+(two drafts for the tag, unknown or duplicate attachments) stops the run while the
+release is still a draft. Run it from one machine only. The receipt records
+`state`: `draft`, `publishing`, `public-unverified` or `published`. A failure after
+the release became public says so explicitly; nothing is deleted, and `--finalize`
+again retries only the public verification.
+
 ```powershell
 # Write access already configured in Git for this exact repository;
 # no scanning of credentials, files or variables of other services.
