@@ -32,6 +32,23 @@ export function idFor(source) {
     "m_" + createHash("sha256").update(source.trim()).digest("hex").slice(0, 12)
   );
 }
+/** Ordinary Rust string literals. Comments, raw strings and char literals are
+ * consumed first so a quote inside them (e.g. r"\\?\" or '"') cannot
+ * desynchronize pairing and hide every later message of the file. */
+export function rustStrings(text) {
+  const out = [];
+  for (const m of text.matchAll(
+    /\/\/[^\n]*|\/\*[\s\S]*?\*\/|r(#*)"[\s\S]*?"\1|'(?:\\.|[^'\\])'|"((?:[^"\\]|\\.)*)"/g,
+  )) {
+    if (m[2] === undefined) continue;
+    try {
+      out.push(JSON.parse('"' + m[2] + '"'));
+    } catch {
+      /* not representable as JSON: not interface text */
+    }
+  }
+  return out;
+}
 export function jsxText(text) {
   const lines = text.split(/\r\n|\n|\r/);
   let last = 0;
@@ -137,13 +154,7 @@ if (
         if (!e.name.includes("tests")) await rust(p);
       } else if (e.name.endsWith(".rs") && !e.name.includes("tests")) {
         const text = await readFile(p, "utf8");
-        for (const m of text.matchAll(/"((?:[^"\\]|\\.)*)"/g)) {
-          let s;
-          try {
-            s = JSON.parse('"' + m[1] + '"');
-          } catch {
-            continue;
-          }
+        for (const s of rustStrings(text)) {
           // Model prompts and their answer sentinels are not interface text.
           if (
             /^(You are the assistant|Translate the supplied|Non risulta dalle fonti)/.test(

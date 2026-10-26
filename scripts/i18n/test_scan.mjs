@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { idFor } from "./scan.mjs";
+import { idFor, rustStrings } from "./scan.mjs";
 
 test("switching the source language preserves existing catalog identities", async () => {
   const catalog = JSON.parse(
@@ -18,4 +18,20 @@ test("switching the source language preserves existing catalog identities", asyn
     idFor(source),
     "m_" + createHash("sha256").update(source).digest("hex").slice(0, 12),
   );
+});
+
+test("raw strings, char literals and comments do not hide later Rust messages", () => {
+  const source = String.raw`
+    let a = text.strip_prefix(r"\\?\");
+    let q = '"';
+    // A "quoted" comment
+    /* "block" */
+    let raw = r#"{"x":1}"#;
+    Err("Port 11434 is occupied by another program.".into())
+    Err("Escaped \"quote\" survives.".into())
+  `;
+  assert.deepEqual(rustStrings(source), [
+    "Port 11434 is occupied by another program.",
+    'Escaped "quote" survives.',
+  ]);
 });
