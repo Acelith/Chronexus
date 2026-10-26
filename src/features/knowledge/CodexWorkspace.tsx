@@ -1,6 +1,13 @@
 import { tr } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import type { SaveGuard } from "../journal/Editor";
 import { errorMessage } from "../journal/api";
 import {
@@ -38,6 +45,37 @@ interface Props {
 export default function CodexWorkspace(props: Props) {
   const [query, setQuery] = useState("");
   const [form, setForm] = useState<"create" | "edit" | null>(null);
+  // One guard for the whole view: unsaved page metadata and the page editor.
+  const formDirty = useRef(false);
+  const editorGuard = useRef<SaveGuard | null>(null);
+  const { register } = props;
+  useEffect(() => {
+    register({
+      dirty: () => formDirty.current || !!editorGuard.current?.dirty(),
+      flush: async () => {
+        if (formDirty.current)
+          throw Error(
+            tr(
+              "Save or cancel the open changes before changing view or closing Chronexus.",
+            ),
+          );
+        await editorGuard.current?.flush();
+      },
+    });
+    return () => register(null);
+  }, [register]);
+  const registerEditor = useCallback((guard: SaveGuard | null) => {
+    editorGuard.current = guard;
+  }, []);
+  const onFormDirty = useCallback((dirty: boolean) => {
+    formDirty.current = dirty;
+  }, []);
+  async function submit(save: () => Promise<unknown>) {
+    // The form's own changes are being saved: they must not block the save itself.
+    formDirty.current = false;
+    if (await save()) setForm(null);
+    else formDirty.current = true;
+  }
   const page = props.pages.find((page) => page.id === props.selectedId);
   const missing = !!props.selectedId && !page;
   return (
@@ -62,10 +100,9 @@ export default function CodexWorkspace(props: Props) {
       {form === "create" ? (
         <PageForm
           busy={props.busy}
+          onDirty={onFormDirty}
           onCancel={() => setForm(null)}
-          onSave={async (metadata) => {
-            if (await props.onCreate(metadata)) setForm(null);
-          }}
+          onSave={(metadata) => submit(() => props.onCreate(metadata))}
         />
       ) : null}
       <div className="journal-layout">
@@ -129,14 +166,15 @@ export default function CodexWorkspace(props: Props) {
                   key={page.id}
                   initial={page}
                   busy={props.busy}
+                  onDirty={onFormDirty}
                   onCancel={() => setForm(null)}
-                  onSave={async (metadata, expected) => {
-                    if (
-                      expected &&
-                      (await props.onUpdate(page.id, metadata, expected))
+                  onSave={(metadata, expected) =>
+                    submit(async () =>
+                      expected
+                        ? props.onUpdate(page.id, metadata, expected)
+                        : undefined,
                     )
-                      setForm(null);
-                  }}
+                  }
                 />
               ) : null}
               <Suspense
@@ -149,7 +187,7 @@ export default function CodexWorkspace(props: Props) {
                 <Editor
                   key={`${page.id}:${props.externalEpoch ?? 0}`}
                   page={page}
-                  register={props.register}
+                  register={registerEditor}
                   onSaved={props.onSaved}
                   focusBlock={props.focusBlock}
                   disabled={props.busy}
@@ -217,11 +255,13 @@ export default function CodexWorkspace(props: Props) {
 function PageForm({
   initial,
   busy,
+  onDirty,
   onSave,
   onCancel,
 }: {
   initial?: KnowledgePage;
   busy: boolean;
+  onDirty: (dirty: boolean) => void;
   onSave: (metadata: PageMetadata, expected?: PageMetadata) => Promise<void>;
   onCancel: () => void;
 }) {
@@ -243,6 +283,16 @@ function PageForm({
     initial?.status ?? "active",
   );
   const [aliases, setAliases] = useState(initial?.aliases.join("\n") ?? "");
+  const changed =
+    title !== (initial?.title ?? "") ||
+    kind !== (initial?.kind ?? "note") ||
+    status !== (initial?.status ?? "active") ||
+    aliases !== (initial?.aliases.join("\n") ?? "");
+  useEffect(() => {
+    onDirty(changed);
+  }, [changed, onDirty]);
+  // Closing the form (save, cancel or another page) releases the guard.
+  useEffect(() => () => onDirty(false), [onDirty]);
   return (
     <form
       className="entry-form"

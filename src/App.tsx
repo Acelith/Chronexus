@@ -294,10 +294,13 @@ export function App() {
   function selectCampaign(id: string) {
     if (id === campaignId && !backupOpen) return;
     void run(async () => {
+      // Invalidate reads still running for the previous campaign (external refresh).
+      const version = ++loadVersion.current;
       const [items, knowledge] = await Promise.all([
         api.sessions(id),
         knowledgeApi.pages(id),
       ]);
+      if (version !== loadVersion.current) return;
       setCampaignId(id);
       setPlayerReturn(null);
       setBackupOpen(false);
@@ -320,6 +323,7 @@ export function App() {
         );
       } else {
         const saved = await api.createCampaign(name);
+        ++loadVersion.current;
         setCampaigns((items) => [...items, saved]);
         setCampaignId(saved.id);
         setPlayerReturn(null);
@@ -399,7 +403,10 @@ export function App() {
     const keyboard = (event: globalThis.KeyboardEvent) => {
       if (
         event.defaultPrevented ||
-        document.querySelector('[role="dialog"],[role="alertdialog"]')
+        // Native modals (the herald) have no role attribute but block input too.
+        document.querySelector(
+          'dialog[open],[role="dialog"],[role="alertdialog"]',
+        )
       )
         return;
       if (!(event.ctrlKey || event.metaKey) || event.altKey) return;

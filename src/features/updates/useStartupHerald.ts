@@ -46,20 +46,20 @@ export function useStartupHerald(canShow: () => boolean) {
   useEffect(() => {
     if (!pending || visible) return;
     let active = true;
+    const idle = () =>
+      canShow() &&
+      document.visibilityState !== "hidden" &&
+      !editing(document.activeElement) &&
+      !document.querySelector(
+        'dialog[open], [role="dialog"], [role="alertdialog"]',
+      );
     const poll = window.setInterval(() => {
-      if (
-        !canShow() ||
-        document.visibilityState === "hidden" ||
-        editing(document.activeElement) ||
-        document.querySelector(
-          'dialog[open], [role="dialog"], [role="alertdialog"]',
-        )
-      )
-        return;
+      if (!idle()) return;
       heraldApi
         .blocked()
         .then((blocked) => {
-          if (active && !blocked) setVisible(true);
+          // The user may have started writing while the check was running.
+          if (active && !blocked && idle()) setVisible(true);
         })
         .catch(() => undefined);
     }, IDLE_POLL_MS);

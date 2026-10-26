@@ -124,8 +124,9 @@ export default function GraphWorkspace({
     setEdgeId(selected.id);
     setRelationship(null);
     setError("");
+    // A newer selection owns the flag: the superseded request will not clear it.
+    setRelationLoading(!!selected.relationshipId);
     if (selected.relationshipId) {
-      setRelationLoading(true);
       try {
         const result = await graphApi.relationship(
           campaignId,
