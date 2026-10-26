@@ -2,9 +2,11 @@ import { useSyncExternalStore } from "react";
 import {
   defaultPreferences,
   localeInfo,
+  resolveLocale,
   validPreferences,
   type Preferences,
   type Locale,
+  type SavedPreferences,
 } from "./locales";
 import english from "./catalogs/en.json";
 import italian from "./catalogs/it.json";
@@ -30,12 +32,25 @@ const legacy = new Map(
 );
 const idFor = (text: string) => reverse.get(text) ?? legacy.get(text);
 let current: Preferences = { ...defaultPreferences };
+let saved: SavedPreferences = { ...defaultPreferences };
 const listeners = new Set<() => void>();
+/** Preferences in effect: the locale is always a bundled one. */
 export function getPreferences() {
   return current;
 }
 export function usePreferences() {
   return useSyncExternalStore(subscribe, getPreferences, getPreferences);
+}
+/** Preferences as chosen, where the locale may be "system". */
+export function getSavedPreferences() {
+  return saved;
+}
+export function useSavedPreferences() {
+  return useSyncExternalStore(
+    subscribe,
+    getSavedPreferences,
+    getSavedPreferences,
+  );
 }
 function subscribe(listener: () => void) {
   listeners.add(listener);
@@ -51,10 +66,11 @@ export async function loadLocale(locale: Locale) {
     catalogs[locale] = module.default;
   } else catalogs[locale] = {};
 }
-export function applyPreferences(preferences: Preferences) {
+export function applyPreferences(preferences: SavedPreferences) {
   if (!validPreferences(preferences))
     throw Error("Invalid language preferences.");
-  current = { ...preferences };
+  saved = { ...preferences };
+  current = { ...preferences, locale: resolveLocale(preferences.locale) };
   const info = localeInfo(current.locale);
   if (typeof document !== "undefined") {
     document.documentElement.lang = info.id;

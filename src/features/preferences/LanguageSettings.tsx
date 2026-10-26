@@ -2,18 +2,21 @@ import TranscriptionPreview from "./TranscriptionPreview";
 import { useState } from "react";
 import {
   defaultPreferences,
+  localeInfo,
   locales,
-  type Locale,
-  type Preferences,
+  resolveLocale,
+  type LocaleChoice,
+  type SavedPreferences,
   type Script,
 } from "../../i18n/locales";
 import {
   applyPreferences,
-  getPreferences,
+  getSavedPreferences,
   loadLocale,
   tr,
   translationCoverage,
   usePreferences,
+  useSavedPreferences,
 } from "../../i18n/store";
 import { preferencesApi } from "../../i18n/preferencesApi";
 import { errorMessage } from "../journal/api";
@@ -22,16 +25,17 @@ export default function LanguageSettings({
 }: {
   disabled?: boolean;
 }) {
-  const preferences = usePreferences();
+  const preferences = useSavedPreferences(),
+    effective = usePreferences();
   const [pending, setPending] = useState(false),
     [error, setError] = useState("");
   const coverage = translationCoverage();
-  async function change(next: Preferences) {
+  async function change(next: SavedPreferences) {
     if (pending) return;
     setPending(true);
     setError("");
     try {
-      await loadLocale(next.locale);
+      await loadLocale(resolveLocale(next.locale));
       const saved = await preferencesApi.save(next);
       applyPreferences(saved);
     } catch (reason) {
@@ -58,10 +62,11 @@ export default function LanguageSettings({
             onChange={(event) =>
               void change({
                 ...preferences,
-                locale: event.target.value as Locale,
+                locale: event.target.value as LocaleChoice,
               })
             }
           >
+            <option value="system">{tr("Automatic (system language)")}</option>
             {locales.map((locale) => (
               <option key={locale.id} value={locale.id} lang={locale.id}>
                 {locale.name}
@@ -69,6 +74,14 @@ export default function LanguageSettings({
             ))}
           </select>
         </label>
+        {preferences.locale === "system" ? (
+          <p className="language-system">
+            {tr(
+              "Following the system language: {0}. Languages without a translation use English.",
+              [localeInfo(effective.locale).name],
+            )}
+          </p>
+        ) : null}
         <label>
           {tr("Script mode")}
           <select
@@ -121,7 +134,7 @@ export default function LanguageSettings({
           coverage.total,
         ])}
       </p>
-      {preferences.locale !== "it" ? (
+      {effective.locale !== "it" ? (
         <p className="language-review">
           {tr(
             "Translation prepared automatically and awaiting review. Missing strings stay in English.",
@@ -141,7 +154,7 @@ export default function LanguageSettings({
         lang="en"
         dir="ltr"
         onClick={() =>
-          void change({ ...getPreferences(), ...defaultPreferences })
+          void change({ ...getSavedPreferences(), ...defaultPreferences })
         }
       >
         English · Reset language and script

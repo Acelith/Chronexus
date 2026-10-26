@@ -11,13 +11,20 @@ export const locales = [
   { id: "ar", name: "العربية", intl: "ar", dir: "rtl" },
 ] as const;
 export type Locale = (typeof locales)[number]["id"];
+/** A saved choice: a locale, or "system" to follow the operating system. */
+export type LocaleChoice = Locale | "system";
 export type Script =
   "standard" | "braille" | "morse" | "galactic" | "espruar" | "dethek";
+/** Preferences in effect, with the locale already resolved. */
 export interface Preferences {
   version: 2;
   locale: Locale;
   script: Script;
   showOriginal: boolean;
+}
+/** Preferences as stored, where the locale may still be "system". */
+export interface SavedPreferences extends Omit<Preferences, "locale"> {
+  locale: LocaleChoice;
 }
 export const defaultPreferences: Preferences = {
   version: 2,
@@ -27,12 +34,40 @@ export const defaultPreferences: Preferences = {
 };
 export const localeInfo = (locale: Locale) =>
   locales.find((item) => item.id === locale)!;
-export function validPreferences(value: unknown): value is Preferences {
+/** Maps a BCP 47 or POSIX language tag to a bundled locale, if any. */
+export function matchLocale(tag: string): Locale | null {
+  const [language = "", ...rest] = tag.trim().toLowerCase().split(/[-_.]/);
+  if (language === "zh")
+    // Only Simplified Chinese is bundled: Traditional falls through.
+    return rest.includes("hans") ||
+      !rest.some((part) => ["hant", "tw", "hk", "mo"].includes(part))
+      ? "zh-Hans"
+      : null;
+  if (language === "pt") return "pt-BR";
+  return locales.find((l) => l.id === language)?.id ?? null;
+}
+function systemLanguages(): readonly string[] {
+  if (typeof navigator === "undefined") return [];
+  return navigator.languages?.length
+    ? navigator.languages
+    : [navigator.language].filter(Boolean);
+}
+/** The first OS language with a bundled translation, otherwise English. */
+export function systemLocale(languages = systemLanguages()): Locale {
+  for (const tag of languages) {
+    const match = matchLocale(tag);
+    if (match) return match;
+  }
+  return "en";
+}
+export const resolveLocale = (choice: LocaleChoice): Locale =>
+  choice === "system" ? systemLocale() : choice;
+export function validPreferences(value: unknown): value is SavedPreferences {
   if (!value || typeof value !== "object") return false;
-  const p = value as Preferences;
+  const p = value as SavedPreferences;
   return (
     p.version === 2 &&
-    locales.some((l) => l.id === p.locale) &&
+    (p.locale === "system" || locales.some((l) => l.id === p.locale)) &&
     ["standard", "braille", "morse", "galactic", "espruar", "dethek"].includes(
       p.script,
     ) &&

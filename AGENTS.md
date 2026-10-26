@@ -331,7 +331,8 @@ This is mandatory, not an optional final polish task.
 
 See `docs/I18N.md` and `docs/I18N_AUDIT.md` for the workflow and current evidence.
 
-English is the source and fallback language for new profiles, developer-facing
+English is the source and fallback language (new profiles follow the OS
+language when it has a catalog, otherwise English), developer-facing
 diagnostics, app metadata, assistant prompts and agent documentation. Keep
 message IDs, database keys, legacy backup folder names, original notes and
 attribution stable. Explicit saved locales survive upgrades. Pre-language

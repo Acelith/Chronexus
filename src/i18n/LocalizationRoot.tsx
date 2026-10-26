@@ -1,11 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { preferencesApi } from "./preferencesApi";
+import { resolveLocale } from "./locales";
 import {
   applyPreferences,
   loadLocale,
   tr,
   usePreferences,
   getPreferences,
+  getSavedPreferences,
 } from "./store";
 export default function LocalizationRoot({
   children,
@@ -23,7 +25,7 @@ export default function LocalizationRoot({
     void preferencesApi
       .read()
       .then(async (prefs) => {
-        await loadLocale(prefs.locale);
+        await loadLocale(resolveLocale(prefs.locale));
         if (active) applyPreferences(prefs);
       })
       .catch((reason) => {
@@ -44,6 +46,18 @@ export default function LocalizationRoot({
     return () => {
       active = false;
     };
+  }, []);
+  useEffect(() => {
+    // Follow the operating system while the saved choice is "system".
+    function follow() {
+      const prefs = getSavedPreferences();
+      if (prefs.locale !== "system") return;
+      void loadLocale(resolveLocale("system")).then(() => {
+        if (getSavedPreferences() === prefs) applyPreferences(prefs);
+      });
+    }
+    window.addEventListener("languagechange", follow);
+    return () => window.removeEventListener("languagechange", follow);
   }, []);
   if (!ready) return <p role="status">{tr("Opening archive…")}</p>;
   return (

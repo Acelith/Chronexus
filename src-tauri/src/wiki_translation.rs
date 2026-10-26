@@ -398,7 +398,7 @@ pub async fn translate_wiki(
     let (generation, title, blocks, hash, epoch, token) = db.with_store(|s| {
         let epoch = wiki.epoch();
         let token = wiki.token();
-        if crate::preferences::read(&s.root)?.locale != locale {
+        if !crate::preferences::matches(&crate::preferences::read(&s.root)?.locale, &locale) {
             return Err("The app language changed. Try the translation again.".into());
         }
         let (title, blocks, hash) = source(&s.connection, &provider, &key)?;
@@ -421,7 +421,7 @@ pub async fn translate_wiki(
         db.with_store(|s| {
             if s.directory != generation
                 || wiki.epoch() != epoch
-                || crate::preferences::read(&s.root)?.locale != locale
+                || !crate::preferences::matches(&crate::preferences::read(&s.root)?.locale, &locale)
             {
                 return Err("Archive, cache or language changed: translation discarded.".into());
             }

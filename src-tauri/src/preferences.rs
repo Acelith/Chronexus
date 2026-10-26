@@ -6,6 +6,9 @@ const FILE: &str = "interface-preferences.json";
 const LOCALES: [&str; 10] = [
     "it", "en", "de", "fr", "es", "pt-BR", "ja", "ko", "zh-Hans", "ar",
 ];
+/// Follow the operating system language. The frontend resolves it to a bundled
+/// locale and falls back to English when the system language has none.
+pub const SYSTEM: &str = "system";
 /// Options removed in M23. Ticinese readers continue in Italian; the fantasy
 /// vocabularies already fell back to English for most text.
 const RETIRED: [(&str, &str); 3] = [("lmo-CH", "it"), ("tlh", "en"), ("art-x-rihan", "en")];
@@ -21,23 +24,26 @@ impl Default for Preferences {
     fn default() -> Self {
         Self {
             version: 2,
-            locale: "en".into(),
+            locale: SYSTEM.into(),
             script: "standard".into(),
             show_original: true,
         }
     }
 }
-/// English is the default from 0.8.1. An archive created by an earlier
-/// version without an explicit choice was shown in Italian: keep it that way
-/// by saving Italian once. A fresh install, or any saved choice, is untouched.
+/// Records the language choice of an archive that has none yet. An archive
+/// created before 0.8.1 without an explicit choice was shown in Italian: keep
+/// it that way. A fresh install saves the default (follow the system) at once,
+/// so it is not mistaken for a legacy archive on the next start. Any saved
+/// choice is untouched.
 pub fn keep_legacy_italian(root: &Path, archive_existed: bool) -> AppResult<()> {
-    if !archive_existed || root.join(FILE).exists() {
+    if root.join(FILE).exists() {
         return Ok(());
     }
+    let locale = if archive_existed { "it" } else { SYSTEM };
     save(
         root,
         Preferences {
-            locale: "it".into(),
+            locale: locale.into(),
             ..Preferences::default()
         },
     )
@@ -45,7 +51,7 @@ pub fn keep_legacy_italian(root: &Path, archive_existed: bool) -> AppResult<()> 
 }
 fn validate(p: &Preferences) -> AppResult<()> {
     if p.version != 2
-        || !LOCALES.contains(&p.locale.as_str())
+        || !(p.locale == SYSTEM || LOCALES.contains(&p.locale.as_str()))
         || ![
             "standard", "braille", "morse", "galactic", "espruar", "dethek",
         ]
@@ -66,6 +72,11 @@ fn upgrade(mut value: Preferences) -> AppResult<Preferences> {
     }
     validate(&value)?;
     Ok(value)
+}
+/// Whether a request made for `locale` still matches the saved choice. With
+/// "system" the frontend resolved the locale itself, so any bundled one fits.
+pub fn matches(saved: &str, locale: &str) -> bool {
+    LOCALES.contains(&locale) && (saved == locale || saved == SYSTEM)
 }
 pub fn read(root: &Path) -> AppResult<Preferences> {
     let damaged =
@@ -98,10 +109,13 @@ mod tests {
     use super::*;
     use std::fs;
     #[test]
-    fn legacy_archives_keep_italian_and_fresh_installs_start_in_english() {
+    fn legacy_archives_keep_italian_and_fresh_installs_follow_the_system() {
         let fresh = tempfile::tempdir().unwrap();
         keep_legacy_italian(fresh.path(), false).unwrap();
-        assert_eq!(read(fresh.path()).unwrap().locale, "en");
+        assert_eq!(read(fresh.path()).unwrap().locale, SYSTEM);
+        // The next start sees an existing archive, but the saved choice wins.
+        keep_legacy_italian(fresh.path(), true).unwrap();
+        assert_eq!(read(fresh.path()).unwrap().locale, SYSTEM);
         let legacy = tempfile::tempdir().unwrap();
         keep_legacy_italian(legacy.path(), true).unwrap();
         assert_eq!(read(legacy.path()).unwrap().locale, "it");
@@ -121,7 +135,7 @@ mod tests {
     fn default_round_trip_and_recovery() {
         let d = tempfile::tempdir().unwrap();
         assert_eq!(read(d.path()).unwrap(), Preferences::default());
-        for locale in LOCALES {
+        for locale in LOCALES.into_iter().chain([SYSTEM]) {
             for script in [
                 "standard", "braille", "morse", "galactic", "espruar", "dethek",
             ] {
@@ -139,6 +153,12 @@ mod tests {
         assert!(read(d.path()).is_err());
         save(d.path(), Preferences::default()).unwrap();
         assert_eq!(read(d.path()).unwrap(), Preferences::default());
+    }
+    #[test]
+    fn system_choice_matches_any_bundled_locale_only() {
+        assert!(matches(SYSTEM, "de") && matches(SYSTEM, "en"));
+        assert!(!matches(SYSTEM, "sv") && !matches(SYSTEM, SYSTEM));
+        assert!(matches("fr", "fr") && !matches("fr", "de"));
     }
     #[test]
     fn invalid_preferences_cannot_replace_previous() {

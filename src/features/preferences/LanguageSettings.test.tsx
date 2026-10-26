@@ -3,13 +3,18 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LanguageSettings from "./LanguageSettings";
 import { preferencesApi } from "../../i18n/preferencesApi";
-import { applyPreferences, getPreferences } from "../../i18n/store";
+import {
+  applyPreferences,
+  getPreferences,
+  getSavedPreferences,
+} from "../../i18n/store";
 import { defaultPreferences } from "../../i18n/locales";
 import { Text } from "../../i18n/Text";
 vi.mock("../../i18n/preferencesApi", () => ({
   preferencesApi: { save: vi.fn(), read: vi.fn() },
 }));
 afterEach(() => {
+  vi.restoreAllMocks();
   applyPreferences(defaultPreferences);
   vi.resetAllMocks();
 });
@@ -94,3 +99,33 @@ it.each(["espruar", "dethek"] as const)(
     await waitFor(() => expect(getPreferences()).toEqual(defaultPreferences));
   },
 );
+
+it("follows the OS language and keeps the automatic choice when other options change", async () => {
+  const user = userEvent.setup();
+  vi.spyOn(navigator, "languages", "get").mockReturnValue(["de-AT", "en-US"]);
+  vi.mocked(preferencesApi.save).mockImplementation(async (p) => p);
+  render(<LanguageSettings />);
+  await user.selectOptions(
+    screen.getByLabelText("Interface language"),
+    "system",
+  );
+  await waitFor(() => expect(getPreferences().locale).toBe("de"));
+  expect(getSavedPreferences().locale).toBe("system");
+  expect(document.documentElement.lang).toBe("de");
+  expect(preferencesApi.save).toHaveBeenLastCalledWith(
+    expect.objectContaining({ locale: "system" }),
+  );
+  expect(document.querySelector(".language-system")).toHaveTextContent(
+    "Deutsch",
+  );
+  await user.click(screen.getByRole("checkbox"));
+  expect(preferencesApi.save).toHaveBeenLastCalledWith(
+    expect.objectContaining({ locale: "system", showOriginal: false }),
+  );
+});
+it("falls back to English when the OS language has no translation", () => {
+  vi.spyOn(navigator, "languages", "get").mockReturnValue(["sv-SE"]);
+  applyPreferences({ ...defaultPreferences, locale: "system" });
+  expect(getPreferences().locale).toBe("en");
+  expect(getSavedPreferences().locale).toBe("system");
+});

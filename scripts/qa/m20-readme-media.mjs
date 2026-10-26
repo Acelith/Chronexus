@@ -22,6 +22,16 @@ assert.equal(
   0,
   "empty profile required",
 );
+// New profiles follow the OS language; README media must be English anyway.
+await call("save_interface_preferences", {
+  preferences: {
+    version: 2,
+    locale: "en",
+    script: "standard",
+    showOriginal: true,
+  },
+});
+await page.reload();
 assert.equal((await call("get_interface_preferences")).locale, "en");
 const campaign = await call("create_campaign", { name: "Varek’s Tower" });
 const c = campaign.id;
