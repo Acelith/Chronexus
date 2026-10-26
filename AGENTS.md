@@ -277,18 +277,20 @@ explicit start/stop tied to the app, model pulls limited to the M18 policy and
 verified by weight digest. Never overwrite or stop a runtime Chronexus did not start.
 README screenshots come only from synthetic campaigns (scripts/qa/m20-readme-media.mjs).
 
-## Planned M23–M25 (not implemented)
+## M23 audit, M24 sharing client, planned M25 server and M27 Android
 
-Planned 25 October 2026, in order: M23 full code audit (bugs, duplication,
-optimization, flaky MCP test, report in docs/AUDIT.md, no format/schema changes
-without migration); M24 opt-in shared campaigns through a user-confirmed self-hosted
-Chronexus server kept in a separate repository (proposed acelith/Chronexus-Server,
-versioned HTTP API contract; this repo holds only the sync client) with accounts and per-item selective sharing (default private,
-desktop stays local-first; P2P evaluated and not chosen as the base); M25 Android
-APK (Tauri 2 mobile) using the same M24 account, read-mostly first. M24/M25 change
-the no-account/no-server invariant only as an explicit opt-in and need user
-confirmation of hosting, registration and encryption choices before coding.
-Never upload private notes, sheets, AI data or preferences unless shared.
+M23 (implemented 26 October 2026): report in docs/AUDIT.md. Archive commands are
+async (`Database::run`), never block the main thread; keep new commands that way.
+M24 sharing client (implemented 26 October 2026, schema 019): opt-in, explicit
+actions only, HTTPS only, invitation-only accounts, per-item sharing with default
+private, received items read-only and attributed (never campaign facts), revision
+conflicts resolved by the user, no CRDT or end-to-end encryption in v1. The session
+token lives in `sync-account.json` outside Git and backups and never reaches the
+UI. Contract v1 in docs/SYNC_API.md until the server publishes its OpenAPI schema.
+M25 is the server in the separate repository `acelith/Chronexus-Server` (notes in
+docs/SERVER_NOTES.md); this repository keeps only the client. M27 is the Android APK
+(moved from M25). Creating the repository, domains or deployments needs an explicit
+request. Never upload private notes, sheets, AI data or preferences unless shared.
 ## English-first internationalization (M26)
 
 English is the source and fallback language for new profiles, developer-facing

@@ -1,3 +1,27 @@
+# Chronexus status — 26 October 2026: M23 complete, M6/M16 platforms, M24 client
+
+Not published; source version 0.8.1, schema 019.
+
+- **M7, M18, M26 closed** by user decision (unperformed checks not claimed).
+- **M23 implemented** (report docs/AUDIT.md): MCP bridge fix, archive commands off
+  the main thread (UI no longer freezes during backups), search 10 s → 19 ms on a
+  12 000-block campaign, `lib.rs` split per domain, `App.tsx` shell split, shared
+  helpers (JSON files, pending actions, blocking work, test HTTP fake), Ticinese/
+  Klingon/Romulan removed with preference migration, catalogue and error fixes,
+  backups of every schema 2–19 restorable. CVE scan still open (tool not permitted).
+- **M6/M16:** macOS arm64/x64 .app and .dmg built (arm64 started; x64 not run, no
+  Rosetta; ad-hoc signing only); Linux arm64/x64 .deb built, installed and started
+  on clean Debian; real-WebView IPC flows 16/16 on Linux arm64; Wikidot parser
+  verified on live pages; 93 wiki strings translated into eight languages.
+- **M24 client implemented:** schema 019, sharing commands and views, contract v1
+  in docs/SYNC_API.md, acceptance scenarios against an in-process contract fake.
+  The server is now **M25** (separate repository, notes in docs/SERVER_NOTES.md);
+  Android moved to **M27**.
+
+Validation (macOS unless noted): Rust 152 pass / 0 fail / 2 ignored; Clippy,
+rustfmt; Vitest 171; tsc, ESLint, Prettier, catalogue check, vite build; MCP stdio
+5/5. Linux arm64: Rust 152, clippy, IPC flows 16/16. Windows not re-run.
+
 # Chronexus status — 26 October 2026: M23 audit, first pass
 
 First M23 pass on macOS; report in docs/AUDIT.md. Fixed: MCP bridge replies lost on

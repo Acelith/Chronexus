@@ -35,7 +35,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 6 | M4a | Rename Chronexus | 23/10/2026 | `9eabd4d` | Delivered |
 | 7 | M5 | Sheet, inventory and spells | 23/10/2026 | `e756ea4 → e964e94` | Windows |
 | 8 | M5a | Reference sheet and SRD catalog | 23/10/2026 | `a15366e → 55dea13` | Windows |
-| 9 | M6 | Search, images/backup, export, summary, Logseq and first distribution | 23/10/2026 | `70e7880 → f984a3c` | Windows; other OS open |
+| 9 | M6 | Search, images/backup, export, summary, Logseq and first distribution | 23/10/2026 | `70e7880 → f984a3c` | Windows; macOS and Linux verified 26/10/2026 |
 | 10 | M6a | First medieval theme/graph restyling | 23/10/2026 | `b22a033` | Windows |
 | 11 | M6b | Party and member knowledge | 23/10/2026 | `dc29fe6 → f5bb67b` | Windows |
 | 12 | M6c | Multi-source Open5e Wiki | 23/10/2026 | `d765db1` | Windows |
@@ -53,7 +53,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 24 | M11 | Forgegit app/AI distribution | 24/10/2026; app completed 25/10 | `43467fb → 4abb4e3; M15` | Partial: large open AIs |
 | 25 | M14 | Hidden external MCP assistants | 25/10/2026 | `fa38d2e` | Windows |
 | 26 | M15 | Updater, pre-installation backup and release 0.4.0 | 25/10/2026 | `c7d95ca → ad7760d` | Windows; public channel |
-| 27 | M16 | Wikidot scraping, source selection and deletable cache | 25/10/2026 | `2fbf17a → 923516f` | Windows; other OS open |
+| 27 | M16 | Wikidot scraping, source selection and deletable cache | 25/10/2026 | `2fbf17a → 923516f` | Windows; macOS/Linux and translations 26/10/2026 |
 | 28 | M15a | Epic update announcement: vassal, trumpet and manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
 | 29 | M17 | Local wiki translation into the app language | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, open linguistic revision |
 | 30 | M18 | Replacement of Qwen models with local Qwen3.8-27B | Implemented Windows | 018 | **Closed** 26/10/2026 by user decision |
@@ -61,10 +61,11 @@ are indicated in the status, without pretending they occurred earlier.
 | 32 | M22 | Guided installation of Ollama and models from settings | 25/10/2026 | `54a6b42` | Windows; release 0.8.0 |
 | 33 | M20 | Quality README with images, quick guide and credits | 25/10/2026 | `d1d1e89` | Render verified on github.com |
 | 34 | M19 | Backup folder in Documents, periodic and update backups | Delivered on Windows, release 0.8.0 | — | Moved to the bottom on user instruction; executed on October 25 2026 |
-| 35 | M23 | Full code audit: bugs, duplication, multilingual support, remove Ticinese/Romulan/Klingon, optimization | Planned, **next** | — | Requested on 25/10/2026 |
-| 36 | M24 | Shared campaign with self-hosted server and selective sharing | Planned | — | After M23; server confirmed, in a separate repository |
-| 37 | M25 | Android App (APK) connected to the server with the same account | Planned | — | Depends on M24 |
+| 35 | M23 | Full code audit: bugs, duplication, multilingual support, remove Ticinese/Romulan/Klingon, optimization | Implemented 26/10/2026 | `fa27012 → 7a70a22` | macOS and Linux verified; report in docs/AUDIT.md |
+| 36 | M24 | Shared campaign: desktop sharing client and API contract v1 | Client implemented 26/10/2026 | see docs/STATUS.md | Server is M25; verified against the in-repo contract fake |
+| 37 | M25 | Chronexus Server (separate repository `acelith/Chronexus-Server`) | Planned, **next** | — | Notes in docs/SERVER_NOTES.md; contract docs/SYNC_API.md |
 | 38 | M26 | English-first app, manifests, documentation and AI instructions | Implemented Windows, source 0.8.1 | — | **Closed** 26/10/2026; ships with the next authorized build/release |
+| 39 | M27 | Android App (APK) connected to the server with the same account | Planned | — | Moved from M25 on 26/10/2026; depends on M25 |
 
 
 ## M0 - Foundation and real local database
@@ -1309,11 +1310,12 @@ alternative text, declared total weight and content.
 - A new user finds downloads, requirements, first start, backup, and privacy in less
   than a minute; technical information removed from README still reachable.
 
-## M23 — Complete code audit: bugs, repetitions, and optimization (planned)
+## M23 — Complete code audit: bugs, repetitions, and optimization (implemented)
 
-**Order:** requested by the user on 25 October 2026 after release 0.8.0; it is the
-next to be executed, before M24/M25, because sharing and mobile rely on the
-existing code. **Status:** planned, not started.
+**Order:** requested by the user on 25 October 2026 after release 0.8.0, executed on
+26 October 2026 before M24. **Status:** implemented and verified on macOS (arm64)
+and Linux (arm64 native, x64 emulated); Windows not re-run in this pass. Findings,
+fixes, measurements and open items are in [docs/AUDIT.md](docs/AUDIT.md).
 
 ### M23.1 — Inventory and starting measures
 
@@ -1358,9 +1360,13 @@ existing code. **Status:** planned, not started.
   repeated executions. Desktop testing of main flows on an isolated profile.
 - No data loss: backups of every previous version are still restorable.
 
-## M24 — Shared campaign between multiple people (planned)
+## M24 — Shared campaign between multiple people (client implemented)
 
-**Order:** after M23, before M25. **Status:** planned, not started. Changes a
+**Order:** after M23. **Status:** desktop client implemented on 26 October 2026
+(schema 019, sharing commands and views, API contract v1 in
+[docs/SYNC_API.md](docs/SYNC_API.md)), verified against an in-process fake of the
+contract. The server itself moved to **M25**; real end-to-end acceptance with a
+deployed server happens there. Changes a
 project invariant: today no account and no service. Sharing
 remains **optional**: without activating it, Chronexus works offline as it does today.
 
@@ -1387,10 +1393,23 @@ versioned and documented (OpenAPI schema and shared types published by the serve
 never copied manually), with declared compatibility between app and server versions.
 The repository must be created at the start of M24, upon explicit request, with the same
 commit, test, and document model (`AGENTS.md`, `ROADMAP.md`, `docs/STATUS.md`).
-Domain/hosting, registration (invitation-only
-or open), and end-to-end encryption remain to be confirmed before coding.
+**Confirmed on 26 October 2026:** HTTPS with the server reading shared items (no
+end-to-end encryption in v1), invitation-only registration, revisions with user
+choice on conflicts (no CRDT in v1), server address entered by the user (no default
+domain).
 
-### M24.1 — Server and account
+### M24 client delivery (26 October 2026)
+
+- Schema 019: links, per-item shares (default private), received copies kept
+  read-only and attributed, conflicts with both versions. Included in backups and
+  validated on restore; the session token stays in `sync-account.json` outside them.
+- Explicit actions only: verify server, sign in or redeem an invitation, create or
+  join a shared campaign, invite (owner), choose items, Synchronize now, resolve
+  conflicts, unlink. No startup or background requests.
+- Shared kinds v1: Codex pages, sessions, relationships (only between shared pages,
+  without source references) and party members. Images and character sheets later.
+
+### M24.1 — Server and account (moved to M25)
 
 - HTTPS Service (Rust/axum, SQLite or PostgreSQL) with accounts, sessions, passkeys or
   robust passwords with attempt limits, campaign invitations and roles
@@ -1426,15 +1445,31 @@ offline work and realignment. Private items never present on the server.
 - Security testing (authentication, per-item authorization, limits), server backup
   and restoration, self-hosted installation guide.
 
-## M25 — Chronexus on Android (APK) connected to the server (planned)
+## M25 — Chronexus Server in a separate repository (planned, next)
 
-**Order:** after M24, which it depends on for accounts and shared data. **Status:**
-planned, not started.
+**Order:** after the M24 client, requested on 26 October 2026; Android moved to M27.
+**Status:** planned, not started. Creating the repository, choosing the domain and
+deploying need an explicit request.
+
+- Implement the server side of M24.1–M24.3 in `acelith/Chronexus-Server` following
+  [docs/SERVER_NOTES.md](docs/SERVER_NOTES.md) and the contract
+  [docs/SYNC_API.md](docs/SYNC_API.md); publish the OpenAPI schema and then make it
+  the source of truth for this repository.
+- Accounts by invitation, campaign roles, per-item authorization, change feed with
+  tombstones, revisions with 409 conflicts, rate limits, logs without content,
+  Docker image, backup/restore procedure and installation guide.
+- Acceptance: the M24 acceptance list below, run with the real desktop client against
+  a test deployment, plus the server security tests in SERVER_NOTES.md.
+
+## M27 — Chronexus on Android (APK) connected to the server (planned)
+
+**Order:** after M25, which it depends on for accounts and shared data (moved from
+M25 on 26 October 2026). **Status:** planned, not started.
 
 - Android app with Tauri 2 mobile (same React/Rust code; Android icons are
   already generated by `pnpm icons`), distributed as a **signed APK** in the releases
   Forgegit; Play Store outside the perimeter unless requested.
-- Access to the M24 server with the **same account** as the desktop: campaign list,
+- Access to the M25 server with the **same account** as the desktop: campaign list,
   consultation of pages, sessions, graph, party, and shared cards; local cache
   for offline consultation. First version primarily in read-only mode; modifications
   mobile stats after testing (quick notes, dice rolls, hit points).
@@ -1445,7 +1480,7 @@ planned, not started.
 - Security: token in Android Keystore, mandatory HTTPS, no private data
   in addition to what was shared, local deletion upon logout.
 
-### M25 Acceptance
+### M27 Acceptance
 
 - Signed APK installed on a real Android device (minimum version to
   be declared), access with the desktop account, shared contents visible and
@@ -1485,8 +1520,11 @@ close platform acceptance or publish a release.
 
 ## Residual acceptances and next phase
 
-- **M6:** runner/macOS/Linux packages and distribution tests not demonstrated
-  from Windows tests alone; follow the updated STATUS evidence.
+- **M6:** verified on 26 October 2026 on macOS (arm64 app/DMG run, x64 app/DMG
+  built and image-verified but not run: no Rosetta) and Linux (arm64 native and x64
+  emulated: Rust tests, clippy, release, .deb installed and started on clean Debian;
+  arm64 real-WebKitGTK IPC flows). macOS packages are ad-hoc signed only (no
+  Developer ID/notarization); AppImage and Windows ARM64 not built.
 - **M7, M18, M26:** closed by user decision on 26 October 2026; the unperformed
   checks (physical offline, other GPU/OS, installer) are not claimed as verified.
 - **M8:** physical proof without network and additional hardware/OS targets not certified;
@@ -1496,8 +1534,10 @@ assistive/real IME; do not declare a complete translation when there is fallback
 - **M11:** distribution of large AI packages still open; the app release
 0.4.0 of M15 does not publish nor completes the old draft 0.2.0.
 - **M15:** upgrade of real files for both versions equipped with an updater and verification of other OS.
-- **M16:** macOS/Linux, translations of new strings and future HTML changes
-of Wikidot; M16 is included in the 0.5.0 release.
+- **M16:** macOS/Linux checks and the translation of the 93 wiki strings into the
+eight other languages done on 26 October 2026 (machine-prepared, native review
+open); parser re-verified on live pages. Future Wikidot HTML changes still need
+watching; M16 is included in the 0.5.0 release.
 - **M15a:** illustrations included in the 0.5.0; remain real upgrades
 from the popup between two signed releases, listening to the fanfare on multiple systems.
 - **M21/M22/M20:** delivered on Windows on October 25 2026, included in the
@@ -1507,8 +1547,8 @@ from 17,7 GB via the interface, macOS/Linux.
 
   a real update with backup in Documents. M18 is implemented on Windows; other GPU/OS and physical tests
   pending offline. Implement only upon request; the residues above remain open.
-- **Planned (25 October 2026):** M23 audit (next), then M24 shared campaign,
-  then M25 Android. None are implemented; each requires an explicit request.
+- **26 October 2026:** M23 audit implemented; M24 sharing client implemented; next
+  M25 server (separate repository), then M27 Android. Each requires an explicit request.
 
 ## Outside the current scope
 
