@@ -208,3 +208,37 @@ fn only_duplicate_session_numbers_report_the_session_number_message() {
     assert!(!foreign.contains("session number"), "{foreign}");
     assert!(foreign.starts_with("Invalid operation"), "{foreign}");
 }
+
+#[test]
+fn session_details_update_title_and_date_and_reindex_search() {
+    let directory = tempfile::tempdir().unwrap();
+    let connection = db::open(&directory.path().join("journal.sqlite3")).unwrap();
+    let campaign = create_campaign(&connection, "Details").unwrap();
+    let session = create_session(&connection, &campaign.id, 3, "Old title", None).unwrap();
+    let updated = update_session_details(
+        &connection,
+        &campaign.id,
+        &session.id,
+        "New title",
+        Some("2026-10-26".into()),
+    )
+    .unwrap();
+    assert_eq!(
+        (
+            updated.title.as_str(),
+            updated.played_on.as_deref(),
+            updated.sequence
+        ),
+        ("New title", Some("2026-10-26"), 3)
+    );
+    assert!(update_session_details(
+        &connection,
+        &campaign.id,
+        &session.id,
+        "x",
+        Some("26/10/2026".into())
+    )
+    .is_err());
+    let hits = crate::search::find(&connection, &campaign.id, "New", None, "relevance").unwrap();
+    assert!(hits.iter().any(|h| h.title == "New title"));
+}

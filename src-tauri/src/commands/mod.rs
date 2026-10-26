@@ -6,4 +6,5 @@ pub mod campaign;
 pub mod knowledge;
 pub mod player;
 pub mod settings;
+pub mod sync;
 pub mod wiki;

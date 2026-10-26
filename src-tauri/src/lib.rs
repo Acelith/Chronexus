@@ -40,6 +40,7 @@ mod preferences;
 mod search;
 #[cfg(test)]
 mod search_tests;
+mod sync;
 #[cfg(test)]
 mod test_support;
 mod updates;
@@ -136,6 +137,7 @@ pub fn run() {
         .manage(assistant::service::State::default())
         .manage(wikidot::State::default())
         .manage(ai_setup::State::default())
+        .manage(sync::Gate::default())
         .setup(|app| {
             // Keep the window usable when initialization fails so the UI can explain recovery.
             let connection = (|| -> Result<_, Box<dyn std::error::Error>> {
@@ -248,6 +250,21 @@ pub fn run() {
             commands::player::store_catalog_cache,
             commands::settings::get_interface_preferences,
             commands::settings::save_interface_preferences,
+            commands::sync::sync_account,
+            commands::sync::sync_set_server,
+            commands::sync::sync_sign_in,
+            commands::sync::sync_redeem_invite,
+            commands::sync::sync_sign_out,
+            commands::sync::sync_link,
+            commands::sync::sync_connect_campaign,
+            commands::sync::sync_unlink,
+            commands::sync::sync_invite,
+            commands::sync::sync_items,
+            commands::sync::sync_set_share,
+            commands::sync::sync_now,
+            commands::sync::sync_conflicts,
+            commands::sync::sync_resolve,
+            commands::sync::sync_remote_items,
             commands::wiki::read_wiki_cache,
             commands::wiki::store_wiki_cache,
             commands::wiki::wiki_cache_epoch,

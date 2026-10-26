@@ -169,6 +169,31 @@ pub fn create_session(
     get_session(connection, campaign_id, &id)
 }
 
+/// Title and play date; the session number and notes keep their own paths.
+pub fn update_session_details(
+    connection: &Connection,
+    campaign_id: &str,
+    id: &str,
+    name: &str,
+    played_on: Option<String>,
+) -> AppResult<Session> {
+    identifier(campaign_id)?;
+    identifier(id)?;
+    let name = title(name)?;
+    if let Some(date) = &played_on {
+        if date.len() != 10 || chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d").is_err() {
+            return Err("Enter a valid date in year-month-day format.".into());
+        }
+    }
+    let tx = connection.unchecked_transaction().map_err(storage)?;
+    let changed = tx.execute("UPDATE sessions SET title=?1,played_on=?2,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?3 AND campaign_id=?4 AND (title<>?1 OR played_on IS NOT ?2)",params![name,played_on,id,campaign_id]).map_err(storage)?;
+    if changed == 1 {
+        crate::search::session(&tx, campaign_id, id)?;
+    }
+    tx.commit().map_err(storage)?;
+    get_session(connection, campaign_id, id)
+}
+
 pub fn get_session(connection: &Connection, campaign_id: &str, id: &str) -> AppResult<Session> {
     identifier(campaign_id)?;
     identifier(id)?;
