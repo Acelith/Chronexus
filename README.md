@@ -20,8 +20,9 @@ in which session and for which faction, with no account and no cloud.
 </div>
 
 > [!NOTE]
-> Latest release: **0.9.0** (Windows x64 installer): optional shared campaigns with
-> automatic synchronization, and the English-first interface. Other platforms are not built yet.
+> Latest release: **[0.9.1](https://github.com/Acelith/Chronexus/releases/tag/v0.9.1)** (Windows x64): fixes legacy backup verification and checks for updates at every launch.
+> If an older updater reports an unexpected database structure, use the 0.9.1 installer manually after preserving a verified backup. Existing archives migrate automatically.
+> Other platforms are not built for this hotfix.
 
 ## What is Chronexus
 
@@ -89,7 +90,7 @@ character or place, then explore **Codex** and **Graph**.
 > [!WARNING]
 > The installer has no Windows Authenticode signature, so SmartScreen may ask for
 > confirmation. In-app updates are still verified with a dedicated cryptographic
-> signature. No macOS, Linux or ARM64 packages are included in release 0.9.0;
+> signature. No macOS, Linux or ARM64 packages are included in release 0.9.1;
 > installation and upgrade of this Windows installer have not been tested.
 
 ## Updates and backups

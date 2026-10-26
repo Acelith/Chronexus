@@ -1,3 +1,28 @@
+# Release 0.9.1 — backup and startup update hotfix
+
+[Download 0.9.1](https://github.com/Acelith/Chronexus/releases/tag/v0.9.1), published
+26 October 2026. Windows x64 NSIS built from `f705438` (annotated tag `v0.9.1`),
+33,909,745 bytes, SHA-256
+`ea9cba017cff6eb27243547ec176fd7248e3ef27d061f16d79fd311cbf8d2998`.
+Production updater signature/tamper rejection passed on the real package. All three
+unique attachments were downloaded and SHA-256 verified anonymously; the canonical
+manifest and public stable API identify 0.9.1. No existing release assets were changed.
+
+Fixes false backup rejection caused by mixed CRLF/LF migration SQL. Schema remains
+021; existing schema 018 archives automatically migrate on open. Verification of an
+actual affected archive passed through backup, extracted-copy migration and a second
+verified backup, without modifying its installed original. The herald checks once per
+launch, respects opt-out/reminders, and is verified in an isolated native WebView.
+
+**Manual bootstrap when the installed updater has this backup error:** preserve a
+verified backup, close Chronexus and run the 0.9.1 installer. The older running updater
+cannot repair its own backup code. Do not delete or edit the database and do not skip
+the mandatory backup in future update flows. A local verified recovery backup was
+created outside Git during the diagnosis. No automatic installer was run.
+
+Windows x64 app only; no AI weights or Windows Authenticode signature. Other
+platforms/architectures and actual installation/upgrade remain unverified.
+
 # Future build checklist — pending, 26 October 2026
 
 Apply this checklist at the next authorized build/release. The user's current

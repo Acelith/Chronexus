@@ -1,4 +1,4 @@
-# Chronexus status — 26 October 2026: 0.9.1 upgrade blocker fixed, packaging next
+# Chronexus status — 26 October 2026: 0.9.1 hotfix published
 
 - Reproduced the installed schema 018 backup failure: `dice_rolls` and
   `wiki_translations` differed from migration references only by CRLF/LF layout.
@@ -22,7 +22,11 @@
 - Installed archive opened read-only: verified .nodex backups created outside Git;
   an extracted copy migrated 018 -> 021 and produced another verified backup with
   unchanged counts. The installed source was not migrated/replaced during QA.
-- 0.9.1 signed packaging/publication follows this checkpoint. Old installed updater
+- 0.9.1 signed Windows x64 installer published from `f705438`, tag `v0.9.1`, release
+  ID 10. Production signature/tamper test, all three anonymous asset SHA-256 checks,
+  canonical manifest and latest API passed. Release tooling: 27 tests passed.
+  Installer SHA-256: `ea9cba017cff6eb27243547ec176fd7248e3ef27d061f16d79fd311cbf8d2998`.
+  Old installed updater
   code cannot repair itself: bootstrap this hotfix with its manual installer after
   preserving the verified backup. Actual installation/upgrade and other platforms
   remain unverified. Next roadmap work remains M25 deployment/TLS acceptance, then M27.

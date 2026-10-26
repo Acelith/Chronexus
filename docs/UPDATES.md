@@ -1,10 +1,19 @@
-# Public channel — 0.8.0
+# Public channel — 0.9.1
 
-Current release: [0.8.0](https://github.com/Acelith/Chronexus/releases/tag/v0.8.0)
-(M19–M22), signed Windows x64 installer. From this version, backups before
-installation go into `Documenti/Chronexus/Backup aggiornamenti` (see below).
-Installed upgrade 0.7.0 → 0.8.0 not yet tested; signature and
-download verification does not equate to a real installation.
+Current release: [0.9.1](https://github.com/Acelith/Chronexus/releases/tag/v0.9.1),
+signed Windows x64 installer (schema 021). Production signature, anonymous downloads
+and the public stable channel verified on 26 October 2026. Actual installation/upgrade
+and other release targets remain unverified. No AI weights are included.
+
+0.9.1 repairs false backup rejection from mixed Windows/Unix migration SQL layout.
+Existing archives migrate automatically on open. An older running updater that fails
+its backup cannot patch itself: preserve a verified backup and install 0.9.1 manually
+with Chronexus closed. The mandatory verified backup is retained for future updates.
+From 0.9.1 automatic update checks run once at every launch unless disabled; a recent
+check no longer suppresses the next launch. Reminders and ignored versions remain.
+
+From 0.8.0, backups before installation go into
+`Documenti/Chronexus/Backup aggiornamenti` (see below).
 
 # M18 — Local 0.7.0, public channel unchanged
 
