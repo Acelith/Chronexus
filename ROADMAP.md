@@ -40,7 +40,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 11 | M6b | Party and member knowledge | 23/10/2026 | `dc29fe6 → f5bb67b` | Windows |
 | 12 | M6c | Multi-source Open5e Wiki | 23/10/2026 | `d765db1` | Windows |
 | 13 | M6d | Readability of dense graphs | 23/10/2026 | `6735251` | Correction delivered |
-| 14 | M7 | Local assistant with GPU | 23/10/2026 | `e6f1763 → 4ac9f7f` | Windows; physical offline open |
+| 14 | M7 | Local assistant with GPU | 23/10/2026 | `e6f1763 → 4ac9f7f` | **Closed** 26/10/2026 by user decision |
 | 15 | M7a | Local app + AI installers | 23/10/2026 | `24946bc` | Local packages |
 | 16 | M8 | Campaign settings, Gemma and QLoRA | 24/10/2026 | `a99355e → 9baee29` | Windows |
 | 17 | M8a | Repair after C → D move | 24/10/2026 | `313e056` | Delivered |
@@ -56,7 +56,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 27 | M16 | Wikidot scraping, source selection and deletable cache | 25/10/2026 | `2fbf17a → 923516f` | Windows; other OS open |
 | 28 | M15a | Epic update announcement: vassal, trumpet and manifesto | 25/10/2026 | `126d250`, `daed026` | Windows; release 0.5.0 |
 | 29 | M17 | Local wiki translation into the app language | 25/10/2026 | `b4f04c4` | Windows; release 0.6.0, open linguistic revision |
-| 30 | M18 | Replacement of Qwen models with local Qwen3.8-27B | Implemented Windows | 018 | Real qualification and comparison, secondary Gemma; other OS pending |
+| 30 | M18 | Replacement of Qwen models with local Qwen3.8-27B | Implemented Windows | 018 | **Closed** 26/10/2026 by user decision |
 | 31 | M21 | New visual identity: herald logo, app icon and branding | 25/10/2026 | `467ca7b` | Windows; release 0.8.0 |
 | 32 | M22 | Guided installation of Ollama and models from settings | 25/10/2026 | `54a6b42` | Windows; release 0.8.0 |
 | 33 | M20 | Quality README with images, quick guide and credits | 25/10/2026 | `d1d1e89` | Render verified on github.com |
@@ -64,7 +64,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 35 | M23 | Full code audit: bugs, duplication, multilingual support, remove Ticinese/Romulan/Klingon, optimization | Planned, **next** | — | Requested on 25/10/2026 |
 | 36 | M24 | Shared campaign with self-hosted server and selective sharing | Planned | — | After M23; server confirmed, in a separate repository |
 | 37 | M25 | Android App (APK) connected to the server with the same account | Planned | — | Depends on M24 |
-| 38 | M26 | English-first app, manifests, documentation and AI instructions | Implemented Windows, source 0.8.1 | — | Existing data/locales preserved; not published |
+| 38 | M26 | English-first app, manifests, documentation and AI instructions | Implemented Windows, source 0.8.1 | — | **Closed** 26/10/2026; ships with the next authorized build/release |
 
 
 ## M0 - Foundation and real local database
@@ -276,7 +276,7 @@ sources to make the display more orderly.
 
 ## M7 - Local D&D Assistant with GPU
 
-**Updated Status:** Operational on Windows with GPU and local sources; specific D&D candidate discarded after testing and replaced, by explicit choice, by multilingual Qwen3. Physical test without network and other OS remain to be verified.
+**Status: closed** on 26 October 2026 by explicit user decision. Operational on Windows with GPU and local sources; the specific D&D candidate was discarded after testing and replaced, by explicit choice, by multilingual Qwen3 (later Qwen3.8-27B, M18). The physical no-network test and other OS were not performed and are no longer acceptance criteria; they are not claimed as verified.
 
 **Git Evidence:** `e6f1763`, `a89874e`, `d63ba16`, `cf39425`, `4ac9f7f`. Verifications and limits in [docs/STATUS.md](docs/STATUS.md).
 
@@ -1097,7 +1097,9 @@ existing weights. Empty/loading/error states, keyboard, accessibility and langua
 
 ## M18 — Replacement of Qwen models with local Qwen3.8-27B (implemented on Windows)
 
-**Status:** implemented on 25 October 2026 at the explicit request to execute M18.
+**Status: closed** on 26 October 2026 by explicit user decision; other GPU/OS checks
+were not performed and are not claimed. Implemented on 25 October 2026 at the
+explicit request to execute M18.
 Qwen3.8-27B Q4_K_M qualified before the changes; first choice for assistant,
 wiki and translation tool. Gemma 4 12B remains secondary and retains the QLoRA.
 018 Schema disables old Qwen without deleting history or identity.
@@ -1451,7 +1453,11 @@ planned, not started.
 - Frontend tests on mobile viewport, tests on at least one real phone; iOS out
   perimeter unless new request.
 
-## M26 — English-first international release preparation (implemented Windows)
+## M26 — English-first international release preparation (closed)
+
+**Status: closed** on 26 October 2026 by explicit user decision. Installer/upgrade
+and other-OS checks move to the next authorized build/release, which will publish
+the English-first source; until then 0.8.1 remains unpublished.
 
 Requested on 25 October 2026. English becomes the primary source/default/fallback
 language for new profiles, public documentation, app/package metadata, release
@@ -1481,7 +1487,9 @@ close platform acceptance or publish a release.
 
 - **M6:** runner/macOS/Linux packages and distribution tests not demonstrated
   from Windows tests alone; follow the updated STATUS evidence.
-- **M7/M8:** physical proof without network and additional hardware/OS targets not certified;
+- **M7, M18, M26:** closed by user decision on 26 October 2026; the unperformed
+  checks (physical offline, other GPU/OS, installer) are not claimed as verified.
+- **M8:** physical proof without network and additional hardware/OS targets not certified;
   keep inference, refresh retrieval, and weight training separate.
 - **M10:** revision of translations/Ticinese, fantasy lexicon, and testing
 assistive/real IME; do not declare a complete translation when there is fallback.
