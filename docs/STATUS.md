@@ -1,3 +1,27 @@
+# Chronexus status — 26 October 2026: 0.9.2 installer branding verified
+
+- NSIS now uses the existing Chronexus herald/wordmark: leather/brass/burgundy
+  welcome/finish sidebar, compact header, explicit installer/uninstaller icons and
+  matching uninstaller header. Standard native text, workflow, per-user mode and
+  passive updater behavior remain; no custom NSIS template or new dependency at build.
+- Generated RGB BMPs are committed (150x57 header, 164x314 sidebar). Reproducible
+  Pillow compositor in `scripts/release/installer_branding.py` reads the approved
+  originals only; source images unchanged. Artwork aspect ratios preserved.
+- Verified Windows x64 signed NSIS build (including frontend TypeScript/Vite build),
+  production signature/tamper test, all 27 release-tool tests, bitmap dimensions/RGB
+  format, generated NSIS image/icon definitions, and diff whitespace. No domain code
+  changed; full React/Rust suites were not rerun for packaging-only branding.
+- Native wizard inspected with Computer Use after explicit authorization: welcome
+  page, icon and directory-page header rendered correctly with readable ordinary
+  headings/controls. Cancelled before installation; no installer window remained.
+  Finish/uninstaller execution, actual install/upgrade and other platforms unverified.
+- Preparing publication as a new 0.9.2 release; older published assets remain intact.
+  Includes the 0.9.1 backup/startup fixes, schema 021 and automatic migrations unchanged.
+- Skills: tauri-v2 for native bundle configuration, impeccable for preserving the
+  existing visual identity, computer-use for the actual Windows wizard inspection.
+  Impeccable mechanical detector returned no findings on the changed asset/config targets.
+  Next functional roadmap work remains M25 deployment/TLS acceptance, then M27.
+
 # Chronexus status — 26 October 2026: 0.9.1 hotfix published
 
 - Reproduced the installed schema 018 backup failure: `dice_rolls` and

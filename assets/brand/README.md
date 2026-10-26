@@ -27,3 +27,18 @@ Conversions with ffmpeg 7.1.1. To regenerate, always start from `source/`.
 At 16–32 px, the icon retains the shape but loses details: M21 evaluates a simplified variant
 for small sizes. The app name remains accessible text
 (`alt`/title), never just drawn letters.
+
+## Windows installer (0.9.2)
+
+The NSIS welcome/finish pages use `installer/sidebar.bmp` (164x314), while
+intermediate pages and uninstaller use `installer/header.bmp` (150x57). The
+existing `src-tauri/icons/icon.ico` supplies installer/uninstaller icons. Both
+bitmaps are opaque RGB, composited on the app's leather palette with brass and
+burgundy accents; the original logos retain their aspect ratios. Native headings
+and controls remain ordinary text. No custom NSIS template or installer behavior
+is introduced. Updater passive mode can omit wizard pages as before.
+
+Regenerate with Pillow: `python scripts/release/installer_branding.py`.
+The generator reads only `source/wordmark-original.webp` and
+`source/logo-original.webp`, never modifying them. Prepared BMP files are committed
+so normal builds do not require Python or Pillow.

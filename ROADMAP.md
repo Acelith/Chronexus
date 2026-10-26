@@ -964,6 +964,12 @@ and language are re-checked before writing. No
 
 ## M21 — New visual identity: heraldic logo, icon, and branding (Windows operational)
 
+26 October refinement (0.9.2): user-approved herald/wordmark artwork added to the
+Windows NSIS welcome/finish sidebar, header and installer/uninstaller icons. Native
+welcome/directory pages visually verified; cancelled before installation. Existing
+original artwork and the standard installation/update flow are preserved.
+
+
 **Updated status:** implemented on 25 October 2026 along with M22: icon generated
 from the herald with transparent corners, vertical logo in the sidebar with name
 accessible, branding and icon in the README (M20). Evidence in docs/STATUS.md.
