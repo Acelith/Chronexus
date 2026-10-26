@@ -17,8 +17,14 @@ use uuid::Uuid;
 use zip::{write::SimpleFileOptions, ZipArchive, ZipWriter};
 
 const DB_ENTRY: &str = "data/nodex.sqlite3";
-const MAX_FILE: u64 = 256 * 1024 * 1024;
-const MAX_TOTAL: u64 = 512 * 1024 * 1024;
+// Live archives have no aggregate cap, so these bounds sit far above realistic
+// personal use; the real protection is the free-space check before writing or
+// extracting. Backups up to 512 MiB stay readable by every earlier version.
+const GIB: u64 = 1024 * 1024 * 1024;
+const MAX_FILE: u64 = 32 * GIB;
+const MAX_TOTAL: u64 = 32 * GIB;
+/// Headroom kept free on the destination disk after a backup or extraction.
+const SPACE_MARGIN: u64 = 64 * 1024 * 1024;
 const MAX_ENTRIES: usize = 10_000;
 const MAX_MANIFEST: u64 = 2 * 1024 * 1024;
 
@@ -65,6 +71,18 @@ fn regular_file(path: &Path) -> AppResult<()> {
     }
     Ok(())
 }
+/// Refuses early, with an actionable message, when `needed` bytes plus the
+/// margin would not fit next to `path`. Unknown free space does not block.
+fn ensure_space(path: &Path, needed: u64) -> AppResult<()> {
+    match crate::ai_setup::available_space(path) {
+        Some(free) if free < needed.saturating_add(SPACE_MARGIN) => Err(format!(
+            "Not enough free disk space: about {} MiB needed, {} MiB available. Free some space or choose another folder, then try again. The current archive was not changed.",
+            needed.saturating_add(SPACE_MARGIN).div_ceil(1024 * 1024),
+            free / (1024 * 1024)
+        )),
+        _ => Ok(()),
+    }
+}
 fn checksum(path: &Path) -> AppResult<(u64, String)> {
     regular_file(path)?;
     let mut file = File::open(path).map_err(io)?;
@@ -78,7 +96,7 @@ fn checksum(path: &Path) -> AppResult<(u64, String)> {
         }
         size += read as u64;
         if size > MAX_FILE {
-            return Err(invalid("a file exceeds the 256 MiB limit"));
+            return Err(invalid("a file exceeds the 32 GiB limit"));
         }
         hash.update(&buffer[..read]);
     }
@@ -473,7 +491,7 @@ pub fn write_backup(
         let (size, sha256) = checksum(path)?;
         total += size;
         if total > MAX_TOTAL {
-            return Err(invalid("total size exceeds 512 MiB"));
+            return Err(invalid("total size exceeds 32 GiB"));
         }
         files.push(Entry {
             path: name.clone(),
@@ -501,6 +519,8 @@ pub fn write_backup(
     if manifest_json.len() as u64 > MAX_MANIFEST {
         return Err(invalid("manifest too large"));
     }
+    // The ZIP and its verification staging copy both live next to the destination.
+    ensure_space(parent, total.saturating_mul(2))?;
     let mut output = NamedTempFile::new_in(parent).map_err(io)?;
     {
         let mut zip = ZipWriter::new(output.as_file_mut());
@@ -509,7 +529,8 @@ pub fn write_backup(
             .unix_permissions(0o600);
         zip.start_file("manifest.json", options).map_err(io)?;
         zip.write_all(&manifest_json).map_err(io)?;
-        for (name, path) in sources {
+        for ((name, path), entry) in sources.into_iter().zip(&manifest.files) {
+            let options = options.large_file(entry.size >= u32::MAX as u64);
             zip.start_file(name, options).map_err(io)?;
             std::io::copy(&mut File::open(path).map_err(io)?, &mut zip).map_err(io)?;
         }
@@ -531,8 +552,8 @@ pub fn write_backup(
 
 pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<PreparedRestore> {
     regular_file(source)?;
-    if fs::metadata(source).map_err(io)?.len() > MAX_TOTAL {
-        return Err(invalid("archive exceeds 512 MiB"));
+    if fs::metadata(source).map_err(io)?.len() > MAX_TOTAL + MAX_MANIFEST {
+        return Err(invalid("archive exceeds 32 GiB"));
     }
     let mut zip = ZipArchive::new(File::open(source).map_err(io)?)
         .map_err(|_| invalid("unreadable or incomplete ZIP"))?;
@@ -592,6 +613,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
     if names != declared || !declared.contains(DB_ENTRY) {
         return Err(invalid("missing or undeclared files"));
     }
+    ensure_space(staging_parent, total)?;
     let directory = tempfile::tempdir_in(staging_parent).map_err(io)?;
     for entry in &manifest.files {
         let path = directory.path().join(&entry.path);
@@ -794,6 +816,28 @@ impl Store {
     }
 }
 
+#[cfg(test)]
+mod capacity_tests {
+    use super::{checksum, ensure_space, GIB};
+    #[test]
+    fn files_above_the_old_256_mib_limit_are_accepted() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("large.bin");
+        // Sparse on NTFS/ext4/APFS: no real 300 MiB write.
+        std::fs::File::create(&path)
+            .unwrap()
+            .set_len(300 * 1024 * 1024)
+            .unwrap();
+        assert_eq!(checksum(&path).unwrap().0, 300 * 1024 * 1024);
+    }
+    #[test]
+    fn missing_disk_space_is_reported_before_any_write() {
+        let dir = tempfile::tempdir().unwrap();
+        let error = ensure_space(dir.path(), 1024 * 1024 * GIB).unwrap_err();
+        assert!(error.starts_with("Not enough free disk space"), "{error}");
+        assert!(ensure_space(dir.path(), 1).is_ok());
+    }
+}
 #[cfg(test)]
 mod path_tests {
     use super::{attachment_path, schema_line_endings};

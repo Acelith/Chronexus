@@ -135,7 +135,7 @@ erase what was previously learned.
 - Safetensors adapters and relative configuration are managed campaign
   attachments, with UUID and hash. The backup verifies properties and integrity; a
   missing or modified file stops the backup/restore. Archive limits remain:
-  256 MiB for files and 512 MiB total; maximum M8 adapter 64 MiB.
+  32 GiB per file and in total; maximum M8 adapter 64 MiB.
 - Base weights, Python environment, working dataset, logs, and derived GGUF copies
   remain outside the ordinary backup and Git. Temporary files are in the
   `ai-training/jobs` folder; they are not the canonical notes.

@@ -189,7 +189,10 @@ name change only. M4 backups are still readable.
 - Allowed paths: `data/nodex.sqlite3` and
   `attachments/<campaign UUID>/<file UUID>[.<lowercase extension>]`. No
   ZIP directory, duplicate, symbolic link, or extra files. Limits: 9998 attachments,
-  256 MiB/file, 512 MiB total/ZIP and 2 MiB manifest. Files never overwritten.
+  32 GiB/file and total (ZIP64 above 4 GiB), 2 MiB manifest, and a free-space check
+  before writing or extracting. Until 0.9.2 the limits were 256 MiB/file and 512 MiB
+  total, which valid live archives could outgrow and so block every backup, the
+  pre-update backup and the restore safety copy. Files never overwritten.
 - Restoration verifies checksum, exact schema of supported migrations,
   integrity_check, foreign_key_check, documents, and campaign boundaries. The
   DB versions 1–4 are allowed and migrated only in the new copy; future ones rejected.

@@ -138,7 +138,9 @@ The contract for future adapters is documented in [docs/RULESETS.md](RULESETS.md
 ZIP/Deflate with manifest v1 and SHA-256 for each file; snapshot via SQLite API,
 integrity checks and references, blocking of hostile paths and altered files.
 **Not encrypted or signed**: keep private copies and use backups from
-trusted provenance. Initial limits: 256 MiB per file, 512 MiB total, and 9998 attachments.
+trusted provenance. Limits: 32 GiB per file and in total, 9998 attachments; a backup
+or restore first checks that the disk has enough free space. Backups above 512 MiB
+cannot be opened by version 0.9.2 or earlier.
 Markdown/JSON ZIP export is available from **Export campaign**; it includes
 images, imported original sources, and SHA-256 manifest. Authoritative restore
 uses `.nodex`; re-import of the export and automatic backups remain future.
