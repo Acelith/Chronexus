@@ -247,6 +247,9 @@ pub fn update_page(
     // Preserve the previous title as an alias so future searches can still find it.
     let mut values = alias_values.to_vec();
     if key(&old.title) != key(name) && !values.iter().any(|alias| key(alias) == key(&old.title)) {
+        if values.len() >= 20 {
+            return Err("This page already has 20 aliases. Remove one so the previous title can be kept as an alias, then rename it.".into());
+        }
         values.push(old.title);
     }
     write_aliases(&transaction, id, &values, name)?;

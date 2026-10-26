@@ -188,3 +188,30 @@ fn listed_pages_keep_their_own_sorted_aliases_within_the_campaign() {
         find(&a.id).aliases
     );
 }
+
+#[test]
+fn renaming_a_page_with_twenty_aliases_explains_the_limit_and_changes_nothing() {
+    let d = tempfile::tempdir().unwrap();
+    let c = crate::db::open(&d.path().join("test.sqlite3")).unwrap();
+    let camp = crate::journal::create_campaign(&c, "Limits").unwrap();
+    let aliases: Vec<String> = (0..20).map(|i| format!("Alias {i}")).collect();
+    let page = create_page(&c, &camp.id, "Old name", "npc", "active", &aliases).unwrap();
+    let error = update_page(
+        &c,
+        &camp.id,
+        &page.id,
+        "New name",
+        "npc",
+        "active",
+        &page.aliases,
+    )
+    .unwrap_err();
+    assert!(error.contains("Remove one"), "{error}");
+    let unchanged = get_page(&c, &camp.id, &page.id).unwrap();
+    assert_eq!(unchanged.title, "Old name");
+    assert_eq!(unchanged.aliases.len(), 20);
+    let mut fewer = page.aliases.clone();
+    fewer.pop();
+    let renamed = update_page(&c, &camp.id, &page.id, "New name", "npc", "active", &fewer).unwrap();
+    assert!(renamed.aliases.contains(&"Old name".to_string()));
+}

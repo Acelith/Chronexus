@@ -244,6 +244,15 @@ export function App() {
       void getCurrentWindow()
         .onCloseRequested((event) => {
           event.preventDefault();
+          if (operation.current) {
+            // Closing now could interrupt a save, backup or restore.
+            setError(
+              tr(
+                "An operation is still running. Close Chronexus again when it has finished.",
+              ),
+            );
+            return;
+          }
           void run(async () => {
             await getCurrentWindow().destroy();
           });
