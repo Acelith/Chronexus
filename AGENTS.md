@@ -303,6 +303,17 @@ request. Never upload private notes, sheets, AI data or preferences unless the u
 that item for the server (`private` or `shared`). Sheet sections and images (schema 021) can
 only be `shared`, as read-only projections; the full sheet, AI data and preferences are never
 replicated.
+## Open milestone priority (planned M28–M40)
+
+ROADMAP "Open milestones in priority order" is the single source for what comes
+next: M28 translations/installer, M29 signed six-target releases, M30 desktop QA
+and CI, M25 server (in progress), M31 clue board, M32 first start/demo, M33 trust
+and transparency, M34 diagnostic bundle, M35 session recap, M36 imports, M37
+timeline, M38 maps, M39 print/PDF, M40 other rulesets, then M27 Android. All are
+planning only: implement one only on explicit request, keep the IDs, and update
+the table when priorities change. Clue items, recaps, imports and pins follow the
+same rules as notes: no implicit factual relationships or AI-written facts.
+
 ## English-first internationalization (M26)
 
 ### Mandatory localization gate for EVERY interface change

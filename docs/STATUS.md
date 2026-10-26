@@ -1,3 +1,12 @@
+# Chronexus status — 26 October 2026: open milestones reprioritized
+
+- Planning only, no code change: ROADMAP gains M28–M40 and a priority table for
+  all open milestones (M28, M29, M30, M25, M31–M40, then M27). M25 is recorded as
+  in progress (server S1–S7 in source 0.1.0; S8, release and deployment open).
+- Next milestone by priority: **M28 — complete translations and multilingual
+  installer**, which also clears the localization blocker below. Nothing starts
+  without an explicit request.
+
 # Chronexus status — 26 October 2026: mandatory localization gate and audit
 
 - AGENTS.md, I18N.md and DEVELOPMENT.md now require localization review on EVERY
