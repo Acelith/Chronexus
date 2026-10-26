@@ -93,7 +93,7 @@ export function uiMessages(source, path) {
 }
 
 const parameters = (text) => (text.match(/\{\d+\}/g) ?? []).sort().join(",");
-export function auditMessages(messages, catalogs) {
+export function coverageMessages(messages, catalogs) {
   const reverse = new Map(
     Object.entries(catalogs.en).map(([id, text]) => [text.trim(), id]),
   );
@@ -138,7 +138,7 @@ if (
       origins.set(text, [...new Set([...(origins.get(text) ?? []), path])]);
     }
   }
-  const result = auditMessages([...origins.keys()], catalogs);
+  const result = coverageMessages([...origins.keys()], catalogs);
   const installerMissing = missingInstallerLanguages(
     JSON.parse(await readFile("src-tauri/tauri.windows.conf.json", "utf8")),
   );
@@ -165,7 +165,7 @@ if (
     );
   } else {
     console.log(
-      `Localization audit: ${origins.size} explicit UI messages; read-only.`,
+      `Localization coverage: ${origins.size} explicit UI messages; read-only.`,
     );
     console.log(
       `Unregistered UI sources: ${result.unregistered.length}; parameter mismatches: ${result.invalidParameters.length}.`,

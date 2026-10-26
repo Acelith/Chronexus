@@ -210,12 +210,12 @@ await openDice();
 if (phase === "check") {
   const cases = [];
   await page.emulateMedia({ reducedMotion: "reduce" });
-  const audit = await new AxeBuilder({ page })
+  const scan = await new AxeBuilder({ page })
     .include(".dice-workspace")
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();
-  await writeFile(`${output}/axe-empty.json`, JSON.stringify(audit, null, 2));
-  assert.deepEqual(audit.violations, []);
+  await writeFile(`${output}/axe-empty.json`, JSON.stringify(scan, null, 2));
+  assert.deepEqual(scan.violations, []);
   for (const sides of [4, 6, 8, 10, 12, 20, 100])
     cases.push((await rollUi([{ sides, quantity: 2 }])).id);
   // Measure rendered phase deadlines rather than assuming timers equal real duration.
@@ -387,15 +387,15 @@ if (phase === "check") {
     { sides: 100, quantity: 1 },
   ]);
   await page.screenshot({ path: `${output}/final.png` });
-  const finalAudit = await new AxeBuilder({ page })
+  const finalScan = await new AxeBuilder({ page })
     .include(".dice-workspace")
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();
   await writeFile(
     `${output}/axe-result.json`,
-    JSON.stringify(finalAudit, null, 2),
+    JSON.stringify(finalScan, null, 2),
   );
-  assert.deepEqual(finalAudit.violations, []);
+  assert.deepEqual(finalScan.violations, []);
   try {
     await stat(`${output}/qa.nodex`);
     await rename(

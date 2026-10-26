@@ -82,7 +82,7 @@ and encumbrance. Casting class/ability, save DC, attack bonus and prepared/known
 count are manual. Slots 1–9 can be added as zeroed counters; the user sets maxima.
 No automatic bonuses, carrying conversions, rests, death outcomes or slot usage.
 
-- HP and resources have simple, safe controls with validation and history/audit optional later.
+- HP and resources have simple, safe controls with validation and an optional change history later.
 - Short/long rest automation only once ruleset adapter semantics are explicit; do not silently implement wrong rules.
 - Future: plugin-style ruleset adapters for formulas, advancement and special actions.
 
@@ -433,10 +433,10 @@ data-folder `update-backups/`; they are never deleted automatically and existing
 ones are only copied on request. Warn that Documents may be cloud-synced. Details
 and acceptance in ROADMAP M19.
 
-## M23–M25 — Audit, shared campaigns, Android (planned)
+## M23–M25 — Code review, shared campaigns, Android (planned)
 
-Planned 25 October 2026, not implemented. M23: measured audit of correctness,
-security, duplication and performance with docs/AUDIT.md. M24: optional shared
+Planned 25 October 2026, not implemented. M23: measured review of correctness,
+security, duplication and performance. M24: optional shared
 campaigns through a self-hosted Chronexus server, developed in a separate
 repository with a versioned API contract (accounts, roles, invites,
 per-item sharing defaulting to private, incremental sync with visible conflicts

@@ -70,9 +70,9 @@ Localization review is mandatory for **every interface change**, including layou
 accessibility labels, dialogs, native installers and displayed backend errors.
 Run the strict check, update all affected catalogs and inspect the changed views
 in English, Italian and affected locales/RTL. English fallback does not count as a
-completed translation. `pnpm i18n:audit` reports missing UI messages and installer
+completed translation. `pnpm i18n:coverage` reports missing UI messages and installer
 languages without writing files; `--json` provides the detailed inventory.
-See [I18N.md](I18N.md) and the actual [audit findings](I18N_AUDIT.md). CI and the
+See [I18N.md](I18N.md). CI and the
 signed-release wrapper stop when this gate fails, before building/signing.
 
 The desktop build produces the local executable without an installer. Distribution

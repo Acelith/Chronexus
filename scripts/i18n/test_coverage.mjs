@@ -4,13 +4,13 @@ import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import {
   uiMessages,
-  auditMessages,
+  coverageMessages,
   translationLocales,
   missingInstallerLanguages,
   nativeLanguages,
-} from "./audit.mjs";
+} from "./coverage.mjs";
 
-test("audits real UI messages, including short labels, without treating data and CSS as translations", () => {
+test("checks real UI messages, including short labels, without treating data and CSS as translations", () => {
   const source = `const css = "language-settings sync-settings";
     const modelGuidance = "Untrusted campaign text";
     tr(modelGuidance); tr("yes"); tr("Session ");
@@ -30,20 +30,20 @@ test("English fallback is reported as a missing translation instead of a pass", 
   const catalogs = { en: { stable: "Delete {0}" } };
   for (const locale of translationLocales)
     catalogs[locale] = { stable: "Translated {0}" };
-  assert.deepEqual(auditMessages(["Delete {0}"], catalogs).missing.it, []);
+  assert.deepEqual(coverageMessages(["Delete {0}"], catalogs).missing.it, []);
   delete catalogs.it.stable;
-  assert.deepEqual(auditMessages(["Delete {0}"], catalogs).missing.it, [
+  assert.deepEqual(coverageMessages(["Delete {0}"], catalogs).missing.it, [
     { id: "stable", source: "Delete {0}" },
   ]);
 });
 
-test("changed source text and missing or duplicated parameters fail the audit", () => {
+test("changed source text and missing or duplicated parameters fail the coverage check", () => {
   const catalogs = { en: { stable: "Saved {0}" } };
   for (const locale of translationLocales)
     catalogs[locale] = { stable: "Tradotto {0}" };
   catalogs.it.stable = "Tradotto";
   catalogs.de.stable = "Übersetzt {0} {0}";
-  const result = auditMessages(["Saved {0}", "New text"], catalogs);
+  const result = coverageMessages(["Saved {0}", "New text"], catalogs);
   assert.deepEqual(result.unregistered, ["New text"]);
   assert.deepEqual(
     result.invalidParameters.map((entry) => entry.locale),
@@ -65,14 +65,14 @@ test("an Italian-only installer does not count as localized for the supported lo
   );
 });
 
-test("the real audit command reports its exit status truthfully without rewriting catalogs", async () => {
+test("the real coverage command reports its exit status truthfully without rewriting catalogs", async () => {
   const paths = ["en", ...translationLocales].map(
     (locale) => `src/i18n/catalogs/${locale}.json`,
   );
   const before = await Promise.all(paths.map((path) => readFile(path, "utf8")));
   const run = spawnSync(
     process.execPath,
-    ["scripts/i18n/audit.mjs", "--json"],
+    ["scripts/i18n/coverage.mjs", "--json"],
     { encoding: "utf8" },
   );
   assert.ifError(run.error);

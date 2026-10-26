@@ -371,17 +371,17 @@ for (const locale of Object.keys(catalogs)) {
   await openPreferences();
   await page.evaluate(() => document.fonts.ready);
   if (["en", "ar", "ja"].includes(locale)) {
-    const audit = await new AxeBuilder({ page })
+    const scan = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
       .analyze();
     await writeFile(
       `${out}/axe-${locale}.json`,
-      JSON.stringify(audit.violations, null, 2),
+      JSON.stringify(scan.violations, null, 2),
     );
     assert.equal(
-      audit.violations.length,
+      scan.violations.length,
       0,
-      `${locale}: ${audit.violations.map((v) => v.id)}`,
+      `${locale}: ${scan.violations.map((v) => v.id)}`,
     );
     await page.screenshot({ path: `${out}/settings-${locale}.png` });
   }

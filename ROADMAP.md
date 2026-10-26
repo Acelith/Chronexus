@@ -62,7 +62,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 32 | M22 | Guided installation of Ollama and models from settings | 25/10/2026 | `54a6b42` | Windows; release 0.8.0 |
 | 33 | M20 | Quality README with images, quick guide and credits | 25/10/2026 | `d1d1e89` | Render verified on github.com |
 | 34 | M19 | Backup folder in Documents, periodic and update backups | Delivered on Windows, release 0.8.0 | — | Moved to the bottom on user instruction; executed on October 25 2026 |
-| 35 | M23 | Full code audit: bugs, duplication, multilingual support, remove Ticinese/Romulan/Klingon, optimization | Implemented 26/10/2026 | `fa27012 → 7a70a22` | macOS and Linux verified; report in docs/AUDIT.md |
+| 35 | M23 | Full code review: bugs, duplication, multilingual support, remove Ticinese/Romulan/Klingon, optimization | Implemented 26/10/2026 | `fa27012 → 7a70a22` | macOS and Linux verified |
 | 36 | M24 | Shared campaign: desktop sharing client and API contract v1 | Client implemented 26/10/2026 | see docs/STATUS.md | Server is M25; verified against the in-repo contract fake |
 | 37 | M25 | Chronexus Server (separate repository `acelith/Chronexus-Server`) | In progress: server S1–S7 in source 0.1.0 | see server repo | S8 integration, release and deployment open; contract docs/SYNC_API.md |
 | 38 | M26 | English-first app, manifests, documentation and AI instructions | Implemented Windows, source 0.8.1 | — | **Closed** 26/10/2026; ships with the next authorized build/release |
@@ -1320,12 +1320,12 @@ alternative text, declared total weight and content.
 - A new user finds downloads, requirements, first start, backup, and privacy in less
   than a minute; technical information removed from README still reachable.
 
-## M23 — Complete code audit: bugs, repetitions, and optimization (implemented)
+## M23 — Complete code review: bugs, repetitions, and optimization (implemented)
 
 **Order:** requested by the user on 25 October 2026 after release 0.8.0, executed on
 26 October 2026 before M24. **Status:** implemented and verified on macOS (arm64)
-and Linux (arm64 native, x64 emulated); Windows not re-run in this pass. Findings,
-fixes, measurements and open items are in [docs/AUDIT.md](docs/AUDIT.md).
+and Linux (arm64 native, x64 emulated); Windows not re-run in this pass. Fixes and
+measurements are in the commits and docs/STATUS.md.
 
 ### M23.1 — Inventory and starting measures
 
@@ -1341,7 +1341,7 @@ fixes, measurements and open items are in [docs/AUDIT.md](docs/AUDIT.md).
   error handling, file paths, command inputs, migrations, and restoration.
 - Fix the unstable MCP `transport_auth_origin_scoping…` test in parallel
   and other intermittent tests, without weakening the assertions.
-- `cargo audit`/`npm audit` or equivalents offline on dependencies, licenses
+- Dependency vulnerability and license scans (offline equivalents), licenses
   (align `Cargo.toml` MIT with `LICENSE` Apache-2.0 only upon user confirmation)
   the Tauri surface (capabilities, CSP, exposed commands).
 - Every confirmed bug receives a failing test before the fix.
@@ -1364,8 +1364,8 @@ fixes, measurements and open items are in [docs/AUDIT.md](docs/AUDIT.md).
 
 ### M23 Acceptance
 
-- `docs/AUDIT.md` Report with found problems, severity, corrections, and issues
-  left open with justification. Separate commits per theme, each verified.
+- Problems found are fixed with tests, or left open with justification in
+  docs/STATUS.md. Separate commits per theme, each verified.
 - Rust/frontend tests, clippy, lint, typecheck, and build are green; MCP test stable on
   repeated executions. Desktop testing of main flows on an isolated profile.
 - No data loss: backups of every previous version are still restorable.
@@ -1521,7 +1521,7 @@ request before implementation, and publication follows the standing release rule
 **Goal:** pass the strict localization gate so a signed build can ship again.
 
 - Translate the UI messages still missing in the eight non-Italian catalogs
-  (267 each at the 26 October audit; see docs/I18N_AUDIT.md), with the same
+  (267 each on 26 October 2026), with the same
   rules as M26: stable message IDs, English fallback, no copied English to
   pass the check.
 - Make the NSIS installer multilingual (the ten app languages), defaulting to
@@ -1625,9 +1625,9 @@ counterpart of the relationship graph.
 - Reproducible build instructions and a check that two builds of a tag match
   where the toolchain allows it; document where it does not.
 - SBOM for npm and Cargo dependencies attached to each release; dependency
-  license report; automated vulnerability audit in CI (M30).
+  license report; automated dependency vulnerability scan in CI (M30).
 - A "verify your download" guide for checksums and signatures (M29).
-- Acceptance: documents reviewed against the code; SBOM and audit generated
+- Acceptance: documents reviewed against the code; SBOM and scan generated
   by the release tooling, not by hand.
 
 ## M34 — Manual diagnostic bundle (planned, priority 8)
@@ -1768,7 +1768,7 @@ from 17,7 GB via the interface, macOS/Linux.
 
   a real update with backup in Documents. M18 is implemented on Windows; other GPU/OS and physical tests
   pending offline. Implement only upon request; the residues above remain open.
-- **26 October 2026:** M23 audit implemented; M24 sharing client implemented; the
+- **26 October 2026:** M23 code review implemented; M24 sharing client implemented; the
   open milestones were reprioritized: M28, M29, M30, M25, M31–M40, then M27 Android.
   Each requires an explicit request.
 

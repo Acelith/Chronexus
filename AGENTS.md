@@ -278,9 +278,9 @@ explicit start/stop tied to the app, model pulls limited to the M18 policy and
 verified by weight digest. Never overwrite or stop a runtime Chronexus did not start.
 README screenshots come only from synthetic campaigns (scripts/qa/m20-readme-media.mjs).
 
-## M23 audit, M24 sharing client, planned M25 server and M27 Android
+## M23 code review, M24 sharing client, planned M25 server and M27 Android
 
-M23 (implemented 26 October 2026): report in docs/AUDIT.md. Archive commands are
+M23 (implemented 26 October 2026). Archive commands are
 async (`Database::run`), never block the main thread; keep new commands that way.
 M24 sharing client (implemented 26 October 2026, schema 019): opt-in, explicit
 actions only, HTTPS only, invitation-only accounts, per-item sharing with default
@@ -328,7 +328,7 @@ This is mandatory, not an optional final polish task.
   the same change, preserving stable IDs and parameters. English fallback is not
   evidence that a translation was completed; never fill missing entries with
   copied English just to satisfy a check.
-- Run `pnpm i18n:check` (read-only UI/installer audit, catalog checks and regression
+- Run `pnpm i18n:check` (read-only UI/installer coverage, catalog checks and regression
   tests), plus relevant component checks in English, Italian and affected locales.
   Verify long labels and RTL when layout or controls change. `i18n:scan` only
   generates candidates; it is not a localization acceptance check.
@@ -340,7 +340,7 @@ This is mandatory, not an optional final polish task.
   reason to silently waive the check. Do not hide failures, weaken the gate or
   refresh a baseline to make untranslated new UI pass.
 
-See `docs/I18N.md` and `docs/I18N_AUDIT.md` for the workflow and current evidence.
+See `docs/I18N.md` for the workflow.
 
 English is the source and fallback language (new profiles follow the OS
 language when it has a catalog, otherwise English), developer-facing

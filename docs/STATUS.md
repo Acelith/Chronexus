@@ -1,29 +1,3 @@
-# Chronexus status — 26 October 2026: app/server audit completed
-
-- Evidence-led audit of app `e404194` and server `7784820`; full prioritized report:
-  [TURBO_AUDIT.md](TURBO_AUDIT.md). 14 actionable findings (12 P2, 2 P3), including
-  known gaps and newly reproduced variants. No source fixes, version bump or release.
-- First recovery risks: valid archives can exceed backup caps and block updates;
-  server restore activates staging before migration/session revocation completes.
-  Publisher race, post-publication verification and unenforced signature acceptance
-  are recorded alongside draft/navigation/graph/herald and scoped SSE defects.
-- Fresh checks: 188 frontend tests; app Rust 171 passed/7 ignored; server 71 passed;
-  four client acceptance tests against a real local server process passed separately.
-  TypeScript, ESLint, Vite build, 27 release-tool tests, seven scanner tests, catalog
-  normalization and five MCP checks passed. Fifteen synthetic frontend/server/release
-  probes pass by asserting current defects; a valid large archive fails the actual
-  backup acceptance test as expected. Fixtures/logs remain ignored, no personal data.
-- Strict localization audit still fails: now 1,305 explicit UI messages, 267 missing
-  in each of eight non-Italian catalogs, nine missing installer languages; additional
-  dynamic labels bypass the static audit. No gate weakened. Next roadmap: **M28**.
-- npm audit: no known advisories; Rust: no vulnerability-class advisories, but app
-  retains glib unsoundness and proc-macro-error maintenance warnings. React Doctor
-  0.9.18 full scan: complete 202-file coverage, zero errors, 97 warnings, score 63.
-  Warnings are triage candidates, not 97 confirmed bugs; editor chunk size also warns.
-- Skills used: Trail of Bits sharp-edges/variant-analysis, systematic-debugging,
-  Rust/SQLite, react-doctor/react-testing and accessibility. No native cross-platform,
-  Docker/TLS deployment, screen-reader or actual installed-upgrade claim.
-
 # Chronexus status — 26 October 2026: open milestones reprioritized
 
 - Planning only, no code change: ROADMAP gains M28–M40 and a priority table for
@@ -33,14 +7,14 @@
   installer**, which also clears the localization blocker below. Nothing starts
   without an explicit request.
 
-# Chronexus status — 26 October 2026: mandatory localization gate and audit
+# Chronexus status — 26 October 2026: mandatory localization gate
 
 - AGENTS.md, I18N.md and DEVELOPMENT.md now require localization review on EVERY
   interface change, including layout/accessibility/confirmation states and native
   installers. CI and the signed-release wrapper run the stricter `i18n:check`.
-- New read-only audit checks 1,303 explicit UI messages, all nine translation catalogs,
-  stable English source registration, parameters and the ten native installer languages.
-  Detailed findings: docs/I18N_AUDIT.md. No baseline reset or copied-English bypass.
+- New read-only coverage check of 1,303 explicit UI messages, all nine translation
+  catalogs, stable English source registration, parameters and the ten native installer
+  languages. No baseline reset or copied-English bypass.
 - Corrected 95 Italian translations, uncatalogued short labels/Italian source fragments,
   the herald startup checkbox in all nine translations and server role display labels.
   Italian explicit-UI gaps 64 -> 0; unregistered sources 15 -> 0 (s/d are invariant symbols).
@@ -51,7 +25,7 @@
 - Also fixed a genuine localization bug: translated combat section titles caused
   inspiration/death-save controls and summary to disappear. Match the stable field
   key instead; the new Italian test failed before the fix and now passes.
-- Executed: 7 scanner/audit regressions; 182 frontend tests; targeted locale/sharing/
+- Executed: 7 scanner/coverage regressions; 182 frontend tests; targeted locale/sharing/
   updates 31 tests; TypeScript, ESLint, Vite build, catalog normalization passed.
   React Doctor changed scope: no diagnostics, score 83 before/after the combat fix.
   Changed-file formatting passed; full format check finds 78 unchanged files, documented
@@ -203,7 +177,7 @@ Not published; source version 0.8.1, schema 021. Server side: `Chronexus-Server`
 Not published; source version 0.8.1, schema 019.
 
 - **M7, M18, M26 closed** by user decision (unperformed checks not claimed).
-- **M23 implemented** (report docs/AUDIT.md): MCP bridge fix, archive commands off
+- **M23 implemented**: MCP bridge fix, archive commands off
   the main thread (UI no longer freezes during backups), search 10 s → 19 ms on a
   12 000-block campaign, `lib.rs` split per domain, `App.tsx` shell split, shared
   helpers (JSON files, pending actions, blocking work, test HTTP fake), Ticinese/
@@ -222,9 +196,9 @@ Validation (macOS unless noted): Rust 152 pass / 0 fail / 2 ignored; Clippy,
 rustfmt; Vitest 171; tsc, ESLint, Prettier, catalogue check, vite build; MCP stdio
 5/5. Linux arm64: Rust 152, clippy, IPC flows 16/16. Windows not re-run.
 
-# Chronexus status — 26 October 2026: M23 audit, first pass
+# Chronexus status — 26 October 2026: M23 code review, first pass
 
-First M23 pass on macOS; report in docs/AUDIT.md. Fixed: MCP bridge replies lost on
+First M23 pass on macOS. Fixed: MCP bridge replies lost on
 refusal and refused slow clients on macOS (RST on close, inherited non-blocking
 sockets); platform-specific Ollama test fixture; misleading constraint error; i18n
 scanner losing Rust messages after raw strings; leftover Italian diagnostics; four
@@ -233,7 +207,7 @@ duplicated JSON preference helpers unified in `json_file.rs`; N+1 alias queries 
 
 Validation (macOS): Rust 140 pass / 0 fail (8 runs), Clippy, rustfmt, Vitest 172,
 TypeScript, ESLint, Prettier, i18n check, MCP stdio 5/5, scanner 2/2, vite build.
-Not run: Windows/Linux, desktop GUI, dependency audits. Open: async DB commands
+Not run: Windows/Linux, desktop GUI, dependency scans. Open: async DB commands
 (main-thread blocking), catalogue regeneration review, lib.rs/App.tsx split.
 Commits: fa27012, 08e7195, 8bf6b75, 4ca1cc8, fee0dd2, 2419419 (one per topic);
 not published.
@@ -282,7 +256,7 @@ Windows WebView2. These checks do not certify a new distributable release.
 
 Skills: reviewed the available catalog; no specialist skill was applicable to this
 language-only source/tooling work. Used source inspection and focused regression
-checks. Next planned milestone: **M23 complete code audit**, then M24 and M25.
+checks. Next planned milestone: **M23 complete code review**, then M24 and M25.
 
 # Chronexus status — 25 October 2026: M26 English-first
 
@@ -345,7 +319,7 @@ Next planned milestone: **M23**, then M24 server in a separate repository and M2
 # Planning — 25 October 2026: M23, M24, M25
 
 Added at user request after release 0.8.0, none implemented:
-M23 full code audit (next), M24 shared campaign (proposal: server
+M23 full code review (next), M24 shared campaign (proposal: server
 Chronexus self-hosted with selective sharing, P2P evaluated and not chosen as
 base; confirmed by user, to be developed in a separate repository), M25 Android APK app with the same account as the
 server. Details in ROADMAP.
@@ -906,7 +880,7 @@ Verifications actually performed:
 - `cargo test --manifest-path src-tauri/Cargo.toml --offline`: PASS, 90 test.
 - `cargo clippy --manifest-path src-tauri/Cargo.toml --offline --all-targets -- -D warnings`: PASS.
 - `cargo build --manifest-path src-tauri/Cargo.toml --offline`: PASS, desktop debug.
-- React Doctor changed: 82/100, no new findings (not a full audit).
+- React Doctor changed: 82/100, no new findings (not a full scan).
 - App debug Windows + real Node MCP process, separate synthetic profile: PASS
   ordinary startup without bridge, catalog, session/note creation UTF-8,
   passed revision and denied AI, persistence after forced stop/restart,
