@@ -24,6 +24,15 @@ in which session and for which faction, with no account and no cloud.
 > If an older updater reports an unexpected database structure, use the 0.9.2 installer manually after preserving a verified backup. Existing archives migrate automatically.
 > Other platforms are not built for this hotfix.
 
+> [!IMPORTANT]
+> **Chronexus is entirely vibecoded.** Its code, tests and documentation were written by
+> AI coding agents (OpenAI Codex and Claude Code) following my instructions, not by hand.
+> I made it purely for a personal need, as a player who wanted this tool, and out of
+> curiosity about how far AI agents can be pushed in real software development. There is
+> no company and no commercial goal behind it. If you prefer to avoid AI-generated
+> software, consider this a fair heads-up. The in-app assistant is a separate, optional
+> feature: it is off by default and the app works fully without it.
+
 ## What is Chronexus
 
 Chronexus is a desktop app for people who **play** a role-playing campaign, not for

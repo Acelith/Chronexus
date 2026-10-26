@@ -19,6 +19,16 @@ in quale sessione e per quale fazione, senza account e senza cloud.
 
 </div>
 
+> [!IMPORTANT]
+> **Chronexus è interamente vibecoded.** Codice, test e documentazione sono stati scritti
+> da agenti di programmazione AI (OpenAI Codex e Claude Code) seguendo le mie istruzioni,
+> non a mano. L’ho realizzato solo per un bisogno personale, da giocatore che voleva
+> questo strumento, e per curiosità di vedere fin dove gli agenti AI possono spingersi
+> nello sviluppo di un software vero. Non c’è un’azienda né uno scopo commerciale. Se
+> preferisci evitare software generato con l’AI, consideralo un avviso onesto.
+> L’assistente integrato è una funzione separata e facoltativa: è disattivato di
+> predefinito e l’app funziona completamente senza.
+
 ## Cos’è Chronexus
 
 Chronexus è un’applicazione desktop per chi **gioca** una campagna di ruolo, non
