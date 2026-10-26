@@ -5,6 +5,7 @@
 pub mod api;
 pub mod auto;
 pub mod engine;
+pub mod projection;
 #[cfg(test)]
 mod tests;
 
@@ -140,7 +141,14 @@ pub fn remote_id(value: &str) -> AppResult<()> {
     }
     Ok(())
 }
-pub const KINDS: [&str; 4] = ["page", "session", "relationship", "party"];
+pub const KINDS: [&str; 6] = [
+    "page",
+    "session",
+    "relationship",
+    "party",
+    "sheetSection",
+    "image",
+];
 pub fn kind(value: &str) -> AppResult<()> {
     if !KINDS.contains(&value) {
         return Err("Unsupported shared item type.".into());

@@ -568,6 +568,13 @@ be decided at the start of M24.
 - **Second computer = attach, not backup restore.** The account's campaigns are listed on an
   explicit click; downloading creates a normal local campaign and creates items under their
   original IDs, in dependency order, retrying items whose pages have not arrived.
+- **Sheets and images are shared projections, not replicas.** The server's `sheetSection` and
+  `image` kinds carry no link to a character or to the page an image belongs to, so another
+  computer could not rebuild a sheet or re-attach an image; a private copy would be unusable and
+  would still put personal data on the server. They can therefore only be shared (or kept
+  here), are excluded from "keep a private copy of everything", and arrive as read-only
+  attributed copies. A section never includes notes or conditions; images are shared as original
+  bytes within the server's limits and fetched only on request.
 - Schema 020 is additive; the legacy cursor is reset because `/sync` cursors differ from the
   legacy feed's.
 - **S6 on the desktop: losing access is not an error to retry.** A refused or missing campaign

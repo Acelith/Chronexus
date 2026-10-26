@@ -41,6 +41,15 @@ Client rules that rely on the contract:
   becomes a conflict, never an overwrite.
 - A tombstone for an item of this account stops its replication here and keeps the local
   item; deletions are never propagated into another device's archive silently.
+- **Projections (S4).** `sheetSection` and `image` items are shared only (`visibility: members`):
+  the payload keys are those of the server's OpenAPI (`characterId, name, section, fields[]`;
+  `attachmentId, caption`). Section item IDs are derived from the character ID and the section
+  name so every computer agrees on them; images use their local ID. An image's original is
+  uploaded first with `POST …/attachments` (checksum header; identical bytes return the stored
+  attachment), then its caption is tied to the returned attachment ID. Received projections are
+  kept as attributed read-only copies; an image's bytes are fetched on request, verified against
+  the checksum the server sent, and never become a local image. A projection of this account from
+  another computer is displayed, not created locally.
 - **Access loss (S6).** A `403` or `404` on `/sync` or the full listing (removed from the
   campaign, or the campaign was deleted: `404 "This campaign was deleted."`) is `AccessLost`:
   received copies of other players' items are cleared, this account's own items, replication

@@ -94,7 +94,36 @@ beforeEach(() => {
               updatedAt: "2026-10-26T12:00:00Z",
               mine: false,
             },
+            {
+              kind: "sheetSection",
+              itemId: "r2",
+              authorId: "acc-3",
+              authorName: "Carol",
+              revision: 1,
+              payload: {
+                characterId: "ch1",
+                name: "Hero · Combat and senses",
+                section: "combat",
+                fields: [
+                  { key: "armorClass", label: "Armor class", value: "16" },
+                ],
+              },
+              updatedAt: "2026-10-26T12:00:00Z",
+              mine: false,
+            },
+            {
+              kind: "image",
+              itemId: "r3",
+              authorId: "acc-3",
+              authorName: "Carol",
+              revision: 1,
+              payload: { attachmentId: "a1", caption: "Map of the keep" },
+              updatedAt: "2026-10-26T12:00:00Z",
+              mine: false,
+            },
           ] as never;
+        case "sync_remote_image":
+          return "data:image/png;base64,iVBORw0KGgo=" as never;
         case "sync_set_scope":
           items = [neral((args as { scope: string }).scope, "new")];
           return items as never;
@@ -365,5 +394,63 @@ test("a player cannot delete the campaign, and a lost access is explained withou
   ).toBeNull();
   expect(
     screen.getByRole("button", { name: "Delete my copy on the server" }),
+  ).toBeVisible();
+});
+
+test("sheet sections and images are shared read-only: no private option, text for fields and the image only on request", async () => {
+  const user = userEvent.setup();
+  items = [
+    {
+      kind: "sheetSection",
+      itemId: "s1",
+      title: "Character sheet · Combat and senses",
+      shared: false,
+      scope: "none",
+      status: "private",
+    },
+    {
+      kind: "image",
+      itemId: "i1",
+      title: "Map of the keep",
+      shared: false,
+      scope: "none",
+      status: "private",
+    },
+  ];
+  render(<CampaignSharing campaignId="c1" busy={false} />);
+  const section = await screen.findByRole("combobox", {
+    name: /Combat and senses/,
+  });
+  expect(
+    within(section).queryByRole("option", { name: /Private copy/ }),
+  ).toBeNull();
+  expect(
+    within(section).getByRole("option", {
+      name: /Shared with the other players/,
+    }),
+  ).toBeVisible();
+  expect(
+    screen.getByText(/Notes and conditions are never included/),
+  ).toBeVisible();
+  expect(
+    screen.getByText(/Images are sent as originals, up to 8 MiB/),
+  ).toBeVisible();
+
+  const received = screen.getByRole("region", { name: "Shared with you" });
+  expect(within(received).getByText(/Armor class: 16\./)).toBeVisible();
+  // The picture is fetched only when asked for, and shown with its caption as text alternative.
+  expect(command).not.toHaveBeenCalledWith(
+    "sync_remote_image",
+    expect.anything(),
+  );
+  await user.click(
+    within(received).getByRole("button", { name: "Show the image" }),
+  );
+  expect(command).toHaveBeenCalledWith("sync_remote_image", {
+    campaignId: "c1",
+    itemId: "r3",
+  });
+  expect(
+    await within(received).findByRole("img", { name: "Map of the keep" }),
   ).toBeVisible();
 });

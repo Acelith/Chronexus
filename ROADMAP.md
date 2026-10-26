@@ -1368,7 +1368,8 @@ fixes, measurements and open items are in [docs/AUDIT.md](docs/AUDIT.md).
 020: private and shared per-item scope, a derived outbound change set with an idempotent
 in-flight operation, continuous synchronization per campaign (debounced, notification
 stream with polling fallback, backoff, pause), visible save states, downloading a campaign
-on a second computer, and the scope summary. Verified against an in-process fake of the
+on a second computer, and the scope summary; schema 021 adds shareable character sheet
+sections and images (read-only projections for the members, not private replicas). Verified against an in-process fake of the
 contract. The server itself moved to **M25**; real end-to-end acceptance with a
 deployed server happens there. Changes a
 project invariant: today no account and no service. Sharing

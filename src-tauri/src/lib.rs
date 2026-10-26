@@ -289,6 +289,7 @@ pub fn run() {
             commands::sync::sync_status,
             commands::sync::sync_remote_campaigns,
             commands::sync::sync_attach_campaign,
+            commands::sync::sync_remote_image,
             commands::sync::sync_erase_server_copy,
             commands::sync::sync_delete_server_campaign,
             commands::sync::sync_delete_account,

@@ -27,7 +27,10 @@ export interface SyncLink {
   /** The server says this account has no access to the campaign any more. */
   accessLost: boolean;
 }
-export type SharedKind = "page" | "session" | "relationship" | "party";
+export type SharedKind =
+  "page" | "session" | "relationship" | "party" | "sheetSection" | "image";
+/** Shared read-only; never replicated privately and never created on another computer. */
+export const projectionKinds: SharedKind[] = ["sheetSection", "image"];
 /** none: only on this device · private: this account's devices · shared: the members. */
 export type SyncScope = "none" | "private" | "shared";
 export interface SyncItem {
@@ -155,6 +158,9 @@ export const syncApi = {
     command<SyncStatus>("sync_status", { campaignId }),
   remoteCampaigns: () => command<RemoteCampaign[]>("sync_remote_campaigns"),
   /** Deletes the server copy of everything this account synchronized; local items stay. */
+  /** The original of an image another player shared, fetched on request for display only. */
+  remoteImage: (campaignId: string, itemId: string) =>
+    command<string>("sync_remote_image", { campaignId, itemId }),
   eraseServerCopy: (campaignId: string) =>
     command<SyncLink>("sync_erase_server_copy", { campaignId }),
   /** Owner only: deletes the campaign on the server; local items stay. */
@@ -206,6 +212,13 @@ export function sharedText(payload: Record<string, unknown> | null): string {
   };
   const document = payload.document as Record<string, unknown> | undefined;
   visit(document?.blocks);
+  if (typeof payload.caption === "string") parts.push(payload.caption);
+  if (Array.isArray(payload.fields)) {
+    for (const field of payload.fields as Record<string, unknown>[]) {
+      if (typeof field.label === "string" && typeof field.value === "string")
+        parts.push(`${field.label}: ${field.value}.`);
+    }
+  }
   for (const key of ["evidence", "notes", "playerName", "role"]) {
     if (typeof payload[key] === "string" && payload[key])
       parts.push(String(payload[key]));

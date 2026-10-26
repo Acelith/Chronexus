@@ -8,6 +8,7 @@ use lines::LineReader;
 use reqwest::{Method, Url};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{json, Value};
+use sha2::Digest;
 use std::time::Duration;
 
 const MAX_RESPONSE: usize = 8 * 1024 * 1024;
@@ -414,6 +415,103 @@ impl Client {
             )),
             other => Err(failure(other)),
         }
+    }
+    /// Uploads one original image (byte for byte) and returns its attachment ID. The server
+    /// recognizes identical bytes from the same author, so a retry returns the stored original.
+    pub async fn upload_attachment(
+        &self,
+        campaign: &str,
+        bytes: Vec<u8>,
+        mime: &str,
+        sha256: &str,
+    ) -> ApiResult<String> {
+        remote_id(campaign)?;
+        if !["image/png", "image/jpeg", "image/webp"].contains(&mime)
+            || sha256.len() != 64
+            || bytes.is_empty()
+            || bytes.len() > MAX_RESPONSE
+        {
+            return Err(Failure::Rejected("This image cannot be uploaded.".into()));
+        }
+        let mut request = self
+            .http
+            .post(self.url(&format!("/api/v1/campaigns/{campaign}/attachments"))?)
+            .header("content-type", mime)
+            .header("x-content-sha256", sha256)
+            .body(bytes);
+        if let Some(token) = &self.token {
+            request = request.bearer_auth(token);
+        }
+        let response = request.send().await.map_err(|_| {
+            Failure::Unavailable("Sharing server not reachable. Check the address, the connection and its HTTPS certificate.".into())
+        })?;
+        let status = response.status().as_u16();
+        let value: Value = response.json().await.unwrap_or(Value::Null);
+        if ![200, 201].contains(&status) {
+            return Err(failure(status));
+        }
+        let id = value["id"].as_str().unwrap_or("");
+        crate::journal::identifier(id)?;
+        if value["sha256"].as_str() != Some(sha256) {
+            return Err(Failure::Rejected(
+                "Invalid answer from the sharing server.".into(),
+            ));
+        }
+        Ok(id.to_string())
+    }
+    /// Downloads an original; the bytes are checked against the checksum the server sent
+    /// before anything is returned. `(bytes, mime)`.
+    pub async fn download_attachment(
+        &self,
+        campaign: &str,
+        attachment: &str,
+    ) -> ApiResult<(Vec<u8>, String)> {
+        remote_id(campaign)?;
+        crate::journal::identifier(attachment)?;
+        let mut request = self.http.get(self.url(&format!(
+            "/api/v1/campaigns/{campaign}/attachments/{attachment}"
+        ))?);
+        if let Some(token) = &self.token {
+            request = request.bearer_auth(token);
+        }
+        let mut response = request.send().await.map_err(|_| {
+            Failure::Unavailable("Sharing server not reachable. Check the address, the connection and its HTTPS certificate.".into())
+        })?;
+        let status = response.status().as_u16();
+        if status != 200 {
+            return Err(failure(status));
+        }
+        let mime = response
+            .headers()
+            .get("content-type")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("")
+            .to_string();
+        let expected = response
+            .headers()
+            .get("x-content-sha256")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("")
+            .to_string();
+        let mut bytes = Vec::new();
+        while let Some(chunk) = response.chunk().await.map_err(|_| {
+            Failure::Unavailable("Connection to the sharing server interrupted.".into())
+        })? {
+            if bytes.len() + chunk.len() > MAX_RESPONSE {
+                return Err(Failure::Rejected(
+                    "Answer from the sharing server too large.".into(),
+                ));
+            }
+            bytes.extend_from_slice(&chunk);
+        }
+        let actual = format!("{:x}", sha2::Sha256::digest(&bytes));
+        if !["image/png", "image/jpeg", "image/webp"].contains(&mime.as_str()) || actual != expected
+        {
+            return Err(Failure::Rejected(
+                "The image from the sharing server is damaged or not a supported type.".into(),
+            ));
+        }
+        Ok((bytes, mime))
     }
     pub async fn join(&self, code: &str) -> ApiResult<RemoteCampaign> {
         checked(

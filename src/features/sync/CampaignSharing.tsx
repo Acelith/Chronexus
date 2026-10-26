@@ -13,6 +13,7 @@ import {
   type SyncItem,
   type SyncLink,
   type SyncScope,
+  projectionKinds,
 } from "./api";
 import { stateText } from "./SyncStatusBadge";
 
@@ -21,6 +22,8 @@ const kindLabels = (): Record<SharedKind, string> => ({
   session: tr("Sessions"),
   relationship: tr("Relationships"),
   party: tr("Party members"),
+  sheetSection: tr("Character sheet sections"),
+  image: tr("Images"),
 });
 const statusLabels = (): Record<SyncItem["status"], string> => ({
   private: tr("only on this device"),
@@ -43,7 +46,8 @@ function itemTitle(kind: SharedKind, payload: Record<string, unknown> | null) {
   if (kind === "session")
     return tr("Session {0}: {1}", [String(payload.sequence), text("title")]);
   if (kind === "relationship") return text("label");
-  if (kind === "party") return text("name");
+  if (kind === "party" || kind === "sheetSection") return text("name");
+  if (kind === "image") return text("caption");
   return text("title");
 }
 
@@ -78,6 +82,7 @@ export default function CampaignSharing({
   const [confirmErase, setConfirmErase] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteName, setDeleteName] = useState("");
+  const [pictures, setPictures] = useState<Record<string, string>>({});
   const { pending, error, notice, setError, perform } = usePendingAction();
   const status = useSyncStatus(link ? campaignId : null);
   const disabled = busy || pending;
@@ -565,6 +570,17 @@ export default function CampaignSharing({
                   disabled={disabled || link.role === "reader"}
                 >
                   <legend>{kinds[kind]}</legend>
+                  {projectionKinds.includes(kind) ? (
+                    <p className="muted">
+                      {kind === "image"
+                        ? tr(
+                            "Images are sent as originals, up to 8 MiB. They are shared read-only: others see them but they never become images of their campaign. Nothing here is copied to your other computers.",
+                          )
+                        : tr(
+                            "Only the sections you choose are shared, as plain read-only text of the fields they show. Notes and conditions are never included. Nothing here is copied to your other computers.",
+                          )}
+                    </p>
+                  ) : null}
                   {rows.map((item) => (
                     <div key={item.itemId} className="sync-item">
                       <label>
@@ -584,11 +600,17 @@ export default function CampaignSharing({
                             })
                           }
                         >
-                          {(Object.keys(scopes) as SyncScope[]).map((scope) => (
-                            <option key={scope} value={scope}>
-                              {scopes[scope]}
-                            </option>
-                          ))}
+                          {(Object.keys(scopes) as SyncScope[])
+                            .filter(
+                              (scope) =>
+                                scope !== "private" ||
+                                !projectionKinds.includes(kind),
+                            )
+                            .map((scope) => (
+                              <option key={scope} value={scope}>
+                                {scopes[scope]}
+                              </option>
+                            ))}
                         </select>
                       </label>{" "}
                       <span className="muted">· {statuses[item.status]}</span>
@@ -622,6 +644,33 @@ export default function CampaignSharing({
                         ])}
                   </span>
                   <p dir="auto">{sharedText(item.payload).slice(0, 600)}</p>
+                  {item.kind === "image" && !item.mine ? (
+                    pictures[item.itemId] ? (
+                      <img
+                        className="sync-picture"
+                        alt={itemTitle(item.kind, item.payload)}
+                        src={pictures[item.itemId]}
+                      />
+                    ) : (
+                      <button
+                        disabled={disabled}
+                        onClick={() =>
+                          void act(async () => {
+                            const shown = await syncApi.remoteImage(
+                              campaignId,
+                              item.itemId,
+                            );
+                            setPictures((current) => ({
+                              ...current,
+                              [item.itemId]: shown,
+                            }));
+                          })
+                        }
+                      >
+                        {tr("Show the image")}
+                      </button>
+                    )
+                  ) : null}
                 </li>
               ))}
             </ul>

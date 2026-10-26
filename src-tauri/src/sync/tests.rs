@@ -40,6 +40,8 @@ struct Campaign {
 }
 /// (operation, kind, item, request digest, accepted revision)
 type Receipt = (String, String, String, String, i64);
+/// An uploaded original: (campaign, author, SHA-256, MIME type, bytes).
+type Upload = (String, String, String, String, Vec<u8>);
 #[derive(Default)]
 struct State {
     accounts: HashMap<String, (String, String, String)>, // id -> (username, display, password)
@@ -47,6 +49,7 @@ struct State {
     invites: HashMap<String, (Option<String>, String)>, // code -> (campaign, role)
     campaigns: HashMap<String, Campaign>,
     receipts: HashMap<(String, String, String), Receipt>,
+    uploads: HashMap<String, Upload>,
     next: u64,
     requests: Vec<String>,
     /// Refuse every connection without an answer, as an unreachable server does.
@@ -151,6 +154,7 @@ fn handle(mut stream: TcpStream, state: &Arc<Mutex<State>>) {
     );
     let mut length = 0;
     let mut token = None;
+    let (mut mime, mut sha) = (String::new(), String::new());
     for line in lines {
         let lower = line.to_lowercase();
         if let Some(v) = lower.strip_prefix("content-length:") {
@@ -159,15 +163,38 @@ fn handle(mut stream: TcpStream, state: &Arc<Mutex<State>>) {
         if lower.starts_with("authorization: bearer ") {
             token = Some(line["authorization: bearer ".len()..].trim().to_string());
         }
+        if let Some(v) = lower.strip_prefix("content-type:") {
+            mime = v.trim().to_string();
+        }
+        if let Some(v) = lower.strip_prefix("x-content-sha256:") {
+            sha = v.trim().to_string();
+        }
     }
     let mut body = vec![0; length];
     let _ = stream.read_exact(&mut body);
+    let raw = body.clone();
     let body: Value = serde_json::from_slice(&body).unwrap_or(Value::Null);
-    let answer = route(&mut state.lock().unwrap(), &method, &target, token, body);
+    let answer = route(
+        &mut state.lock().unwrap(),
+        &method,
+        &target,
+        token,
+        body,
+        (raw, mime, sha),
+    );
     // No answer: the connection just closes, like a dead or unreachable server.
     let Some((status, reply)) = answer else {
         return;
     };
+    if let Some(file) = reply.get("__raw") {
+        use base64::Engine;
+        let bytes = base64::engine::general_purpose::STANDARD
+            .decode(file["b64"].as_str().unwrap())
+            .unwrap();
+        let _ = write!(stream, "HTTP/1.1 {status} X\r\nContent-Type: {}\r\nX-Content-SHA256: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", file["mime"].as_str().unwrap(), file["sha"].as_str().unwrap(), bytes.len());
+        let _ = stream.write_all(&bytes);
+        return;
+    }
     let text = reply.to_string();
     let _ = write!(stream, "HTTP/1.1 {status} X\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{text}", text.len());
 }
@@ -197,6 +224,7 @@ fn route(
     target: &str,
     token: Option<String>,
     body: Value,
+    upload: (Vec<u8>, String, String),
 ) -> Option<(u16, Value)> {
     if s.offline {
         return None;
@@ -359,6 +387,48 @@ fn route(
                     (
                         201,
                         json!({"code":code,"role":body["role"],"expiresAt":"2026-11-02T00:00:00Z"}),
+                    )
+                }
+                ("POST", ["attachments"]) if role != "reader" => {
+                    use sha2::Digest;
+                    let (raw, mime, sha) = upload;
+                    if format!("{:x}", sha2::Sha256::digest(&raw)) != sha {
+                        return Some((400, json!({})));
+                    }
+                    let known = s
+                        .uploads
+                        .iter()
+                        .find(|(_, u)| u.0 == campaign && u.1 == me && u.2 == sha)
+                        .map(|(id, _)| id.clone());
+                    let (id, status) = match known {
+                        Some(id) => (id, 200),
+                        None => {
+                            s.next += 1;
+                            let id = uuid::Uuid::new_v4().to_string();
+                            s.uploads.insert(
+                                id.clone(),
+                                (campaign.clone(), me.clone(), sha.clone(), mime, raw),
+                            );
+                            (id, 201)
+                        }
+                    };
+                    (status, json!({"id":id,"authorId":me,"sha256":sha}))
+                }
+                ("GET", ["attachments", id]) => {
+                    use base64::Engine;
+                    let Some((c, author, sha, mime, bytes)) = s.uploads.get(*id).cloned() else {
+                        return Some((404, json!({})));
+                    };
+                    let shared = s.campaigns[&campaign].items.values().any(|v| {
+                        v.visibility == "members"
+                            && v.payload.as_ref().is_some_and(|p| p["attachmentId"] == *id)
+                    });
+                    if c != campaign || (author != me && !shared) {
+                        return Some((404, json!({})));
+                    }
+                    (
+                        200,
+                        json!({"__raw":{"mime":mime,"sha":sha,"b64":base64::engine::general_purpose::STANDARD.encode(bytes)}}),
                     )
                 }
                 ("POST", ["deletion"]) if role == "owner" => {
@@ -1764,6 +1834,76 @@ mod live {
 
     #[tokio::test]
     #[ignore = "needs the Chronexus-Server binary (CHRONEXUS_SERVER_BIN)"]
+    async fn sheet_sections_and_images_are_validated_stored_and_served_by_the_real_server() {
+        use super::projections::{hero, item, picture, png};
+        use crate::{images, player};
+        let server = Real::start();
+        let mut alice = Device::new("Live projections");
+        let alice_id = alice
+            .sign(&server.base, Some(&server.invite()), "alice")
+            .await;
+        let remote = alice
+            .client()
+            .create_campaign("Live projections")
+            .await
+            .unwrap();
+        alice.link(&server.base, &alice_id, &remote);
+        let page = alice.page("Keep", "place");
+        alice
+            .with(|c| player::save_character(c, &alice.campaign, None, None, hero()))
+            .unwrap();
+        let original = png(7);
+        picture(&alice, &page, "Map of the keep", original.clone());
+        let combat = item(&alice, "sheetSection", "Combat");
+        let image = item(&alice, "image", "Map of the keep");
+        alice
+            .scope("sheetSection", &combat.item_id, "shared")
+            .unwrap();
+        alice.scope("image", &image.item_id, "shared").unwrap();
+        // The real server validates the section fields and stores the uploaded original.
+        let report = alice.sync().await;
+        assert_eq!((report.pushed, report.blocked), (2, 0), "{report:?}");
+
+        let invite = alice.client().invite(&remote.id, "player").await.unwrap();
+        let mut bob = Device::new("Live viewer");
+        let bob_id = bob.sign(&server.base, Some(&server.invite()), "bob").await;
+        let joined = bob.client().join(&invite.code).await.unwrap();
+        bob.link(&server.base, &bob_id, &joined);
+        assert_eq!(bob.sync().await.received, 2);
+        let seen = bob.remote();
+        let shared = seen.iter().find(|i| i.kind == "sheetSection").unwrap();
+        assert!(shared.payload["fields"].to_string().contains("Armor class"));
+        assert!(!shared.payload.to_string().contains("PRIVATE-MARKER"));
+        let picture_item = seen.iter().find(|i| i.kind == "image").unwrap();
+        let (bytes, mime) = bob
+            .client()
+            .download_attachment(
+                &joined.id,
+                picture_item.payload["attachmentId"].as_str().unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!((bytes, mime.as_str()), (original, "image/png"));
+        assert!(bob
+            .with(|c| images::all(c, &bob.campaign))
+            .unwrap()
+            .is_empty());
+        // The owner's second computer shows them as items of her account, never as local ones.
+        let desktop = second_device(&server.base, "alice", &remote).await;
+        let report = desktop.sync().await;
+        assert_eq!(report.materialized, 0);
+        assert!(desktop
+            .with(|c| images::all(c, &desktop.campaign))
+            .unwrap()
+            .is_empty());
+        assert!(desktop
+            .with(|c| player::get_character(c, &desktop.campaign))
+            .unwrap()
+            .is_none());
+    }
+
+    #[tokio::test]
+    #[ignore = "needs the Chronexus-Server binary (CHRONEXUS_SERVER_BIN)"]
     async fn removal_erasure_and_deletion_against_the_real_server_leave_local_data_alone() {
         let server = Real::start();
         let mut alice = Device::new("Live lifecycle");
@@ -2153,5 +2293,237 @@ mod lifecycle {
             );
         });
         assert!(owner.text_of(&page).contains("paragraph"));
+    }
+}
+
+/// Sheet sections and images: shared as read-only projections, never replicated privately.
+mod projections {
+    use super::*;
+    use crate::{images, player};
+    use std::collections::BTreeMap;
+
+    pub(super) fn hero() -> player::CharacterInput {
+        player::CharacterInput {
+            sheet: player::SheetDetails {
+                fields: BTreeMap::from([
+                    ("armorClass".to_string(), "16".to_string()),
+                    ("gold".to_string(), "42".to_string()),
+                    ("playerName".to_string(), "Dana".to_string()),
+                ]),
+                ..Default::default()
+            },
+            name: "Hero".into(),
+            system_id: "generic".into(),
+            ancestry: "Human".into(),
+            vocation: "Rogue".into(),
+            level: Some(3),
+            experience: None,
+            hp_current: 8,
+            hp_maximum: 12,
+            hp_temporary: 0,
+            stats: vec![],
+            resources: vec![],
+            conditions: "PRIVATE-MARKER secret curse".into(),
+            notes: "PRIVATE-MARKER personal notes".into(),
+        }
+    }
+    pub(super) fn png(width: u32) -> Vec<u8> {
+        let mut out = std::io::Cursor::new(vec![]);
+        image::DynamicImage::new_rgb8(width, 2)
+            .write_to(&mut out, image::ImageFormat::Png)
+            .unwrap();
+        out.into_inner()
+    }
+    pub(super) fn picture(device: &Device, page: &str, caption: &str, bytes: Vec<u8>) -> String {
+        let root = device.db.root().unwrap();
+        device.with(|c| {
+            images::add(
+                c,
+                &root,
+                &device.campaign,
+                &images::ImageTarget {
+                    kind: "page".into(),
+                    id: page.into(),
+                },
+                caption,
+                "map",
+                bytes,
+            )
+            .unwrap()
+            .id
+        })
+    }
+    pub(super) fn item(device: &Device, kind: &str, title: &str) -> engine::Item {
+        device
+            .with(|c| engine::items(c, &device.campaign))
+            .unwrap()
+            .into_iter()
+            .find(|i| i.kind == kind && i.title.contains(title))
+            .unwrap_or_else(|| panic!("no {kind} item {title}"))
+    }
+
+    #[tokio::test]
+    async fn selected_sheet_sections_and_images_are_shared_read_only_and_never_become_local_items()
+    {
+        let fake = Fake::start();
+        let mut alice = Device::new("Alice");
+        let alice_id = alice.sign(&fake.base, Some("ADMIN-INVITE"), "alice").await;
+        let remote = alice.client().create_campaign("Projections").await.unwrap();
+        alice.link(&fake.base, &alice_id, &remote);
+        let page = alice.page("Keep", "place");
+        alice
+            .with(|c| player::save_character(c, &alice.campaign, None, None, hero()))
+            .unwrap();
+        let original = png(5);
+        let map = picture(&alice, &page, "Map of the keep", original.clone());
+
+        // Only sections that say something are offered, and the private notes are not among them.
+        let identity = item(&alice, "sheetSection", "Identity");
+        let combat = item(&alice, "sheetSection", "Combat");
+        let equipment = item(&alice, "sheetSection", "Money");
+        assert!(alice
+            .with(|c| engine::items(c, &alice.campaign))
+            .unwrap()
+            .iter()
+            .all(|i| !i.title.contains("Magic")));
+        let image = item(&alice, "image", "Map of the keep");
+        // They can only be shared: a private copy would be unusable on another computer.
+        assert!(alice
+            .scope("sheetSection", &identity.item_id, "private")
+            .unwrap_err()
+            .contains("only be shared"));
+        assert!(alice.scope("image", &map, "private").is_err());
+        // "Keep a private copy of everything" skips them.
+        alice
+            .with(|c| engine::replicate_all_privately(c, &alice.campaign))
+            .unwrap();
+        assert!(alice
+            .with(|c| engine::items(c, &alice.campaign))
+            .unwrap()
+            .iter()
+            .filter(|i| matches!(i.kind.as_str(), "sheetSection" | "image"))
+            .all(|i| i.scope == "none"));
+
+        alice.scope("page", &page, "shared").unwrap();
+        alice
+            .scope("sheetSection", &combat.item_id, "shared")
+            .unwrap();
+        alice
+            .scope("sheetSection", &equipment.item_id, "shared")
+            .unwrap();
+        alice.scope("image", &image.item_id, "shared").unwrap();
+        assert_eq!(alice.sync().await.pushed, 4);
+        // Nothing from the identity section, the conditions or the notes reached the server.
+        let requests = fake.state.lock().unwrap().requests.join("\n");
+        assert!(
+            !requests.contains("PRIVATE-MARKER"),
+            "private fields stay private"
+        );
+        assert!(requests.contains("Armor class") && requests.contains("Gold pieces"));
+        assert_eq!(fake.revision(&combat.item_id), Some(1));
+
+        // A member sees them attributed, as text and as the original image, and creates nothing.
+        let invite = alice.client().invite(&remote.id, "player").await.unwrap();
+        let mut bob = Device::new("Bob");
+        fake.invite("BOB");
+        let bob_id = bob.sign(&fake.base, Some("BOB"), "bob").await;
+        let joined = bob.client().join(&invite.code).await.unwrap();
+        bob.link(&fake.base, &bob_id, &joined);
+        assert_eq!(bob.sync().await.received, 4);
+        assert!(bob
+            .with(|c| player::get_character(c, &bob.campaign))
+            .unwrap()
+            .is_none());
+        assert!(bob
+            .with(|c| images::all(c, &bob.campaign))
+            .unwrap()
+            .is_empty());
+        let seen = bob.remote();
+        let shared = seen
+            .iter()
+            .find(|i| i.kind == "sheetSection" && i.payload["section"] == "combat")
+            .unwrap();
+        assert!(shared.payload["fields"].to_string().contains("16"));
+        let shown = seen.iter().find(|i| i.kind == "image").unwrap();
+        let attachment = shown.payload["attachmentId"].as_str().unwrap().to_string();
+        let (bytes, mime) = bob
+            .client()
+            .download_attachment(&joined.id, &attachment)
+            .await
+            .unwrap();
+        assert_eq!((bytes, mime.as_str()), (original.clone(), "image/png"));
+
+        // A changed sheet is sent; an emptied section is removed.
+        alice.with(|c| {
+            let current = player::get_character(c, &alice.campaign).unwrap().unwrap();
+            let mut data = hero();
+            data.sheet.fields.insert("armorClass".into(), "18".into());
+            data.sheet.fields.remove("gold");
+            player::save_character(
+                c,
+                &alice.campaign,
+                Some(&current.id),
+                Some(current.revision),
+                data,
+            )
+            .unwrap();
+        });
+        let report = alice.sync().await;
+        assert_eq!((report.pushed, report.deleted), (1, 1), "{report:?}");
+        bob.sync().await;
+        let seen = bob.remote();
+        assert!(seen
+            .iter()
+            .any(|i| i.kind == "sheetSection" && i.payload.to_string().contains("18")));
+        assert!(seen
+            .iter()
+            .all(|i| !i.payload.to_string().contains("Gold pieces")));
+        // Stopping to share an image removes it from the members; the local image stays.
+        alice.scope("image", &image.item_id, "none").unwrap();
+        assert_eq!(alice.sync().await.deleted, 1);
+        bob.sync().await;
+        assert!(bob.remote().iter().all(|i| i.kind != "image"));
+        assert_eq!(
+            alice
+                .with(|c| images::all(c, &alice.campaign))
+                .unwrap()
+                .len(),
+            1
+        );
+
+        // A tampered download is refused before anything is displayed.
+        fake.set(|s| {
+            for upload in s.uploads.values_mut() {
+                upload.4 = png(9);
+            }
+        });
+        assert!(bob
+            .client()
+            .download_attachment(&joined.id, &attachment)
+            .await
+            .is_err());
+    }
+
+    #[tokio::test]
+    async fn an_image_the_server_would_refuse_is_reported_instead_of_retried() {
+        let fake = Fake::start();
+        let mut alice = Device::new("Alice");
+        let alice_id = alice.sign(&fake.base, Some("ADMIN-INVITE"), "alice").await;
+        let remote = alice.client().create_campaign("Big").await.unwrap();
+        alice.link(&fake.base, &alice_id, &remote);
+        let page = alice.page("Keep", "place");
+        let map = picture(&alice, &page, "Huge poster", png(5));
+        // The archive records a size above the server's 8 MiB limit.
+        alice.with(|c| {
+            c.execute(
+                "UPDATE image_attachments SET size=9000000 WHERE id=?1",
+                [&map],
+            )
+            .unwrap();
+        });
+        let error = alice.scope("image", &map, "shared").unwrap_err();
+        assert!(error.contains("too large for the server"), "{error}");
+        assert_eq!(alice.sync().await, engine::Report::default());
+        assert!(fake.state.lock().unwrap().uploads.is_empty());
     }
 }

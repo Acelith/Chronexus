@@ -521,3 +521,38 @@ pub async fn sync_delete_account(
     auto.reload().await;
     Ok(AccountView::from(&account))
 }
+
+/// The original of an image another player shared, for display only: it is fetched when the
+/// user asks, checked against its checksum, and never stored as a local image.
+#[tauri::command]
+pub async fn sync_remote_image(
+    db: tauri::State<'_, Database>,
+    campaign_id: String,
+    item_id: String,
+) -> AppResult<String> {
+    use base64::{engine::general_purpose::STANDARD, Engine};
+    let (current, session, client) = signed_in(&db)?;
+    let link = linked(
+        &db,
+        &campaign_id,
+        &session,
+        current.server.as_deref().unwrap_or(""),
+    )
+    .await?;
+    let id = campaign_id.clone();
+    let remote = db
+        .run(move |c| engine::remote_items(c, &id))
+        .await?
+        .into_iter()
+        .find(|item| item.kind == "image" && item.item_id == item_id)
+        .ok_or("This image is not shared with you any more.")?;
+    let attachment = remote.payload["attachmentId"]
+        .as_str()
+        .ok_or("This image has no original.")?
+        .to_string();
+    let (bytes, mime) = client
+        .download_attachment(&link.remote_id, &attachment)
+        .await
+        .map_err(String::from)?;
+    Ok(format!("data:{mime};base64,{}", STANDARD.encode(bytes)))
+}

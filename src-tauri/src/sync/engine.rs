@@ -10,7 +10,7 @@
 //! is stored separately (`sync_outbox`) so a lost response is retried under the same ID.
 use super::{
     api::{self, ApiResult, Failure},
-    kind, remote_id,
+    kind, projection, remote_id,
 };
 use crate::{
     graph, journal,
@@ -111,6 +111,11 @@ fn invalid() -> String {
 pub fn hash(value: &Value) -> String {
     // serde_json maps are ordered by key, so equal content hashes equally.
     format!("{:x}", Sha256::digest(value.to_string()))
+}
+/// Sheet sections and images are shared as read-only projections: another computer cannot
+/// rebuild a sheet or re-attach an image from them, so they are never created locally.
+fn is_projection(kind_name: &str) -> bool {
+    matches!(kind_name, "sheetSection" | "image")
 }
 /// Pages and sessions first, then the items that refer to them.
 fn rank(kind_name: &str) -> u8 {
@@ -328,6 +333,8 @@ pub fn payload(
         "relationship" => graph::get_relationship(c, campaign, id).ok().map(|r| {
             json!({"fromPageId":r.input.from_page_id,"toPageId":r.input.to_page_id,"label":r.input.label,"certainty":r.input.certainty,"evidence":r.input.evidence,"notes":r.input.notes})
         }),
+        "sheetSection" => projection::section_payload(c, campaign, id)?,
+        "image" => projection::image_payload(c, campaign, id)?,
         _ => party::list(c, campaign)?
             .into_iter()
             .find(|m| m.page.id == id)
@@ -340,7 +347,8 @@ fn item_title(kind_name: &str, payload: &Value) -> String {
     match kind_name {
         "session" => format!("Session {}: {}", payload["sequence"], text("title")),
         "relationship" => text("label"),
-        "party" => text("name"),
+        "party" | "sheetSection" => text("name"),
+        "image" => text("caption"),
         _ => text("title"),
     }
 }
@@ -365,6 +373,10 @@ fn blocked(
     visibility: &str,
     pages: &HashMap<String, String>,
 ) -> bool {
+    // An image the server would refuse is reported as waiting, not retried forever.
+    if kind_name == "image" && projection::image_too_large(value) {
+        return true;
+    }
     endpoints(kind_name, value)
         .iter()
         .any(|page| match pages.get(page) {
@@ -414,6 +426,12 @@ pub fn items(c: &Connection, campaign: &str) -> AppResult<Vec<Item>> {
     }
     for member in party::list(c, campaign)? {
         ids.push(("party".into(), member.page.id));
+    }
+    for (id, _, _) in projection::sections(c, campaign)? {
+        ids.push(("sheetSection".into(), id));
+    }
+    for (id, _) in projection::image_items(c, campaign)? {
+        ids.push(("image".into(), id));
     }
     let pages = page_shares(c, campaign)?;
     let mut out = vec![];
@@ -474,7 +492,16 @@ pub fn set_scope(
     if !["none", "private", "shared"].contains(&scope) {
         return Err("Choose none, private or shared.".into());
     }
+    if is_projection(kind_name) && scope == "private" {
+        return Err(
+            "Character sheet sections and images can only be shared, or kept on this device."
+                .into(),
+        );
+    }
     let value = payload(c, campaign, kind_name, id)?.ok_or("Item not found in this campaign.")?;
+    if scope != "none" && kind_name == "image" && projection::image_too_large(&value) {
+        return Err("This image is too large for the server: at most 8 MiB, 8192 pixels on a side and 16 million pixels.".into());
+    }
     let visibility = if scope == "shared" {
         "members"
     } else {
@@ -555,6 +582,10 @@ pub fn replicate_all_privately(c: &Connection, campaign: &str) -> AppResult<usiz
     let mut list = items(c, campaign)?;
     list.sort_by_key(|i| rank(&i.kind));
     for item in list {
+        // Sheet sections and images are never part of a private copy: they can only be shared.
+        if is_projection(&item.kind) {
+            continue;
+        }
         if item.scope == "none" && item.status == "private" {
             set_scope(c, campaign, &item.kind, &item.item_id, "private")?;
             chosen += 1;
@@ -652,7 +683,7 @@ pub fn pending(c: &Connection, campaign: &str) -> AppResult<(Vec<Job>, usize)> {
 /// Cheap by design: counts, revision sums and newest timestamps, no payloads.
 pub fn fingerprint(c: &Connection, campaign: &str) -> AppResult<String> {
     c.query_row(
-        "SELECT (SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM pages WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM sessions WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM relationships WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0) FROM party_members WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(length(visibility)+length(state)),0) FROM sync_shares WHERE campaign_id=?1)||'|'||(SELECT count(*) FROM sync_conflicts WHERE campaign_id=?1)",
+        "SELECT (SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM pages WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM sessions WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM relationships WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0) FROM party_members WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(length(visibility)+length(state)),0) FROM sync_shares WHERE campaign_id=?1)||'|'||(SELECT count(*) FROM sync_conflicts WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0) FROM characters WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(max(caption),'') FROM image_attachments WHERE campaign_id=?1)",
         [campaign],
         |r| r.get(0),
     )
@@ -848,6 +879,24 @@ fn apply_items(
             continue;
         }
         let row = share(c, campaign, &change.kind, &change.id)?;
+        if is_projection(&change.kind) {
+            // Adopt the server's revision (another computer of this account may have shared
+            // the same projection); the local content is not replaced and never deleted.
+            match (row, change.deleted) {
+                (Some((_, _, base, _, _)), false) if change.revision > base => {
+                    c.execute(
+                        "UPDATE sync_shares SET remote_revision=?4 WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
+                        params![campaign, change.kind, change.id, change.revision],
+                    )
+                    .map_err(storage)?;
+                }
+                (Some(_), true) => later.push(change),
+                (Some(_), false) => {}
+                (None, false) => later.push(change),
+                (None, true) => {}
+            }
+            continue;
+        }
         match (row, change.deleted) {
             (Some((_, pushed, base, visibility, pushed_visibility)), false)
                 if change.revision > base =>
@@ -955,6 +1004,9 @@ fn apply_items(
 /// Returns false when a different local item already uses the id: both versions are then
 /// kept as a conflict for the user. Errors leave nothing half-created.
 fn materialize(c: &Connection, campaign: &str, change: &api::Change) -> AppResult<bool> {
+    if is_projection(&change.kind) {
+        return Err("Sheet sections and images are not created from the server.".into());
+    }
     let remote = change.payload.as_ref().ok_or_else(invalid)?;
     let text = |key: &str| remote[key].as_str().unwrap_or_default().to_string();
     let exists = payload(c, campaign, &change.kind, &change.id)?;
@@ -1100,6 +1152,10 @@ fn retry_deferred(c: &Connection, campaign: &str, account: &str) -> AppResult<us
     let mut waiting: Vec<_> = rows;
     waiting.sort_by_key(|row| rank(&row.0));
     for (kind_name, id, author_id, author_name, revision, raw, updated_at, visibility) in waiting {
+        // Projections of this account's other computers are only displayed.
+        if is_projection(&kind_name) {
+            continue;
+        }
         let change = api::Change {
             kind: kind_name.clone(),
             id: id.clone(),
@@ -1202,6 +1258,9 @@ fn apply_local(
     remote: &Value,
 ) -> AppResult<()> {
     let text = |key: &str| remote[key].as_str().unwrap_or_default().to_string();
+    if is_projection(kind_name) {
+        return Err("Sheet sections and images are never replaced from the server.".into());
+    }
     match kind_name {
         "page" => {
             let aliases: Vec<String> = remote["aliases"]
@@ -1334,6 +1393,17 @@ pub fn resolve(
         .map_err(storage)?
         .ok_or("Conflict already resolved. Reload the list.")?;
     let remote: Value = serde_json::from_str(&raw).map_err(|_| invalid())?;
+    if keep == "remote" && is_projection(kind_name) {
+        // The server's version cannot replace the local sheet or image: accepting it means
+        // this device stops sharing that item.
+        record_deleted(c, campaign, kind_name, id)?;
+        c.execute(
+            "DELETE FROM sync_conflicts WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
+            params![campaign, kind_name, id],
+        )
+        .map_err(storage)?;
+        return Ok(());
+    }
     if keep == "remote" && !remote.is_null() {
         // Domain functions run their own transactions: apply before recording.
         if payload(c, campaign, kind_name, id)?.is_some() {
@@ -1514,6 +1584,38 @@ pub fn validate_payload(kind_name: &str, value: &Value) -> AppResult<()> {
             }
             text(object, "evidence", 4000)?;
             text(object, "notes", 4000)?;
+        }
+        "sheetSection" => {
+            only(&["characterId", "name", "section", "fields"])?;
+            identifier(object["characterId"].as_str().ok_or_else(invalid)?)?;
+            title(object["name"].as_str().ok_or_else(invalid)?)?;
+            if !["identity", "combat", "equipment", "spellcasting", "custom"]
+                .contains(&object["section"].as_str().unwrap_or(""))
+            {
+                return Err(invalid());
+            }
+            let fields = object["fields"].as_array().ok_or_else(invalid)?;
+            if fields.is_empty() || fields.len() > 64 {
+                return Err(invalid());
+            }
+            let mut keys = HashSet::new();
+            for field in fields {
+                let field = field.as_object().ok_or_else(invalid)?;
+                if field.len() != 3 {
+                    return Err(invalid());
+                }
+                text(field, "key", 100)?;
+                text(field, "label", 100)?;
+                text(field, "value", 4000)?;
+                if !keys.insert(field["key"].as_str().unwrap_or("").to_string()) {
+                    return Err(invalid());
+                }
+            }
+        }
+        "image" => {
+            only(&["attachmentId", "caption"])?;
+            identifier(object["attachmentId"].as_str().ok_or_else(invalid)?)?;
+            text(object, "caption", 4000)?;
         }
         _ => {
             only(&["pageId", "name", "playerName", "role", "status"])?;
@@ -1736,11 +1838,72 @@ async fn push_pending(
     let (jobs, blocked) = db.run(move |c| pending(c, &id)).await?;
     report.blocked = blocked;
     for job in jobs {
+        let job = match prepare(db, client, link, campaign, job).await {
+            Ok(job) => job,
+            // The server refused the original itself (size, format): wait, do not retry blindly.
+            Err(Failure::Rejected(_)) => {
+                report.blocked += 1;
+                continue;
+            }
+            Err(error) => return Err(error),
+        };
         let (id, planned) = (campaign.to_string(), job);
         let out = db.run(move |c| begin(c, &id, &planned)).await?;
         settle(db, client, link, campaign, out, report).await?;
     }
     Ok(())
+}
+/// Turns an image's local form into what the server stores: the original is uploaded first
+/// (identical bytes are recognized, so a retry returns the stored copy), then the caption is
+/// tied to the returned attachment. Other jobs are sent as they are.
+async fn prepare(
+    db: &Database,
+    client: &api::Client,
+    link: &Link,
+    campaign: &str,
+    job: Job,
+) -> ApiResult<Job> {
+    let Job::Put {
+        kind,
+        id,
+        base,
+        payload,
+        hash,
+        visibility,
+    } = job
+    else {
+        return Ok(job);
+    };
+    if kind != "image" {
+        return Ok(Job::Put {
+            kind,
+            id,
+            base,
+            payload,
+            hash,
+            visibility,
+        });
+    }
+    let root = db.root()?;
+    let (campaign_id, image_id) = (campaign.to_string(), id.clone());
+    let (bytes, sha256) = db
+        .run(move |c| {
+            let attachment = crate::images::get(c, &campaign_id, &image_id)?;
+            Ok((crate::images::bytes(&root, &attachment)?, attachment.sha256))
+        })
+        .await?;
+    let mime = payload["mime"].as_str().unwrap_or("image/png").to_string();
+    let attachment = client
+        .upload_attachment(&link.remote_id, bytes, &mime, &sha256)
+        .await?;
+    Ok(Job::Put {
+        payload: json!({"attachmentId": attachment, "caption": payload["caption"]}),
+        kind,
+        id,
+        base,
+        hash,
+        visibility,
+    })
 }
 async fn send(client: &api::Client, link: &Link, out: &Outbound) -> ApiResult<api::Write> {
     match (&out.op[..], &out.payload) {

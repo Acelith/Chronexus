@@ -1,6 +1,6 @@
-# Chronexus status — 26 October 2026: S5 desktop replication (schema 020)
+# Chronexus status — 26 October 2026: S5/S6/S4 desktop replication (schema 021)
 
-Not published; source version 0.8.1, schema 020. Server side: `Chronexus-Server` commit
+Not published; source version 0.8.1, schema 021. Server side: `Chronexus-Server` commit
 3e4629d (S5 incremental sync, idempotent mutations, notifications).
 
 - **What works:** each page, session, relationship or party member can stay on this device,
@@ -19,8 +19,8 @@ Not published; source version 0.8.1, schema 020. Server side: `Chronexus-Server`
   concurrent edits became a resolvable conflict; sharing, withdrawal and 120-item paging were
   checked; a member never saw private items. These live tests are `#[ignore]`d (they need the
   server binary) and were run with `--ignored --test-threads=1`.
-- **Hermetic checks:** Rust lib 164 passed / 5 ignored (three of them the live real-server tests; the other two are older ignored tests); sync tests stable over 4 consecutive runs; Clippy `-D warnings`
-  all targets and rustfmt clean; Vitest 177 passed; ESLint, `tsc --noEmit`, i18n catalog check
+- **Hermetic checks:** Rust lib 168 passed / 6 ignored (four of them the live real-server tests; the other two are older ignored tests); sync tests stable over 4 consecutive runs; Clippy `-D warnings`
+  all targets and rustfmt clean; Vitest 178 passed; ESLint, `tsc --noEmit`, i18n catalog check
   pass. Backups of schemas 2-20 restore. Not run: macOS/Linux, GUI WebView, installers.
 - **S6 desktop (same day):** losing access (removed, or the campaign was deleted) clears the
   copies received from other players, keeps own items, drafts and replication choices, restarts
@@ -29,10 +29,17 @@ Not published; source version 0.8.1, schema 020. Server side: `Chronexus-Server`
   server" (exact name) and "Delete my account" are confirmed actions that never delete a local
   item. Hermetic lifecycle tests plus a third real-server test (member removal and return,
   erasure, campaign and account deletion) passed against the S6 server.
-- **Not done (still S4 work):** images and character-sheet sections are not replicated or
-  shared yet; deletions do not propagate into another computer's archive (they stop its
-  replication); real WebView check of the new controls (component tests only); no new strings
-  are machine-translated beyond the English fallback.
+- **S4 desktop (schema 021):** character sheet sections (identity, combat, equipment,
+  spellcasting: only non-empty fields, never notes or conditions) and images can be **shared**
+  (not replicated privately). Images are uploaded as originals within the server's limits
+  (larger ones are reported instead of retried); members see sections as read-only text and fetch
+  an image only on request, checksum-verified, and none of it becomes a local sheet or image.
+  Real-server test 4 (validation, upload, download, no local creation on the owner's second
+  computer) passed.
+- **Not done:** private replication of sheets and images (the server has no kind that lets another
+  computer rebuild them); deletions do not propagate into another computer's archive (they stop
+  its replication); real WebView check of the new controls (component tests only); no new
+  strings are machine-translated beyond the English fallback.
 
 # Chronexus status — 26 October 2026: M23 complete, M6/M16 platforms, M24 client
 

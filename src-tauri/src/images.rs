@@ -137,7 +137,7 @@ pub fn all(c: &Connection, campaign: &str) -> AppResult<Vec<Attachment>> {
         .map_err(storage);
     rows
 }
-fn get(c: &Connection, campaign: &str, id: &str) -> AppResult<Attachment> {
+pub(crate) fn get(c: &Connection, campaign: &str, id: &str) -> AppResult<Attachment> {
     identifier(id)?;
     require_campaign(c, campaign)?;
     c.query_row(

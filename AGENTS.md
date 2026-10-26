@@ -299,8 +299,9 @@ M25 is the server in the separate repository `acelith/Chronexus-Server` (notes i
 docs/SERVER_NOTES.md); this repository keeps only the client. M27 is the Android APK
 (moved from M25). Creating the repository, domains or deployments needs an explicit
 request. Never upload private notes, sheets, AI data or preferences unless the user chose
-that item for the server (`private` or `shared`); character sheets, images, AI data and
-preferences are not replicated yet.
+that item for the server (`private` or `shared`). Sheet sections and images (schema 021) can
+only be `shared`, as read-only projections; the full sheet, AI data and preferences are never
+replicated.
 ## English-first internationalization (M26)
 
 English is the source and fallback language for new profiles, developer-facing
