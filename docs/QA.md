@@ -72,6 +72,10 @@ sourced relationship and graph edges, character and asset, Party, dice history,
 interface/wiki preferences, image import and thumbnails, backup while measuring
 main-thread latency (must stay under 250 ms), export, restore into a new
 generation and 40 concurrent commands. The report lists every step with timing.
+The report is rewritten after every step with `"done": false` until the end, so a
+stall shows the last completed step. Keep the window visible and the session
+unlocked: WebKit suspends pages of hidden windows (observed on macOS with the user
+idle, where runs stopped after the backup step on old and new binaries alike).
 
 
 - Navigate with Tab; verify visible focus, fields with labels, and form submission.

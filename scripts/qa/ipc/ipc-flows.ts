@@ -29,6 +29,19 @@ async function check(step: string, run: () => Promise<string | void>) {
   log.textContent = steps
     .map((s) => `${s.ok ? "PASS" : "FAIL"} ${s.step} ${s.detail}`)
     .join("\n");
+  await report(false);
+}
+/** Posted after every step, so a hang still shows how far the flows got. */
+async function report(done: boolean) {
+  const failed = steps.filter((s) => !s.ok).length;
+  await fetch("/report", {
+    method: "POST",
+    body: JSON.stringify(
+      { userAgent: navigator.userAgent, done, failed, steps },
+      null,
+      2,
+    ),
+  });
 }
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw Error(message);
@@ -326,15 +339,7 @@ async function main() {
       "a concurrent command failed",
     );
   });
-  const failed = steps.filter((s) => !s.ok).length;
-  await fetch("/report", {
-    method: "POST",
-    body: JSON.stringify(
-      { userAgent: navigator.userAgent, failed, steps },
-      null,
-      2,
-    ),
-  });
-  log.textContent += `\nDONE ${failed} failed`;
+  await report(true);
+  log.textContent += "\nDONE";
 }
 void main();
