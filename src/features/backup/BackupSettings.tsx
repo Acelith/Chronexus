@@ -1,3 +1,4 @@
+import { usePendingAction } from "../../usePendingAction";
 import { useEffect, useState } from "react";
 import { date as formatDateTime, tr } from "../../i18n/store";
 import { errorMessage } from "../journal/api";
@@ -32,9 +33,7 @@ export function outcomeMessage(outcome: PeriodicOutcome) {
 export default function BackupSettings({ disabled }: { disabled: boolean }) {
   const [status, setStatus] = useState<BackupFolderStatus | null>(null);
   const [draft, setDraft] = useState<BackupSchedule | null>(null);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const { pending, error, notice, setError, perform: act } = usePendingAction();
   function adopt(next: BackupFolderStatus) {
     setStatus(next);
     const { enabled, frequency, hours, keep } = next.preferences;
@@ -57,22 +56,10 @@ export default function BackupSettings({ disabled }: { disabled: boolean }) {
       active = false;
       window.removeEventListener(BACKUP_STATUS_EVENT, load);
     };
-  }, []);
+  }, [setError]);
   const busy = disabled || pending;
-  async function perform(action: () => Promise<string | void>) {
-    if (busy) return;
-    setPending(true);
-    setError("");
-    setNotice("");
-    try {
-      const message = await action();
-      if (message) setNotice(message);
-    } catch (reason) {
-      setError(errorMessage(reason));
-    } finally {
-      setPending(false);
-    }
-  }
+  const perform = (action: () => Promise<string | void>) =>
+    act(action, { blocked: busy });
   const prefs = status?.preferences;
   const changed =
     !!draft &&

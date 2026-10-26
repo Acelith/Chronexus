@@ -1,3 +1,4 @@
+import { usePendingAction } from "../../usePendingAction";
 import { localizeLabels, tr } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
 import {
@@ -42,10 +43,15 @@ export default function ImageGallery({
 }) {
   const run = useContext(OperationContext);
   const [images, setImages] = useState<Attachment[]>([]),
-    [loading, setLoading] = useState(true),
-    [pending, setPending] = useState(false),
-    [error, setError] = useState(""),
-    [notice, setNotice] = useState("");
+    [loading, setLoading] = useState(true);
+  const {
+    pending,
+    error,
+    notice,
+    setError,
+    setNotice,
+    perform: act,
+  } = usePendingAction();
   const [role, setRole] = useState<Attachment["role"]>(
     target.kind === "character" ? "portrait" : "image",
   );
@@ -81,25 +87,10 @@ export default function ImageGallery({
     return () => {
       active = false;
     };
-  }, [campaignId, target.kind, target.id, refresh]);
+  }, [campaignId, target.kind, target.id, refresh, setError]);
   const disabled = busy || pending;
-  async function perform(action: () => Promise<void>) {
-    if (disabled) return;
-    setPending(true);
-    setError("");
-    setNotice("");
-    try {
-      await run(async () => {
-        try {
-          await action();
-        } catch (e) {
-          setError(errorMessage(e));
-        }
-      });
-    } finally {
-      setPending(false);
-    }
-  }
+  const perform = (action: () => Promise<void>) =>
+    act(action, { blocked: disabled, through: run });
   async function add(selected: File) {
     await perform(async () => {
       if (selected.size > 20 * 1024 * 1024)

@@ -1,3 +1,4 @@
+import { usePendingAction } from "../../usePendingAction";
 import { useEffect, useRef, useState } from "react";
 import { localeInfo } from "../../i18n/locales";
 import { getPreferences, tr } from "../../i18n/store";
@@ -23,9 +24,14 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
   const [summary, setSummary] = useState<CacheSummary | null>(null);
   const [scope, setScope] = useState<Scope>("wikidot");
   const [confirm, setConfirm] = useState(false);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const {
+    pending,
+    error,
+    notice,
+    setError,
+    setNotice,
+    perform: act,
+  } = usePendingAction();
   const confirmButton = useRef<HTMLButtonElement>(null);
   const opener = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -43,7 +49,7 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [setError]);
   const wasOpen = useRef(false);
   useEffect(() => {
     // Focus moves only after render, when the opener is enabled again.
@@ -51,19 +57,8 @@ export default function WikiSettings({ disabled }: { disabled: boolean }) {
     else if (wasOpen.current) opener.current?.focus();
     wasOpen.current = confirm;
   }, [confirm]);
-  async function perform(action: () => Promise<string>) {
-    if (pending || disabled) return;
-    setPending(true);
-    setError("");
-    setNotice("");
-    try {
-      setNotice(await action());
-    } catch (reason) {
-      setError(errorMessage(reason));
-    } finally {
-      setPending(false);
-    }
-  }
+  const perform = (action: () => Promise<string>) =>
+    act(action, { blocked: disabled });
   const busy = pending || disabled;
   const selected =
     summary &&

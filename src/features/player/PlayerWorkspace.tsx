@@ -1,3 +1,4 @@
+import { usePendingAction } from "../../usePendingAction";
 import { Text } from "../../i18n/Text";
 import { tr } from "../../i18n/store";
 import {
@@ -78,8 +79,14 @@ export default function PlayerWorkspace({
   const [character, setCharacter] = useState<Character | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const {
+    pending,
+    error,
+    notice,
+    setError,
+    perform: act,
+    running: operation,
+  } = usePendingAction();
   const [refresh, setRefresh] = useState(0);
   const [editor, setEditor] = useState<EditState>(() =>
     initialDraft
@@ -93,7 +100,6 @@ export default function PlayerWorkspace({
   );
   const draftOnMount = useRef(initialDraft ?? null);
   const draftUsed = useRef(onDraftUsed);
-  const [pending, setPending] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(
     initialSelection ?? null,
   );
@@ -103,7 +109,6 @@ export default function PlayerWorkspace({
   const [status, setStatus] = useState("all");
   const [catalogOpen, setCatalogOpen] = useState(false);
   const dirty = useRef(initialDraft != null);
-  const operation = useRef(false);
   const deleteButton = useRef<HTMLButtonElement>(null);
   function edit(value: EditState) {
     dirty.current = value !== null;
@@ -129,7 +134,7 @@ export default function PlayerWorkspace({
       },
     });
     return () => register(null);
-  }, [register]);
+  }, [register, operation]);
   useEffect(() => {
     let active = true;
     playerApi
@@ -167,27 +172,19 @@ export default function PlayerWorkspace({
     return () => {
       active = false;
     };
-  }, [campaignId, refresh]);
+  }, [campaignId, refresh, setError]);
   const disabled = busy || pending;
-  async function perform(
+  const perform = (
     action: () => Promise<void>,
     message = tr("Saved on the computer."),
-  ) {
-    if (operation.current || busy) return;
-    operation.current = true;
-    setPending(true);
-    setError("");
-    setNotice("");
-    try {
-      await action();
-      setNotice(message);
-    } catch (reason) {
-      setError(errorMessage(reason));
-    } finally {
-      operation.current = false;
-      setPending(false);
-    }
-  }
+  ) =>
+    act(
+      async () => {
+        await action();
+        return message;
+      },
+      { blocked: busy },
+    );
   function saveAsset(input: AssetInput, initial: Asset | null) {
     if (!character) return Promise.resolve();
     return perform(async () => {
