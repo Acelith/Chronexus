@@ -34,7 +34,11 @@ NSIS Windows x64 installer compiled from commit `d88425e` (annotated tag `v0.9.0
 updater signed and verified with the production key
 (`updates_signed_release_package_matches_production_key`). Size 33,842,720 bytes,
 SHA-256 `6c7dac0a369efc0b439430cdc0474ec47aaf589f8b5c7f6d4207307a566b394e`. Published on 26 October 2026 with `publish_app_update.py`: installer,
-`.sig` and `latest.json` verified as drafts and after publication. App only, no AI weights.
+`.sig` and `latest.json` verified as drafts and after publication, with anonymous
+SHA-256 checks. Concurrent publishers created duplicate attachments; after verifying
+all six copies, the three duplicates were removed with user approval. The stable API
+now exposes exactly three unique attachments and the canonical manifest checksum passes.
+App only, no AI weights.
 Built with a temporary `pnpm.cmd` shim that forwards to `npm run` (pnpm is not installed here).
 **Not built or verified:** macOS, Linux, ARM64 (no toolchains here), installation and upgrade of the
 installer. The companion server is released separately:

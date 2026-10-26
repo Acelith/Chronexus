@@ -4,6 +4,19 @@ Windows x64 installer 0.9.0 (schema 021) published and verified on github.com, t
 (`d88425e`); Chronexus Server 0.1.0 published the same day. Other platforms, installer
 installation/upgrade and the Docker image remain unbuilt or unverified; see docs/INSTALLERS.md.
 
+Release follow-up verification: the production signature test executable passed on the
+real installer and rejected tampering; all 27 release-tool unit tests passed. The Cargo
+wrapper could not finish because the running debug app locked `chronexus.exe`, so the
+already-built signature test executable was run directly. Two concurrent publishers
+created six attachments; all six passed anonymous SHA-256 checks, then duplicate IDs
+31, 34 and 35 were removed with explicit user approval. Exactly three unique assets
+remain (30, 32, 33); the anonymous stable API and canonical manifest checksum pass.
+No application code, schema, signing key or release tag changed in this follow-up.
+Skill applied: `systematic-debugging` for the locked binary, credential context and
+concurrent publication investigation. ROADMAP still lists M25 server acceptance next;
+its server binary is now published separately, while deployment/TLS acceptance remains
+open, followed by M27 Android (not started).
+
 # Chronexus status — 26 October 2026: S5/S6/S4 desktop replication (schema 021)
 
 Not published; source version 0.8.1, schema 021. Server side: `Chronexus-Server` commit

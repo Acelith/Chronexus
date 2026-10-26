@@ -89,7 +89,8 @@ character or place, then explore **Codex** and **Graph**.
 > [!WARNING]
 > The installer has no Windows Authenticode signature, so SmartScreen may ask for
 > confirmation. In-app updates are still verified with a dedicated cryptographic
-> signature. macOS and Linux are not verified yet.
+> signature. No macOS, Linux or ARM64 packages are included in release 0.9.0;
+> installation and upgrade of this Windows installer have not been tested.
 
 ## Updates and backups
 
