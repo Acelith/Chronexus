@@ -306,7 +306,8 @@ pub fn retrieve(
                 .map(|t| format!("\"{}\"*", t.replace('"', "\"\"")))
                 .collect::<Vec<_>>()
                 .join(" OR ");
-            let mut rows=c.prepare("SELECT d.kind,d.source_id,NULLIF(d.block_id,'') FROM search_fts JOIN search_documents d ON d.id=search_fts.rowid WHERE search_fts MATCH ?1 AND d.campaign_id=?2 ORDER BY bm25(search_fts,5.0,1.0),d.id LIMIT 32").map_err(storage)?;
+            // FTS stays the outer loop, as in search::SEARCH_SQL.
+            let mut rows=c.prepare("SELECT d.kind,d.source_id,NULLIF(d.block_id,'') FROM search_fts CROSS JOIN search_documents d ON d.id=search_fts.rowid WHERE search_fts MATCH ?1 AND d.campaign_id=?2 ORDER BY bm25(search_fts,5.0,1.0),d.id LIMIT 32").map_err(storage)?;
             let hits = rows
                 .query_map(params![expression, campaign], |r| {
                     Ok((

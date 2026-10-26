@@ -89,3 +89,25 @@ fn schema_six_migration_indexes_existing_notes_without_rewriting_documents() {
         document("Memoria precedente")
     );
 }
+
+#[test]
+fn full_text_match_drives_the_search_query_plan() {
+    let d = tempfile::tempdir().unwrap();
+    let c = crate::db::open(&d.path().join("plan.sqlite3")).unwrap();
+    let plan: Vec<String> = c
+        .prepare(&format!("EXPLAIN QUERY PLAN {}", crate::search::SEARCH_SQL))
+        .unwrap()
+        .query_map(
+            rusqlite::params!["\"x\"*", "c", None::<String>, "relevance"],
+            |r| r.get::<_, String>(3),
+        )
+        .unwrap()
+        .collect::<rusqlite::Result<_>>()
+        .unwrap();
+    // The virtual table must be scanned first; documents are looked up by id.
+    assert!(plan[0].contains("search_fts VIRTUAL TABLE"), "{plan:?}");
+    assert!(
+        plan.iter().any(|p| p.contains("INTEGER PRIMARY KEY")),
+        "{plan:?}"
+    );
+}
