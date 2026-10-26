@@ -3,12 +3,6 @@ import { localeInfo } from "./i18n/locales";
 import { getPreferences } from "./i18n/store";
 import { Text } from "./i18n/Text";
 import { usePreferences, tr } from "./i18n/store";
-import { Icon } from "./components/Ornaments";
-// M21: herald logo chosen by the user (assets/brand/README.md); the name stays in alt.
-const brandLogo = new URL(
-  "../assets/brand/chronexus-logo.webp",
-  import.meta.url,
-).href;
 import {
   lazy,
   Suspense,
@@ -16,7 +10,6 @@ import {
   useEffect,
   useRef,
   useState,
-  type FormEvent,
 } from "react";
 import { isTauri } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -43,6 +36,11 @@ import { OperationContext } from "./operations";
 import { heraldApi, type UpdateOffer } from "./features/updates/api";
 import { usePeriodicBackup } from "./features/backup/usePeriodicBackup";
 import { useStartupHerald } from "./features/updates/useStartupHerald";
+import { PeriodicBackupNotice } from "./features/backup/PeriodicBackupNotice";
+import { CampaignForm, SessionForm } from "./features/journal/EntryForms";
+import { AppSidebar } from "./features/shell/AppSidebar";
+import { CampaignTabs } from "./features/shell/CampaignTabs";
+import type { View } from "./features/shell/views";
 const SearchPanel = lazy(() => import("./features/search/SearchPanel"));
 
 const Editor = lazy(() => import("./features/journal/Editor"));
@@ -97,19 +95,7 @@ export function App() {
   const [pages, setPages] = useState<KnowledgePage[]>([]);
   const [pageId, setPageId] = useState<string | null>(null);
   const [fallback, setFallback] = useState("");
-  const [view, setView] = useState<
-    | "overview"
-    | "journal"
-    | "codex"
-    | "graph"
-    | "wiki"
-    | "party"
-    | "assistant"
-    | "settings"
-    | "dice"
-    | "preferences"
-    | PlayerView
-  >("journal");
+  const [view, setView] = useState<View>("journal");
   const [playerReturn, setPlayerReturn] = useState<{
     view: PlayerView;
     assetId: string;
@@ -274,6 +260,24 @@ export function App() {
       window.removeEventListener("beforeunload", warn);
     };
   }, [run]);
+
+  /** Switches workspace after flushing drafts, closing any open form. */
+  function show(
+    next: View,
+    options: {
+      closeBackup?: boolean;
+      clearFocus?: boolean;
+      before?: () => void;
+    } = {},
+  ) {
+    void run(async () => {
+      if (options.closeBackup) setBackupOpen(false);
+      setView(next);
+      setForm(null);
+      options.before?.();
+      if (options.clearFocus) setFocusBlock(undefined);
+    });
+  }
 
   function selectCampaign(id: string) {
     if (id === campaignId && !backupOpen) return;
@@ -489,23 +493,10 @@ export function App() {
   }
   return (
     <OperationContext.Provider value={run}>
-      {periodic.outcome ? (
-        <div
-          className={
-            periodic.outcome.error
-              ? "periodic-backup-notice error"
-              : "periodic-backup-notice"
-          }
-          role={periodic.outcome.error ? "alert" : "status"}
-        >
-          <p>
-            {periodic.outcome.error
-              ? tr("Periodic backup failed: {0}", [periodic.outcome.error])
-              : tr("Periodic backup created and verified.")}
-          </p>
-          <button onClick={periodic.dismiss}>{tr("Close")}</button>
-        </div>
-      ) : null}
+      <PeriodicBackupNotice
+        outcome={periodic.outcome}
+        onClose={periodic.dismiss}
+      />
       {herald.announcement ? (
         <Suspense fallback={null}>
           <HeraldAnnouncement
@@ -533,150 +524,29 @@ export function App() {
         value={{ pages, open: openPage, create: createLinkedPage }}
       >
         <div className="shell" aria-busy={busy || loading}>
-          <aside>
-            <div className="brand">
-              <h1>
-                <img
-                  className="brand-logo"
-                  src={brandLogo}
-                  alt={appText.appName}
-                />
-              </h1>
-              <p>
-                <Text source={"Your stories live on"} />
-              </p>
-            </div>
-            <nav className="sidebar-menu" aria-label={appText.campaigns}>
-              <label className="campaign-picker">
-                <Text source={"Current campaign"} />
-                <select
-                  aria-label={tr("Current campaign")}
-                  value={backupOpen ? "" : (campaignId ?? "")}
-                  disabled={busy || loading}
-                  onChange={(e) => selectCampaign(e.target.value)}
-                >
-                  {backupOpen ? (
-                    <option value="">{tr("Select campaign")}</option>
-                  ) : null}
-                  {!campaigns.length ? (
-                    <option value="">{tr("No campaign")}</option>
-                  ) : null}
-                  {campaigns.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                disabled={busy || loading}
-                onClick={() => {
-                  void run(async () => {
-                    setBackupOpen(false);
-                    setForm("campaign");
-                  });
-                }}
-              >
-                <Icon name="plus" />
-                {appText.newCampaign}
-              </button>
-              <button
-                disabled={busy || loading}
-                aria-current={backupOpen ? "page" : undefined}
-                onClick={() => {
-                  void run(async () => {
-                    setForm(null);
-                    setBackupOpen(true);
-                  });
-                }}
-              >
-                <Icon name="backup" />
-                <Text source={"Backup and restore"} />
-              </button>
-              {campaign ? (
-                <>
-                  <button
-                    disabled={busy}
-                    aria-current={
-                      !backupOpen && view === "settings" ? "page" : undefined
-                    }
-                    onClick={() => {
-                      void run(async () => {
-                        setBackupOpen(false);
-                        setView("settings");
-                        setForm(null);
-                      });
-                    }}
-                  >
-                    <Icon name="settings" />
-                    <Text source={"Campaign settings"} />
-                  </button>
-                  <button
-                    disabled={busy}
-                    aria-current={
-                      !backupOpen && view === "assistant" ? "page" : undefined
-                    }
-                    onClick={() => {
-                      void run(async () => {
-                        setBackupOpen(false);
-                        setView("assistant");
-                        setForm(null);
-                      });
-                    }}
-                  >
-                    <Icon name="star" />
-                    <Text source={"Local assistant"} />
-                  </button>
-                </>
-              ) : null}
-              {campaign ? (
-                <button
-                  disabled={busy}
-                  aria-current={
-                    !backupOpen && view === "dice" ? "page" : undefined
-                  }
-                  onClick={() => {
-                    void run(async () => {
-                      setBackupOpen(false);
-                      setView("dice");
-                      setForm(null);
-                    });
-                  }}
-                >
-                  <Icon name="dice" />
-                  <Text source={"Dice roller"} />
-                </button>
-              ) : null}
-              <button
-                disabled={busy || loading}
-                aria-current={
-                  !backupOpen && view === "preferences" ? "page" : undefined
-                }
-                onClick={() => {
-                  void run(async () => {
-                    setBackupOpen(false);
-                    setForm(null);
-                    setView("preferences");
-                  });
-                }}
-              >
-                <Icon name="settings" />
-                {tr("App settings")}
-              </button>
-            </nav>
-            <div className="local-mark">
-              <img
-                src={new URL("../assets/gui/castle.png", import.meta.url).href}
-                alt=""
-              />
-              <p>
-                <Text source={"People, places, ideas."} />
-                <br />
-                <Text source={"Everything is connected."} />
-              </p>
-              <span aria-hidden="true">— ◈ —</span>
-            </div>
-          </aside>
+          <AppSidebar
+            campaigns={campaigns}
+            campaignId={campaignId}
+            hasCampaign={!!campaign}
+            backupOpen={backupOpen}
+            view={view}
+            busy={busy}
+            loading={loading}
+            onSelectCampaign={selectCampaign}
+            onNewCampaign={() =>
+              void run(async () => {
+                setBackupOpen(false);
+                setForm("campaign");
+              })
+            }
+            onOpenBackup={() =>
+              void run(async () => {
+                setForm(null);
+                setBackupOpen(true);
+              })
+            }
+            onShow={(next) => show(next, { closeBackup: true })}
+          />
           <main>
             {searchOpen && campaignId ? (
               <Suspense
@@ -807,121 +677,22 @@ export function App() {
                   ) : null}
                 </header>
                 {campaign ? (
-                  <nav className="view-tabs" aria-label={tr("Campaign views")}>
-                    <button
-                      aria-current={view === "overview" ? "page" : undefined}
-                      disabled={busy}
-                      onClick={() =>
-                        void run(async () => {
-                          setView("overview");
-                          setForm(null);
-                        })
-                      }
-                    >
-                      <Icon name="document" />
-                      <Text source={"Overview"} />
-                    </button>
-                    <button
-                      aria-current={view === "journal" ? "page" : undefined}
-                      disabled={busy}
-                      onClick={() => {
-                        void run(async () => {
-                          setView("journal");
-                          setForm(null);
-                          setFocusBlock(undefined);
-                        });
-                      }}
-                    >
-                      <Icon name="book" />
-                      <Text source={"Journal"} />
-                    </button>
-                    <button
-                      aria-current={view === "codex" ? "page" : undefined}
-                      disabled={busy}
-                      onClick={() => {
-                        void run(async () => {
-                          setView("codex");
-                          setForm(null);
-                          if (!pageId) setPageId(pages[0]?.id ?? null);
-                          setFocusBlock(undefined);
-                        });
-                      }}
-                    >
-                      <Icon name="books" />
-                      <Text source={"Codex"} />
-                    </button>
-                    <button
-                      aria-current={view === "graph" ? "page" : undefined}
-                      disabled={busy}
-                      onClick={() => {
-                        void run(async () => {
-                          setView("graph");
-                          setForm(null);
-                          setFocusBlock(undefined);
-                        });
-                      }}
-                    >
-                      <Icon name="graph" />
-                      <Text source={"Graph"} />
-                    </button>
-                    <button
-                      aria-current={view === "party" ? "page" : undefined}
-                      disabled={busy}
-                      onClick={() =>
-                        void run(async () => {
-                          setView("party");
-                          setForm(null);
-                        })
-                      }
-                    >
-                      <Icon name="party" />
-                      <Text source={"Party"} />
-                    </button>
-                    {(
-                      [
-                        ["character", tr("Character")],
-                        ["inventory", tr("Inventory")],
-                        ["abilities", tr("Spells")],
-                      ] as const
-                    ).map(([id, label]) => (
-                      <button
-                        key={id}
-                        aria-current={view === id ? "page" : undefined}
-                        disabled={busy}
-                        onClick={() => {
-                          void run(async () => {
-                            setView(id);
-                            setForm(null);
-                            setFocusBlock(undefined);
-                          });
-                        }}
-                      >
-                        <Icon
-                          name={
-                            id === "character"
-                              ? "helmet"
-                              : id === "inventory"
-                                ? "bag"
-                                : "star"
-                          }
-                        />
-                        {label}
-                      </button>
-                    ))}
-                    <button
-                      aria-current={view === "wiki" ? "page" : undefined}
-                      disabled={busy}
-                      onClick={() =>
-                        void run(async () => {
-                          setView("wiki");
-                          setForm(null);
-                        })
-                      }
-                    >
-                      <Icon name="wiki" />
-                      <Text source={"D&D Wiki"} />
-                    </button>
-                  </nav>
+                  <CampaignTabs
+                    view={view}
+                    busy={busy}
+                    onShow={(next) =>
+                      show(next, {
+                        // Overview, Party and Wiki keep the focused source block.
+                        clearFocus: !["overview", "party", "wiki"].includes(
+                          next,
+                        ),
+                        before:
+                          next === "codex" && !pageId
+                            ? () => setPageId(pages[0]?.id ?? null)
+                            : undefined,
+                      })
+                    }
+                  />
                 ) : null}
                 <div className={`workspace-content view-${view}`}>
                   {playerReturn && (view === "journal" || view === "codex") ? (
@@ -1308,126 +1079,4 @@ function formatDate(date: string | null) {
     month: "long",
     year: "numeric",
   }).format(new Date(`${date}T12:00:00`));
-}
-
-function CampaignForm({
-  initialName,
-  rename,
-  busy,
-  onSave,
-  onCancel,
-}: {
-  initialName: string;
-  rename: boolean;
-  busy: boolean;
-  onSave: (name: string) => Promise<void>;
-  onCancel: () => void;
-}) {
-  const [name, setName] = useState(initialName);
-  return (
-    <form
-      className="entry-form"
-      aria-label={rename ? appText.rename : appText.newCampaign}
-      onSubmit={(event: FormEvent) => {
-        event.preventDefault();
-        void onSave(name);
-      }}
-    >
-      <label>
-        {appText.campaignName}
-        <input
-          autoFocus
-          required
-          maxLength={200}
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          disabled={busy}
-        />
-      </label>
-      <div className="actions">
-        <button className="primary" disabled={busy || !name.trim()}>
-          {rename ? appText.saveName : appText.createCampaign}
-        </button>
-        <button type="button" disabled={busy} onClick={onCancel}>
-          {appText.cancel}
-        </button>
-      </div>
-    </form>
-  );
-}
-
-function SessionForm({
-  initialSequence,
-  busy,
-  onSave,
-  onCancel,
-}: {
-  initialSequence: number;
-  busy: boolean;
-  onSave: (
-    sequence: number,
-    title: string,
-    date: string | null,
-  ) => Promise<void>;
-  onCancel: () => void;
-}) {
-  const [sequence, setSequence] = useState(initialSequence);
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  return (
-    <form
-      className="entry-form"
-      aria-label={appText.newSession}
-      onSubmit={(event: FormEvent) => {
-        event.preventDefault();
-        void onSave(sequence, title, date || null);
-      }}
-    >
-      <div className="form-fields">
-        <label className="number-field">
-          {appText.sessionNumber}
-          <input
-            type="number"
-            required
-            min={1}
-            max={999999}
-            step={1}
-            value={sequence}
-            onChange={(event) => setSequence(event.target.valueAsNumber)}
-            disabled={busy}
-          />
-        </label>
-        <label>
-          {appText.sessionTitle}
-          <input
-            autoFocus
-            required
-            maxLength={200}
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            disabled={busy}
-          />
-        </label>
-        <label>
-          {appText.sessionDate}
-          <input
-            type="date"
-            min="0001-01-01"
-            max="9999-12-31"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-            disabled={busy}
-          />
-        </label>
-      </div>
-      <div className="actions">
-        <button className="primary" disabled={busy || !title.trim()}>
-          {appText.createSession}
-        </button>
-        <button type="button" disabled={busy} onClick={onCancel}>
-          {appText.cancel}
-        </button>
-      </div>
-    </form>
-  );
 }
