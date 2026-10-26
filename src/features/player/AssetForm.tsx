@@ -110,12 +110,18 @@ export default function AssetForm({
       >
         <fieldset disabled={busy || lookup}>
           <legend>
-            {initial ? tr("Edit") : tr("Add")}{" "}
+            {/* Whole phrases: word order and grammar differ by language. */}
             {details.kind === "item"
-              ? "oggetto"
+              ? initial
+                ? tr("Edit item")
+                : tr("Add item")
               : details.kind === "spell"
-                ? "incantesimo"
-                : tr("ability")}
+                ? initial
+                  ? tr("Edit spell")
+                  : tr("Add spell")
+                : initial
+                  ? tr("Edit ability")
+                  : tr("Add ability")}
           </legend>
           {details.kind === "spell" ? (
             <>

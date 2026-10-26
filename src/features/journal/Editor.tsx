@@ -230,12 +230,13 @@ function NoteEditor(props: Props) {
       query,
     ).map((page) => ({
       title: page.title,
-      subtext: `${pageKinds[page.kind]}${page.status === "stub" ? " · Draft" : ""}${page.aliases.length ? ` · Aliases: ${page.aliases.join(", ")}` : ""}`,
+      // Labels are translated; titles and aliases are campaign text and stay as written.
+      subtext: `${pageKinds[page.kind]}${page.status === "stub" ? tr(" · Draft") : ""}${page.aliases.length ? ` · ${tr("Aliases: ")}${page.aliases.join(", ")}` : ""}`,
       onItemClick: () => insertPage(page),
     }));
     if (canCreatePage(links.pages, query))
       items.push({
-        title: `Create draft «${title}»`,
+        title: tr("Create draft «{0}»", [title]),
         subtext: tr("New page in this campaign's Codex"),
         onItemClick: () => createLinkedPage(title),
       });
