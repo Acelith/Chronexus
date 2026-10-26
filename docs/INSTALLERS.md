@@ -1,3 +1,33 @@
+# Future build checklist — pending, 26 October 2026
+
+Apply this checklist at the next authorized build/release. The user's current
+request is documentation only: do not compile, install or publish now.
+
+| Platform | x64 (64-bit Intel/AMD) | ARM64 (64-bit ARM) | Delivery priority |
+| --- | --- | --- | --- |
+| macOS | Pending | Pending | Build and publish both architectures |
+| Windows | Pending | Pending | Build and publish both where feasible |
+| Linux | Pending | Pending | Build and publish both where feasible |
+
+- Extend the build/release tooling to cover this six-target matrix. This checklist
+  does not mean that cross-platform packaging or CI is already implemented.
+- For macOS, produce distinct x64 and ARM64 packages from the same release source;
+  check platform dependencies, signing/notarization requirements and native runtime
+  compatibility for each architecture. Do not assume the Windows-only managed AI
+  runtime or its packages work on other targets.
+- For Windows and Linux, attempt both architectures when suitable toolchains,
+  runners and dependencies are available. Record precise blockers for omitted
+  targets; do not substitute an x64 package labelled ARM64 or claim unrun checks.
+- Run relevant checks per target and record build, startup, installation/upgrade
+  evidence and signing limitations separately. Preserve the M15 updater signature
+  and backup guarantees; include only supported, signed artifacts in its channel.
+- Publish verified packages to the existing Forgegit origin with explicit OS and
+  architecture labels, checksums and release notes. Verify downloaded assets;
+  preserve existing releases/tags/assets and report partial delivery honestly.
+
+This is a future distribution requirement under M11/M6, not a new completed
+milestone. The next functional milestone remains M23, followed by M24 and M25.
+
 # Release 0.8.0 — M19, M20, M21, M22
 
 NSIS Windows x64 Installer compiled from commit `c540c2d` (annotated tag `v0.8.0`),

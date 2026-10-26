@@ -647,6 +647,14 @@ as complete automatic translations of Elvish or Dwarvish languages.
 
 ## M11 — Versioned releases and packages on Forgegit
 
+**Future build TODO (26 October 2026; documentation only, do not execute now):**
+extend compilation to Windows, Linux and macOS on both x64 and ARM64. At the next
+authorized build/release, compile and publish both macOS versions; also compile
+and publish both architectures for Windows and Linux where feasible. Track actual
+checks and blockers per target using the [future build checklist](docs/INSTALLERS.md#future-build-checklist--pending-26-october-2026).
+No build tooling, package or publication is delivered by this planning entry;
+M23 remains the next functional milestone.
+
 **Updated Status:** Partial: local app/AI packages 0.2.0 and draft ID 2; large uploads interrupted by the gateway. The app-only release 0.4.0 is public via M15, but the AI M11 distribution is incomplete.
 
 **Git Evidence:** `43467fb`, `3af0ef0`, `5431d28`, `4abb4e3`, `ad7760d` (app delivery M15). Verifications and limits in [docs/STATUS.md](docs/STATUS.md).
