@@ -74,6 +74,8 @@ const CampaignSettings = lazy(
   () => import("./features/assistant/CampaignSettings"),
 );
 const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
+const SyncSettings = lazy(() => import("./features/sync/SyncSettings"));
+const CampaignSharing = lazy(() => import("./features/sync/CampaignSharing"));
 
 const modifiedDateFormat = {
   format: (value: Date) =>
@@ -801,6 +803,7 @@ export function App() {
                         <BackupSettings disabled={busy} />
                         <WikiSettings disabled={busy} />
                         <AiSetupSettings disabled={busy} />
+                        <SyncSettings disabled={busy} />
                       </>
                     </Suspense>
                   ) : null}
@@ -833,6 +836,17 @@ export function App() {
                         campaignId={campaign.id}
                         name={campaign.name}
                         register={register}
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign && view === "sharing" ? (
+                    <Suspense
+                      fallback={<p role="status">{tr("Opening sharing…")}</p>}
+                    >
+                      <CampaignSharing
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        busy={busy}
                       />
                     </Suspense>
                   ) : null}

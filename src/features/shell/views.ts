@@ -10,6 +10,7 @@ export type View =
   | "party"
   | "assistant"
   | "settings"
+  | "sharing"
   | "dice"
   | "preferences"
   | PlayerView;

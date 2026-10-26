@@ -256,6 +256,26 @@ async function main() {
     const provider = await invoke<{ provider: string }>("get_wiki_provider");
     assert(["wikidot", "open5e"].includes(provider.provider), "provider");
   });
+  await check("sharing stays local until explicitly configured", async () => {
+    const account = await invoke<{ server: string | null; signedIn: boolean }>(
+      "sync_account",
+    );
+    assert(!account.server && !account.signedIn, "no server by default");
+    assert((await invoke("sync_link", { campaignId })) === null, "unlinked");
+    const http = await invoke("sync_set_server", {
+      server: "http://example.org",
+    })
+      .then(() => "")
+      .catch((e: unknown) => String(e));
+    assert(http.includes("HTTPS"), `plain HTTP refused: ${http}`);
+    const connect = await invoke("sync_connect_campaign", {
+      campaignId,
+      inviteCode: null,
+    })
+      .then(() => "")
+      .catch((e: unknown) => String(e));
+    assert(connect.includes("server first"), `needs a server: ${connect}`);
+  });
   let images = 0;
   await check("images: import, list, thumbnail", async () => {
     for (let i = 0; i < 3; i++) {

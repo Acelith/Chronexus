@@ -1,0 +1,153 @@
+import { command } from "../journal/api";
+
+/** M24 sharing client; the session token never reaches the interface. */
+export interface SyncAccount {
+  server: string | null;
+  signedIn: boolean;
+  accountId: string | null;
+  username: string | null;
+  displayName: string | null;
+  device: string | null;
+}
+export interface SyncLink {
+  campaignId: string;
+  server: string;
+  remoteId: string;
+  accountId: string;
+  role: "owner" | "player" | "reader";
+  cursor: string;
+  syncedAt: string | null;
+}
+export type SharedKind = "page" | "session" | "relationship" | "party";
+export interface SyncItem {
+  kind: SharedKind;
+  itemId: string;
+  title: string;
+  shared: boolean;
+  status:
+    | "private"
+    | "new"
+    | "pending"
+    | "synced"
+    | "conflict"
+    | "blocked"
+    | "revoking";
+}
+export interface SyncReport {
+  received: number;
+  removed: number;
+  updated: number;
+  pushed: number;
+  deleted: number;
+  conflicts: number;
+  blocked: number;
+}
+export interface SyncConflict {
+  kind: SharedKind;
+  itemId: string;
+  title: string;
+  remoteRevision: number;
+  local: Record<string, unknown> | null;
+  remote: Record<string, unknown> | null;
+}
+export interface RemoteItem {
+  kind: SharedKind;
+  itemId: string;
+  authorId: string;
+  authorName: string;
+  revision: number;
+  payload: Record<string, unknown>;
+  updatedAt: string;
+  mine: boolean;
+}
+export interface SyncInvite {
+  code: string;
+  role: string;
+  expiresAt: string;
+}
+
+export const syncApi = {
+  account: () => command<SyncAccount>("sync_account"),
+  setServer: (server: string) =>
+    command<SyncAccount>("sync_set_server", { server }),
+  signIn: (username: string, password: string, device: string) =>
+    command<SyncAccount>("sync_sign_in", { username, password, device }),
+  redeem: (
+    code: string,
+    username: string,
+    displayName: string,
+    password: string,
+    device: string,
+  ) =>
+    command<SyncAccount>("sync_redeem_invite", {
+      code,
+      username,
+      displayName,
+      password,
+      device,
+    }),
+  signOut: () => command<SyncAccount>("sync_sign_out"),
+  link: (campaignId: string) =>
+    command<SyncLink | null>("sync_link", { campaignId }),
+  connect: (campaignId: string, inviteCode: string | null) =>
+    command<SyncLink>("sync_connect_campaign", { campaignId, inviteCode }),
+  unlink: (campaignId: string) => command<void>("sync_unlink", { campaignId }),
+  invite: (campaignId: string, role: "player" | "reader") =>
+    command<SyncInvite>("sync_invite", { campaignId, role }),
+  items: (campaignId: string) =>
+    command<SyncItem[]>("sync_items", { campaignId }),
+  setShare: (
+    campaignId: string,
+    kind: SharedKind,
+    itemId: string,
+    shared: boolean,
+  ) =>
+    command<SyncItem[]>("sync_set_share", {
+      campaignId,
+      kind,
+      itemId,
+      shared,
+    }),
+  now: (campaignId: string) => command<SyncReport>("sync_now", { campaignId }),
+  conflicts: (campaignId: string) =>
+    command<SyncConflict[]>("sync_conflicts", { campaignId }),
+  resolve: (
+    campaignId: string,
+    kind: SharedKind,
+    itemId: string,
+    keep: "local" | "remote",
+  ) =>
+    command<SyncConflict[]>("sync_resolve", {
+      campaignId,
+      kind,
+      itemId,
+      keep,
+    }),
+  remote: (campaignId: string) =>
+    command<RemoteItem[]>("sync_remote_items", { campaignId }),
+};
+
+/** Plain text of a shared item, for read-only display; never rendered as HTML. */
+export function sharedText(payload: Record<string, unknown> | null): string {
+  if (!payload) return "";
+  const parts: string[] = [];
+  const visit = (value: unknown) => {
+    if (Array.isArray(value)) value.forEach(visit);
+    else if (value && typeof value === "object") {
+      const record = value as Record<string, unknown>;
+      if (typeof record.text === "string") parts.push(record.text);
+      const props = record.props as Record<string, unknown> | undefined;
+      if (record.type === "pageMention" && typeof props?.label === "string")
+        parts.push(props.label);
+      visit(record.content);
+      visit(record.children);
+    }
+  };
+  const document = payload.document as Record<string, unknown> | undefined;
+  visit(document?.blocks);
+  for (const key of ["evidence", "notes", "playerName", "role"]) {
+    if (typeof payload[key] === "string" && payload[key])
+      parts.push(String(payload[key]));
+  }
+  return parts.join(" ").replace(/\s+/g, " ").trim();
+}

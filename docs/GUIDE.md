@@ -208,6 +208,29 @@ with a warning. Cache limited to 100 answers: the least recent can be
 replaced. Sources and coverage do not equate to all commercial manuals.
 API/Skill Search: [docs/RESEARCH_DND.md](RESEARCH_DND.md).
 
+## Sharing a campaign (M24, optional)
+
+Chronexus keeps working offline; sharing needs a self-hosted Chronexus server
+(planned in M25) and is used only when you ask for it.
+
+1. **App settings → Campaign sharing:** enter the server's HTTPS address and press
+   **Verify and save server**. Sign in, or create your account with an invitation
+   code. The password is sent only to that server and is never stored.
+2. **Sharing** in the campaign menu: create the shared campaign on the server, or
+   join one with a campaign invitation. The owner can invite players and readers.
+3. Tick the Codex pages, sessions, relationships (only between shared pages) and
+   party members to share. Everything else stays private on this device.
+4. Press **Synchronize now** to send your changes and receive the others'. Items
+   from other players appear under **Shared with you**, read-only and attributed to
+   their author: they are claims, not facts of your campaign.
+5. If an item changed both here and on the server, **Conflicts** shows both versions;
+   choose which one to keep. Nothing is overwritten silently.
+6. Unticking an item removes it from the server and from the other players at their
+   next synchronization; your local copy stays. **Unlink this campaign** forgets the
+   sharing state on this device only.
+
+The contract between app and server is in [SYNC_API.md](SYNC_API.md).
+
 ## Local Assistant M7
 
 The **Local Assistant** section queries the campaign notes and the D&D

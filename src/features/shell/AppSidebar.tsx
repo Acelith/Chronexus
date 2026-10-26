@@ -105,6 +105,7 @@ export function AppSidebar({
               <Text source={"Campaign settings"} />,
             )}
             {item("assistant", "star", <Text source={"Local assistant"} />)}
+            {item("sharing", "party", <Text source={"Sharing"} />)}
             {item("dice", "dice", <Text source={"Dice roller"} />)}
           </>
         ) : null}
