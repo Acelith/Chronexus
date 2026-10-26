@@ -17,15 +17,13 @@ pub fn documents(app: &tauri::AppHandle) -> Option<PathBuf> {
     app.path().document_dir().ok()
 }
 fn root(app: &tauri::AppHandle) -> AppResult<PathBuf> {
-    app.state::<Database>().with_store(|s| Ok(s.root.clone()))
+    app.state::<Database>().root()
 }
 async fn blocking<T: Send + 'static>(
     app: tauri::AppHandle,
     job: impl FnOnce(tauri::AppHandle) -> AppResult<T> + Send + 'static,
 ) -> AppResult<T> {
-    tauri::async_runtime::spawn_blocking(move || job(app))
-        .await
-        .map_err(|_| "Backup operation interrupted.".to_string())?
+    crate::blocking(app, "Backup operation interrupted.", job).await
 }
 /// Update, AI answer or training in progress: periodic backups wait.
 fn activity(app: &tauri::AppHandle) -> AppResult<Option<&'static str>> {
@@ -80,8 +78,12 @@ fn pick_folder(app: &tauri::AppHandle) -> AppResult<Option<PathBuf>> {
         .transpose()
 }
 #[tauri::command]
-pub fn list_backup_files(app: tauri::AppHandle) -> AppResult<Listing> {
-    super::list(&root(&app)?, documents(&app).as_deref())
+pub async fn list_backup_files(app: tauri::AppHandle) -> AppResult<Listing> {
+    // Folder scans can be slow on external or network disks.
+    blocking(app, |app| {
+        super::list(&root(&app)?, documents(&app).as_deref())
+    })
+    .await
 }
 #[tauri::command]
 pub async fn inspect_listed_backup(
@@ -149,7 +151,7 @@ pub async fn periodic_backup_tick(app: tauri::AppHandle) -> AppResult<Tick> {
         }
         let docs = documents(&app);
         let db = app.state::<Database>();
-        let shared = db.0.as_ref().map_err(Clone::clone)?;
+        let shared = db.shared()?;
         let Ok(store) = shared.try_lock() else {
             return Ok(idle("Archive busy: the periodic backup is waiting."));
         };

@@ -353,15 +353,16 @@ async fn generate(
 }
 
 #[tauri::command]
-pub fn read_wiki_translation(
-    db: tauri::State<Database>,
+pub async fn read_wiki_translation(
+    db: tauri::State<'_, Database>,
     provider: String,
     key: String,
     locale: String,
     model: Option<String>,
 ) -> AppResult<Option<Translation>> {
     let name = model.unwrap_or(models::policy()?.primary.name.clone());
-    db.with(|c| cached_for(c, &provider, &key, &locale, &name))
+    db.run(move |c| cached_for(c, &provider, &key, &locale, &name))
+        .await
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

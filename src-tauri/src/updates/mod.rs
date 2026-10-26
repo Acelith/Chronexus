@@ -96,7 +96,7 @@ pub struct Progress {
     pub backup_notice: Option<String>,
 }
 fn root(app: &tauri::AppHandle) -> AppResult<PathBuf> {
-    app.state::<Database>().with_store(|s| Ok(s.root.clone()))
+    app.state::<Database>().root()
 }
 fn emit(
     events: &Channel<Progress>,

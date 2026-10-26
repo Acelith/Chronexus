@@ -11,7 +11,7 @@ use serde_json::Value;
 use std::{
     sync::{
         atomic::{AtomicU64, Ordering},
-        Mutex,
+        Arc, Mutex,
     },
     time::{Duration, Instant},
 };
@@ -339,7 +339,7 @@ pub fn plain_text(e: &Entry) -> String {
 pub struct State {
     gate: tokio::sync::Mutex<Option<Instant>>,
     interval: Duration,
-    epoch: AtomicU64,
+    epoch: Arc<AtomicU64>,
     cancel: Mutex<CancellationToken>,
 }
 impl Default for State {
@@ -352,13 +352,17 @@ impl State {
         Self {
             gate: tokio::sync::Mutex::new(None),
             interval,
-            epoch: AtomicU64::new(0),
+            epoch: Arc::new(AtomicU64::new(0)),
             cancel: Mutex::new(CancellationToken::new()),
         }
     }
     /// Changes after every cache clear; writes started before it are rejected.
     pub fn epoch(&self) -> u64 {
         self.epoch.load(Ordering::SeqCst)
+    }
+    /// Shared counter, so a check can run under the Store lock on another thread.
+    pub fn epoch_counter(&self) -> Arc<AtomicU64> {
+        Arc::clone(&self.epoch)
     }
     pub fn token(&self) -> CancellationToken {
         self.cancel
