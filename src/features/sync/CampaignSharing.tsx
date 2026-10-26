@@ -75,6 +75,9 @@ export default function CampaignSharing({
   const [invite, setInvite] = useState<SyncInvite | null>(null);
   const [confirmUnlink, setConfirmUnlink] = useState(false);
   const [confirmAll, setConfirmAll] = useState(false);
+  const [confirmErase, setConfirmErase] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteName, setDeleteName] = useState("");
   const { pending, error, notice, setError, perform } = usePendingAction();
   const status = useSyncStatus(link ? campaignId : null);
   const disabled = busy || pending;
@@ -296,10 +299,36 @@ export default function CampaignSharing({
                 ))}
               </>
             ) : null}
+            {link.role !== "reader" ? (
+              <button
+                disabled={disabled}
+                onClick={() => setConfirmErase(true)}
+                title={tr(
+                  "Deletes what you synchronized to the server; this device keeps everything",
+                )}
+              >
+                {tr("Delete my copy on the server")}
+              </button>
+            ) : null}
+            {link.role === "owner" ? (
+              <button
+                disabled={disabled}
+                onClick={() => setConfirmDelete(true)}
+              >
+                {tr("Delete the campaign on the server")}
+              </button>
+            ) : null}
             <button disabled={disabled} onClick={() => setConfirmUnlink(true)}>
               {tr("Unlink this campaign")}
             </button>
           </div>
+          {link.accessLost ? (
+            <p className="error" role="alert">
+              {tr(
+                "You no longer have access to this campaign on the server (you were removed, or it was deleted). Copies received from other players were cleared from this device; your own items stay here. If you are invited again, switch automatic synchronization back on.",
+              )}
+            </p>
+          ) : null}
           {invite ? (
             <p className="sync-invite" role="status">
               {tr(
@@ -307,6 +336,90 @@ export default function CampaignSharing({
                 [invite.role, invite.code, invite.expiresAt],
               )}
             </p>
+          ) : null}
+          {confirmErase ? (
+            <div
+              role="alertdialog"
+              aria-label={tr("Delete my copy on the server")}
+            >
+              <p>
+                {tr(
+                  "This deletes everything you synchronized to this campaign from the server: your private copies and the items you shared. The other players lose the items you shared. Everything stays on this device and nothing is sent again until you choose items. Copies other players already received cannot be taken back.",
+                )}
+              </p>
+              <button
+                className="primary"
+                disabled={disabled}
+                onClick={() =>
+                  void act(async () => {
+                    setLink(await syncApi.eraseServerCopy(campaignId));
+                    setConfirmErase(false);
+                    await reload();
+                    return tr(
+                      "Your copy on the server was deleted. Your items are still on this device.",
+                    );
+                  })
+                }
+              >
+                {tr("Delete my copy on the server")}
+              </button>
+              <button
+                disabled={disabled}
+                onClick={() => setConfirmErase(false)}
+              >
+                {tr("Cancel")}
+              </button>
+            </div>
+          ) : null}
+          {confirmDelete ? (
+            <div
+              role="alertdialog"
+              aria-label={tr("Delete the campaign on the server")}
+            >
+              <p>
+                {tr(
+                  "This deletes the shared campaign on the server for everyone: all private and shared copies, uploads and invitations. Each player keeps what is on their own computer. It cannot be undone. Type the exact campaign name to confirm.",
+                )}
+              </p>
+              <label>
+                {tr("Campaign name")}
+                <input
+                  autoComplete="off"
+                  value={deleteName}
+                  disabled={disabled}
+                  onChange={(event) => setDeleteName(event.target.value)}
+                />
+              </label>
+              <button
+                className="primary"
+                disabled={disabled || !deleteName}
+                onClick={() =>
+                  void act(async () => {
+                    await syncApi.deleteServerCampaign(campaignId, deleteName);
+                    setConfirmDelete(false);
+                    setDeleteName("");
+                    setItems([]);
+                    setConflicts([]);
+                    setRemote([]);
+                    await reload();
+                    return tr(
+                      "The campaign was deleted on the server and unlinked here. Everything on this device is untouched.",
+                    );
+                  })
+                }
+              >
+                {tr("Delete on the server")}
+              </button>
+              <button
+                disabled={disabled}
+                onClick={() => {
+                  setConfirmDelete(false);
+                  setDeleteName("");
+                }}
+              >
+                {tr("Cancel")}
+              </button>
+            </div>
           ) : null}
           {confirmAll ? (
             <div

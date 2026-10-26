@@ -37,6 +37,8 @@ pub struct Link {
     pub auto: bool,
     pub paused: bool,
     pub last_error: Option<String>,
+    /// The server says this account no longer has access to the campaign.
+    pub access_lost: bool,
 }
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -123,7 +125,7 @@ fn rank(kind_name: &str) -> u8 {
 pub fn link(c: &Connection, campaign: &str) -> AppResult<Option<Link>> {
     identifier(campaign)?;
     c.query_row(
-        "SELECT campaign_id,server,remote_id,account_id,role,cursor,synced_at,auto,paused,last_error FROM sync_links WHERE campaign_id=?1",
+        "SELECT campaign_id,server,remote_id,account_id,role,cursor,synced_at,auto,paused,last_error,access_lost FROM sync_links WHERE campaign_id=?1",
         [campaign],
         |r| {
             Ok(Link {
@@ -137,6 +139,7 @@ pub fn link(c: &Connection, campaign: &str) -> AppResult<Option<Link>> {
                 auto: r.get(7)?,
                 paused: r.get(8)?,
                 last_error: r.get(9)?,
+                access_lost: r.get(10)?,
             })
         },
     )
@@ -202,6 +205,7 @@ pub fn attach_campaign(
         auto: false,
         paused: false,
         last_error: None,
+        access_lost: false,
     };
     save_link(c, &attached)?;
     Ok(created)
@@ -228,12 +232,57 @@ pub fn unlink(c: &Connection, campaign: &str) -> AppResult<()> {
 /// Explicit activation of continuous synchronization (and its pause) for one campaign.
 pub fn set_auto(c: &Connection, campaign: &str, auto: bool, paused: bool) -> AppResult<Link> {
     require_link(c, campaign)?;
+    // Switching it on again is a new attempt: the next pass finds out whether access is back.
     c.execute(
-        "UPDATE sync_links SET auto=?2,paused=?3 WHERE campaign_id=?1",
+        "UPDATE sync_links SET auto=?2,paused=?3,access_lost=CASE WHEN ?2=1 THEN 0 ELSE access_lost END,last_error=CASE WHEN ?2=1 THEN NULL ELSE last_error END WHERE campaign_id=?1",
         params![campaign, auto, paused && auto],
     )
     .map_err(storage)?;
     require_link(c, campaign)
+}
+/// The server no longer lets this account into the campaign (removed, or the campaign was
+/// deleted). Copies received from other players are cleared; this account's own items, its
+/// replication choices and pending changes stay, so access can resume if it comes back.
+pub fn access_lost(c: &Connection, campaign: &str, message: &str) -> AppResult<()> {
+    let link = require_link(c, campaign)?;
+    let tx = c.unchecked_transaction().map_err(storage)?;
+    tx.execute(
+        "DELETE FROM sync_remote_items WHERE campaign_id=?1 AND author_id<>?2",
+        params![campaign, link.account_id],
+    )
+    .map_err(storage)?;
+    tx.execute(
+        // The cursor restarts too: if access returns, everything is read again.
+        "UPDATE sync_links SET access_lost=1,auto=0,paused=0,cursor='',last_error=?2 WHERE campaign_id=?1",
+        params![campaign, message.chars().take(300).collect::<String>()],
+    )
+    .map_err(storage)?;
+    tx.commit().map_err(storage)
+}
+/// Forgets every link of a signed-out or deleted account on one server. Campaign data stays.
+pub fn forget_account(c: &Connection, server: &str, account: &str) -> AppResult<usize> {
+    let mut forgotten = 0;
+    for link in all_links(c)? {
+        if link.server == server && link.account_id == account {
+            unlink(c, &link.campaign_id)?;
+            forgotten += 1;
+        }
+    }
+    Ok(forgotten)
+}
+/// Stops replicating every item of a campaign after its server copy was erased. Local items
+/// stay; nothing is sent until the user chooses items again.
+pub fn forget_replication(c: &Connection, campaign: &str) -> AppResult<()> {
+    require_link(c, campaign)?;
+    let tx = c.unchecked_transaction().map_err(storage)?;
+    for table in ["sync_outbox", "sync_shares", "sync_conflicts"] {
+        tx.execute(
+            &format!("DELETE FROM {table} WHERE campaign_id=?1"),
+            [campaign],
+        )
+        .map_err(storage)?;
+    }
+    tx.commit().map_err(storage)
 }
 /// Short, content-free note for the status line; `None` clears it.
 pub fn set_error(c: &Connection, campaign: &str, message: Option<&str>) -> AppResult<()> {
@@ -1550,17 +1599,19 @@ pub async fn sync_now(db: &Database, client: &api::Client, campaign: String) -> 
     let id = campaign.clone();
     let link = db.run(move |c| require_link(c, &id)).await?;
     let mut report = Report::default();
-    // Operations left on the wire by a crash or a lost response are settled first, under
-    // their original IDs: the server acknowledges instead of re-applying them, and the
-    // echo of such a write is then not mistaken for a change made elsewhere.
-    settle_outbox(db, client, &link, &campaign, &mut report).await?;
-    let pulled = pull(db, client, &link, &campaign).await?;
-    add(&mut report, pulled);
-    push_pending(db, client, &link, &campaign, &mut report).await?;
+    match sync_pass(db, client, &link, &campaign, &mut report).await {
+        Ok(()) => {}
+        Err(Failure::AccessLost(message)) => {
+            let (id, note) = (campaign.clone(), message.clone());
+            db.run(move |c| access_lost(c, &id, &note)).await?;
+            return Err(Failure::AccessLost(message));
+        }
+        Err(error) => return Err(error),
+    }
     let id = campaign.clone();
     db.run(move |c| {
         c.execute(
-            "UPDATE sync_links SET synced_at=?2,last_error=NULL WHERE campaign_id=?1",
+            "UPDATE sync_links SET synced_at=?2,last_error=NULL,access_lost=0 WHERE campaign_id=?1",
             params![id, now()],
         )
         .map_err(storage)?;
@@ -1568,6 +1619,22 @@ pub async fn sync_now(db: &Database, client: &api::Client, campaign: String) -> 
     })
     .await?;
     Ok(report)
+}
+async fn sync_pass(
+    db: &Database,
+    client: &api::Client,
+    link: &Link,
+    campaign: &str,
+    report: &mut Report,
+) -> ApiResult<()> {
+    // Operations left on the wire by a crash or a lost response are settled first, under
+    // their original IDs: the server acknowledges instead of re-applying them, and the
+    // echo of such a write is then not mistaken for a change made elsewhere.
+    settle_outbox(db, client, link, campaign, report).await?;
+    let pulled = pull(db, client, link, campaign).await?;
+    add(report, pulled);
+    push_pending(db, client, link, campaign, report).await?;
+    Ok(())
 }
 fn add(total: &mut Report, part: Report) {
     total.received += part.received;

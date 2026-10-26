@@ -36,6 +36,7 @@ struct Campaign {
     log: Vec<(i64, String, String, String, String)>,
     seq: i64,
     floor: i64,
+    deleted: bool,
 }
 /// (operation, kind, item, request digest, accepted revision)
 type Receipt = (String, String, String, String, i64);
@@ -307,9 +308,38 @@ fn route(
                 _ => (410, json!({})),
             }
         }
+        ("POST", ["api", "v1", "auth", "account", "deletion"]) => {
+            let me = me.unwrap();
+            if s.accounts[&me].2 != body["password"].as_str().unwrap_or("") {
+                return Some((401, json!({})));
+            }
+            let owns_shared = s.campaigns.values().any(|c| {
+                !c.deleted
+                    && c.members.get(&me).is_some_and(|r| r == "owner")
+                    && c.members.len() > 1
+            });
+            if owns_shared && body["deleteOwnedCampaigns"] != json!(true) {
+                return Some((409, json!({})));
+            }
+            for c in s.campaigns.values_mut() {
+                if c.members.get(&me).is_some_and(|r| r == "owner") {
+                    c.deleted = true;
+                    c.items.clear();
+                }
+                c.members.remove(&me);
+            }
+            s.tokens.retain(|_, account| *account != me);
+            (204, Value::Null)
+        }
         (_, ["api", "v1", "campaigns", campaign, rest @ ..]) => {
             let campaign = campaign.to_string();
             let me = me.unwrap();
+            if s.campaigns
+                .get(&campaign)
+                .is_some_and(|c| c.deleted && c.members.contains_key(&me))
+            {
+                return Some((404, json!({"error":"This campaign was deleted."})));
+            }
             let Some(role) = s
                 .campaigns
                 .get(&campaign)
@@ -330,6 +360,37 @@ fn route(
                         201,
                         json!({"code":code,"role":body["role"],"expiresAt":"2026-11-02T00:00:00Z"}),
                     )
+                }
+                ("POST", ["deletion"]) if role == "owner" => {
+                    let c = s.campaigns.get_mut(&campaign).unwrap();
+                    if body["confirmName"].as_str() != Some(c.name.as_str()) {
+                        return Some((400, json!({})));
+                    }
+                    c.deleted = true;
+                    c.items.clear();
+                    c.log.clear();
+                    (204, Value::Null)
+                }
+                ("POST", ["own-content", "deletion"]) => {
+                    let c = s.campaigns.get_mut(&campaign).unwrap();
+                    let mine: Vec<(String, String)> = c
+                        .items
+                        .iter()
+                        .filter(|(_, v)| v.author == me && v.payload.is_some())
+                        .map(|(k, _)| k.clone())
+                        .collect();
+                    for key in &mine {
+                        let item = c.items.get_mut(key).unwrap();
+                        let state = if item.visibility == "members" {
+                            "deleted"
+                        } else {
+                            "deleted-private"
+                        };
+                        item.payload = None;
+                        item.revision += 1;
+                        log_change(c, &key.0, &key.1, &me, state);
+                    }
+                    (200, json!({"items":mine.len(),"attachments":0}))
                 }
                 ("GET", ["sync"]) => {
                     let cursor = if param("cursor").is_empty() {
@@ -600,6 +661,7 @@ impl Device {
             auto: false,
             paused: false,
             last_error: None,
+            access_lost: false,
         };
         self.with(|c| engine::save_link(c, &link)).unwrap();
     }
@@ -1702,6 +1764,126 @@ mod live {
 
     #[tokio::test]
     #[ignore = "needs the Chronexus-Server binary (CHRONEXUS_SERVER_BIN)"]
+    async fn removal_erasure_and_deletion_against_the_real_server_leave_local_data_alone() {
+        let server = Real::start();
+        let mut alice = Device::new("Live lifecycle");
+        let alice_id = alice
+            .sign(&server.base, Some(&server.invite()), "alice")
+            .await;
+        let remote = alice
+            .client()
+            .create_campaign("Live lifecycle")
+            .await
+            .unwrap();
+        alice.link(&server.base, &alice_id, &remote);
+        let claim = alice.page("Alice claim", "lore");
+        alice.scope("page", &claim, "shared").unwrap();
+        alice.sync().await;
+        let invite = alice.client().invite(&remote.id, "player").await.unwrap();
+        let mut bob = Device::new("Bob lifecycle");
+        let bob_id = bob.sign(&server.base, Some(&server.invite()), "bob").await;
+        let joined = bob.client().join(&invite.code).await.unwrap();
+        bob.link(&server.base, &bob_id, &joined);
+        let mine = bob.page("Bob private", "note");
+        bob.scope("page", &mine, "private").unwrap();
+        assert_eq!(bob.sync().await.received, 1);
+        bob.edit(&mine, "Draft written before the removal.");
+
+        // The owner removes Bob through the real API.
+        let http = reqwest::Client::new();
+        let members: Value = http
+            .get(format!(
+                "{}/api/v1/campaigns/{}/members",
+                server.base, remote.id
+            ))
+            .bearer_auth(alice.client().token().unwrap())
+            .send()
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
+        let revision = members
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|m| m["accountId"] == bob_id.as_str())
+            .unwrap()["revision"]
+            .as_i64()
+            .unwrap();
+        let removed = http
+            .delete(format!(
+                "{}/api/v1/campaigns/{}/members/{bob_id}?baseRevision={revision}",
+                server.base, remote.id
+            ))
+            .bearer_auth(alice.client().token().unwrap())
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(removed.status(), 204);
+        let lost = bob.try_sync().await.unwrap_err();
+        assert!(matches!(lost, Failure::AccessLost(_)), "{lost:?}");
+        assert!(bob.remote().is_empty());
+        assert!(bob.text_of(&mine).contains("Draft written before"));
+
+        // Invited again, Bob switches synchronization back on: shared items come back, his
+        // private original was never touched by the removal, and his draft is sent.
+        let again = alice.client().invite(&remote.id, "player").await.unwrap();
+        bob.client().join(&again.code).await.unwrap();
+        bob.with(|c| engine::set_auto(c, &bob.campaign, true, false))
+            .unwrap();
+        let report = bob.sync().await;
+        assert_eq!(report.received, 1);
+        assert_eq!(report.pushed, 1, "the draft made while access was lost");
+
+        // Bob erases his own server copy: the item leaves the server, stays on his computer.
+        bob.client().erase_own_content(&remote.id).await.unwrap();
+        bob.with(|c| engine::forget_replication(c, &bob.campaign))
+            .unwrap();
+        assert_eq!(bob.sync().await, engine::Report::default());
+        assert!(bob.text_of(&mine).contains("Draft written before"));
+
+        // The owner deletes the campaign: the name must match, and everything local stays.
+        assert!(alice
+            .client()
+            .delete_campaign(&remote.id, "wrong name")
+            .await
+            .is_err());
+        alice
+            .client()
+            .delete_campaign(&remote.id, "Live lifecycle")
+            .await
+            .unwrap();
+        assert!(matches!(
+            alice.try_sync().await.unwrap_err(),
+            Failure::AccessLost(_)
+        ));
+        assert!(alice.text_of(&claim).contains("paragraph"));
+        assert!(alice.client().campaigns().await.unwrap().is_empty());
+
+        // Account deletion: wrong password refused, then the account is gone for good.
+        assert!(bob
+            .client()
+            .delete_account("not my password!!", false)
+            .await
+            .is_err());
+        bob.client()
+            .delete_account("correct horse battery", false)
+            .await
+            .unwrap();
+        let anonymous =
+            api::Client::new(server_url(&server.base, true).unwrap(), None, true).unwrap();
+        assert!(matches!(
+            anonymous
+                .login("bob", "correct horse battery", "again")
+                .await
+                .unwrap_err(),
+            Failure::Unauthorized(_)
+        ));
+    }
+
+    #[tokio::test]
+    #[ignore = "needs the Chronexus-Server binary (CHRONEXUS_SERVER_BIN)"]
     async fn concurrent_edits_conflicts_sharing_withdrawal_and_resync_against_the_real_server() {
         let server = Real::start();
         let mut owner = Device::new("Live conflicts");
@@ -1783,5 +1965,193 @@ mod live {
             .is_ok()));
         assert_eq!(other.sync().await, engine::Report::default());
         assert_eq!(member.sync().await, engine::Report::default());
+    }
+}
+
+mod lifecycle {
+    use super::*;
+
+    #[tokio::test]
+    async fn losing_access_clears_received_copies_keeps_own_items_and_asks_for_nothing_more() {
+        let fake = Fake::start();
+        let mut alice = Device::new("Alice");
+        let alice_id = alice.sign(&fake.base, Some("ADMIN-INVITE"), "alice").await;
+        let remote = alice.client().create_campaign("Shared").await.unwrap();
+        alice.link(&fake.base, &alice_id, &remote);
+        let theirs = alice.page("Alice claim", "lore");
+        alice.scope("page", &theirs, "shared").unwrap();
+        alice.sync().await;
+        let invite = alice.client().invite(&remote.id, "player").await.unwrap();
+        let mut bob = Device::new("Bob");
+        fake.invite("BOB");
+        let bob_id = bob.sign(&fake.base, Some("BOB"), "bob").await;
+        let joined = bob.client().join(&invite.code).await.unwrap();
+        bob.link(&fake.base, &bob_id, &joined);
+        let mine = bob.page("Bob private", "note");
+        bob.scope("page", &mine, "private").unwrap();
+        assert_eq!(bob.sync().await.received, 1);
+        assert_eq!(bob.remote().len(), 1);
+        bob.edit(&mine, "Unsent draft written before the removal.");
+
+        // The owner removes Bob. His next synchronization learns it and cleans up after itself.
+        fake.set(|s| {
+            for c in s.campaigns.values_mut() {
+                c.members.remove(&bob_id);
+            }
+        });
+        let error = bob.try_sync().await.unwrap_err();
+        assert!(matches!(error, Failure::AccessLost(_)), "{error:?}");
+        assert!(bob.remote().is_empty(), "received copies are cleared");
+        // His own item, its draft and its replication choice are all still there.
+        assert!(bob.text_of(&mine).contains("Unsent draft"));
+        let link = bob
+            .with(|c| engine::link(c, &bob.campaign))
+            .unwrap()
+            .unwrap();
+        assert!(link.access_lost && !link.auto);
+        assert!(link.last_error.unwrap().contains("no longer have access"));
+        let items = bob.with(|c| engine::items(c, &bob.campaign)).unwrap();
+        assert!(items
+            .iter()
+            .any(|i| i.item_id == mine && i.scope == "private"));
+        // The visible state says what happened.
+        let (auto, seen) = continuous::controller(&bob, &fake.base, continuous::fast());
+        assert_eq!(auto.status(&bob.campaign).await.unwrap().state, "attention");
+        auto.reload().await;
+        tokio::time::sleep(Duration::from_millis(300)).await;
+        assert!(
+            seen.lock().unwrap().iter().all(|s| s.state != "syncing"),
+            "no pass runs for a lost campaign"
+        );
+
+        // If the owner invites him back, switching it on again tries again and succeeds.
+        fake.set(|s| {
+            for c in s.campaigns.values_mut() {
+                c.members.insert(bob_id.clone(), "player".into());
+            }
+        });
+        bob.with(|c| engine::set_auto(c, &bob.campaign, true, false))
+            .unwrap();
+        let report = bob.sync().await;
+        assert_eq!(report.received, 1);
+        let link = bob
+            .with(|c| engine::link(c, &bob.campaign))
+            .unwrap()
+            .unwrap();
+        assert!(!link.access_lost && link.last_error.is_none());
+    }
+
+    #[tokio::test]
+    async fn erasing_the_server_copy_is_explicit_and_leaves_every_local_item() {
+        let fake = Fake::start();
+        let mut device = Device::new("Erase");
+        let account = device.sign(&fake.base, Some("ADMIN-INVITE"), "mia").await;
+        let remote = device.client().create_campaign("Erase").await.unwrap();
+        device.link(&fake.base, &account, &remote);
+        let (a, b) = (device.page("One", "note"), device.page("Two", "note"));
+        device
+            .with(|c| engine::replicate_all_privately(c, &device.campaign))
+            .unwrap();
+        assert_eq!(device.sync().await.pushed, 2);
+        assert!(fake.stored(&a) && fake.stored(&b));
+
+        device.client().erase_own_content(&remote.id).await.unwrap();
+        device
+            .with(|c| engine::forget_replication(c, &device.campaign))
+            .unwrap();
+        assert!(!fake.stored(&a) && !fake.stored(&b));
+        // Local items are untouched and nothing is replicated any more.
+        assert!(device.text_of(&a).contains("paragraph"));
+        assert!(device
+            .with(|c| engine::items(c, &device.campaign))
+            .unwrap()
+            .iter()
+            .all(|i| i.scope == "none" && i.status == "private"));
+        assert_eq!(device.sync().await, engine::Report::default());
+        assert!(!fake.stored(&a), "an idle pass never re-uploads");
+    }
+
+    #[tokio::test]
+    async fn deleting_the_campaign_or_the_account_on_the_server_never_touches_local_data() {
+        let fake = Fake::start();
+        let mut owner = Device::new("Doomed");
+        let account = owner.sign(&fake.base, Some("ADMIN-INVITE"), "ned").await;
+        let remote = owner.client().create_campaign("Doomed").await.unwrap();
+        owner.link(&fake.base, &account, &remote);
+        let page = owner.page("Keepsake", "note");
+        owner.scope("page", &page, "shared").unwrap();
+        owner.sync().await;
+
+        // The exact name is required.
+        assert!(owner
+            .client()
+            .delete_campaign(&remote.id, "doomed")
+            .await
+            .is_err());
+        owner
+            .client()
+            .delete_campaign(&remote.id, "Doomed")
+            .await
+            .unwrap();
+        let error = owner.try_sync().await.unwrap_err();
+        assert!(matches!(error, Failure::AccessLost(_)));
+        assert!(
+            owner.text_of(&page).contains("paragraph"),
+            "local content survives"
+        );
+        owner.with(|c| engine::unlink(c, &owner.campaign)).unwrap();
+
+        // Account deletion: wrong password is refused, a shared campaign needs the flag.
+        let second = owner.client().create_campaign("Second").await.unwrap();
+        let invite = owner.client().invite(&second.id, "player").await.unwrap();
+        let mut guest = Device::new("Guest");
+        fake.invite("GUEST");
+        let guest_id = guest.sign(&fake.base, Some("GUEST"), "olga").await;
+        guest.client().join(&invite.code).await.unwrap();
+        let _ = guest_id;
+        assert!(owner
+            .client()
+            .delete_account("wrong password!!", true)
+            .await
+            .is_err());
+        assert!(owner
+            .client()
+            .delete_account("correct horse battery", false)
+            .await
+            .unwrap_err()
+            .message()
+            .contains("own a campaign"));
+        owner
+            .client()
+            .delete_account("correct horse battery", true)
+            .await
+            .unwrap();
+        assert!(matches!(
+            owner.client().campaigns().await.unwrap_err(),
+            Failure::Unauthorized(_)
+        ));
+        // The forgetting is local and complete for that account only.
+        owner.with(|c| {
+            engine::attach_campaign(
+                c,
+                "http://127.0.0.1:1",
+                &account,
+                &api::RemoteCampaign {
+                    id: "camp-x".into(),
+                    name: "X".into(),
+                    role: "owner".into(),
+                },
+            )
+            .unwrap();
+            assert_eq!(
+                engine::forget_account(c, "http://127.0.0.1:1", &account).unwrap(),
+                1
+            );
+            assert_eq!(
+                engine::forget_account(c, "http://127.0.0.1:1", &account).unwrap(),
+                0
+            );
+        });
+        assert!(owner.text_of(&page).contains("paragraph"));
     }
 }

@@ -14,6 +14,8 @@ export default function SyncSettings({
 }) {
   const [account, setAccount] = useState<SyncAccount | null>(null);
   const [onServer, setOnServer] = useState<RemoteCampaign[] | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deletion, setDeletion] = useState({ password: "", owned: false });
   const [server, setServer] = useState("");
   const [mode, setMode] = useState<"signin" | "invite">("signin");
   const [form, setForm] = useState({
@@ -143,6 +145,81 @@ export default function SyncSettings({
               >
                 {tr("Sign out")}
               </button>
+              <section aria-label={tr("Delete my account")}>
+                <h4>{tr("Delete my account")}</h4>
+                {deleting ? (
+                  <div role="alertdialog" aria-label={tr("Delete my account")}>
+                    <p>
+                      {tr(
+                        "This deletes your account on the server with everything you synchronized, in every campaign. The items you shared disappear for the other players. Your campaigns stay on this device. It cannot be undone.",
+                      )}
+                    </p>
+                    <label>
+                      {tr("Password")}
+                      <input
+                        type="password"
+                        autoComplete="current-password"
+                        value={deletion.password}
+                        disabled={busy}
+                        onChange={(event) =>
+                          setDeletion((current) => ({
+                            ...current,
+                            password: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={deletion.owned}
+                        disabled={busy}
+                        onChange={(event) =>
+                          setDeletion((current) => ({
+                            ...current,
+                            owned: event.target.checked,
+                          }))
+                        }
+                      />{" "}
+                      {tr(
+                        "Also delete the campaigns I own that other players still use",
+                      )}
+                    </label>
+                    <button
+                      className="primary"
+                      disabled={busy || !deletion.password}
+                      onClick={() =>
+                        void perform(
+                          async () => {
+                            setAccount(
+                              await syncApi.deleteAccount(
+                                deletion.password,
+                                deletion.owned,
+                              ),
+                            );
+                            setDeletion({ password: "", owned: false });
+                            setDeleting(false);
+                            setOnServer(null);
+                            return tr(
+                              "Your account on the server was deleted. Your campaigns are still on this device.",
+                            );
+                          },
+                          { blocked: disabled },
+                        )
+                      }
+                    >
+                      {tr("Delete my account permanently")}
+                    </button>
+                    <button disabled={busy} onClick={() => setDeleting(false)}>
+                      {tr("Cancel")}
+                    </button>
+                  </div>
+                ) : (
+                  <button disabled={busy} onClick={() => setDeleting(true)}>
+                    {tr("Delete my account on the server")}
+                  </button>
+                )}
+              </section>
               <section aria-label={tr("Campaigns on the server")}>
                 <h4>{tr("Campaigns on the server")}</h4>
                 <p className="muted">

@@ -163,7 +163,9 @@ impl Auto {
                 Ok((link, counts))
             })
             .await?;
-        let state = if !link.auto {
+        let state = if link.access_lost {
+            "attention"
+        } else if !link.auto {
             "off"
         } else if link.paused {
             "paused"
@@ -191,7 +193,7 @@ impl Auto {
         let signed_in = (self.0.factory)().is_ok();
         let wanted: Vec<String> = links
             .iter()
-            .filter(|l| l.auto && !l.paused && signed_in)
+            .filter(|l| l.auto && !l.paused && !l.access_lost && signed_in)
             .map(|l| l.campaign_id.clone())
             .collect();
         let stale: Vec<String> = self
@@ -386,7 +388,8 @@ impl Auto {
                         failure = ("offline", status.message.clone().unwrap_or_default());
                         status.state = "offline".into();
                         self.publish(status);
-                    } else if matches!(error, Failure::Unauthorized(_)) {
+                    } else if matches!(error, Failure::Unauthorized(_) | Failure::AccessLost(_)) {
+                        // A refused session, or a campaign that is gone: stop asking.
                         status.state = "attention".into();
                         self.publish(status);
                         break;

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, test, vi } from "vitest";
 import { command } from "../journal/api";
@@ -77,4 +77,50 @@ test("nothing is contacted until the user verifies a server, then invites create
   expect(screen.queryByLabelText("Password")).toBeNull();
   await user.click(screen.getByRole("button", { name: "Sign out" }));
   expect(await screen.findByText(/Signed out/)).toBeVisible();
+});
+
+test("deleting the account needs the password and says that campaigns stay on this device", async () => {
+  const user = userEvent.setup();
+  vi.mocked(command).mockImplementation(
+    async (name: string, args?: unknown) => {
+      switch (name) {
+        case "sync_account":
+          return signed as never;
+        case "sync_delete_account":
+          expect(args).toEqual({
+            password: "correct horse battery",
+            deleteOwnedCampaigns: true,
+          });
+          return { ...blank, server: "https://sync.example.org" } as never;
+        default:
+          throw Error(`Unexpected command: ${name}`);
+      }
+    },
+  );
+  render(<SyncSettings disabled={false} />);
+  await user.click(
+    await screen.findByRole("button", {
+      name: "Delete my account on the server",
+    }),
+  );
+  const dialog = screen.getByRole("alertdialog", { name: "Delete my account" });
+  expect(
+    within(dialog).getByText(/Your campaigns stay on this device/),
+  ).toBeVisible();
+  const confirm = within(dialog).getByRole("button", {
+    name: "Delete my account permanently",
+  });
+  expect(confirm).toBeDisabled();
+  await user.type(
+    within(dialog).getByLabelText("Password"),
+    "correct horse battery",
+  );
+  await user.click(
+    within(dialog).getByLabelText(/Also delete the campaigns I own/),
+  );
+  await user.click(confirm);
+  expect(
+    await screen.findByText(/Your account on the server was deleted/),
+  ).toBeVisible();
+  expect(screen.queryByRole("alertdialog")).toBeNull();
 });

@@ -19,14 +19,20 @@ Not published; source version 0.8.1, schema 020. Server side: `Chronexus-Server`
   concurrent edits became a resolvable conflict; sharing, withdrawal and 120-item paging were
   checked; a member never saw private items. These live tests are `#[ignore]`d (they need the
   server binary) and were run with `--ignored --test-threads=1`.
-- **Hermetic checks:** Rust lib 161 passed / 4 ignored (two of them the live real-server tests; the other two are older ignored tests); sync tests stable over 4 consecutive runs; Clippy `-D warnings`
-  all targets and rustfmt clean; Vitest 174 passed; ESLint, `tsc --noEmit`, i18n catalog check
+- **Hermetic checks:** Rust lib 164 passed / 5 ignored (three of them the live real-server tests; the other two are older ignored tests); sync tests stable over 4 consecutive runs; Clippy `-D warnings`
+  all targets and rustfmt clean; Vitest 177 passed; ESLint, `tsc --noEmit`, i18n catalog check
   pass. Backups of schemas 2-20 restore. Not run: macOS/Linux, GUI WebView, installers.
-- **Not done (still S4/S6 work):** images and character-sheet sections are not replicated or
+- **S6 desktop (same day):** losing access (removed, or the campaign was deleted) clears the
+  copies received from other players, keeps own items, drafts and replication choices, restarts
+  the cursor, stops automatic synchronization with a visible reason and resumes if switched on
+  again after a new invitation; "Delete my copy on the server", "Delete the campaign on the
+  server" (exact name) and "Delete my account" are confirmed actions that never delete a local
+  item. Hermetic lifecycle tests plus a third real-server test (member removal and return,
+  erasure, campaign and account deletion) passed against the S6 server.
+- **Not done (still S4 work):** images and character-sheet sections are not replicated or
   shared yet; deletions do not propagate into another computer's archive (they stop its
-  replication); server-side revocation/deletion/recovery lifecycle (S6); real WebView check of
-  the new controls (component tests only); no new strings are machine-translated beyond the
-  English fallback.
+  replication); real WebView check of the new controls (component tests only); no new strings
+  are machine-translated beyond the English fallback.
 
 # Chronexus status — 26 October 2026: M23 complete, M6/M16 platforms, M24 client
 

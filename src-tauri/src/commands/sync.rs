@@ -231,6 +231,7 @@ pub async fn sync_connect_campaign(
         auto: false,
         paused: false,
         last_error: None,
+        access_lost: false,
     };
     let saved = link.clone();
     db.run(move |c| engine::save_link(c, &saved)).await?;
@@ -425,4 +426,98 @@ pub async fn sync_remote_items(
     campaign_id: String,
 ) -> AppResult<Vec<engine::RemoteItem>> {
     db.run(move |c| engine::remote_items(c, &campaign_id)).await
+}
+
+/// Deletes the server copy of everything this account synchronized to the campaign. The
+/// local items stay on this device and stop being replicated. Explicit, confirmed in the UI.
+#[tauri::command]
+pub async fn sync_erase_server_copy(
+    db: tauri::State<'_, Database>,
+    auto: tauri::State<'_, Auto>,
+    campaign_id: String,
+) -> AppResult<engine::Link> {
+    let (current, session, client) = signed_in(&db)?;
+    let link = linked(
+        &db,
+        &campaign_id,
+        &session,
+        current.server.as_deref().unwrap_or(""),
+    )
+    .await?;
+    client
+        .erase_own_content(&link.remote_id)
+        .await
+        .map_err(String::from)?;
+    let id = campaign_id.clone();
+    db.run(move |c| {
+        engine::forget_replication(c, &id)?;
+        engine::set_auto(c, &id, false, false)
+    })
+    .await?;
+    auto.reload().await;
+    let id = campaign_id.clone();
+    db.run(move |c| engine::require_link(c, &id)).await
+}
+/// Owner only: deletes the campaign on the server (exact name required) and unlinks it here.
+/// Every local item stays.
+#[tauri::command]
+pub async fn sync_delete_server_campaign(
+    db: tauri::State<'_, Database>,
+    auto: tauri::State<'_, Auto>,
+    campaign_id: String,
+    confirm_name: String,
+) -> AppResult<()> {
+    let (current, session, client) = signed_in(&db)?;
+    let link = linked(
+        &db,
+        &campaign_id,
+        &session,
+        current.server.as_deref().unwrap_or(""),
+    )
+    .await?;
+    if link.role != "owner" {
+        return Err("Only the owner of the shared campaign can delete it on the server.".into());
+    }
+    client
+        .delete_campaign(&link.remote_id, &confirm_name)
+        .await
+        .map_err(String::from)?;
+    db.run(move |c| engine::unlink(c, &campaign_id)).await?;
+    auto.reload().await;
+    Ok(())
+}
+/// Deletes the account on the server after a password check, then forgets the session and
+/// the links of that account here. Campaign data on this device is untouched.
+#[tauri::command]
+pub async fn sync_delete_account(
+    db: tauri::State<'_, Database>,
+    gate: tauri::State<'_, sync::Gate>,
+    auto: tauri::State<'_, Auto>,
+    password: String,
+    delete_owned_campaigns: bool,
+) -> AppResult<AccountView> {
+    let _busy = gate.0.try_lock().map_err(|_| BUSY)?;
+    if password.is_empty() || password.len() > 1024 {
+        return Err("Enter your password.".into());
+    }
+    let (current, session, client) = signed_in(&db)?;
+    auto.stop_all();
+    client
+        .delete_account(&password, delete_owned_campaigns)
+        .await
+        .map_err(String::from)
+        .inspect_err(|_| {
+            // Nothing was deleted: keep synchronizing as before.
+        })?;
+    let (server, account_id) = (
+        current.server.clone().unwrap_or_default(),
+        session.account_id,
+    );
+    db.run(move |c| engine::forget_account(c, &server, &account_id))
+        .await?;
+    let mut account = current;
+    account.session = None;
+    sync::write_account(&db.root()?, &account)?;
+    auto.reload().await;
+    Ok(AccountView::from(&account))
 }

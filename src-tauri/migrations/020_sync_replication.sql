@@ -4,6 +4,8 @@
 ALTER TABLE sync_links ADD COLUMN auto INTEGER NOT NULL DEFAULT 0 CHECK(auto IN (0,1));
 ALTER TABLE sync_links ADD COLUMN paused INTEGER NOT NULL DEFAULT 0 CHECK(paused IN (0,1));
 ALTER TABLE sync_links ADD COLUMN last_error TEXT CHECK(last_error IS NULL OR length(last_error)<=300);
+-- The server told this device it has no access to the campaign any more (removed, or deleted).
+ALTER TABLE sync_links ADD COLUMN access_lost INTEGER NOT NULL DEFAULT 0 CHECK(access_lost IN (0,1));
 -- Cursors of the legacy /changes feed mean nothing to /sync; re-reading is idempotent
 -- because every applied item records its revision.
 UPDATE sync_links SET cursor='';

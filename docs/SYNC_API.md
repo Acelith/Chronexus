@@ -41,6 +41,15 @@ Client rules that rely on the contract:
   becomes a conflict, never an overwrite.
 - A tombstone for an item of this account stops its replication here and keeps the local
   item; deletions are never propagated into another device's archive silently.
+- **Access loss (S6).** A `403` or `404` on `/sync` or the full listing (removed from the
+  campaign, or the campaign was deleted: `404 "This campaign was deleted."`) is `AccessLost`:
+  received copies of other players' items are cleared, this account's own items, replication
+  choices, drafts and pending operations stay, the cursor restarts, automatic synchronization
+  is switched off and the Sharing view says why. Switching it on again tries once more.
+- **Explicit destructive actions** map to `POST …/own-content/deletion` (delete my server copy:
+  local items stay, replication choices are forgotten), `POST …/deletion` with the exact campaign
+  name (owner; unlinks locally, local items stay) and `POST /auth/account/deletion` with the
+  password (the session and this account's links are forgotten locally, campaigns stay).
 
 Decisions confirmed by the user on 26 October 2026:
 

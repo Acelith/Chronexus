@@ -19,6 +19,7 @@ const link = {
   auto: false,
   paused: false,
   lastError: null,
+  accessLost: false,
 };
 const status = (state: string, extra: object = {}) => ({
   campaignId: "c1",
@@ -100,6 +101,12 @@ beforeEach(() => {
         case "sync_replicate_all":
           items = [neral("private", "new")];
           return items as never;
+        case "sync_erase_server_copy":
+          items = [neral("none", "private")];
+          return current as never;
+        case "sync_delete_server_campaign":
+          current = null as never;
+          return undefined as never;
         case "sync_set_auto": {
           const input = args as { enabled: boolean; paused: boolean };
           current = { ...current, auto: input.enabled, paused: input.paused };
@@ -285,4 +292,78 @@ test("the save state never calls a local save a server save", async () => {
   );
   await vi.waitFor(() => expect(command).toHaveBeenCalled());
   expect(container).toBeEmptyDOMElement();
+});
+
+test("deleting your server copy or the whole campaign is confirmed, explains what stays, and never touches local items", async () => {
+  const user = userEvent.setup();
+  render(<CampaignSharing campaignId="c1" busy={false} />);
+  await user.click(
+    await screen.findByRole("button", { name: "Delete my copy on the server" }),
+  );
+  const erase = screen.getByRole("alertdialog", {
+    name: "Delete my copy on the server",
+  });
+  expect(
+    within(erase).getByText(/Everything stays on this device/),
+  ).toBeVisible();
+  expect(within(erase).getByText(/cannot be taken back/)).toBeVisible();
+  expect(command).not.toHaveBeenCalledWith("sync_erase_server_copy", {
+    campaignId: "c1",
+  });
+  await user.click(
+    within(erase).getByRole("button", { name: "Delete my copy on the server" }),
+  );
+  expect(command).toHaveBeenCalledWith("sync_erase_server_copy", {
+    campaignId: "c1",
+  });
+  expect(
+    await screen.findByText(/Your items are still on this device/),
+  ).toBeVisible();
+
+  // The campaign itself needs its exact name, and only its owner can ask.
+  await user.click(
+    screen.getByRole("button", { name: "Delete the campaign on the server" }),
+  );
+  const campaign = screen.getByRole("alertdialog", {
+    name: "Delete the campaign on the server",
+  });
+  expect(
+    within(campaign).getByText(
+      /Each player keeps what is on their own computer/,
+    ),
+  ).toBeVisible();
+  const confirm = within(campaign).getByRole("button", {
+    name: "Delete on the server",
+  });
+  expect(confirm).toBeDisabled();
+  await user.type(
+    within(campaign).getByLabelText("Campaign name"),
+    "Synthetic",
+  );
+  await user.click(confirm);
+  expect(command).toHaveBeenCalledWith("sync_delete_server_campaign", {
+    campaignId: "c1",
+    confirmName: "Synthetic",
+  });
+  expect(
+    await screen.findByText(/Everything on this device is untouched/),
+  ).toBeVisible();
+});
+test("a player cannot delete the campaign, and a lost access is explained without blaming the user", async () => {
+  current = {
+    ...link,
+    role: "player",
+    accessLost: true,
+    lastError: "no access",
+  } as never;
+  render(<CampaignSharing campaignId="c1" busy={false} />);
+  expect(
+    await screen.findByText(/You no longer have access to this campaign/),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Delete the campaign on the server" }),
+  ).toBeNull();
+  expect(
+    screen.getByRole("button", { name: "Delete my copy on the server" }),
+  ).toBeVisible();
 });

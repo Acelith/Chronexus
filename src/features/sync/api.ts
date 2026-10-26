@@ -24,6 +24,8 @@ export interface SyncLink {
   auto: boolean;
   paused: boolean;
   lastError: string | null;
+  /** The server says this account has no access to the campaign any more. */
+  accessLost: boolean;
 }
 export type SharedKind = "page" | "session" | "relationship" | "party";
 /** none: only on this device · private: this account's devices · shared: the members. */
@@ -152,6 +154,17 @@ export const syncApi = {
   status: (campaignId: string) =>
     command<SyncStatus>("sync_status", { campaignId }),
   remoteCampaigns: () => command<RemoteCampaign[]>("sync_remote_campaigns"),
+  /** Deletes the server copy of everything this account synchronized; local items stay. */
+  eraseServerCopy: (campaignId: string) =>
+    command<SyncLink>("sync_erase_server_copy", { campaignId }),
+  /** Owner only: deletes the campaign on the server; local items stay. */
+  deleteServerCampaign: (campaignId: string, confirmName: string) =>
+    command<void>("sync_delete_server_campaign", { campaignId, confirmName }),
+  deleteAccount: (password: string, deleteOwnedCampaigns: boolean) =>
+    command<SyncAccount>("sync_delete_account", {
+      password,
+      deleteOwnedCampaigns,
+    }),
   attach: (remoteId: string) =>
     command<{ id: string; name: string }>("sync_attach_campaign", {
       remoteId,

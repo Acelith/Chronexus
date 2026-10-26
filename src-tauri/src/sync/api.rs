@@ -26,13 +26,18 @@ pub enum Failure {
     CursorExpired,
     /// 410 for an old operation ID: re-read the item and create a new operation.
     RequestExpired,
+    /// The campaign is not available to this account any more: removed, or deleted.
+    AccessLost(String),
     /// The server understood and refused; retrying the same request cannot help.
     Rejected(String),
 }
 impl Failure {
     pub fn message(&self) -> String {
         match self {
-            Self::Unavailable(m) | Self::Unauthorized(m) | Self::Rejected(m) => m.clone(),
+            Self::Unavailable(m)
+            | Self::Unauthorized(m)
+            | Self::AccessLost(m)
+            | Self::Rejected(m) => m.clone(),
             Self::CursorExpired => {
                 "The server no longer remembers this device's position: resynchronizing.".into()
             }
@@ -356,6 +361,60 @@ impl Client {
         }
         list.into_iter().map(checked).collect()
     }
+    /// Deletes the server copy of everything this account synchronized to the campaign.
+    pub async fn erase_own_content(&self, campaign: &str) -> ApiResult<()> {
+        remote_id(campaign)?;
+        let (status, _) = self
+            .send(
+                Method::POST,
+                self.url(&format!(
+                    "/api/v1/campaigns/{campaign}/own-content/deletion"
+                ))?,
+                Some(json!({"confirm":true})),
+                None,
+            )
+            .await?;
+        if status == 200 {
+            Ok(())
+        } else {
+            Err(failure(status))
+        }
+    }
+    /// Owner only: deletes the campaign on the server, after typing its exact name.
+    pub async fn delete_campaign(&self, campaign: &str, name: &str) -> ApiResult<()> {
+        remote_id(campaign)?;
+        let (status, _) = self
+            .send(
+                Method::POST,
+                self.url(&format!("/api/v1/campaigns/{campaign}/deletion"))?,
+                Some(json!({"confirmName":name})),
+                None,
+            )
+            .await?;
+        if status == 204 {
+            Ok(())
+        } else {
+            Err(failure(status))
+        }
+    }
+    pub async fn delete_account(&self, password: &str, owned: bool) -> ApiResult<()> {
+        let (status, _) = self
+            .send(
+                Method::POST,
+                self.url("/api/v1/auth/account/deletion")?,
+                Some(json!({"password":password,"deleteOwnedCampaigns":owned})),
+                None,
+            )
+            .await?;
+        match status {
+            204 => Ok(()),
+            401 => Err(Failure::Rejected("The password is not correct.".into())),
+            409 => Err(Failure::Rejected(
+                "You own a campaign other members use: delete it first, or confirm deleting it with your account.".into(),
+            )),
+            other => Err(failure(other)),
+        }
+    }
     pub async fn join(&self, code: &str) -> ApiResult<RemoteCampaign> {
         checked(
             self.call(
@@ -379,6 +438,13 @@ impl Client {
         match status {
             200 => {}
             410 => return Err(Failure::CursorExpired),
+            // A campaign read that is refused or missing means access is gone (an item
+            // write answering 404 means something else, so this is limited to reads).
+            403 | 404 => {
+                return Err(Failure::AccessLost(
+                    "You no longer have access to this campaign on the server: you were removed, or it was deleted.".into(),
+                ))
+            }
             _ => return Err(failure(status)),
         }
         let page: Page = serde_json::from_value(value)

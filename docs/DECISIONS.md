@@ -570,3 +570,9 @@ be decided at the start of M24.
   original IDs, in dependency order, retrying items whose pages have not arrived.
 - Schema 020 is additive; the legacy cursor is reset because `/sync` cursors differ from the
   legacy feed's.
+- **S6 on the desktop: losing access is not an error to retry.** A refused or missing campaign
+  read clears only what came from other players, keeps everything the account owns locally, resets
+  the cursor and switches automatic synchronization off with a visible reason, so nothing keeps
+  knocking and nothing local is lost. Server-side erasure, campaign deletion and account deletion
+  are separate, typed, confirmed commands that forget replication state but never delete a local
+  item.
