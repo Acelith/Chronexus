@@ -1,3 +1,25 @@
+# Release 0.9.2 — Chronexus-branded Windows installer
+
+[Chronexus 0.9.2](https://github.com/Acelith/Chronexus/releases/tag/v0.9.2), published
+26 October 2026. Windows x64 NSIS, source `ad68875`, annotated tag `v0.9.2`.
+Size 34,118,247 bytes; SHA-256
+`11553df57cf6f4c75299fc2bc983d83b287a1a943619c363ea121ceb82098256`.
+Production signature and tamper rejection passed. Installer, signature and manifest
+were verified in the draft and redownloaded anonymously with matching SHA-256;
+public latest API and canonical manifest identify 0.9.2. Exactly three unique assets.
+
+The native wizard uses the approved herald/wordmark on a leather/brass/burgundy
+sidebar and compact header; installer/uninstaller icons use the existing Chronexus
+icon. Actual welcome and directory pages visually verified, then cancelled before
+installation. Finish/uninstaller execution and actual installation/upgrade were not
+performed. Standard Tauri NSIS template and passive updater behavior preserved.
+Original artwork stays unchanged; provenance/regeneration: `assets/brand/README.md`.
+
+Includes the 0.9.1 backup and startup-check fixes below; schema 021 and automatic
+migrations unchanged. Users blocked by an older updater's backup error can manually
+install 0.9.2 after preserving a verified backup and closing Chronexus. Windows x64
+app only; no AI weights or Authenticode signature. Other release targets unverified.
+
 # Release 0.9.1 — backup and startup update hotfix
 
 [Download 0.9.1](https://github.com/Acelith/Chronexus/releases/tag/v0.9.1), published

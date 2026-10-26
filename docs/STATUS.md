@@ -1,4 +1,4 @@
-# Chronexus status — 26 October 2026: 0.9.2 installer branding verified
+# Chronexus status — 26 October 2026: 0.9.2 installer branding published
 
 - NSIS now uses the existing Chronexus herald/wordmark: leather/brass/burgundy
   welcome/finish sidebar, compact header, explicit installer/uninstaller icons and
@@ -15,7 +15,11 @@
   page, icon and directory-page header rendered correctly with readable ordinary
   headings/controls. Cancelled before installation; no installer window remained.
   Finish/uninstaller execution, actual install/upgrade and other platforms unverified.
-- Preparing publication as a new 0.9.2 release; older published assets remain intact.
+- Published 0.9.2 from `ad68875`, tag `v0.9.2`, release ID 11. All three unique
+  attachments passed anonymous SHA-256 verification, canonical manifest and public
+  stable API checks. Installer: 34,118,247 bytes, SHA-256
+  `11553df57cf6f4c75299fc2bc983d83b287a1a943619c363ea121ceb82098256`.
+  Older published assets remain intact.
   Includes the 0.9.1 backup/startup fixes, schema 021 and automatic migrations unchanged.
 - Skills: tauri-v2 for native bundle configuration, impeccable for preserving the
   existing visual identity, computer-use for the actual Windows wizard inspection.
