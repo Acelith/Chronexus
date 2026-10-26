@@ -51,7 +51,28 @@ last line, visible text, and bold/title/list formatting in a
 second session. Control images are saved under `.tools/`.
 The test does not delete data: to repeat from scratch, use another new profile.
 
-## Complementary manual checks
+## Cross-platform IPC flows (macOS, Linux, Windows)
+
+The CDP scripts above need WebView2. `scripts/qa/ipc/` runs the main flows in any
+real desktop WebView without changing the app: a dedicated Vite config serves
+`ipc-flows.html` at the debug dev URL and the page calls the real commands through
+Tauri IPC with the shipped frontend API modules. Use a new, empty profile only.
+
+```bash
+export CHRONEXUS_IPC_REPORT="$PWD/.tools/ipc/report.json"
+node node_modules/vite/bin/vite.js --config scripts/qa/ipc/vite.config.mjs &
+NODEX_DEV_DATA_DIR="$PWD/.tools/ipc/profile" NODEX_DEV_DOCUMENTS_DIR="$PWD/.tools/ipc/docs" \
+NODEX_DEV_BACKUP_FILE="$PWD/.tools/ipc/qa.nodex" NODEX_DEV_RESTORE_FILE="$PWD/.tools/ipc/qa.nodex" \
+NODEX_DEV_EXPORT_FILE="$PWD/.tools/ipc/qa-export.zip" src-tauri/target/debug/chronexus
+```
+
+Covered: campaign/session creation and ordering, duplicate and stale-revision
+errors, pages with rename alias, mentions and backlinks, FTS search and rebuild,
+sourced relationship and graph edges, character and asset, Party, dice history,
+interface/wiki preferences, image import and thumbnails, backup while measuring
+main-thread latency (must stay under 250 ms), export, restore into a new
+generation and 40 concurrent commands. The report lists every step with timing.
+
 
 - Navigate with Tab; verify visible focus, fields with labels, and form submission.
 - Try a narrow window, long notes, accents, and 200 character names.
