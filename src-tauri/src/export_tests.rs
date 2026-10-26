@@ -14,8 +14,8 @@ fn readable_export_contains_canonical_data_stable_links_and_original_image_bytes
     let other = journal::create_campaign(c, "Other").unwrap();
     knowledge::create_page(c, &other.id, "PrivateOther", "note", "active", &[]).unwrap();
     let p =
-        knowledge::create_page(c, &a.id, "Varek", "npc", "active", &["Custode".into()]).unwrap();
-    let s = journal::create_session(c, &a.id, 12, "La chiave", None).unwrap();
+        knowledge::create_page(c, &a.id, "Varek", "npc", "active", &["Keeper".into()]).unwrap();
+    let s = journal::create_session(c, &a.id, 12, "The key", None).unwrap();
     journal::save_document(c,&a.id,&s.id,0,json!({"version":1,"blocks":[{"id":"source","type":"paragraph","props":{},"children":[],"content":[{"type":"pageMention","props":{"pageId":p.id,"label":"Varek"}}]}]})).unwrap();
     let mut buffer = Cursor::new(vec![]);
     DynamicImage::new_rgb8(2, 3)
@@ -57,7 +57,7 @@ fn readable_export_contains_canonical_data_stable_links_and_original_image_bytes
         .read_to_string(&mut md)
         .unwrap();
     assert!(md.contains(&format!("../pages/{}.md", p.id)));
-    assert!(md.starts_with("# Session 12 — La chiave\n"));
+    assert!(md.starts_with("# Session 12 — The key\n"));
     let mut index = String::new();
     archive
         .by_name("README.md")
@@ -72,10 +72,10 @@ fn readable_export_contains_canonical_data_stable_links_and_original_image_bytes
         .unwrap()
         .read_to_string(&mut page_text)
         .unwrap();
-    assert!(page_text.contains("Type: npc") && page_text.contains("Alias: Custode"));
+    assert!(page_text.contains("Type: npc") && page_text.contains("Alias: Keeper"));
     // English wrappers must not translate canonical campaign titles or aliases.
-    assert_eq!(exported["sessions"][0]["title"], "La chiave");
-    assert_eq!(exported["pages"][0]["aliases"][0], "Custode");
+    assert_eq!(exported["sessions"][0]["title"], "The key");
+    assert_eq!(exported["pages"][0]["aliases"][0], "Keeper");
     let mut bytes = vec![];
     archive
         .by_name(&format!("attachments/{}/{}", a.id, picture.filename))

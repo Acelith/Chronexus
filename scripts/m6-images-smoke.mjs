@@ -82,7 +82,7 @@ try {
   });
   const page = await invoke("create_page", {
     campaignId: campaign.id,
-    title: "Mappa della costa",
+    title: "Coast map",
     kind: "place",
     status: "active",
     aliases: ["Costa"],
@@ -90,7 +90,7 @@ try {
   const session = await invoke("create_session", {
     campaignId: campaign.id,
     sequence: 12,
-    title: "La costa",
+    title: "The coast",
     playedOn: null,
   });
   await invoke("save_document", {
@@ -107,7 +107,7 @@ try {
           content: [
             {
               type: "text",
-              text: "La chiave corallina si trova sulla costa.",
+              text: "The coral key lies on the coast.",
               styles: {},
             },
           ],
@@ -121,7 +121,7 @@ try {
   await click("Codex");
   await p
     .getByRole("navigation", { name: "Codex pages", exact: true })
-    .getByRole("button", { name: /Mappa della costa/ })
+    .getByRole("button", { name: /Coast map/ })
     .click();
   await p.getByText("Immagini (0)", { exact: true }).click();
   await p.getByLabel("Image caption", { exact: true }).fill("Costa illustrata");

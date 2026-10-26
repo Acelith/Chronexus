@@ -10,55 +10,55 @@ fn full_text_is_atomic_scoped_accent_insensitive_and_rebuildable_after_restart()
     let c = db::open(&file).unwrap();
     let a = journal::create_campaign(&c, "A").unwrap();
     let b = journal::create_campaign(&c, "B").unwrap();
-    let s = journal::create_session(&c, &a.id, 12, "Il ponte", None).unwrap();
+    let s = journal::create_session(&c, &a.id, 12, "The bridge", None).unwrap();
     journal::save_document(
         &c,
         &a.id,
         &s.id,
         0,
-        document("La città nasconde una chiave dorata"),
+        document("The café hides a golden key"),
     )
     .unwrap();
-    let hits = search::find(&c, &a.id, "citta chiave", None, "relevance").unwrap();
+    let hits = search::find(&c, &a.id, "cafe key", None, "relevance").unwrap();
     assert_eq!(hits.len(), 1);
     assert_eq!(hits[0].block_id.as_deref(), Some("source"));
-    assert!(search::find(&c, &b.id, "chiave", None, "relevance")
+    assert!(search::find(&c, &b.id, "key", None, "relevance")
         .unwrap()
         .is_empty());
     assert!(
-        journal::save_document(&c, &a.id, &s.id, 0, document("Sostituzione sbagliata")).is_err()
+        journal::save_document(&c, &a.id, &s.id, 0, document("Wrong replacement")).is_err()
     );
-    assert!(search::find(&c, &a.id, "sbagliata", None, "relevance")
+    assert!(search::find(&c, &a.id, "wrong", None, "relevance")
         .unwrap()
         .is_empty());
     let p =
-        knowledge::create_page(&c, &a.id, "Varek", "npc", "active", &["Custode".into()]).unwrap();
+        knowledge::create_page(&c, &a.id, "Varek", "npc", "active", &["Keeper".into()]).unwrap();
     knowledge::update_page(
         &c,
         &a.id,
         &p.id,
-        "Varek nuovo",
+        "New Varek",
         "npc",
         "active",
-        &["Custode".into()],
+        &["Keeper".into()],
     )
     .unwrap();
     assert_eq!(
-        search::find(&c, &a.id, "Custode", Some("page"), "recent").unwrap()[0].source_id,
+        search::find(&c, &a.id, "Keeper", Some("page"), "recent").unwrap()[0].source_id,
         p.id
     );
-    let original = search::find(&c, &a.id, "chiave", None, "relevance").unwrap()[0]
+    let original = search::find(&c, &a.id, "key", None, "relevance").unwrap()[0]
         .preview
         .clone();
     c.execute("DELETE FROM search_documents", []).unwrap();
-    assert!(search::find(&c, &a.id, "chiave", None, "relevance")
+    assert!(search::find(&c, &a.id, "key", None, "relevance")
         .unwrap()
         .is_empty());
     search::rebuild(&c).unwrap();
     drop(c);
     let c = db::open(&file).unwrap();
     assert_eq!(
-        search::find(&c, &a.id, "chiave", None, "relevance").unwrap()[0].preview,
+        search::find(&c, &a.id, "key", None, "relevance").unwrap()[0].preview,
         original
     );
     for query in ["\" OR *", "a:b", "[[Varek]]", "' ; DROP TABLE pages;--"] {

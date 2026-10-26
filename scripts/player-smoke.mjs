@@ -95,7 +95,7 @@ async function saved() {
   ).toHaveText("Saved on the computer.");
 }
 const detail = () =>
-  page.getByRole("article", { name: "Dettaglio voce", exact: true });
+  page.getByRole("article", { name: "Entry details", exact: true });
 async function selectItem(name) {
   await page
     .getByRole("navigation", { name: "Character entries" })
@@ -112,17 +112,17 @@ async function assertCharacter(data) {
   await expect(
     page.getByRole("heading", { name: "Neme", exact: true }),
   ).toBeVisible();
-  await expect(page.getByLabel("Punti vita", { exact: true })).toHaveText(
+  await expect(page.getByLabel("Hit points", { exact: true })).toHaveText(
     `${data.character.data.hpCurrent} / 10`,
   );
   await expect(page.getByLabel("Focus", { exact: true })).toHaveText("2 / 3");
-  await expect(page.getByLabel("Primo cerchio", { exact: true })).toHaveText(
+  await expect(page.getByLabel("First circle", { exact: true })).toHaveText(
     "0 / 2",
   );
 }
 async function assertContextNavigation() {
   await tab("Inventory");
-  await selectItem("Chiave del portone");
+  await selectItem("Gate key");
   await detail()
     .getByRole("button", { name: "PNG: Varek", exact: true })
     .click();
@@ -131,7 +131,7 @@ async function assertContextNavigation() {
   ).toBeVisible();
   await tab("Back to the character entry");
   await expect(
-    detail().getByRole("heading", { name: "Chiave del portone", exact: true }),
+    detail().getByRole("heading", { name: "Gate key", exact: true }),
   ).toBeVisible();
   await detail()
     .getByRole("button", { name: "Open source session at block", exact: true })
@@ -146,7 +146,7 @@ async function assertContextNavigation() {
   assert.equal(focused, "m5-key-source");
   await tab("Back to the character entry");
   await expect(
-    detail().getByRole("heading", { name: "Chiave del portone", exact: true }),
+    detail().getByRole("heading", { name: "Gate key", exact: true }),
   ).toBeVisible();
 }
 if (phase === "prepare") {
@@ -168,13 +168,13 @@ if (phase === "prepare") {
     });
   const npc = await newPage("Varek", "npc"),
     place = await newPage("Ponte", "place"),
-    quest = await newPage("Aprire il portone", "quest"),
-    itemPage = await newPage("Chiave del portone", "item"),
-    spellPage = await newPage("Luce tenue", "note");
+    quest = await newPage("Open the gate", "quest"),
+    itemPage = await newPage("Gate key", "item"),
+    spellPage = await newPage("Faint light", "note");
   const session = await invoke("create_session", {
     campaignId: campaign.id,
     sequence: 12,
-    title: "La chiave di Varek",
+    title: "Varek’s key",
     playedOn: "2026-10-23",
   });
   const document = {
@@ -186,7 +186,7 @@ if (phase === "prepare") {
         props: {},
         children: [],
         content: [
-          { type: "text", text: "Siamo arrivati al ponte.", styles: {} },
+          { type: "text", text: "We reached the bridge.", styles: {} },
         ],
       },
       {
@@ -197,7 +197,7 @@ if (phase === "prepare") {
         content: [
           {
             type: "text",
-            text: "Varek mi ha consegnato la chiave del portone. ",
+            text: "Varek handed me the gate key. ",
             styles: {},
           },
           { type: "pageMention", props: { pageId: npc.id, label: "Varek" } },
@@ -215,7 +215,7 @@ if (phase === "prepare") {
   await tab("Character");
   await tab("Create character");
   await fill("Character name", "Neme");
-  await fill("Rules system", "Manuale della compagnia");
+  await fill("Rules system", "Company handbook");
   await fill("Origin or species", "Viandante");
   await fill("Class or calling", "Esploratrice");
   await fill("Level (optional)", 2);
@@ -233,30 +233,30 @@ if (phase === "prepare") {
   await fill("Risorsa 1: massimo", 3);
   await fill("Risorsa 1: attuale", 2);
   await tab("Add resource");
-  await fill("Resource 2: name", "Primo cerchio");
+  await fill("Resource 2: name", "First circle");
   await page
     .getByLabel("Risorsa 2: tipo", { exact: true })
     .selectOption("slot");
   await fill("Risorsa 2: massimo", 2);
   await fill("Risorsa 2: attuale", 1);
-  await fill("Conditions", "Stanca, secondo il mio regolamento.");
-  await fill("Character notes", "Appunti personali della scheda.");
+  await fill("Conditions", "Tired, according to my house rules.");
+  await fill("Character notes", "Personal sheet notes.");
   await tab("Save character");
   await saved();
-  await tab("Riduci Punti vita");
-  await expect(page.getByLabel("Punti vita", { exact: true })).toHaveText(
+  await tab("Decrease Hit points");
+  await expect(page.getByLabel("Hit points", { exact: true })).toHaveText(
     "7 / 10",
   );
-  await tab("Riduci Focus");
+  await tab("Decrease Focus");
   await expect(page.getByLabel("Focus", { exact: true })).toHaveText("1 / 3");
-  await tab("Aumenta Focus");
+  await tab("Increase Focus");
   await expect(page.getByLabel("Focus", { exact: true })).toHaveText("2 / 3");
-  await tab("Decrease Primo cerchio");
-  await expect(page.getByLabel("Primo cerchio", { exact: true })).toHaveText(
+  await tab("Decrease First circle");
+  await expect(page.getByLabel("First circle", { exact: true })).toHaveText(
     "0 / 2",
   );
   await expect(
-    page.getByRole("button", { name: "Decrease Primo cerchio", exact: true }),
+    page.getByRole("button", { name: "Decrease First circle", exact: true }),
   ).toBeDisabled();
   const characterBeforeAbilities = await invoke("get_character", {
     campaignId: campaign.id,
@@ -267,26 +267,26 @@ if (phase === "prepare") {
   );
   await tab("Inventory");
   await tab("Add item");
-  await fill("Entry name", "Chiave del portone");
+  await fill("Entry name", "Gate key");
   await fill("Quantity", 2);
   await fill("Item category", "Chiavi");
   await fill("Weight (your own unit, optional)", 0.2);
-  await fill("Value or currency (free text)", "Due monete annotate");
-  await fill("Description", "Una chiave consegnata da Varek.");
+  await fill("Value or currency (free text)", "Two noted coins");
+  await fill("Description", "A key handed over by Varek.");
   for (const [label, value] of [
     ["Linked NPC", npc.id],
     ["Linked place", place.id],
     ["Linked quest", quest.id],
     ["Codex page of the entry", itemPage.id],
     ["Source session", session.id],
-    ["Blocco fonte", "m5-key-source"],
+    ["Source block", "m5-key-source"],
   ])
     await page.getByLabel(label, { exact: true }).selectOption(value);
-  await fill("Provenance notes", "Ricevuta nella Sessione 12, non acquistata.");
+  await fill("Provenance notes", "Received in Session 12, not bought.");
   await tab("Character");
   await expect(page.getByRole("alert")).toContainText("Save or cancel");
   await expect(page.getByLabel("Entry name", { exact: true })).toHaveValue(
-    "Chiave del portone",
+    "Gate key",
   );
   await tab("Close message");
   await tab("Save entry");
@@ -303,7 +303,7 @@ if (phase === "prepare") {
   await saved();
   await expect(detail()).toContainText("Equipped");
   await tab("Add item");
-  await fill("Entry name", "Astuccio di prova");
+  await fill("Entry name", "Test case");
   await fill("Quantity", 0);
   await tab("Save entry");
   await saved();
@@ -313,15 +313,15 @@ if (phase === "prepare") {
   await assertContextNavigation(); // Return must keep the key selected, not the first item.
   await detail()
     .getByRole("button", {
-      name: "Pagina Codex: Chiave del portone",
+      name: "Codex page: Gate key",
       exact: true,
     })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Chiave del portone", exact: true }),
+    page.getByRole("heading", { name: "Gate key", exact: true }),
   ).toBeVisible();
   await tab("Back to the character entry");
-  await selectItem("Astuccio di prova");
+  await selectItem("Test case");
   await tab("Delete entry");
   await expect(page.getByRole("alertdialog")).toBeVisible();
   await page.keyboard.press("Escape");
@@ -330,7 +330,7 @@ if (phase === "prepare") {
   await tab("Confirm deletion");
   await expect(page.getByRole("alertdialog")).toHaveCount(0);
   await expect(
-    detail().getByRole("heading", { name: "Chiave del portone", exact: true }),
+    detail().getByRole("heading", { name: "Gate key", exact: true }),
   ).toBeVisible();
   await page.screenshot({ path: ".tools/m5-inventory.png", fullPage: true });
   console.log(
@@ -338,14 +338,14 @@ if (phase === "prepare") {
   );
   await tab("Abilities");
   await tab("Add spell");
-  await fill("Entry name", "Luce tenue");
-  await fill("Level or rank (free text)", "Primo cerchio");
-  await fill("School or tradition", "Luce");
-  await fill("Activation time", "Un gesto");
-  await fill("Duration", "Un breve momento");
-  await fill("Range", "Vicino");
-  await fill("Components", "Voce");
-  await fill("Description", "Un testo originale, senza regole commerciali.");
+  await fill("Entry name", "Faint light");
+  await fill("Level or rank (free text)", "First circle");
+  await fill("School or tradition", "Light");
+  await fill("Activation time", "One gesture");
+  await fill("Duration", "A brief moment");
+  await fill("Range", "Near");
+  await fill("Components", "Voice");
+  await fill("Description", "Original text, without commercial rules.");
   await page.getByLabel("Known", { exact: true }).check();
   await page.getByLabel("Prepared", { exact: true }).check();
   await page
@@ -356,22 +356,22 @@ if (phase === "prepare") {
   await page
     .getByLabel("Status or type", { exact: true })
     .selectOption("prepared");
-  await expect(detail()).toContainText("Conosciuta · Preparata");
+  await expect(detail()).toContainText("Known · Prepared");
   await tab("Toggle prepared");
   await expect(
     page.getByText("No entries match the filters.", { exact: true }),
   ).toBeVisible();
   await page.getByLabel("Status or type", { exact: true }).selectOption("all");
   await tab("Add ability");
-  await fill("Entry name", "Passo cauto");
-  await fill("Level or rank (free text)", "Talento personale");
+  await fill("Entry name", "Careful step");
+  await fill("Level or rank (free text)", "Personal talent");
   await page.getByLabel("Prepared", { exact: true }).check();
   await tab("Save entry");
   await saved();
-  await fill("Search by name", "Passo");
-  await fill("Filter by level", "Talento");
+  await fill("Search by name", "Careful");
+  await fill("Filter by level", "Personal");
   await expect(detail()).toContainText(
-    "Non segnata come conosciuta · Preparata",
+    "Not marked as known · Prepared",
   );
   assert.deepEqual(
     await invoke("get_character", { campaignId: campaign.id }),

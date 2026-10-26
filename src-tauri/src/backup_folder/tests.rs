@@ -89,7 +89,7 @@ fn schedule_is_due_once_per_interval_and_failures_wait_a_full_interval() {
 #[test]
 fn folder_is_created_only_when_needed_with_spaces_and_unicode() {
     let (dir, store) = store();
-    let documents = dir.path().join("Documenti di Zoë ✦");
+    let documents = dir.path().join("Zoë’s documents ✦");
     fs::create_dir(&documents).unwrap();
     let status = status(&store.root, Some(&documents)).unwrap();
     assert!(status.periodic_folder.unwrap().ends_with(PERIODIC));
@@ -117,7 +117,7 @@ fn folder_is_created_only_when_needed_with_spaces_and_unicode() {
 fn unsafe_or_missing_destinations_record_an_actionable_error_without_writing() {
     let (dir, store) = store();
     enable(&store.root, 3);
-    let missing = dir.path().join("non-esiste");
+    let missing = dir.path().join("does-not-exist");
     let outcome = run(&store, Some(&missing), at(10)).unwrap();
     assert!(outcome.error.unwrap().contains("unavailable"));
     let documents = dir.path().join("Documenti");
@@ -195,7 +195,7 @@ fn rotation_deletes_only_registered_unchanged_periodic_files_in_the_same_folder(
     // A failed run records the error and never rotates.
     let periodic = folder.clone();
     fs::rename(&periodic, dir.path().join("spostata")).unwrap();
-    fs::write(&periodic, "ora è un file").unwrap();
+    fs::write(&periodic, "now it is a file").unwrap();
     let failed = run(&store, Some(&documents), at(9)).unwrap();
     assert!(failed.error.is_some() && failed.removed == 0);
     assert_eq!(read_index(&store.root).unwrap().entries.len(), 2);
@@ -294,7 +294,7 @@ fn periodic_backup_with_images_restores_and_preferences_survive_restore() {
     .unwrap();
     enable(&store.root, 4);
     let path = run(&store, Some(&documents), at(1)).unwrap().path.unwrap();
-    journal::create_campaign(&store.connection, "Dopo il backup").unwrap();
+    journal::create_campaign(&store.connection, "After the backup").unwrap();
     let listed = list(&store.root, Some(&documents)).unwrap();
     let entry = &listed.backups[0];
     assert!(entry.registered && entry.kind == Kind::Periodic);

@@ -10,7 +10,7 @@ vi.mock("../journal/api", async (original) => ({
 const image: Attachment = {
   id: "image",
   campaignId: "a",
-  caption: "Mappa della costa",
+  caption: "Coast map",
   role: "map",
   filename: "image.png",
   width: 3,
@@ -42,7 +42,7 @@ test("file upload copies through typed commands; preview zooms and removal requi
     new File([new Uint8Array([1, 2, 3])], "map.png", { type: "image/png" }),
   );
   await screen.findByRole("button", {
-    name: "Open image: Mappa della costa",
+    name: "Open image: Coast map",
   });
   expect(command).toHaveBeenCalledWith(
     "add_image",
@@ -55,7 +55,7 @@ test("file upload copies through typed commands; preview zooms and removal requi
     }),
   );
   await user.click(
-    screen.getByRole("button", { name: "Open image: Mappa della costa" }),
+    screen.getByRole("button", { name: "Open image: Coast map" }),
   );
   await screen.findByRole("dialog");
   await user.selectOptions(screen.getByLabelText("Image zoom"), "200");
@@ -80,7 +80,7 @@ test("file upload copies through typed commands; preview zooms and removal requi
     }),
   );
   expect(
-    screen.queryByRole("button", { name: "Open image: Mappa della costa" }),
+    screen.queryByRole("button", { name: "Open image: Coast map" }),
   ).not.toBeInTheDocument();
 });
 test("failed copy keeps caption and exposes failure instead of adding a fake image", async () => {

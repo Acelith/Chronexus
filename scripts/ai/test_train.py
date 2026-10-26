@@ -12,11 +12,11 @@ from train import examples, merge_gguf, train, training_plan
 
 class WorkerTests(unittest.TestCase):
     def test_all_fragments_are_covered_beyond_64_examples_and_overflow_fails(self):
-        rows = examples([{"title":f"Pagina {i}","text":f"Informazione {i}"} for i in range(73)])
+        rows = examples([{"title":f"Page {i}","text":f"Information {i}"} for i in range(73)])
         plan = training_plan(rows)
         covered = {row[-1]["content"] for row in plan}
         self.assertEqual(covered,{row[-1]["content"] for row in rows})
-        self.assertTrue(any("Informazione 72" in text for text in covered))
+        self.assertTrue(any("Information 72" in text for text in covered))
         with self.assertRaisesRegex(ValueError,"8000"):
             training_plan(rows*110)
         with self.assertRaisesRegex(ValueError,"approved excerpts"):
@@ -27,7 +27,7 @@ class WorkerTests(unittest.TestCase):
             def __call__(self,text,**_):return {"input_ids":[ord(c) for c in text]}
             def decode(self,tokens,**_):return "".join(chr(c) for c in tokens)
         text="Appunti "*100+"Fine importante."
-        rows=examples([{"title":"Pagina","text":text}],CharacterTokenizer())
+        rows=examples([{"title":"Page","text":text}],CharacterTokenizer())
         fragments=[json.loads(row[1]["content"])["sources"][0]["text"] for row in rows]
         self.assertEqual("".join(fragments),text)
     def test_missing_cuda_fails_before_loading_campaign_or_model(self):
@@ -36,8 +36,8 @@ class WorkerTests(unittest.TestCase):
                 train({},Path("unused"))
 
     def test_examples_preserve_claims_and_do_not_execute_document_text(self):
-        rows = examples([{"title": "Mirna", "text": "Mirna dice di essere una maga."}])
-        self.assertIn("dice di essere", rows[0][-1]["content"])
+        rows = examples([{"title": "Mirna", "text": "Mirna claims to be a mage."}])
+        self.assertIn("claims to be", rows[0][-1]["content"])
         self.assertIn("remain unverified", rows[0][-1]["content"])
         self.assertIn("[S1]", rows[0][-1]["content"])
         self.assertEqual(examples([{"title": "Vuoto", "text": "  "}]), [])

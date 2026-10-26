@@ -65,7 +65,7 @@ const fixture = await page.evaluate(async (phase) => {
     for (let i = 1; i <= 35; i++)
       await call("create_page", {
         campaignId: campaign.id,
-        title: `Voce di collaudo ${i}`,
+        title: `Test entry ${i}`,
         kind: "note",
         status: "stub",
         aliases: [],
@@ -76,7 +76,7 @@ const fixture = await page.evaluate(async (phase) => {
     const session = await call("create_session", {
       campaignId: campaign.id,
       sequence: 1,
-      title: "Indizio del viandante",
+      title: "The wanderer’s clue",
       playedOn: null,
     });
     await call("save_document", {
@@ -93,7 +93,7 @@ const fixture = await page.evaluate(async (phase) => {
             content: [
               {
                 type: "text",
-                text: "Abbiamo incontrato ",
+                text: "We met ",
                 styles: { underline: true, backgroundColor: "yellow" },
               },
               {
@@ -110,7 +110,7 @@ const fixture = await page.evaluate(async (phase) => {
       await call("create_session", {
         campaignId: campaign.id,
         sequence: i,
-        title: `Sessione di collaudo ${i}`,
+        title: `Test session ${i}`,
         playedOn: null,
       });
   }
@@ -120,7 +120,7 @@ await page.reload();
 await page.getByRole("button", { name: "Journal", exact: true }).click();
 await page
   .locator(".session-list button")
-  .filter({ hasText: "Indizio del viandante" })
+  .filter({ hasText: "The wanderer’s clue" })
   .click();
 await page.getByRole("toolbar", { name: "Note commands" }).waitFor();
 await mkdir(".tools/ui-refresh", { recursive: true });
@@ -209,7 +209,7 @@ assert.equal(original.content[1].type, "pageMention");
 await page.getByRole("button", { name: "Journal", exact: true }).click();
 await page
   .locator(".session-list button")
-  .filter({ hasText: "Indizio del viandante" })
+  .filter({ hasText: "The wanderer’s clue" })
   .click();
 await expect(page.locator(".note-sheet")).toContainText("Indizio persistente");
 await page.screenshot({ path: `.tools/ui-refresh/editor-${phase}.png` });

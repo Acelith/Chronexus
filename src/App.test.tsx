@@ -50,7 +50,7 @@ vi.mock("./features/journal/Editor", async () => {
       register({ flush, dirty: () => true });
       return () => register(null);
     }, [register]);
-    return <div>Editor di test</div>;
+    return <div>Test editor</div>;
   }
   return { default: TestEditor };
 });
@@ -59,7 +59,7 @@ const session: Session = {
   id: "s1",
   campaignId: "a",
   sequence: 1,
-  title: "Il ponte",
+  title: "The bridge",
   playedOn: null,
   document: { version: 1, blocks: [] },
   revision: 0,
@@ -79,11 +79,11 @@ test("creates a campaign from the empty state and renames it", async () => {
   const user = userEvent.setup();
   vi.mocked(api.createCampaign).mockResolvedValue({
     id: "a",
-    name: "Le ceneri",
+    name: "The ashes",
   });
   vi.mocked(api.renameCampaign).mockResolvedValue({
     id: "a",
-    name: "Le stelle",
+    name: "The stars",
   });
   render(<App />);
   expect(
@@ -92,18 +92,18 @@ test("creates a campaign from the empty state and renames it", async () => {
   await user.click(
     await screen.findByRole("button", { name: "Create campaign" }),
   );
-  await user.type(screen.getByLabelText("Campaign name"), "Le ceneri");
+  await user.type(screen.getByLabelText("Campaign name"), "The ashes");
   await user.click(screen.getByRole("button", { name: "Create campaign" }));
   expect(
-    await screen.findByRole("heading", { name: "Le ceneri" }),
+    await screen.findByRole("heading", { name: "The ashes" }),
   ).toBeInTheDocument();
-  expect(api.createCampaign).toHaveBeenCalledWith("Le ceneri");
+  expect(api.createCampaign).toHaveBeenCalledWith("The ashes");
   await user.click(screen.getByRole("button", { name: "Rename campaign" }));
   await user.clear(screen.getByLabelText("Campaign name"));
-  await user.type(screen.getByLabelText("Campaign name"), "Le stelle");
+  await user.type(screen.getByLabelText("Campaign name"), "The stars");
   await user.click(screen.getByRole("button", { name: "Save name" }));
   expect(
-    await screen.findByRole("heading", { name: "Le stelle" }),
+    await screen.findByRole("heading", { name: "The stars" }),
   ).toBeInTheDocument();
 });
 
@@ -113,7 +113,7 @@ const knowledgePage: KnowledgePage = {
   title: "Varek",
   kind: "npc",
   status: "stub",
-  aliases: ["Il mercante"],
+  aliases: ["The merchant"],
   document: { version: 1, blocks: [] },
   revision: 0,
   updatedAt: "2026-10-23",
@@ -124,11 +124,11 @@ test("opening backup waits for notes and stays in the editor if saving fails", a
   vi.mocked(api.campaigns).mockResolvedValue([{ id: "a", name: "Campagna" }]);
   vi.mocked(api.sessions).mockResolvedValue([session]);
   render(<App />);
-  await screen.findByText("Editor di test");
+  await screen.findByText("Test editor");
   flush.mockRejectedValueOnce(new Error("Unsaved notes"));
   await user.click(screen.getByRole("button", { name: "Backup and restore" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("Unsaved notes");
-  expect(screen.getByText("Editor di test")).toBeInTheDocument();
+  expect(screen.getByText("Test editor")).toBeInTheDocument();
   expect(
     screen.queryByRole("heading", { name: "Backup and restore" }),
   ).not.toBeInTheDocument();
@@ -136,7 +136,7 @@ test("opening backup waits for notes and stays in the editor if saving fails", a
   expect(
     await screen.findByRole("heading", { name: "Backup and restore" }),
   ).toBeInTheDocument();
-  expect(screen.queryByText("Editor di test")).not.toBeInTheDocument();
+  expect(screen.queryByText("Test editor")).not.toBeInTheDocument();
 });
 
 test("restoring into an empty archive updates the campaign bar and opens restored documents", async () => {
@@ -166,7 +166,7 @@ test("restoring into an empty archive updates the campaign bar and opens restore
       { id: "a", name: "Campagna recuperata" },
     ]);
     vi.mocked(api.sessions).mockResolvedValue([session]);
-    return { safetyPath: "C:/backup/prima.nodex", counts, warning: null };
+    return { safetyPath: "C:/backup/before.nodex", counts, warning: null };
   });
   render(<App />);
   await screen.findByRole("button", { name: "Create campaign" });
@@ -192,8 +192,8 @@ test("restoring into an empty archive updates the campaign bar and opens restore
     screen.getByRole("combobox", { name: "Current campaign" }),
     "a",
   );
-  expect(await screen.findByText("Editor di test")).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "Il ponte" })).toBeInTheDocument();
+  expect(await screen.findByText("Test editor")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "The bridge" })).toBeInTheDocument();
 });
 
 test("creates a typed page and renames it while keeping the Codex open", async () => {
@@ -202,9 +202,9 @@ test("creates a typed page and renames it while keeping the Codex open", async (
   vi.mocked(knowledgeApi.create).mockResolvedValue(knowledgePage);
   const updated = {
     ...knowledgePage,
-    title: "Varek il grigio",
+    title: "Varek the Grey",
     status: "active" as const,
-    aliases: ["Varek", "Il mercante"],
+    aliases: ["Varek", "The merchant"],
   };
   vi.mocked(knowledgeApi.update).mockResolvedValue(updated);
   render(<App />);
@@ -215,7 +215,7 @@ test("creates a typed page and renames it while keeping the Codex open", async (
   await user.selectOptions(screen.getByLabelText("Status"), "stub");
   await user.type(
     screen.getByLabelText("Aliases (one per line, up to 20)"),
-    "Il mercante",
+    "The merchant",
   );
   await user.click(screen.getByRole("button", { name: "Create page" }));
   expect(
@@ -225,15 +225,15 @@ test("creates a typed page and renames it while keeping the Codex open", async (
     title: "Varek",
     kind: "npc",
     status: "stub",
-    aliases: ["Il mercante"],
+    aliases: ["The merchant"],
   });
   await user.click(screen.getByRole("button", { name: "Edit page" }));
   await user.clear(screen.getByLabelText("Page title"));
-  await user.type(screen.getByLabelText("Page title"), "Varek il grigio");
+  await user.type(screen.getByLabelText("Page title"), "Varek the Grey");
   await user.selectOptions(screen.getByLabelText("Status"), "active");
   await user.click(screen.getByRole("button", { name: "Save page" }));
   expect(
-    await screen.findByRole("heading", { name: "Varek il grigio" }),
+    await screen.findByRole("heading", { name: "Varek the Grey" }),
   ).toBeInTheDocument();
 });
 
@@ -246,20 +246,20 @@ test("a backlink opens the source session after saving", async () => {
     {
       sourceKind: "session",
       sourceId: "s1",
-      sourceTitle: "Il ponte",
+      sourceTitle: "The bridge",
       sequence: 1,
       blockId: "b1",
-      preview: "Ho incontrato Varek",
+      preview: "I met Varek",
     },
   ]);
   render(<App />);
-  await screen.findByText("Editor di test");
+  await screen.findByText("Test editor");
   await user.click(screen.getByRole("button", { name: "Codex" }));
   await user.click(
-    await screen.findByRole("button", { name: /Ho incontrato Varek/ }),
+    await screen.findByRole("button", { name: /I met Varek/ }),
   );
   expect(
-    await screen.findByRole("heading", { name: "Il ponte" }),
+    await screen.findByRole("heading", { name: "The bridge" }),
   ).toBeInTheDocument();
   expect(flush).toHaveBeenCalled();
 });
@@ -272,10 +272,10 @@ test("creates a session with a number, title and optional date", async () => {
   await user.click(
     await screen.findByRole("button", { name: /\+ New session/ }),
   );
-  await user.type(screen.getByLabelText("Session title"), "Il ponte");
+  await user.type(screen.getByLabelText("Session title"), "The bridge");
   await user.click(screen.getByRole("button", { name: "Create session" }));
-  expect(api.createSession).toHaveBeenCalledWith("a", 1, "Il ponte", null);
-  expect(await screen.findByText("Editor di test")).toBeInTheDocument();
+  expect(api.createSession).toHaveBeenCalledWith("a", 1, "The bridge", null);
+  expect(await screen.findByText("Test editor")).toBeInTheDocument();
 });
 
 test("a write error blocks switching campaigns and preserves the open note", async () => {
@@ -286,7 +286,7 @@ test("a write error blocks switching campaigns and preserves the open note", asy
   ]);
   vi.mocked(api.sessions).mockResolvedValue([session]);
   render(<App />);
-  await screen.findByText("Editor di test");
+  await screen.findByText("Test editor");
   flush.mockRejectedValue(new Error("Disk full: riprova."));
   await user.selectOptions(
     screen.getByRole("combobox", { name: "Current campaign" }),
@@ -296,7 +296,7 @@ test("a write error blocks switching campaigns and preserves the open note", asy
   expect(
     screen.getByRole("heading", { name: "Campagna A" }),
   ).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "Il ponte" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "The bridge" })).toBeInTheDocument();
   expect(api.sessions).toHaveBeenCalledTimes(1);
 });
 

@@ -7,7 +7,7 @@ const metadata = JSON.parse(
   readFileSync(new URL("metadata.json", root), "utf8"),
 );
 for (const family of ["Espruar", "Dethek"]) {
-  test(`${family}: font originale, lettere e licenza`, () => {
+  test(`${family}: original font, letters and licence`, () => {
     const file = readFileSync(new URL(`${family}.otf`, root));
     assert.equal(
       createHash("sha256").update(file).digest("hex"),

@@ -36,7 +36,7 @@ fn images_are_real_copies_scoped_to_owner_and_survive_backup_restore() {
         &source.directory,
         &a.id,
         &target,
-        "Mappa di prova",
+        "Test map",
         "map",
         data.clone(),
     )

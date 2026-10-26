@@ -68,7 +68,7 @@ const session: Session = {
   id: "s1",
   campaignId: "a",
   sequence: 12,
-  title: "Il ponte",
+  title: "The bridge",
   playedOn: null,
   document: {
     version: 1,
@@ -78,7 +78,7 @@ const session: Session = {
         type: "paragraph",
         props: {},
         children: [],
-        content: [{ type: "text", text: "Varek mi dà la chiave", styles: {} }],
+        content: [{ type: "text", text: "Varek gives me the key", styles: {} }],
       },
     ],
   },
@@ -95,10 +95,10 @@ const item: Asset = {
     ...emptyAsset("item", "generic"),
     details: {
       kind: "item",
-      name: "Chiave del ponte",
+      name: "Bridge key",
       quantity: 1,
       category: "Chiavi",
-      description: "Da conservare",
+      description: "To keep",
       weight: null,
       value: "",
       equipped: false,
@@ -210,7 +210,7 @@ test("saves an item with NPC, session and block and opens its links", async () =
   );
   const { user, onPage, onSource } = setup("inventory");
   await user.click(await screen.findByRole("button", { name: "Add item" }));
-  await user.type(screen.getByLabelText("Entry name"), "Chiave del ponte");
+  await user.type(screen.getByLabelText("Entry name"), "Bridge key");
   await user.selectOptions(screen.getByLabelText("Linked NPC"), "npc");
   await user.selectOptions(screen.getByLabelText("Source session"), "s1");
   await user.selectOptions(screen.getByLabelText("Source block"), "proof");
@@ -266,7 +266,7 @@ test("filters manual abilities and flags do not change counters", async () => {
     id: "light",
     input: emptyAsset("spell", "generic"),
   };
-  spell.input.details.name = "Luce tenue";
+  spell.input.details.name = "Faint light";
   if (spell.input.details.kind !== "item") {
     spell.input.details.rank = "Primo cerchio";
     spell.input.details.prepared = true;

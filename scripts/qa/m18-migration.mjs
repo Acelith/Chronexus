@@ -56,7 +56,7 @@ await assert.rejects(
   }),
   /not qualified|retired/,
 );
-const other = campaigns.find((c) => c.name.startsWith("Prova AI M7"));
+const other = campaigns.find((c) => c.name.startsWith("AI test M7"));
 assert(other);
 const gemma = await call("get_ai_settings", { campaignId: other.id });
 assert.equal(gemma.enabled, true);

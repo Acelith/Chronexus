@@ -19,8 +19,8 @@ test("search uses campaign filters and opens an exact source block; keyboard clo
       kind: "session",
       sourceId: "s",
       blockId: "block",
-      title: "La torre",
-      preview: "Chiave nella torre",
+      title: "The tower",
+      preview: "Key in the tower",
       updatedAt: "2026-10-23",
     },
   ]);
@@ -28,7 +28,7 @@ test("search uses campaign filters and opens an exact source block; keyboard clo
     <SearchPanel campaignId="campaign-a" onSelect={select} onClose={close} />,
   );
   await user.type(screen.getByLabelText("Text to search"), "chiave");
-  await screen.findByRole("button", { name: /La torre/ });
+  await screen.findByRole("button", { name: /The tower/ });
   await waitFor(() =>
     expect(command).toHaveBeenLastCalledWith("search_campaign", {
       campaignId: "campaign-a",
@@ -37,7 +37,7 @@ test("search uses campaign filters and opens an exact source block; keyboard clo
       sort: "relevance",
     }),
   );
-  await user.click(screen.getByRole("button", { name: /La torre/ }));
+  await user.click(screen.getByRole("button", { name: /The tower/ }));
   expect(select).toHaveBeenCalledWith(
     expect.objectContaining({ sourceId: "s", blockId: "block" }),
   );

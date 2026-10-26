@@ -14,7 +14,7 @@ test("preserves drafts and metadata snapshots during an external update", async 
   const page: KnowledgePage = {
     id: "page",
     campaignId: "campaign",
-    title: "Titolo originale",
+    title: "Original title",
     kind: "note",
     status: "active",
     aliases: [],
@@ -39,13 +39,13 @@ test("preserves drafts and metadata snapshots during an external update", async 
   };
   const view = render(<CodexWorkspace {...props} />);
   await user.click(screen.getByRole("button", { name: "Edit page" }));
-  const input = screen.getByDisplayValue("Titolo originale");
+  const input = screen.getByDisplayValue("Original title");
   await user.clear(input);
   await user.type(input, "Bozza locale");
   view.rerender(
     <CodexWorkspace
       {...props}
-      pages={[{ ...page, title: "Modifica AI" }]}
+      pages={[{ ...page, title: "AI edit" }]}
       externalEpoch={1}
     />,
   );
@@ -54,7 +54,7 @@ test("preserves drafts and metadata snapshots during an external update", async 
   expect(onUpdate).toHaveBeenCalledWith(
     "page",
     { title: "Bozza locale", kind: "note", status: "active", aliases: [] },
-    { title: "Titolo originale", kind: "note", status: "active", aliases: [] },
+    { title: "Original title", kind: "note", status: "active", aliases: [] },
   );
   expect(screen.getByDisplayValue("Bozza locale")).toBeInTheDocument();
 });

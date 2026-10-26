@@ -193,9 +193,9 @@ Does not modify existing releases not recognized by its local receipt.
 
 ```powershell
 # Write access already configured in Git for this exact repository;
-# nessuna scansione di credenziali, file o variabili di altri servizi.
+# no scanning of credentials, files or variables of other services.
 python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --git-credentials
-# Dopo verifica di tutti e tre gli allegati nella bozza:
+# After verifying all three attachments in the draft:
 python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --git-credentials --finalize
 ```
 

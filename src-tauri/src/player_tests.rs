@@ -32,7 +32,7 @@ fn sheet() -> CharacterInput {
             },
             Resource {
                 id: Uuid::new_v4().to_string(),
-                label: "Usi del primo cerchio".into(),
+                label: "First circle uses".into(),
                 kind: "slot".into(),
                 current: 0,
                 maximum: 2,
@@ -46,24 +46,24 @@ fn item() -> AssetInput {
     AssetInput {
         details: AssetDetails::Item {
             location: String::new(),
-            name: "Chiave del ponte".into(),
+            name: "Bridge key".into(),
             quantity: 1,
             category: "Chiavi".into(),
-            description: "Ricevuta da Varek".into(),
+            description: "Received from Varek".into(),
             weight: Some(0.1),
-            value: "Senza prezzo".into(),
+            value: "No price".into(),
             equipped: false,
             consumable: false,
-            notes: "Da conservare".into(),
+            notes: "To keep".into(),
         },
         links: AssetLinks::default(),
     }
 }
 fn ability(kind: &str) -> AssetInput {
-    serde_json::from_value(json!({"details":{"kind":kind,"name":"Luce tenue","systemId":"Sistema personale","rank":"Primo cerchio","school":"Luce","castingTime":"Un gesto","duration":"Breve","range":"Vicina","components":"Voce","known":false,"prepared":true,"description":"Testo originale del giocatore.","notes":"Nessun consumo automatico."},"links":{"pageId":null,"sourceSessionId":null,"sourceBlockId":null,"npcId":null,"placeId":null,"questId":null,"provenanceNotes":""}})).unwrap()
+    serde_json::from_value(json!({"details":{"kind":kind,"name":"Faint light","systemId":"Personal system","rank":"First circle","school":"Light","castingTime":"One gesture","duration":"Short","range":"Vicina","components":"Voce","known":false,"prepared":true,"description":"Player's original text.","notes":"Nessun consumo automatico."},"links":{"pageId":null,"sourceSessionId":null,"sourceBlockId":null,"npcId":null,"placeId":null,"questId":null,"provenanceNotes":""}})).unwrap()
 }
 fn document() -> Value {
-    json!({"version":1,"blocks":[{"id":"key-source","type":"paragraph","props":{},"children":[],"content":[{"type":"text","text":"Varek mi ha dato la chiave.","styles":{}}]}]})
+    json!({"version":1,"blocks":[{"id":"key-source","type":"paragraph","props":{},"children":[],"content":[{"type":"text","text":"Varek gave me the key.","styles":{}}]}]})
 }
 #[test]
 fn legacy_sheet_defaults_and_expanded_validation_preserve_saved_data() {
@@ -193,9 +193,9 @@ fn inventory_crud_preserves_provenance_through_page_renames_and_does_not_create_
     let character = save_character(&c, &a.id, None, None, sheet()).unwrap();
     let npc = knowledge::create_page(&c, &a.id, "Varek", "npc", "active", &[]).unwrap();
     let place = knowledge::create_page(&c, &a.id, "Ponte", "place", "active", &[]).unwrap();
-    let quest = knowledge::create_page(&c, &a.id, "Il portone", "quest", "stub", &[]).unwrap();
+    let quest = knowledge::create_page(&c, &a.id, "The gate", "quest", "stub", &[]).unwrap();
     let page = knowledge::create_page(&c, &a.id, "Chiave", "item", "active", &[]).unwrap();
-    let session = journal::create_session(&c, &a.id, 12, "Una chiave", None).unwrap();
+    let session = journal::create_session(&c, &a.id, 12, "A key", None).unwrap();
     journal::save_document(&c, &a.id, &session.id, 0, document()).unwrap();
     let mut input = item();
     input.links = AssetLinks {
@@ -205,10 +205,10 @@ fn inventory_crud_preserves_provenance_through_page_renames_and_does_not_create_
         npc_id: Some(npc.id.clone()),
         place_id: Some(place.id),
         quest_id: Some(quest.id),
-        provenance_notes: "L'ho ricevuta, non l'ho comprata.".into(),
+        provenance_notes: "I received it, I did not buy it.".into(),
     };
     let saved = save_asset(&c, &a.id, &character.id, None, None, input.clone()).unwrap();
-    knowledge::update_page(&c, &a.id, &npc.id, "Varek il grigio", "npc", "active", &[]).unwrap();
+    knowledge::update_page(&c, &a.id, &npc.id, "Varek the Grey", "npc", "active", &[]).unwrap();
     assert_eq!(
         list_assets(&c, &a.id, &character.id).unwrap()[0]
             .input
@@ -242,7 +242,7 @@ fn inventory_crud_preserves_provenance_through_page_renames_and_does_not_create_
     assert!(list_assets(&c, &a.id, &character.id).unwrap().is_empty());
     assert_eq!(
         knowledge::get_page(&c, &a.id, &npc.id).unwrap().title,
-        "Varek il grigio"
+        "Varek the Grey"
     );
     assert_eq!(journal::list_sessions(&c, &a.id).unwrap().len(), 1);
 }
@@ -261,7 +261,7 @@ fn changed_codex_kind_preserves_historical_provenance_and_backup() {
         &c,
         &a.id,
         &npc.id,
-        "Nome riletto come luogo",
+        "Name reread as a place",
         "place",
         "active",
         &[],
@@ -308,7 +308,7 @@ fn rejects_invalid_payloads_cross_campaign_and_wrong_provenance_types_without_re
     let b = journal::create_campaign(&c, "B").unwrap();
     let character = save_character(&c, &a.id, None, None, sheet()).unwrap();
     let foreign = knowledge::create_page(&c, &b.id, "Varek", "npc", "active", &[]).unwrap();
-    let page = knowledge::create_page(&c, &a.id, "Gilda", "faction", "active", &[]).unwrap();
+    let page = knowledge::create_page(&c, &a.id, "Guild", "faction", "active", &[]).unwrap();
     for scenario in 0..6 {
         let mut bad = sheet();
         match scenario {
@@ -448,7 +448,7 @@ fn backup_round_trip_includes_character_resources_items_and_abilities_with_stabl
     input
         .sheet
         .fields
-        .insert("background".into(), "Cartografa".into());
+        .insert("background".into(), "Cartographer".into());
     input.sheet.fields.insert("spellSaveDc".into(), "13".into());
     input.sheet.inspiration = true;
     input.sheet.death_successes = 2;

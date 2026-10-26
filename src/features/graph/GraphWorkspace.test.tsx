@@ -20,7 +20,7 @@ vi.mock("./api", async (original) => ({
     remove: vi.fn(),
   },
 }));
-vi.mock("./GraphCanvas", () => ({ default: () => <div>Canvas di test</div> }));
+vi.mock("./GraphCanvas", () => ({ default: () => <div>Test canvas</div> }));
 const pages = [
   {
     id: "v",
@@ -36,7 +36,7 @@ const pages = [
   {
     id: "g",
     campaignId: "a",
-    title: "Gilda",
+    title: "Guild",
     kind: "faction",
     status: "active",
     aliases: [],
@@ -50,7 +50,7 @@ const sessions = [
     id: "s",
     campaignId: "a",
     sequence: 12,
-    title: "L'accusa",
+    title: "The accusation",
     playedOn: null,
     revision: 0,
     updatedAt: "",
@@ -63,7 +63,7 @@ const sessions = [
           props: {},
           children: [],
           content: [
-            { type: "text", text: "Varek accusa la Gilda.", styles: {} },
+            { type: "text", text: "Varek accuses the Guild.", styles: {} },
           ],
         },
       ],
@@ -82,7 +82,7 @@ const data: GraphData = {
     {
       id: "page:g",
       entityId: "g",
-      title: "Gilda",
+      title: "Guild",
       kind: "faction",
       missing: false,
     },
@@ -104,8 +104,8 @@ const record: Relationship = {
   sourceKind: "session",
   sourceId: "s",
   sourceBlockId: "b",
-  evidence: "Una dichiarazione.",
-  notes: "Da verificare.",
+  evidence: "A claim.",
+  notes: "To be checked.",
 };
 const register = vi.fn();
 const onNode = vi.fn();
@@ -133,7 +133,7 @@ beforeEach(() => {
 test("creates a relationship with certainty and a source block without changing mentions", async () => {
   const user = userEvent.setup();
   renderGraph();
-  await screen.findByText("Canvas di test");
+  await screen.findByText("Test canvas");
   await user.click(screen.getByRole("button", { name: "New relationship" }));
   expect(screen.getByLabelText("Certainty")).toHaveValue("unknown");
   await user.type(screen.getByLabelText("Relationship label"), "accusa");
@@ -145,11 +145,11 @@ test("creates a relationship with certainty and a source block without changing 
   await user.selectOptions(screen.getByLabelText("Source block"), "b");
   await user.type(
     screen.getByLabelText("Evidence or quote"),
-    "Una dichiarazione.",
+    "A claim.",
   );
   await user.type(
     screen.getByLabelText("Relationship notes"),
-    "Da verificare.",
+    "To be checked.",
   );
   await user.click(screen.getByRole("button", { name: "Save relationship" }));
   await screen.findByText("Relationship saved on the computer.");
@@ -163,8 +163,8 @@ test("creates a relationship with certainty and a source block without changing 
       sourceKind: "session",
       sourceId: "s",
       sourceBlockId: "b",
-      evidence: "Una dichiarazione.",
-      notes: "Da verificare.",
+      evidence: "A claim.",
+      notes: "To be checked.",
     },
     undefined,
   );
@@ -194,7 +194,7 @@ test("deletion requires confirmation and uses the current revision", async () =>
   };
   vi.mocked(graphApi.graph).mockResolvedValue(graph);
   renderGraph();
-  await screen.findByText("Canvas di test");
+  await screen.findByText("Test canvas");
   await user.click(screen.getByText("Accessible list of nodes and links"));
   await user.click(screen.getByRole("button", { name: /Relationship: Varek/ }));
   await user.click(
@@ -218,7 +218,7 @@ test("deletion requires confirmation and uses the current revision", async () =>
 test("an open relationship blocks navigation and preserves the form after an error", async () => {
   const user = userEvent.setup();
   renderGraph();
-  await screen.findByText("Canvas di test");
+  await screen.findByText("Test canvas");
   await user.click(screen.getByRole("button", { name: "New relationship" }));
   await user.type(screen.getByLabelText("Relationship label"), "accusa");
   const guard = register.mock.calls.at(-1)![0] as SaveGuard;
@@ -244,7 +244,7 @@ test("applies filters and neighborhood only on confirmation and indicates a limi
     totalEdges: 800,
   });
   renderGraph();
-  await screen.findByText("Canvas di test");
+  await screen.findByText("Test canvas");
   expect(screen.getByText(/View limited to 150 nodes/)).toBeInTheDocument();
   await user.selectOptions(screen.getByLabelText("Links"), "assertions");
   await user.selectOptions(

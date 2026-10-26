@@ -57,7 +57,7 @@ function setup() {
 test("creates a backup receipt and handles cancellation and destination errors", async () => {
   const { user } = setup();
   vi.mocked(backupApi.create)
-    .mockResolvedValueOnce({ path: "E:/copie/nuovo.nodex", counts })
+    .mockResolvedValueOnce({ path: "E:/copies/new.nodex", counts })
     .mockResolvedValueOnce(null)
     .mockRejectedValueOnce(
       new Error("The file already exists. Choose a new name."),
@@ -65,7 +65,7 @@ test("creates a backup receipt and handles cancellation and destination errors",
   const button = screen.getByRole("button", { name: "Create backup" });
   await user.click(button);
   const receipt = await screen.findByRole("region", { name: "Backup created" });
-  expect(within(receipt).getByText("E:/copie/nuovo.nodex")).toBeInTheDocument();
+  expect(within(receipt).getByText("E:/copies/new.nodex")).toBeInTheDocument();
   expect(within(receipt).getByText("Attachments")).toBeInTheDocument();
   await user.click(button);
   expect(
@@ -123,9 +123,9 @@ test("restores only the verified token, updates campaigns and shows the safety c
   const { user, onRestored } = setup();
   vi.mocked(backupApi.inspect).mockResolvedValue(preview);
   vi.mocked(backupApi.restore).mockResolvedValue({
-    safetyPath: "C:/dati/backups/prima.nodex",
+    safetyPath: "C:/data/backups/before.nodex",
     counts,
-    warning: "Controlla la sincronizzazione su disco.",
+    warning: "Check the disk synchronization.",
   });
   await user.click(screen.getByRole("button", { name: "Select backup" }));
   await user.click(
@@ -137,10 +137,10 @@ test("restores only the verified token, updates campaigns and shows the safety c
   expect(backupApi.restore).toHaveBeenCalledWith("verified-token");
   expect(onRestored).toHaveBeenCalledOnce();
   expect(
-    within(receipt).getByText("C:/dati/backups/prima.nodex"),
+    within(receipt).getByText("C:/data/backups/before.nodex"),
   ).toBeInTheDocument();
   expect(within(receipt).getByRole("alert")).toHaveTextContent(
-    "sincronizzazione",
+    "synchronization",
   );
 });
 test("blocks other operations while busy and requires verification again after an error", async () => {

@@ -5,7 +5,7 @@ test("compact view keeps the requested center, bounded neighbors and no dangling
   const nodes = Array.from({ length: 75 }, (_, i) => ({
     id: `p${i}`,
     entityId: `${i}`,
-    title: `Voce ${i}`,
+    title: `Entry ${i}`,
     kind: "npc" as const,
     missing: false,
   }));

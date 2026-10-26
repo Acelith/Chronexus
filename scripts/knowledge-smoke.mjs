@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 const phase = process.argv[2];
 if (!["prepare", "verify"].includes(phase))
   throw Error(
-    "Usa prepare o verify con il profilo isolato descritto in docs/QA.md.",
+    "Use prepare or verify with the isolated profile described in docs/QA.md.",
   );
 const browser = await chromium.connectOverCDP("http://127.0.0.1:9223");
 const page = browser
@@ -45,15 +45,15 @@ try {
       .getByRole("button", { name: "Create campaign", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "+ Nuova sessione", exact: true })
+      .getByRole("button", { name: "New session", exact: true })
       .click();
     await page.getByLabel("Number", { exact: true }).fill("12");
-    await page.getByLabel("Session title").fill("La testimonianza");
+    await page.getByLabel("Session title").fill("The testimony");
     await page
       .getByRole("button", { name: "Create session", exact: true })
       .click();
     await editor().click();
-    await page.keyboard.insertText("Ho incontrato ");
+    await page.keyboard.insertText("I met ");
     await page.keyboard.type("[[Varek");
     await page.getByText("Create draft «Varek»", { exact: true }).click();
     await saved();
@@ -64,24 +64,24 @@ try {
       page.getByRole("heading", { name: "Varek", exact: true }),
     ).toBeVisible();
     await expect(page.getByLabel("References to this page")).toContainText(
-      "Sessione 12: La testimonianza",
+      "Session 12: The testimony",
     );
     await page.getByRole("button", { name: "Edit page", exact: true }).click();
-    await page.getByLabel("Page title").fill("Varek il grigio");
+    await page.getByLabel("Page title").fill("Varek the Grey");
     await page.getByLabel("Type", { exact: true }).selectOption("npc");
     await page.getByLabel("Status", { exact: true }).selectOption("active");
-    await page.getByLabel("Aliases (one per line, up to 20)").fill("Custode");
+    await page.getByLabel("Aliases (one per line, up to 20)").fill("Keeper");
     await page.getByRole("button", { name: "Save page", exact: true }).click();
     await expect(
-      page.getByRole("heading", { name: "Varek il grigio", exact: true }),
+      page.getByRole("heading", { name: "Varek the Grey", exact: true }),
     ).toBeVisible();
     await page
       .getByRole("button", {
-        name: /Ho incontrato Varek.*Apri il blocco di origine/,
+        name: /I met Varek.*Open the source block/,
       })
       .click();
     await expect(
-      page.getByRole("heading", { name: "La testimonianza", exact: true }),
+      page.getByRole("heading", { name: "The testimony", exact: true }),
     ).toBeVisible();
     await expect(page.locator(".note-sheet")).toHaveAttribute(
       "data-focused-source",
@@ -94,17 +94,17 @@ try {
       page.locator(`.bn-block-outer[data-id="${blockId}"]`),
     ).toHaveCSS("outline-style", "solid");
     await page
-      .getByRole("button", { name: "Open Varek il grigio", exact: true })
+      .getByRole("button", { name: "Open Varek the Grey", exact: true })
       .click();
-    await createMention("Gilda");
-    await page.getByRole("button", { name: "Open Gilda", exact: true }).click();
+    await createMention("Guild");
+    await page.getByRole("button", { name: "Open Guild", exact: true }).click();
     await expect(page.getByLabel("References to this page")).toContainText(
-      "Pagina: Varek il grigio",
+      "Page: Varek the Grey",
     );
     await page.getByRole("button", { name: "New page", exact: true }).click();
     await page.getByLabel("Page title").fill("Nara");
     await page.getByLabel("Type", { exact: true }).selectOption("npc");
-    await page.getByLabel("Aliases (one per line, up to 20)").fill("Custode");
+    await page.getByLabel("Aliases (one per line, up to 20)").fill("Keeper");
     await page
       .getByRole("button", { name: "Create page", exact: true })
       .click();
@@ -114,13 +114,13 @@ try {
     await page.getByRole("button", { name: "Journal", exact: true }).click();
     await editor().click();
     await page.keyboard.press("Control+End");
-    await page.keyboard.type(" [[Custode]]");
+    await page.keyboard.type(" [[Keeper]]");
     await expect(
-      page.getByText("Varek il grigio", { exact: true }),
+      page.getByText("Varek the Grey", { exact: true }),
     ).toBeVisible();
     await expect(page.getByText("Nara", { exact: true })).toBeVisible();
     await expect(
-      page.getByText("Create draft «Custode»", { exact: true }),
+      page.getByText("Create draft «Keeper»", { exact: true }),
     ).toHaveCount(0);
     await page.getByText("Nara", { exact: true }).click();
     await saved();
@@ -128,17 +128,17 @@ try {
     // The real backend rejects the duplicate; typed text must survive the failure.
     await invoke("create_page", {
       campaignId: campaign.id,
-      title: "Contesa",
+      title: "Dispute",
       kind: "note",
       status: "stub",
       aliases: [],
     });
     await editor().click();
     await page.keyboard.press("Control+End");
-    await page.keyboard.type(" [[Contesa");
-    await page.getByText("Create draft «Contesa»", { exact: true }).click();
+    await page.keyboard.type(" [[Dispute");
+    await page.getByText("Create draft «Dispute»", { exact: true }).click();
     await expect(page.getByRole("alert")).toContainText("already");
-    await expect(editor()).toContainText("[[Contesa]]");
+    await expect(editor()).toContainText("[[Dispute]]");
     await saved();
     // Inject an unresolved reference via the real typed command to exercise recovery.
     const [session] = await invoke("list_sessions", {
@@ -152,7 +152,7 @@ try {
       props: {},
       children: [],
       content: [
-        { type: "pageMention", props: { pageId: missingId, label: "Perduta" } },
+        { type: "pageMention", props: { pageId: missingId, label: "Lost" } },
       ],
     });
     await invoke("save_document", {
@@ -164,20 +164,20 @@ try {
     await page.reload();
     await page
       .getByRole("button", {
-        name: "Apri Perduta (pagina mancante)",
+        name: "Open Lost (missing page)",
         exact: true,
       })
       .click();
-    await page.getByLabel("Title to recover").fill("Perduta recuperata");
+    await page.getByLabel("Title to recover").fill("Lost, recovered");
     await page
       .getByRole("button", { name: "Recover draft", exact: true })
       .click();
     await expect(
-      page.getByRole("heading", { name: "Perduta recuperata", exact: true }),
+      page.getByRole("heading", { name: "Lost, recovered", exact: true }),
     ).toBeVisible();
     const pages = await invoke("list_pages", { campaignId: campaign.id });
     const sessions = await invoke("list_sessions", { campaignId: campaign.id });
-    assert.equal(pages.find((p) => p.id === varek.id).title, "Varek il grigio");
+    assert.equal(pages.find((p) => p.id === varek.id).title, "Varek the Grey");
     assert(pages.find((p) => p.id === varek.id).aliases.includes("Varek"));
     assert.equal(pages.find((p) => p.id === missingId).status, "stub");
     assert.equal(pages.length, 5);
@@ -206,21 +206,21 @@ try {
       expected.sessions,
     );
     await page
-      .getByRole("button", { name: "Open Varek il grigio", exact: true })
+      .getByRole("button", { name: "Open Varek the Grey", exact: true })
       .click();
     await expect(
-      page.getByRole("heading", { name: "Varek il grigio", exact: true }),
+      page.getByRole("heading", { name: "Varek the Grey", exact: true }),
     ).toBeVisible();
     await expect(page.getByLabel("References to this page")).toContainText(
-      "Sessione 12: La testimonianza",
+      "Session 12: The testimony",
     );
     await page.screenshot({
       path: ".tools/codex-m2-reopened.png",
       fullPage: true,
     });
-    await page.getByRole("button", { name: "Open Gilda", exact: true }).click();
+    await page.getByRole("button", { name: "Open Guild", exact: true }).click();
     await expect(page.getByLabel("References to this page")).toContainText(
-      "Pagina: Varek il grigio",
+      "Page: Varek the Grey",
     );
     assert.deepEqual(errors, []);
     await invoke("plugin:window|close", { label: "main" }).catch(() => {});

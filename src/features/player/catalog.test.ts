@@ -79,8 +79,8 @@ test("spell import preserves mechanics, materials, higher levels and original id
     name: "Test Spell",
     level: 2,
     school: { name: "Test" },
-    desc: ["Testo di prova"],
-    higher_level: ["Altro testo"],
+    desc: ["Test text"],
+    higher_level: ["Other text"],
     components: ["V", "M"],
     material: "Cristallo",
     ritual: true,
@@ -98,5 +98,5 @@ test("spell import preserves mechanics, materials, higher levels and original id
     catalogSource: { path: "spells/test-spell", name: "Test Spell" },
   });
   expect(spell.description).toContain("Cristallo");
-  expect(spell.description).toContain("Altro testo");
+  expect(spell.description).toContain("Other text");
 });

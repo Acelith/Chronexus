@@ -10,21 +10,21 @@ use zip::{write::SimpleFileOptions, ZipArchive, ZipWriter};
 
 fn seed(store: &Store) -> (String, String, String, String) {
     let c = &store.connection;
-    let campaign = journal::create_campaign(c, "La via delle ceneri").unwrap();
+    let campaign = journal::create_campaign(c, "The Ash Road").unwrap();
     let v = knowledge::create_page(
         c,
         &campaign.id,
         "Varek",
         "npc",
         "active",
-        &["Il testimone".into()],
+        &["The witness".into()],
     )
     .unwrap();
-    let g = knowledge::create_page(c, &campaign.id, "Gilda", "faction", "stub", &[]).unwrap();
+    let g = knowledge::create_page(c, &campaign.id, "Guild", "faction", "stub", &[]).unwrap();
     let session =
-        journal::create_session(c, &campaign.id, 12, "L'accusa", Some("2026-10-23".into()))
+        journal::create_session(c, &campaign.id, 12, "The accusation", Some("2026-10-23".into()))
             .unwrap();
-    let doc = json!({"version":1,"blocks":[{"id":"proof","type":"paragraph","props":{},"children":[],"content":[{"type":"text","text":"È una supposizione. ","styles":{}},{"type":"pageMention","props":{"pageId":v.id,"label":"Varek"}},{"type":"pageMention","props":{"pageId":g.id,"label":"Gilda"}}]}]});
+    let doc = json!({"version":1,"blocks":[{"id":"proof","type":"paragraph","props":{},"children":[],"content":[{"type":"text","text":"It is an assumption. ","styles":{}},{"type":"pageMention","props":{"pageId":v.id,"label":"Varek"}},{"type":"pageMention","props":{"pageId":g.id,"label":"Guild"}}]}]});
     journal::save_document(c, &campaign.id, &session.id, 0, doc.clone()).unwrap();
     knowledge::save_page_document(c, &campaign.id, &v.id, 0, doc).unwrap();
     let relation = graph::save_relationship(
@@ -40,8 +40,8 @@ fn seed(store: &Store) -> (String, String, String, String) {
             source_kind: Some("session".into()),
             source_id: Some(session.id.clone()),
             source_block_id: Some("proof".into()),
-            evidence: "Dichiarazione al ponte".into(),
-            notes: "Da verificare".into(),
+            evidence: "Claim at the bridge".into(),
+            notes: "To be checked".into(),
         },
     )
     .unwrap();
@@ -91,7 +91,7 @@ fn backup_restore_round_trip_preserves_all_campaigns_documents_links_relationshi
     let temp = tempfile::tempdir().unwrap();
     let source = Store::open(&temp.path().join("source")).unwrap();
     let (campaign, session, page, relation) = seed(&source);
-    journal::create_campaign(&source.connection, "Seconda campagna").unwrap();
+    journal::create_campaign(&source.connection, "Second campaign").unwrap();
     // A WAL write is visible in the snapshot, without raw copying the live DB.
     source
         .connection
@@ -123,7 +123,7 @@ fn backup_restore_round_trip_preserves_all_campaigns_documents_links_relationshi
     );
     let target_root = temp.path().join("fresh");
     let mut target = Store::open(&target_root).unwrap();
-    let old = journal::create_campaign(&target.connection, "Da proteggere").unwrap();
+    let old = journal::create_campaign(&target.connection, "To protect").unwrap();
     let preview = target.prepare(&bundle).unwrap();
     assert_eq!(
         journal::list_campaigns(&target.connection).unwrap()[0].id,

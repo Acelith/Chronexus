@@ -78,7 +78,7 @@ describe("local catalogs", () => {
       name: "Shield",
       description: "Original English source.",
     });
-    const untouched = "Oran [[Sigillo]] العربية 日本語";
+    const untouched = "Oran [[Seal]] العربية 日本語";
     expect(tr(untouched)).toBe(untouched);
     expect(translateError("Operation failed. Try again.")).not.toBe(
       "Operation failed. Try again.",

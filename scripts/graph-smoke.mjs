@@ -83,7 +83,7 @@ async function createRelationship(varek, guild, session, block) {
     .click();
   await page.getByLabel("From page", { exact: true }).selectOption(varek.id);
   await page.getByLabel("At page", { exact: true }).selectOption(guild.id);
-  await page.getByLabel("Relationship label", { exact: true }).fill("accusa");
+  await page.getByLabel("Relationship label", { exact: true }).fill("accuses");
   await page.getByLabel("Certainty", { exact: true }).selectOption("suspected");
   await page
     .getByLabel("Source (optional)", { exact: true })
@@ -91,7 +91,7 @@ async function createRelationship(varek, guild, session, block) {
   await page.getByLabel("Source block", { exact: true }).selectOption(block);
   await page
     .getByLabel("Evidence or quote", { exact: true })
-    .fill("Varek accusa la Gilda: è una dichiarazione da verificare.");
+    .fill("Varek accuses the Guild: a claim to be checked.");
   await page
     .getByLabel("Relationship notes", { exact: true })
     .fill("Nessuna alleanza dedotta dalle menzioni.");
@@ -115,17 +115,17 @@ try {
       .getByRole("button", { name: "Create campaign", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "+ Nuova sessione", exact: true })
+      .getByRole("button", { name: "New session", exact: true })
       .click();
     await page.getByLabel("Number", { exact: true }).fill("12");
-    await page.getByLabel("Session title").fill("La voce di Varek");
+    await page.getByLabel("Session title").fill("Varek’s rumour");
     await page
       .getByRole("button", { name: "Create session", exact: true })
       .click();
     const editor = page.locator('.bn-editor[contenteditable="true"]');
     await editor.click();
-    await page.keyboard.insertText("Nella stessa nota: ");
-    for (const title of ["Varek", "Gilda"]) {
+    await page.keyboard.insertText("In the same note: ");
+    for (const title of ["Varek", "Guild"]) {
       await page.keyboard.type(`[[${title}`);
       await page.getByText(`Create draft «${title}»`, { exact: true }).click();
       await expect(page.locator(".save-state")).toHaveText(
@@ -137,7 +137,7 @@ try {
     const [campaign] = await invoke("list_campaigns");
     const pages = await invoke("list_pages", { campaignId: campaign.id });
     const varek = pages.find((p) => p.title === "Varek"),
-      guild = pages.find((p) => p.title === "Gilda");
+      guild = pages.find((p) => p.title === "Guild");
     const [session] = await invoke("list_sessions", {
       campaignId: campaign.id,
     });
@@ -158,11 +158,11 @@ try {
     await page
       .getByRole("button", { name: "New relationship", exact: true })
       .click();
-    await page.getByLabel("Relationship label").fill("Da conservare");
+    await page.getByLabel("Relationship label").fill("To keep");
     await page.getByRole("button", { name: "Journal", exact: true }).click();
     await expect(page.getByRole("alert")).toContainText("Save or cancel");
     await expect(page.getByLabel("Relationship label")).toHaveValue(
-      "Da conservare",
+      "To keep",
     );
     await page
       .getByRole("button", { name: "Close message", exact: true })
@@ -183,7 +183,7 @@ try {
         (e) =>
           e.kind === "assertion" &&
           e.line === "solid" &&
-          e.label === "accusa (Sospetta)",
+          e.label === "accuses (Suspected)",
       ),
     );
     await clickElement(`page:${varek.id}`);
@@ -200,7 +200,7 @@ try {
       .getByRole("button", { name: "Open source", exact: true })
       .click();
     await expect(
-      page.getByRole("heading", { name: "La voce di Varek", exact: true }),
+      page.getByRole("heading", { name: "Varek’s rumour", exact: true }),
     ).toBeVisible();
     await expect(page.locator(".note-sheet")).toHaveAttribute(
       "data-focused-source",
@@ -318,11 +318,11 @@ try {
       "Suspected",
     );
     await expect(page.getByLabel("Link details")).toContainText(
-      "dichiarazione da verificare",
+      "claim to be checked",
     );
     assert(
       (await styles()).some(
-        (e) => e.line === "solid" && e.label === "accusa (Sospetta)",
+        (e) => e.line === "solid" && e.label === "accuses (Suspected)",
       ),
     );
     await page.screenshot({

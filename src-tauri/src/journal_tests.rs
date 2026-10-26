@@ -3,8 +3,8 @@ use serde_json::json;
 
 fn document() -> serde_json::Value {
     json!({"version":1,"blocks":[
-        {"id":"one","type":"paragraph","props":{},"content":[{"type":"text","text":"Varek sostiene di conoscere la gilda.","styles":{}}],"children":[]},
-        {"id":"two","type":"paragraph","props":{},"content":[{"type":"text","text":"È soltanto un sospetto.","styles":{"bold":true}}],"children":[]}
+        {"id":"one","type":"paragraph","props":{},"content":[{"type":"text","text":"Varek claims to know the guild.","styles":{}}],"children":[]},
+        {"id":"two","type":"paragraph","props":{},"content":[{"type":"text","text":"It is only a suspicion.","styles":{"bold":true}}],"children":[]}
     ]})
 }
 
@@ -14,8 +14,8 @@ fn campaign_session_two_paragraphs_survive_restart_in_order() {
     let path = directory.path().join("journal.sqlite3");
     let (campaign_id, session_id) = {
         let connection = db::open(&path).unwrap();
-        let campaign = create_campaign(&connection, "Campagna di prova").unwrap();
-        create_session(&connection, &campaign.id, 12, "Il ritorno", None).unwrap();
+        let campaign = create_campaign(&connection, "Test campaign").unwrap();
+        create_session(&connection, &campaign.id, 12, "The return", None).unwrap();
         let session = create_session(
             &connection,
             &campaign.id,
@@ -26,11 +26,11 @@ fn campaign_session_two_paragraphs_survive_restart_in_order() {
         .unwrap();
         let saved = save_document(&connection, &campaign.id, &session.id, 0, document()).unwrap();
         assert_eq!(saved.revision, 1);
-        rename_campaign(&connection, &campaign.id, "Nuovo nome").unwrap();
+        rename_campaign(&connection, &campaign.id, "New name").unwrap();
         (campaign.id, session.id)
     };
     let connection = db::open(&path).unwrap();
-    assert_eq!(list_campaigns(&connection).unwrap()[0].name, "Nuovo nome");
+    assert_eq!(list_campaigns(&connection).unwrap()[0].name, "New name");
     let sessions = list_sessions(&connection, &campaign_id).unwrap();
     assert_eq!(
         sessions.iter().map(|s| s.sequence).collect::<Vec<_>>(),

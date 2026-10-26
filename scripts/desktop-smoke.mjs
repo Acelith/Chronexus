@@ -24,7 +24,7 @@ try {
     assert.deepEqual(
       await invoke("list_campaigns"),
       [],
-      "Il profilo deve essere vuoto. Non usare dati personali.",
+      "The profile must be empty. Do not use personal data.",
     );
     await page
       .getByRole("button", { name: "Create campaign", exact: true })
@@ -35,14 +35,14 @@ try {
       .click();
     await page.getByRole("heading", { name: "Verifica locale M1" }).waitFor();
     await page.getByRole("button", { name: "Rename campaign" }).click();
-    await page.getByLabel("Campaign name").fill("Diario di verifica M1");
+    await page.getByLabel("Campaign name").fill("M1 verification journal");
     await page.getByRole("button", { name: "Save name" }).click();
     for (const [sequence, title] of [
-      [12, "Il ritorno"],
-      [2, "Il ponte"],
+      [12, "The return"],
+      [2, "The bridge"],
     ]) {
       await page
-        .getByRole("button", { name: "+ Nuova sessione", exact: true })
+        .getByRole("button", { name: "New session", exact: true })
         .click();
       await page.getByLabel("Number", { exact: true }).fill(String(sequence));
       await page.getByLabel("Session title").fill(title);
@@ -53,10 +53,10 @@ try {
     }
     const editor = page.locator('.bn-editor[contenteditable="true"]');
     await editor.click();
-    await page.keyboard.insertText("Varek sostiene di conoscere la gilda.");
+    await page.keyboard.insertText("Varek claims to know the guild.");
     await page.keyboard.press("Enter");
     await page.keyboard.insertText(
-      "È soltanto un sospetto, non un fatto accertato.",
+      "It is only a suspicion, not an established fact.",
     );
     await expect(page.getByRole("status")).toHaveText("Saved on the computer");
     const [campaign] = await invoke("list_campaigns");
@@ -68,11 +68,11 @@ try {
     assert.equal(sessions[0].document.blocks.length, 2);
     assert.equal(
       sessions[0].document.blocks[0].content[0].text,
-      "Varek sostiene di conoscere la gilda.",
+      "Varek claims to know the guild.",
     );
     assert.equal(
       sessions[0].document.blocks[1].content[0].text,
-      "È soltanto un sospetto, non un fatto accertato.",
+      "It is only a suspicion, not an established fact.",
     );
     await writeFile(
       ".tools/smoke-expectation.json",
@@ -80,7 +80,7 @@ try {
     );
     await page.screenshot({ path: ".tools/desktop-m1.png", fullPage: true });
     // Queue an edit and close immediately: the window must flush its pending write.
-    await page.keyboard.insertText(" Chiusura immediata.");
+    await page.keyboard.insertText(" Immediate close.");
     await invoke("plugin:window|close", { label: "main" }).catch(() => {});
     console.log(
       "PASS prepare: create/rename, ordering, real editor, two paragraphs and close request.",
@@ -99,13 +99,13 @@ try {
       [2, 12],
     );
     const blocks = structuredClone(expected.sessions[0].document.blocks);
-    blocks[1].content[0].text += " Chiusura immediata.";
+    blocks[1].content[0].text += " Immediate close.";
     assert.deepEqual(sessions[0].document, { version: 1, blocks });
     await expect(page.locator(".bn-editor")).toContainText(
-      "Varek sostiene di conoscere la gilda.",
+      "Varek claims to know the guild.",
     );
     await expect(page.locator(".bn-editor")).toContainText(
-      "È soltanto un sospetto, non un fatto accertato. Chiusura immediata.",
+      "It is only a suspicion, not an established fact. Immediate close.",
     );
     await page.screenshot({
       path: ".tools/desktop-m1-reopened.png",
@@ -119,14 +119,14 @@ try {
     await editor.click();
     if (sessions[1].document.blocks.every((block) => !block.content.length)) {
       await page.keyboard.press("Control+b");
-      await page.keyboard.insertText("Un indizio");
+      await page.keyboard.insertText("A clue");
       await page.keyboard.press("Control+b");
       await page.keyboard.press("Enter");
       await page.keyboard.type("# ");
-      await page.keyboard.insertText("Ipotesi");
+      await page.keyboard.insertText("Hypothesis");
       await page.keyboard.press("Enter");
       await page.keyboard.type("- ");
-      await page.keyboard.insertText("Da verificare");
+      await page.keyboard.insertText("To be checked");
       await expect(page.getByRole("status")).toHaveText(
         "Saved on the computer",
       );

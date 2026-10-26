@@ -29,13 +29,13 @@ const settings = {
 const turn: Turn = {
   id: "turn",
   campaignId: "c",
-  question: "Chi è Mirna?",
+  question: "Who is Mirna?",
   mode: "campaign",
   edition: null,
   model: settings.model,
   digest: settings.digest,
   status: "complete",
-  answer: "Mirna è una cartografa [S1].",
+  answer: "Mirna is a cartographer [S1].",
   sources: [
     {
       key: "S1",
@@ -44,7 +44,7 @@ const turn: Turn = {
       blockId: "block",
       title: "Mirna",
       revision: 1,
-      text: "Mirna è una cartografa.",
+      text: "Mirna is a cartographer.",
       hash: "h",
       edition: null,
     },
@@ -140,7 +140,7 @@ test("streams, cancels on navigation and retains errors and partial answers", as
     />,
   );
   await screen.findByLabelText("Question");
-  await user.type(screen.getByLabelText("Question"), "Chi è Mirna?");
+  await user.type(screen.getByLabelText("Question"), "Who is Mirna?");
   await user.click(screen.getByRole("button", { name: "Ask the sources" }));
   const request = vi.mocked(assistantApi.ask).mock.calls[0][0];
   act(() => receive({ requestId: request.id, phase: "token", text: "Mirna…" }));
@@ -160,7 +160,7 @@ test("changed sources require explicit current-version navigation and deletion c
   vi.mocked(assistantApi.source).mockResolvedValue({
     available: true,
     changed: true,
-    title: "Mirna nuova",
+    title: "New Mirna",
   });
   vi.mocked(assistantApi.remove).mockResolvedValue();
   const user = userEvent.setup(),
@@ -172,7 +172,7 @@ test("changed sources require explicit current-version navigation and deletion c
       onSource={onSource}
     />,
   );
-  await user.click(await screen.findByRole("button", { name: /Chi è Mirna/ }));
+  await user.click(await screen.findByRole("button", { name: /Who is Mirna/ }));
   expect(
     screen.getByText(/Sources excluded for possible instructions: 1/),
   ).toBeVisible();

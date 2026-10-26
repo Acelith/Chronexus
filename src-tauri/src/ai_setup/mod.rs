@@ -451,7 +451,7 @@ pub fn remove_runtime(root: &Path, state: &State) -> AppResult<()> {
         .map_err(|_| "Cannot remove the runtime. Close Ollama and try again.".into())
 }
 pub(crate) fn write_receipt(dir: &Path, files: usize) -> AppResult<()> {
-    let receipt = json!({"version": OLLAMA_VERSION, "source": OLLAMA_URL, "sha256": OLLAMA_SHA256, "files": files, "license": "MIT (OLLAMA_LICENSE nel pacchetto ufficiale)"});
+    let receipt = json!({"version": OLLAMA_VERSION, "source": OLLAMA_URL, "sha256": OLLAMA_SHA256, "files": files, "license": "MIT (OLLAMA_LICENSE in the official package)"});
     fs::write(
         dir.join(RECEIPT),
         serde_json::to_vec_pretty(&receipt).unwrap_or_default(),

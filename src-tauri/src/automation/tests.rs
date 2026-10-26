@@ -26,7 +26,7 @@ fn append_preserves_blocks_and_rejects_stale_revision_and_other_campaign() {
     let p = policy(&campaign.id);
     let s = journal::create_session(&c, &campaign.id, 1, "Session", None).unwrap();
     let old = s.document["blocks"][0].clone();
-    let args = json!({"campaignId":campaign.id,"target":"session","id":s.id,"revision":0,"text":"Oran sostiene: [[NON una relazione fattuale]] 日本語"});
+    let args = json!({"campaignId":campaign.id,"target":"session","id":s.id,"revision":0,"text":"Oran claims: [[NOT a factual relationship]] 日本語"});
     let saved = execute(&c, &p, "append_note", args.clone());
     assert_eq!(saved["document"]["blocks"][0], old);
     assert_eq!(saved["revision"], 1);
@@ -90,11 +90,11 @@ fn metadata_etag_detects_changes_even_without_document_revision_change() {
     let p = policy(&camp.id);
     let page = knowledge::create_page(&c, &camp.id, "Varek", "npc", "active", &[]).unwrap();
     let read = execute(&c, &p, "page", json!({"campaignId":camp.id,"id":page.id}));
-    knowledge::update_page(&c, &camp.id, &page.id, "Varek nuovo", "npc", "active", &[]).unwrap();
+    knowledge::update_page(&c, &camp.id, &page.id, "New Varek", "npc", "active", &[]).unwrap();
     assert!(domain::call(&c,&p,"chronexus_update_page",&json!({"campaignId":camp.id,"id":page.id,"etag":read["etag"],"patch":{"status":"archived"}})).is_err());
     assert_eq!(
         knowledge::get_page(&c, &camp.id, &page.id).unwrap().title,
-        "Varek nuovo"
+        "New Varek"
     );
 }
 #[test]
@@ -109,7 +109,7 @@ fn character_patch_preserves_fields_and_party_uses_membership_revisions() {
         "create_character",
         json!({"campaignId":camp.id,"name":"Oran"}),
     );
-    let args = json!({"campaignId":camp.id,"id":character["id"],"revision":0,"patch":{"notes":"Nota esterna","hpMaximum":10,"hpCurrent":7}});
+    let args = json!({"campaignId":camp.id,"id":character["id"],"revision":0,"patch":{"notes":"External note","hpMaximum":10,"hpCurrent":7}});
     execute(&c, &p, "update_character", args.clone());
     assert_eq!(
         player::get_character(&c, &camp.id)
@@ -195,8 +195,8 @@ fn transport_auth_origin_scoping_cleanup_and_live_store() {
         "Origin: https://example.org\r\n"
     )
     .starts_with("HTTP/1.1 403"));
-    let raw=post(endpoint,token,&json!({"tool":"chronexus_create_session","arguments":{"campaignId":camp.id,"sequence":1,"title":"Da MCP"}}).to_string(),"");
-    assert!(raw.contains("Da MCP"));
+    let raw=post(endpoint,token,&json!({"tool":"chronexus_create_session","arguments":{"campaignId":camp.id,"sequence":1,"title":"From MCP"}}).to_string(),"");
+    assert!(raw.contains("From MCP"));
     assert_eq!(
         journal::list_sessions(&store.lock().unwrap().connection, &camp.id)
             .unwrap()
@@ -287,7 +287,7 @@ fn reference_templates_create_real_assets_and_stale_gui_metadata_cannot_overwrit
         &c,
         &camp.id,
         &page.id,
-        "Modificata da AI",
+        "Edited by AI",
         "note",
         "active",
         &[],
@@ -298,7 +298,7 @@ fn reference_templates_create_real_assets_and_stale_gui_metadata_cannot_overwrit
         &camp.id,
         &page.id,
         knowledge::Metadata {
-            title: "Bozza vecchia UI".into(),
+            title: "Old UI draft".into(),
             kind: "note".into(),
             status: "active".into(),
             aliases: vec![]
@@ -308,7 +308,7 @@ fn reference_templates_create_real_assets_and_stale_gui_metadata_cannot_overwrit
     .is_err());
     assert_eq!(
         knowledge::get_page(&c, &camp.id, &page.id).unwrap().title,
-        "Modificata da AI"
+        "Edited by AI"
     );
 }
 #[test]
@@ -357,7 +357,7 @@ fn running_bridge_follows_real_backup_restore_and_never_backs_up_its_token() {
             &current.connection,
             &campaign.id,
             9,
-            "Da scartare nel ripristino",
+            "To discard on restore",
             None,
         )
         .unwrap();
@@ -367,8 +367,8 @@ fn running_bridge_follows_real_backup_restore_and_never_backs_up_its_token() {
     let discovery: Value =
         serde_json::from_slice(&std::fs::read(root.path().join(transport::DISCOVERY)).unwrap())
             .unwrap();
-    let raw=post(discovery["endpoint"].as_str().unwrap(),discovery["token"].as_str().unwrap(),&json!({"tool":"chronexus_create_session","arguments":{"campaignId":campaign.id,"sequence":1,"title":"Dopo ripristino"}}).to_string(),"");
-    assert!(raw.contains("Dopo ripristino"));
+    let raw=post(discovery["endpoint"].as_str().unwrap(),discovery["token"].as_str().unwrap(),&json!({"tool":"chronexus_create_session","arguments":{"campaignId":campaign.id,"sequence":1,"title":"After restore"}}).to_string(),"");
+    assert!(raw.contains("After restore"));
     let current = store.lock().unwrap();
     assert_eq!(
         journal::list_sessions(&current.connection, &campaign.id)

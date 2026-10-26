@@ -35,20 +35,20 @@ if (mode === "restore") {
 }
 if (mode === "prepare") {
   assert.equal((await ipc("list_campaigns")).length, 0);
-  await ipc("create_campaign", { name: "Prova M6 — compagnia e biblioteca" });
+  await ipc("create_campaign", { name: "M6 test — party and library" });
   await p.reload();
   await p
     .getByRole("button", {
-      name: "Prova M6 — compagnia e biblioteca",
+      name: "M6 test — party and library",
       exact: true,
     })
     .click();
   await p.getByRole("button", { name: "Party", exact: true }).click();
   await p.getByRole("button", { name: "Add member", exact: true }).click();
-  await p.getByLabel("Character name").fill("Varek di prova");
+  await p.getByLabel("Character name").fill("Test Varek");
   await p
     .getByLabel("Player (optional)", { exact: true })
-    .fill("Giocatore esempio");
+    .fill("Sample player");
   await p.getByLabel("Role in the company").fill("Cartografo");
   await p.getByRole("button", { name: "Save member", exact: true }).click();
   await expect(
@@ -57,7 +57,7 @@ if (mode === "prepare") {
   const edit = p.locator(".bn-editor[contenteditable=true]");
   await expect(edit).toBeVisible();
   await edit.click();
-  await p.keyboard.type("Varek sostiene di conoscere la torre. Da verificare.");
+  await p.keyboard.type("Varek claims to know the tower. To be checked.");
   await p.getByRole("button", { name: "D&D Wiki", exact: true }).click();
   await p.getByLabel("Term in the wiki").fill("magic missile");
   await p.getByRole("button", { name: "Search the wiki", exact: true }).click();
@@ -81,11 +81,11 @@ if (mode === "prepare") {
   const members = await ipc("list_party", { campaignId });
   assert.equal(members.length, 1);
   const page = members[0].page;
-  assert(JSON.stringify(page.document).includes("Da verificare"));
+  assert(JSON.stringify(page.document).includes("To be checked"));
   await ipc("add_image", {
     campaignId,
     target: { kind: "page", id: page.id },
-    caption: "Immagine di prova locale",
+    caption: "Local test image",
     role: "portrait",
     dataBase64:
       "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGOQM3Jzi0phyKtoWrBqCwAa0AUBqodUtwAAAABJRU5ErkJggg==",
@@ -93,7 +93,7 @@ if (mode === "prepare") {
   const session = await ipc("create_session", {
     campaignId,
     sequence: 1,
-    title: "La torre di prova",
+    title: "The test tower",
     playedOn: null,
   });
   await ipc("save_document", {
@@ -109,7 +109,7 @@ if (mode === "prepare") {
           props: {},
           children: [],
           content: [
-            { type: "text", text: "Appunto di prova: ", styles: {} },
+            { type: "text", text: "Test note: ", styles: {} },
             {
               type: "pageMention",
               props: { pageId: page.id, label: page.title },
@@ -122,7 +122,7 @@ if (mode === "prepare") {
   await p.reload();
   await p
     .getByRole("button", {
-      name: "Prova M6 — compagnia e biblioteca",
+      name: "M6 test — party and library",
       exact: true,
     })
     .click();
@@ -133,7 +133,7 @@ if (mode === "prepare") {
     .first()
     .click();
   await expect(
-    p.getByRole("button", { name: "Open image: Immagine di prova locale" }),
+    p.getByRole("button", { name: "Open image: Local test image" }),
   ).toBeVisible({ timeout: 15000 });
   await p.screenshot({ path: ".tools/party-real-m6.png" });
   await p.getByRole("button", { name: "Graph", exact: true }).click();
@@ -201,7 +201,7 @@ if (mode === "prepare") {
   );
   await p
     .getByRole("button", {
-      name: "Prova M6 — compagnia e biblioteca",
+      name: "M6 test — party and library",
       exact: true,
     })
     .click();

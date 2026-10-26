@@ -78,10 +78,10 @@ if (phase === "check") {
   await page.reload();
   await page.getByRole("button", { name: "Character", exact: true }).click();
   await page.getByRole("button", { name: "Create character" }).click();
-  await page.getByLabel("Character name").fill("Oran di prova");
+  await page.getByLabel("Character name").fill("Test Oran");
   await page.getByRole("button", { name: "Save character" }).click();
   await expect(
-    page.getByRole("heading", { name: "Oran di prova" }),
+    page.getByRole("heading", { name: "Test Oran" }),
   ).toBeVisible();
 
   await page.getByRole("button", { name: "D&D Wiki", exact: true }).click();
@@ -148,7 +148,7 @@ if (phase === "check") {
   });
 
   await page.getByRole("button", { name: "D&D Wiki", exact: true }).click();
-  await page.getByLabel("Name in the wiki").fill("zzqq nessuna voce");
+  await page.getByLabel("Name in the wiki").fill("zzqq no entry");
   await page.getByRole("button", { name: "Search Wikidot" }).click();
   const prompt = page.getByRole("alertdialog");
   await expect(prompt).toContainText(

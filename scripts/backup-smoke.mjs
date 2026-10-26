@@ -13,7 +13,7 @@ const targetDirectory = path.resolve(
 );
 assert(
   targetDirectory.startsWith(path.resolve(".tools") + path.sep),
-  "Il profilo smoke deve essere dentro .tools",
+  "The smoke profile must be inside .tools",
 );
 await expect
   .poll(
@@ -92,17 +92,17 @@ if (phase === "seed") {
   const campaign = await invoke("create_campaign", {
     name: "Verifica backup M4",
   });
-  await invoke("create_campaign", { name: "Seconda campagna M4" });
+  await invoke("create_campaign", { name: "Second campaign M4" });
   const v = await invoke("create_page", {
     campaignId: campaign.id,
     title: "Varek",
     kind: "npc",
     status: "active",
-    aliases: ["Il testimone"],
+    aliases: ["The witness"],
   });
   const g = await invoke("create_page", {
     campaignId: campaign.id,
-    title: "Gilda",
+    title: "Guild",
     kind: "faction",
     status: "stub",
     aliases: [],
@@ -110,7 +110,7 @@ if (phase === "seed") {
   const s = await invoke("create_session", {
     campaignId: campaign.id,
     sequence: 12,
-    title: "Una dichiarazione",
+    title: "A claim",
     playedOn: "2026-10-23",
   });
   const document = {
@@ -122,7 +122,7 @@ if (phase === "seed") {
         props: {},
         children: [],
         content: [
-          { type: "text", text: "Varek accusa la Gilda. ", styles: {} },
+          { type: "text", text: "Varek accuses the Guild. ", styles: {} },
           ...[v, g].map((p) => ({
             type: "pageMention",
             props: { pageId: p.id, label: p.title },
@@ -150,13 +150,13 @@ if (phase === "seed") {
     input: {
       fromPageId: v.id,
       toPageId: g.id,
-      label: "accusa",
+      label: "accuses",
       certainty: "suspected",
       sourceKind: "session",
       sourceId: s.id,
       sourceBlockId: "m4-proof",
-      evidence: "Dichiarazione, non fatto confermato.",
-      notes: "Verificare con il personaggio.",
+      evidence: "A claim, not a confirmed fact.",
+      notes: "Check with the character.",
     },
   });
   const source = path.resolve(".tools/m4-source");
@@ -184,7 +184,7 @@ if (phase === "seed") {
     .getByRole("button", { name: "Create backup", exact: true })
     .click();
   console.log(
-    "Selezionare nel dialogo nativo: .tools/m4-portable.nodex (percorso assoluto).",
+    "Select in the native dialog: .tools/m4-portable.nodex (absolute path).",
   );
 } else if (phase === "created") {
   const receipt = page.getByRole("region", {
@@ -200,13 +200,13 @@ if (phase === "seed") {
   await page.screenshot({ path: ".tools/backup-created.png", fullPage: true });
   await close();
   console.log(
-    "PASS backup reale creato e verificato (scelta file nativa o predefinita nel debug)",
+    "PASS real backup created and verified (native or default file choice in debug)",
   );
 } else if (phase === "select") {
   const campaigns = await invoke("list_campaigns");
   if (!campaigns.length) {
     const prior = await invoke("create_campaign", {
-      name: "Archivio da proteggere M4",
+      name: "M4 archive to protect",
     });
     const expected = JSON.parse(await readFile(expectationPath, "utf8"));
     expected.prior = prior;
@@ -217,13 +217,13 @@ if (phase === "seed") {
   await page
     .getByRole("button", { name: "Select backup", exact: true })
     .click();
-  console.log("Selezionare nel dialogo nativo .tools/m4-portable.nodex.");
+  console.log("Select .tools/m4-portable.nodex in the native dialog.");
 } else if (phase === "cancel") {
   const expected = JSON.parse(await readFile(expectationPath, "utf8"));
   await expect(page.getByRole("alertdialog")).toBeVisible();
   assert.deepEqual(await invoke("list_campaigns"), [expected.prior]);
   await page
-    .getByRole("button", { name: "Archivio da proteggere M4", exact: true })
+    .getByRole("button", { name: "M4 archive to protect", exact: true })
     .click();
   await expect(page.getByRole("alert")).toContainText("Conferma o annulla");
   await page
@@ -261,7 +261,7 @@ if (phase === "seed") {
   await writeFile(expectationPath, JSON.stringify(expected));
   await page.screenshot({ path: ".tools/backup-restored.png", fullPage: true });
   await close();
-  console.log("PASS ripristino, confronto integrale dati e copia preventiva");
+  console.log("PASS restore, full data comparison and safety copy");
 } else if (phase === "verify") {
   const expected = JSON.parse(await readFile(expectationPath, "utf8"));
   assert.deepEqual(await data(), expected.data);

@@ -17,10 +17,10 @@ fn stable_mentions_backlinks_and_rename_survive_restart() {
             "Varek",
             "npc",
             "stub",
-            &["Il mercante".into()],
+            &["The merchant".into()],
         )
         .unwrap();
-        let session = journal::create_session(&c, &campaign.id, 12, "La gilda", None).unwrap();
+        let session = journal::create_session(&c, &campaign.id, 12, "The guild", None).unwrap();
         journal::save_document(&c, &campaign.id, &session.id, 0, document(&page.id)).unwrap();
         let links = backlinks(&c, &campaign.id, &page.id).unwrap();
         assert_eq!(links.len(), 2);
@@ -32,7 +32,7 @@ fn stable_mentions_backlinks_and_rename_survive_restart() {
             &c,
             &campaign.id,
             &page.id,
-            "Varek il grigio",
+            "Varek the Grey",
             "npc",
             "active",
             &page.aliases,
@@ -45,7 +45,7 @@ fn stable_mentions_backlinks_and_rename_survive_restart() {
     let c = db::open(&path).unwrap();
     assert_eq!(
         get_page(&c, &campaign_id, &page_id).unwrap().title,
-        "Varek il grigio"
+        "Varek the Grey"
     );
     assert_eq!(
         journal::get_session(&c, &campaign_id, &session_id)
@@ -90,15 +90,15 @@ fn page_sources_are_indexed_and_stale_or_cross_campaign_writes_roll_back() {
 fn ambiguous_aliases_remain_explicit_and_duplicate_creation_is_rejected() {
     let c = db::open(std::path::Path::new(":memory:")).unwrap();
     let a = journal::create_campaign(&c, "A").unwrap();
-    let p = create_page(&c, &a.id, "Varek", "npc", "stub", &["Custode".into()]).unwrap();
-    create_page(&c, &a.id, "Nara", "npc", "active", &["Custode".into()]).unwrap();
+    let p = create_page(&c, &a.id, "Varek", "npc", "stub", &["Keeper".into()]).unwrap();
+    create_page(&c, &a.id, "Nara", "npc", "active", &["Keeper".into()]).unwrap();
     let candidates = list_pages(&c, &a.id)
         .unwrap()
         .into_iter()
-        .filter(|p| p.aliases.contains(&"Custode".into()))
+        .filter(|p| p.aliases.contains(&"Keeper".into()))
         .count();
     assert_eq!(candidates, 2);
-    assert!(create_page(&c, &a.id, " custode ", "note", "stub", &[]).is_err());
+    assert!(create_page(&c, &a.id, " keeper ", "note", "stub", &[]).is_err());
     assert!(create_page(&c, &a.id, " VAREK ", "note", "stub", &[]).is_err());
     assert!(update_page(&c, &a.id, &p.id, "Nara", "npc", "active", &[]).is_err());
     assert_eq!(get_page(&c, &a.id, &p.id).unwrap().title, "Varek");
@@ -123,7 +123,7 @@ fn missing_reference_can_be_recovered_with_same_id_only_in_its_campaign() {
 fn plain_brackets_do_not_assert_links_and_invalid_mentions_are_rejected() {
     let mut doc = journal::empty_document();
     doc["blocks"][0]["content"] =
-        json!([{"type":"text","text":"[[Varek]] conosce [[Gilda]]","styles":{}}]);
+        json!([{"type":"text","text":"[[Varek]] knows [[Guild]]","styles":{}}]);
     assert!(extract_mentions(&doc).unwrap().is_empty());
     doc["blocks"][0]["content"] =
         json!([{"type":"pageMention","props":{"pageId":"not-an-id","label":"Varek"}}]);

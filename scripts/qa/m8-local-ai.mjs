@@ -1,5 +1,7 @@
 // Native Tauri/Ollama/CUDA acceptance. Use only an empty isolated debug profile.
 // Fixtures are original synthetic text; reports and weights stay under .tools/.
+// The campaign questions and expected answers stay Italian: they are the recorded
+// historical benchmark, and translating them would invalidate past results.
 import { chromium, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
@@ -300,7 +302,7 @@ if (phase === "seed") {
     .first()
     .click();
   await expect(
-    p.getByText("Adapter attivato soltanto per questa campagna.", {
+    p.getByText("Adapter activated for this campaign only.", {
       exact: false,
     }),
   ).toBeVisible({ timeout: 180000 });

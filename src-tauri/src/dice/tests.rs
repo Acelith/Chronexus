@@ -170,7 +170,7 @@ fn older_backup_migrates_without_history_or_data_loss() {
         old.execute_batch(migration).unwrap();
     }
     let campaign = journal::create_campaign(&old, "Archivio precedente").unwrap();
-    let session = journal::create_session(&old, &campaign.id, 1, "Da conservare", None).unwrap();
+    let session = journal::create_session(&old, &campaign.id, 1, "To keep", None).unwrap();
     let bundle = dir.path().join("old.nodex");
     backup::write_backup(&old, &old_root, &bundle).unwrap();
     let mut target = backup::Store::open(&dir.path().join("target")).unwrap();

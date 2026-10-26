@@ -7,7 +7,7 @@ fn original_sources_are_immutable_scoped_and_preserved_in_backup() {
     let a = journal::create_campaign(c, "A").unwrap();
     let b = journal::create_campaign(c, "B").unwrap();
     let p = knowledge::create_page(c, &a.id, "Fonte", "note", "active", &[]).unwrap();
-    let raw = "type:: npc\r\n- [[Varek]] dice una cosa, non è una conferma.\r\n";
+    let raw = "type:: npc\r\n- [[Varek]] says something, it is not a confirmation.\r\n";
     let source = sources::add(c, &a.id, "page", &p.id, "pages/Fonte.md", raw).unwrap();
     assert!(sources::add(c, &a.id, "page", &p.id, "pages/Fonte.md", "Overwrite").is_err());
     assert!(sources::get(c, &b.id, "page", &p.id).unwrap().is_none());

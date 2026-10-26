@@ -110,7 +110,7 @@ def merge_gguf(base, adapter, output):
             raise ValueError("Adapter contains an unauthorized tensor")
         b = weights[name.replace(".lora_A.weight", ".lora_B.weight")]
         if a.ndim != 2 or b.ndim != 2 or a.shape[0] != rank or b.shape[1] != rank or a.shape[1] > 8192 or b.shape[0] > 8192 or a.shape[1] * b.shape[0] > 32_000_000:
-            raise ValueError("Dimensioni adapter oltre i limiti")
+            raise ValueError("Adapter size exceeds the limits")
         if not np.isfinite(a).all() or not np.isfinite(b).all():
             raise ValueError("Adapter contains non-finite values")
         tensor = "blk." + match[1] + (".attn_q.weight" if match[2] == "q_proj" else ".attn_output.weight")
@@ -131,7 +131,7 @@ def merge_gguf(base, adapter, output):
         if t.name in updates:
             value = gguf.dequantize(t.data, t.tensor_type).reshape(tuple(reversed(t.shape)))
             if value.shape != updates[t.name].shape:
-                raise ValueError("Forma dei tensori incompatibile con Gemma 4 12B")
+                raise ValueError("Tensor shape incompatible with Gemma 4 12B")
             value = (value + updates[t.name]).astype(np.float16)
             writer.add_tensor(t.name, value)
             found.add(t.name)
@@ -196,7 +196,7 @@ def train(job, out):
         torch.nn.utils.clip_grad_norm_((p for p in model.parameters() if p.requires_grad), 1.0)
         optimizer.step(); optimizer.zero_grad(set_to_none=True)
         losses.append(float(loss.item()))
-        emit(out, "training", step=i+1, steps=steps, loss=losses[-1], message="Addestramento locale dei pesi adapter…")
+        emit(out, "training", step=i+1, steps=steps, loss=losses[-1], message="Training adapter weights locally…")
     changed = any(not torch.equal(initial[n], p.detach().cpu()) for n, p in model.named_parameters() if p.requires_grad)
     if not changed:
         raise RuntimeError("Weights did not change: training failed")
@@ -223,10 +223,10 @@ def main():
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=True)
     try:
         if args.input.stat().st_size > 8 * 1024 * 1024:
-            raise ValueError("Dataset oltre il limite")
+            raise ValueError("Dataset exceeds the limit")
         job = json.loads(args.input.read_text(encoding="utf-8-sig"))
         if args.merge:
-            emit(out, "merging", message="Preparazione dei pesi derivati per Ollama…")
+            emit(out, "merging", message="Preparing derived weights for Ollama…")
             merge_gguf(Path(job["gguf"]), Path(job["adapter"]), out / "model.gguf")
             emit(out, "complete", message="Pesi derivati preparati")
         else:

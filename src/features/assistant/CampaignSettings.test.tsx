@@ -42,7 +42,7 @@ test("loads only campaign data and saves edition preferences before refresh", as
   const user = userEvent.setup();
   vi.mocked(campaignAi.save).mockResolvedValue(initial.profile);
   vi.mocked(campaignAi.refresh).mockResolvedValue(initial);
-  render(<CampaignSettings campaignId="campaign-a" name="La campagna" />);
+  render(<CampaignSettings campaignId="campaign-a" name="The campaign" />);
   await screen.findByText("Sources and resources");
   expect(campaignAi.get).toHaveBeenCalledWith("campaign-a");
   expect(assistantApi.probe).not.toHaveBeenCalled();
@@ -63,7 +63,7 @@ test("loads only campaign data and saves edition preferences before refresh", as
 });
 test("surfaces load errors without contacting Ollama", async () => {
   vi.mocked(campaignAi.get).mockRejectedValue(new Error("Archive unavailable"));
-  render(<CampaignSettings campaignId="campaign-a" name="La campagna" />);
+  render(<CampaignSettings campaignId="campaign-a" name="The campaign" />);
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Archive unavailable",
   );

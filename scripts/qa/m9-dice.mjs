@@ -82,7 +82,7 @@ let campaign = campaigns.find((c) => !c.name.endsWith("separata"));
 if (!campaign) {
   assert.equal(phase, "check");
   campaign = await call("create_campaign", {
-    name: "Collaudo M9 — Il cerchio dei draghi",
+    name: "M9 test — The dragon circle",
   });
 }
 async function all(campaignId) {

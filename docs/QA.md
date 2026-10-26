@@ -101,7 +101,7 @@ The `prepare` phase uses real UI and commands to verify:
 - Session 12 → `[[Varek` → draft creation → page opening and backlink.
 - Rename to «Varek the gray», type/status/alias, and preserved UUID.
 - Return from backlink to source block with highlighting, then page→page
-  mention towards «Gilda» and backlink from the page.
+  mention towards «Guild» and backlink from the page.
 - Alias «Guardian» shared by two pages: explicit choice, no duplicates.
 - A second writer creates a name before menu confirmation: real duplicate
   error and `[[Contesa]]` text preserved in the editor and saved.
@@ -137,8 +137,8 @@ node scripts/graph-smoke.mjs prepare
 
 `prepare` creates campaign/Session 12 and two mentions in the same note, then try:
 
--" Real query with only session→page arcs, without inferred Varek→Gilda relation.
--" Manual creation of «Varek accuses Gilda», suspicious certainty, evidence/notes, and source block.
+-" Real query with only session→page arcs, without inferred Varek→Guild relation.
+-" Manual creation of «Varek accuses the Guild», suspicious certainty, evidence/notes, and source block.
 - Real Cytoscape style (hatching/continuous, certainty text) and mouse click on
   nodes and arcs at the rendered coordinates. The test reads the local record
   of the canvas only to identify the click points: no data or event mocks.

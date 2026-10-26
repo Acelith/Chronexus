@@ -72,11 +72,11 @@ const png =
 if (phase === "auto") {
   assert.equal((await call("list_campaigns")).length, 0, "fresh profile");
   const campaign = await call("create_campaign", {
-    name: "Campagna periodica",
+    name: "Periodic campaign",
   });
   const map = await call("create_page", {
     campaignId: campaign.id,
-    title: "Mappa del porto",
+    title: "Harbour map",
     kind: "place",
     status: "active",
     aliases: [],
@@ -147,7 +147,7 @@ if (phase === "auto") {
   );
   assert.equal(periodicFiles().length, 2);
   pass("overdue periodic backup ran after restart once idle");
-  await call("create_campaign", { name: "Dopo il backup" });
+  await call("create_campaign", { name: "After the backup" });
   await page.getByRole("button", { name: "Backup and restore" }).click();
   const list = page.getByRole("region", {
     name: "Backups in the Chronexus folders",
@@ -155,7 +155,7 @@ if (phase === "auto") {
   await list.getByRole("button", { name: "Refresh list" }).click();
   await list.getByRole("button", { name: "Copy to Documents" }).click();
   await expect(
-    page.getByText(/L’originale resta nella cartella dati/),
+    page.getByText(/The original stays in the data folder/),
   ).toBeVisible();
   assert(existsSync(path.join(updates, "before-update-qa.nodex")));
   assert(
@@ -175,7 +175,7 @@ if (phase === "auto") {
   const campaigns = await call("list_campaigns");
   assert.deepEqual(
     campaigns.map((c) => c.name),
-    ["Campagna periodica"],
+    ["Periodic campaign"],
   );
   const pages = await call("list_pages", { campaignId: campaigns[0].id });
   const images = await call("list_images", {

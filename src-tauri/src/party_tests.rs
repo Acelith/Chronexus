@@ -24,8 +24,8 @@ fn party_preserves_codex_identity_through_rename_removal_and_restore() {
     let updated = party::save(c, &a.id, &input).unwrap();
     assert_eq!(updated.revision, 1);
     assert!(party::save(c, &a.id, &input).is_err());
-    knowledge::update_page(c, &a.id, &saved.page.id, "Nuovo nome", "npc", "active", &[]).unwrap();
-    assert_eq!(party::list(c, &a.id).unwrap()[0].page.title, "Nuovo nome");
+    knowledge::update_page(c, &a.id, &saved.page.id, "New name", "npc", "active", &[]).unwrap();
+    assert_eq!(party::list(c, &a.id).unwrap()[0].page.title, "New name");
     let file = d.path().join("party.nodex");
     backup::write_backup(c, &store.directory, &file).unwrap();
     let mut restored = backup::Store::open(&d.path().join("restored")).unwrap();
@@ -40,7 +40,7 @@ fn party_preserves_codex_identity_through_rename_removal_and_restore() {
     assert!(knowledge::get_page(c, &a.id, &saved.page.id).is_ok());
     input.page_id = None;
     input.revision = None;
-    input.name = "Non creato".into();
+    input.name = "Not created".into();
     input.status = "spoiler".into();
     assert!(party::save(c, &a.id, &input).is_err());
     assert_eq!(knowledge::list_pages(c, &a.id).unwrap().len(), 1);

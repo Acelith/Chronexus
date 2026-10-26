@@ -101,7 +101,7 @@ try {
     await invoke("create_session", {
       campaignId: camp.id,
       sequence: 1,
-      title: "La torre",
+      title: "The tower",
       playedOn: null,
     });
     await page.reload();
@@ -112,7 +112,7 @@ try {
     await fill("Maximum HP", 24);
     await fill("Current HP", 19);
     await expand("Identity and background");
-    await fill("Background", "Cartografa della torre");
+    await fill("Background", "Tower cartographer");
     await fill("Alignment", "Neutrale");
     await expand("Combat and senses");
     await fill("Armor class", "15");
@@ -121,7 +121,7 @@ try {
     await page.getByLabel("Inspiration", { exact: true }).check();
     await expand("History, appearance and proficiencies");
     await fill("Linguaggi", "Comune, Elfico");
-    await fill("Ideals", "Proteggere le memorie");
+    await fill("Ideals", "Protect the memories");
     await expand("Money, valuables and load");
     await fill("Gold pieces", "27");
     await expand("Magic");
@@ -171,15 +171,15 @@ try {
     await expect(page.getByLabel("Entry name", { exact: true })).toHaveValue(
       "Magic Missile",
     );
-    await fill("Entry name", "Dardi di Neme");
-    await fill("Entry notes", "Variante personale; fonte conservata.");
+    await fill("Entry name", "Neme’s darts");
+    await fill("Entry notes", "Personal variant; source kept.");
     await click("Save entry");
     await expect(
-      page.getByRole("heading", { name: "Dardi di Neme", exact: true }),
+      page.getByRole("heading", { name: "Neme’s darts", exact: true }),
     ).toBeVisible();
     await click("Add spell");
-    await fill("Entry name", "Segnale delle memorie");
-    await fill("Description", "Incantesimo originale di prova, resta locale.");
+    await fill("Entry name", "Signal of memories");
+    await fill("Description", "Original test spell, stays local.");
     await click("Search this name in D&D");
     await click("Search the API");
     await expect(
@@ -187,7 +187,7 @@ try {
     ).toBeVisible();
     await click("Close catalog");
     await expect(page.getByLabel("Entry name", { exact: true })).toHaveValue(
-      "Segnale delle memorie",
+      "Signal of memories",
     );
     await click("Save entry");
     await click("Search D&D");
@@ -226,7 +226,7 @@ try {
     const actual = await snapshot();
     assert.equal(actual.assets.length, 2);
     const imported = actual.assets.find(
-      (a) => a.input.details.name === "Dardi di Neme",
+      (a) => a.input.details.name === "Neme’s darts",
     );
     assert.equal(
       imported.input.details.catalogSource.path,

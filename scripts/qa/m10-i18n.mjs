@@ -117,7 +117,7 @@ if (!campaign) {
   const s = await call("create_session", {
     campaignId: campaign.id,
     sequence: 1,
-    title: "Il sigillo — 日本語 العربية",
+    title: "The seal — 日本語 العربية",
     playedOn: "2026-10-24",
   });
   await call("save_document", {
@@ -138,7 +138,7 @@ if (!campaign) {
           content: [
             {
               type: "text",
-              text: "Oran conserva il sigillo. 日本語 العربية. Fonte originale.",
+              text: "Oran keeps the seal. 日本語 العربية. Original source.",
               styles: {},
             },
           ],
@@ -149,7 +149,7 @@ if (!campaign) {
   });
   const p = await call("create_page", {
     campaignId: campaign.id,
-    title: "Varek — Il porto",
+    title: "Varek — The harbour",
     kind: "npc",
     status: "active",
     aliases: ["Esploratore"],
@@ -159,8 +159,8 @@ if (!campaign) {
     input: {
       pageId: p.id,
       name: p.title,
-      playerName: "Giocatore di prova",
-      role: "Alleato — ruolo originale",
+      playerName: "Test player",
+      role: "Ally — original role",
       status: "active",
       revision: null,
     },
@@ -195,7 +195,7 @@ if (!campaign) {
       },
     ],
     conditions: "",
-    notes: "Note originali — 日本語 العربية",
+    notes: "Original notes — 日本語 العربية",
     sheet: {
       fields: {},
       inspiration: false,

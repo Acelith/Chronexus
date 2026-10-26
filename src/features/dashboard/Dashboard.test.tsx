@@ -12,7 +12,7 @@ test("dashboard shows real counts and opens the latest session without placehold
     id: "s",
     campaignId: "c",
     sequence: 84,
-    title: "Il ritorno",
+    title: "The return",
     playedOn: null,
     document: { version: 1 as const, blocks: [] },
     revision: 0,

@@ -37,19 +37,19 @@ test.each([
   "|Nome|Valore|\n|---|---|",
   "<script>alert(1)</script>",
   "![mappa](https://example.org/a.png)",
-  "#### Titolo",
+  "#### Title",
 ])("unsupported syntax is rejected without silent conversion: %s", (source) =>
   expect(() => validateMarkdown(source)).toThrow(),
 );
 test("supported Markdown and campaign links are accepted", () =>
   expect(() =>
     validateMarkdown(
-      `# Diario\n\n- [x] **Indizio**\n\n> Fonte\n\n[Varek](chronexus://page/${id})`,
+      `# Journal\n\n- [x] **Clue**\n\n> Source\n\n[Varek](chronexus://page/${id})`,
     ),
   ).not.toThrow());
 test.each([
   "javascript:alert(1)",
-  "file:///segreto",
+  "file:///secret",
   "chronexus://page/invalid",
 ])("rejects unsafe links or invalid UUIDs: %s", (href) =>
   expect(() =>
@@ -83,7 +83,7 @@ test("preserves underline, color and alignment of blocks unchanged in source", (
     content: [
       {
         type: "text",
-        text: "Testo originale",
+        text: "Original text",
         styles: { underline: true, backgroundColor: "yellow" },
       },
     ],
@@ -93,11 +93,11 @@ test("preserves underline, color and alignment of blocks unchanged in source", (
     id: "nuovo",
     type: "paragraph",
     props: {},
-    content: [{ type: "text", text: "Testo originale", styles: {} }],
+    content: [{ type: "text", text: "Original text", styles: {} }],
     children: [],
   };
   expect(restoreMarkdownBlocks([parsed], [previous])).toEqual([previous]);
   const changed = structuredClone(parsed);
-  changed.content[0].text = "Testo cambiato";
+  changed.content[0].text = "Changed text";
   expect(restoreMarkdownBlocks([changed], [previous])).toEqual([changed]);
 });

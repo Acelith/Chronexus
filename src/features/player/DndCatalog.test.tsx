@@ -33,7 +33,7 @@ test("does not search on opening; name and level filter locally; import requires
       payload: {
         index: "test-spell",
         name: "Test Spell",
-        desc: ["Descrizione prova"],
+        desc: ["Test description"],
         level: 1,
       },
     });
@@ -47,7 +47,7 @@ test("does not search on opening; name and level filter locally; import requires
   ).not.toBeInTheDocument();
   expect(loadCatalog).toHaveBeenCalledTimes(1);
   await user.click(screen.getByRole("button", { name: /Test Spell/ }));
-  await screen.findByText("Descrizione prova");
+  await screen.findByText("Test description");
   expect(onImport).not.toHaveBeenCalled();
   await user.click(
     screen.getByRole("button", { name: "Use this data in the form" }),

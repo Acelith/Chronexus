@@ -73,11 +73,11 @@ Example arguments for `chronexus_append_note`, after reading the session:
 
 ```json
 {
-  "campaignId": "UUID-CAMPAGNA",
+  "campaignId": "CAMPAIGN-UUID",
   "target": "session",
-  "id": "UUID-SESSIONE",
+  "id": "SESSION-UUID",
   "revision": 0,
-  "text": "Oran sostiene che il sigillo si trovi al porto. Da verificare."
+  "text": "Oran claims the seal is at the harbour. To be checked."
 }
 ```
 

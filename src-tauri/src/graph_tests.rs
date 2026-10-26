@@ -20,7 +20,7 @@ fn input(from: &str, to: &str) -> RelationshipInput {
         source_kind: None,
         source_id: None,
         source_block_id: None,
-        evidence: "Una dichiarazione, non una prova.".into(),
+        evidence: "A claim, not proof.".into(),
         notes: String::new(),
     }
 }
@@ -35,8 +35,8 @@ fn co_mentions_are_only_session_edges_until_an_assertion_is_created() {
     let c = db::open(std::path::Path::new(":memory:")).unwrap();
     let a = journal::create_campaign(&c, "A").unwrap();
     let v = page(&c, &a.id, "Varek");
-    let g = page(&c, &a.id, "Gilda");
-    let s = journal::create_session(&c, &a.id, 12, "L'accusa", None).unwrap();
+    let g = page(&c, &a.id, "Guild");
+    let s = journal::create_session(&c, &a.id, 12, "The accusation", None).unwrap();
     journal::save_document(&c, &a.id, &s.id, 0, doc(&[&v.id, &g.id])).unwrap();
     let data = graph(&c, &a.id, query()).unwrap();
     assert_eq!(data.edges.len(), 2);
@@ -67,7 +67,7 @@ fn relationships_persist_update_with_revision_and_delete_without_touching_mentio
         let c = db::open(&path).unwrap();
         let a = journal::create_campaign(&c, "A").unwrap();
         let v = page(&c, &a.id, "Varek");
-        let g = page(&c, &a.id, "Gilda");
+        let g = page(&c, &a.id, "Guild");
         let r = save_relationship(&c, &a.id, None, None, input(&v.id, &g.id)).unwrap();
         (a.id, r.id)
     };
@@ -90,7 +90,7 @@ fn campaign_boundaries_and_source_validation_are_enforced() {
     let a = journal::create_campaign(&c, "A").unwrap();
     let b = journal::create_campaign(&c, "B").unwrap();
     let v = page(&c, &a.id, "Varek");
-    let g = page(&c, &a.id, "Gilda");
+    let g = page(&c, &a.id, "Guild");
     let foreign = page(&c, &b.id, "Other");
     assert!(save_relationship(&c, &a.id, None, None, input(&v.id, &foreign.id)).is_err());
     let mut invalid = input(&v.id, &g.id);
@@ -115,7 +115,7 @@ fn removed_source_block_is_reported_without_erasing_relationship_or_evidence() {
     let c = db::open(std::path::Path::new(":memory:")).unwrap();
     let a = journal::create_campaign(&c, "A").unwrap();
     let v = page(&c, &a.id, "Varek");
-    let g = page(&c, &a.id, "Gilda");
+    let g = page(&c, &a.id, "Guild");
     let s = journal::create_session(&c, &a.id, 1, "Prima", None).unwrap();
     journal::save_document(&c, &a.id, &s.id, 0, doc(&[&v.id])).unwrap();
     let mut source = input(&v.id, &g.id);
@@ -126,14 +126,14 @@ fn removed_source_block_is_reported_without_erasing_relationship_or_evidence() {
     journal::save_document(&c, &a.id, &s.id, 1, journal::empty_document()).unwrap();
     let saved = get_relationship(&c, &a.id, &r.id).unwrap();
     assert!(!saved.source_available);
-    assert_eq!(saved.input.evidence, "Una dichiarazione, non una prova.");
+    assert_eq!(saved.input.evidence, "A claim, not proof.");
 }
 #[test]
 fn filters_depth_and_session_provenance_have_defined_semantics() {
     let c = db::open(std::path::Path::new(":memory:")).unwrap();
     let a = journal::create_campaign(&c, "A").unwrap();
     let v = page(&c, &a.id, "Varek");
-    let g = page(&c, &a.id, "Gilda");
+    let g = page(&c, &a.id, "Guild");
     let n = page(&c, &a.id, "Nara");
     save_relationship(&c, &a.id, None, None, input(&v.id, &g.id)).unwrap();
     let mut other = input(&g.id, &n.id);
@@ -162,7 +162,7 @@ fn graph_view_is_bounded_and_never_contains_dangling_canvas_edges() {
     let c = db::open(std::path::Path::new(":memory:")).unwrap();
     let a = journal::create_campaign(&c, "A").unwrap();
     let pages: Vec<_> = (0..155)
-        .map(|i| page(&c, &a.id, &format!("Pagina {i:03}")))
+        .map(|i| page(&c, &a.id, &format!("Page {i:03}")))
         .collect();
     for _ in 0..405 {
         save_relationship(&c, &a.id, None, None, input(&pages[0].id, &pages[1].id)).unwrap();

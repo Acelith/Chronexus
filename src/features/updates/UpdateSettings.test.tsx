@@ -22,7 +22,7 @@ const overview = {
 const offer = {
   id: "update-1",
   version: "0.5.0",
-  notes: "Note pubbliche <script>",
+  notes: "Public notes <script>",
 };
 const run = async (action: () => Promise<void>) => action();
 beforeEach(() => {

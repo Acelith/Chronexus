@@ -32,10 +32,10 @@ function initial(): Asset {
   const input = emptyAsset("spell", "Sistema mio");
   if (input.details.kind !== "item") {
     input.details.name = "Mio incantesimo";
-    input.details.notes = "Nota personale";
+    input.details.notes = "Personal note";
     input.details.known = true;
   }
-  input.links.provenanceNotes = "Acquisito in campagna";
+  input.links.provenanceNotes = "Acquired during the campaign";
   return {
     id: "pc-spell",
     campaignId: "c",
@@ -70,7 +70,7 @@ test("explicit template use preserves notes, flags and campaign links; draft rem
   );
   expect(onSave).not.toHaveBeenCalled();
   expect(screen.getByLabelText("Entry name")).toHaveValue("Base SRD");
-  expect(screen.getByLabelText("Entry notes")).toHaveValue("Nota personale");
+  expect(screen.getByLabelText("Entry notes")).toHaveValue("Personal note");
   expect(screen.getByLabelText("Known")).toBeChecked();
   await user.clear(screen.getByLabelText("Entry name"));
   await user.type(screen.getByLabelText("Entry name"), "Variante mia");
@@ -80,11 +80,11 @@ test("explicit template use preserves notes, flags and campaign links; draft rem
       details: expect.objectContaining({
         name: "Variante mia",
         known: true,
-        notes: "Nota personale",
+        notes: "Personal note",
         catalogSource: { path: "spells/test-spell", name: "Base SRD" },
       }),
       links: expect.objectContaining({
-        provenanceNotes: "Acquisito in campagna",
+        provenanceNotes: "Acquired during the campaign",
       }),
     }),
   );
