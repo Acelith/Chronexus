@@ -3,6 +3,7 @@
 //! Every request follows an explicit user action; nothing runs at startup.
 //! Only items the user marked as shared leave the device, over HTTPS.
 pub mod api;
+pub mod auto;
 pub mod engine;
 #[cfg(test)]
 mod tests;

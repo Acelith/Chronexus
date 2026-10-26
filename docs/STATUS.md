@@ -1,3 +1,33 @@
+# Chronexus status — 26 October 2026: S5 desktop replication (schema 020)
+
+Not published; source version 0.8.1, schema 020. Server side: `Chronexus-Server` commit
+3e4629d (S5 incremental sync, idempotent mutations, notifications).
+
+- **What works:** each page, session, relationship or party member can stay on this device,
+  be replicated **privately** to the same account's other computers, or be **shared**. A
+  campaign switched to automatic synchronization sends changes a moment after they are saved
+  locally, receives the other computer's changes through a notification stream (polling every
+  30 s as fallback), pauses on request, backs off when the server is away and stops when the
+  session is refused. The header badge and the Sharing view say whether a change is only on
+  this device, being sent, saved on the server, offline (trying again), in conflict or stopped.
+  A second computer downloads a campaign from Settings; an expired cursor re-lists the campaign.
+- **Real server acceptance (Windows x64, `Chronexus-Server` debug build, loopback HTTP):** two
+  computers of one account stayed aligned; autosave-to-other-computer latency over 8 edits was
+  min 88-156 ms, median 162-167 ms, max 170-488 ms across runs with a 60 s poll (so notification
+  driven); the server was killed and restarted on its database (offline state shown, 3 changes
+  recovered by themselves); a stored operation was replayed once after a simulated crash;
+  concurrent edits became a resolvable conflict; sharing, withdrawal and 120-item paging were
+  checked; a member never saw private items. These live tests are `#[ignore]`d (they need the
+  server binary) and were run with `--ignored --test-threads=1`.
+- **Hermetic checks:** Rust lib 161 passed / 4 ignored (two of them the live real-server tests; the other two are older ignored tests); sync tests stable over 4 consecutive runs; Clippy `-D warnings`
+  all targets and rustfmt clean; Vitest 174 passed; ESLint, `tsc --noEmit`, i18n catalog check
+  pass. Backups of schemas 2-20 restore. Not run: macOS/Linux, GUI WebView, installers.
+- **Not done (still S4/S6 work):** images and character-sheet sections are not replicated or
+  shared yet; deletions do not propagate into another computer's archive (they stop its
+  replication); server-side revocation/deletion/recovery lifecycle (S6); real WebView check of
+  the new controls (component tests only); no new strings are machine-translated beyond the
+  English fallback.
+
 # Chronexus status — 26 October 2026: M23 complete, M6/M16 platforms, M24 client
 
 Not published; source version 0.8.1, schema 019.

@@ -1360,11 +1360,15 @@ fixes, measurements and open items are in [docs/AUDIT.md](docs/AUDIT.md).
   repeated executions. Desktop testing of main flows on an isolated profile.
 - No data loss: backups of every previous version are still restorable.
 
-## M24 — Shared campaign between multiple people (client implemented)
+## M24 — Shared campaign between multiple people (client implemented; S5 desktop done)
 
 **Order:** after M23. **Status:** desktop client implemented on 26 October 2026
 (schema 019, sharing commands and views, API contract v1 in
-[docs/SYNC_API.md](docs/SYNC_API.md)), verified against an in-process fake of the
+[docs/SYNC_API.md](docs/SYNC_API.md)); the same day the **S5 desktop** slice added schema
+020: private and shared per-item scope, a derived outbound change set with an idempotent
+in-flight operation, continuous synchronization per campaign (debounced, notification
+stream with polling fallback, backoff, pause), visible save states, downloading a campaign
+on a second computer, and the scope summary. Verified against an in-process fake of the
 contract. The server itself moved to **M25**; real end-to-end acceptance with a
 deployed server happens there. Changes a
 project invariant: today no account and no service. Sharing

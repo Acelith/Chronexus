@@ -57,6 +57,7 @@ use tauri::Manager;
 /// Commands reach it through [`Database::run`]/[`Database::run_store`], which
 /// wait for the Store lock on the blocking pool: Tauri runs non-async commands
 /// on the main thread, where waiting behind a backup or restore froze the UI.
+#[derive(Clone)]
 pub(crate) struct Database {
     store: Result<Arc<Mutex<backup::Store>>, String>,
     /// Fixed for the process lifetime (restores switch only the profile directory).
@@ -162,7 +163,29 @@ pub fn run() {
                 assistant::training::recover(&store.connection).map_err(std::io::Error::other)?;
                 Ok(Arc::new(Mutex::new(store)))
             })().map_err(|error| format!("Archive not available: {error}. Check space and permissions of the data folder and restart Chronexus. If you are using an older version, go back to the most recent one."));
-            app.manage(Database::new(connection));
+            let database = Database::new(connection);
+            app.manage(database.clone());
+            // Continuous synchronization exists only for campaigns the user switched on:
+            // for those, and only those, it resumes after startup. Status goes to the interface.
+            let status_handle = app.handle().clone();
+            let session_source = database.clone();
+            let auto = sync::auto::Auto::new(
+                database,
+                Arc::new(move || {
+                    let (account, session, client) = commands::sync::signed_in(&session_source)?;
+                    Ok(sync::auto::Backend {
+                        client,
+                        account_id: session.account_id,
+                        server: account.server.unwrap_or_default(),
+                    })
+                }),
+                Arc::new(move |status| {
+                    let _ = status_handle.emit("chronexus:sync-status", status);
+                }),
+                sync::auto::Timing::production(),
+            );
+            app.manage(auto.clone());
+            tauri::async_runtime::spawn(async move { auto.reload().await });
             if let Some(config)=automation::Config::parse(std::env::args()).map_err(std::io::Error::other)? {
                 let state=app.state::<Database>();
                 let store=state.shared().map_err(std::io::Error::other)?;
@@ -260,7 +283,12 @@ pub fn run() {
             commands::sync::sync_unlink,
             commands::sync::sync_invite,
             commands::sync::sync_items,
-            commands::sync::sync_set_share,
+            commands::sync::sync_set_scope,
+            commands::sync::sync_replicate_all,
+            commands::sync::sync_set_auto,
+            commands::sync::sync_status,
+            commands::sync::sync_remote_campaigns,
+            commands::sync::sync_attach_campaign,
             commands::sync::sync_now,
             commands::sync::sync_conflicts,
             commands::sync::sync_resolve,
@@ -295,6 +323,9 @@ pub fn run() {
         if matches!(event, tauri::RunEvent::Exit) {
             app.state::<updates::State>().shutdown();
             app.state::<ai_setup::State>().shutdown();
+            if let Some(auto) = app.try_state::<sync::auto::Auto>() {
+                auto.stop_all();
+            }
             if let Some(server) = app.try_state::<automation::Server>() {
                 server.shutdown();
             }

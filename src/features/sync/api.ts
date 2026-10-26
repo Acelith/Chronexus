@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { isTauri } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { command } from "../journal/api";
 
 /** M24 sharing client; the session token never reaches the interface. */
@@ -17,13 +20,20 @@ export interface SyncLink {
   role: "owner" | "player" | "reader";
   cursor: string;
   syncedAt: string | null;
+  /** Continuous synchronization was switched on for this campaign. */
+  auto: boolean;
+  paused: boolean;
+  lastError: string | null;
 }
 export type SharedKind = "page" | "session" | "relationship" | "party";
+/** none: only on this device · private: this account's devices · shared: the members. */
+export type SyncScope = "none" | "private" | "shared";
 export interface SyncItem {
   kind: SharedKind;
   itemId: string;
   title: string;
   shared: boolean;
+  scope: SyncScope;
   status:
     | "private"
     | "new"
@@ -37,10 +47,37 @@ export interface SyncReport {
   received: number;
   removed: number;
   updated: number;
+  materialized: number;
   pushed: number;
   deleted: number;
   conflicts: number;
   blocked: number;
+  resynchronized: boolean;
+}
+export type SyncState =
+  | "off"
+  | "paused"
+  | "syncing"
+  | "saved"
+  | "pending"
+  | "offline"
+  | "conflict"
+  | "attention";
+/** Visible save state of one campaign; counts never include item text. */
+export interface SyncStatus {
+  campaignId: string;
+  state: SyncState;
+  pending: number;
+  conflicts: number;
+  blocked: number;
+  lastSyncedAt: string | null;
+  message: string | null;
+  retryInSeconds: number | null;
+}
+export interface RemoteCampaign {
+  id: string;
+  name: string;
+  role: "owner" | "player" | "reader";
 }
 export interface SyncConflict {
   kind: SharedKind;
@@ -96,17 +133,28 @@ export const syncApi = {
     command<SyncInvite>("sync_invite", { campaignId, role }),
   items: (campaignId: string) =>
     command<SyncItem[]>("sync_items", { campaignId }),
-  setShare: (
+  setScope: (
     campaignId: string,
     kind: SharedKind,
     itemId: string,
-    shared: boolean,
+    scope: SyncScope,
   ) =>
-    command<SyncItem[]>("sync_set_share", {
+    command<SyncItem[]>("sync_set_scope", {
       campaignId,
       kind,
       itemId,
-      shared,
+      scope,
+    }),
+  replicateAll: (campaignId: string) =>
+    command<SyncItem[]>("sync_replicate_all", { campaignId }),
+  setAuto: (campaignId: string, enabled: boolean, paused: boolean) =>
+    command<SyncLink>("sync_set_auto", { campaignId, enabled, paused }),
+  status: (campaignId: string) =>
+    command<SyncStatus>("sync_status", { campaignId }),
+  remoteCampaigns: () => command<RemoteCampaign[]>("sync_remote_campaigns"),
+  attach: (remoteId: string) =>
+    command<{ id: string; name: string }>("sync_attach_campaign", {
+      remoteId,
     }),
   now: (campaignId: string) => command<SyncReport>("sync_now", { campaignId }),
   conflicts: (campaignId: string) =>
@@ -150,4 +198,44 @@ export function sharedText(payload: Record<string, unknown> | null): string {
       parts.push(String(payload[key]));
   }
   return parts.join(" ").replace(/\s+/g, " ").trim();
+}
+
+/** Subscribes to save-state changes pushed by the backend; a no-op outside the app. */
+export function watchSyncStatus(handler: (status: SyncStatus) => void) {
+  if (!isTauri()) return () => {};
+  const stop = listen<SyncStatus>("chronexus:sync-status", (event) =>
+    handler(event.payload),
+  );
+  return () => {
+    void stop.then((unlisten) => unlisten()).catch(() => {});
+  };
+}
+
+/** The campaign's save state: read once from the archive (no network), then kept live. */
+export function useSyncStatus(campaignId: string | null) {
+  const [known, setKnown] = useState<{
+    campaignId: string;
+    status: SyncStatus;
+  } | null>(null);
+  useEffect(() => {
+    if (!campaignId) return;
+    let active = true;
+    const keep = (status: SyncStatus) => {
+      if (active && status.campaignId === campaignId)
+        setKnown({ campaignId, status });
+    };
+    syncApi
+      .status(campaignId)
+      .then(keep)
+      .catch(() => {
+        // Not linked (or the archive is busy): there is nothing to show.
+      });
+    const stop = watchSyncStatus(keep);
+    return () => {
+      active = false;
+      stop();
+    };
+  }, [campaignId]);
+  // A state read for another campaign is never shown.
+  return known && known.campaignId === campaignId ? known.status : null;
 }

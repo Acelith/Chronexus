@@ -542,3 +542,31 @@ the app remains installable and usable without it. The boundary is a versioned H
 with a contract published by the server; no manual copy of types or
 schemas between repositories. Hosting, registration, and end-to-end encryption remain to
 be decided at the start of M24.
+
+## 26 October 2026 — S5 desktop: derived pending work, one stored operation, opt-in loop
+
+- **No separate outbound queue for content.** An item is pending when its payload or
+  visibility differs from what the server last accepted. That difference is computed from the
+  archive and therefore commits atomically with the autosave that caused it, which a second
+  queue written by every domain command could not guarantee without touching all of them.
+  Only the operation on the wire needs identity: `sync_outbox` keeps its UUIDv7 request ID,
+  base revision, visibility and exact payload, so a lost response is acknowledged by the
+  server's receipt instead of being re-applied or turned into a false conflict. Settling the
+  outbox precedes the pull so the echo of an own write is not read as someone else's edit.
+- **Local changes are noticed by a cheap fingerprint** (counts, revision sums, newest
+  timestamps), not by hooks in each write command: every write path, including the external
+  assistant and restores, counts, and a missed hint is still bounded by the polling timer.
+- **Continuous synchronization is a per-campaign opt-in** persisted in the archive. It is the
+  only background network activity of the sharing client; it resumes at startup only for
+  campaigns switched on, stops on sign-out, pause, unlink and a refused session, and backs off
+  with jitter. The notification stream only wakes the loop; frames carry no data.
+- **Deletion semantics stay conservative.** A tombstone for an item of this account stops its
+  replication on the receiving device and keeps the local item, because "removed from the
+  server copy" and "deleted by the user" are indistinguishable on the wire. The server copy
+  and the other device can therefore diverge after a deletion; independent `.nodex` backups
+  remain the safety net, as the roadmap states.
+- **Second computer = attach, not backup restore.** The account's campaigns are listed on an
+  explicit click; downloading creates a normal local campaign and creates items under their
+  original IDs, in dependency order, retrying items whose pages have not arrived.
+- Schema 020 is additive; the legacy cursor is reset because `/sync` cursors differ from the
+  legacy feed's.

@@ -2076,3 +2076,60 @@ textarea::placeholder {
 .backup-list strong {
   overflow-wrap: anywhere;
 }
+
+/* S5: save state of a synchronized campaign. The text always carries the meaning; the dot only reinforces it. */
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border: 1px solid #b8a37a;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.sync-badge:focus-visible {
+  outline: 2px solid #7a4b12;
+  outline-offset: 2px;
+}
+.sync-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #6f6552;
+  flex: none;
+}
+.sync-badge[data-state="saved"] .sync-dot {
+  background: #2f6b3a;
+}
+.sync-badge[data-state="syncing"] .sync-dot,
+.sync-badge[data-state="pending"] .sync-dot {
+  background: #a06a12;
+}
+.sync-badge[data-state="offline"] .sync-dot,
+.sync-badge[data-state="paused"] .sync-dot {
+  background: #6f6552;
+}
+.sync-badge[data-state="conflict"] .sync-dot,
+.sync-badge[data-state="attention"] .sync-dot {
+  background: #a3281d;
+}
+.sync-state {
+  font-weight: 600;
+}
+.sync-item select {
+  max-width: 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sync-badge[data-state="syncing"] .sync-dot {
+    animation: sync-pulse 1.2s ease-in-out infinite;
+  }
+}
+@keyframes sync-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}

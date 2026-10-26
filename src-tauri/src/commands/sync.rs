@@ -2,7 +2,7 @@
 //! actions; the session token never reaches the interface.
 use crate::{
     journal::{self, AppResult},
-    sync::{self, api, engine, Account, AccountView, Session},
+    sync::{self, api, auto::Auto, engine, Account, AccountView, Session},
     Database,
 };
 
@@ -11,7 +11,7 @@ const BUSY: &str = "A sharing operation is already running.";
 fn account(db: &Database) -> AppResult<Account> {
     sync::read_account(&db.root()?)
 }
-fn signed_in(db: &Database) -> AppResult<(Account, Session, api::Client)> {
+pub(crate) fn signed_in(db: &Database) -> AppResult<(Account, Session, api::Client)> {
     let account = account(db)?;
     let server = account
         .server
@@ -65,7 +65,10 @@ pub async fn sync_set_server(
     let _busy = gate.0.try_lock().map_err(|_| BUSY)?;
     let url = sync::server_url(&server, false)?;
     // Explicit check that this is a compatible Chronexus server.
-    api::Client::new(url.clone(), None, false)?.meta().await?;
+    let meta = api::Client::new(url.clone(), None, false)?.meta().await?;
+    if !meta.supports_replication() {
+        return Err("This sharing server is older than this version of Chronexus needs: ask its operator to update it.".into());
+    }
     let mut current = account(&db)?;
     let origin = url.origin().ascii_serialization();
     if current.server.as_deref() != Some(origin.as_str()) {
@@ -96,6 +99,7 @@ async fn store_session(
 pub async fn sync_sign_in(
     db: tauri::State<'_, Database>,
     gate: tauri::State<'_, sync::Gate>,
+    auto: tauri::State<'_, Auto>,
     username: String,
     password: String,
     device: String,
@@ -115,12 +119,16 @@ pub async fn sync_sign_in(
     let signed = client
         .login(username.trim(), &password, device.trim())
         .await?;
-    store_session(&db, current, signed, device.trim().into()).await
+    let view = store_session(&db, current, signed, device.trim().into()).await?;
+    auto.reload().await;
+    Ok(view)
 }
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub async fn sync_redeem_invite(
     db: tauri::State<'_, Database>,
     gate: tauri::State<'_, sync::Gate>,
+    auto: tauri::State<'_, Auto>,
     code: String,
     username: String,
     display_name: String,
@@ -150,14 +158,19 @@ pub async fn sync_redeem_invite(
             device.trim(),
         )
         .await?;
-    store_session(&db, current, signed, device.trim().into()).await
+    let view = store_session(&db, current, signed, device.trim().into()).await?;
+    auto.reload().await;
+    Ok(view)
 }
 #[tauri::command]
 pub async fn sync_sign_out(
     db: tauri::State<'_, Database>,
     gate: tauri::State<'_, sync::Gate>,
+    auto: tauri::State<'_, Auto>,
 ) -> AppResult<AccountView> {
     let _busy = gate.0.try_lock().map_err(|_| BUSY)?;
+    // Stop continuous synchronization first: its session is about to disappear.
+    auto.stop_all();
     let mut current = account(&db)?;
     if let (Some(server), Some(session)) = (&current.server, &current.session) {
         // Best effort: the local session is forgotten even when offline.
@@ -171,6 +184,7 @@ pub async fn sync_sign_out(
     }
     current.session = None;
     sync::write_account(&db.root()?, &current)?;
+    auto.reload().await;
     Ok(AccountView::from(&current))
 }
 #[tauri::command]
@@ -214,14 +228,23 @@ pub async fn sync_connect_campaign(
         role: remote.role,
         cursor: String::new(),
         synced_at: None,
+        auto: false,
+        paused: false,
+        last_error: None,
     };
     let saved = link.clone();
     db.run(move |c| engine::save_link(c, &saved)).await?;
     Ok(link)
 }
 #[tauri::command]
-pub async fn sync_unlink(db: tauri::State<'_, Database>, campaign_id: String) -> AppResult<()> {
-    db.run(move |c| engine::unlink(c, &campaign_id)).await
+pub async fn sync_unlink(
+    db: tauri::State<'_, Database>,
+    auto: tauri::State<'_, Auto>,
+    campaign_id: String,
+) -> AppResult<()> {
+    db.run(move |c| engine::unlink(c, &campaign_id)).await?;
+    auto.reload().await;
+    Ok(())
 }
 #[tauri::command]
 pub async fn sync_invite(
@@ -245,7 +268,10 @@ pub async fn sync_invite(
     if link.role != "owner" {
         return Err("Only the owner of the shared campaign can invite.".into());
     }
-    client.invite(&link.remote_id, &role).await
+    client
+        .invite(&link.remote_id, &role)
+        .await
+        .map_err(String::from)
 }
 #[tauri::command]
 pub async fn sync_items(
@@ -255,27 +281,69 @@ pub async fn sync_items(
     db.run(move |c| engine::items(c, &campaign_id)).await
 }
 #[tauri::command]
-pub async fn sync_set_share(
+pub async fn sync_set_scope(
     db: tauri::State<'_, Database>,
+    auto: tauri::State<'_, Auto>,
     campaign_id: String,
     kind: String,
     item_id: String,
-    shared: bool,
+    scope: String,
 ) -> AppResult<Vec<engine::Item>> {
-    db.run(move |c| {
-        engine::set_share(c, &campaign_id, &kind, &item_id, shared)?;
-        engine::items(c, &campaign_id)
-    })
-    .await
+    let items = db
+        .run(move |c| {
+            engine::set_scope(c, &campaign_id, &kind, &item_id, &scope)?;
+            engine::items(c, &campaign_id)
+        })
+        .await?;
+    auto.touch();
+    Ok(items)
+}
+/// Replicates every item privately (nothing becomes visible to the members).
+#[tauri::command]
+pub async fn sync_replicate_all(
+    db: tauri::State<'_, Database>,
+    auto: tauri::State<'_, Auto>,
+    campaign_id: String,
+) -> AppResult<Vec<engine::Item>> {
+    let items = db
+        .run(move |c| {
+            engine::replicate_all_privately(c, &campaign_id)?;
+            engine::items(c, &campaign_id)
+        })
+        .await?;
+    auto.touch();
+    Ok(items)
+}
+/// Explicit activation, pause and resumption of continuous synchronization.
+#[tauri::command]
+pub async fn sync_set_auto(
+    db: tauri::State<'_, Database>,
+    auto: tauri::State<'_, Auto>,
+    campaign_id: String,
+    enabled: bool,
+    paused: bool,
+) -> AppResult<engine::Link> {
+    let id = campaign_id.clone();
+    let link = db
+        .run(move |c| engine::set_auto(c, &id, enabled, paused))
+        .await?;
+    auto.reload().await;
+    Ok(link)
+}
+#[tauri::command]
+pub async fn sync_status(
+    auto: tauri::State<'_, Auto>,
+    campaign_id: String,
+) -> AppResult<sync::auto::Status> {
+    auto.status(&campaign_id).await
 }
 #[tauri::command]
 pub async fn sync_now(
     db: tauri::State<'_, Database>,
-    gate: tauri::State<'_, sync::Gate>,
+    auto: tauri::State<'_, Auto>,
     campaign_id: String,
 ) -> AppResult<engine::Report> {
-    let _busy = gate.0.try_lock().map_err(|_| BUSY)?;
-    let (current, session, client) = signed_in(&db)?;
+    let (current, session, _) = signed_in(&db)?;
     linked(
         &db,
         &campaign_id,
@@ -283,7 +351,52 @@ pub async fn sync_now(
         current.server.as_deref().unwrap_or(""),
     )
     .await?;
-    engine::sync_now(&db, &client, campaign_id).await
+    let report = auto.sync_once(&campaign_id).await.map_err(String::from)?;
+    // The visible state may have changed (conflicts, pending items).
+    auto.reload().await;
+    Ok(report)
+}
+/// Campaigns of the signed-in account that this device has no local copy of yet.
+#[tauri::command]
+pub async fn sync_remote_campaigns(
+    db: tauri::State<'_, Database>,
+) -> AppResult<Vec<api::RemoteCampaign>> {
+    let (current, _, client) = signed_in(&db)?;
+    let server = current.server.unwrap_or_default();
+    let all = client.campaigns().await?;
+    db.run(move |c| {
+        let mut taken = std::collections::HashSet::new();
+        for link in engine::all_links(c)? {
+            if link.server == server {
+                taken.insert(link.remote_id);
+            }
+        }
+        Ok(all.into_iter().filter(|r| !taken.contains(&r.id)).collect())
+    })
+    .await
+}
+/// Creates a local copy of a campaign that lives on the server, for example on a second
+/// computer of the same account, and downloads it.
+#[tauri::command]
+pub async fn sync_attach_campaign(
+    db: tauri::State<'_, Database>,
+    auto: tauri::State<'_, Auto>,
+    remote_id: String,
+) -> AppResult<journal::Campaign> {
+    let (current, session, client) = signed_in(&db)?;
+    let server = current.server.clone().unwrap_or_default();
+    let remote = client
+        .campaigns()
+        .await?
+        .into_iter()
+        .find(|r| r.id == remote_id)
+        .ok_or("This campaign is not available to your account on the sharing server.")?;
+    let campaign = db
+        .run(move |c| engine::attach_campaign(c, &server, &session.account_id, &remote))
+        .await?;
+    // First download; a failure leaves the linked, still empty campaign to retry from.
+    auto.sync_once(&campaign.id).await.map_err(String::from)?;
+    Ok(campaign)
 }
 #[tauri::command]
 pub async fn sync_conflicts(

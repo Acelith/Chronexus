@@ -150,7 +150,26 @@ pub fn create_session(
     name: &str,
     played_on: Option<String>,
 ) -> AppResult<Session> {
+    create_session_with_id(
+        connection,
+        campaign_id,
+        &Uuid::new_v4().to_string(),
+        sequence,
+        name,
+        played_on,
+    )
+}
+/// Creates a session under a chosen id: the replica of one created on another device.
+pub fn create_session_with_id(
+    connection: &Connection,
+    campaign_id: &str,
+    id: &str,
+    sequence: i64,
+    name: &str,
+    played_on: Option<String>,
+) -> AppResult<Session> {
     require_campaign(connection, campaign_id)?;
+    identifier(id)?;
     let name = title(name)?;
     if !(1..=999999).contains(&sequence) {
         return Err("The session number must be between 1 and 999999.".into());
@@ -160,13 +179,12 @@ pub fn create_session(
             return Err("Enter a valid date in year-month-day format.".into());
         }
     }
-    let id = Uuid::new_v4().to_string();
     let document = empty_document();
     let tx = connection.unchecked_transaction().map_err(storage)?;
     tx.execute("INSERT INTO sessions(id,campaign_id,sequence,title,played_on,document) VALUES (?1,?2,?3,?4,?5,?6)",params![id,campaign_id,sequence,name,played_on,document.to_string()]).map_err(storage)?;
-    crate::search::session(&tx, campaign_id, &id)?;
+    crate::search::session(&tx, campaign_id, id)?;
     tx.commit().map_err(storage)?;
-    get_session(connection, campaign_id, &id)
+    get_session(connection, campaign_id, id)
 }
 
 /// Title and play date; the session number and notes keep their own paths.

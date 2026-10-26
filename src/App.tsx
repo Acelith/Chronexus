@@ -20,6 +20,7 @@ import {
   type Session,
 } from "./features/journal/api";
 import { useExternalUpdates } from "./features/journal/useExternalUpdates";
+import SyncStatusBadge from "./features/sync/SyncStatusBadge";
 import type { SaveGuard } from "./features/journal/Editor";
 import { appText } from "./strings";
 import {
@@ -627,6 +628,13 @@ export function App() {
                         : (campaign?.name ?? appText.emptyCampaigns)}
                     </h2>
                   </div>
+                  {campaign && view !== "preferences" ? (
+                    <SyncStatusBadge
+                      key={campaign.id}
+                      campaignId={campaign.id}
+                      onOpen={() => show("sharing")}
+                    />
+                  ) : null}
                   <span className="last-modified">
                     {[...sessions, ...pages].some((item) =>
                       Number.isFinite(Date.parse(item.updatedAt)),
@@ -803,7 +811,10 @@ export function App() {
                         <BackupSettings disabled={busy} />
                         <WikiSettings disabled={busy} />
                         <AiSetupSettings disabled={busy} />
-                        <SyncSettings disabled={busy} />
+                        <SyncSettings
+                          disabled={busy}
+                          onCampaignAdded={() => void load()}
+                        />
                       </>
                     </Suspense>
                   ) : null}

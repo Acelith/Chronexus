@@ -181,10 +181,32 @@ pub(crate) fn create_page_in_transaction(
     status: &str,
     alias_values: &[String],
 ) -> AppResult<Page> {
+    create_page_with_id(
+        connection,
+        campaign_id,
+        &Uuid::new_v4().to_string(),
+        name,
+        kind,
+        status,
+        alias_values,
+    )
+}
+/// Creates a page under a chosen id: the replica of a page created on another device.
+/// The caller runs it inside a transaction and sets the document afterwards.
+pub(crate) fn create_page_with_id(
+    connection: &Connection,
+    campaign_id: &str,
+    id: &str,
+    name: &str,
+    kind: &str,
+    status: &str,
+    alias_values: &[String],
+) -> AppResult<Page> {
     require_campaign(connection, campaign_id)?;
+    identifier(id)?;
     let name = title(name)?;
     validate_kind(kind, status)?;
-    let id = Uuid::new_v4().to_string();
+    let id = id.to_string();
     ensure_available(connection, campaign_id, name, "")?;
     connection.execute("INSERT INTO pages(id,campaign_id,title,title_key,kind,status,document) VALUES (?1,?2,?3,?4,?5,?6,?7)",params![id,campaign_id,name,key(name),kind,status,empty_document().to_string()]).map_err(storage)?;
     write_aliases(connection, &id, alias_values, name)?;

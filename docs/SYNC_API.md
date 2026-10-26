@@ -1,11 +1,46 @@
-# Chronexus sharing API — contract v1 (M24)
+# Chronexus sharing API — contract v1 (M24, S5)
 
-Status: **draft contract written with the M24 desktop client**, 26 October 2026.
-The server lives in a separate repository (proposed `acelith/Chronexus-Server`,
-milestone M25). Until that repository publishes its OpenAPI schema, this file and
-the executable fake in `src-tauri/src/sync/tests.rs` are the reference. When the
-server publishes the schema, it becomes the source of truth and this file must point
-to it instead of being edited by hand.
+Status: **the server repository `Chronexus-Server` now generates the authoritative
+OpenAPI** (`api/openapi.json`, with TypeScript schemas) from its implemented code; read
+that for exact types. This file explains how the desktop client uses it and keeps the
+rules the client depends on. The executable fake in `src-tauri/src/sync/tests.rs`
+mirrors the server rules for hermetic tests; `sync::tests::live` runs the same client
+against the real server binary (see Acceptance).
+
+## S5 replication endpoints (used by this client since schema 020)
+
+The client replicates the items the user chose, privately or shared, over the typed
+content API, and no longer uses `/items` or `/changes` (both are still served for older
+clients and documented further below). `GET /api/v1/meta` must list the capabilities
+`private-content`, `idempotent-mutations` and `incremental-sync`; the client refuses
+servers that do not (it also uses `change-notifications` when present).
+
+| Call | Use |
+| --- | --- |
+| `PUT /api/v1/campaigns/{id}/content/{kind}/{itemId}` | Save with `requestId` (UUIDv7), `baseRevision`, `visibility` (`private`, `members`) and `payload`. 409 carries the current `{revision, payload}` for a revision conflict, or `{error}` for a reused request ID. |
+| `DELETE …/content/{kind}/{itemId}?baseRevision=&requestId=` | Remove the server copy (a tombstone). |
+| `GET …/sync?cursor=` | The caller's authorized current state since a cursor: own items (private or shared) with payload, tombstones for deleted items and for items other members stopped seeing. 410 means the cursor is stale or from the future: list and resume. |
+| `GET …/content?after=` | Full listing (50 per page); every page carries `head`, the cursor to resume `/sync` from (use the first page's). |
+| `GET /api/v1/campaigns` | The account's campaigns, to download one on a second computer. |
+| `GET …/events` | `text/event-stream` of content-free hints (`ready`, `changed`, `reconnect`, `closed`); the client wakes a pass and never stores anything from it. Polling every 30 s covers a missed hint. |
+
+Client rules that rely on the contract:
+
+- Every outbound operation gets a **UUIDv7** request ID that is stored in `sync_outbox`
+  together with the exact payload *before* the request is sent. After a crash or a lost
+  response the stored operation is replayed first and acknowledged by the server's
+  receipt; a 410 on a request ID (older than 30 days) discards it and the item is
+  re-evaluated from its current state.
+- Unknown item kinds in `/sync` are ignored, so a newer server cannot stall the feed.
+- A stale cursor is never repaired by guessing: the client lists the campaign, keeps what
+  is listed, stops replicating its own items that are gone and drops received copies that
+  are gone, then resumes from the listing's `head`.
+- Items of this account that exist only on another device are **created locally** with
+  their original ID in dependency order (pages, sessions, party, relationships); ones whose
+  page has not arrived are kept and retried. A different local item with the same ID
+  becomes a conflict, never an overwrite.
+- A tombstone for an item of this account stops its replication here and keeps the local
+  item; deletions are never propagated into another device's archive silently.
 
 Decisions confirmed by the user on 26 October 2026:
 
@@ -98,7 +133,7 @@ Response: `{ "id", "name", "role" }` with role `player` or `reader`. 410 when us
 Owner only (403 otherwise). Request: `{ "role": "player" | "reader" }`.
 Response 201: `{ "code": "…", "role": "player", "expiresAt": "2026-11-02T00:00:00Z" }`.
 
-### `GET /api/v1/campaigns/{campaignId}/changes?since=<cursor>`
+### `GET /api/v1/campaigns/{campaignId}/changes?since=<cursor>` (legacy, no longer used by the client)
 
 Members only. Returns every item of the campaign whose state changed after `cursor`
 (an opaque string ≤ 128 characters; empty string = from the beginning), in change
@@ -130,7 +165,7 @@ order, at most 1000 per page:
 - The feed includes the caller's own items (the client skips its own echoes).
 - `more: true` asks the client to call again with the new cursor.
 
-### `PUT /api/v1/campaigns/{campaignId}/items/{kind}/{itemId}`
+### `PUT /api/v1/campaigns/{campaignId}/items/{kind}/{itemId}` (legacy, no longer used by the client)
 
 Players and owners only; only the **author** may change an existing item (403).
 Request: `{ "baseRevision": n, "payload": { … } }`.
@@ -141,7 +176,7 @@ Request: `{ "baseRevision": n, "payload": { … } }`.
 - Missing item with `baseRevision > 0`: 404.
 - Success: `{ "revision": n }` (the new revision).
 
-### `DELETE /api/v1/campaigns/{campaignId}/items/{kind}/{itemId}?baseRevision=n`
+### `DELETE /api/v1/campaigns/{campaignId}/items/{kind}/{itemId}?baseRevision=n` (legacy, no longer used by the client)
 
 Author only. Same revision rule (409 with current state). Creates a tombstone and
 returns `{ "revision": n }`. Already deleted or never created: 404.

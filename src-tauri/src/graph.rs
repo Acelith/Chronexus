@@ -181,6 +181,28 @@ pub fn save_relationship(
     transaction.commit().map_err(storage)?;
     get_relationship(connection, campaign_id, chosen)
 }
+/// Creates a relationship under a chosen id: the replica of one created on another device.
+pub fn create_relationship_with_id(
+    connection: &Connection,
+    campaign_id: &str,
+    id: &str,
+    input: RelationshipInput,
+) -> AppResult<Relationship> {
+    identifier(id)?;
+    let transaction = connection.unchecked_transaction().map_err(storage)?;
+    validate(&transaction, campaign_id, &input)?;
+    let source_session = input
+        .source_id
+        .as_deref()
+        .filter(|_| input.source_kind.as_deref() == Some("session"));
+    let source_page = input
+        .source_id
+        .as_deref()
+        .filter(|_| input.source_kind.as_deref() == Some("page"));
+    transaction.execute("INSERT INTO relationships(id,campaign_id,from_page_id,to_page_id,label,certainty,source_session_id,source_page_id,source_block_id,evidence,notes) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11)",params![id,campaign_id,input.from_page_id,input.to_page_id,input.label.trim(),input.certainty,source_session,source_page,input.source_block_id,input.evidence,input.notes]).map_err(storage)?;
+    transaction.commit().map_err(storage)?;
+    get_relationship(connection, campaign_id, id)
+}
 pub fn delete_relationship(
     connection: &Connection,
     campaign_id: &str,

@@ -1,11 +1,19 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { tr } from "../../i18n/store";
 import { usePendingAction } from "../../usePendingAction";
-import { syncApi, type SyncAccount } from "./api";
+import { syncApi, type RemoteCampaign, type SyncAccount } from "./api";
 
 /** M24: sharing server and account; nothing is contacted without a click. */
-export default function SyncSettings({ disabled }: { disabled: boolean }) {
+export default function SyncSettings({
+  disabled,
+  onCampaignAdded,
+}: {
+  disabled: boolean;
+  /** A campaign was downloaded from the server: reload the campaign list. */
+  onCampaignAdded?: () => void;
+}) {
   const [account, setAccount] = useState<SyncAccount | null>(null);
+  const [onServer, setOnServer] = useState<RemoteCampaign[] | null>(null);
   const [server, setServer] = useState("");
   const [mode, setMode] = useState<"signin" | "invite">("signin");
   const [form, setForm] = useState({
@@ -79,7 +87,7 @@ export default function SyncSettings({ disabled }: { disabled: boolean }) {
       <h3>{tr("Campaign sharing")}</h3>
       <p>
         {tr(
-          "Optional. Chronexus works offline as before; a self-hosted Chronexus server is contacted only when you press a button here or in a campaign's Sharing view. Only the items you mark as shared are sent; private notes, sheets, AI data and preferences stay on this device.",
+          "Optional. Chronexus works offline as before. A self-hosted Chronexus server is contacted only when you press a button here or in a campaign's Sharing view, and, after you switch it on for a campaign, to keep that campaign synchronized. Only the items you choose are sent; everything else, and character sheets, AI data and preferences, stay on this device.",
         )}
       </p>
       {error ? (
@@ -123,6 +131,7 @@ export default function SyncSettings({ disabled }: { disabled: boolean }) {
                 onClick={() =>
                   void perform(
                     async () => {
+                      setOnServer(null);
                       setAccount(await syncApi.signOut());
                       return tr(
                         "Signed out. Shared campaigns stay on this device.",
@@ -134,6 +143,63 @@ export default function SyncSettings({ disabled }: { disabled: boolean }) {
               >
                 {tr("Sign out")}
               </button>
+              <section aria-label={tr("Campaigns on the server")}>
+                <h4>{tr("Campaigns on the server")}</h4>
+                <p className="muted">
+                  {tr(
+                    "Download a campaign you already keep on the server, for example to continue on a second computer. It becomes a normal campaign on this device.",
+                  )}
+                </p>
+                <button
+                  disabled={busy}
+                  onClick={() =>
+                    void perform(
+                      async () => {
+                        const found = await syncApi.remoteCampaigns();
+                        setOnServer(found);
+                        return found.length
+                          ? undefined
+                          : tr(
+                              "Every campaign of your account is already on this device.",
+                            );
+                      },
+                      { blocked: disabled },
+                    )
+                  }
+                >
+                  {tr("Look for my campaigns on the server")}
+                </button>
+                {onServer?.length ? (
+                  <ul>
+                    {onServer.map((remote) => (
+                      <li key={remote.id}>
+                        <span dir="auto">{remote.name}</span>{" "}
+                        <span className="muted">· {remote.role}</span>{" "}
+                        <button
+                          disabled={busy}
+                          onClick={() =>
+                            void perform(
+                              async () => {
+                                const added = await syncApi.attach(remote.id);
+                                setOnServer(
+                                  (list) =>
+                                    list?.filter((c) => c.id !== remote.id) ??
+                                    null,
+                                );
+                                onCampaignAdded?.();
+                                return tr("Downloaded “{0}”.", [added.name]);
+                              },
+                              { blocked: disabled },
+                            )
+                          }
+                        >
+                          {tr("Download to this device")}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </section>
             </div>
           ) : null}
           {account.server && !account.signedIn ? (

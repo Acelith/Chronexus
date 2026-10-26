@@ -286,11 +286,21 @@ actions only, HTTPS only, invitation-only accounts, per-item sharing with defaul
 private, received items read-only and attributed (never campaign facts), revision
 conflicts resolved by the user, no CRDT or end-to-end encryption in v1. The session
 token lives in `sync-account.json` outside Git and backups and never reaches the
-UI. Contract v1 in docs/SYNC_API.md until the server publishes its OpenAPI schema.
+UI. S5 desktop (implemented 26 October 2026, schema 020): the per-item choice is
+`none` (only here), `private` (replicated to the same account's devices, invisible to
+members) or `shared`; continuous synchronization (`sync/auto.rs`) exists only for
+campaigns the user switched on, resumes at startup only for those, pauses on request and
+never blocks editing. Pending work is derived from the archive; only the operation on the
+wire is stored (`sync_outbox`, UUIDv7 request ID plus exact payload). Own items from another
+device are created locally by ID; tombstones never delete local items; a stale cursor forces
+a full listing. The server OpenAPI is the contract; docs/SYNC_API.md explains the client.
+Real-server acceptance is `sync::tests::live` (ignored by default; needs the server binary).
 M25 is the server in the separate repository `acelith/Chronexus-Server` (notes in
 docs/SERVER_NOTES.md); this repository keeps only the client. M27 is the Android APK
 (moved from M25). Creating the repository, domains or deployments needs an explicit
-request. Never upload private notes, sheets, AI data or preferences unless shared.
+request. Never upload private notes, sheets, AI data or preferences unless the user chose
+that item for the server (`private` or `shared`); character sheets, images, AI data and
+preferences are not replicated yet.
 ## English-first internationalization (M26)
 
 English is the source and fallback language for new profiles, developer-facing

@@ -5,13 +5,16 @@ import { usePendingAction } from "../../usePendingAction";
 import {
   sharedText,
   syncApi,
+  useSyncStatus,
   type RemoteItem,
   type SharedKind,
   type SyncConflict,
   type SyncInvite,
   type SyncItem,
   type SyncLink,
+  type SyncScope,
 } from "./api";
+import { stateText } from "./SyncStatusBadge";
 
 const kindLabels = (): Record<SharedKind, string> => ({
   page: tr("Codex pages"),
@@ -20,13 +23,18 @@ const kindLabels = (): Record<SharedKind, string> => ({
   party: tr("Party members"),
 });
 const statusLabels = (): Record<SyncItem["status"], string> => ({
-  private: tr("private"),
+  private: tr("only on this device"),
   new: tr("to send"),
   pending: tr("changed, to send"),
   synced: tr("synchronized"),
   conflict: tr("conflict"),
-  blocked: tr("waiting: share both pages"),
-  revoking: tr("removal at next synchronization"),
+  blocked: tr("waiting: the pages it refers to must go first"),
+  revoking: tr("removal from the server at next synchronization"),
+});
+const scopeLabels = (): Record<SyncScope, string> => ({
+  none: tr("Only on this device"),
+  private: tr("Private copy on the server (your devices only)"),
+  shared: tr("Shared with the other players"),
 });
 function itemTitle(kind: SharedKind, payload: Record<string, unknown> | null) {
   if (!payload) return "";
@@ -50,7 +58,7 @@ async function read(campaignId: string) {
   return { link, items, conflicts, remote };
 }
 
-/** M24: what this campaign shares, what others shared, and open conflicts. */
+/** What this campaign replicates or shares, what others shared, and open conflicts. */
 export default function CampaignSharing({
   campaignId,
   busy,
@@ -66,7 +74,9 @@ export default function CampaignSharing({
   const [code, setCode] = useState("");
   const [invite, setInvite] = useState<SyncInvite | null>(null);
   const [confirmUnlink, setConfirmUnlink] = useState(false);
+  const [confirmAll, setConfirmAll] = useState(false);
   const { pending, error, notice, setError, perform } = usePendingAction();
+  const status = useSyncStatus(link ? campaignId : null);
   const disabled = busy || pending;
   const reload = useCallback(async () => {
     const state = await read(campaignId);
@@ -75,7 +85,11 @@ export default function CampaignSharing({
     setConflicts(state.conflicts);
     setRemote(state.remote);
   }, [campaignId]);
+  // A finished background pass may have received items or opened a conflict: read again.
+  const settled = status?.state;
+  const syncedAt = status?.lastSyncedAt;
   useEffect(() => {
+    if (settled === "syncing") return;
     let active = true;
     read(campaignId)
       .then((state) => {
@@ -91,17 +105,18 @@ export default function CampaignSharing({
     return () => {
       active = false;
     };
-  }, [campaignId, setError]);
+  }, [campaignId, setError, settled, syncedAt]);
   const act = (action: () => Promise<string | void>) =>
     perform(action, { blocked: busy, through: run });
   const kinds = kindLabels();
   const statuses = statusLabels();
+  const scopes = scopeLabels();
   return (
     <section className="campaign-sharing" aria-label={tr("Sharing")}>
       <h3>{tr("Sharing")}</h3>
       <p>
         {tr(
-          "Everything is private by default. Shared items are sent only when you press Synchronize now. What other players share stays attributed to them and never becomes a fact of your campaign.",
+          "Nothing leaves this device unless you choose it. For each item you decide: only on this device, a private copy on the server for your own devices, or shared with the other players. What other players share stays attributed to them and never becomes a fact of your campaign.",
         )}
       </p>
       {error ? (
@@ -117,7 +132,7 @@ export default function CampaignSharing({
         <div className="sync-connect">
           <p>
             {tr(
-              "This campaign is not linked. Choose the server and sign in from App settings, then create the shared campaign or join one with an invitation code.",
+              "This campaign is not linked. Choose the server and sign in from App settings, then create the shared campaign or join one with an invitation code. To download a campaign you already keep on the server, use App settings.",
             )}
           </p>
           <button
@@ -169,6 +184,62 @@ export default function CampaignSharing({
               link.syncedAt ?? tr("never"),
             ])}
           </p>
+          <section aria-label={tr("Automatic synchronization")}>
+            <h4>{tr("Automatic synchronization")}</h4>
+            <label className="sync-item">
+              <input
+                type="checkbox"
+                checked={link.auto}
+                disabled={disabled}
+                onChange={(event) => {
+                  // Read before awaiting: a controlled input reverts until the state updates.
+                  const enabled = event.target.checked;
+                  void act(async () => {
+                    setLink(await syncApi.setAuto(campaignId, enabled, false));
+                    return enabled
+                      ? tr(
+                          "Automatic synchronization is on. Chronexus will contact the server for this campaign, also after you restart it, until you turn it off.",
+                        )
+                      : tr(
+                          "Automatic synchronization is off. Nothing is sent until you press Synchronize now.",
+                        );
+                  });
+                }}
+              />{" "}
+              {tr("Keep this campaign synchronized automatically")}
+            </label>
+            <p className="muted">
+              {tr(
+                "Changes are saved on this device first and sent a moment later. Editing never waits for the server. The status always says whether a change is only on this device or also on the server.",
+              )}
+            </p>
+            {link.auto ? (
+              <button
+                disabled={disabled}
+                onClick={() =>
+                  void act(async () => {
+                    setLink(
+                      await syncApi.setAuto(campaignId, true, !link.paused),
+                    );
+                  })
+                }
+              >
+                {link.paused
+                  ? tr("Resume automatic synchronization")
+                  : tr("Pause automatic synchronization")}
+              </button>
+            ) : null}
+            {status ? (
+              <p className="sync-state" data-state={status.state}>
+                {stateText(status)}
+                {status.state === "attention" || status.state === "offline"
+                  ? null
+                  : status.blocked
+                    ? ` · ${tr("{0} items wait for the pages they refer to", [status.blocked])}`
+                    : null}
+              </p>
+            ) : null}
+          </section>
           <div className="actions">
             <button
               className="primary"
@@ -178,12 +249,13 @@ export default function CampaignSharing({
                   const r = await syncApi.now(campaignId);
                   await reload();
                   return tr(
-                    "Synchronized: {0} sent, {1} removed from the server, {2} received, {3} updated here, {4} withdrawn by others, {5} conflicts, {6} waiting.",
+                    "Synchronized: {0} sent, {1} removed from the server, {2} received, {3} updated here, {4} created here from your other device, {5} withdrawn by others, {6} conflicts, {7} waiting.",
                     [
                       r.pushed,
                       r.deleted,
                       r.received,
                       r.updated,
+                      r.materialized,
                       r.removed,
                       r.conflicts,
                       r.blocked,
@@ -194,6 +266,17 @@ export default function CampaignSharing({
             >
               {tr("Synchronize now")}
             </button>
+            {link.role !== "reader" ? (
+              <button
+                disabled={disabled}
+                onClick={() => setConfirmAll(true)}
+                title={tr(
+                  "Copies everything to your account on the server, visible only to you",
+                )}
+              >
+                {tr("Keep a private copy of everything")}
+              </button>
+            ) : null}
             {link.role === "owner" ? (
               <>
                 {(["player", "reader"] as const).map((role) => (
@@ -224,6 +307,36 @@ export default function CampaignSharing({
                 [invite.role, invite.code, invite.expiresAt],
               )}
             </p>
+          ) : null}
+          {confirmAll ? (
+            <div
+              role="alertdialog"
+              aria-label={tr("Keep a private copy of everything")}
+            >
+              <p>
+                {tr(
+                  "Every page, session, relationship and party member of this campaign will be copied to your account on the server so your other computers can download them. They stay private: the other players see nothing unless you share an item. Character sheets, images, AI data and preferences are not included.",
+                )}
+              </p>
+              <button
+                className="primary"
+                disabled={disabled}
+                onClick={() =>
+                  void act(async () => {
+                    setItems(await syncApi.replicateAll(campaignId));
+                    setConfirmAll(false);
+                    return tr(
+                      "Chosen. The copies are sent at the next synchronization.",
+                    );
+                  })
+                }
+              >
+                {tr("Copy everything privately")}
+              </button>
+              <button disabled={disabled} onClick={() => setConfirmAll(false)}>
+                {tr("Cancel")}
+              </button>
+            </div>
           ) : null}
           {confirmUnlink ? (
             <div role="alertdialog" aria-label={tr("Unlink this campaign")}>
@@ -314,8 +427,18 @@ export default function CampaignSharing({
               ))}
             </section>
           ) : null}
-          <section aria-label={tr("What you share")}>
-            <h4>{tr("What you share")}</h4>
+          <section aria-label={tr("What leaves this device")}>
+            <h4>{tr("What leaves this device")}</h4>
+            <p role="status" className="sync-preview">
+              {tr(
+                "Summary: {0} only on this device · {1} private copies on the server · {2} shared with the other players.",
+                [
+                  items.filter((item) => item.scope === "none").length,
+                  items.filter((item) => item.scope === "private").length,
+                  items.filter((item) => item.scope === "shared").length,
+                ],
+              )}
+            </p>
             {link.role === "reader" ? (
               <p className="muted">
                 {tr("Readers consult the shared campaign without sharing.")}
@@ -330,26 +453,33 @@ export default function CampaignSharing({
                 >
                   <legend>{kinds[kind]}</legend>
                   {rows.map((item) => (
-                    <label key={item.itemId} className="sync-item">
-                      <input
-                        type="checkbox"
-                        checked={item.shared}
-                        onChange={(event) =>
-                          void act(async () => {
-                            setItems(
-                              await syncApi.setShare(
-                                campaignId,
-                                kind,
-                                item.itemId,
-                                event.target.checked,
-                              ),
-                            );
-                          })
-                        }
-                      />
-                      <span dir="auto">{item.title}</span>{" "}
+                    <div key={item.itemId} className="sync-item">
+                      <label>
+                        <span dir="auto">{item.title}</span>{" "}
+                        <select
+                          value={item.scope}
+                          onChange={(event) =>
+                            void act(async () => {
+                              setItems(
+                                await syncApi.setScope(
+                                  campaignId,
+                                  kind,
+                                  item.itemId,
+                                  event.target.value as SyncScope,
+                                ),
+                              );
+                            })
+                          }
+                        >
+                          {(Object.keys(scopes) as SyncScope[]).map((scope) => (
+                            <option key={scope} value={scope}>
+                              {scopes[scope]}
+                            </option>
+                          ))}
+                        </select>
+                      </label>{" "}
                       <span className="muted">· {statuses[item.status]}</span>
-                    </label>
+                    </div>
                   ))}
                 </fieldset>
               ) : null;
@@ -368,10 +498,10 @@ export default function CampaignSharing({
                   </strong>{" "}
                   <span className="muted">
                     {item.mine
-                      ? tr("· {0} · from your other device · revision {1}", [
-                          kinds[item.kind],
-                          item.revision,
-                        ])
+                      ? tr(
+                          "· {0} · from your other device, waiting for what it refers to · revision {1}",
+                          [kinds[item.kind], item.revision],
+                        )
                       : tr("· {0} · shared by {1} · revision {2}", [
                           kinds[item.kind],
                           item.authorName,

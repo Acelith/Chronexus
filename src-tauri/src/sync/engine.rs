@@ -1,7 +1,17 @@
-//! Local side of sharing: which items are shared, what was last accepted by
-//! the server, items received from other members, and conflicts. Network
-//! calls happen between short archive transactions, never while holding it.
-use super::{api, kind, remote_id};
+//! Local side of replication: which items are replicated (privately for this account's
+//! own devices, or shared with the members), what the server last accepted, the operation
+//! currently on the wire, items received from other members, and conflicts. Network calls
+//! happen between short archive transactions, never while holding the archive.
+//!
+//! Pending work is *derived*: an item is pending when its current payload or visibility
+//! differs from what the server last accepted. That difference lives in the same archive,
+//! and commits in the same transaction, as the content itself, so an autosave and its
+//! outbound change can never be separated by a crash. Only the operation actually sent
+//! is stored separately (`sync_outbox`) so a lost response is retried under the same ID.
+use super::{
+    api::{self, ApiResult, Failure},
+    kind, remote_id,
+};
 use crate::{
     graph, journal,
     journal::{identifier, storage, title, AppResult},
@@ -11,7 +21,7 @@ use rusqlite::{params, Connection, OptionalExtension};
 use serde::Serialize;
 use serde_json::{json, Map, Value};
 use sha2::{Digest, Sha256};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -23,6 +33,10 @@ pub struct Link {
     pub role: String,
     pub cursor: String,
     pub synced_at: Option<String>,
+    /// Continuous synchronization was explicitly activated for this campaign.
+    pub auto: bool,
+    pub paused: bool,
+    pub last_error: Option<String>,
 }
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -30,7 +44,10 @@ pub struct Item {
     pub kind: String,
     pub item_id: String,
     pub title: String,
+    /// Visible to the other members.
     pub shared: bool,
+    /// none | private | shared
+    pub scope: String,
     /// private | new | pending | synced | conflict | blocked | revoking
     pub status: String,
 }
@@ -44,7 +61,7 @@ pub struct RemoteItem {
     pub revision: i64,
     pub payload: Value,
     pub updated_at: String,
-    /// Shared by this account from another device.
+    /// This account's own item that has not been created on this device yet.
     pub mine: bool,
 }
 #[derive(Debug, Clone, Serialize)]
@@ -64,10 +81,23 @@ pub struct Report {
     pub received: usize,
     pub removed: usize,
     pub updated: usize,
+    /// Items of this account created locally from another device's copy.
+    pub materialized: usize,
     pub pushed: usize,
     pub deleted: usize,
     pub conflicts: usize,
     pub blocked: usize,
+    /// The server asked this device to list the campaign again.
+    pub resynchronized: bool,
+}
+/// What still separates this device from the server, for the visible save state.
+#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct Counts {
+    pub pending: usize,
+    pub blocked: usize,
+    pub conflicts: usize,
+    pub in_flight: usize,
 }
 
 fn now() -> String {
@@ -80,11 +110,20 @@ pub fn hash(value: &Value) -> String {
     // serde_json maps are ordered by key, so equal content hashes equally.
     format!("{:x}", Sha256::digest(value.to_string()))
 }
+/// Pages and sessions first, then the items that refer to them.
+fn rank(kind_name: &str) -> u8 {
+    match kind_name {
+        "page" => 0,
+        "session" => 1,
+        "party" => 2,
+        _ => 3,
+    }
+}
 
 pub fn link(c: &Connection, campaign: &str) -> AppResult<Option<Link>> {
     identifier(campaign)?;
     c.query_row(
-        "SELECT campaign_id,server,remote_id,account_id,role,cursor,synced_at FROM sync_links WHERE campaign_id=?1",
+        "SELECT campaign_id,server,remote_id,account_id,role,cursor,synced_at,auto,paused,last_error FROM sync_links WHERE campaign_id=?1",
         [campaign],
         |r| {
             Ok(Link {
@@ -95,13 +134,29 @@ pub fn link(c: &Connection, campaign: &str) -> AppResult<Option<Link>> {
                 role: r.get(4)?,
                 cursor: r.get(5)?,
                 synced_at: r.get(6)?,
+                auto: r.get(7)?,
+                paused: r.get(8)?,
+                last_error: r.get(9)?,
             })
         },
     )
     .optional()
     .map_err(storage)
 }
-fn require_link(c: &Connection, campaign: &str) -> AppResult<Link> {
+pub fn all_links(c: &Connection) -> AppResult<Vec<Link>> {
+    let mut q = c
+        .prepare("SELECT campaign_id FROM sync_links ORDER BY campaign_id")
+        .map_err(storage)?;
+    let ids = q
+        .query_map([], |r| r.get::<_, String>(0))
+        .map_err(storage)?
+        .collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(storage)?;
+    ids.iter()
+        .filter_map(|id| link(c, id).transpose())
+        .collect()
+}
+pub fn require_link(c: &Connection, campaign: &str) -> AppResult<Link> {
     link(c, campaign)?.ok_or_else(|| "This campaign is not linked to a sharing server.".into())
 }
 pub fn save_link(c: &Connection, link: &Link) -> AppResult<()> {
@@ -121,11 +176,42 @@ pub fn save_link(c: &Connection, link: &Link) -> AppResult<()> {
     .map_err(storage)?;
     Ok(())
 }
+/// Creates the local copy of a campaign that lives on the server (for example for a second
+/// computer of the same account) and links it. The first synchronization fills it.
+pub fn attach_campaign(
+    c: &Connection,
+    server: &str,
+    account_id: &str,
+    remote: &api::RemoteCampaign,
+) -> AppResult<journal::Campaign> {
+    if all_links(c)?
+        .iter()
+        .any(|l| l.server == server && l.remote_id == remote.id)
+    {
+        return Err("This campaign is already on this device.".into());
+    }
+    let created = journal::create_campaign(c, &remote.name)?;
+    let attached = Link {
+        campaign_id: created.id.clone(),
+        server: server.into(),
+        remote_id: remote.id.clone(),
+        account_id: account_id.into(),
+        role: remote.role.clone(),
+        cursor: String::new(),
+        synced_at: None,
+        auto: false,
+        paused: false,
+        last_error: None,
+    };
+    save_link(c, &attached)?;
+    Ok(created)
+}
 /// Local only: forgets the link, choices and received copies; campaign data stays.
 pub fn unlink(c: &Connection, campaign: &str) -> AppResult<()> {
     require_link(c, campaign)?;
     let tx = c.unchecked_transaction().map_err(storage)?;
     for table in [
+        "sync_outbox",
         "sync_conflicts",
         "sync_remote_items",
         "sync_shares",
@@ -139,17 +225,38 @@ pub fn unlink(c: &Connection, campaign: &str) -> AppResult<()> {
     }
     tx.commit().map_err(storage)
 }
+/// Explicit activation of continuous synchronization (and its pause) for one campaign.
+pub fn set_auto(c: &Connection, campaign: &str, auto: bool, paused: bool) -> AppResult<Link> {
+    require_link(c, campaign)?;
+    c.execute(
+        "UPDATE sync_links SET auto=?2,paused=?3 WHERE campaign_id=?1",
+        params![campaign, auto, paused && auto],
+    )
+    .map_err(storage)?;
+    require_link(c, campaign)
+}
+/// Short, content-free note for the status line; `None` clears it.
+pub fn set_error(c: &Connection, campaign: &str, message: Option<&str>) -> AppResult<()> {
+    let text = message.map(|m| m.chars().take(300).collect::<String>());
+    c.execute(
+        "UPDATE sync_links SET last_error=?2 WHERE campaign_id=?1",
+        params![campaign, text],
+    )
+    .map_err(storage)?;
+    Ok(())
+}
 
-fn page_ids_shared(c: &Connection, campaign: &str) -> AppResult<HashSet<String>> {
+/// Replicated pages and the visibility they must have on the server.
+fn page_shares(c: &Connection, campaign: &str) -> AppResult<HashMap<String, String>> {
     let mut q = c
-        .prepare("SELECT item_id FROM sync_shares WHERE campaign_id=?1 AND kind='page' AND state='shared'")
+        .prepare("SELECT item_id,visibility FROM sync_shares WHERE campaign_id=?1 AND kind='page' AND state='shared'")
         .map_err(storage)?;
-    let ids = q
-        .query_map([campaign], |r| r.get(0))
+    let rows = q
+        .query_map([campaign], |r| Ok((r.get(0)?, r.get(1)?)))
         .map_err(storage)?
-        .collect::<rusqlite::Result<HashSet<String>>>()
+        .collect::<rusqlite::Result<HashMap<String, String>>>()
         .map_err(storage);
-    ids
+    rows
 }
 
 /// The shared form of a local item, or None when it no longer exists.
@@ -189,7 +296,55 @@ fn item_title(kind_name: &str, payload: &Value) -> String {
     }
 }
 
-/// Every local item with its sharing state, for the selection list.
+/// Pages an item points to; they must exist on the server first.
+fn endpoints(kind_name: &str, value: &Value) -> Vec<String> {
+    let id = |key: &str| value[key].as_str().map(String::from);
+    match kind_name {
+        "relationship" => ["fromPageId", "toPageId"]
+            .iter()
+            .filter_map(|k| id(k))
+            .collect(),
+        "party" => id("pageId").into_iter().collect(),
+        _ => vec![],
+    }
+}
+/// An item cannot be sent while a page it refers to is not replicated, nor shared with
+/// the members while a page it refers to is private.
+fn blocked(
+    kind_name: &str,
+    value: &Value,
+    visibility: &str,
+    pages: &HashMap<String, String>,
+) -> bool {
+    endpoints(kind_name, value)
+        .iter()
+        .any(|page| match pages.get(page) {
+            None => true,
+            Some(v) => visibility == "members" && v != "members",
+        })
+}
+
+type ShareRow = (String, String, i64, String, String);
+const SHARE_COLUMNS: &str = "state,pushed_hash,remote_revision,visibility,pushed_visibility";
+fn share(c: &Connection, campaign: &str, kind_name: &str, id: &str) -> AppResult<Option<ShareRow>> {
+    c.query_row(
+        &format!("SELECT {SHARE_COLUMNS} FROM sync_shares WHERE campaign_id=?1 AND kind=?2 AND item_id=?3"),
+        params![campaign, kind_name, id],
+        |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?)),
+    )
+    .optional()
+    .map_err(storage)
+}
+fn has_conflict(c: &Connection, campaign: &str, kind_name: &str, id: &str) -> AppResult<bool> {
+    c.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sync_conflicts WHERE campaign_id=?1 AND kind=?2 AND item_id=?3)",
+        params![campaign, kind_name, id],
+        |r| r.get(0),
+    )
+    .map_err(storage)
+}
+
+/// Every local item with its replication state, for the selection list.
 pub fn items(c: &Connection, campaign: &str) -> AppResult<Vec<Item>> {
     require_link(c, campaign)?;
     let mut ids: Vec<(String, String)> = vec![];
@@ -211,28 +366,39 @@ pub fn items(c: &Connection, campaign: &str) -> AppResult<Vec<Item>> {
     for member in party::list(c, campaign)? {
         ids.push(("party".into(), member.page.id));
     }
-    let pages = page_ids_shared(c, campaign)?;
+    let pages = page_shares(c, campaign)?;
     let mut out = vec![];
     for (kind_name, id) in ids {
         let Some(value) = payload(c, campaign, &kind_name, &id)? else {
             continue;
         };
-        let share = share(c, campaign, &kind_name, &id)?;
+        let row = share(c, campaign, &kind_name, &id)?;
         let conflict = has_conflict(c, campaign, &kind_name, &id)?;
-        let status = match &share {
+        let active = row.as_ref().filter(|(state, ..)| state == "shared");
+        let status = match &row {
             None => "private",
             Some(_) if conflict => "conflict",
-            Some((state, _, _)) if state == "revoked" => "revoking",
-            Some(_) if kind_name == "relationship" && !endpoints_shared(&value, &pages) => {
+            Some((state, ..)) if state == "revoked" => "revoking",
+            Some((_, _, _, visibility, _)) if blocked(&kind_name, &value, visibility, &pages) => {
                 "blocked"
             }
-            Some((_, _, 0)) => "new",
-            Some((_, pushed, _)) if *pushed != hash(&value) => "pending",
+            Some((_, _, 0, ..)) => "new",
+            Some((_, pushed, _, visibility, pushed_visibility))
+                if *pushed != hash(&value) || visibility != pushed_visibility =>
+            {
+                "pending"
+            }
             Some(_) => "synced",
         };
         out.push(Item {
             title: item_title(&kind_name, &value),
-            shared: share.as_ref().is_some_and(|(s, _, _)| s == "shared"),
+            scope: match active {
+                None => "none",
+                Some((.., visibility, _)) if visibility == "members" => "shared",
+                Some(_) => "private",
+            }
+            .into(),
+            shared: active.is_some_and(|(.., visibility, _)| visibility == "members"),
             kind: kind_name,
             item_id: id,
             status: status.into(),
@@ -240,84 +406,89 @@ pub fn items(c: &Connection, campaign: &str) -> AppResult<Vec<Item>> {
     }
     Ok(out)
 }
-fn endpoints_shared(value: &Value, pages: &HashSet<String>) -> bool {
-    ["fromPageId", "toPageId"]
-        .iter()
-        .all(|k| value[k].as_str().is_some_and(|id| pages.contains(id)))
-}
-type ShareRow = (String, String, i64);
-fn share(c: &Connection, campaign: &str, kind_name: &str, id: &str) -> AppResult<Option<ShareRow>> {
-    c.query_row(
-        "SELECT state,pushed_hash,remote_revision FROM sync_shares WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
-        params![campaign, kind_name, id],
-        |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
-    )
-    .optional()
-    .map_err(storage)
-}
-fn has_conflict(c: &Connection, campaign: &str, kind_name: &str, id: &str) -> AppResult<bool> {
-    c.query_row(
-        "SELECT EXISTS(SELECT 1 FROM sync_conflicts WHERE campaign_id=?1 AND kind=?2 AND item_id=?3)",
-        params![campaign, kind_name, id],
-        |r| r.get(0),
-    )
-    .map_err(storage)
-}
 
-/// Marks an item as shared or private. Unsharing an item already on the
-/// server keeps a revocation to send at the next synchronization.
-pub fn set_share(
+/// Chooses what happens to an item: `none` (stays on this device), `private` (replicated
+/// to this account's other devices, invisible to the members) or `shared` (visible to
+/// the members). Choosing `none` for an item already on the server removes the server copy
+/// at the next synchronization; the local item is never touched.
+pub fn set_scope(
     c: &Connection,
     campaign: &str,
     kind_name: &str,
     id: &str,
-    shared: bool,
+    scope: &str,
 ) -> AppResult<()> {
     let link = require_link(c, campaign)?;
     if link.role == "reader" {
         return Err("Readers can consult the shared campaign but not share items.".into());
     }
+    if !["none", "private", "shared"].contains(&scope) {
+        return Err("Choose none, private or shared.".into());
+    }
     let value = payload(c, campaign, kind_name, id)?.ok_or("Item not found in this campaign.")?;
+    let visibility = if scope == "shared" {
+        "members"
+    } else {
+        "private"
+    };
     let tx = c.unchecked_transaction().map_err(storage)?;
-    if shared {
-        if kind_name == "relationship"
-            && !endpoints_shared(&value, &page_ids_shared(&tx, campaign)?)
-        {
-            return Err("Share both pages of the relationship first.".into());
+    if scope != "none" {
+        let pages = page_shares(&tx, campaign)?;
+        if blocked(kind_name, &value, visibility, &pages) {
+            return Err(if visibility == "members" {
+                "Share the pages this item refers to first.".into()
+            } else {
+                "Replicate the pages this item refers to first.".to_string()
+            });
         }
         tx.execute(
-            "INSERT INTO sync_shares(campaign_id,kind,item_id,state) VALUES(?1,?2,?3,'shared') ON CONFLICT(campaign_id,kind,item_id) DO UPDATE SET state='shared'",
-            params![campaign, kind_name, id],
+            "INSERT INTO sync_shares(campaign_id,kind,item_id,state,visibility) VALUES(?1,?2,?3,'shared',?4) ON CONFLICT(campaign_id,kind,item_id) DO UPDATE SET state='shared',visibility=excluded.visibility",
+            params![campaign, kind_name, id, visibility],
         )
         .map_err(storage)?;
     } else {
-        unshare(&tx, campaign, kind_name, id)?;
-        if kind_name == "page" {
-            // A shared relationship must not point to a page that became private.
-            let mut q = tx
-                .prepare("SELECT item_id FROM sync_shares WHERE campaign_id=?1 AND kind='relationship' AND state='shared'")
+        stop_replicating(&tx, campaign, kind_name, id)?;
+    }
+    if kind_name == "page" && scope != "shared" {
+        // Dependent items must not outlive the visibility of the pages they refer to.
+        let mut q = tx
+            .prepare("SELECT kind,item_id,visibility FROM sync_shares WHERE campaign_id=?1 AND kind IN ('relationship','party') AND state='shared'")
+            .map_err(storage)?;
+        let rows = q
+            .query_map([campaign], |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, String>(2)?,
+                ))
+            })
+            .map_err(storage)?
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .map_err(storage)?;
+        drop(q);
+        for (dependent_kind, dependent, current) in rows {
+            let refers = payload(&tx, campaign, &dependent_kind, &dependent)?
+                .is_some_and(|v| endpoints(&dependent_kind, &v).iter().any(|p| p == id));
+            if !refers {
+                continue;
+            }
+            if scope == "none" {
+                stop_replicating(&tx, campaign, &dependent_kind, &dependent)?;
+            } else if current == "members" {
+                tx.execute(
+                    "UPDATE sync_shares SET visibility='private' WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
+                    params![campaign, dependent_kind, dependent],
+                )
                 .map_err(storage)?;
-            let rows = q
-                .query_map([campaign], |r| r.get::<_, String>(0))
-                .map_err(storage)?
-                .collect::<rusqlite::Result<Vec<_>>>()
-                .map_err(storage)?;
-            drop(q);
-            for relationship in rows {
-                if payload(&tx, campaign, "relationship", &relationship)?.is_some_and(|v| {
-                    v["fromPageId"].as_str() == Some(id) || v["toPageId"].as_str() == Some(id)
-                }) {
-                    unshare(&tx, campaign, "relationship", &relationship)?;
-                }
             }
         }
     }
     tx.commit().map_err(storage)
 }
-fn unshare(c: &Connection, campaign: &str, kind_name: &str, id: &str) -> AppResult<()> {
-    // Never sent: forget it. Already on the server: revoke at the next sync.
+/// Never sent: forget it. Already on the server: remove the server copy at the next sync.
+fn stop_replicating(c: &Connection, campaign: &str, kind_name: &str, id: &str) -> AppResult<()> {
     c.execute(
-        "DELETE FROM sync_shares WHERE campaign_id=?1 AND kind=?2 AND item_id=?3 AND remote_revision=0",
+        "DELETE FROM sync_shares WHERE campaign_id=?1 AND kind=?2 AND item_id=?3 AND remote_revision=0 AND NOT EXISTS(SELECT 1 FROM sync_outbox o WHERE o.campaign_id=sync_shares.campaign_id AND o.kind=sync_shares.kind AND o.item_id=sync_shares.item_id)",
         params![campaign, kind_name, id],
     )
     .map_err(storage)?;
@@ -328,6 +499,20 @@ fn unshare(c: &Connection, campaign: &str, kind_name: &str, id: &str) -> AppResu
     .map_err(storage)?;
     Ok(())
 }
+/// Replicates every local item privately, except the ones already chosen, in dependency order.
+pub fn replicate_all_privately(c: &Connection, campaign: &str) -> AppResult<usize> {
+    require_link(c, campaign)?;
+    let mut chosen = 0;
+    let mut list = items(c, campaign)?;
+    list.sort_by_key(|i| rank(&i.kind));
+    for item in list {
+        if item.scope == "none" && item.status == "private" {
+            set_scope(c, campaign, &item.kind, &item.item_id, "private")?;
+            chosen += 1;
+        }
+    }
+    Ok(chosen)
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Job {
@@ -337,6 +522,7 @@ pub enum Job {
         base: i64,
         payload: Value,
         hash: String,
+        visibility: String,
     },
     Delete {
         kind: String,
@@ -351,7 +537,7 @@ pub fn pending(c: &Connection, campaign: &str) -> AppResult<(Vec<Job>, usize)> {
         return Ok((vec![], 0));
     }
     let mut q = c
-        .prepare("SELECT kind,item_id,state,pushed_hash,remote_revision FROM sync_shares s WHERE campaign_id=?1 AND NOT EXISTS(SELECT 1 FROM sync_conflicts k WHERE k.campaign_id=s.campaign_id AND k.kind=s.kind AND k.item_id=s.item_id) ORDER BY kind,item_id")
+        .prepare("SELECT kind,item_id,state,pushed_hash,remote_revision,visibility,pushed_visibility FROM sync_shares s WHERE campaign_id=?1 AND NOT EXISTS(SELECT 1 FROM sync_conflicts k WHERE k.campaign_id=s.campaign_id AND k.kind=s.kind AND k.item_id=s.item_id) AND NOT EXISTS(SELECT 1 FROM sync_outbox o WHERE o.campaign_id=s.campaign_id AND o.kind=s.kind AND o.item_id=s.item_id) ORDER BY kind,item_id")
         .map_err(storage)?;
     let rows = q
         .query_map([campaign], |r| {
@@ -361,29 +547,33 @@ pub fn pending(c: &Connection, campaign: &str) -> AppResult<(Vec<Job>, usize)> {
                 r.get::<_, String>(2)?,
                 r.get::<_, String>(3)?,
                 r.get::<_, i64>(4)?,
+                r.get::<_, String>(5)?,
+                r.get::<_, String>(6)?,
             ))
         })
         .map_err(storage)?
         .collect::<rusqlite::Result<Vec<_>>>()
         .map_err(storage)?;
-    let pages = page_ids_shared(c, campaign)?;
-    let (mut jobs, mut blocked) = (vec![], 0);
-    for (kind_name, id, state, pushed, base) in rows {
+    drop(q);
+    let pages = page_shares(c, campaign)?;
+    let (mut jobs, mut blocked_count) = (vec![], 0);
+    for (kind_name, id, state, pushed, base, visibility, pushed_visibility) in rows {
         let current = payload(c, campaign, &kind_name, &id)?;
         match (state.as_str(), current) {
             ("shared", Some(value)) => {
-                if kind_name == "relationship" && !endpoints_shared(&value, &pages) {
-                    blocked += 1;
+                if blocked(&kind_name, &value, &visibility, &pages) {
+                    blocked_count += 1;
                     continue;
                 }
                 let h = hash(&value);
-                if h != pushed || base == 0 {
+                if h != pushed || base == 0 || visibility != pushed_visibility {
                     jobs.push(Job::Put {
                         kind: kind_name,
                         id,
                         base,
                         payload: value,
                         hash: h,
+                        visibility,
                     });
                 }
             }
@@ -402,8 +592,137 @@ pub fn pending(c: &Connection, campaign: &str) -> AppResult<(Vec<Job>, usize)> {
             }
         }
     }
-    Ok((jobs, blocked))
+    jobs.sort_by_key(|job| match job {
+        Job::Put { kind, .. } => (0, rank(kind)),
+        // Deletions go last and dependents first: a page is removed after its relationships.
+        Job::Delete { kind, .. } => (1, 4 - rank(kind)),
+    });
+    Ok((jobs, blocked_count))
 }
+/// Changes whenever something replicable (or the replication choices) changed locally.
+/// Cheap by design: counts, revision sums and newest timestamps, no payloads.
+pub fn fingerprint(c: &Connection, campaign: &str) -> AppResult<String> {
+    c.query_row(
+        "SELECT (SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM pages WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM sessions WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM relationships WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0) FROM party_members WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(length(visibility)+length(state)),0) FROM sync_shares WHERE campaign_id=?1)||'|'||(SELECT count(*) FROM sync_conflicts WHERE campaign_id=?1)",
+        [campaign],
+        |r| r.get(0),
+    )
+    .map_err(storage)
+}
+pub fn counts(c: &Connection, campaign: &str) -> AppResult<Counts> {
+    let (jobs, blocked) = pending(c, campaign)?;
+    let number = |sql: &str| -> AppResult<usize> {
+        c.query_row(sql, [campaign], |r| r.get::<_, i64>(0))
+            .map(|n| n as usize)
+            .map_err(storage)
+    };
+    Ok(Counts {
+        pending: jobs.len(),
+        blocked,
+        conflicts: number("SELECT count(*) FROM sync_conflicts WHERE campaign_id=?1")?,
+        in_flight: number("SELECT count(*) FROM sync_outbox WHERE campaign_id=?1")?,
+    })
+}
+
+/// The operation on the wire: stored with its request ID before the request is sent.
+#[derive(Debug, Clone)]
+pub struct Outbound {
+    pub kind: String,
+    pub id: String,
+    pub op: String,
+    pub request_id: String,
+    pub base: i64,
+    pub visibility: String,
+    pub payload: Option<Value>,
+    pub hash: String,
+}
+/// UUIDv7: the server verifies the age of operation IDs to bound its receipts.
+fn request_id() -> String {
+    uuid::Uuid::now_v7().to_string()
+}
+pub fn begin(c: &Connection, campaign: &str, job: &Job) -> AppResult<Outbound> {
+    let out = match job {
+        Job::Put {
+            kind,
+            id,
+            base,
+            payload,
+            hash,
+            visibility,
+        } => Outbound {
+            kind: kind.clone(),
+            id: id.clone(),
+            op: "save".into(),
+            request_id: request_id(),
+            base: *base,
+            visibility: visibility.clone(),
+            payload: Some(payload.clone()),
+            hash: hash.clone(),
+        },
+        Job::Delete { kind, id, base } => Outbound {
+            kind: kind.clone(),
+            id: id.clone(),
+            op: "delete".into(),
+            request_id: request_id(),
+            base: *base,
+            visibility: "private".into(),
+            payload: None,
+            hash: String::new(),
+        },
+    };
+    c.execute(
+        "INSERT INTO sync_outbox(campaign_id,kind,item_id,op,request_id,base_revision,visibility,payload,payload_hash,created_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10) ON CONFLICT(campaign_id,kind,item_id) DO UPDATE SET op=excluded.op,request_id=excluded.request_id,base_revision=excluded.base_revision,visibility=excluded.visibility,payload=excluded.payload,payload_hash=excluded.payload_hash,created_at=excluded.created_at",
+        params![campaign, out.kind, out.id, out.op, out.request_id, out.base, out.visibility, out.payload.as_ref().map(Value::to_string), out.hash, now()],
+    )
+    .map_err(storage)?;
+    Ok(out)
+}
+pub fn outbox(c: &Connection, campaign: &str) -> AppResult<Vec<Outbound>> {
+    let mut q = c
+        .prepare("SELECT kind,item_id,op,request_id,base_revision,visibility,payload,payload_hash FROM sync_outbox WHERE campaign_id=?1 ORDER BY created_at,kind,item_id")
+        .map_err(storage)?;
+    let rows = q
+        .query_map([campaign], |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                r.get::<_, String>(1)?,
+                r.get::<_, String>(2)?,
+                r.get::<_, String>(3)?,
+                r.get::<_, i64>(4)?,
+                r.get::<_, String>(5)?,
+                r.get::<_, Option<String>>(6)?,
+                r.get::<_, String>(7)?,
+            ))
+        })
+        .map_err(storage)?
+        .collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(storage)?;
+    rows.into_iter()
+        .map(|(kind, id, op, request_id, base, visibility, raw, hash)| {
+            Ok(Outbound {
+                payload: raw
+                    .map(|text| serde_json::from_str(&text).map_err(|_| invalid()))
+                    .transpose()?,
+                kind,
+                id,
+                op,
+                request_id,
+                base,
+                visibility,
+                hash,
+            })
+        })
+        .collect()
+}
+fn finish(c: &Connection, campaign: &str, out: &Outbound) -> AppResult<()> {
+    c.execute(
+        "DELETE FROM sync_outbox WHERE campaign_id=?1 AND kind=?2 AND item_id=?3 AND request_id=?4",
+        params![campaign, out.kind, out.id, out.request_id],
+    )
+    .map_err(storage)?;
+    Ok(())
+}
+
 pub fn record_put(
     c: &Connection,
     campaign: &str,
@@ -411,10 +730,11 @@ pub fn record_put(
     id: &str,
     hash: &str,
     revision: i64,
+    visibility: &str,
 ) -> AppResult<()> {
     c.execute(
-        "UPDATE sync_shares SET pushed_hash=?4,remote_revision=?5 WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
-        params![campaign, kind_name, id, hash, revision],
+        "UPDATE sync_shares SET pushed_hash=?4,remote_revision=?5,pushed_visibility=?6 WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
+        params![campaign, kind_name, id, hash, revision, visibility],
     )
     .map_err(storage)?;
     Ok(())
@@ -446,16 +766,24 @@ pub fn record_conflict(
     Ok(())
 }
 
-/// Applies one page of server changes. Own items changed on another device
-/// are applied first through the domain functions (each in its own
-/// transaction); received copies, conflicts and the cursor then commit
-/// together. On any error the cursor stays put and the page is read again;
-/// already applied items are skipped then because their revision is recorded.
+/// Applies one page of server changes. Items of this account that exist on another device
+/// are applied or created first through the domain functions (each in its own transaction);
+/// received copies, conflicts and the cursor then commit together. On any error the cursor
+/// stays put and the page is read again; already applied items are skipped then because
+/// their revision is recorded.
 pub fn apply_changes(
     c: &Connection,
     campaign: &str,
     changes: &[api::Change],
     cursor: &str,
+) -> AppResult<Report> {
+    apply_items(c, campaign, changes, Some(cursor))
+}
+fn apply_items(
+    c: &Connection,
+    campaign: &str,
+    changes: &[api::Change],
+    cursor: Option<&str>,
 ) -> AppResult<Report> {
     let link = require_link(c, campaign)?;
     for change in changes.iter().filter(|c| !c.deleted) {
@@ -463,17 +791,21 @@ pub fn apply_changes(
     }
     let mut report = Report::default();
     let mut later = vec![];
-    for change in changes {
-        let own = if change.author_id == link.account_id {
-            share(c, campaign, &change.kind, &change.id)?
-        } else {
-            None
-        };
-        match (own, change.deleted) {
-            (Some((_, pushed, base)), false) if change.revision > base => {
+    let mut ordered: Vec<&api::Change> = changes.iter().collect();
+    ordered.sort_by_key(|change| rank(&change.kind));
+    for change in ordered {
+        if change.author_id != link.account_id {
+            later.push(change);
+            continue;
+        }
+        let row = share(c, campaign, &change.kind, &change.id)?;
+        match (row, change.deleted) {
+            (Some((_, pushed, base, visibility, pushed_visibility)), false)
+                if change.revision > base =>
+            {
                 let remote = change.payload.as_ref().ok_or_else(invalid)?;
                 match payload(c, campaign, &change.kind, &change.id)? {
-                    Some(local) if hash(&local) == pushed => {
+                    Some(local) if hash(&local) == pushed && visibility == pushed_visibility => {
                         apply_local(c, campaign, &change.kind, &change.id, remote)?;
                         let applied =
                             payload(c, campaign, &change.kind, &change.id)?.ok_or_else(invalid)?;
@@ -484,30 +816,51 @@ pub fn apply_changes(
                             &change.id,
                             &hash(&applied),
                             change.revision,
+                            change.visibility(),
                         )?;
+                        c.execute(
+                            "UPDATE sync_shares SET visibility=?4 WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
+                            params![campaign, change.kind, change.id, change.visibility()],
+                        )
+                        .map_err(storage)?;
                         report.updated += 1;
                     }
                     _ => later.push(change),
                 }
             }
+            // An echo of this device's own write, or an older revision.
             (Some(_), false) => {}
-            _ => later.push(change),
+            (Some(_), true) => later.push(change),
+            (None, false) => match materialize(c, campaign, change) {
+                Ok(true) => report.materialized += 1,
+                Ok(false) => report.conflicts += 1,
+                // A dependency (its page) may arrive later: keep a copy and retry.
+                Err(_) => later.push(change),
+            },
+            (None, true) => {
+                c.execute(
+                    "DELETE FROM sync_remote_items WHERE campaign_id=?1 AND kind=?2 AND item_id=?3 AND author_id=?4",
+                    params![campaign, change.kind, change.id, link.account_id],
+                )
+                .map_err(storage)?;
+            }
         }
     }
     let tx = c.unchecked_transaction().map_err(storage)?;
     for change in later {
-        let own = if change.author_id == link.account_id {
+        let own = change.author_id == link.account_id;
+        let row = if own {
             share(&tx, campaign, &change.kind, &change.id)?
         } else {
             None
         };
-        match own {
-            // Revoked from another device: stop sharing, keep the local item.
-            Some(_) if change.deleted => {
+        match (own, row, change.deleted) {
+            // Removed from the server on another device: stop replicating, keep the local item.
+            (true, Some(_), true) => {
                 record_deleted(&tx, campaign, &change.kind, &change.id)?;
                 report.removed += 1;
             }
-            Some(_) => {
+            (true, Some(_), false) => {
                 record_conflict(
                     &tx,
                     campaign,
@@ -518,7 +871,7 @@ pub fn apply_changes(
                 )?;
                 report.conflicts += 1;
             }
-            None if change.deleted => {
+            (_, _, true) => {
                 report.removed += tx
                     .execute(
                         "DELETE FROM sync_remote_items WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
@@ -526,23 +879,267 @@ pub fn apply_changes(
                     )
                     .map_err(storage)?;
             }
-            None => {
+            (_, _, false) => {
                 let value = change.payload.as_ref().ok_or_else(invalid)?;
                 tx.execute(
-                    "INSERT INTO sync_remote_items(campaign_id,kind,item_id,author_id,author_name,revision,payload,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8) ON CONFLICT(campaign_id,kind,item_id) DO UPDATE SET author_id=excluded.author_id,author_name=excluded.author_name,revision=excluded.revision,payload=excluded.payload,updated_at=excluded.updated_at WHERE excluded.revision>=sync_remote_items.revision",
-                    params![campaign, change.kind, change.id, change.author_id, change.author_name.trim(), change.revision, value.to_string(), change.updated_at],
+                    "INSERT INTO sync_remote_items(campaign_id,kind,item_id,author_id,author_name,revision,payload,updated_at,visibility) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9) ON CONFLICT(campaign_id,kind,item_id) DO UPDATE SET author_id=excluded.author_id,author_name=excluded.author_name,revision=excluded.revision,payload=excluded.payload,updated_at=excluded.updated_at,visibility=excluded.visibility WHERE excluded.revision>=sync_remote_items.revision",
+                    params![campaign, change.kind, change.id, change.author_id, change.author_name.trim(), change.revision, value.to_string(), change.updated_at, change.visibility()],
                 )
                 .map_err(storage)?;
                 report.received += 1;
             }
         }
     }
+    if let Some(cursor) = cursor {
+        tx.execute(
+            "UPDATE sync_links SET cursor=?2 WHERE campaign_id=?1",
+            params![campaign, cursor],
+        )
+        .map_err(storage)?;
+    }
+    tx.commit().map_err(storage)?;
+    report.materialized += retry_deferred(c, campaign, &link.account_id)?;
+    Ok(report)
+}
+
+/// Creates this account's item locally from its server copy, then records it as replicated.
+/// Returns false when a different local item already uses the id: both versions are then
+/// kept as a conflict for the user. Errors leave nothing half-created.
+fn materialize(c: &Connection, campaign: &str, change: &api::Change) -> AppResult<bool> {
+    let remote = change.payload.as_ref().ok_or_else(invalid)?;
+    let text = |key: &str| remote[key].as_str().unwrap_or_default().to_string();
+    let exists = payload(c, campaign, &change.kind, &change.id)?;
+    if let Some(local) = exists {
+        let same = hash(&local) == hash(remote);
+        c.execute(
+            "INSERT INTO sync_shares(campaign_id,kind,item_id,state,visibility,pushed_visibility) VALUES(?1,?2,?3,'shared',?4,?4) ON CONFLICT(campaign_id,kind,item_id) DO NOTHING",
+            params![campaign, change.kind, change.id, change.visibility()],
+        )
+        .map_err(storage)?;
+        if same {
+            record_put(
+                c,
+                campaign,
+                &change.kind,
+                &change.id,
+                &hash(&local),
+                change.revision,
+                change.visibility(),
+            )?;
+            return Ok(true);
+        }
+        record_conflict(
+            c,
+            campaign,
+            &change.kind,
+            &change.id,
+            change.revision,
+            Some(remote),
+        )?;
+        return Ok(false);
+    }
+    match change.kind.as_str() {
+        "page" => {
+            let aliases: Vec<String> = remote["aliases"]
+                .as_array()
+                .ok_or_else(invalid)?
+                .iter()
+                .filter_map(|a| a.as_str().map(String::from))
+                .collect();
+            let tx = c.unchecked_transaction().map_err(storage)?;
+            let page = knowledge::create_page_with_id(
+                &tx,
+                campaign,
+                &change.id,
+                &text("title"),
+                &text("kind"),
+                &text("status"),
+                &aliases,
+            )?;
+            tx.commit().map_err(storage)?;
+            knowledge::save_page_document(
+                c,
+                campaign,
+                &change.id,
+                page.revision,
+                remote["document"].clone(),
+            )?;
+        }
+        "session" => {
+            let played_on = remote["playedOn"].as_str().map(String::from);
+            let sequence = remote["sequence"].as_i64().ok_or_else(invalid)?;
+            let session = journal::create_session_with_id(
+                c,
+                campaign,
+                &change.id,
+                sequence,
+                &text("title"),
+                played_on,
+            )?;
+            journal::save_document(
+                c,
+                campaign,
+                &change.id,
+                session.revision,
+                remote["document"].clone(),
+            )?;
+        }
+        "relationship" => {
+            graph::create_relationship_with_id(
+                c,
+                campaign,
+                &change.id,
+                graph::RelationshipInput {
+                    from_page_id: text("fromPageId"),
+                    to_page_id: text("toPageId"),
+                    label: text("label"),
+                    certainty: text("certainty"),
+                    source_kind: None,
+                    source_id: None,
+                    source_block_id: None,
+                    evidence: text("evidence"),
+                    notes: text("notes"),
+                },
+            )?;
+        }
+        _ => {
+            party::save(
+                c,
+                campaign,
+                &party::MemberInput {
+                    page_id: Some(text("pageId")),
+                    name: text("name"),
+                    player_name: text("playerName"),
+                    role: text("role"),
+                    status: text("status"),
+                    revision: None,
+                },
+            )?;
+        }
+    }
+    let applied = payload(c, campaign, &change.kind, &change.id)?.ok_or_else(invalid)?;
+    c.execute(
+        "INSERT INTO sync_shares(campaign_id,kind,item_id,state,visibility,pushed_visibility,pushed_hash,remote_revision) VALUES(?1,?2,?3,'shared',?4,?4,?5,?6) ON CONFLICT(campaign_id,kind,item_id) DO UPDATE SET state='shared',visibility=excluded.visibility,pushed_visibility=excluded.pushed_visibility,pushed_hash=excluded.pushed_hash,remote_revision=excluded.remote_revision",
+        params![campaign, change.kind, change.id, change.visibility(), hash(&applied), change.revision],
+    )
+    .map_err(storage)?;
+    Ok(true)
+}
+/// Own items that could not be created before (their page had not arrived) are tried again.
+fn retry_deferred(c: &Connection, campaign: &str, account: &str) -> AppResult<usize> {
+    let mut q = c
+        .prepare("SELECT kind,item_id,author_id,author_name,revision,payload,updated_at,visibility FROM sync_remote_items WHERE campaign_id=?1 AND author_id=?2")
+        .map_err(storage)?;
+    let rows = q
+        .query_map(params![campaign, account], |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                r.get::<_, String>(1)?,
+                r.get::<_, String>(2)?,
+                r.get::<_, String>(3)?,
+                r.get::<_, i64>(4)?,
+                r.get::<_, String>(5)?,
+                r.get::<_, String>(6)?,
+                r.get::<_, String>(7)?,
+            ))
+        })
+        .map_err(storage)?
+        .collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(storage)?;
+    drop(q);
+    let mut created = 0;
+    let mut waiting: Vec<_> = rows;
+    waiting.sort_by_key(|row| rank(&row.0));
+    for (kind_name, id, author_id, author_name, revision, raw, updated_at, visibility) in waiting {
+        let change = api::Change {
+            kind: kind_name.clone(),
+            id: id.clone(),
+            author_id,
+            author_name,
+            revision,
+            deleted: false,
+            payload: serde_json::from_str(&raw).ok(),
+            updated_at,
+            visibility: Some(visibility),
+        };
+        if materialize(c, campaign, &change).is_ok() {
+            c.execute(
+                "DELETE FROM sync_remote_items WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
+                params![campaign, kind_name, id],
+            )
+            .map_err(storage)?;
+            created += 1;
+        }
+    }
+    Ok(created)
+}
+/// Reconciles this device with a full listing: everything absent from it is gone from the
+/// server for this account. Own items that vanished stop being replicated (never deleted).
+pub fn apply_snapshot(
+    c: &Connection,
+    campaign: &str,
+    listed: &[api::Change],
+    head: &str,
+) -> AppResult<Report> {
+    let link = require_link(c, campaign)?;
+    let mut report = apply_items(c, campaign, listed, None)?;
+    let present: HashSet<(String, String)> = listed
+        .iter()
+        .map(|change| (change.kind.clone(), change.id.clone()))
+        .collect();
+    let tx = c.unchecked_transaction().map_err(storage)?;
+    let mut q = tx
+        .prepare("SELECT kind,item_id FROM sync_remote_items WHERE campaign_id=?1")
+        .map_err(storage)?;
+    let held = q
+        .query_map([campaign], |r| {
+            Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))
+        })
+        .map_err(storage)?
+        .collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(storage)?;
+    drop(q);
+    for (kind_name, id) in held {
+        if !present.contains(&(kind_name.clone(), id.clone())) {
+            tx.execute(
+                "DELETE FROM sync_remote_items WHERE campaign_id=?1 AND kind=?2 AND item_id=?3",
+                params![campaign, kind_name, id],
+            )
+            .map_err(storage)?;
+            report.removed += 1;
+        }
+    }
+    let mut q = tx
+        .prepare("SELECT kind,item_id FROM sync_shares WHERE campaign_id=?1 AND state='shared' AND remote_revision>0")
+        .map_err(storage)?;
+    let replicated = q
+        .query_map([campaign], |r| {
+            Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))
+        })
+        .map_err(storage)?
+        .collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(storage)?;
+    drop(q);
+    for (kind_name, id) in replicated {
+        let pushing: bool = tx
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM sync_outbox WHERE campaign_id=?1 AND kind=?2 AND item_id=?3)",
+                params![campaign, kind_name, id],
+                |r| r.get(0),
+            )
+            .map_err(storage)?;
+        if !present.contains(&(kind_name.clone(), id.clone())) && !pushing {
+            record_deleted(&tx, campaign, &kind_name, &id)?;
+            report.removed += 1;
+        }
+    }
     tx.execute(
         "UPDATE sync_links SET cursor=?2 WHERE campaign_id=?1",
-        params![campaign, cursor],
+        params![link.campaign_id, head],
     )
     .map_err(storage)?;
     tx.commit().map_err(storage)?;
+    report.resynchronized = true;
     Ok(report)
 }
 
@@ -690,7 +1287,25 @@ pub fn resolve(
     let remote: Value = serde_json::from_str(&raw).map_err(|_| invalid())?;
     if keep == "remote" && !remote.is_null() {
         // Domain functions run their own transactions: apply before recording.
-        apply_local(c, campaign, kind_name, id, &remote)?;
+        if payload(c, campaign, kind_name, id)?.is_some() {
+            apply_local(c, campaign, kind_name, id, &remote)?;
+        } else {
+            materialize(
+                c,
+                campaign,
+                &api::Change {
+                    kind: kind_name.into(),
+                    id: id.into(),
+                    author_id: String::new(),
+                    author_name: String::new(),
+                    revision,
+                    deleted: false,
+                    payload: Some(remote.clone()),
+                    updated_at: String::new(),
+                    visibility: None,
+                },
+            )?;
+        }
     }
     let tx = c.unchecked_transaction().map_err(storage)?;
     match keep {
@@ -705,7 +1320,18 @@ pub fn resolve(
         "remote" if remote.is_null() => record_deleted(&tx, campaign, kind_name, id)?,
         "remote" => {
             let applied = payload(&tx, campaign, kind_name, id)?.ok_or_else(invalid)?;
-            record_put(&tx, campaign, kind_name, id, &hash(&applied), revision)?;
+            let visibility = share(&tx, campaign, kind_name, id)?
+                .map(|row| row.3)
+                .unwrap_or_else(|| "members".into());
+            record_put(
+                &tx,
+                campaign,
+                kind_name,
+                id,
+                &hash(&applied),
+                revision,
+                &visibility,
+            )?;
         }
         _ => return Err("Choose which version to keep.".into()),
     }
@@ -876,12 +1502,22 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
         remote_id(&remote)?;
         remote_id(&account)?;
     }
-    for table in ["sync_remote_items", "sync_conflicts"] {
-        let column = if table == "sync_conflicts" {
-            "remote_payload"
-        } else {
-            "payload"
-        };
+    // Archives written by schema 19 have no outbox; later ones always do.
+    let has_outbox: bool = c
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='sync_outbox')",
+            [],
+            |r| r.get(0),
+        )
+        .map_err(storage)?;
+    let mut tables = vec![
+        ("sync_remote_items", "payload"),
+        ("sync_conflicts", "remote_payload"),
+    ];
+    if has_outbox {
+        tables.push(("sync_outbox", "coalesce(payload,'null')"));
+    }
+    for (table, column) in tables {
         let mut q = c
             .prepare(&format!("SELECT kind,item_id,{column} FROM {table}"))
             .map_err(storage)?;
@@ -899,7 +1535,7 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
         for (kind_name, id, raw) in rows {
             identifier(&id)?;
             let value: Value = serde_json::from_str(&raw).map_err(|_| invalid())?;
-            if !(table == "sync_conflicts" && value.is_null()) {
+            if !(table != "sync_remote_items" && value.is_null()) {
                 validate_payload(&kind_name, &value)?;
             }
         }
@@ -907,94 +1543,24 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
     Ok(())
 }
 
-/// Pull, then push, for one campaign. Reports counts; never overwrites a
-/// local change that the server did not see: those become conflicts.
-pub async fn sync_now(db: &Database, client: &api::Client, campaign: String) -> AppResult<Report> {
+/// Pull, then push, for one campaign. Reports counts; never overwrites a local change that
+/// the server did not see: those become conflicts. Every failure is classified so a caller
+/// can retry, ask for a new sign-in, or resynchronize.
+pub async fn sync_now(db: &Database, client: &api::Client, campaign: String) -> ApiResult<Report> {
     let id = campaign.clone();
     let link = db.run(move |c| require_link(c, &id)).await?;
     let mut report = Report::default();
-    let mut cursor = link.cursor.clone();
-    for _ in 0..100 {
-        let page = client.changes(&link.remote_id, &cursor).await?;
-        let (id, changes, next) = (campaign.clone(), page.items, page.cursor.clone());
-        let pulled = db
-            .run(move |c| apply_changes(c, &id, &changes, &next))
-            .await?;
-        report.received += pulled.received;
-        report.removed += pulled.removed;
-        report.updated += pulled.updated;
-        report.conflicts += pulled.conflicts;
-        cursor = page.cursor;
-        if !page.more {
-            break;
-        }
-    }
-    let id = campaign.clone();
-    let (jobs, blocked) = db.run(move |c| pending(c, &id)).await?;
-    report.blocked = blocked;
-    for job in jobs {
-        let id = campaign.clone();
-        match job {
-            Job::Put {
-                kind,
-                id: item,
-                base,
-                payload,
-                hash,
-            } => {
-                match client
-                    .put_item(&link.remote_id, &kind, &item, base, &payload)
-                    .await?
-                {
-                    api::Write::Accepted { revision } => {
-                        db.run(move |c| record_put(c, &id, &kind, &item, &hash, revision))
-                            .await?;
-                        report.pushed += 1;
-                    }
-                    api::Write::Conflict { revision, payload } => {
-                        db.run(move |c| {
-                            record_conflict(c, &id, &kind, &item, revision, payload.as_ref())
-                        })
-                        .await?;
-                        report.conflicts += 1;
-                    }
-                    // Removed on the server meanwhile: the user decides.
-                    api::Write::Missing => {
-                        db.run(move |c| record_conflict(c, &id, &kind, &item, base.max(1), None))
-                            .await?;
-                        report.conflicts += 1;
-                    }
-                }
-            }
-            Job::Delete {
-                kind,
-                id: item,
-                base,
-            } => {
-                let mut outcome = client
-                    .delete_item(&link.remote_id, &kind, &item, base)
-                    .await?;
-                // Revocation wins over a newer copy from another device:
-                // the content stays on this device anyway.
-                if let api::Write::Conflict { revision, .. } = outcome {
-                    outcome = client
-                        .delete_item(&link.remote_id, &kind, &item, revision)
-                        .await?;
-                }
-                if matches!(outcome, api::Write::Accepted { .. } | api::Write::Missing) {
-                    db.run(move |c| record_deleted(c, &id, &kind, &item))
-                        .await?;
-                    report.deleted += 1;
-                } else {
-                    report.conflicts += 1;
-                }
-            }
-        }
-    }
+    // Operations left on the wire by a crash or a lost response are settled first, under
+    // their original IDs: the server acknowledges instead of re-applying them, and the
+    // echo of such a write is then not mistaken for a change made elsewhere.
+    settle_outbox(db, client, &link, &campaign, &mut report).await?;
+    let pulled = pull(db, client, &link, &campaign).await?;
+    add(&mut report, pulled);
+    push_pending(db, client, &link, &campaign, &mut report).await?;
     let id = campaign.clone();
     db.run(move |c| {
         c.execute(
-            "UPDATE sync_links SET synced_at=?2 WHERE campaign_id=?1",
+            "UPDATE sync_links SET synced_at=?2,last_error=NULL WHERE campaign_id=?1",
             params![id, now()],
         )
         .map_err(storage)?;
@@ -1002,4 +1568,240 @@ pub async fn sync_now(db: &Database, client: &api::Client, campaign: String) -> 
     })
     .await?;
     Ok(report)
+}
+fn add(total: &mut Report, part: Report) {
+    total.received += part.received;
+    total.removed += part.removed;
+    total.updated += part.updated;
+    total.materialized += part.materialized;
+    total.conflicts += part.conflicts;
+    total.resynchronized |= part.resynchronized;
+}
+async fn pull(
+    db: &Database,
+    client: &api::Client,
+    link: &Link,
+    campaign: &str,
+) -> ApiResult<Report> {
+    let mut report = Report::default();
+    let mut cursor = link.cursor.clone();
+    let mut listed_again = false;
+    for _ in 0..200 {
+        let page = match client.sync(&link.remote_id, &cursor).await {
+            Ok(page) => page,
+            Err(Failure::CursorExpired) if !listed_again => {
+                // The server dropped the history this device was waiting for.
+                listed_again = true;
+                let (summary, head) = resync(db, client, link, campaign).await?;
+                add(&mut report, summary);
+                cursor = head;
+                continue;
+            }
+            Err(error) => return Err(error),
+        };
+        let (id, changes, next) = (campaign.to_string(), page.items, page.cursor.clone());
+        let pulled = db
+            .run(move |c| apply_changes(c, &id, &changes, &next))
+            .await?;
+        add(&mut report, pulled);
+        cursor = page.cursor;
+        if !page.more {
+            return Ok(report);
+        }
+    }
+    Err(Failure::Unavailable(
+        "Too many changes to read at once: the rest continues at the next synchronization.".into(),
+    ))
+}
+/// Lists the whole campaign and reconciles it; returns the cursor to resume from.
+async fn resync(
+    db: &Database,
+    client: &api::Client,
+    link: &Link,
+    campaign: &str,
+) -> ApiResult<(Report, String)> {
+    let mut listed = vec![];
+    let mut after = String::new();
+    let mut head = None;
+    for _ in 0..200 {
+        let page = client.list(&link.remote_id, &after).await?;
+        if head.is_none() {
+            head = page.head.clone();
+        }
+        listed.extend(page.items);
+        after = page.cursor;
+        if !page.more {
+            let head = head.ok_or_else(|| {
+                Failure::Rejected("The sharing server did not report where to resume.".into())
+            })?;
+            let (id, snapshot, resume) = (campaign.to_string(), listed, head.clone());
+            let report = db
+                .run(move |c| apply_snapshot(c, &id, &snapshot, &resume))
+                .await?;
+            return Ok((report, head));
+        }
+    }
+    Err(Failure::Rejected(
+        "The campaign is too large to list on the sharing server.".into(),
+    ))
+}
+async fn settle_outbox(
+    db: &Database,
+    client: &api::Client,
+    link: &Link,
+    campaign: &str,
+    report: &mut Report,
+) -> ApiResult<()> {
+    let id = campaign.to_string();
+    for out in db.run(move |c| outbox(c, &id)).await? {
+        settle(db, client, link, campaign, out, report).await?;
+    }
+    Ok(())
+}
+async fn push_pending(
+    db: &Database,
+    client: &api::Client,
+    link: &Link,
+    campaign: &str,
+    report: &mut Report,
+) -> ApiResult<()> {
+    let id = campaign.to_string();
+    let (jobs, blocked) = db.run(move |c| pending(c, &id)).await?;
+    report.blocked = blocked;
+    for job in jobs {
+        let (id, planned) = (campaign.to_string(), job);
+        let out = db.run(move |c| begin(c, &id, &planned)).await?;
+        settle(db, client, link, campaign, out, report).await?;
+    }
+    Ok(())
+}
+async fn send(client: &api::Client, link: &Link, out: &Outbound) -> ApiResult<api::Write> {
+    match (&out.op[..], &out.payload) {
+        ("save", Some(payload)) => {
+            client
+                .put(
+                    &link.remote_id,
+                    &out.kind,
+                    &out.id,
+                    &out.request_id,
+                    out.base,
+                    &out.visibility,
+                    payload,
+                )
+                .await
+        }
+        _ => {
+            client
+                .delete(
+                    &link.remote_id,
+                    &out.kind,
+                    &out.id,
+                    &out.request_id,
+                    out.base,
+                )
+                .await
+        }
+    }
+}
+/// Sends one stored operation and records its definitive outcome. A transport failure keeps
+/// the operation stored so the retry reuses its ID.
+async fn settle(
+    db: &Database,
+    client: &api::Client,
+    link: &Link,
+    campaign: &str,
+    out: Outbound,
+    report: &mut Report,
+) -> ApiResult<()> {
+    let outcome = match send(client, link, &out).await {
+        Ok(outcome) => outcome,
+        // Too old to be acknowledged: forget it; the item is evaluated again from its state.
+        Err(Failure::RequestExpired) => {
+            let (id, finished) = (campaign.to_string(), out);
+            db.run(move |c| finish(c, &id, &finished)).await?;
+            return Ok(());
+        }
+        Err(error) => {
+            // Refused for good (not a transport problem): do not retry the same bytes forever.
+            if !error.transient() && !matches!(error, Failure::Unauthorized(_)) {
+                let (id, finished) = (campaign.to_string(), out);
+                db.run(move |c| finish(c, &id, &finished)).await?;
+            }
+            return Err(error);
+        }
+    };
+    let (id, done) = (campaign.to_string(), out.clone());
+    match (&out.op[..], outcome) {
+        ("save", api::Write::Accepted { revision }) => {
+            db.run(move |c| {
+                record_put(
+                    c,
+                    &id,
+                    &done.kind,
+                    &done.id,
+                    &done.hash,
+                    revision,
+                    &done.visibility,
+                )?;
+                finish(c, &id, &done)
+            })
+            .await?;
+            report.pushed += 1;
+        }
+        ("save", api::Write::Conflict { revision, payload }) => {
+            db.run(move |c| {
+                record_conflict(c, &id, &done.kind, &done.id, revision, payload.as_ref())?;
+                finish(c, &id, &done)
+            })
+            .await?;
+            report.conflicts += 1;
+        }
+        // Removed on the server meanwhile: the user decides.
+        ("save", api::Write::Missing) => {
+            db.run(move |c| {
+                record_conflict(c, &id, &done.kind, &done.id, done.base.max(1), None)?;
+                finish(c, &id, &done)
+            })
+            .await?;
+            report.conflicts += 1;
+        }
+        (_, api::Write::Accepted { .. }) | (_, api::Write::Missing) => {
+            db.run(move |c| {
+                record_deleted(c, &id, &done.kind, &done.id)?;
+                finish(c, &id, &done)
+            })
+            .await?;
+            report.deleted += 1;
+        }
+        // Revocation wins over a newer copy from another device: the content stays here anyway.
+        (_, api::Write::Conflict { revision, .. }) => {
+            let again = Job::Delete {
+                kind: out.kind.clone(),
+                id: out.id.clone(),
+                base: revision,
+            };
+            let (id2, finished) = (id.clone(), done.clone());
+            let next = db
+                .run(move |c| {
+                    finish(c, &id2, &finished)?;
+                    begin(c, &id2, &again)
+                })
+                .await?;
+            match send(client, link, &next).await? {
+                api::Write::Accepted { .. } | api::Write::Missing => {
+                    db.run(move |c| {
+                        record_deleted(c, &id, &next.kind, &next.id)?;
+                        finish(c, &id, &next)
+                    })
+                    .await?;
+                    report.deleted += 1;
+                }
+                api::Write::Conflict { .. } => {
+                    db.run(move |c| finish(c, &id, &next)).await?;
+                    report.conflicts += 1;
+                }
+            }
+        }
+    }
+    Ok(())
 }

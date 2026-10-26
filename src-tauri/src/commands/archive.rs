@@ -89,7 +89,8 @@ pub async fn restore_backup(
     app: tauri::AppHandle,
     token: String,
 ) -> AppResult<backup::RestoreReceipt> {
-    crate::blocking(
+    let handle = app.clone();
+    let receipt = crate::blocking(
         app,
         "Restore interrupted. Restart Chronexus and check the active archive before trying again.",
         move |app| {
@@ -97,7 +98,10 @@ pub async fn restore_backup(
                 .with_store(|store| store.restore(&token))
         },
     )
-    .await
+    .await?;
+    // The restored archive may link other campaigns, or none: match the running loops to it.
+    handle.state::<crate::sync::auto::Auto>().reload().await;
+    Ok(receipt)
 }
 
 #[tauri::command]
