@@ -189,3 +189,22 @@ fn failed_migration_rolls_back_without_erasing_existing_tables() {
         1
     );
 }
+
+#[test]
+fn only_duplicate_session_numbers_report_the_session_number_message() {
+    let directory = tempfile::tempdir().unwrap();
+    let connection = db::open(&directory.path().join("journal.sqlite3")).unwrap();
+    let campaign = create_campaign(&connection, "Constraint").unwrap();
+    create_session(&connection, &campaign.id, 1, "First", None).unwrap();
+    let duplicate = create_session(&connection, &campaign.id, 1, "Again", None).unwrap_err();
+    assert!(duplicate.contains("session number"), "{duplicate}");
+    let foreign = connection
+        .execute(
+            "INSERT INTO pages(id,campaign_id,title,title_key,kind,status,document) VALUES ('p','missing','T','t','note','stub','{}')",
+            [],
+        )
+        .map_err(storage)
+        .unwrap_err();
+    assert!(!foreign.contains("session number"), "{foreign}");
+    assert!(foreign.starts_with("Invalid operation"), "{foreign}");
+}

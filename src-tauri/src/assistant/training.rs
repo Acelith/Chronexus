@@ -454,8 +454,8 @@ async fn run(
         let adapter = output.join("adapter/adapter_model.safetensors");
         let config = output.join("adapter/adapter_config.json");
         for path in [&adapter, &config] {
-            if fs::metadata(path).map_err(|_| "Adapter incompleto.")?.len() > 64 * 1024 * 1024 {
-                return Err("Adapter oltre il limite di 64 MiB.".into());
+            if fs::metadata(path).map_err(|_| "Incomplete adapter.")?.len() > 64 * 1024 * 1024 {
+                return Err("Adapter over the 64 MiB limit.".into());
             }
         }
         j.adapter_hash = hash_file(&adapter)?;
@@ -488,7 +488,7 @@ async fn run(
                 tokio_util::io::ReaderStream::with_capacity(file, 1048576),
             ))
             .send();
-        let response = tokio::select! {r=upload=>r.map_err(|_|"Importazione locale dei pesi interrotta.")?,_=cancel.changed()=>return Err("Import cancelled.".into())};
+        let response = tokio::select! {r=upload=>r.map_err(|_|"Local weight import interrupted.")?,_=cancel.changed()=>return Err("Import cancelled.".into())};
         if !response.status().is_success() {
             return Err("Failed to import weights into the local runtime.".into());
         }

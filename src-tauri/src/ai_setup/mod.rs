@@ -391,7 +391,7 @@ pub async fn pull(
         let Some(chunk) = chunk else { break };
         pending.extend_from_slice(&chunk);
         if pending.len() > 1 << 20 {
-            return Err("Risposta del runtime oltre il limite.".into());
+            return Err("Runtime answer over the limit.".into());
         }
         while let Some(end) = pending.iter().position(|b| *b == b'\n') {
             let line: Vec<u8> = pending.drain(..=end).collect();

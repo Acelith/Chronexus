@@ -532,7 +532,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
     let directory = tempfile::tempdir_in(staging_parent).map_err(io)?;
     for entry in &manifest.files {
         let path = directory.path().join(&entry.path);
-        fs::create_dir_all(path.parent().ok_or_else(|| invalid("percorso vuoto"))?).map_err(io)?;
+        fs::create_dir_all(path.parent().ok_or_else(|| invalid("empty path"))?).map_err(io)?;
         let mut output = File::create_new(&path).map_err(io)?;
         let mut file = zip.by_name(&entry.path).map_err(io)?;
         if file.size() != entry.size {

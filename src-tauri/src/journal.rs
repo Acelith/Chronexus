@@ -28,8 +28,19 @@ pub struct Session {
 
 pub(crate) fn storage(error: rusqlite::Error) -> String {
     match error {
-        rusqlite::Error::SqliteFailure(ref e, _) if e.code == rusqlite::ErrorCode::ConstraintViolation =>
-            "Invalid operation: check that the session number is unique in the campaign.".into(),
+        // Only the session sequence is unique by user choice; other constraint
+        // failures must not blame the session number.
+        rusqlite::Error::SqliteFailure(ref e, Some(ref detail))
+            if e.code == rusqlite::ErrorCode::ConstraintViolation
+                && detail.contains("sessions.sequence") =>
+        {
+            "Invalid operation: check that the session number is unique in the campaign.".into()
+        }
+        rusqlite::Error::SqliteFailure(ref e, _)
+            if e.code == rusqlite::ErrorCode::ConstraintViolation =>
+        {
+            "Invalid operation: the change conflicts with existing or linked data. Reload and try again; nothing was saved.".into()
+        }
         _ => "Cannot access the archive. Check space and permissions, then try again. The notes stay in the editor.".into(),
     }
 }

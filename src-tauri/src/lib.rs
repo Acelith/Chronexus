@@ -238,7 +238,7 @@ fn choose_backup_file(app: &tauri::AppHandle, save: bool) -> AppResult<Option<st
         if let Some(path) = std::env::var_os(key) {
             let path = std::path::PathBuf::from(path);
             if !path.is_absolute() {
-                return Err(format!("{key} deve essere assoluta."));
+                return Err(format!("{key} must be an absolute path."));
             }
             return Ok(Some(path));
         }
