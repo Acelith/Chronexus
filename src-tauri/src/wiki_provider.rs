@@ -1,7 +1,7 @@
 use crate::journal::AppResult;
+use crate::json_file::{self, ReadError, WriteError};
 use serde::{Deserialize, Serialize};
-use std::{fs, io::Write, path::Path};
-use tempfile::NamedTempFile;
+use std::path::Path;
 /// Global, outside restore generations: restoring campaigns never changes the wiki.
 pub const FILE: &str = "wiki-preferences.json";
 pub const PROVIDERS: [&str; 2] = ["wikidot", "open5e"];
@@ -25,21 +25,21 @@ fn validate(p: &WikiPreferences) -> AppResult<()> {
     Ok(())
 }
 pub fn read(root: &Path) -> AppResult<WikiChoice> {
-    let path = root.join(FILE);
-    let meta = match fs::symlink_metadata(&path) {
-        Ok(m) => m,
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+    let bytes = match json_file::read_bounded(&root.join(FILE), 1024) {
+        Ok(Some(bytes)) => bytes,
+        Ok(None) => {
             return Ok(WikiChoice {
                 provider: "wikidot".into(),
                 explicit: false,
             })
         }
-        Err(_) => return Err("Cannot read the chosen wiki source. Check permissions.".into()),
+        Err(ReadError::Unreadable) => {
+            return Err("Cannot read the chosen wiki source. Check permissions.".into())
+        }
+        Err(ReadError::Invalid) => {
+            return Err("Wiki source preference damaged. Choose it again in the settings.".into())
+        }
     };
-    if !meta.is_file() || meta.file_type().is_symlink() || meta.len() > 1024 {
-        return Err("Wiki source preference damaged. Choose it again in the settings.".into());
-    }
-    let bytes = fs::read(&path).map_err(|_| "Cannot read the chosen wiki source.")?;
     let value: WikiPreferences = serde_json::from_slice(&bytes).map_err(|_| {
         "Wiki source preference damaged. Choose it again in the settings.".to_string()
     })?;
@@ -55,23 +55,17 @@ pub fn save(root: &Path, provider: &str) -> AppResult<WikiChoice> {
         provider: provider.into(),
     };
     validate(&value)?;
-    let path = root.join(FILE);
-    if fs::symlink_metadata(&path).is_ok_and(|m| !m.is_file() || m.file_type().is_symlink()) {
-        return Err("Unsafe destination for the wiki preference.".into());
-    }
-    let mut next = NamedTempFile::new_in(root)
-        .map_err(|_| "Cannot save the wiki source. Check space and permissions.")?;
-    let bytes = serde_json::to_vec_pretty(&value).map_err(|_| "Invalid wiki source preference.")?;
-    next.write_all(&bytes)
-        .and_then(|_| next.as_file().sync_all())
-        .map_err(|_| "Cannot save the wiki source. Check space and permissions.")?;
-    next.persist(path)
-        .map_err(|_| "Cannot confirm the wiki source. The previous choice is kept.".to_string())?;
+    json_file::write_atomic(root, FILE, &value).map_err(|e| match e {
+        WriteError::Unsafe => "Unsafe destination for the wiki preference.",
+        WriteError::Write => "Cannot save the wiki source. Check space and permissions.",
+        WriteError::Persist => "Cannot confirm the wiki source. The previous choice is kept.",
+    })?;
     read(root)
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
     #[test]
     fn defaults_to_wikidot_and_keeps_explicit_choice() {
         let d = tempfile::tempdir().unwrap();

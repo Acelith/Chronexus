@@ -1,7 +1,7 @@
 use crate::journal::AppResult;
+use crate::json_file::{self, ReadError};
 use serde::{Deserialize, Serialize};
-use std::{fs, io::Write, path::Path};
-use tempfile::NamedTempFile;
+use std::path::Path;
 const FILE: &str = "interface-preferences.json";
 const LOCALES: [&str; 13] = [
     "it",
@@ -74,43 +74,35 @@ fn upgrade(mut value: Preferences) -> AppResult<Preferences> {
     Ok(value)
 }
 pub fn read(root: &Path) -> AppResult<Preferences> {
-    let path = root.join(FILE);
-    let bytes = match fs::read(path) {
-        Ok(bytes) => bytes,
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Preferences::default()),
-        Err(_) => {
+    let damaged =
+        || "Interface preferences damaged. You can reset to English from the settings.".to_string();
+    let bytes = match json_file::read_bounded(&root.join(FILE), 4096) {
+        Ok(Some(bytes)) => bytes,
+        Ok(None) => return Ok(Preferences::default()),
+        Err(ReadError::Invalid) => return Err(damaged()),
+        Err(ReadError::Unreadable) => {
             return Err(
                 "Cannot read the interface preferences. Check permissions and try again.".into(),
             )
         }
     };
-    if bytes.len() > 4096 {
-        return Err(
-            "Interface preferences damaged. You can reset to English from the settings.".into(),
-        );
-    }
-    let value: Preferences = serde_json::from_slice(&bytes).map_err(|_| {
-        "Interface preferences damaged. You can reset to English from the settings.".to_string()
-    })?;
+    let value: Preferences = serde_json::from_slice(&bytes).map_err(|_| damaged())?;
     upgrade(value)
 }
 pub fn save(root: &Path, value: Preferences) -> AppResult<Preferences> {
     let value = upgrade(value)?;
-    let mut next = NamedTempFile::new_in(root)
-        .map_err(|_| "Cannot save the language. Check space and permissions.".to_string())?;
-    let bytes = serde_json::to_vec_pretty(&value)
-        .map_err(|_| "Invalid language preferences.".to_string())?;
-    next.write_all(&bytes)
-        .and_then(|_| next.as_file().sync_all())
-        .map_err(|_| "Cannot save the language. Check space and permissions.".to_string())?;
-    next.persist(root.join(FILE)).map_err(|_| {
-        "Cannot confirm the preferences. The previous language is kept.".to_string()
+    json_file::write_atomic(root, FILE, &value).map_err(|e| match e {
+        json_file::WriteError::Persist => {
+            "Cannot confirm the preferences. The previous language is kept.".to_string()
+        }
+        _ => "Cannot save the language. Check space and permissions.".to_string(),
     })?;
     Ok(value)
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
     #[test]
     fn legacy_archives_keep_italian_and_fresh_installs_start_in_english() {
         let fresh = tempfile::tempdir().unwrap();

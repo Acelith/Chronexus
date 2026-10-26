@@ -4,13 +4,14 @@
 use crate::{
     backup::{self, Store},
     journal::AppResult,
+    json_file::{self, is_link, ReadError, WriteError},
 };
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
     fs::{self, File},
-    io::{Read, Write},
+    io::Read,
     path::{Path, PathBuf},
 };
 use tempfile::NamedTempFile;
@@ -131,32 +132,16 @@ fn validate(p: &Preferences) -> AppResult<()> {
     Ok(())
 }
 fn read_file(root: &Path, file: &str, limit: u64) -> AppResult<Option<Vec<u8>>> {
-    let path = root.join(file);
-    let meta = match fs::symlink_metadata(&path) {
-        Ok(m) => m,
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
-        Err(_) => return Err(format!("Cannot read {file}. Check permissions.")),
-    };
-    if !meta.is_file() || is_link(&meta) || meta.len() > limit {
-        return Err(format!("{file} is not a valid file: correct or move it."));
-    }
-    fs::read(path)
-        .map(Some)
-        .map_err(|_| format!("Cannot read {file}. Check permissions."))
+    json_file::read_bounded(&root.join(file), limit).map_err(|e| match e {
+        ReadError::Unreadable => format!("Cannot read {file}. Check permissions."),
+        ReadError::Invalid => format!("{file} is not a valid file: correct or move it."),
+    })
 }
 fn write_file<T: Serialize>(root: &Path, file: &str, value: &T) -> AppResult<()> {
-    let path = root.join(file);
-    if fs::symlink_metadata(&path).is_ok_and(|m| !m.is_file() || is_link(&m)) {
-        return Err(format!("{file}: unsafe destination."));
-    }
-    let failed = || format!("Cannot save {file}. Check space and permissions.");
-    let mut next = NamedTempFile::new_in(root).map_err(|_| failed())?;
-    serde_json::to_writer_pretty(next.as_file_mut(), value).map_err(|_| failed())?;
-    next.flush()
-        .and_then(|_| next.as_file().sync_all())
-        .map_err(|_| failed())?;
-    next.persist(path).map_err(|_| failed())?;
-    backup::sync_dir(root)
+    json_file::write_atomic(root, file, value).map_err(|e| match e {
+        WriteError::Unsafe => format!("{file}: unsafe destination."),
+        _ => format!("Cannot save {file}. Check space and permissions."),
+    })
 }
 pub fn read_preferences(root: &Path) -> AppResult<Preferences> {
     let Some(bytes) = read_file(root, PREFERENCES, 8192)? else {
@@ -236,17 +221,6 @@ pub fn due(p: &Preferences, index: &Index, now: DateTime<Utc>) -> bool {
     next_due(p, index).is_some_and(|t| t <= now)
 }
 
-fn is_link(meta: &fs::Metadata) -> bool {
-    #[cfg(windows)]
-    {
-        use std::os::windows::fs::MetadataExt;
-        // Junctions and other reparse points, not only symbolic links.
-        if meta.file_attributes() & 0x400 != 0 {
-            return true;
-        }
-    }
-    meta.file_type().is_symlink()
-}
 pub fn shown(path: &Path) -> String {
     let text = path.display().to_string();
     text.strip_prefix(r"\\?\")

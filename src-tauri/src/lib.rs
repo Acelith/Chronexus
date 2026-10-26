@@ -23,6 +23,7 @@ mod import_sources_tests;
 mod journal;
 #[cfg(test)]
 mod journal_tests;
+mod json_file;
 mod knowledge;
 #[cfg(test)]
 mod knowledge_tests;
