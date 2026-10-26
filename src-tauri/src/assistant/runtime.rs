@@ -202,28 +202,13 @@ mod tests {
         .is_err());
         assert!(check_local(&json!({"details":{"format":"gguf"}})).is_ok());
     }
-    fn server(status: u16, body: String, extra: &str) -> (String, std::thread::JoinHandle<String>) {
-        use std::{
-            io::{Read, Write},
-            net::TcpListener,
-        };
-        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-        let address = format!("http://{}", listener.local_addr().unwrap());
-        let extra = extra.to_string();
-        let thread = std::thread::spawn(move || {
-            let (mut stream, _) = listener.accept().unwrap();
-            stream
-                .set_read_timeout(Some(Duration::from_secs(3)))
-                .unwrap();
-            let mut buf = [0u8; 8192];
-            let count = stream.read(&mut buf).unwrap();
-            let request = String::from_utf8_lossy(&buf[..count]).to_string();
-            let header=format!("HTTP/1.1 {status} Test\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n{extra}\r\n",body.len());
-            let _ = stream.write_all(header.as_bytes());
-            let _ = stream.write_all(body.as_bytes());
-            request
-        });
-        (address, thread)
+    fn server(
+        status: u16,
+        body: String,
+        extra: &str,
+    ) -> (String, std::thread::JoinHandle<Vec<String>>) {
+        let header = format!("HTTP/1.1 {status} Test\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n{extra}\r\n",body.len());
+        crate::test_support::serve(vec![[header.into_bytes(), body.into_bytes()].concat()])
     }
     #[tokio::test]
     async fn cloud_unconfirmed_stops_probe_before_any_model_or_context_request() {
@@ -232,7 +217,7 @@ mod tests {
             .await
             .unwrap_err()
             .contains("cloud"));
-        let request = server.join().unwrap();
+        let request = server.join().unwrap().remove(0);
         assert!(request.starts_with("GET /api/status "));
         assert!(!request.contains("sources"));
     }
@@ -248,9 +233,7 @@ mod tests {
             assert!(get(&client().unwrap(), &base, "/api/status").await.is_err());
             server.join().unwrap();
         }
-        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
-        let base = format!("http://{}", listener.local_addr().unwrap());
-        drop(listener);
+        let base = crate::test_support::closed_port();
         assert!(get(&client().unwrap(), &base, "/api/status")
             .await
             .unwrap_err()

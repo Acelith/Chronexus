@@ -1,10 +1,7 @@
 // Loopback fakes stand in for GitHub and Ollama: no real download in tests.
 use super::{download::Source, *};
 use sha2::{Digest, Sha256};
-use std::{
-    io::{Read, Write},
-    net::TcpListener,
-};
+use std::io::Write;
 
 fn zip_bytes(entries: &[(&str, &[u8])]) -> Vec<u8> {
     let mut buffer = std::io::Cursor::new(Vec::new());
@@ -20,46 +17,7 @@ fn zip_bytes(entries: &[(&str, &[u8])]) -> Vec<u8> {
     }
     buffer.into_inner()
 }
-/// Serves canned responses in order, one connection each; returns request lines.
-fn server(responses: Vec<Vec<u8>>) -> (String, std::thread::JoinHandle<Vec<String>>) {
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let base = format!("http://{}", listener.local_addr().unwrap());
-    let worker = std::thread::spawn(move || {
-        let mut seen = vec![];
-        for response in responses {
-            let Ok((mut stream, _)) = listener.accept() else {
-                break;
-            };
-            stream
-                .set_read_timeout(Some(Duration::from_secs(15)))
-                .unwrap();
-            let mut head = vec![];
-            let mut b = [0];
-            while !head.ends_with(b"\r\n\r\n") && stream.read_exact(&mut b).is_ok() {
-                head.push(b[0]);
-            }
-            let head = String::from_utf8_lossy(&head).to_string();
-            let length = head
-                .lines()
-                .find_map(|l| {
-                    l.to_lowercase()
-                        .strip_prefix("content-length:")
-                        .map(|v| v.trim().parse::<usize>().unwrap_or(0))
-                })
-                .unwrap_or(0);
-            let mut body = vec![0; length];
-            let _ = stream.read_exact(&mut body);
-            seen.push(format!(
-                "{} {}",
-                head.lines().next().unwrap_or(""),
-                String::from_utf8_lossy(&body)
-            ));
-            let _ = stream.write_all(&response);
-        }
-        seen
-    });
-    (base, worker)
-}
+use crate::test_support::serve as server;
 fn ok(body: &[u8], kind: &str) -> Vec<u8> {
     let mut r = format!(
         "HTTP/1.1 200 OK\r\nContent-Type: {kind}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
@@ -312,9 +270,7 @@ async fn pull_streams_progress_and_reports_ready_only_for_qualified_weights() {
 #[tokio::test]
 async fn status_never_downloads_and_handles_a_stopped_runtime() {
     let root = tempfile::tempdir().unwrap();
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let base = format!("http://{}", listener.local_addr().unwrap());
-    drop(listener);
+    let base = crate::test_support::closed_port();
     let s = status(root.path(), &State::default(), &base).await.unwrap();
     assert_eq!(s.runtime, "stopped");
     assert!(!s.managed_installed && !s.managed_running);

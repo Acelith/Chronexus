@@ -38,6 +38,8 @@ mod preferences;
 mod search;
 #[cfg(test)]
 mod search_tests;
+#[cfg(test)]
+mod test_support;
 mod updates;
 mod wiki;
 mod wiki_provider;

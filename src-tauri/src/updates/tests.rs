@@ -2,8 +2,6 @@ use super::*;
 use crate::{backup, images, journal, knowledge};
 use std::{
     fs,
-    io::{Read, Write},
-    net::TcpListener,
     sync::atomic::{AtomicBool, Ordering},
 };
 
@@ -138,28 +136,17 @@ fn failed_backup_never_calls_installer_and_installer_failure_keeps_backup() {
         2
     );
 }
+/// One canned response for `/latest.json`; checks the request stays anonymous.
 fn response_server(response: String) -> (reqwest::Url, std::thread::JoinHandle<()>) {
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let url = format!("http://{}/latest.json", listener.local_addr().unwrap())
-        .parse()
-        .unwrap();
-    let worker = std::thread::spawn(move || {
-        let (mut stream, _) = listener.accept().unwrap();
-        stream
-            .set_read_timeout(Some(Duration::from_secs(2)))
-            .unwrap();
-        let mut header = vec![];
-        let mut b = [0];
-        while !header.ends_with(b"\r\n\r\n") {
-            stream.read_exact(&mut b).unwrap();
-            header.push(b[0]);
+    let (base, worker) = crate::test_support::serve_text(vec![response]);
+    let url = format!("{base}/latest.json").parse().unwrap();
+    let check = std::thread::spawn(move || {
+        for head in worker.join().unwrap() {
+            assert!(head.starts_with("GET /latest.json HTTP/1.1"));
+            assert!(!head.to_lowercase().contains("authorization:"));
         }
-        let header = String::from_utf8(header).unwrap();
-        assert!(header.starts_with("GET /latest.json HTTP/1.1"));
-        assert!(!header.to_lowercase().contains("authorization:"));
-        let _ = stream.write_all(response.as_bytes());
     });
-    (url, worker)
+    (url, check)
 }
 #[tokio::test]
 async fn downloads_are_bounded_even_without_content_length_and_public_errors_are_clear() {

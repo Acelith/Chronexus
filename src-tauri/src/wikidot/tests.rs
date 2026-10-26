@@ -1,10 +1,6 @@
 // Synthetic fixtures only: they mimic the public page structure, not its text.
 use super::*;
 use crate::{backup, journal};
-use std::{
-    io::{Read, Write},
-    net::TcpListener,
-};
 
 fn page(title: &str, content: &str) -> String {
     format!(
@@ -246,29 +242,8 @@ fn json_obj() -> Value {
     serde_json::json!({})
 }
 fn server(responses: Vec<String>) -> (Url, std::thread::JoinHandle<Vec<String>>) {
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let url = format!("http://{}/", listener.local_addr().unwrap())
-        .parse()
-        .unwrap();
-    let worker = std::thread::spawn(move || {
-        let mut seen = vec![];
-        for response in responses {
-            let (mut stream, _) = listener.accept().unwrap();
-            stream
-                .set_read_timeout(Some(Duration::from_secs(3)))
-                .unwrap();
-            let mut header = vec![];
-            let mut b = [0];
-            while !header.ends_with(b"\r\n\r\n") {
-                stream.read_exact(&mut b).unwrap();
-                header.push(b[0]);
-            }
-            seen.push(String::from_utf8(header).unwrap());
-            let _ = stream.write_all(response.as_bytes());
-        }
-        seen
-    });
-    (url, worker)
+    let (base, worker) = crate::test_support::serve_text(responses);
+    (format!("{base}/").parse().unwrap(), worker)
 }
 fn test_client() -> Client {
     Client::builder()
