@@ -225,11 +225,71 @@ fn schema(connection: &Connection) -> AppResult<Vec<(String, String, String)>> {
         .prepare("SELECT type,name,sql FROM sqlite_master WHERE sql IS NOT NULL ORDER BY type,name")
         .map_err(journal::storage)?;
     let rows = statement
-        .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))
+        .query_map([], |r| {
+            let sql: String = r.get(2)?;
+            Ok((r.get(0)?, r.get(1)?, schema_line_endings(&sql)))
+        })
         .map_err(journal::storage)?
         .collect::<rusqlite::Result<Vec<_>>>()
         .map_err(journal::storage)?;
     Ok(rows)
+}
+
+/// SQLite preserves migration source newlines in sqlite_master. Archives can
+/// contain both Windows and Unix migrations after upgrades or cross-OS restores.
+/// Normalize only SQL layout: quoted values/identifiers remain byte-exact, so a
+/// modified CHECK/default cannot pass validation through newline normalization.
+fn schema_line_endings(sql: &str) -> String {
+    let mut out = String::with_capacity(sql.len());
+    let mut chars = sql.chars().peekable();
+    let mut quote = None;
+    let mut line_comment = false;
+    let mut block_comment = false;
+    while let Some(c) = chars.next() {
+        if let Some(end) = quote {
+            out.push(c);
+            if c == end {
+                if end != ']' && chars.peek() == Some(&end) {
+                    out.push(chars.next().unwrap_or(end));
+                } else {
+                    quote = None;
+                }
+            }
+            continue;
+        }
+        if c == '\r' && chars.peek() == Some(&'\n') {
+            chars.next();
+            out.push('\n');
+            line_comment = false;
+            continue;
+        }
+        out.push(c);
+        if line_comment {
+            if c == '\n' {
+                line_comment = false;
+            }
+        } else if block_comment {
+            if c == '*' && chars.peek() == Some(&'/') {
+                out.push(chars.next().unwrap_or('/'));
+                block_comment = false;
+            }
+        } else {
+            match c {
+                '\'' | '"' | '`' => quote = Some(c),
+                '[' => quote = Some(']'),
+                '-' if chars.peek() == Some(&'-') => {
+                    out.push(chars.next().unwrap_or('-'));
+                    line_comment = true;
+                }
+                '/' if chars.peek() == Some(&'*') => {
+                    out.push(chars.next().unwrap_or('*'));
+                    block_comment = true;
+                }
+                _ => {}
+            }
+        }
+    }
+    out
 }
 
 fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
@@ -736,7 +796,17 @@ impl Store {
 
 #[cfg(test)]
 mod path_tests {
-    use super::attachment_path;
+    use super::{attachment_path, schema_line_endings};
+    #[test]
+    fn schema_normalization_preserves_quoted_values_and_handles_comment_quotes() {
+        let sql = "CREATE TABLE x (\r\n-- owner's comment\r\nv TEXT CHECK(v='a\r\nb'),\r\n/* ' */ [a\r\nb] TEXT DEFAULT 'it''s\r\nexact'\r\n)";
+        let expected = "CREATE TABLE x (\n-- owner's comment\nv TEXT CHECK(v='a\r\nb'),\n/* ' */ [a\r\nb] TEXT DEFAULT 'it''s\r\nexact'\n)";
+        assert_eq!(schema_line_endings(sql), expected);
+        assert_ne!(
+            schema_line_endings(sql),
+            schema_line_endings(&sql.replace("a\r\nb", "a\nb"))
+        );
+    }
     #[test]
     fn attachment_names_are_portable_and_cannot_alias_windows_trailing_dots() {
         let prefix =

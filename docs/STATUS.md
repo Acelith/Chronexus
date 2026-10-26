@@ -1,3 +1,34 @@
+# Chronexus status — 26 October 2026: 0.9.1 upgrade blocker fixed, packaging next
+
+- Reproduced the installed schema 018 backup failure: `dice_rolls` and
+  `wiki_translations` differed from migration references only by CRLF/LF layout.
+  Backup validation now normalizes SQL layout newlines, preserving quoted values
+  and identifiers exactly. Integrity, schema objects/constraints, migration history,
+  references, content and attachment checks remain enforced. No schema change.
+- Regression failed before the fix; mixed Windows/Unix schemas 018 and 021 now back
+  up, restore and automatically migrate to 021 with stable campaign/session IDs.
+  Existing archives already migrate in `db::open`; no manual SQL is required.
+- Startup checks run once at every launch unless disabled, including when the last
+  check was recent. Wait for the update gate instead of dropping a busy startup
+  check. Reminders, dismissals, idle display, signature and mandatory backup remain.
+- Windows real WebView, isolated synthetic profile: recent-check herald visible,
+  keyboard/focus/Escape and Axe (zero violations) passed; immediate restart checks
+  again, respects the reminder and a repeated call does not recheck in the session.
+- Checks: Rust lib 170 passed / 7 ignored; Vitest 179 passed with two workers (first
+  unrestricted run had an unrelated ImageGallery 5 s timeout); TypeScript, ESLint,
+  i18n normalization check, Vite build, rustfmt and all-target Clippy passed.
+  React Doctor changed scope: no issues, 88/100. Updated the native herald QA script
+  for the new launch policy and current English labels, waiting for WebView navigation.
+- Installed archive opened read-only: verified .nodex backups created outside Git;
+  an extracted copy migrated 018 -> 021 and produced another verified backup with
+  unchanged counts. The installed source was not migrated/replaced during QA.
+- 0.9.1 signed packaging/publication follows this checkpoint. Old installed updater
+  code cannot repair itself: bootstrap this hotfix with its manual installer after
+  preserving the verified backup. Actual installation/upgrade and other platforms
+  remain unverified. Next roadmap work remains M25 deployment/TLS acceptance, then M27.
+- Skills: systematic-debugging, rust-best-practices, sqlite-expert, tauri-v2,
+  react-testing, react-doctor and webapp-testing for diagnosis, validation and native QA.
+
 # Chronexus status — 26 October 2026: release 0.9.0 published
 
 Windows x64 installer 0.9.0 (schema 021) published and verified on github.com, tag `v0.9.0`

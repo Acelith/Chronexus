@@ -504,3 +504,78 @@ fn backups_from_every_schema_version_restore_into_the_current_one() {
         assert_eq!(latest, db::LATEST_SCHEMA, "schema {version}");
     }
 }
+
+#[test]
+fn mixed_windows_and_unix_migrations_back_up_and_restore_without_losing_data() {
+    for version in [18, 21] {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("legacy");
+        fs::create_dir(&root).unwrap();
+        let c = rusqlite::Connection::open(root.join("nodex.sqlite3")).unwrap();
+        c.pragma_update(None, "foreign_keys", "ON").unwrap();
+        for (index, migration) in db::MIGRATIONS.iter().take(version).enumerate() {
+            let unix = migration.replace("\r\n", "\n");
+            let sql = if index % 2 == 0 {
+                unix.replace('\n', "\r\n")
+            } else {
+                unix
+            };
+            c.execute_batch(&sql).unwrap();
+        }
+        let campaign = journal::create_campaign(&c, "Preserved campaign").unwrap();
+        let session =
+            journal::create_session(&c, &campaign.id, 1, "Preserved session", None).unwrap();
+        let bundle = temp.path().join("portable.nodex");
+        write_backup(&c, &root, &bundle).unwrap();
+        drop(c);
+        let mut target = Store::open(&temp.path().join("target")).unwrap();
+        let preview = target.prepare(&bundle).unwrap();
+        target.restore(&preview.token).unwrap();
+        assert_eq!(
+            journal::list_sessions(&target.connection, &campaign.id).unwrap()[0].id,
+            session.id
+        );
+        assert_eq!(
+            target
+                .connection
+                .query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
+                    .get::<_, i64>(0))
+                .unwrap(),
+            db::LATEST_SCHEMA
+        );
+        // Reopening is idempotent and the migrated archive remains backuppable.
+        let reopened = db::open(&target.directory.join("nodex.sqlite3")).unwrap();
+        write_backup(
+            &reopened,
+            &target.directory,
+            &temp.path().join("migrated.nodex"),
+        )
+        .unwrap();
+    }
+}
+
+#[test]
+#[ignore = "Requires explicit CHRONEXUS_QA_BACKUP_PROFILE and CHRONEXUS_QA_BACKUP_OUTPUT; source is read-only"]
+fn installed_archive_can_be_backed_up_without_modifying_the_source() {
+    let profile =
+        std::path::PathBuf::from(std::env::var_os("CHRONEXUS_QA_BACKUP_PROFILE").unwrap());
+    let output = std::path::PathBuf::from(std::env::var_os("CHRONEXUS_QA_BACKUP_OUTPUT").unwrap());
+    let connection = rusqlite::Connection::open_with_flags(
+        profile.join("nodex.sqlite3"),
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+    )
+    .unwrap();
+    let receipt = write_backup(&connection, &profile, &output).unwrap();
+    let staging = tempfile::tempdir().unwrap();
+    let prepared = prepare_restore(Path::new(&receipt.path), staging.path()).unwrap();
+    assert_eq!(prepared.manifest.counts, receipt.counts);
+    // Migrate only the extracted, verified copy. The installed archive stays
+    // read-only, while real historical rows exercise the same db::open path.
+    let migrated = db::open(&prepared.directory.path().join("data/nodex.sqlite3")).unwrap();
+    let migrated_output = staging.path().join("migrated.nodex");
+    let migrated_receipt =
+        write_backup(&migrated, prepared.directory.path(), &migrated_output).unwrap();
+    assert_eq!(migrated_receipt.counts, receipt.counts);
+    let checked = prepare_restore(&migrated_output, staging.path()).unwrap();
+    assert_eq!(checked.manifest.schema_version, db::LATEST_SCHEMA);
+}

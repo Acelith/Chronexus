@@ -256,7 +256,7 @@ export default function UpdateSettings({
                   [
                     "startupCheck",
                     tr(
-                      "Check once at startup (at most every 20 hours) and announce new versions with the herald",
+                      "Check once at every startup and announce new versions with the herald",
                     ),
                   ],
                   ["sound", tr("Sound the trumpet when the herald appears")],

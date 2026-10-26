@@ -1,6 +1,6 @@
 // M15a desktop acceptance on an isolated debug profile only (port 9224).
-// Phases: fixture (debug-only synthetic offer), quiet (same profile, no new
-// check), real (fresh profile, real public channel: 0.4.0 is current, so silence).
+// Phases: fixture (debug-only synthetic offer), quiet (same profile, a new
+// session check; reminder suppresses the popup), real (current public channel).
 import { chromium, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import assert from "node:assert/strict";
@@ -28,6 +28,14 @@ await expect
   )
   .toBe(true);
 const browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
+await expect
+  .poll(() =>
+    browser
+      .contexts()[0]
+      .pages()
+      .some((p) => p.url().includes("1420")),
+  )
+  .toBe(true);
 const page = browser
   .contexts()[0]
   .pages()
@@ -55,7 +63,9 @@ if (phase === "fixture") {
     name: "Chronexus 0.5.0 is available",
   });
   await expect(heading).toBeFocused();
-  await expect(page.getByText("Collaudo sintetico M15a")).toBeVisible();
+  await expect(
+    page.getByText("M15a synthetic test: no real package."),
+  ).toBeVisible();
   await page.waitForTimeout(1800);
   await page.screenshot({ path: `${out}/herald.png` });
   const axe = await new AxeBuilder({ page }).include("dialog.herald").analyze();
@@ -64,7 +74,7 @@ if (phase === "fixture") {
     [],
   );
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Refresh" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Update" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   await expect.poll(async () => (await prefs())?.remind?.version).toBe("0.5.0");
@@ -78,14 +88,18 @@ if (phase === "fixture") {
   });
 } else if (phase === "quiet") {
   const before = await prefs();
-  await page.waitForTimeout(12000);
+  await expect
+    .poll(async () => (await prefs())?.lastAutomaticCheck, { timeout: 20000 })
+    .not.toBe(before.lastAutomaticCheck);
   await expect(dialog).toHaveCount(0);
-  assert.deepEqual(
-    await prefs(),
-    before,
-    "no automatic check inside the interval",
+  assert.deepEqual((await prefs()).remind, before.remind);
+  const checked = (await prefs()).lastAutomaticCheck;
+  const again = await page.evaluate(() =>
+    window.__TAURI_INTERNALS__.invoke("startup_update_check"),
   );
-  pass("restart within interval: no check, no announcement");
+  assert.equal(again, null);
+  assert.equal((await prefs()).lastAutomaticCheck, checked);
+  pass("restart checks again, reminder respected, once per session");
 } else if (phase === "real") {
   assert.equal(await prefs(), null, "real phase needs a fresh profile");
   await expect.poll(prefs, { timeout: 30000 }).not.toBeNull();
@@ -96,7 +110,7 @@ if (phase === "fixture") {
   pass("real channel checked once, current version: silent", p);
   await page.getByRole("button", { name: "App settings" }).click();
   const box = page.getByRole("checkbox", {
-    name: /Controlla una volta all’avvio/,
+    name: /Check once at every startup/,
   });
   await box.click();
   await expect(box).not.toBeChecked();

@@ -198,7 +198,8 @@ local proofs; do not delete or overwrite the old M11 draft.
 ### M15a — herald announcement (from the next version to the 0.4.0)
 
 About 6 seconds after startup, Chronexus performs a light automatic check:
-one per session and at most every 20 hours, only towards the channel configured here.
+one per session, only towards the channel configured here. From 0.9.1 a recent
+check no longer suppresses the next launch; explicit opt-out remains respected.
 It is disabled with **Check once at startup…**; the manual button remains.
 If it finds a more recent compatible version, as soon as the app is idle, the
 herald appears with the manifesto: **Update** opens this section and starts the verified download;

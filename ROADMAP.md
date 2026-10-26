@@ -741,7 +741,7 @@ public updater versions and macOS/Linux acceptance remain. Details in STATUS.md.
 ## M15a — Epic update announcement (Windows operational)
 
 **Updated status:** implemented 25 October 2026 after M16. Startup check
-(one per session, maximum every 20 hours, can be disabled), accessible popup with
+(one per session, can be disabled; the 20-hour launch gate was removed in 0.9.1), accessible popup with
 defer/ignore for version, Web Audio fanfare, wait for an idle app and
 transition to M15 flow. Raster illustrations to be provided: until then
 geometric emblem. Real upgrade between two signed releases still to be tested.

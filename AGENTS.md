@@ -211,7 +211,8 @@ instead of inventing them.
 ## Implemented M15a and M16 refinements
 
 M15a is implemented on Windows (after M16); raster herald art is still pending.
-Keep the startup check updater-only, once per session and per 20 hours, opt-out,
+Keep the startup check updater-only, once per session at every launch (0.9.1 removes
+the 20-hour gate following the user's explicit request), opt-out,
 silent on errors, and the debug-only NODEX_DEV_HERALD_VERSION fixture out of
 release builds. M15a adds a medieval
 update popup (vassal/herald, trumpet, parchment manifesto), based on real newer

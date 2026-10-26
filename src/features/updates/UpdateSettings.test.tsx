@@ -60,7 +60,7 @@ test("the herald offer downloads and verifies without automatic installation", a
   expect(updatesApi.install).not.toHaveBeenCalled();
   expect(updatesApi.check).not.toHaveBeenCalled();
   await user.click(
-    screen.getByRole("checkbox", { name: /Check once at startup/ }),
+    screen.getByRole("checkbox", { name: /Check once at every startup/ }),
   );
   expect(heraldApi.save).toHaveBeenCalledWith({
     startupCheck: false,

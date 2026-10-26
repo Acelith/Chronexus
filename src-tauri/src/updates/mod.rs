@@ -185,11 +185,13 @@ pub struct Announcement {
     pub offer: Offer,
     pub sound: bool,
 }
-/// The only automatic network request of the app: one bounded check per session
-/// and per interval, never when disabled. Failures stay silent: no false alarm.
+/// One bounded check per session, never when disabled. Failures stay silent.
 #[tauri::command]
 pub async fn startup_update_check(app: tauri::AppHandle) -> AppResult<Option<Announcement>> {
     let state = app.state::<State>();
+    // Wait for an existing manual update operation instead of consuming the
+    // session's only check and silently dropping it on a busy gate.
+    let _gate = state.gate.lock().await;
     if state
         .automatic_checked
         .swap(true, std::sync::atomic::Ordering::SeqCst)
@@ -198,7 +200,7 @@ pub async fn startup_update_check(app: tauri::AppHandle) -> AppResult<Option<Ann
     }
     let root = root(&app)?;
     let mut prefs = herald::read(&root)?;
-    if !herald::should_check(&prefs, now()) {
+    if !herald::should_check(&prefs) {
         return Ok(None);
     }
     // Debug-only QA fixture on an isolated profile; absent from release builds.
@@ -220,9 +222,6 @@ pub async fn startup_update_check(app: tauri::AppHandle) -> AppResult<Option<Ann
             }),
         );
     }
-    let Ok(_gate) = state.gate.try_lock() else {
-        return Ok(None);
-    };
     let found = match check(&app).await {
         Ok(found) => found,
         Err(_) => return Ok(None),

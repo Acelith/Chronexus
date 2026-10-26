@@ -7,8 +7,6 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 
 pub const FILE: &str = "update-announcements.json";
-/// At most one automatic check per this interval, and one per app session.
-pub const CHECK_INTERVAL_HOURS: i64 = 20;
 pub const REMIND_AFTER_DAYS: i64 = 3;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -106,13 +104,10 @@ pub fn settings(a: &Announcements) -> HeraldSettings {
         sound: a.sound,
     }
 }
-/// Automatic checks need the opt-out off and the interval elapsed.
-pub fn should_check(a: &Announcements, now: DateTime<Utc>) -> bool {
+/// Check every app session unless explicitly disabled. Keep the historical last
+/// check timestamp for preference/backup compatibility, never as a launch gate.
+pub fn should_check(a: &Announcements) -> bool {
     a.startup_check
-        && a.last_automatic_check
-            .as_deref()
-            .and_then(time)
-            .is_none_or(|last| now - last >= Duration::hours(CHECK_INTERVAL_HOURS) || last > now)
 }
 /// Whether a found version may interrupt with the herald.
 pub fn should_announce(a: &Announcements, version: &str, now: DateTime<Utc>) -> bool {
@@ -158,17 +153,16 @@ mod tests {
         time(s).unwrap()
     }
     #[test]
-    fn automatic_checks_are_opt_out_and_rate_limited() {
+    fn every_new_session_checks_even_when_the_previous_check_was_recent() {
         let now = at("2026-10-25T10:00:00Z");
         let mut a = Announcements::default();
-        assert!(should_check(&a, now));
+        assert!(should_check(&a));
         record_check(&mut a, now);
-        assert!(!should_check(&a, now + Duration::hours(19)));
-        assert!(should_check(&a, now + Duration::hours(20)));
-        // A clock moved backwards does not lock checks out forever.
-        assert!(should_check(&a, now - Duration::hours(1)));
+        assert!(should_check(&a));
+        record_check(&mut a, now + Duration::minutes(1));
+        assert!(should_check(&a));
         a.startup_check = false;
-        assert!(!should_check(&a, now + Duration::days(30)));
+        assert!(!should_check(&a));
     }
     #[test]
     fn dismiss_and_remind_are_per_version_without_loops() {

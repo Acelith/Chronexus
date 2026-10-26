@@ -1992,7 +1992,7 @@
   "m_e980fc14b1f7": "The original source is no longer available. The cited copy is kept here.",
   "m_e998bd663f67": "Documents folder unavailable: choose a folder for periodic backups.",
   "m_e9ee3fb167be": "Cancel translation",
-  "m_ea0122d3f1e0": "Check once at startup (at most every 20 hours) and announce new versions with the herald",
+  "m_ea0122d3f1e0": "Check once at every startup and announce new versions with the herald",
   "m_ea112e5bb029": "Cannot read the announcement preferences.",
   "m_ea2b8a878841": "Background",
   "m_ea815782df64": "Local model",
