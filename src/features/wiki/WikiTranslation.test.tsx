@@ -2,7 +2,7 @@ import policy from "../../ai-models.json";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { applyPreferences } from "../../i18n/store";
+import { applyPreferences, tr } from "../../i18n/store";
 import { defaultPreferences } from "../../i18n/locales";
 import { command } from "../journal/api";
 import WikiTranslation from "./WikiTranslation";
@@ -34,7 +34,7 @@ beforeEach(() => {
 });
 afterEach(() => applyPreferences(defaultPreferences));
 
-test("Gemma è una scelta esplicita e non un fallback automatico", async () => {
+test("Gemma requires explicit selection and is not an automatic fallback", async () => {
   const user = userEvent.setup();
   vi.mocked(command).mockImplementation(async (name, args) => {
     if (name === "translate_wiki") {
@@ -58,7 +58,7 @@ test("Gemma è una scelta esplicita e non un fallback automatico", async () => {
     vi.mocked(command).mock.calls.filter(([n]) => n === "translate_wiki"),
   ).toHaveLength(1);
   await user.selectOptions(
-    screen.getByLabelText("Modello per la traduzione"),
+    screen.getByLabelText(tr("Translation model")),
     policy.secondary.name,
   );
   const retry = screen.getByRole("button", { name: "Traduci in Italiano" });
@@ -74,7 +74,7 @@ test("Gemma è una scelta esplicita e non un fallback automatico", async () => {
 });
 
 test.each(["wikidot", "open5e"] as const)(
-  "%s: legge solo cache finché l’utente non traduce e conserva l’originale",
+  "%s: reads only cache until explicit translation and preserves the original",
   async (provider) => {
     const user = userEvent.setup();
     vi.mocked(command).mockImplementation(
@@ -92,11 +92,11 @@ test.each(["wikidot", "open5e"] as const)(
     await user.click(button);
     expect(await screen.findByText("Una luce per 1 minuto.")).toBeVisible();
     expect(screen.getByText(/Bozza automatica/)).toBeVisible();
-    await user.click(screen.getByText("Mostra originale"));
+    await user.click(screen.getByText(tr("Show original")));
     expect(screen.getByText("A light for 1 minute.")).toBeVisible();
   },
 );
-test("riutilizza la copia offline senza inferenza e il cambio lingua elimina quella vecchia", async () => {
+test("reuses the offline copy without inference and language changes discard the old copy", async () => {
   vi.mocked(command).mockImplementation(
     async (name, args) =>
       (name === "read_wiki_translation" &&
@@ -119,7 +119,7 @@ test("riutilizza la copia offline senza inferenza e il cambio lingua elimina que
       .mock.calls.every(([name]) => name === "read_wiki_translation"),
   ).toBe(true);
 });
-test("annulla la richiesta lasciando leggibile la fonte e scarta risultati tardivi al cambio lingua", async () => {
+test("cancels requests while keeping the source readable and discards late results after language changes", async () => {
   const user = userEvent.setup();
   let finish: (value: unknown) => void = () => undefined;
   vi.mocked(command).mockImplementation(async (name) => {
@@ -134,7 +134,9 @@ test("annulla la richiesta lasciando leggibile la fonte e scarta risultati tardi
   await waitFor(() => expect(button).toBeEnabled());
   await user.click(button);
   expect(screen.getByText("A light for 1 minute.")).toBeVisible();
-  await user.click(screen.getByRole("button", { name: "Annulla traduzione" }));
+  await user.click(
+    screen.getByRole("button", { name: tr("Cancel translation") }),
+  );
   expect(command).toHaveBeenCalledWith(
     "cancel_local_ai",
     expect.objectContaining({ id: expect.any(String) }),
@@ -144,10 +146,10 @@ test("annulla la richiesta lasciando leggibile la fonte e scarta risultati tardi
   expect(screen.queryByText("Una luce per 1 minuto.")).not.toBeInTheDocument();
   expect(screen.getByText("A light for 1 minute.")).toBeVisible();
 });
-test("modello assente: errore visibile, originale e possibilità di riprovare", async () => {
+test("missing model shows an error, preserves the original and allows retry", async () => {
   const user = userEvent.setup();
   vi.mocked(command).mockImplementation(async (name) => {
-    if (name === "translate_wiki") throw Error("Ollama non disponibile.");
+    if (name === "translate_wiki") throw Error("Ollama unavailable.");
     return null as never;
   });
   render(view());
@@ -155,13 +157,13 @@ test("modello assente: errore visibile, originale e possibilità di riprovare", 
   await waitFor(() => expect(button).toBeEnabled());
   await user.click(button);
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Ollama non disponibile.",
+    "Ollama unavailable.",
   );
   expect(button).toBeEnabled();
   expect(screen.getByText("A light for 1 minute.")).toBeVisible();
 });
 test.each(["tlh", "art-x-rihan"] as const)(
-  "%s: fallback dichiarato senza chiamate al traduttore",
+  "%s: explicit fallback without translator calls",
   (locale) => {
     applyPreferences({ ...defaultPreferences, locale });
     render(view());

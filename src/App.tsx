@@ -28,7 +28,7 @@ import {
 } from "./features/journal/api";
 import { useExternalUpdates } from "./features/journal/useExternalUpdates";
 import type { SaveGuard } from "./features/journal/Editor";
-import { it } from "./strings";
+import { appText } from "./strings";
 import {
   knowledgeApi,
   type KnowledgePage,
@@ -536,13 +536,17 @@ export function App() {
           <aside>
             <div className="brand">
               <h1>
-                <img className="brand-logo" src={brandLogo} alt={it.appName} />
+                <img
+                  className="brand-logo"
+                  src={brandLogo}
+                  alt={appText.appName}
+                />
               </h1>
               <p>
                 <Text source={"Your stories live on"} />
               </p>
             </div>
-            <nav className="sidebar-menu" aria-label={it.campaigns}>
+            <nav className="sidebar-menu" aria-label={appText.campaigns}>
               <label className="campaign-picker">
                 <Text source={"Current campaign"} />
                 <select
@@ -574,7 +578,7 @@ export function App() {
                 }}
               >
                 <Icon name="plus" />
-                {it.newCampaign}
+                {appText.newCampaign}
               </button>
               <button
                 disabled={busy || loading}
@@ -709,7 +713,7 @@ export function App() {
                       void load();
                     }}
                   >
-                    {it.retry}
+                    {appText.retry}
                   </button>
                 ) : null}
               </div>
@@ -731,7 +735,7 @@ export function App() {
                 />
               </Suspense>
             ) : loading ? (
-              <p role="status">{it.loading}</p>
+              <p role="status">{appText.loading}</p>
             ) : (
               <>
                 <header className="campaign-header">
@@ -739,7 +743,7 @@ export function App() {
                     <h2>
                       {view === "preferences"
                         ? tr("App settings")
-                        : (campaign?.name ?? it.emptyCampaigns)}
+                        : (campaign?.name ?? appText.emptyCampaigns)}
                     </h2>
                   </div>
                   <span className="last-modified">
@@ -787,7 +791,7 @@ export function App() {
                             void run(async () => setForm("rename"));
                           }}
                         >
-                          {it.rename}
+                          {appText.rename}
                         </button>
                         <button
                           className="primary"
@@ -796,7 +800,7 @@ export function App() {
                             void run(async () => setForm("session"));
                           }}
                         >
-                          + {it.newSession}
+                          + {appText.newSession}
                         </button>
                       </div>
                     </details>
@@ -964,13 +968,13 @@ export function App() {
                       <span className="book-mark" aria-hidden="true">
                         ◇
                       </span>
-                      <p>{it.emptyCampaignHint}</p>
+                      <p>{appText.emptyCampaignHint}</p>
                       {form !== "campaign" ? (
                         <button
                           className="primary"
                           onClick={() => setForm("campaign")}
                         >
-                          {it.createCampaign}
+                          {appText.createCampaign}
                         </button>
                       ) : null}
                     </section>
@@ -1202,20 +1206,23 @@ export function App() {
                   !sessions.length &&
                   form !== "session" ? (
                     <section className="empty">
-                      <h3>{it.emptySessions}</h3>
-                      <p>{it.emptySessionsHint}</p>
+                      <h3>{appText.emptySessions}</h3>
+                      <p>{appText.emptySessionsHint}</p>
                       <button
                         className="primary"
                         disabled={busy}
                         onClick={() => setForm("session")}
                       >
-                        {it.newSession}
+                        {appText.newSession}
                       </button>
                     </section>
                   ) : null}
                   {view === "journal" && sessions.length ? (
                     <div className="journal-layout">
-                      <nav className="session-list" aria-label={it.journal}>
+                      <nav
+                        className="session-list"
+                        aria-label={appText.journal}
+                      >
                         {sessions.map((item) => (
                           <button
                             key={item.id}
@@ -1254,7 +1261,9 @@ export function App() {
                               <h3>{session.title}</h3>
                             </header>
                             <Suspense
-                              fallback={<p role="status">{it.editorLoading}</p>}
+                              fallback={
+                                <p role="status">{appText.editorLoading}</p>
+                              }
                             >
                               <Editor
                                 key={`${session.id}:${externalEpoch}`}
@@ -1277,7 +1286,7 @@ export function App() {
                             ) : null}
                           </>
                         ) : (
-                          <p>{it.chooseSession}</p>
+                          <p>{appText.chooseSession}</p>
                         )}
                       </article>
                     </div>
@@ -1293,7 +1302,7 @@ export function App() {
 }
 
 function formatDate(date: string | null) {
-  if (!date) return it.dateMissing;
+  if (!date) return appText.dateMissing;
   return new Intl.DateTimeFormat(localeInfo(getPreferences().locale).intl, {
     day: "numeric",
     month: "long",
@@ -1318,14 +1327,14 @@ function CampaignForm({
   return (
     <form
       className="entry-form"
-      aria-label={rename ? it.rename : it.newCampaign}
+      aria-label={rename ? appText.rename : appText.newCampaign}
       onSubmit={(event: FormEvent) => {
         event.preventDefault();
         void onSave(name);
       }}
     >
       <label>
-        {it.campaignName}
+        {appText.campaignName}
         <input
           autoFocus
           required
@@ -1337,10 +1346,10 @@ function CampaignForm({
       </label>
       <div className="actions">
         <button className="primary" disabled={busy || !name.trim()}>
-          {rename ? it.saveName : it.createCampaign}
+          {rename ? appText.saveName : appText.createCampaign}
         </button>
         <button type="button" disabled={busy} onClick={onCancel}>
-          {it.cancel}
+          {appText.cancel}
         </button>
       </div>
     </form>
@@ -1368,7 +1377,7 @@ function SessionForm({
   return (
     <form
       className="entry-form"
-      aria-label={it.newSession}
+      aria-label={appText.newSession}
       onSubmit={(event: FormEvent) => {
         event.preventDefault();
         void onSave(sequence, title, date || null);
@@ -1376,7 +1385,7 @@ function SessionForm({
     >
       <div className="form-fields">
         <label className="number-field">
-          {it.sessionNumber}
+          {appText.sessionNumber}
           <input
             type="number"
             required
@@ -1389,7 +1398,7 @@ function SessionForm({
           />
         </label>
         <label>
-          {it.sessionTitle}
+          {appText.sessionTitle}
           <input
             autoFocus
             required
@@ -1400,7 +1409,7 @@ function SessionForm({
           />
         </label>
         <label>
-          {it.sessionDate}
+          {appText.sessionDate}
           <input
             type="date"
             min="0001-01-01"
@@ -1413,10 +1422,10 @@ function SessionForm({
       </div>
       <div className="actions">
         <button className="primary" disabled={busy || !title.trim()}>
-          {it.createSession}
+          {appText.createSession}
         </button>
         <button type="button" disabled={busy} onClick={onCancel}>
-          {it.cancel}
+          {appText.cancel}
         </button>
       </div>
     </form>

@@ -1,6 +1,6 @@
-# M9 — Tiradadi and the circle of dragons
+# M9 — Dice roller and the circle of dragons
 
-Open a campaign and select **Tiradadi** in the left menu. Add dice by clicking
+Open a campaign and select **Dice roller** in the left menu. Add dice by clicking
 their icon or the +/- buttons, or type the quantity. Available
 dice are d4, d6, d8, d10, d12, d20, and d100; they can be combined in the same roll.
 The d100 gives an integer from **1 to 100**, including the extremes: zero is not a result.

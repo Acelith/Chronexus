@@ -372,7 +372,7 @@ pub async fn pull(
     };
     if !response.status().is_success() {
         return Err(format!(
-            "Il runtime locale ha rifiutato il download (HTTP {}).",
+            "The local runtime rejected the download (HTTP {}).",
             response.status().as_u16()
         ));
     }
@@ -433,7 +433,7 @@ pub async fn pull(
 /// Removes only the Chronexus-managed runtime folder, never models or other runtimes.
 pub fn remove_runtime(root: &Path, state: &State) -> AppResult<()> {
     if state.managed_running() {
-        return Err("Arresta prima il runtime gestito.".into());
+        return Err("Stop the managed runtime first.".into());
     }
     let dir = runtime_dir(root);
     let meta = fs::symlink_metadata(&dir).map_err(|_| "No managed runtime to remove.")?;

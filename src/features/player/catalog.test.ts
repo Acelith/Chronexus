@@ -67,8 +67,8 @@ test("bad responses and storage errors never masquerade as saved results", async
   fetchMock.mockResolvedValue(new Response(JSON.stringify(entry.payload)));
   vi.mocked(command)
     .mockResolvedValueOnce(null)
-    .mockRejectedValueOnce(Error("Disco pieno"));
-  await expect(loadCatalog("spells")).rejects.toThrow("Disco pieno");
+    .mockRejectedValueOnce(Error("Disk full"));
+  await expect(loadCatalog("spells")).rejects.toThrow("Disk full");
   expect(() =>
     parseDocument("spells/test-spell", { index: "wrong", name: "Wrong" }),
   ).toThrow();

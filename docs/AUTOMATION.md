@@ -14,7 +14,7 @@ does not open the connection. Node.js 22 or later is required for the adapter.
 chronexus.exe --automation
 # Read-only, scoped to one campaign
 chronexus.exe --automation --automation-campaign UUID
-# Lettura e scrittura, limitate obbligatoriamente a una campagna
+# Read and write access, always scoped to one campaign
 chronexus.exe --automation --automation-campaign UUID --automation-write
 ```
 

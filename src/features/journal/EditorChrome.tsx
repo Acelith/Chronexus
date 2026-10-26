@@ -2,7 +2,7 @@ import { tr } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
 import type { ReactNode } from "react";
 import type { SaveState } from "./autosave";
-import { it } from "../../strings";
+import { appText } from "../../strings";
 export function EditorSaveBar({
   state,
   sourceDirty,
@@ -15,10 +15,10 @@ export function EditorSaveBar({
   onSave: () => void;
 }) {
   const status = {
-    saved: it.saved,
-    dirty: it.dirty,
-    saving: it.saving,
-    error: it.failed,
+    saved: appText.saved,
+    dirty: appText.dirty,
+    saving: appText.saving,
+    error: appText.failed,
   }[state.kind];
   return (
     <div className="save-bar">
@@ -34,7 +34,7 @@ export function EditorSaveBar({
         }
         onClick={onSave}
       >
-        {state.kind === "error" ? it.retry : it.saveNow}
+        {state.kind === "error" ? appText.retry : appText.saveNow}
       </button>
     </div>
   );

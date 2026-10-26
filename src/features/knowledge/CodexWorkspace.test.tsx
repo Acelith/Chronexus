@@ -9,7 +9,7 @@ vi.mock("./api", async (original) => ({
   ...(await original<typeof import("./api")>()),
   knowledgeApi: { backlinks: vi.fn().mockResolvedValue([]) },
 }));
-test("preserva bozza e snapshot metadati durante un aggiornamento esterno", async () => {
+test("preserves drafts and metadata snapshots during an external update", async () => {
   const user = userEvent.setup();
   const page: KnowledgePage = {
     id: "page",

@@ -32,7 +32,7 @@ beforeEach(() => {
   vi.mocked(assistantApi.cancel).mockResolvedValue(undefined);
 });
 
-test("Qwen resta utilizzabile per inferenza ma non abilita QLoRA Gemma", async () => {
+test("Qwen remains available for inference without enabling Gemma QLoRA", async () => {
   vi.mocked(trainingApi.get).mockResolvedValue({
     ...initial,
     trainingSupported: false,

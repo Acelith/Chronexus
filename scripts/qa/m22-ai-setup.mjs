@@ -29,7 +29,7 @@ if (phase === "install") {
   await region.getByRole("button", { name: "Install Ollama…" }).click();
   await region.getByRole("button", { name: "Download and install" }).click();
   const started = Date.now();
-  await expect(region.getByText(/Ollama installato e verificato/)).toBeVisible({
+  await expect(region.getByText(/Ollama installed and verified/)).toBeVisible({
     timeout: 30 * 60_000,
   });
   const entries = readdirSync(path.join(profile, "ai-runtime"));
@@ -37,23 +37,23 @@ if (phase === "install") {
   pass(`install ${Math.round((Date.now() - started) / 1000)} s`);
   await region.getByRole("button", { name: "Start Ollama" }).click();
   await expect(
-    region.getByText(/cloud disabilitato · versione 0.40.10/),
+    region.getByText(/cloud disabled · version 0.40.10/),
   ).toBeVisible({ timeout: 60_000 });
-  await expect(region.getByText(/avviato da Chronexus/)).toBeVisible();
+  await expect(region.getByText(/started by Chronexus/)).toBeVisible();
   pass("managed runtime started with cloud disabled");
   await region.getByRole("button", { name: "Stop Ollama" }).click();
   await expect(
-    region.getByText(/Installato da Chronexus, non avviato/),
+    region.getByText(/Installed by Chronexus, not running/),
   ).toBeVisible({ timeout: 30_000 });
   pass("managed runtime stopped");
 } else {
-  await expect(region.getByText(/cloud disabilitato/)).toBeVisible();
+  await expect(region.getByText(/cloud disabled/)).toBeVisible();
   await region.getByRole("button", { name: "Download model…" }).click();
   await region.getByRole("button", { name: "Download", exact: true }).click();
-  await expect(region.getByText(/scaricato e verificato/)).toBeVisible({
+  await expect(region.getByText(/downloaded and verified/)).toBeVisible({
     timeout: 10 * 60_000,
   });
-  await expect(region.getByText(/è pronto/)).toBeVisible();
+  await expect(region.getByText(/is ready/)).toBeVisible();
   pass("qualified model pulled/verified through the running runtime");
 }
 await browser.close();

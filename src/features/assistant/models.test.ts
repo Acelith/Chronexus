@@ -11,7 +11,7 @@ const model = (name: string, weightDigest: string): Model => ({
   residentBytes: 0,
   gpuBytes: 0,
 });
-test("Qwen3.8 precede Gemma e il vecchio Qwen non è selezionabile", () => {
+test("Qwen3.8 precedes Gemma and retired Qwen cannot be selected", () => {
   const available = [
     model(policy.secondary.name, policy.secondary.weightDigest),
     model("qwen3:4b-instruct", "old"),

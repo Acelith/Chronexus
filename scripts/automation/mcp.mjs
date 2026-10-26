@@ -9,10 +9,10 @@ const VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
 export async function connection(path) {
   const meta = await lstat(path);
   if (!meta.isFile() || meta.isSymbolicLink() || meta.size > 16384)
-    throw new Error("File di collegamento non valido.");
+    throw new Error("Invalid connection file.");
   const raw = await readFile(path, "utf8");
   if (Buffer.byteLength(raw) > 16384)
-    throw new Error("File di collegamento troppo grande.");
+    throw new Error("Connection file is too large.");
   const data = JSON.parse(raw),
     url = new URL(data.endpoint);
   if (
@@ -31,14 +31,14 @@ export async function connection(path) {
     url.search ||
     url.hash
   )
-    throw new Error("Destinazione automation non autorizzata.");
+    throw new Error("Automation destination is not allowed.");
   return data;
 }
 export async function invoke(path, tool, args) {
   const data = await connection(path),
     body = JSON.stringify({ tool, arguments: args });
   if (Buffer.byteLength(body) > MAX_REQUEST)
-    throw new Error("Richiesta troppo grande.");
+    throw new Error("Request is too large.");
   return await new Promise((resolve, reject) => {
     const req = http.request(
       data.endpoint,
@@ -55,7 +55,7 @@ export async function invoke(path, tool, args) {
           response.resume();
           reject(
             new Error(
-              "Collegamento scaduto o richiesta rifiutata. Riavvia la connessione MCP.",
+              "Connection expired or request rejected. Restart the MCP connection.",
             ),
           );
           return;
@@ -65,7 +65,7 @@ export async function invoke(path, tool, args) {
         response.on("data", (chunk) => {
           size += chunk.length;
           if (size > MAX_REPLY)
-            req.destroy(new Error("Risposta troppo grande."));
+            req.destroy(new Error("Response is too large."));
           else chunks.push(chunk);
         });
         response.on("error", reject);
@@ -73,7 +73,7 @@ export async function invoke(path, tool, args) {
           try {
             resolve(JSON.parse(Buffer.concat(chunks).toString("utf8")));
           } catch {
-            reject(new Error("Risposta automation non valida."));
+            reject(new Error("Invalid automation response."));
           }
         });
       },
@@ -82,7 +82,7 @@ export async function invoke(path, tool, args) {
       () =>
         req.destroy(
           new Error(
-            "Tempo scaduto. Esito della scrittura incerto: rileggi i dati prima di riprovare.",
+            "Request timed out. The write outcome is uncertain: read the data again before retrying.",
           ),
         ),
       10000,
@@ -91,7 +91,7 @@ export async function invoke(path, tool, args) {
     req.on("error", () =>
       reject(
         new Error(
-          "Collegamento non disponibile. Esito di una scrittura eventualmente incerto: rileggi prima di riprovare.",
+          "Connection unavailable. A write outcome may be uncertain: read the data again before retrying.",
         ),
       ),
     );
@@ -113,7 +113,7 @@ export async function run({
     try {
       request = JSON.parse(line);
     } catch {
-      fail(null, -32700, "JSON non valido.");
+      fail(null, -32700, "Invalid JSON.");
       return;
     }
     if (
@@ -122,7 +122,7 @@ export async function run({
       request.jsonrpc !== "2.0" ||
       typeof request.method !== "string"
     ) {
-      fail(null, -32600, "Richiesta JSON-RPC non valida.");
+      fail(null, -32600, "Invalid JSON-RPC request.");
       return;
     }
     if (!Object.hasOwn(request, "id")) {
@@ -135,7 +135,7 @@ export async function run({
     }
     const id = request.id;
     if (!(typeof id === "string" || Number.isSafeInteger(id))) {
-      fail(null, -32600, "ID non valido.");
+      fail(null, -32600, "Invalid ID.");
       return;
     }
     try {
@@ -143,7 +143,7 @@ export async function run({
       if (request.method === "ping") result = {};
       else if (request.method === "initialize") {
         if (state !== "new") {
-          fail(id, -32600, "Connessione già inizializzata.");
+          fail(id, -32600, "Connection already initialized.");
           return;
         }
         if (
@@ -151,7 +151,7 @@ export async function run({
           typeof request.params?.clientInfo?.name !== "string" ||
           typeof request.params?.clientInfo?.version !== "string"
         ) {
-          fail(id, -32602, "Parametri initialize non validi.");
+          fail(id, -32602, "Invalid initialization parameters.");
           return;
         }
         const config = await connection(connectionPath);
@@ -169,15 +169,11 @@ export async function run({
         };
         state = "negotiated";
       } else if (state !== "ready") {
-        fail(
-          id,
-          -32002,
-          "Inizializza la connessione MCP prima di usare gli strumenti.",
-        );
+        fail(id, -32002, "Initialize the MCP connection before using tools.");
         return;
       } else if (request.method === "tools/list") {
         if (request.params?.cursor) {
-          fail(id, -32602, "Cursor non valido.");
+          fail(id, -32602, "Invalid cursor.");
           return;
         }
         const response = await invoke(connectionPath, "describe", {});
@@ -191,7 +187,7 @@ export async function run({
           Array.isArray(params.arguments) ||
           typeof params.arguments !== "object"
         ) {
-          fail(id, -32602, "Nome o argomenti dello strumento non validi.");
+          fail(id, -32602, "Invalid tool name or arguments.");
           return;
         }
         try {
@@ -218,13 +214,13 @@ export async function run({
             content: [
               {
                 type: "text",
-                text: "Collegamento non disponibile o richiesta rifiutata. Una scrittura potrebbe essere già confermata: rileggi i dati prima di riprovare.",
+                text: "Connection unavailable or request rejected. A write may already have been committed: read the data again before retrying.",
               },
             ],
           };
         }
       } else {
-        fail(id, -32601, "Metodo MCP non supportato.");
+        fail(id, -32601, "Unsupported MCP method.");
         return;
       }
       send({ jsonrpc: "2.0", id, result });
@@ -232,7 +228,7 @@ export async function run({
       fail(
         id,
         -32000,
-        "Collegamento non disponibile. Avvia Chronexus con --automation e controlla il file di connessione.",
+        "Connection unavailable. Start Chronexus with --automation and check the connection file.",
       );
     }
   }
@@ -244,18 +240,18 @@ export async function run({
       const line = buffer.slice(0, newline);
       buffer = buffer.slice(newline + 1);
       if (Buffer.byteLength(line) > MAX_REQUEST) {
-        fail(null, -32600, "Messaggio troppo grande.");
+        fail(null, -32600, "Message is too large.");
         continue;
       }
       if (line.trim()) await message(line);
     }
     if (Buffer.byteLength(buffer) > MAX_REQUEST) {
-      fail(null, -32600, "Messaggio troppo grande.");
+      fail(null, -32600, "Message is too large.");
       return;
     }
   }
   if (buffer.trim())
-    fail(null, -32700, "Messaggio incompleto: manca il separatore di riga.");
+    fail(null, -32700, "Incomplete message: missing newline separator.");
 }
 if (
   process.argv[1] &&
@@ -263,7 +259,7 @@ if (
 ) {
   if (process.argv.length !== 4 || process.argv[2] !== "--connection") {
     process.stderr.write(
-      "Uso: node mcp.mjs --connection <automation-connection.json>\n",
+      "Usage: node mcp.mjs --connection <automation-connection.json>\n",
     );
     process.exitCode = 1;
   } else await run({ connectionPath: process.argv[3] });

@@ -87,7 +87,7 @@ test("failed copy keeps caption and exposes failure instead of adding a fake ima
   const user = userEvent.setup();
   vi.mocked(command).mockImplementation(async (name) => {
     if (name === "list_images") return [];
-    throw Error("Disco pieno");
+    throw Error("Disk full");
   });
   render(
     <ImageGallery campaignId="a" target={{ kind: "character", id: "pc" }} />,
@@ -99,9 +99,9 @@ test("failed copy keeps caption and exposes failure instead of adding a fake ima
     new File(["test"], "oran.jpg", { type: "image/jpeg" }),
   );
   await screen.findByRole("alert");
-  expect(screen.getByRole("alert")).toHaveTextContent("Disco pieno");
+  expect(screen.getByRole("alert")).toHaveTextContent("Disk full");
   expect(screen.getByLabelText("Image caption")).toHaveValue("Oran");
   expect(
-    screen.queryByRole("button", { name: /Apri immagine/ }),
+    screen.queryByRole("button", { name: /Open image/ }),
   ).not.toBeInTheDocument();
 });

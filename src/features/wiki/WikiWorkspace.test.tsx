@@ -66,7 +66,7 @@ beforeEach(() => {
   vi.mocked(command).mockImplementation(
     async (name: string, args?: unknown) => {
       const handler = handlers[name];
-      if (!handler) throw Error(`Comando non previsto: ${name}`);
+      if (!handler) throw Error(`Unexpected command: ${name}`);
       return handler(args) as never;
     },
   );
@@ -75,7 +75,7 @@ afterEach(() => vi.unstubAllGlobals());
 const calls = (name: string) =>
   vi.mocked(command).mock.calls.filter(([n]) => n === name);
 
-test("Wikidot è predefinito, non contatta la rete all’apertura e importa solo su azione", async () => {
+test("Wikidot is the default, makes no network request on opening and imports only on action", async () => {
   const user = userEvent.setup();
   handlers.wikidot_search = () => result;
   handlers.wikidot_entry = () => ({
@@ -113,7 +113,7 @@ test("Wikidot è predefinito, non contatta la rete all’apertura e importa solo
   expect(fetchMock).not.toHaveBeenCalled();
 });
 
-test("se Wikidot non risponde, rifiutare resta su Wikidot senza contattare Open5e", async () => {
+test("declining an unavailable Wikidot result keeps Wikidot without contacting Open5e", async () => {
   const user = userEvent.setup();
   handlers.wikidot_search = () => {
     throw Error("Wikidot not reachable. Check the connection and try again.");
@@ -146,7 +146,7 @@ test("se Wikidot non risponde, rifiutare resta su Wikidot senza contattare Open5
   expect(calls("save_wiki_provider")).toHaveLength(0);
 });
 
-test("accettare salva Open5e e ripete una sola volta la ricerca, senza ciclo di proposte", async () => {
+test("accepting saves Open5e and repeats the search once without repeated prompts", async () => {
   const user = userEvent.setup();
   handlers.wikidot_search = () => ({ ...result, total: 0, rows: [] });
   handlers.save_wiki_provider = (args) => ({

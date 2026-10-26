@@ -75,7 +75,7 @@ beforeEach(() => {
   vi.mocked(knowledgeApi.backlinks).mockResolvedValue([]);
 });
 
-test("crea una campagna dallo stato vuoto e ne modifica il nome", async () => {
+test("creates a campaign from the empty state and renames it", async () => {
   const user = userEvent.setup();
   vi.mocked(api.createCampaign).mockResolvedValue({
     id: "a",
@@ -119,7 +119,7 @@ const knowledgePage: KnowledgePage = {
   updatedAt: "2026-10-23",
 };
 
-test("apertura backup attende gli appunti e rimane nell'editor se il salvataggio fallisce", async () => {
+test("opening backup waits for notes and stays in the editor if saving fails", async () => {
   const user = userEvent.setup();
   vi.mocked(api.campaigns).mockResolvedValue([{ id: "a", name: "Campagna" }]);
   vi.mocked(api.sessions).mockResolvedValue([session]);
@@ -139,7 +139,7 @@ test("apertura backup attende gli appunti e rimane nell'editor se il salvataggio
   expect(screen.queryByText("Editor di test")).not.toBeInTheDocument();
 });
 
-test("ripristino da archivio vuoto aggiorna la barra campagne e apre i documenti ripristinati", async () => {
+test("restoring into an empty archive updates the campaign bar and opens restored documents", async () => {
   const user = userEvent.setup();
   const counts = {
     campaigns: 1,
@@ -196,7 +196,7 @@ test("ripristino da archivio vuoto aggiorna la barra campagne e apre i documenti
   expect(screen.getByRole("heading", { name: "Il ponte" })).toBeInTheDocument();
 });
 
-test("crea una pagina tipizzata e la rinomina conservando il Codex", async () => {
+test("creates a typed page and renames it while keeping the Codex open", async () => {
   const user = userEvent.setup();
   vi.mocked(api.campaigns).mockResolvedValue([{ id: "a", name: "Campagna" }]);
   vi.mocked(knowledgeApi.create).mockResolvedValue(knowledgePage);
@@ -237,7 +237,7 @@ test("crea una pagina tipizzata e la rinomina conservando il Codex", async () =>
   ).toBeInTheDocument();
 });
 
-test("un backlink apre la sessione sorgente dopo il salvataggio", async () => {
+test("a backlink opens the source session after saving", async () => {
   const user = userEvent.setup();
   vi.mocked(api.campaigns).mockResolvedValue([{ id: "a", name: "Campagna" }]);
   vi.mocked(api.sessions).mockResolvedValue([session]);
@@ -264,7 +264,7 @@ test("un backlink apre la sessione sorgente dopo il salvataggio", async () => {
   expect(flush).toHaveBeenCalled();
 });
 
-test("crea una sessione con numero titolo e data facoltativa", async () => {
+test("creates a session with a number, title and optional date", async () => {
   const user = userEvent.setup();
   vi.mocked(api.campaigns).mockResolvedValue([{ id: "a", name: "Campagna" }]);
   vi.mocked(api.createSession).mockResolvedValue(session);
@@ -278,7 +278,7 @@ test("crea una sessione con numero titolo e data facoltativa", async () => {
   expect(await screen.findByText("Editor di test")).toBeInTheDocument();
 });
 
-test("un errore di scrittura impedisce il cambio campagna e preserva la nota aperta", async () => {
+test("a write error blocks switching campaigns and preserves the open note", async () => {
   const user = userEvent.setup();
   vi.mocked(api.campaigns).mockResolvedValue([
     { id: "a", name: "Campagna A" },
@@ -287,12 +287,12 @@ test("un errore di scrittura impedisce il cambio campagna e preserva la nota ape
   vi.mocked(api.sessions).mockResolvedValue([session]);
   render(<App />);
   await screen.findByText("Editor di test");
-  flush.mockRejectedValue(new Error("Disco pieno: riprova."));
+  flush.mockRejectedValue(new Error("Disk full: riprova."));
   await user.selectOptions(
     screen.getByRole("combobox", { name: "Current campaign" }),
     "b",
   );
-  expect(await screen.findByRole("alert")).toHaveTextContent("Disco pieno");
+  expect(await screen.findByRole("alert")).toHaveTextContent("Disk full");
   expect(
     screen.getByRole("heading", { name: "Campagna A" }),
   ).toBeInTheDocument();
@@ -300,14 +300,14 @@ test("un errore di scrittura impedisce il cambio campagna e preserva la nota ape
   expect(api.sessions).toHaveBeenCalledTimes(1);
 });
 
-test("un errore iniziale spiega come riprovare senza mostrare dati fittizi", async () => {
+test("a startup error explains how to retry without showing fake data", async () => {
   const user = userEvent.setup();
   vi.mocked(api.campaigns).mockRejectedValueOnce(
-    new Error("Archivio non disponibile"),
+    new Error("Archive unavailable"),
   );
   render(<App />);
   const alert = await screen.findByRole("alert");
-  expect(alert).toHaveTextContent("Archivio non disponibile");
+  expect(alert).toHaveTextContent("Archive unavailable");
   await user.click(within(alert).getByRole("button", { name: "Try again" }));
   await waitFor(() =>
     expect(screen.queryByRole("alert")).not.toBeInTheDocument(),

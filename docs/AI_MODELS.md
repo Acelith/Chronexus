@@ -14,9 +14,9 @@ only the chosen model before offline use:
 $env:OLLAMA_NO_CLOUD = '1'
 $env:OLLAMA_HOST = '127.0.0.1:11434'
 ollama serve
-# In un altro terminale, sullo stesso runtime:
+# In another terminal, using the same runtime:
 ollama pull qwen3.8:27b-q4_K_M
-# Opzionale, solo se vuoi l’alternativa:
+# Optional, only if you want the alternative:
 ollama pull gemma4:12b
 ```
 

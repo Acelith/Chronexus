@@ -21,7 +21,7 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { api, type JournalDocument, type Session } from "./api";
 import { Autosave, type SaveState } from "./autosave";
-import { it } from "../../strings";
+import { appText } from "../../strings";
 import {
   markdownBlocks,
   markdownForParser,
@@ -63,7 +63,7 @@ function NoteEditor(props: Props) {
     !Array.isArray(session.document.blocks) ||
     !session.document.blocks.length
   )
-    throw new Error(it.unavailable);
+    throw new Error(appText.unavailable);
   const editor = useCreateBlockNote({
     schema,
     dictionary: editorDictionary(),
@@ -326,7 +326,7 @@ function NoteEditor(props: Props) {
       <div
         className="note-sheet"
         hidden={mode === "markdown"}
-        aria-label={it.notes}
+        aria-label={appText.notes}
         data-focused-source={focusBlock}
       >
         {focusBlock ? (
@@ -352,7 +352,7 @@ function NoteEditor(props: Props) {
           />
         </BlockNoteView>
       </div>
-      <p className="editor-hint">{it.editorHint}</p>
+      <p className="editor-hint">{appText.editorHint}</p>
     </>
   );
 }
@@ -368,8 +368,8 @@ class EditorBoundary extends Component<
   render() {
     return this.state.failed ? (
       <section role="alert">
-        <p>{it.unavailable}</p>
-        <p>{it.copyHint}</p>
+        <p>{appText.unavailable}</p>
+        <p>{appText.copyHint}</p>
         <textarea
           dir="auto"
           aria-label={tr("Original document")}

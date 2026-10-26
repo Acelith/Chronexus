@@ -20,7 +20,7 @@ fn text(value: &str, max: usize) -> AppResult<()> {
 fn bounded(value: i64, min: i64, max: i64, label: &str) -> AppResult<()> {
     if !(min..=max).contains(&value) {
         return Err(format!(
-            "{label}: inserisci un numero intero da {min} a {max}."
+            "{label}: enter a whole number from {min} to {max}."
         ));
     }
     Ok(())

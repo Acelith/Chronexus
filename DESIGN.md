@@ -13,7 +13,7 @@ Window occupied at 100%, header and menu fixed. Independent scroll for session/p
 ## Assets and Constraints
 Coherent SVG icons, compass roses, and geometric frames; textures and engraving as separate assets. The graphics do not incorporate names, buttons, or fictitious results. No remote dependencies at runtime.
 
-## Tiradadi M9 — Operate with scenic moment
+## Dice roller M9 — Operate with scenic moment
 
 Dedicated panel from the left menu. On desktop, vertical composer with seven
 geometries on the left, bronze dragon circle in the center, and chronicles on the right.
@@ -41,7 +41,7 @@ Critical dialogues, data, and native menus remain ordinary. Details: docs/I18N.m
 
 ## M15a — Update Herald
 
-The only animated moment outside the tiradadi: herald on the left overlapping the
+The only animated moment outside the dice roller: herald on the left overlapping the
 manifesto parchment (double burgundy frame), ~1,5 s, skippable and static with
 reduced movement. Text, version, notes, and buttons always HTML. Until raster
 illustrations (`assets/herald/`) are missing, the geometric trumpet and

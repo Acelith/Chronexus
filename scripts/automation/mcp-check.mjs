@@ -123,6 +123,10 @@ test("no tool calls before initialization or through notifications", async () =>
       },
     ]);
     assert.equal(result[0].error.code, -32002);
+    assert.equal(
+      result[0].error.message,
+      "Initialize the MCP connection before using tools.",
+    );
     assert.equal(calls.length, 0);
   }));
 test("malformed JSON, unknown methods and domain errors use MCP errors", async () =>
@@ -141,6 +145,7 @@ test("malformed JSON, unknown methods and domain errors use MCP errors", async (
     ]);
     assert.equal(result[0].error.code, -32700);
     assert.equal(result[2].error.code, -32601);
+    assert.equal(result[2].error.message, "Unsupported MCP method.");
     assert.equal(result[3].result.isError, true);
   }));
 test("discovery rejects remote URLs and incomplete lines do not mutate", async () =>

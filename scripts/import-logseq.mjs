@@ -139,7 +139,7 @@ try {
       const key = normalizeName(alias);
       if (mentions.has(key) && mentions.get(key) !== record.page.id) {
         report.warnings.push(
-          `Alias conservato nel testo ma non registrato perché coincide con un titolo: ${alias}`,
+          `Alias preserved in text but not registered because it matches a title: ${alias}`,
         );
         continue;
       }
@@ -171,13 +171,13 @@ try {
       const candidates = aliases.get(normalizeName(name));
       if (candidates?.size > 1) {
         report.warnings.push(
-          `Riferimento ambiguo conservato come testo: ${name}`,
+          `Ambiguous reference preserved as text: ${name}`,
         );
         continue;
       }
       if (!name || name.length > 200) {
         report.warnings.push(
-          "Riferimento con titolo troppo lungo conservato come testo.",
+          "Reference with an oversized title preserved as text.",
         );
         continue;
       }
@@ -214,7 +214,7 @@ try {
         props: {},
         children: [],
         content: [
-          { type: "text", text: "Indice della sessione: ", styles: {} },
+          { type: "text", text: "Session index: ", styles: {} },
           {
             type: "pageMention",
             props: { pageId: record.page.id, label: record.page.title },
@@ -240,7 +240,7 @@ try {
             content: [
               {
                 type: "text",
-                text: "Gli appunti originali di questa sessione sono nel Diario. Apri il backlink della sessione qui sotto per raggiungerli. Questa pagina conserva i collegamenti Logseq basati sul titolo.",
+                text: "The original notes for this session are in the Journal. Open the session backlink below to reach them. This page preserves title-based Logseq links.",
                 styles: {},
               },
             ],
@@ -278,7 +278,8 @@ try {
     for (const ref of parsed.imageRefs) {
       try {
         const url = decodeURIComponent(ref.url.trim().replace(/^<|>$/g, ""));
-        if (/^[a-z]+:/i.test(url)) throw Error("Immagine remota non scaricata");
+        if (/^[a-z]+:/i.test(url))
+          throw Error("Remote image was not downloaded");
         const file = path.resolve(path.dirname(record.file), url);
         const actual = await realpath(file);
         assert(actual.startsWith(path.join(source, "assets") + path.sep));
@@ -295,7 +296,7 @@ try {
         });
       } catch (e) {
         report.warnings.push(
-          `${record.name}: immagine non risolta (${ref.url}): ${e.message}`,
+          `${record.name}: unresolved image (${ref.url}): ${e.message}`,
         );
       }
     }
@@ -308,7 +309,7 @@ try {
   if (unused.length) {
     const p = await invoke("create_page", {
       campaignId: campaign.id,
-      title: "Archivio immagini importate",
+      title: "Imported image archive",
       kind: "note",
       status: "active",
       aliases: [],
@@ -365,7 +366,7 @@ try {
             questId: null,
             provenanceNotes:
               entry.provenanceNotes ??
-              "Trascritto dalla scheda fornita dall’utente.",
+              "Transcribed from the sheet provided by the user.",
           },
         },
       });
@@ -394,12 +395,12 @@ try {
   report.warnings = [...new Set(report.warnings)];
   const summary = await invoke("create_page", {
     campaignId: campaign.id,
-    title: "Rapporto importazione Logseq",
+    title: "Logseq import report",
     kind: "note",
     status: "active",
     aliases: [],
   });
-  const text = `Importazione di ${report.pages} pagine, ${report.sessions} sessioni, ${report.stubPages} bozze e ${report.images} immagini. ${report.originalSources} file Markdown originali conservati in sola lettura con SHA-256. Le pagine-indice delle sessioni aprono il Diario tramite i backlink; nessuna relazione fattuale è stata inferita.\n\n${report.warnings.length ? report.warnings.join("\n") : "Nessun avviso di conversione."}\n\nLa scheda fotografata è una trascrizione manuale parziale: valori poco leggibili o assenti non sono ricostruiti con formule. Consulta sempre le foto originali allegate alla scheda.`;
+  const text = `Imported ${report.pages} pages, ${report.sessions} sessions, ${report.stubPages} drafts and ${report.images} images. ${report.originalSources} original Markdown files preserved as read-only with SHA-256. Session index pages open the Journal through backlinks; no factual relationship was inferred.\n\n${report.warnings.length ? report.warnings.join("\n") : "No conversion warnings."}\n\nThe photographed sheet is a partial manual transcription: unclear or missing values are not reconstructed using formulas. Always consult the original photos attached to the sheet.`;
   await invoke("save_page_document", {
     campaignId: campaign.id,
     id: summary.id,

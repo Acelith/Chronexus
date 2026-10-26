@@ -4,13 +4,13 @@ import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
 const phase = process.argv[2];
 if (!["prepare", "verify"].includes(phase))
-  throw Error("Usa prepare o verify con un profilo di prova vuoto.");
+  throw Error("Use prepare or verify with an empty test profile.");
 const browser = await chromium.connectOverCDP("http://127.0.0.1:9223");
 const page = browser
   .contexts()
   .flatMap((c) => c.pages())
   .find((p) => p.url().startsWith("http://127.0.0.1:1420"));
-if (!page) throw Error("WebView di sviluppo non trovata.");
+if (!page) throw Error("Development WebView not found.");
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 const invoke = (name, args) =>
@@ -39,7 +39,7 @@ async function graphReady(edges) {
     .toBe(true);
 }
 async function openGraph(edges = 3) {
-  await page.getByRole("button", { name: "Grafo", exact: true }).click();
+  await page.getByRole("button", { name: "Graph", exact: true }).click();
   await graphReady(edges);
 }
 async function styles() {
@@ -67,40 +67,36 @@ async function clickElement(id, edge = false) {
   await page.mouse.click(box.x + point.x, box.y + point.y);
 }
 async function selectAssertion() {
-  const summary = page.getByText("Elenco accessibile di nodi e collegamenti", {
+  const summary = page.getByText("Accessible list of nodes and links", {
     exact: true,
   });
   if (!(await page.locator(".graph-accessible").getAttribute("open")))
     await summary.click();
   await page.getByRole("button", { name: /Relazione: Varek/ }).click();
   await page
-    .getByRole("button", { name: "Modifica relazione", exact: true })
+    .getByRole("button", { name: "Edit relationship", exact: true })
     .waitFor();
 }
 async function createRelationship(varek, guild, session, block) {
   await page
-    .getByRole("button", { name: "Nuova relazione", exact: true })
+    .getByRole("button", { name: "New relationship", exact: true })
     .click();
-  await page.getByLabel("Da pagina", { exact: true }).selectOption(varek.id);
-  await page.getByLabel("A pagina", { exact: true }).selectOption(guild.id);
+  await page.getByLabel("From page", { exact: true }).selectOption(varek.id);
+  await page.getByLabel("At page", { exact: true }).selectOption(guild.id);
+  await page.getByLabel("Relationship label", { exact: true }).fill("accusa");
+  await page.getByLabel("Certainty", { exact: true }).selectOption("suspected");
   await page
-    .getByLabel("Etichetta della relazione", { exact: true })
-    .fill("accusa");
-  await page.getByLabel("Certezza", { exact: true }).selectOption("suspected");
-  await page
-    .getByLabel("Fonte (facoltativa)", { exact: true })
+    .getByLabel("Source (optional)", { exact: true })
     .selectOption(`session:${session.id}`);
+  await page.getByLabel("Source block", { exact: true }).selectOption(block);
   await page
-    .getByLabel("Blocco della fonte", { exact: true })
-    .selectOption(block);
-  await page
-    .getByLabel("Evidenza o citazione", { exact: true })
+    .getByLabel("Evidence or quote", { exact: true })
     .fill("Varek accusa la Gilda: è una dichiarazione da verificare.");
   await page
-    .getByLabel("Note sulla relazione", { exact: true })
+    .getByLabel("Relationship notes", { exact: true })
     .fill("Nessuna alleanza dedotta dalle menzioni.");
   await page
-    .getByRole("button", { name: "Salva relazione", exact: true })
+    .getByRole("button", { name: "Save relationship", exact: true })
     .click();
   await graphReady(3);
 }
@@ -109,31 +105,31 @@ try {
     assert.deepEqual(
       await invoke("list_campaigns"),
       [],
-      "Il profilo deve essere vuoto: non usare campagne personali.",
+      "The profile must be empty: do not use personal campaigns.",
     );
     await page
-      .getByRole("button", { name: "Crea campagna", exact: true })
+      .getByRole("button", { name: "Create campaign", exact: true })
       .click();
-    await page.getByLabel("Nome della campagna").fill("Verifica grafo M3");
+    await page.getByLabel("Campaign name").fill("Verifica grafo M3");
     await page
-      .getByRole("button", { name: "Crea campagna", exact: true })
+      .getByRole("button", { name: "Create campaign", exact: true })
       .click();
     await page
       .getByRole("button", { name: "+ Nuova sessione", exact: true })
       .click();
-    await page.getByLabel("Numero", { exact: true }).fill("12");
-    await page.getByLabel("Titolo della sessione").fill("La voce di Varek");
+    await page.getByLabel("Number", { exact: true }).fill("12");
+    await page.getByLabel("Session title").fill("La voce di Varek");
     await page
-      .getByRole("button", { name: "Crea sessione", exact: true })
+      .getByRole("button", { name: "Create session", exact: true })
       .click();
     const editor = page.locator('.bn-editor[contenteditable="true"]');
     await editor.click();
     await page.keyboard.insertText("Nella stessa nota: ");
     for (const title of ["Varek", "Gilda"]) {
       await page.keyboard.type(`[[${title}`);
-      await page.getByText(`Crea bozza «${title}»`, { exact: true }).click();
+      await page.getByText(`Create draft «${title}»`, { exact: true }).click();
       await expect(page.locator(".save-state")).toHaveText(
-        "Salvato sul computer",
+        "Saved on the computer",
       );
       await editor.click();
       await page.keyboard.press("Control+End");
@@ -160,19 +156,19 @@ try {
     assert((await styles()).every((e) => e.line === "dashed"));
     // A form is guarded before closing or navigating away.
     await page
-      .getByRole("button", { name: "Nuova relazione", exact: true })
+      .getByRole("button", { name: "New relationship", exact: true })
       .click();
-    await page.getByLabel("Etichetta della relazione").fill("Da conservare");
-    await page.getByRole("button", { name: "Diario", exact: true }).click();
-    await expect(page.getByRole("alert")).toContainText("Salva o annulla");
-    await expect(page.getByLabel("Etichetta della relazione")).toHaveValue(
+    await page.getByLabel("Relationship label").fill("Da conservare");
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText("Save or cancel");
+    await expect(page.getByLabel("Relationship label")).toHaveValue(
       "Da conservare",
     );
     await page
-      .getByRole("button", { name: "Chiudi messaggio", exact: true })
+      .getByRole("button", { name: "Close message", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "Annulla relazione", exact: true })
+      .getByRole("button", { name: "Cancel relationship", exact: true })
       .click();
     await createRelationship(varek, guild, session, block);
     const graph = await invoke("get_graph", { campaignId: campaign.id, query });
@@ -196,13 +192,13 @@ try {
     ).toBeVisible();
     await openGraph();
     await clickElement(`relationship:${relationship.id}`, true);
-    await expect(page.getByLabel("Dettaglio collegamento")).toContainText(
-      "Relazione dichiarata",
+    await expect(page.getByLabel("Link details")).toContainText(
+      "Declared relationship",
     );
-    await expect(page.getByLabel("Dettaglio collegamento")).toContainText(
-      "Sospetta",
-    );
-    await page.getByRole("button", { name: "Apri fonte", exact: true }).click();
+    await expect(page.getByLabel("Link details")).toContainText("Suspected");
+    await page
+      .getByRole("button", { name: "Open source", exact: true })
+      .click();
     await expect(
       page.getByRole("heading", { name: "La voce di Varek", exact: true }),
     ).toBeVisible();
@@ -213,56 +209,54 @@ try {
     await openGraph();
     await selectAssertion();
     await page
-      .getByRole("button", { name: "Modifica relazione", exact: true })
+      .getByRole("button", { name: "Edit relationship", exact: true })
       .click();
     await page
-      .getByLabel("Certezza", { exact: true })
+      .getByLabel("Certainty", { exact: true })
       .selectOption("disproven");
     await page
-      .getByRole("button", { name: "Salva relazione", exact: true })
+      .getByRole("button", { name: "Save relationship", exact: true })
       .click();
     await expect(page.locator(".graph-detail .certainty")).toHaveText(
-      "Smentita",
+      "Disproven",
     );
+    await page.getByLabel("Links", { exact: true }).selectOption("assertions");
     await page
-      .getByLabel("Collegamenti", { exact: true })
-      .selectOption("assertions");
-    await page
-      .getByLabel("Certezza delle relazioni", { exact: true })
+      .getByLabel("Relationship certainty", { exact: true })
       .selectOption("suspected");
     await page
-      .getByRole("button", { name: "Applica filtri", exact: true })
+      .getByRole("button", { name: "Apply filters", exact: true })
       .click();
     await graphReady(0);
     await page
-      .getByLabel("Certezza delle relazioni", { exact: true })
+      .getByLabel("Relationship certainty", { exact: true })
       .selectOption("disproven");
     await page
-      .getByRole("button", { name: "Applica filtri", exact: true })
+      .getByRole("button", { name: "Apply filters", exact: true })
       .click();
     await graphReady(1);
     await page
-      .getByRole("button", { name: "Azzera filtri", exact: true })
+      .getByRole("button", { name: "Clear filters", exact: true })
       .click();
     await graphReady(3);
     await page
-      .getByLabel("Fonte sessione", { exact: true })
+      .getByLabel("Session source", { exact: true })
       .selectOption(session.id);
     await page
-      .getByLabel("Nodo centrale", { exact: true })
+      .getByLabel("Central node", { exact: true })
       .selectOption(`page:${varek.id}`);
-    await page.getByLabel("Profondità", { exact: true }).selectOption("2");
+    await page.getByLabel("Depth", { exact: true }).selectOption("2");
     await page
-      .getByRole("button", { name: "Applica filtri", exact: true })
+      .getByRole("button", { name: "Apply filters", exact: true })
       .click();
     await graphReady(3);
     await page
-      .getByRole("button", { name: "Azzera filtri", exact: true })
+      .getByRole("button", { name: "Clear filters", exact: true })
       .click();
     await graphReady(3);
     await selectAssertion();
     await page
-      .getByRole("button", { name: "Elimina relazione", exact: true })
+      .getByRole("button", { name: "Delete relationship", exact: true })
       .click();
     await expect(page.getByRole("alertdialog")).toBeVisible();
     await page.keyboard.press("Escape");
@@ -272,10 +266,10 @@ try {
       3,
     );
     await page
-      .getByRole("button", { name: "Elimina relazione", exact: true })
+      .getByRole("button", { name: "Delete relationship", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "Conferma eliminazione", exact: true })
+      .getByRole("button", { name: "Confirm deletion", exact: true })
       .click();
     await graphReady(2);
     assert(
@@ -297,7 +291,7 @@ try {
     assert.deepEqual(errors, []);
     await invoke("plugin:window|close", { label: "main" }).catch(() => {});
     console.log(
-      "PASS M3 prepare: co-menzioni distinte, canvas/nodi/archi reali, fonte al blocco, CRUD confermato, filtri e form protetto.",
+      "PASS M3 prepare: distinct co-mentions, real canvas/nodes/edges, block source, confirmed CRUD, filters and guarded form.",
     );
   } else {
     const expected = JSON.parse(
@@ -321,9 +315,9 @@ try {
     await openGraph();
     await selectAssertion();
     await expect(page.locator(".graph-detail .certainty")).toHaveText(
-      "Sospetta",
+      "Suspected",
     );
-    await expect(page.getByLabel("Dettaglio collegamento")).toContainText(
+    await expect(page.getByLabel("Link details")).toContainText(
       "dichiarazione da verificare",
     );
     assert(
@@ -338,7 +332,7 @@ try {
     assert.deepEqual(errors, []);
     await invoke("plugin:window|close", { label: "main" }).catch(() => {});
     console.log(
-      "PASS M3 verify: grafo, ID, relazione, certezza, evidenza e documento identici dopo riavvio desktop.",
+      "PASS M3 verify: graph, IDs, relationship, certainty, evidence and document identical after desktop restart.",
     );
   }
 } finally {

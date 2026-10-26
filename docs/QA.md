@@ -150,7 +150,7 @@ or activation. Windows test dedicated to occupied directories without DELETE sha
 Repeatable desktop smoke, only on empty test profiles in `.tools/`:
 
 ```powershell
-# Prima compilare il debug, configurare Rust come nel README, avviare pnpm dev.
+# Build the debug app first, configure Rust as in the README, and start pnpm dev.
 cargo build --offline --manifest-path src-tauri/Cargo.toml
 $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS='--remote-debugging-port=9223'
 $env:NODEX_DEV_DATA_DIR="$PWD/.tools/m4-source"
@@ -159,7 +159,7 @@ Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle
 node scripts/backup-smoke.mjs seed
 node scripts/backup-smoke.mjs create
 node scripts/backup-smoke.mjs created
-# created chiude normalmente la finestra dopo la ricevuta.
+# created closes the window normally after the receipt.
 $env:NODEX_DEV_DATA_DIR="$PWD/.tools/m4-target"
 $env:NODEX_DEV_RESTORE_FILE="$PWD/.tools/m4-portable.nodex"
 Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
@@ -167,7 +167,7 @@ node scripts/backup-smoke.mjs select
 node scripts/backup-smoke.mjs cancel
 node scripts/backup-smoke.mjs select
 node scripts/backup-smoke.mjs restore
-# restore chiude normalmente dopo confronto e verifica della copia preventiva.
+# restore closes normally after comparison and safety-copy verification.
 Start-Process -FilePath "$PWD/src-tauri/target/debug/chronexus.exe" -WindowStyle Hidden
 node scripts/backup-smoke.mjs verify
 ```

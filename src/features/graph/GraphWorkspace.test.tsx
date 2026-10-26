@@ -130,7 +130,7 @@ beforeEach(() => {
   vi.mocked(graphApi.remove).mockResolvedValue(undefined);
 });
 
-test("crea una relazione con certezza e blocco fonte senza trasformare menzioni", async () => {
+test("creates a relationship with certainty and a source block without changing mentions", async () => {
   const user = userEvent.setup();
   renderGraph();
   await screen.findByText("Canvas di test");
@@ -174,7 +174,7 @@ test("crea una relazione con certezza e blocco fonte senza trasformare menzioni"
   );
 });
 
-test("l'eliminazione richiede conferma e usa la revisione corrente", async () => {
+test("deletion requires confirmation and uses the current revision", async () => {
   const user = userEvent.setup();
   const graph = {
     ...data,
@@ -215,7 +215,7 @@ test("l'eliminazione richiede conferma e usa la revisione corrente", async () =>
   expect(graphApi.remove).toHaveBeenCalledExactlyOnceWith("a", record);
 });
 
-test("una relazione aperta blocca la navigazione e conserva il form dopo errore", async () => {
+test("an open relationship blocks navigation and preserves the form after an error", async () => {
   const user = userEvent.setup();
   renderGraph();
   await screen.findByText("Canvas di test");
@@ -224,18 +224,18 @@ test("una relazione aperta blocca la navigazione e conserva il form dopo errore"
   const guard = register.mock.calls.at(-1)![0] as SaveGuard;
   await expect(guard.flush()).rejects.toThrow("Save or cancel");
   vi.mocked(graphApi.save).mockRejectedValue(
-    new Error("Archivio non scrivibile"),
+    new Error("Archive is not writable"),
   );
   await user.click(screen.getByRole("button", { name: "Save relationship" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Archivio non scrivibile",
+    "Archive is not writable",
   );
   expect(screen.getByLabelText("Relationship label")).toHaveValue("accusa");
   await user.click(screen.getByRole("button", { name: "Cancel relationship" }));
   await expect(guard.flush()).resolves.toBeUndefined();
 });
 
-test("applica filtri e vicinato solo alla conferma e segnala la vista limitata", async () => {
+test("applies filters and neighborhood only on confirmation and indicates a limited view", async () => {
   const user = userEvent.setup();
   vi.mocked(graphApi.graph).mockResolvedValue({
     ...data,

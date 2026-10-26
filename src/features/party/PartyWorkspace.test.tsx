@@ -31,7 +31,7 @@ test("party links an existing character and keeps failed edits guarded and recov
     onSaved = vi.fn();
   vi.mocked(command).mockImplementation(async (name) => {
     if (name === "list_party") return [];
-    throw Error("Disco pieno");
+    throw Error("Disk full");
   });
   render(
     <PartyWorkspace
@@ -50,7 +50,7 @@ test("party links an existing character and keeps failed edits guarded and recov
   expect(guard.dirty()).toBe(true);
   await expect(guard.flush()).rejects.toThrow("Save or cancel");
   await user.click(screen.getByRole("button", { name: "Save member" }));
-  await screen.findByText("Disco pieno");
+  await screen.findByText("Disk full");
   expect(screen.getByLabelText("Role in the company")).toHaveValue(
     "Esploratore",
   );

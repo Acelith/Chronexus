@@ -57,6 +57,25 @@ fn readable_export_contains_canonical_data_stable_links_and_original_image_bytes
         .read_to_string(&mut md)
         .unwrap();
     assert!(md.contains(&format!("../pages/{}.md", p.id)));
+    assert!(md.starts_with("# Session 12 — La chiave\n"));
+    let mut index = String::new();
+    archive
+        .by_name("README.md")
+        .unwrap()
+        .read_to_string(&mut index)
+        .unwrap();
+    assert!(index.contains("Chronexus export."));
+    assert!(index.contains("## Pages") && index.contains("## Sessions"));
+    let mut page_text = String::new();
+    archive
+        .by_name(&format!("pages/{}.md", p.id))
+        .unwrap()
+        .read_to_string(&mut page_text)
+        .unwrap();
+    assert!(page_text.contains("Type: npc") && page_text.contains("Alias: Custode"));
+    // English wrappers must not translate canonical campaign titles or aliases.
+    assert_eq!(exported["sessions"][0]["title"], "La chiave");
+    assert_eq!(exported["pages"][0]["aliases"][0], "Custode");
     let mut bytes = vec![];
     archive
         .by_name(&format!("attachments/{}/{}", a.id, picture.filename))

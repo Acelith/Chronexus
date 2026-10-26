@@ -1,5 +1,5 @@
 import { localizeLabels } from "./i18n/store";
-export const it = localizeLabels({
+export const appText = localizeLabels({
   appName: "Chronexus",
   tagline: "Your campaign journal",
   local: "Personal archive · offline",

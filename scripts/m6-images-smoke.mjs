@@ -120,20 +120,18 @@ try {
   await click(campaign.name);
   await click("Codex");
   await p
-    .getByRole("navigation", { name: "Pagine del Codex", exact: true })
+    .getByRole("navigation", { name: "Codex pages", exact: true })
     .getByRole("button", { name: /Mappa della costa/ })
     .click();
   await p.getByText("Immagini (0)", { exact: true }).click();
+  await p.getByLabel("Image caption", { exact: true }).fill("Costa illustrata");
+  await p.getByLabel("Image type", { exact: true }).selectOption("map");
   await p
-    .getByLabel("Didascalia immagine", { exact: true })
-    .fill("Costa illustrata");
-  await p.getByLabel("Tipo immagine", { exact: true }).selectOption("map");
-  await p
-    .getByLabel("Aggiungi immagine", { exact: true })
+    .getByLabel("Add image", { exact: true })
     .setInputFiles(".tools/m6-image-fixture.png");
   await expect(
     p.getByRole("button", {
-      name: "Apri immagine: Costa illustrata",
+      name: "Open image: Costa illustrata",
       exact: true,
     }),
   ).toBeVisible();
@@ -145,26 +143,24 @@ try {
   assert.equal(images[0].size, png.length);
   await p
     .getByRole("button", {
-      name: "Apri immagine: Costa illustrata",
+      name: "Open image: Costa illustrata",
       exact: true,
     })
     .click();
   await expect(p.getByRole("dialog")).toBeVisible();
-  await p
-    .getByLabel("Ingrandimento immagine", { exact: true })
-    .selectOption("200");
+  await p.getByLabel("Image zoom", { exact: true }).selectOption("200");
   await p.keyboard.press("Escape");
-  await click("Cerca nella campagna");
-  await p.getByLabel("Testo da cercare", { exact: true }).fill("corallina");
+  await click("Search the campaign");
+  await p.getByLabel("Text to search", { exact: true }).fill("corallina");
   await p
     .getByRole("dialog")
     .getByRole("button", { name: /La costa/ })
     .click();
   await expect(p.locator('[data-id="m6-source"]').first()).toBeVisible();
-  await click("Backup e ripristino");
-  await click("Crea backup");
+  await click("Backup and restore");
+  await click("Create backup");
   await expect(
-    p.getByRole("region", { name: "Backup creato", exact: true }),
+    p.getByRole("region", { name: "Backup created", exact: true }),
   ).toBeVisible({ timeout: 20000 });
   await p.screenshot({ path: ".tools/m6-images-backup.png", fullPage: true });
   await invoke("plugin:window|close", { label: "main" }).catch(() => {});

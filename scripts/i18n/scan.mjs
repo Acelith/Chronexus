@@ -84,7 +84,7 @@ if (
           "Codex",
           "Party",
           "Background",
-          "Wiki D&D",
+          "D&D Wiki",
           "Markdown",
           "AI",
           "OK",

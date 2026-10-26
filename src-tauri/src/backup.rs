@@ -78,7 +78,7 @@ fn checksum(path: &Path) -> AppResult<(u64, String)> {
         }
         size += read as u64;
         if size > MAX_FILE {
-            return Err(invalid("un file supera il limite di 256 MiB"));
+            return Err(invalid("a file exceeds the 256 MiB limit"));
         }
         hash.update(&buffer[..read]);
     }
@@ -157,7 +157,7 @@ fn version(connection: &Connection) -> AppResult<i64> {
         .query_row("SELECT MAX(version) FROM schema_migrations", [], |row| {
             row.get(0)
         })
-        .map_err(|_| invalid("versione del database assente"))
+        .map_err(|_| invalid("database version missing"))
 }
 fn count(connection: &Connection, table: &str) -> AppResult<u64> {
     // All table names are constants owned by this module.
@@ -240,7 +240,7 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
         path,
         OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
     )
-    .map_err(|_| invalid("database illeggibile"))?;
+    .map_err(|_| invalid("unreadable database"))?;
     connection
         .pragma_update(None, "trusted_schema", "OFF")
         .map_err(journal::storage)?;
@@ -259,7 +259,7 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if schema(&connection)? != schema(&expected)?
         || count(&connection, "schema_migrations")? != expected_version as u64
     {
-        return Err(invalid("struttura del database inattesa"));
+        return Err(invalid("unexpected database structure"));
     }
     let versions: i64 = connection
         .query_row("SELECT SUM(version) FROM schema_migrations", [], |r| {
@@ -267,13 +267,13 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
         })
         .map_err(journal::storage)?;
     if versions != expected_version * (expected_version + 1) / 2 {
-        return Err(invalid("cronologia migrazioni incoerente"));
+        return Err(invalid("inconsistent migration history"));
     }
     let mut foreign = connection
         .prepare("PRAGMA foreign_key_check")
         .map_err(journal::storage)?;
     if foreign.exists([]).map_err(journal::storage)? {
-        return Err(invalid("riferimenti del database incoerenti"));
+        return Err(invalid("inconsistent database references"));
     }
     drop(foreign);
     if expected_version >= 5 {
@@ -321,7 +321,7 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if expected_version >= 3 {
         let crossing: bool = connection.query_row("SELECT EXISTS(SELECT 1 FROM mentions m JOIN pages p ON p.id=m.target_page_id WHERE p.campaign_id!=m.campaign_id)",[],|r|r.get(0)).map_err(journal::storage)?;
         if crossing {
-            return Err(invalid("menzioni tra campagne diverse"));
+            return Err(invalid("mentions cross campaign boundaries"));
         }
         for campaign in journal::list_campaigns(&connection)? {
             for page in crate::knowledge::list_pages(&connection, &campaign.id)? {
@@ -374,7 +374,7 @@ fn attachments(directory: &Path, connection: &Connection) -> AppResult<Vec<(Stri
             regular_file(&file.path())?;
             files.push((name, file.path()));
             if files.len() + 2 > MAX_ENTRIES {
-                return Err(invalid("troppi allegati (massimo 9998)"));
+                return Err(invalid("too many attachments (maximum 9998)"));
             }
         }
     }
@@ -410,7 +410,7 @@ pub fn write_backup(
         let (size, sha256) = checksum(path)?;
         total += size;
         if total > MAX_TOTAL {
-            return Err(invalid("dimensione totale oltre 512 MiB"));
+            return Err(invalid("total size exceeds 512 MiB"));
         }
         files.push(Entry {
             path: name.clone(),
@@ -472,7 +472,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
         return Err(invalid("archive exceeds 512 MiB"));
     }
     let mut zip = ZipArchive::new(File::open(source).map_err(io)?)
-        .map_err(|_| invalid("ZIP illeggibile o incompleto"))?;
+        .map_err(|_| invalid("unreadable or incomplete ZIP"))?;
     if zip.len() < 2 || zip.len() > MAX_ENTRIES {
         return Err(invalid("file count not allowed"));
     }
@@ -493,12 +493,12 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
     let manifest: Manifest = {
         let file = zip
             .by_name("manifest.json")
-            .map_err(|_| invalid("manifest assente"))?;
+            .map_err(|_| invalid("manifest missing"))?;
         if file.size() > MAX_MANIFEST {
             return Err(invalid("manifest too large"));
         }
         serde_json::from_reader(file.take(MAX_MANIFEST + 1))
-            .map_err(|_| invalid("manifest illeggibile"))?
+            .map_err(|_| invalid("unreadable manifest"))?
     };
     if manifest.format_version != 1
         || manifest.scope != "all_campaigns"
@@ -512,7 +512,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
     for entry in &manifest.files {
         total = total
             .checked_add(entry.size)
-            .ok_or_else(|| invalid("dimensioni incoerenti"))?;
+            .ok_or_else(|| invalid("inconsistent sizes"))?;
         if !allowed_path(&entry.path)
             || !declared.insert(entry.path.clone())
             || entry.size > MAX_FILE
@@ -536,7 +536,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
         let mut output = File::create_new(&path).map_err(io)?;
         let mut file = zip.by_name(&entry.path).map_err(io)?;
         if file.size() != entry.size {
-            return Err(invalid("dimensione dichiarata incoerente"));
+            return Err(invalid("inconsistent declared size"));
         }
         let written =
             std::io::copy(&mut (&mut file).take(entry.size + 1), &mut output).map_err(io)?;
@@ -573,7 +573,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
         && manifest.assistant_settings.as_ref()
             != Some(&crate::assistant::store::settings(&connection)?)
     {
-        return Err(invalid("configurazione AI del manifest incoerente"));
+        return Err(invalid("inconsistent manifest AI configuration"));
     }
     let actual = counts(
         &connection,
@@ -587,7 +587,7 @@ pub fn prepare_restore(source: &Path, staging_parent: &Path) -> AppResult<Prepar
     if manifest.schema_version >= 2 {
         attachments(directory.path(), &connection)?;
     } else if actual.attachments != 0 {
-        return Err(invalid("allegati senza campagne"));
+        return Err(invalid("attachments without campaigns"));
     }
     drop(connection);
     Ok(PreparedRestore {
@@ -622,7 +622,7 @@ impl Store {
             let value: String =
                 serde_json::from_slice(&fs::read(&pointer).map_err(io)?).map_err(|_| {
                     invalid(
-                        "selettore del profilo danneggiato; conserva i dati prima di intervenire",
+                        "damaged profile selector; preserve the data before attempting recovery",
                     )
                 })?;
             if !canonical_id(&value) {

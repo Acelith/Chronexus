@@ -5,9 +5,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 $trainingRoot = [IO.Path]::GetFullPath($TrainingHome)
-if (!(Test-Path -LiteralPath $PythonPath -PathType Leaf)) { throw 'Specifica il percorso assoluto di Python 3.12.' }
+if (!(Test-Path -LiteralPath $PythonPath -PathType Leaf)) { throw 'Specify the absolute path to Python 3.12.' }
 $version = & $PythonPath -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'
-if ($LASTEXITCODE -ne 0 -or $version -ne '3.12') { throw 'Il backend M8 verificato richiede Python 3.12.' }
+if ($LASTEXITCODE -ne 0 -or $version -ne '3.12') { throw 'The verified M8 backend requires Python 3.12.' }
 if (Test-Path -LiteralPath $trainingRoot) {
     if ((Get-Item -LiteralPath $trainingRoot).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'The training folder must not be a link.' }
 }
@@ -15,13 +15,13 @@ New-Item -ItemType Directory -Force -Path $trainingRoot | Out-Null
 $venv = Join-Path $trainingRoot 'venv'
 if (!(Test-Path -LiteralPath (Join-Path $venv 'Scripts/python.exe'))) {
     & $PythonPath -m venv $venv
-    if ($LASTEXITCODE -ne 0) { throw 'Creazione ambiente isolato non riuscita.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Failed to create the isolated environment.' }
 }
 $python = Join-Path $venv 'Scripts/python.exe'
 & $python -m pip install 'torch==2.14.1+cu130' --index-url https://download.pytorch.org/whl/cu130
-if ($LASTEXITCODE -ne 0) { throw 'Installazione PyTorch CUDA non riuscita.' }
+if ($LASTEXITCODE -ne 0) { throw 'PyTorch CUDA installation failed.' }
 & $python -m pip install -r (Join-Path $PSScriptRoot 'ai/requirements.txt')
-if ($LASTEXITCODE -ne 0) { throw 'Installazione dipendenze QLoRA non riuscita.' }
+if ($LASTEXITCODE -ne 0) { throw 'QLoRA dependency installation failed.' }
 $env:HF_HUB_DISABLE_TELEMETRY = '1'
 $env:HF_HOME = Join-Path $trainingRoot 'cache'
 $env:CHRONEXUS_TRAINING_SETUP = $trainingRoot
@@ -32,7 +32,7 @@ from huggingface_hub import snapshot_download
 root = Path(os.environ["CHRONEXUS_TRAINING_SETUP"])
 snapshot_download("google/gemma-4-12B-it", revision="707f0a3b8a3c7ad586ed01e27eafbad8a27dd0f7", local_dir=root / "hf-base", allow_patterns=["*.json", "*.jinja", "*.safetensors"])
 '@ | & $python -
-if ($LASTEXITCODE -ne 0) { throw 'Download checkpoint non completato; riesegui per riprendere.' }
+if ($LASTEXITCODE -ne 0) { throw 'Checkpoint download incomplete; run again to resume.' }
 & $python -I -B (Join-Path $PSScriptRoot 'ai/train.py') --probe
-if ($LASTEXITCODE -ne 0) { throw 'Controllo backend non riuscito.' }
+if ($LASTEXITCODE -ne 0) { throw 'Backend check failed.' }
 Write-Output 'Local environment prepared. Training starts only from the button in campaign settings. No system-wide service installed.'

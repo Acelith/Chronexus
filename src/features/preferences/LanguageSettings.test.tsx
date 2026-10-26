@@ -13,7 +13,7 @@ afterEach(() => {
   applyPreferences(defaultPreferences);
   vi.resetAllMocks();
 });
-it("cambia lingua subito, salva e permette recupero italiano in ogni scrittura", async () => {
+it("changes language immediately, saves and allows English recovery in every script", async () => {
   const user = userEvent.setup();
   vi.mocked(preferencesApi.save).mockImplementation(async (p) => p);
   render(<LanguageSettings />);
@@ -31,15 +31,15 @@ it("cambia lingua subito, salva e permette recupero italiano in ogni scrittura",
   await waitFor(() => expect(document.documentElement.dir).toBe("ltr"));
   expect(getPreferences()).toEqual(defaultPreferences);
 });
-it("salvataggio fallito conserva lingua precedente e presenta errore", async () => {
+it("failed saving preserves the previous language and shows an error", async () => {
   const user = userEvent.setup();
-  vi.mocked(preferencesApi.save).mockRejectedValue(Error("Disco pieno"));
+  vi.mocked(preferencesApi.save).mockRejectedValue(Error("Disk full"));
   render(<LanguageSettings />);
   await user.selectOptions(screen.getByLabelText("Interface language"), "it");
-  expect(await screen.findByRole("alert")).toHaveTextContent("Disco pieno");
+  expect(await screen.findByRole("alert")).toHaveTextContent("Disk full");
   expect(getPreferences().locale).toBe("en");
 });
-it("i glifi sono decorativi, il comando ha nome semantico ordinario", () => {
+it("glyphs are decorative and the control has an ordinary semantic name", () => {
   applyPreferences({
     ...defaultPreferences,
     script: "morse",
@@ -47,16 +47,16 @@ it("i glifi sono decorativi, il comando ha nome semantico ordinario", () => {
   });
   render(
     <button>
-      <Text source="Salva" />
+      <Text source="Save" />
     </button>,
   );
-  expect(screen.getByRole("button", { name: "Salva" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
   expect(document.querySelector(".script-glyphs")).toHaveAttribute(
     "aria-hidden",
     "true",
   );
 });
-it("Galattico senza font disponibile mantiene il testo ordinario visibile", () => {
+it("Galactic keeps ordinary text visible when the font is unavailable", () => {
   applyPreferences({
     ...defaultPreferences,
     script: "galactic",
@@ -64,14 +64,14 @@ it("Galattico senza font disponibile mantiene il testo ordinario visibile", () =
   });
   render(
     <button>
-      <Text source="Salva" />
+      <Text source="Save" />
     </button>,
   );
-  expect(document.querySelector(".script-original")).toHaveTextContent("Salva");
+  expect(document.querySelector(".script-original")).toHaveTextContent("Save");
 });
 
 it.each(["espruar", "dethek"] as const)(
-  "seleziona %s e salva preferenze v2 senza alterare il testo",
+  "selects %s and saves v2 preferences without changing text",
   async (script) => {
     const user = userEvent.setup();
     vi.mocked(preferencesApi.save).mockImplementation(async (p) => p);

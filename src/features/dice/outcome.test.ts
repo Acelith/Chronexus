@@ -17,15 +17,15 @@ function roll(sides: Sides, value: number, quantity = 1): Roll {
     total: value * quantity,
   };
 }
-describe("esiti dei draghi: solo presentazione", () => {
-  test.each(SIDES)("d%i migliore, peggiore e intermedio", (sides) => {
+describe("dragon outcomes affect presentation only", () => {
+  test.each(SIDES)("d%i best, worst and intermediate outcomes", (sides) => {
     expect(dragonOutcome(roll(sides, sides === 100 ? 1 : sides))).toBe(
       "celebration",
     );
     expect(dragonOutcome(roll(sides, sides === 100 ? 100 : 1))).toBe("threat");
     expect(dragonOutcome(roll(sides, Math.floor(sides / 2)))).toBe("ordinary");
   });
-  test("non attiva per più dadi, misti o dati incoerenti e non modifica il tiro", () => {
+  test("does not activate for multiple, mixed or inconsistent dice and preserves the roll", () => {
     const one = roll(20, 20),
       before = JSON.stringify(one);
     dragonOutcome(one);

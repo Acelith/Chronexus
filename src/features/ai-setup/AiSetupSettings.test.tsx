@@ -45,7 +45,7 @@ const base: SetupStatus = {
   runtimeInstallBytes: 3816998068,
 };
 beforeEach(() => vi.resetAllMocks());
-test("non contatta nulla all’apertura e installa Ollama solo dopo conferma", async () => {
+test("makes no requests on opening and installs Ollama only after confirmation", async () => {
   const user = userEvent.setup();
   render(<AiSetupSettings disabled={false} />);
   expect(aiSetupApi.status).not.toHaveBeenCalled();
@@ -78,7 +78,7 @@ test("non contatta nulla all’apertura e installa Ollama solo dopo conferma", a
   ).toBeVisible();
   expect(screen.getByRole("button", { name: "Start Ollama" })).toBeEnabled();
 });
-test("scarica solo il modello scelto dopo conferma e mostra gli errori", async () => {
+test("downloads only the chosen model after confirmation and shows errors", async () => {
   const user = userEvent.setup();
   const ready = {
     ...base,
@@ -97,7 +97,7 @@ test("scarica solo il modello scelto dopo conferma e mostra gli errori", async (
     screen.getByRole("group", { name: "Confirm model download" }),
   ).toHaveTextContent("Gemma 4 12B");
   vi.mocked(aiSetupApi.pull).mockRejectedValueOnce(
-    Error("Download del modello annullato."),
+    Error("Model download cancelled."),
   );
   await user.click(screen.getByRole("button", { name: "Download" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("cancelled");

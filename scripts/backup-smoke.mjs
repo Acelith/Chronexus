@@ -41,7 +41,7 @@ await expect
     { timeout: 20000, intervals: [100, 200, 500] },
   )
   .toBe(true);
-assert(page, "WebView di sviluppo non trovata");
+assert(page, "Development WebView not found");
 const invoke = (name, args) =>
   page.evaluate(
     ({ name, args }) => window.__TAURI_INTERNALS__.invoke(name, args),
@@ -72,10 +72,10 @@ async function data() {
 }
 async function openBackup() {
   await page
-    .getByRole("button", { name: "Backup e ripristino", exact: true })
+    .getByRole("button", { name: "Backup and restore", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Backup e ripristino", exact: true }),
+    page.getByRole("heading", { name: "Backup and restore", exact: true }),
   ).toBeVisible();
 }
 async function close() {
@@ -177,22 +177,24 @@ if (phase === "seed") {
   await page.reload();
   await openBackup();
   console.log(
-    "PASS seed: due campagne, sessione, pagine, menzioni, relazione con fonte e immagine reale",
+    "PASS seed: two campaigns, session, pages, mentions, sourced relationship and real image",
   );
 } else if (phase === "create") {
-  await page.getByRole("button", { name: "Crea backup", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Create backup", exact: true })
+    .click();
   console.log(
     "Selezionare nel dialogo nativo: .tools/m4-portable.nodex (percorso assoluto).",
   );
 } else if (phase === "created") {
   const receipt = page.getByRole("region", {
-    name: "Backup creato",
+    name: "Backup created",
     exact: true,
   });
   await expect(receipt).toBeVisible();
-  await expect(receipt.getByText("Allegati", { exact: true })).toBeVisible();
+  await expect(receipt.getByText("Attachments", { exact: true })).toBeVisible();
   await expect(page.getByRole("status")).toHaveText(
-    "Backup creato e verificato.",
+    "Backup created and verified.",
   );
   assert((await readFile(".tools/m4-portable.nodex")).length > 0);
   await page.screenshot({ path: ".tools/backup-created.png", fullPage: true });
@@ -213,7 +215,7 @@ if (phase === "seed") {
   }
   await openBackup();
   await page
-    .getByRole("button", { name: "Seleziona backup", exact: true })
+    .getByRole("button", { name: "Select backup", exact: true })
     .click();
   console.log("Selezionare nel dialogo nativo .tools/m4-portable.nodex.");
 } else if (phase === "cancel") {
@@ -225,16 +227,16 @@ if (phase === "seed") {
     .click();
   await expect(page.getByRole("alert")).toContainText("Conferma o annulla");
   await page
-    .getByRole("button", { name: "Annulla ripristino", exact: true })
+    .getByRole("button", { name: "Cancel restore", exact: true })
     .focus();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("alertdialog")).toHaveCount(0);
   assert.deepEqual(await invoke("list_campaigns"), [expected.prior]);
   await page
-    .getByRole("button", { name: "Chiudi messaggio", exact: true })
+    .getByRole("button", { name: "Close message", exact: true })
     .click();
   console.log(
-    "PASS anteprima, protezione navigazione e annullamento senza sostituzione",
+    "PASS preview, navigation guard and cancellation without replacement",
   );
 } else if (phase === "restore") {
   const expected = JSON.parse(await readFile(expectationPath, "utf8"));
@@ -242,10 +244,10 @@ if (phase === "seed") {
   assert.deepEqual(await invoke("list_campaigns"), [expected.prior]);
   await page.screenshot({ path: ".tools/backup-preview.png", fullPage: true });
   await page
-    .getByRole("button", { name: "Sostituisci archivio", exact: true })
+    .getByRole("button", { name: "Replace archive", exact: true })
     .click();
   const receipt = page.getByRole("region", {
-    name: "Ripristino completato",
+    name: "Restore completed",
     exact: true,
   });
   await expect(receipt).toBeVisible();
@@ -284,7 +286,7 @@ if (phase === "seed") {
   await page
     .getByRole("button", { name: "Verifica backup M4", exact: true })
     .click();
-  await page.getByRole("button", { name: "Grafo", exact: true }).click();
+  await page.getByRole("button", { name: "Graph", exact: true }).click();
   await expect(page.locator(".graph-canvas")).toHaveAttribute(
     "data-edge-count",
     "5",
@@ -292,11 +294,11 @@ if (phase === "seed") {
   await page.screenshot({ path: ".tools/backup-reopened.png", fullPage: true });
   await close();
   console.log(
-    "PASS riavvio: documenti, UUID, menzioni, relazioni/fonti, grafo e hash immagine identici",
+    "PASS restart: documents, UUIDs, mentions, relationships/sources, graph and image hash identical",
   );
 } else
   throw Error(
-    "Fase non valida: seed/create/created/select/cancel/restore/verify",
+    "Invalid phase: seed/create/created/select/cancel/restore/verify",
   );
 assert.deepEqual(errors, [], "Errori runtime WebView");
 await browser.close();

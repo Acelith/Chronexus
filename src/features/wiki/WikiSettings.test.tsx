@@ -30,12 +30,12 @@ beforeEach(() => {
         case "clear_wiki_cache":
           return empty as never;
         default:
-          throw Error(`Comando non previsto: ${name}`);
+          throw Error(`Unexpected command: ${name}`);
       }
     },
   );
 });
-test("mostra il default Wikidot e salva una scelta esplicita senza campagna", async () => {
+test("shows the Wikidot default and saves an explicit choice without a campaign", async () => {
   const user = userEvent.setup();
   const changed = vi.fn();
   window.addEventListener(WIKI_CHANGED, changed);
@@ -54,7 +54,7 @@ test("mostra il default Wikidot e salva una scelta esplicita senza campagna", as
   expect(changed).toHaveBeenCalledTimes(1);
   window.removeEventListener(WIKI_CHANGED, changed);
 });
-test("svuotare la cache richiede conferma, avvisa sulle fonti AI e può essere annullato", async () => {
+test("clearing cache requires confirmation, warns about AI sources and can be cancelled", async () => {
   const user = userEvent.setup();
   render(<WikiSettings disabled={false} />);
   await screen.findByText(/Wikidot D&D 5e · cached entries: 5/);
@@ -96,7 +96,7 @@ test("svuotare la cache richiede conferma, avvisa sulle fonti AI e può essere a
     screen.getByRole("button", { name: "Clear offline cache…" }),
   ).toBeEnabled();
 });
-test("un errore di svuotamento resta visibile e non cambia il riepilogo", async () => {
+test("a cache-clear error stays visible and preserves the summary", async () => {
   const user = userEvent.setup();
   const base = vi.mocked(command).getMockImplementation()!;
   vi.mocked(command).mockImplementation(async (name, args) => {

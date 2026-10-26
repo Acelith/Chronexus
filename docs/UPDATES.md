@@ -120,7 +120,7 @@ installed the app trust the embedded public one. The wrapper does not create,
 rotate or recover keys and do not print the content.
 
 ```powershell
-# Toolchain Rust disponibile nel PATH; firma in memoria, password mai nei comandi
+# Rust toolchain available on PATH; sign in memory, never put passwords in commands
 ./scripts/release/Build-SignedUpdate.ps1
 ```
 
@@ -203,7 +203,7 @@ It is disabled with **Check once at startup…**; the manual button remains.
 If it finds a more recent compatible version, as soon as the app is idle, the
 herald appears with the manifesto: **Update** opens this section and starts the verified download;
 **Create backup and install** remains necessary. **Remind me later**
-(o Escape) rimanda di 3 giorni quella versione, **Ignora questa versione** non la
-riannuncia. La trombetta si disattiva dall’annuncio o da qui. Preferenze in
-`update-announcements.json`, incluse nella ricevuta del backup pre-installazione.
-Collaudo: `scripts/qa/m15a-herald.mjs` (vedi docs/QA.md).
+(or Escape) postpones that version for three days; **Ignore this version** prevents
+further announcements for it. Disable the trumpet in the announcement or here.
+Preferences are stored in `update-announcements.json` and included in the
+pre-installation backup receipt. Testing: `scripts/qa/m15a-herald.mjs` (see docs/QA.md).

@@ -54,7 +54,7 @@ await assert.rejects(
     multilingualConsent: true,
     campaignId: legacy.campaign.id,
   }),
-  /non qualificato|ritirato/,
+  /not qualified|retired/,
 );
 const other = campaigns.find((c) => c.name.startsWith("Prova AI M7"));
 assert(other);
@@ -69,7 +69,7 @@ await page
   .getByRole("button", { name: "Campaign settings", exact: true })
   .click();
 await expect(
-  page.getByText(/Il precedente modello Qwen è stato ritirato/),
+  page.getByText(/The previous Qwen model has been retired/),
 ).toBeVisible();
 await page
   .getByRole("button", { name: "Check Ollama and GPU", exact: true })
@@ -77,8 +77,8 @@ await page
 const picker = page.getByLabel("Local model", { exact: true });
 await expect(picker).toHaveValue(policy.primary.name);
 const choices = await picker.locator("option").allTextContents();
-assert.match(choices[1], /Qwen3.8-27B.*Principale/);
-assert.match(choices[2], /Gemma 4 12B.*Secondario/);
+assert.match(choices[1], /Qwen3.8-27B.*Primary/);
+assert.match(choices[2], /Gemma 4 12B.*Secondary/);
 assert(choices.every((t) => !t.includes("qwen3:4b")));
 const activate = page.getByRole("button", {
   name: "Activate model for the campaign",
@@ -86,7 +86,7 @@ const activate = page.getByRole("button", {
 });
 await expect(activate).toBeDisabled();
 await page
-  .getByRole("checkbox", { name: /Confermo l'uso di un modello multilingue/ })
+  .getByRole("checkbox", { name: /I confirm using a multilingual model/ })
   .check();
 await activate.click();
 await expect

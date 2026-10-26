@@ -250,11 +250,11 @@ verified; M8 installation not repeated). The complete M7 package remains distinc
 
 M8 Verifications: 69 Rust test, 59 frontend and 5 Python worker, desktop/NSIS build and
 actual training RTX 4080 SUPER with 74 extracted/74 steps. Physical offline
-and other platforms remain. M9, the tiradadi, is now operational on Windows. The next functional milestone is M10, the multilingual.
+and other platforms remain. M9, the dice roller, is now operational on Windows. The next functional milestone is M10, the multilingual.
 
-## Tiradadi — M9
+## Dice roller — M9
 
-From the left menu of the campaign, open **Tiradadi**: d4, d6, d8, d10, d12, d20 and
+From the left menu of the campaign, open **Dice roller**: d4, d6, d8, d10, d12, d20 and
 d100, independent quantities and mixed rolls. Up to 50 per type/100 dice per roll;
 selection reset after confirmation, SQLite history for campaign included in backups.
 Dragon's circle and quick slot revelation, skippable and with reduced movement.

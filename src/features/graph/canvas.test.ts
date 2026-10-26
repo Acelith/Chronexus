@@ -43,7 +43,7 @@ test("compact view keeps the requested center, bounded neighbors and no dangling
   expect(data.nodes).toHaveLength(75);
 });
 
-test("disposizione deterministica non modifica dati e mantiene il centro richiesto", () => {
+test("deterministic layout preserves data and the requested center", () => {
   const data: GraphData = {
     nodes: ["a", "b", "c"].map((id) => ({
       id,

@@ -151,7 +151,7 @@ pub fn write_export(
         "campaign.json".into(),
         serde_json::to_vec_pretty(&data).map_err(|_| "JSON export failed.")?,
     )];
-    let mut index=format!("# {}\n\nEsportazione Chronexus. Le immagini collegate sono incluse; il ripristino completo usa il backup .nodex.\n\n## Pagine\n\n",campaign.name);
+    let mut index=format!("# {}\n\nChronexus export. Linked images are included; use a .nodex backup for full restoration.\n\n## Pages\n\n",campaign.name);
     if !party.is_empty() {
         index.push_str("## Party\n\n");
         for member in &party {
@@ -160,11 +160,11 @@ pub fn write_export(
                 member.page.title, member.page.id, member.role, member.status
             ));
         }
-        index.push_str("\n## Pagine\n\n");
+        index.push_str("\n## Pages\n\n");
     }
     for page in &pages {
         let mut text = format!(
-            "# {}\n\nTipo: {}\n\nAlias: {}\n\n{}",
+            "# {}\n\nType: {}\n\nAlias: {}\n\n{}",
             page.title,
             page.kind,
             page.aliases.join(", "),
@@ -178,12 +178,12 @@ pub fn write_export(
             page.id
         ));
     }
-    index.push_str("\n## Sessioni\n\n");
+    index.push_str("\n## Sessions\n\n");
     for session in &sessions {
         files.push((
             format!("sessions/{}.md", session.id),
             format!(
-                "# Sessione {} — {}\n\n{}",
+                "# Session {} — {}\n\n{}",
                 session.sequence,
                 session.title,
                 markdown(&session.document)
@@ -214,7 +214,7 @@ pub fn write_export(
                 .as_array()
                 .and_then(|a| a.iter().find(|a| a["id"] == asset.id))
                 .and_then(|a| a["input"]["details"]["name"].as_str())
-                .unwrap_or("Voce"),
+                .unwrap_or("Entry"),
             serde_json::to_string_pretty(asset).map_err(|_| "Entry unreadable.")?
         );
         append_images(&mut text, &pictures, None, None, Some(&asset.id));
@@ -227,19 +227,19 @@ pub fn write_export(
         let mut text = format!("# {}\n\nStatus: {}\n\nModel: {} ({})\n\nEdition: {}\n\n{}\n\n{}\n\n## Sources at the time of the answer\n\n", turn.question,turn.status,turn.model,turn.digest,turn.edition.as_deref().unwrap_or("campaign notes"),turn.answer,turn.error);
         for source in &turn.sources {
             text.push_str(&format!(
-                "### [{}] {}\n\nTipo: {}; ID: {}; blocco: {}; revisione: {}; SHA-256: {}\n\n{}\n\n",
+                "### [{}] {}\n\nType: {}; ID: {}; block: {}; revision: {}; SHA-256: {}\n\n{}\n\n",
                 source.key,
                 source.title,
                 source.kind,
                 source.source_id,
-                source.block_id.as_deref().unwrap_or("intera voce"),
+                source.block_id.as_deref().unwrap_or("entire entry"),
                 source.revision,
                 source.hash,
                 source.text
             ));
         }
         index.push_str(&format!(
-            "- [Risposta {}](assistant/{}.md)\n",
+            "- [Answer {}](assistant/{}.md)\n",
             turn.created_at, turn.id
         ));
         files.push((format!("assistant/{}.md", turn.id), text.into_bytes()));

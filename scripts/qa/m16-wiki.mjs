@@ -70,7 +70,7 @@ if (phase === "check") {
   await expect(
     settings.getByRole("radio", { name: /Wikidot D&D 5e/ }),
   ).toBeChecked();
-  await expect(settings.getByText(/Nessuna scelta salvata/)).toBeVisible();
+  await expect(settings.getByText(/No choice saved/)).toBeVisible();
   assert.equal(remote.length, 0, "settings must not contact remote hosts");
   step("default Wikidot without campaign, no network on open");
 
@@ -186,7 +186,7 @@ if (phase === "check") {
   const wikidotRadio = settings.getByRole("radio", { name: /Wikidot D&D 5e/ });
   await wikidotRadio.click();
   await expect(
-    settings.getByText("Fonte wiki salvata: Wikidot D&D 5e."),
+    settings.getByText("Wiki source saved: Wikidot D&D 5e."),
   ).toBeVisible();
   await expect(wikidotRadio).toBeChecked();
   const summary = await call("wiki_cache_summary");

@@ -54,13 +54,13 @@ function setup() {
   render(<BackupWorkspace register={register} onRestored={onRestored} />);
   return { user: userEvent.setup(), getGuard: () => guard, onRestored };
 }
-test("crea backup con ricevuta e gestisce annullamento ed errore di destinazione", async () => {
+test("creates a backup receipt and handles cancellation and destination errors", async () => {
   const { user } = setup();
   vi.mocked(backupApi.create)
     .mockResolvedValueOnce({ path: "E:/copie/nuovo.nodex", counts })
     .mockResolvedValueOnce(null)
     .mockRejectedValueOnce(
-      new Error("Il file esiste già. Scegli un nuovo nome."),
+      new Error("The file already exists. Choose a new name."),
     );
   const button = screen.getByRole("button", { name: "Create backup" });
   await user.click(button);
@@ -73,16 +73,14 @@ test("crea backup con ricevuta e gestisce annullamento ed errore di destinazione
   ).toBeInTheDocument();
   await user.click(button);
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Il file esiste già",
+    "The file already exists",
   );
 });
-test("il selettore annullato e il backup danneggiato non propongono ripristini", async () => {
+test("cancelled selection and corrupt backups do not offer restoration", async () => {
   const { user, onRestored } = setup();
   vi.mocked(backupApi.inspect)
     .mockResolvedValueOnce(null)
-    .mockRejectedValueOnce(
-      new Error("Backup non valido: checksum non corrispondente."),
-    );
+    .mockRejectedValueOnce(new Error("Invalid backup: checksum mismatch."));
   await user.click(screen.getByRole("button", { name: "Select backup" }));
   expect(
     await screen.findByText("Selection cancelled. Archive unchanged."),
@@ -93,7 +91,7 @@ test("il selettore annullato e il backup danneggiato non propongono ripristini",
   expect(backupApi.restore).not.toHaveBeenCalled();
   expect(onRestored).not.toHaveBeenCalled();
 });
-test("anteprima verificata richiede conferma, protegge navigazione e gestisce Tab ed Escape", async () => {
+test("verified preview requires confirmation, guards navigation and handles Tab and Escape", async () => {
   const { user, getGuard } = setup();
   vi.mocked(backupApi.inspect).mockResolvedValue(preview);
   await user.click(screen.getByRole("button", { name: "Select backup" }));
@@ -121,7 +119,7 @@ test("anteprima verificata richiede conferma, protegge navigazione e gestisce Ta
   expect(screen.getByRole("button", { name: "Select backup" })).toHaveFocus();
   expect(getGuard()?.dirty()).toBe(false);
 });
-test("ripristina solo il token verificato, aggiorna campagne e mostra la copia preventiva", async () => {
+test("restores only the verified token, updates campaigns and shows the safety copy", async () => {
   const { user, onRestored } = setup();
   vi.mocked(backupApi.inspect).mockResolvedValue(preview);
   vi.mocked(backupApi.restore).mockResolvedValue({
@@ -145,7 +143,7 @@ test("ripristina solo il token verificato, aggiorna campagne e mostra la copia p
     "sincronizzazione",
   );
 });
-test("blocca altre operazioni durante il lavoro e richiede nuova verifica dopo errore", async () => {
+test("blocks other operations while busy and requires verification again after an error", async () => {
   const { user, getGuard, onRestored } = setup();
   vi.mocked(backupApi.inspect).mockResolvedValue(preview);
   let reject: (reason: Error) => void = () => {};
@@ -161,24 +159,20 @@ test("blocca altre operazioni durante il lavoro e richiede nuova verifica dopo e
   );
   expect(screen.getByRole("button", { name: "Cancel restore" })).toBeDisabled();
   await expect(getGuard()?.flush()).rejects.toThrow("Wait");
-  reject(
-    new Error("Copia preventiva non disponibile. Archivio corrente invariato."),
-  );
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Copia preventiva",
-  );
+  reject(new Error("Safety copy unavailable. Current archive unchanged."));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Safety copy");
   expect(onRestored).not.toHaveBeenCalled();
   expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Select backup" })).toBeEnabled();
 });
-test("elenca i backup delle cartelle, ripristina con verifica e copia quelli legacy", async () => {
+test("lists folder backups, restores with verification and copies legacy backups", async () => {
   const listed = {
     folders: [
       {
         location: "updates" as const,
         path: "C:/Users/Zoë/Documents/Chronexus/Backup aggiornamenti",
         exists: false,
-        error: "C:/x è un collegamento simbolico o una giunzione",
+        error: "C:/x is a symbolic link or junction",
       },
     ],
     backups: [
@@ -210,7 +204,7 @@ test("elenca i backup delle cartelle, ripristina con verifica e copia quelli leg
   const region = await screen.findByRole("region", {
     name: "Backups in the Chronexus folders",
   });
-  expect(within(region).getByText(/giunzione/)).toBeInTheDocument();
+  expect(within(region).getByText(/junction/)).toBeInTheDocument();
   expect(
     within(region).getByText(/Periodic · Documents · Periodic backups/),
   ).toBeInTheDocument();
@@ -240,7 +234,7 @@ test("elenca i backup delle cartelle, ripristina con verifica e copia quelli leg
     "campagne.nodex",
   );
 });
-test("mostra lo stato vuoto dell’elenco", async () => {
+test("shows the empty list state", async () => {
   setup();
   expect(
     await screen.findByText("No backups in the Chronexus folders yet."),

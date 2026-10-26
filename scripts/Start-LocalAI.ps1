@@ -9,7 +9,7 @@ if (!(Test-Path -LiteralPath $OllamaPath -PathType Leaf)) {
 if (!$ModelsPath) { $ModelsPath = Join-Path $runtimeDirectory 'models' }
 try {
     $status = Invoke-RestMethod 'http://127.0.0.1:11434/api/status' -TimeoutSec 2
-    if ($status.cloud.disabled -ne $true) { throw 'cloud non disabilitato' }
+    if ($status.cloud.disabled -ne $true) { throw 'cloud is not disabled' }
     Write-Output 'Local Ollama is already available with cloud disabled.'
     return
 } catch {

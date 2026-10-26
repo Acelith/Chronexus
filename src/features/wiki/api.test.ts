@@ -51,8 +51,8 @@ test("wiki explicit search is bounded, credential-free and cached; storage failu
   vi.mocked(command)
     .mockResolvedValueOnce(null)
     .mockResolvedValueOnce(7)
-    .mockRejectedValueOnce(Error("Disco pieno"));
-  await expect(search("Sample")).rejects.toThrow("Disco pieno");
+    .mockRejectedValueOnce(Error("Disk full"));
+  await expect(search("Sample")).rejects.toThrow("Disk full");
 });
 test("wiki refuses unsafe routes, huge bodies and mismatched detail identities", async () => {
   expect(category({ ...hit, route: "https://evil.test/" })).toBeNull();

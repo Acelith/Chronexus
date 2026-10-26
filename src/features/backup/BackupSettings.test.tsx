@@ -31,7 +31,7 @@ const base: BackupFolderStatus = {
   cloudSynced: true,
   lastSuccess: null,
   lastAttempt: "2026-10-25T08:00:00Z",
-  lastError: "Disco pieno",
+  lastError: "Disk full",
   nextDue: null,
   dueNow: false,
   registered: 0,
@@ -40,14 +40,14 @@ beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(backupFolderApi.status).mockResolvedValue(base);
 });
-test("mostra percorsi, avviso cloud ed errore con azione e salva la pianificazione", async () => {
+test("shows paths, cloud warning and actionable errors and saves the schedule", async () => {
   const user = userEvent.setup();
   render(<BackupSettings disabled={false} />);
   expect(
     await screen.findByText(/Backup aggiornamenti$/, { selector: "bdi" }),
   ).toBeInTheDocument();
   expect(screen.getByRole("note")).toHaveTextContent("are not encrypted");
-  expect(screen.getByText(/Disco pieno/)).toHaveTextContent("try again");
+  expect(screen.getByText(/Disk full/)).toHaveTextContent("try again");
   expect(screen.getByText("Periodic backups off")).toBeInTheDocument();
   const save = screen.getByRole("button", { name: "Save schedule" });
   expect(save).toBeDisabled();
@@ -78,7 +78,7 @@ test("mostra percorsi, avviso cloud ed errore con azione e salva la pianificazio
   ).toBeInTheDocument();
   expect(screen.getByText("Backup schedule saved.")).toBeInTheDocument();
 });
-test("scelta cartella annullata, ritorno ai Documenti ed errore del backup immediato", async () => {
+test("handles cancelled folder selection, Documents reset and immediate backup errors", async () => {
   const user = userEvent.setup();
   render(<BackupSettings disabled={false} />);
   await screen.findByText("Periodic backups off");
@@ -106,12 +106,12 @@ test("scelta cartella annullata, ritorno ai Documenti ed errore del backup immed
   );
   vi.mocked(backupFolderApi.runNow).mockResolvedValue({
     path: null,
-    error: "Cartella non scrivibile",
+    error: "Folder is not writable",
     removed: 0,
     keptUnverified: 0,
   });
   await user.click(screen.getByRole("button", { name: "Run backup now" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Cartella non scrivibile",
+    "Folder is not writable",
   );
 });

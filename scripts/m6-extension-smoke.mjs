@@ -24,17 +24,13 @@ const ipc = (name, args = {}) =>
   );
 if (mode === "restore") {
   await p
-    .getByRole("button", { name: "Backup e ripristino", exact: true })
+    .getByRole("button", { name: "Backup and restore", exact: true })
     .click();
-  await p
-    .getByRole("button", { name: "Seleziona backup", exact: true })
-    .click();
+  await p.getByRole("button", { name: "Select backup", exact: true }).click();
   await expect(p.getByRole("alertdialog")).toBeVisible({ timeout: 30000 });
-  await p
-    .getByRole("button", { name: "Sostituisci archivio", exact: true })
-    .click();
+  await p.getByRole("button", { name: "Replace archive", exact: true }).click();
   await expect(
-    p.getByRole("region", { name: "Ripristino completato", exact: true }),
+    p.getByRole("region", { name: "Restore completed", exact: true }),
   ).toBeVisible({ timeout: 30000 });
 }
 if (mode === "prepare") {
@@ -48,25 +44,23 @@ if (mode === "prepare") {
     })
     .click();
   await p.getByRole("button", { name: "Party", exact: true }).click();
-  await p.getByRole("button", { name: "Aggiungi membro", exact: true }).click();
-  await p.getByLabel("Nome del personaggio").fill("Varek di prova");
+  await p.getByRole("button", { name: "Add member", exact: true }).click();
+  await p.getByLabel("Character name").fill("Varek di prova");
   await p
-    .getByLabel("Giocatore (facoltativo)", { exact: true })
+    .getByLabel("Player (optional)", { exact: true })
     .fill("Giocatore esempio");
-  await p.getByLabel("Ruolo nella compagnia").fill("Cartografo");
-  await p.getByRole("button", { name: "Salva membro", exact: true }).click();
+  await p.getByLabel("Role in the company").fill("Cartografo");
+  await p.getByRole("button", { name: "Save member", exact: true }).click();
   await expect(
-    p.getByRole("heading", { name: "Quello che so", exact: true }),
+    p.getByRole("heading", { name: "What I know", exact: true }),
   ).toBeVisible();
   const edit = p.locator(".bn-editor[contenteditable=true]");
   await expect(edit).toBeVisible();
   await edit.click();
   await p.keyboard.type("Varek sostiene di conoscere la torre. Da verificare.");
-  await p.getByRole("button", { name: "Wiki D&D", exact: true }).click();
-  await p.getByLabel("Termine nella wiki").fill("magic missile");
-  await p
-    .getByRole("button", { name: "Cerca nella wiki", exact: true })
-    .click();
+  await p.getByRole("button", { name: "D&D Wiki", exact: true }).click();
+  await p.getByLabel("Term in the wiki").fill("magic missile");
+  await p.getByRole("button", { name: "Search the wiki", exact: true }).click();
   await expect(
     p
       .locator(".wiki-results button")
@@ -134,15 +128,15 @@ if (mode === "prepare") {
     .click();
   await p.getByRole("button", { name: "Party", exact: true }).click();
   await p
-    .getByRole("navigation", { name: "Membri del party" })
+    .getByRole("navigation", { name: "Party members" })
     .getByRole("button")
     .first()
     .click();
   await expect(
-    p.getByRole("button", { name: "Apri immagine: Immagine di prova locale" }),
+    p.getByRole("button", { name: "Open image: Immagine di prova locale" }),
   ).toBeVisible({ timeout: 15000 });
   await p.screenshot({ path: ".tools/party-real-m6.png" });
-  await p.getByRole("button", { name: "Grafo", exact: true }).click();
+  await p.getByRole("button", { name: "Graph", exact: true }).click();
   await expect(p.locator(".graph-canvas")).toBeVisible();
   await p.locator(".graph-canvas").scrollIntoViewIfNeeded();
   await p.screenshot({ path: ".tools/graph-real-m6.png" });
@@ -160,18 +154,16 @@ if (mode === "prepare") {
   });
   assert.equal(graph.edges.length, 1);
   assert.equal(graph.edges[0].kind, "mention");
-  await p
-    .getByRole("button", { name: "Esporta campagna", exact: true })
-    .click();
+  await p.getByRole("button", { name: "Export campaign", exact: true }).click();
   await expect(p.getByText(/Esportazione creata:/)).toBeVisible({
     timeout: 30000,
   });
   await p
-    .getByRole("button", { name: "Backup e ripristino", exact: true })
+    .getByRole("button", { name: "Backup and restore", exact: true })
     .click();
-  await p.getByRole("button", { name: "Crea backup", exact: true }).click();
+  await p.getByRole("button", { name: "Create backup", exact: true }).click();
   await expect(
-    p.getByRole("region", { name: "Backup creato", exact: true }),
+    p.getByRole("region", { name: "Backup created", exact: true }),
   ).toBeVisible({ timeout: 30000 });
   const images = await ipc("list_images", {
     campaignId,
@@ -213,12 +205,10 @@ if (mode === "prepare") {
       exact: true,
     })
     .click();
-  await p.getByRole("button", { name: "Wiki D&D", exact: true }).click();
+  await p.getByRole("button", { name: "D&D Wiki", exact: true }).click();
   await p.route("https://api.open5e.com/**", (r) => r.abort());
-  await p.getByLabel("Termine nella wiki").fill("magic missile");
-  await p
-    .getByRole("button", { name: "Cerca nella wiki", exact: true })
-    .click();
+  await p.getByLabel("Term in the wiki").fill("magic missile");
+  await p.getByRole("button", { name: "Search the wiki", exact: true }).click();
   await p
     .locator(".wiki-results button")
     .filter({ hasText: "System Reference Document 5.1" })
@@ -228,10 +218,10 @@ if (mode === "prepare") {
     p.getByRole("heading", { name: "Magic Missile", exact: true }),
   ).toBeVisible();
   await p
-    .getByRole("button", { name: "Aggiorna voce online", exact: true })
+    .getByRole("button", { name: "Refresh online entry", exact: true })
     .click();
   await expect(
-    p.getByRole("status").filter({ hasText: "copia locale" }),
+    p.getByRole("status").filter({ hasText: "local copy" }),
   ).toBeVisible();
 }
 await ipc("plugin:window|close", { label: "main" }).catch(() => {});

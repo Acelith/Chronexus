@@ -52,7 +52,7 @@ const pass = (m, d) => console.log(`PASS ${m}`, d ? JSON.stringify(d) : "");
 if (phase === "fixture") {
   await expect(dialog).toBeVisible({ timeout: 20000 });
   const heading = page.getByRole("heading", {
-    name: "Chronexus 0.5.0 è disponibile",
+    name: "Chronexus 0.5.0 is available",
   });
   await expect(heading).toBeFocused();
   await expect(page.getByText("Collaudo sintetico M15a")).toBeVisible();

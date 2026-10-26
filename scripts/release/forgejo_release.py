@@ -42,7 +42,7 @@ class Client:
   name=safe_asset(path.name)
   response=ROOT/'.tools/m11-m13'/('upload-'+uuid.uuid4().hex+'.json')
   url=self.base_url+f'{REPO}/releases/{int(release)}/assets?name={urllib.parse.quote(name)}'
-  print('Caricamento: '+name,flush=True)
+  print('Uploading: '+name,flush=True)
   # Curl handles Expect: 100-continue and reports final HTTP errors even when
   # the gateway rejects a body during transfer. Authorization travels via stdin.
   result=subprocess.run(['curl.exe','--config','-','--silent','--show-error',
@@ -51,10 +51,10 @@ class Client:
     '--output',str(response),'--write-out','%{json}',url],
     input=f'header = "Authorization: {self.authorization}"\n',capture_output=True,text=True)
   try:stats=json.loads(result.stdout)
-  except json.JSONDecodeError:raise RuntimeError('Trasferimento interrotto prima della risposta HTTP; bozza conservata') from None
+  except json.JSONDecodeError:raise RuntimeError('Transfer interrupted before the HTTP response; draft preserved') from None
   status=stats.get('http_code',0)
-  print(f'HTTP {status}; inviati {stats.get("size_upload",0)} byte; {stats.get("time_total",0)} secondi',flush=True)
-  if result.returncode or status!=201:raise RuntimeError(f'Upload HTTP {status}, client {result.returncode}; bozza conservata')
+  print(f'HTTP {status}; uploaded {stats.get("size_upload",0)} bytes; {stats.get("time_total",0)} seconds',flush=True)
+  if result.returncode or status!=201:raise RuntimeError(f'Upload HTTP {status}, client {result.returncode}; draft preserved')
   return json.loads(response.read_text(encoding='utf-8'))
  def verify(self,asset,expected):
   url=self.download_url(asset['browser_download_url'])
@@ -63,7 +63,7 @@ class Client:
   with self.opener.open(req,timeout=1800) as r:
    while block:=r.read(8*1024**2):digest.update(block);size+=len(block)
   if size!=expected['size'] or digest.hexdigest()!=expected['sha256']:raise ValueError('Remote checksum mismatch')
-  print('Download e checksum verificati: '+expected['name'],flush=True)
+  print('Download and checksum verified: '+expected['name'],flush=True)
 
 def confirm_repository(client):
  actual=client.json(REPO)
@@ -107,7 +107,7 @@ def publish(authorization,base_url=BASE,finalize=True):
   releases=client.json(REPO+'/releases?limit=50')
   if any(r['tag_name']==tag for r in releases):raise ValueError('Existing release: never overwrite')
   body=(ROOT/'docs/releases'/f'{tag}.md').read_text(encoding='utf-8')
-  body+='\n\n### SHA-256 dei sei ZIP\n\n```text\n'+''.join(f"{a['sha256']}  {a['name']}\n" for a in report['assets'])+'```\n'
+  body+='\n\n### SHA-256 of the six ZIPs\n\n```text\n'+''.join(f"{a['sha256']}  {a['name']}\n" for a in report['assets'])+'```\n'
   r=client.json(REPO+'/releases','POST',{'tag_name':tag,'target_commitish':plan['commit'],'name':'Chronexus '+plan['version'],'body':body,'draft':True,'prerelease':False})
   receipt={'id':r['id'],'tag':tag,'commit':plan['commit'],'assets':{},'published':False};save()
  release=client.json(REPO+f"/releases/{receipt['id']}")
@@ -117,7 +117,7 @@ def publish(authorization,base_url=BASE,finalize=True):
   if any(release.get(k)!=canonical.get(k) for k in ['id','tag_name','target_commitish']):raise ValueError('Local draft differs from canonical release')
  if release['draft']:
   body=(ROOT/'docs/releases'/f'{tag}.md').read_text(encoding='utf-8')
-  body+='\n\n### SHA-256 dei sei ZIP\n\n```text\n'+''.join(f"{a['sha256']}  {a['name']}\n" for a in report['assets'])+'```\n'
+  body+='\n\n### SHA-256 of the six ZIPs\n\n```text\n'+''.join(f"{a['sha256']}  {a['name']}\n" for a in report['assets'])+'```\n'
   client.json(REPO+f"/releases/{receipt['id']}",'PATCH',{'body':body})
  remote=client.json(REPO+f"/releases/{receipt['id']}/assets")
  for asset in report['assets']:
@@ -136,8 +136,8 @@ def publish(authorization,base_url=BASE,finalize=True):
  expected={a['name']:receipt['assets'][a['name']] for a in report['assets']}
  if {a['name']:a['id'] for a in complete}!=expected:raise ValueError('Unexpected release assets; draft preserved')
  if not finalize:
-  print('Tutti gli allegati verificati; bozza conservata per le note finali.',flush=True);return
+  print('All assets verified; draft preserved for final notes.',flush=True);return
  if release['draft']:release=client.json(REPO+f"/releases/{receipt['id']}",'PATCH',{'draft':False})
  if release['draft'] or len(client.json(REPO+f"/releases/{receipt['id']}/assets"))!=len(report['assets']):raise ValueError('Publication not confirmed')
  receipt['published']=True;receipt['url']=release['html_url'];save()
- print('Release pubblicata e verificata: '+release['html_url'],flush=True)
+ print('Release published and verified: '+release['html_url'],flush=True)

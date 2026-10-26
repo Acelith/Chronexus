@@ -13,7 +13,7 @@ const page = browser
   .contexts()
   .flatMap((context) => context.pages())
   .find((page) => page.url().startsWith("http://127.0.0.1:1420"));
-if (!page) throw Error("WebView desktop di sviluppo non trovata.");
+if (!page) throw Error("Development desktop WebView not found.");
 const errors = [];
 page.on("pageerror", (error) => errors.push(error.message));
 const invoke = (name, args) =>
@@ -23,11 +23,11 @@ const invoke = (name, args) =>
   );
 const editor = () => page.locator('.bn-editor[contenteditable="true"]');
 const saved = () =>
-  expect(page.locator(".save-state")).toHaveText("Salvato sul computer");
+  expect(page.locator(".save-state")).toHaveText("Saved on the computer");
 async function createMention(title) {
   await editor().click();
   await page.keyboard.type(`[[${title}`);
-  await page.getByText(`Crea bozza «${title}»`, { exact: true }).click();
+  await page.getByText(`Create draft «${title}»`, { exact: true }).click();
   await saved();
 }
 try {
@@ -35,47 +35,43 @@ try {
     assert.deepEqual(
       await invoke("list_campaigns"),
       [],
-      "Il profilo deve essere vuoto; non usare campagne personali.",
+      "The profile must be empty; do not use personal campaigns.",
     );
     await page
-      .getByRole("button", { name: "Crea campagna", exact: true })
+      .getByRole("button", { name: "Create campaign", exact: true })
       .click();
-    await page.getByLabel("Nome della campagna").fill("Verifica Codex M2");
+    await page.getByLabel("Campaign name").fill("Verifica Codex M2");
     await page
-      .getByRole("button", { name: "Crea campagna", exact: true })
+      .getByRole("button", { name: "Create campaign", exact: true })
       .click();
     await page
       .getByRole("button", { name: "+ Nuova sessione", exact: true })
       .click();
-    await page.getByLabel("Numero", { exact: true }).fill("12");
-    await page.getByLabel("Titolo della sessione").fill("La testimonianza");
+    await page.getByLabel("Number", { exact: true }).fill("12");
+    await page.getByLabel("Session title").fill("La testimonianza");
     await page
-      .getByRole("button", { name: "Crea sessione", exact: true })
+      .getByRole("button", { name: "Create session", exact: true })
       .click();
     await editor().click();
     await page.keyboard.insertText("Ho incontrato ");
     await page.keyboard.type("[[Varek");
-    await page.getByText("Crea bozza «Varek»", { exact: true }).click();
+    await page.getByText("Create draft «Varek»", { exact: true }).click();
     await saved();
     const [campaign] = await invoke("list_campaigns");
     const [varek] = await invoke("list_pages", { campaignId: campaign.id });
-    await page.getByRole("button", { name: "Apri Varek", exact: true }).click();
+    await page.getByRole("button", { name: "Open Varek", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "Varek", exact: true }),
     ).toBeVisible();
-    await expect(page.getByLabel("Riferimenti a questa pagina")).toContainText(
+    await expect(page.getByLabel("References to this page")).toContainText(
       "Sessione 12: La testimonianza",
     );
-    await page
-      .getByRole("button", { name: "Modifica pagina", exact: true })
-      .click();
-    await page.getByLabel("Titolo della pagina").fill("Varek il grigio");
-    await page.getByLabel("Tipo", { exact: true }).selectOption("npc");
-    await page.getByLabel("Stato", { exact: true }).selectOption("active");
-    await page.getByLabel("Alias (uno per riga, massimo 20)").fill("Custode");
-    await page
-      .getByRole("button", { name: "Salva pagina", exact: true })
-      .click();
+    await page.getByRole("button", { name: "Edit page", exact: true }).click();
+    await page.getByLabel("Page title").fill("Varek il grigio");
+    await page.getByLabel("Type", { exact: true }).selectOption("npc");
+    await page.getByLabel("Status", { exact: true }).selectOption("active");
+    await page.getByLabel("Aliases (one per line, up to 20)").fill("Custode");
+    await page.getByRole("button", { name: "Save page", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "Varek il grigio", exact: true }),
     ).toBeVisible();
@@ -98,26 +94,24 @@ try {
       page.locator(`.bn-block-outer[data-id="${blockId}"]`),
     ).toHaveCSS("outline-style", "solid");
     await page
-      .getByRole("button", { name: "Apri Varek il grigio", exact: true })
+      .getByRole("button", { name: "Open Varek il grigio", exact: true })
       .click();
     await createMention("Gilda");
-    await page.getByRole("button", { name: "Apri Gilda", exact: true }).click();
-    await expect(page.getByLabel("Riferimenti a questa pagina")).toContainText(
+    await page.getByRole("button", { name: "Open Gilda", exact: true }).click();
+    await expect(page.getByLabel("References to this page")).toContainText(
       "Pagina: Varek il grigio",
     );
+    await page.getByRole("button", { name: "New page", exact: true }).click();
+    await page.getByLabel("Page title").fill("Nara");
+    await page.getByLabel("Type", { exact: true }).selectOption("npc");
+    await page.getByLabel("Aliases (one per line, up to 20)").fill("Custode");
     await page
-      .getByRole("button", { name: "Nuova pagina", exact: true })
-      .click();
-    await page.getByLabel("Titolo della pagina").fill("Nara");
-    await page.getByLabel("Tipo", { exact: true }).selectOption("npc");
-    await page.getByLabel("Alias (uno per riga, massimo 20)").fill("Custode");
-    await page
-      .getByRole("button", { name: "Crea pagina", exact: true })
+      .getByRole("button", { name: "Create page", exact: true })
       .click();
     await expect(
       page.getByRole("heading", { name: "Nara", exact: true }),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Diario", exact: true }).click();
+    await page.getByRole("button", { name: "Journal", exact: true }).click();
     await editor().click();
     await page.keyboard.press("Control+End");
     await page.keyboard.type(" [[Custode]]");
@@ -126,7 +120,7 @@ try {
     ).toBeVisible();
     await expect(page.getByText("Nara", { exact: true })).toBeVisible();
     await expect(
-      page.getByText("Crea bozza «Custode»", { exact: true }),
+      page.getByText("Create draft «Custode»", { exact: true }),
     ).toHaveCount(0);
     await page.getByText("Nara", { exact: true }).click();
     await saved();
@@ -142,8 +136,8 @@ try {
     await editor().click();
     await page.keyboard.press("Control+End");
     await page.keyboard.type(" [[Contesa");
-    await page.getByText("Crea bozza «Contesa»", { exact: true }).click();
-    await expect(page.getByRole("alert")).toContainText("già");
+    await page.getByText("Create draft «Contesa»", { exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText("already");
     await expect(editor()).toContainText("[[Contesa]]");
     await saved();
     // Inject an unresolved reference via the real typed command to exercise recovery.
@@ -174,9 +168,9 @@ try {
         exact: true,
       })
       .click();
-    await page.getByLabel("Titolo da recuperare").fill("Perduta recuperata");
+    await page.getByLabel("Title to recover").fill("Perduta recuperata");
     await page
-      .getByRole("button", { name: "Recupera bozza", exact: true })
+      .getByRole("button", { name: "Recover draft", exact: true })
       .click();
     await expect(
       page.getByRole("heading", { name: "Perduta recuperata", exact: true }),
@@ -196,7 +190,7 @@ try {
     await invoke("plugin:window|close", { label: "main" }).catch(() => {});
     assert.deepEqual(errors, []);
     console.log(
-      "PASS M2 prepare: [[crea]], rinomina, ID stabili, fonte/blocco, pagina-pagina, alias ambiguo e recupero mancante su SQLite reale.",
+      "PASS M2 prepare: [[create]], rename, stable IDs, source/block, page-to-page links, ambiguous alias and missing-page recovery on real SQLite.",
     );
   } else {
     const expected = JSON.parse(
@@ -212,26 +206,26 @@ try {
       expected.sessions,
     );
     await page
-      .getByRole("button", { name: "Apri Varek il grigio", exact: true })
+      .getByRole("button", { name: "Open Varek il grigio", exact: true })
       .click();
     await expect(
       page.getByRole("heading", { name: "Varek il grigio", exact: true }),
     ).toBeVisible();
-    await expect(page.getByLabel("Riferimenti a questa pagina")).toContainText(
+    await expect(page.getByLabel("References to this page")).toContainText(
       "Sessione 12: La testimonianza",
     );
     await page.screenshot({
       path: ".tools/codex-m2-reopened.png",
       fullPage: true,
     });
-    await page.getByRole("button", { name: "Apri Gilda", exact: true }).click();
-    await expect(page.getByLabel("Riferimenti a questa pagina")).toContainText(
+    await page.getByRole("button", { name: "Open Gilda", exact: true }).click();
+    await expect(page.getByLabel("References to this page")).toContainText(
       "Pagina: Varek il grigio",
     );
     assert.deepEqual(errors, []);
     await invoke("plugin:window|close", { label: "main" }).catch(() => {});
     console.log(
-      "PASS M2 verify: documenti/UUID/alias identici dopo riavvio, menzioni rinominate e backlink sessione/pagina funzionanti.",
+      "PASS M2 verify: documents/UUIDs/aliases identical after restart, renamed mentions and working session/page backlinks.",
     );
   }
 } finally {

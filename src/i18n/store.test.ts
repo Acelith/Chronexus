@@ -11,7 +11,7 @@ import {
   plural,
 } from "./store";
 afterEach(() => applyPreferences(defaultPreferences));
-describe("interfaccia separata dalla campagna", () => {
+describe("interface stays separate from campaign content", () => {
   it("uses English by default and keeps Italian source aliases compatible", () => {
     applyPreferences(defaultPreferences);
     expect(getPreferences().locale).toBe("en");
@@ -27,7 +27,7 @@ describe("interfaccia separata dalla campagna", () => {
     expect(translateError(note)).toBe(note);
     expect(tr("Number of d{0}", [100])).toBe("Number of d100");
   });
-  it("aggiorna lingua e direzione, senza alterare i valori dei parametri", () => {
+  it("updates language and direction without changing parameter values", () => {
     applyPreferences({ ...defaultPreferences, locale: "ar" });
     expect(document.documentElement.dir).toBe("rtl");
     expect(getPreferences().locale).toBe("ar");
@@ -38,7 +38,7 @@ describe("interfaccia separata dalla campagna", () => {
     expect(plural(0, { zero: "Zero", other: "Other" })).toBe("Zero");
     expect(date("invalid")).toBe("Date not given");
   });
-  it("rifiuta preferenze sconosciute senza sostituire quelle valide", () => {
+  it("rejects unknown preferences without replacing valid ones", () => {
     expect(() =>
       applyPreferences({ ...defaultPreferences, locale: "invalid" } as never),
     ).toThrow();

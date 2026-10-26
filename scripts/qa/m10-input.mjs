@@ -175,6 +175,6 @@ await writeFile(
   ),
 );
 console.log(
-  "PASS: 5 font locali, font assente, Unicode MD/visuale e composizione simulata, CJK ricerca, UUID e dati conservati. IME di sistema non collaudato.",
+  "PASS: 5 local fonts, missing font, Unicode Markdown/visual and simulated composition, CJK search, UUIDs and data preserved. System IME not tested.",
 );
 process.exit(0);

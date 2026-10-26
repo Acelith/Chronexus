@@ -11,13 +11,13 @@ test("export reports cancellation and failures truthfully", async () => {
   const user = userEvent.setup();
   vi.mocked(command)
     .mockResolvedValueOnce(null)
-    .mockRejectedValueOnce(Error("Disco non disponibile"));
+    .mockRejectedValueOnce(Error("Disk unavailable"));
   render(<ExportButton campaignId="campaign" busy={false} />);
   await user.click(screen.getByRole("button", { name: "Export campaign" }));
   expect(await screen.findByRole("status")).toHaveTextContent("cancelled");
   await user.click(screen.getByRole("button", { name: "Export campaign" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Disco non disponibile",
+    "Disk unavailable",
   );
   expect(command).toHaveBeenCalledWith("export_campaign", {
     campaignId: "campaign",

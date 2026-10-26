@@ -24,7 +24,7 @@ afterEach(() => {
   vi.useRealTimers();
   vi.resetAllMocks();
 });
-test("attende l’inattività, rispetta il blocco dell’app e riprova al giro successivo", async () => {
+test("waits for idle, respects the app lock and retries on the next cycle", async () => {
   let allowed = false;
   const refreshed = vi.fn();
   window.addEventListener("chronexus:backup-status", refreshed);
@@ -51,7 +51,7 @@ test("attende l’inattività, rispetta il blocco dell’app e riprova al giro s
   expect(result.current.outcome).toBeNull();
   window.removeEventListener("chronexus:backup-status", refreshed);
 });
-test("non parte mentre un campo di testo ha il focus", async () => {
+test("does not start while a text field has focus", async () => {
   const input = document.createElement("input");
   document.body.append(input);
   input.focus();

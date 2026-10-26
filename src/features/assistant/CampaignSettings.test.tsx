@@ -62,12 +62,10 @@ test("loads only campaign data and saves edition preferences before refresh", as
   expect(campaignAi.refresh).toHaveBeenCalledWith("campaign-a");
 });
 test("surfaces load errors without contacting Ollama", async () => {
-  vi.mocked(campaignAi.get).mockRejectedValue(
-    new Error("Archivio non disponibile"),
-  );
+  vi.mocked(campaignAi.get).mockRejectedValue(new Error("Archive unavailable"));
   render(<CampaignSettings campaignId="campaign-a" name="La campagna" />);
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Archivio non disponibile",
+    "Archive unavailable",
   );
   expect(assistantApi.probe).not.toHaveBeenCalled();
   expect(screen.queryByText("Loading settings…")).not.toBeInTheDocument();

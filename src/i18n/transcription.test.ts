@@ -5,19 +5,19 @@ import {
   transcriptionPacket,
   restoreTranscription,
 } from "./transcription";
-describe("trascrizione senza perdita degli originali", () => {
-  it("Morse ITU, decodifica normalizzata e codici sconosciuti", () => {
+describe("transcription preserves originals", () => {
+  it("ITU Morse, normalized decoding and unknown codes", () => {
     expect(transcribe("SOS 100", "morse").text).toBe(
       "... --- ... / .---- ----- -----",
     );
     expect(decodeMorse("... --- ... / .---- ----- -----")).toBe("SOS 100");
     expect(decodeMorse("???")).toBe("�");
   });
-  it("Braille italiano letterario: maiuscole, numeri, accenti e punteggiatura", () => {
+  it("Italian literary Braille: capitals, numbers, accents and punctuation", () => {
     expect(transcribe("Ab 10, è!", "braille").text).toBe("⠨⠁⠃ ⠼⠁⠚⠂ ⠮⠖");
     expect(transcribe("1a", "braille").text).toBe("⠼⠁⠰⠁");
   });
-  it("Galattico Monocraft usa soltanto i glifi A–Z del font concesso", () => {
+  it("Monocraft Galactic uses only A–Z glyphs from the licensed font", () => {
     expect(transcribe("Az 100!", "galactic")).toEqual({
       text: "\ueb40\ueb59 100!",
       unsupported: [],
@@ -25,7 +25,7 @@ describe("trascrizione senza perdita degli originali", () => {
     expect(transcribe("日本 العربية", "galactic").unsupported).toContain("日");
   });
   it.each(["standard", "braille", "morse", "galactic"] as const)(
-    "%s: pacchetto ripristina byte per byte e rifiuta alterazioni",
+    "%s: package restores exact bytes and rejects tampering",
     (script) => {
       const source = "Oran è Vivo! 100\n日本語 العربية [[UUID]]";
       const packet = transcriptionPacket(source, script);
@@ -40,7 +40,7 @@ describe("trascrizione senza perdita degli originali", () => {
 });
 
 it.each(["espruar", "dethek"] as const)(
-  "%s: mapping font originale e pacchetto v2 reversibile",
+  "%s: original font mapping and reversible v2 package",
   (script) => {
     const source = "AaZz 100 è 日本語 العربية ſ";
     const rendered = transcribe(source, script);

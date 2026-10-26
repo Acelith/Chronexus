@@ -1,3 +1,49 @@
+# Chronexus status — 26 October 2026: English source and tooling completion
+
+Completed the M26 language sweep beyond the visible interface: renamed the internal
+Italian-named label map to `appText`, translated remaining Rust diagnostics,
+Markdown export headings, future Logseq import reports, setup/installer and release
+messages, code comments, test descriptions and native QA output/selectors. Remaining
+Italian prose in source documentation and dice guides is now English.
+
+The interface stays English-first; Italian remains selectable. Translation catalogs,
+multilingual fixtures/detection and compatibility identifiers remain intentional
+exceptions, documented in docs/I18N.md. Canonical campaign text, original Markdown,
+aliases, saved locales, message IDs, schema 018 and legacy backup paths are unchanged.
+No new dependency, migration or version bump. Published artifacts and Git history
+were not rewritten.
+
+Actual macOS validation:
+
+- **172 Vitest tests PASS**, plus 2 targeted AssetForm tests after translating its
+  mock controls; **14 i18n tests PASS**. TypeScript, ESLint, Prettier, stable-ID
+  scanner and frontend build PASS. Existing editor chunk >500 kB warning remains.
+- **134 Rust unit tests + 1 integration PASS** with two known failing unit tests
+  excluded and two separately ignored tests (saved Wikidot fixture and real signed
+  final package). The full unit run: 134 PASS, 2 FAIL, 1 ignored.
+- Both failures reproduced against untouched commit **e1327d5** in a temporary
+  source copy: `verified_archive_installs_atomically_and_bad_ones_leave_nothing`
+  builds a Windows `ollama.exe` fixture that does not satisfy the macOS executable
+  path; `transport_auth_origin_scoping_cleanup_and_live_store` fails its initial
+  HTTP 401 assertion. No claim that the full Rust suite passes on macOS.
+- Rustfmt, Clippy all targets/features with `-D warnings`, and native debug
+  executable build PASS. Icons were generated locally before compiling.
+- MCP stdio tests **5/5 PASS**, including English protocol errors; JavaScript syntax
+  checks **35/35 scripts PASS**. Loopback tests executed outside the sandbox.
+- Python 3.12: **23 release-tool tests + 5 local translation-tool tests PASS**.
+  Windows PowerShell installer tests not run on macOS. Training-worker tests are
+  blocked by missing `gguf`; no training dependencies or weights installed.
+- Export regression verifies English wrappers around unchanged Italian titles and
+  aliases, stable links and byte-identical original image contents.
+
+No native GUI acceptance, installer/upgrade, model qualification or publication was
+performed. Edited native QA scripts passed syntax checks; they were not run against
+Windows WebView2. These checks do not certify a new distributable release.
+
+Skills: reviewed the available catalog; no specialist skill was applicable to this
+language-only source/tooling work. Used source inspection and focused regression
+checks. Next planned milestone: **M23 complete code audit**, then M24 and M25.
+
 # Chronexus status — 25 October 2026: M26 English-first
 
 Implemented in source version **0.8.1**, not published. English is the primary
@@ -535,60 +581,60 @@ changes to UI, data, dependencies, installer, tags or release; no M16 implementa
 declared. Acceptances M6/M7/M8/M10/M11/M15 already documented remain.
 
 Checks for this delivery: comparison with Git history, order validation,
-ID/commit/link documentali e git diff --check: PASS (27 milestone, 60 commit
-validi, 27 link locali, 6 soli file Markdown). Test dell’app/build non eseguiti
-perché sono cambiati solo Markdown; i risultati sotto restano storici.
-Skill: valutato il catalogo disponibile; nessuna Skill specialistica necessaria
-per questo riordino documentale. Usati gli strumenti ordinari Git e file.
+ID/commit/document-link validation and git diff --check: PASS (27 milestones,
+60 valid commits, 27 local links, only 6 Markdown files). App tests/build were
+not run because only Markdown changed; the results below remain historical.
+Skills: evaluated the available catalog; no specialist skill was needed for
+this documentation reordering. Used ordinary Git and file tools.
 
-Prossima nuova milestone funzionale: M16, soltanto su richiesta di implementazione.
-Nessuna pubblicazione/versione per questa modifica di pianificazione.
+Next new functional milestone: M16, only upon an implementation request.
+No publication/version for this planning change.
 
 # Chronexus status — 25 October 2026
 
-## M15 — operativa Windows, release pubblica 0.4.0
+## M15 — operational on Windows, public release 0.4.0
 
-Release pubblicata e verificata senza autenticazione:
+Release published and verified without authentication:
 https://github.com/Acelith/Chronexus/releases/tag/v0.4.0
-API stabile: https://api.github.com/repos/Acelith/Chronexus/releases/latest
-Release id 3, tre allegati: setup Windows x64, .sig e latest.json. Upload, download,
-SHA-256, download anonimi e API latest PASS. Nessuna modifica alla bozza M11 id 2.
-Tag v0.4.0 identifica il sorgente compilato d75f5f3; le modifiche successive sono
-soltanto documentazione/strumenti di pubblicazione. Codice e tag su origin.
+Stable API: https://api.github.com/repos/Acelith/Chronexus/releases/latest
+Release ID 3, three attachments: Windows x64 setup, .sig and latest.json. Upload,
+download, SHA-256, anonymous downloads and latest API PASS. M11 draft ID 2 unchanged.
+Tag v0.4.0 identifies the compiled source d75f5f3; subsequent changes only affect
+documentation/publication tools. Code and tag on origin.
 
-Impostazioni dell’app: controllo esplicito, download annullabile e installazione
-ufficiale Tauri con backup verificato obbligatorio. Discovery API Forgejo stabile
-con latest.json unico o manifesto HTTPS configurabile. Nessun account client,
-controllo all’avvio o invio campagne. Firma vincolata a pacchetto e versione.
-Prima di ogni installazione: .nodex completo con immagini/allegati gestiti e
-ricevuta SHA-256/preferenze in update-backups. Fallimento blocca l’installer;
-Store bloccato fino all’handoff, AI attiva rifiutata, backup mai eliminati.
-Chiave privata cifrata/password Windows DPAPI fuori Git; client con sola chiave
-pubblica. SQLite 015/appID invariati. Pesi/runtime AI separati. docs/UPDATES.md.
+App settings: explicit check, cancellable download and official Tauri installation
+with mandatory verified backup. Stable Forgejo API discovery with a unique
+latest.json or configurable HTTPS manifest. No client account, startup check or
+campaign uploads. Signature bound to package and version.
+Before every installation: complete .nodex with managed images/attachments and
+SHA-256/preferences receipt in update-backups. Failure blocks the installer;
+Store locked until handoff, active AI rejected, backups never deleted.
+Encrypted private key/Windows DPAPI password outside Git; client contains only the
+public key. SQLite 015/appID unchanged. AI weights/runtime separate. docs/UPDATES.md.
 
-Verifiche realmente eseguite:
-- pnpm test PASS: 136 test / 32 file; lint/typecheck/build/format:check PASS.
-- cargo test offline PASS: 96 unitari + 1 integrazione crittografica. Il test del
-  pacchetto reale, ignorato nel run ordinario, è stato eseguito esplicitamente:
-  PASS per firma dell’installer definitivo e rifiuto della sua copia manomessa.
-- cargo fmt e clippy --all-targets -- -D warnings PASS.
-- Python manifesto 4 test PASS, publisher 4 PASS; MCP Node 5 PASS.
-- React Doctor changed 82/100, nessun nuovo rilievo.
-- Desktop debug autonomo/profili sintetici: schermata/versione, HTTP rifiutato,
-  errore per canale non pubblicato, poi discovery del canale pubblico sia API sia
-  statico, nessuna reinstallazione della versione corrente, endpoint persistente
-  dopo riavvio e chiusure ordinarie PASS. Axe sulla sezione aggiornamenti: 0 rilievi.
-- Backup/ripristino reale con immagini e blocco callback installer su errore PASS.
-- NSIS Windows firmato updater costruito; licenze/font e mcp.mjs ispezionati
-  dentro il setup. 32.006.516 byte; SHA-256:
+Checks actually performed:
+- pnpm test PASS: 136 tests / 32 files; lint/typecheck/build/format:check PASS.
+- cargo test offline PASS: 96 unit tests + 1 cryptographic integration test. The
+  real-package test, ignored in ordinary runs, was explicitly executed: PASS for
+  the final installer's signature and rejection of its tampered copy.
+- cargo fmt and clippy --all-targets -- -D warnings PASS.
+- Python manifest 4 tests PASS, publisher 4 PASS; MCP Node 5 PASS.
+- React Doctor changed 82/100, no new findings.
+- Standalone debug desktop/synthetic profiles: screen/version, HTTP rejection,
+  unpublished-channel error, then public-channel discovery through both API and
+  static manifest, no reinstall of the current version, persistent endpoint after
+  restart and ordinary shutdown PASS. Axe: 0 findings in update settings.
+- Real backup/restore with images and installer callback blocked on error PASS.
+- Updater-signed Windows NSIS built; licenses/fonts and mcp.mjs inspected inside
+  the setup. 32,006,516 bytes; SHA-256:
   c8d4f7138b5be438f05ee1511f55676e109cc37cb340bd0ba31d849867da1b15.
 
-Output locali: installers/Chronexus-0.4.0-Windows-x64, con manifesto, setup/firma,
-checksum/report/ricevuta e LEGGIMI. Sorgenti: c7d95ca feature, d75f5f3 licenze,
-db8fc68 publisher. Bootstrap manuale dalle versioni prive di updater, con backup
-ordinario prima della prima installazione; le successive usano il nuovo flusso.
-Limiti: upgrade pubblico reale tra due versioni updater non ancora eseguito,
-installer non Authenticode, macOS/Linux non certificati, nuove stringhe con fallback
+Local outputs: installers/Chronexus-0.4.0-Windows-x64, with manifest, setup/signature,
+checksums/report/receipt and LEGGIMI. Sources: c7d95ca feature, d75f5f3 licenses,
+db8fc68 publisher. Manual bootstrap from versions without an updater, with an
+ordinary backup before the first installation; subsequent updates use the new flow.
+Limits: a real public upgrade between two updater versions has not yet been run,
+installer lacks Authenticode, macOS/Linux not certified, new strings fall back to
 Italian. Do not declare personal installations or upgrades performed when they are not.
 
 Skill: tauri-v2/rust-best-practices for updater and Store; react-testing/react-doctor
@@ -757,7 +803,7 @@ The following sections preserve previous checkpoints and the verification path.
 
 ## M9 — operational and tested on Windows
 
-- Tiradadi from left menu: d4/d6/d8/d10/d12/d20/d100, mixed compositions,
+- Dice roller from left menu: d4/d6/d8/d10/d12/d20/d100, mixed compositions,
   quantities from 0 to 50 per type and 1–100 dice per throw. Reset only after
   confirmation; errors retain selection and ID for retry without duplications.
 - Campaign history in SQLite 015: values, subtotals, total, date, UUID and
@@ -878,59 +924,59 @@ The user explicitly approved Qwen3:4b-instruct multilingual with local sources,
 - `pnpm build:desktop` and `pnpm package:desktop`: PASS; unsigned Windows
   NSIS installer generated. M8 installation not repeated, do not confuse with M6.
 - GPU RTX 4080 SUPER 16 GB: 4 Qwen cases and 4 Gemma with expected result in the app.
-  Training dal menu su 4 estratti/8 passaggi e successiva prova su 74 estratti,
-  74 esempi/74 passaggi: pesi modificati, copertura completa, tre controlli di
-  citazioni/assenze/GPU, attivazione e domanda sull'ultima fonte PASS.
-  Picco PyTorch: 11.705.906.688 byte (circa 10,9 GiB).
-- Annullamento reale dopo il primo passaggio GPU: PASS, modello attivo invariato.
-  Riavvio, backup/restore nativo, rimozione del solo modello sintetico e sua
-  ricostruzione dall'adapter senza nuovo training: PASS; citazioni ancora valide.
-- Regole sintetiche 2014/2024 separate, edizione errata respinta, fonte malevola
-  esclusa dalle risposte e bloccante per training, esclusione esplicita: PASS.
-  Ollama realmente spento: errore utile e `sentToModel=false`; runtime riavviato.
-- Backend Python/CUDA e checkpoint verificati anche nel percorso standard
-  `%APPDATA%/it.nodex.desktop/ai-training`. Campagne personali non modificate.
-  Runtime e checkpoint fuori dagli archivi; adapter compatti inclusi e verificati.
-- Script ripetibile con fixture sintetiche: `scripts/qa/m8-local-ai.mjs`;
-  originali dei rapporti in `.tools/m8/`, ignorati. La fase boundaries del
-  nuovo harness è stata rieseguita; seed/train/recover/coverage derivano dagli
-  stessi scenari nativi eseguiti prima del consolidamento, senza un secondo
-  giro completo del nuovo harness. Modelli derivati temporanei rimossi dopo
-  importazione/collaudo; nessun test fisico offline o guasto hardware simulato
-  presentato come verifica reale. CUDA assente coperta da test controllato.
-- Commit: a99355e impostazioni; 1fde390 training; 4d007f1 copertura completa.
-  Guide e collaudo consolidato nel commit successivo. Nessun push.
+  Training from the menu on 4 excerpts/8 steps, then 74 excerpts,
+  74 examples/74 steps: weights changed, full coverage, three checks for
+  citations/missing information/GPU, activation and a question about the last
+  source PASS. Peak PyTorch: 11,705,906,688 bytes (about 10.9 GiB).
+- Real cancellation after the first GPU step: PASS, active model unchanged.
+  Restart, native backup/restore, removal of only the synthetic model and its
+  reconstruction from the adapter without new training: PASS; citations still valid.
+- Synthetic 2014/2024 rules kept separate, wrong edition rejected, malicious source
+  excluded from answers and blocking training, explicit exclusion: PASS.
+  Ollama actually stopped: actionable error and `sentToModel=false`; runtime restarted.
+- Python/CUDA backend and checkpoint also verified in the standard path
+  `%APPDATA%/it.nodex.desktop/ai-training`. Personal campaigns unchanged.
+  Runtime and checkpoint excluded from archives; compact adapters included and verified.
+- Repeatable script with synthetic fixtures: `scripts/qa/m8-local-ai.mjs`;
+  original reports in `.tools/m8/`, ignored. The new harness's boundaries phase
+  was rerun; seed/train/recover/coverage derive from the same native scenarios
+  executed before consolidation, without a second complete run of the new harness.
+  Temporary derived models removed after import/testing; no physical offline test
+  or simulated hardware failure presented as a real check. Missing CUDA covered
+  by a controlled test.
+- Commits: a99355e settings; 1fde390 training; 4d007f1 full coverage.
+  Guide and testing consolidated in the following commit. No push.
 
-## Funziona
+## Working features
 
-- M0–M6: campagne e diario/autosave, Codex UUID/backlink, relazioni con fonte e
-  certezza, scheda estesa, inventario/incantesimi, FTS5, dashboard, immagini gestite
-  incluse nei backup, export Markdown/JSON e originali Logseq immutabili.
-- Tema pergamena/cuoio/ottone, grafo ordinato/organico con filtri e dettaglio;
-  Party sulle pagine Codex; Wiki Open5e multi-fonte con cache offline.
-- Assistente facoltativo, disattivato inizialmente: adapter Rust su loopback fisso,
-  cloud disabilitato verificato, identità GGUF/digest, preflight GPU prima degli
-  appunti. Nessun download, inferenza all'avvio, cloud fallback o tool del modello.
-- Retrieval lessicale per sola campagna e regole cache scelte per edizione;
-  estratti limitati con ID/blocco/revisione/hash. Fonti riapribili con avviso di
-  modifica/mancanza; affermazioni dei PNG non promosse automaticamente a fatti.
-- Streaming, cancellazione anche durante la risposta, bozze persistenti e recovery.
-  Cronologia paginata, cancellazione confermata, backup/export di conversazioni
-  e fonti; runtime/pesi esclusi. Nessuna scrittura implicita in note/grafo/scheda.
-- Gate prudente esclude estratti con possibili istruzioni al modello. Se tutti
-  sono sospetti ferma la richiesta e conserva le copie per revisione.
-- Schema M7 **012 additivo**; vecchi backup migrati in copia, nuovi richiedono versione
-  compatibile. Identificatori legacy it.nodex.desktop/nodex.sqlite3/.nodex mantenuti.
+- M0–M6: campaigns and journal/autosave, Codex UUIDs/backlinks, relationships with
+  source and certainty, extended sheet, inventory/spells, FTS5, dashboard, managed
+  images in backups, Markdown/JSON export and immutable Logseq originals.
+- Parchment/leather/brass theme, ordered/organic graph with filters and details;
+  Party on Codex pages; multi-source Open5e wiki with offline cache.
+- Optional assistant, initially disabled: Rust adapter on fixed loopback,
+  verified cloud-disabled status, GGUF identity/digest, GPU preflight before notes
+  are sent. No download, startup inference, cloud fallback or model tools.
+- Lexical retrieval scoped to one campaign and cached rules chosen by edition;
+  bounded excerpts with ID/block/revision/hash. Reopenable sources with
+  changed/missing warnings; NPC claims never automatically promoted to facts.
+- Streaming, cancellation during answers, persistent drafts and recovery.
+  Paginated history, confirmed deletion, conversation/source backup and export;
+  runtime/weights excluded. No implicit writes to notes/graph/sheet.
+- Conservative gate excludes excerpts with possible model instructions. If all
+  are suspicious, it stops the request and preserves copies for review.
+- M7 schema **012 additive**; old backups migrated in a copy, new backups require a
+  compatible version. Legacy it.nodex.desktop/nodex.sqlite3/.nodex identifiers kept.
 
 ## M7 checks actually performed
 
 - `cargo test --offline --manifest-path src-tauri/Cargo.toml`: **63 PASS**.
 - `cargo clippy --offline --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings`:
-  PASS. Build debug: PASS.
-- `pnpm test`: **55 PASS / 19 file**; ultimi ritocchi verificati anche con i 3
-  test mirati dell'assistente. Lint, typecheck, format:check: PASS.
-- `pnpm package:desktop`: PASS, installer Windows NSIS non firmato. L'installazione
-  M7 non è stata ripetuta; installazione/avvio/rimozione M6 erano stati verificati
+  PASS. Debug build: PASS.
+- `pnpm test`: **55 PASS / 19 files**; final adjustments also verified with the
+  3 targeted assistant tests. Lint, typecheck, format:check: PASS.
+- `pnpm package:desktop`: PASS, unsigned Windows NSIS installer. M7 installation
+  was not repeated; M6 installation/startup/removal had been verified,
   preserving two personal DBs with identical SHA-256.
 - Real GPU: Ollama 0.40.10, Qwen3:4b-instruct Q4_K_M, context 8192, **3539 MiB
   entirely in VRAM** on the RTX 4080 SUPER. Performance depends on load.

@@ -48,7 +48,7 @@ afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
-test("stato vuoto, tutti i dadi incluso d100 e controlli con mouse", async () => {
+test("empty state, all dice including d100 and mouse controls", async () => {
   const user = userEvent.setup();
   render(<DiceWorkspace campaignId="campaign" register={vi.fn()} />);
   await screen.findByText(t.noHistory);
@@ -69,7 +69,7 @@ test("stato vuoto, tutti i dadi incluso d100 e controlli con mouse", async () =>
   await user.click(screen.getByRole("button", { name: t.zero }));
   expect(screen.getByRole("button", { name: t.roll })).toBeDisabled();
 });
-test("tiro misto azzera tutte le quantità e rende visibili risultati e storico reali", async () => {
+test("mixed roll resets quantities and displays real results and history", async () => {
   const user = userEvent.setup();
   render(<DiceWorkspace campaignId="campaign" register={vi.fn()} />);
   await screen.findByText(t.noHistory);
@@ -103,16 +103,16 @@ test("tiro misto azzera tutte le quantità e rende visibili risultati e storico 
   ).toHaveTextContent("624");
   expect(screen.getByRole("button", { name: t.roll })).toBeDisabled();
 });
-test("errore mantiene la selezione e il retry usa lo stesso ID", async () => {
+test("errors preserve selection and retry reuses the same ID", async () => {
   const user = userEvent.setup();
-  vi.mocked(diceApi.roll).mockRejectedValueOnce(Error("Disco pieno"));
+  vi.mocked(diceApi.roll).mockRejectedValueOnce(Error("Disk full"));
   render(<DiceWorkspace campaignId="campaign" register={vi.fn()} />);
   await screen.findByText(t.noHistory);
   fireEvent.change(screen.getByLabelText(t.quantity(100)), {
     target: { value: "1" },
   });
   await user.click(screen.getByRole("button", { name: t.roll }));
-  expect(await screen.findByRole("alert")).toHaveTextContent("Disco pieno");
+  expect(await screen.findByRole("alert")).toHaveTextContent("Disk full");
   expect(screen.getByLabelText(t.quantity(100))).toHaveValue(1);
   const first = vi.mocked(diceApi.roll).mock.calls[0][1];
   await user.click(screen.getByRole("button", { name: t.roll }));
@@ -122,7 +122,7 @@ test("errore mantiene la selezione e il retry usa lo stesso ID", async () => {
     expect(screen.getByLabelText(t.quantity(100))).toHaveValue(0),
   );
 });
-test("invii duplicati bloccati e chiusura attende la registrazione", async () => {
+test("duplicate submissions are blocked and closing waits for persistence", async () => {
   let resolve!: (value: Roll) => void;
   vi.mocked(diceApi.roll).mockReturnValue(
     new Promise((r) => {
@@ -154,7 +154,7 @@ test("invii duplicati bloccati e chiusura attende la registrazione", async () =>
   expect(flushed).toBe(true);
   expect(guard.dirty()).toBe(false);
 });
-test("limiti e quantità frazionarie non inviano richieste", async () => {
+test("out-of-range and fractional quantities do not send requests", async () => {
   render(<DiceWorkspace campaignId="campaign" register={vi.fn()} />);
   await screen.findByText(t.noHistory);
   fireEvent.change(screen.getByLabelText(t.quantity(20)), {
@@ -174,7 +174,7 @@ test("limiti e quantità frazionarie non inviano richieste", async () => {
   expect(screen.getByRole("alert")).toHaveTextContent(t.totalError);
   expect(diceApi.roll).not.toHaveBeenCalled();
 });
-test("storico paginato si recupera da un errore e non duplica righe", async () => {
+test("paginated history recovers from errors without duplicate rows", async () => {
   vi.mocked(diceApi.history)
     .mockRejectedValueOnce(Error("Archivio occupato"))
     .mockResolvedValueOnce({
@@ -202,7 +202,7 @@ test("storico paginato si recupera da un errore e non duplica righe", async () =
     ).getAllByLabelText(/^Roll of/),
   ).toHaveLength(2);
 });
-test("timeline di 2,5 secondi e salto non cambiano il risultato", async () => {
+test("the 2.5-second timeline and skipping do not change the result", async () => {
   motion(false);
   vi.useFakeTimers();
   const done = vi.fn();
@@ -219,7 +219,7 @@ test("timeline di 2,5 secondi e salto non cambiano il risultato", async () => {
   expect(screen.getByRole("status")).toHaveTextContent(t.saved);
   expect(diceApi.roll).not.toHaveBeenCalled();
 });
-test("salto annulla i timer e movimento ridotto evita la sequenza", async () => {
+test("skipping cancels timers and reduced motion bypasses the sequence", async () => {
   motion(false);
   vi.useFakeTimers();
   const done = vi.fn();
@@ -238,7 +238,7 @@ test("salto annulla i timer e movimento ridotto evita la sequenza", async () => 
   expect(done).toHaveBeenCalledTimes(2);
 });
 
-test("il tiro è registrato ma lo storico non anticipa il risultato prima della rivelazione", async () => {
+test("the roll is saved but history does not reveal it early", async () => {
   motion(false);
   vi.useFakeTimers();
   render(<DiceWorkspace campaignId="campaign" register={vi.fn()} />);
@@ -263,7 +263,7 @@ test("il tiro è registrato ma lo storico non anticipa il risultato prima della 
   );
 });
 
-test("i due draghi reagiscono soltanto alla rivelazione, con sequenza finita e skip", () => {
+test("both dragons react only on reveal with a finite, skippable sequence", () => {
   motion(false);
   vi.useFakeTimers();
   const done = vi.fn();
@@ -307,7 +307,7 @@ test("i due draghi reagiscono soltanto alla rivelazione, con sequenza finita e s
   expect(document.querySelector(".living-dragons")).toBeNull();
   expect(done).toHaveBeenCalledTimes(2);
 });
-test("movimento ridotto mantiene esito statico e replay non invoca un nuovo tiro", async () => {
+test("reduced motion keeps a static outcome and replay does not request a new roll", async () => {
   motion(true);
   vi.useFakeTimers();
   const done = vi.fn();

@@ -19,7 +19,7 @@ vi.mock("../journal/api", async (original) => ({
   ...(await original<typeof import("../journal/api")>()),
   command: vi.fn(async (name: string) => {
     if (name === "list_images") return [];
-    throw Error(`Comando non previsto nel test player: ${name}`);
+    throw Error(`Unexpected command in player test: ${name}`);
   }),
 }));
 vi.mock("./api", async (original) => ({
@@ -132,10 +132,10 @@ function setup(view: PlayerView = "character") {
   );
   return { user: userEvent.setup(), getGuard: () => guard, onPage, onSource };
 }
-test("crea una scheda generica con risorse e protegge un modulo che non si salva", async () => {
+test("creates a generic sheet with resources and guards a form that fails to save", async () => {
   vi.mocked(playerApi.character).mockResolvedValue(null);
   vi.mocked(playerApi.saveCharacter).mockRejectedValue(
-    new Error("Disco non disponibile. Riprova."),
+    new Error("Disk unavailable. Try again."),
   );
   const { user, getGuard } = setup();
   await user.click(
@@ -150,7 +150,7 @@ test("crea una scheda generica con risorse e protegge un modulo che non si salva
   await user.type(screen.getByLabelText("Resource 1: maximum"), "3");
   await user.click(screen.getByRole("button", { name: "Save character" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Disco non disponibile",
+    "Disk unavailable",
   );
   expect(screen.getByLabelText("Character name")).toHaveValue("Neme");
   expect(playerApi.saveCharacter).toHaveBeenCalledWith(
@@ -164,7 +164,7 @@ test("crea una scheda generica con risorse e protegge un modulo che non si salva
   await user.click(screen.getByRole("button", { name: "Discard changes" }));
   expect(getGuard()?.dirty()).toBe(false);
 });
-test("contatori attendono la persistenza e mantengono il valore quando il salvataggio fallisce", async () => {
+test("counters wait for persistence and preserve values when saving fails", async () => {
   const { user, getGuard } = setup();
   let resolve: (value: Character) => void = () => {};
   vi.mocked(playerApi.counter)
@@ -204,7 +204,7 @@ test("contatori attendono la persistenza e mantengono il valore quando il salvat
     screen.getByLabelText("Concentration", { selector: "output" }),
   ).toHaveTextContent("1 / 3");
 });
-test("salva oggetto con PNG, sessione e blocco e apre i collegamenti della voce", async () => {
+test("saves an item with NPC, session and block and opens its links", async () => {
   vi.mocked(playerApi.saveAsset).mockImplementation(
     async (_c, _pc, _initial, input) => ({ ...item, input }),
   );
@@ -241,7 +241,7 @@ test("salva oggetto con PNG, sessione e blocco e apre i collegamenti della voce"
     "inventory",
   );
 });
-test("elimina solo dopo conferma, Escape annulla e la richiesta usa la revisione corrente", async () => {
+test("deletes only after confirmation, Escape cancels and the request uses the current revision", async () => {
   vi.mocked(playerApi.assets).mockResolvedValue([item]);
   vi.mocked(playerApi.deleteAsset).mockResolvedValue();
   const { user } = setup("inventory");
@@ -260,7 +260,7 @@ test("elimina solo dopo conferma, Escape annulla e la richiesta usa la revisione
   );
   expect(playerApi.deleteAsset).toHaveBeenCalledWith(item);
 });
-test("filtra capacità manuali e i marcatori non cambiano i contatori", async () => {
+test("filters manual abilities and flags do not change counters", async () => {
   const spell: Asset = {
     ...item,
     id: "light",
@@ -289,7 +289,7 @@ test("filtra capacità manuali e i marcatori non cambiano i contatori", async ()
     await screen.findByText("No entries match the filters."),
   ).toBeInTheDocument();
 });
-test("errore lettura non mostra una falsa scheda vuota e consente riprova", async () => {
+test("read errors do not show a fake empty sheet and allow retry", async () => {
   vi.mocked(playerApi.character)
     .mockRejectedValueOnce(new Error("Archivio occupato"))
     .mockResolvedValueOnce(character);
@@ -305,7 +305,7 @@ test("errore lettura non mostra una falsa scheda vuota e consente riprova", asyn
     await screen.findByRole("heading", { name: "Neme" }),
   ).toBeInTheDocument();
 });
-test("adattatori generico e sconosciuto preservano statistiche manuali senza derivazioni", () => {
+test("generic and unknown adapters preserve manual statistics without derived values", () => {
   for (const system of ["generic", "D&D personale", "__proto__"]) {
     const adapter = adapterFor(system);
     expect(adapter.mode).toBe("manual");
@@ -323,7 +323,7 @@ const wikiSpell = {
     provider: "wikidot" as const,
   },
 };
-test("una voce Wikidot apre un modulo modificabile e si salva solo esplicitamente", async () => {
+test("a Wikidot entry opens an editable form and saves only explicitly", async () => {
   vi.mocked(playerApi.character).mockResolvedValue(character);
   vi.mocked(playerApi.assets).mockResolvedValue([]);
   vi.mocked(playerApi.saveAsset).mockImplementation(
@@ -373,7 +373,7 @@ test("una voce Wikidot apre un modulo modificabile e si salva solo esplicitament
     catalogSource: { provider: "wikidot", path: "spell:acid-splash" },
   });
 });
-test("senza personaggio l’importazione dalla wiki viene annullata con un avviso", async () => {
+test("without a character wiki import is cancelled with a warning", async () => {
   vi.mocked(playerApi.character).mockResolvedValue(null);
   const onDraftUsed = vi.fn();
   render(

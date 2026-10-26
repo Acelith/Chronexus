@@ -5,13 +5,13 @@ import assert from "node:assert/strict";
 
 const phase = process.argv[2];
 if (!["prepare", "verify"].includes(phase))
-  throw Error("Usa prepare oppure verify; consulta docs/QA.md.");
+  throw Error("Use prepare or verify; see docs/QA.md.");
 const browser = await chromium.connectOverCDP("http://127.0.0.1:9223");
 const page = browser
   .contexts()
   .flatMap((context) => context.pages())
   .find((page) => page.url().startsWith("http://127.0.0.1:1420"));
-if (!page) throw Error("WebView desktop di sviluppo non trovata.");
+if (!page) throw Error("Development desktop WebView not found.");
 page.on("pageerror", (error) => console.error("WebView:", error.message));
 const invoke = (name, args) =>
   page.evaluate(
@@ -27,16 +27,16 @@ try {
       "Il profilo deve essere vuoto. Non usare dati personali.",
     );
     await page
-      .getByRole("button", { name: "Crea campagna", exact: true })
+      .getByRole("button", { name: "Create campaign", exact: true })
       .click();
-    await page.getByLabel("Nome della campagna").fill("Verifica locale M1");
+    await page.getByLabel("Campaign name").fill("Verifica locale M1");
     await page
-      .getByRole("button", { name: "Crea campagna", exact: true })
+      .getByRole("button", { name: "Create campaign", exact: true })
       .click();
     await page.getByRole("heading", { name: "Verifica locale M1" }).waitFor();
-    await page.getByRole("button", { name: "Rinomina campagna" }).click();
-    await page.getByLabel("Nome della campagna").fill("Diario di verifica M1");
-    await page.getByRole("button", { name: "Salva nome" }).click();
+    await page.getByRole("button", { name: "Rename campaign" }).click();
+    await page.getByLabel("Campaign name").fill("Diario di verifica M1");
+    await page.getByRole("button", { name: "Save name" }).click();
     for (const [sequence, title] of [
       [12, "Il ritorno"],
       [2, "Il ponte"],
@@ -44,10 +44,10 @@ try {
       await page
         .getByRole("button", { name: "+ Nuova sessione", exact: true })
         .click();
-      await page.getByLabel("Numero", { exact: true }).fill(String(sequence));
-      await page.getByLabel("Titolo della sessione").fill(title);
+      await page.getByLabel("Number", { exact: true }).fill(String(sequence));
+      await page.getByLabel("Session title").fill(title);
       await page
-        .getByRole("button", { name: "Crea sessione", exact: true })
+        .getByRole("button", { name: "Create session", exact: true })
         .click();
       await page.locator('.bn-editor[contenteditable="true"]').waitFor();
     }
@@ -58,7 +58,7 @@ try {
     await page.keyboard.insertText(
       "È soltanto un sospetto, non un fatto accertato.",
     );
-    await expect(page.getByRole("status")).toHaveText("Salvato sul computer");
+    await expect(page.getByRole("status")).toHaveText("Saved on the computer");
     const [campaign] = await invoke("list_campaigns");
     const sessions = await invoke("list_sessions", { campaignId: campaign.id });
     assert.deepEqual(
@@ -83,7 +83,7 @@ try {
     await page.keyboard.insertText(" Chiusura immediata.");
     await invoke("plugin:window|close", { label: "main" }).catch(() => {});
     console.log(
-      "PASS prepare: creazione/rinomina, ordine, editor reale, due paragrafi e richiesta di chiusura.",
+      "PASS prepare: create/rename, ordering, real editor, two paragraphs and close request.",
     );
   } else {
     const expected = JSON.parse(
@@ -112,7 +112,7 @@ try {
       fullPage: true,
     });
     console.log(
-      "PASS verify: riavvio desktop, documento identico e ultima battuta salvata durante la chiusura.",
+      "PASS verify: desktop restart, identical document and last keystroke saved while closing.",
     );
     await page.getByRole("button", { name: /Sessione 12/ }).click();
     const editor = page.locator('.bn-editor[contenteditable="true"]');
@@ -127,7 +127,9 @@ try {
       await page.keyboard.press("Enter");
       await page.keyboard.type("- ");
       await page.keyboard.insertText("Da verificare");
-      await expect(page.getByRole("status")).toHaveText("Salvato sul computer");
+      await expect(page.getByRole("status")).toHaveText(
+        "Saved on the computer",
+      );
     }
     const formatted = (
       await invoke("list_sessions", { campaignId: expected.campaign.id })
@@ -135,9 +137,7 @@ try {
     assert.equal(formatted[0].content[0].styles.bold, true);
     assert.equal(formatted[1].type, "heading");
     assert.equal(formatted[2].type, "bulletListItem");
-    console.log(
-      "PASS formatting: grassetto, titolo ed elenco salvati in SQLite.",
-    );
+    console.log("PASS formatting: bold, heading and list saved in SQLite.");
   }
 } finally {
   await browser.close();

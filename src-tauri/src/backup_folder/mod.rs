@@ -1,6 +1,6 @@
-//! M19: cartella `Chronexus` nei Documenti, backup periodici configurabili e
-//! destinazione dei backup di aggiornamento. Le preferenze e l'indice dei file
-//! periodici stanno nella radice dati, fuori dalle generazioni di ripristino.
+//! M19: `Chronexus` folder in Documents, configurable periodic backups and
+//! update backup destination. Preferences and the periodic file index live
+//! in the data root, outside restore generations.
 use crate::{
     backup::{self, Store},
     journal::AppResult,

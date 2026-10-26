@@ -106,51 +106,51 @@ try {
     });
     await page.reload();
     await click("Scheda e catalogo QA");
-    await click("Personaggio");
-    await click("Crea personaggio");
-    await fill("Nome del personaggio", "Neme");
-    await fill("PF massimi", 24);
-    await fill("PF attuali", 19);
-    await expand("Identità e background");
+    await click("Character");
+    await click("Create character");
+    await fill("Character name", "Neme");
+    await fill("Maximum HP", 24);
+    await fill("Current HP", 19);
+    await expand("Identity and background");
     await fill("Background", "Cartografa della torre");
-    await fill("Allineamento", "Neutrale");
-    await expand("Combattimento e sensi");
-    await fill("Classe armatura", "15");
-    await fill("Bonus competenza", "+2");
-    await fill("Successi contro morte", 2);
-    await page.getByLabel("Ispirazione", { exact: true }).check();
-    await expand("Storia, aspetto e competenze");
+    await fill("Alignment", "Neutrale");
+    await expand("Combat and senses");
+    await fill("Armor class", "15");
+    await fill("Proficiency bonus", "+2");
+    await fill("Death save successes", 2);
+    await page.getByLabel("Inspiration", { exact: true }).check();
+    await expand("History, appearance and proficiencies");
     await fill("Linguaggi", "Comune, Elfico");
-    await fill("Ideali", "Proteggere le memorie");
-    await expand("Denaro, valori e carico");
-    await fill("Monete d’oro", "27");
-    await expand("Magia");
-    await fill("CD tiro salvezza incantesimi", "13");
-    await fill("Caratteristica da incantatore", "Intelligenza");
+    await fill("Ideals", "Proteggere le memorie");
+    await expand("Money, valuables and load");
+    await fill("Gold pieces", "27");
+    await expand("Magic");
+    await fill("Spell save DC", "13");
+    await fill("Spellcasting ability", "Intelligence");
     await expand("Armi, attacchi e munizioni (0)");
-    await click("Aggiungi attacco");
+    await click("Add attack");
     await fill("Arma o attacco 1", "Arco corto");
     await fill("Bonus attacco 1", "+4");
     await fill("Danno e tipo 1", "1d6 perforante");
     await fill("Munizioni 1", "12");
-    await click("Aggiungi campi D&D 2014");
-    await click("Aggiungi slot 1°–9°");
+    await click("Add D&D 2014 fields");
+    await click("Add 1st–9th level slots");
     await fill("Risorsa 1: massimo", 3);
     await fill("Risorsa 1: attuale", 2);
-    await click("Salva personaggio");
+    await click("Save character");
     await expect(
-      page.getByRole("button", { name: "Modifica personaggio", exact: true }),
+      page.getByRole("button", { name: "Edit character", exact: true }),
     ).toBeVisible();
     assert.equal(requests.length, 0, "No automatic network traffic");
     const before = await snapshot();
     assert.equal(before.character.data.stats.length, 30);
     assert.equal(before.character.data.resources.length, 9);
-    await click("Capacità");
-    await click("Cerca in D&D");
-    await fill("Nome nel catalogo", "Magic Missile");
-    await click("Cerca nell’API");
+    await click("Abilities");
+    await click("Search D&D");
+    await fill("Catalog name", "Magic Missile");
+    await click("Search the API");
     const catalog = page.getByRole("region", {
-      name: "Catalogo D&D",
+      name: "D&D catalog",
       exact: true,
     });
     await expect(
@@ -159,7 +159,7 @@ try {
     await catalog.getByRole("button", { name: /Magic Missile/ }).click();
     await expect(
       catalog.getByRole("button", {
-        name: "Usa questi dati nel modulo",
+        name: "Use this data in the form",
         exact: true,
       }),
     ).toBeVisible({ timeout: 15000 });
@@ -167,42 +167,42 @@ try {
       path: ".tools/sheet-catalog-preview.png",
       fullPage: true,
     });
-    await click("Usa questi dati nel modulo");
-    await expect(
-      page.getByLabel("Nome della voce", { exact: true }),
-    ).toHaveValue("Magic Missile");
-    await fill("Nome della voce", "Dardi di Neme");
-    await fill("Note della voce", "Variante personale; fonte conservata.");
-    await click("Salva voce");
+    await click("Use this data in the form");
+    await expect(page.getByLabel("Entry name", { exact: true })).toHaveValue(
+      "Magic Missile",
+    );
+    await fill("Entry name", "Dardi di Neme");
+    await fill("Entry notes", "Variante personale; fonte conservata.");
+    await click("Save entry");
     await expect(
       page.getByRole("heading", { name: "Dardi di Neme", exact: true }),
     ).toBeVisible();
-    await click("Aggiungi incantesimo");
-    await fill("Nome della voce", "Segnale delle memorie");
-    await fill("Descrizione", "Incantesimo originale di prova, resta locale.");
-    await click("Cerca questo nome in D&D");
-    await click("Cerca nell’API");
+    await click("Add spell");
+    await fill("Entry name", "Segnale delle memorie");
+    await fill("Description", "Incantesimo originale di prova, resta locale.");
+    await click("Search this name in D&D");
+    await click("Search the API");
     await expect(
-      page.getByText(/Nessun risultato\. Prova il nome inglese/),
+      page.getByText(/No results\. Try the English name/),
     ).toBeVisible();
-    await click("Chiudi catalogo");
-    await expect(
-      page.getByLabel("Nome della voce", { exact: true }),
-    ).toHaveValue("Segnale delle memorie");
-    await click("Salva voce");
-    await click("Cerca in D&D");
+    await click("Close catalog");
+    await expect(page.getByLabel("Entry name", { exact: true })).toHaveValue(
+      "Segnale delle memorie",
+    );
+    await click("Save entry");
+    await click("Search D&D");
     for (const [category, query] of [
       ["classes", "Wizard"],
       ["equipment", "Longsword"],
       ["rules", "Ability Checks"],
     ]) {
       await page
-        .getByLabel("Categoria D&D", { exact: true })
+        .getByLabel("D&D category", { exact: true })
         .selectOption(category);
-      await fill("Nome nel catalogo", query);
-      await click("Cerca nell’API");
+      await fill("Catalog name", query);
+      await click("Search the API");
       await page
-        .getByRole("navigation", { name: "Risultati D&D", exact: true })
+        .getByRole("navigation", { name: "D&D results", exact: true })
         .getByRole("button", { name: query, exact: true })
         .click();
       await expect(
@@ -211,7 +211,7 @@ try {
       assert.equal(
         await page
           .getByRole("button", {
-            name: "Usa questi dati nel modulo",
+            name: "Use this data in the form",
             exact: true,
           })
           .count(),
@@ -222,7 +222,7 @@ try {
     await expect(
       page.getByRole("heading", { name: "Passive Checks", exact: true }),
     ).toBeVisible({ timeout: 15000 });
-    await click("Chiudi catalogo");
+    await click("Close catalog");
     const actual = await snapshot();
     assert.equal(actual.assets.length, 2);
     const imported = actual.assets.find(
@@ -251,9 +251,9 @@ try {
       ".tools/sheet-catalog-expectation.json",
       JSON.stringify(actual, null, 2),
     );
-    await click("Personaggio");
+    await click("Character");
     await expect(
-      page.getByRole("button", { name: "Modifica personaggio", exact: true }),
+      page.getByRole("button", { name: "Edit character", exact: true }),
     ).toBeVisible();
     await page.screenshot({
       path: ".tools/sheet-expanded.png",
@@ -270,10 +270,10 @@ try {
       fullPage: true,
     });
     await page.setViewportSize({ width: 1200, height: 800 });
-    await click("Backup e ripristino");
-    await click("Crea backup");
+    await click("Backup and restore");
+    await click("Create backup");
     await expect(
-      page.getByRole("region", { name: "Backup creato", exact: true }),
+      page.getByRole("region", { name: "Backup created", exact: true }),
     ).toBeVisible({ timeout: 20000 });
     await close();
     console.log(
@@ -285,13 +285,13 @@ try {
     );
     if (phase === "restore") {
       assert.equal((await invoke("list_campaigns")).length, 0);
-      await click("Backup e ripristino");
-      await click("Seleziona backup");
+      await click("Backup and restore");
+      await click("Select backup");
       await expect(page.getByRole("alertdialog")).toBeVisible();
-      await click("Sostituisci archivio");
+      await click("Replace archive");
       await expect(
         page.getByRole("region", {
-          name: "Ripristino completato",
+          name: "Restore completed",
           exact: true,
         }),
       ).toBeVisible({ timeout: 20000 });
@@ -304,14 +304,14 @@ try {
           route.abort("internetdisconnected"),
         );
       await click("Scheda e catalogo QA");
-      await click("Capacità");
-      await click("Cerca in D&D");
-      await fill("Nome nel catalogo", "Magic Missile");
-      await click("Cerca nell’API");
+      await click("Abilities");
+      await click("Search D&D");
+      await fill("Catalog name", "Magic Missile");
+      await click("Search the API");
       await page.getByRole("button", { name: /Magic Missile/ }).click();
       await expect(
         page.getByRole("button", {
-          name: "Usa questi dati nel modulo",
+          name: "Use this data in the form",
           exact: true,
         }),
       ).toBeVisible();
@@ -320,8 +320,8 @@ try {
         0,
         "Cached reads must not require network after restart",
       );
-      await click("Aggiorna voce online");
-      await expect(page.getByText(/Aggiornamento non riuscito/)).toBeVisible({
+      await click("Refresh online entry");
+      await expect(page.getByText(/Update failed/)).toBeVisible({
         timeout: 15000,
       });
       await page.screenshot({

@@ -3,7 +3,7 @@ import { Autosave } from "./autosave";
 
 afterEach(() => vi.useRealTimers());
 
-test("raggruppa le battute e salva soltanto il documento più recente", async () => {
+test("debounces typing and saves only the latest document", async () => {
   vi.useFakeTimers();
   const write = vi.fn().mockResolvedValue(1);
   const report = vi.fn();
@@ -17,7 +17,7 @@ test("raggruppa le battute e salva soltanto il documento più recente", async ()
   expect(saver.dirty).toBe(false);
 });
 
-test("serializza salvataggi concorrenti e scarica le modifiche arrivate durante la scrittura", async () => {
+test("serializes concurrent saves and flushes changes received during a write", async () => {
   let resolve!: (value: number) => void;
   const write = vi
     .fn()
@@ -44,29 +44,29 @@ test("serializza salvataggi concorrenti e scarica le modifiche arrivate durante 
   expect(saver.dirty).toBe(false);
 });
 
-test("un errore resta visibile e il tentativo successivo conserva gli appunti", async () => {
+test("an error stays visible and the next attempt preserves notes", async () => {
   const write = vi
     .fn()
-    .mockRejectedValueOnce(new Error("Disco pieno"))
+    .mockRejectedValueOnce(new Error("Disk full"))
     .mockResolvedValueOnce(1);
   const report = vi.fn();
   const saver = new Autosave(0, write, report);
-  saver.change("non perdere");
-  await expect(saver.flush()).rejects.toThrow("Disco pieno");
+  saver.change("do not lose");
+  await expect(saver.flush()).rejects.toThrow("Disk full");
   expect(saver.dirty).toBe(true);
   expect(report).toHaveBeenLastCalledWith({
     kind: "error",
-    message: "Disco pieno",
+    message: "Disk full",
   });
   await saver.flush();
   expect(write.mock.calls).toEqual([
-    ["non perdere", 0],
-    ["non perdere", 0],
+    ["do not lose", 0],
+    ["do not lose", 0],
   ]);
   expect(saver.dirty).toBe(false);
 });
 
-test("flush salva subito prima di cambiare nota, senza attendere il debounce", async () => {
+test("flush saves before switching notes without waiting for debounce", async () => {
   vi.useFakeTimers();
   const write = vi.fn().mockResolvedValue(3);
   const saver = new Autosave(2, write, vi.fn());

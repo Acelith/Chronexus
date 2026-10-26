@@ -5,14 +5,14 @@ const pages = [
   { id: "v", title: "Varek", aliases: ["Custode"] },
   { id: "n", title: "Nara", aliases: ["Custode"] },
 ] as KnowledgePage[];
-test("un alias ambiguo presenta entrambe le pagine senza crearne un'altra", () => {
+test("an ambiguous alias presents both pages without creating another", () => {
   expect(matchingPages(pages, " custode]]").map((page) => page.id)).toEqual([
     "v",
     "n",
   ]);
   expect(canCreatePage(pages, "Custode")).toBe(false);
 });
-test("la ricerca ignora maiuscole e parentesi finali e permette una bozza sconosciuta", () => {
+test("search ignores case and trailing brackets and allows an unknown draft", () => {
   expect(matchingPages(pages, "VAREK]]").map((page) => page.id)).toEqual(["v"]);
   expect(canCreatePage(pages, "VAREK]]")).toBe(false);
   expect(canCreatePage(pages, "Gilda]]")).toBe(true);

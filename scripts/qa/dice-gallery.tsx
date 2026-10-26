@@ -34,16 +34,16 @@ createRoot(document.getElementById("root")!).render(
   >
     <style>{`html,body,#root{height:auto;overflow:auto}.fixture-faces{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.fixture-faces figure{margin:0;text-align:center}.fixture-faces .die-face{width:100%;max-width:120px;margin:auto}.fixture-faces figcaption{margin-top:8px;font-size:18px}.fixture-faces .die-d100 .die-value{font-size:28px}`}</style>
     <header className="dice-heading">
-      <h1 style={{ fontSize: 32 }}>Verifica grafica dei dadi</h1>
+      <h1 style={{ fontSize: 32 }}>Dice visual check</h1>
       <p>
-        Fixture sintetica: valori fissi per verificare forme, 6/9 e d100. Non
-        sono tiri di campagna.
+        Synthetic fixture: fixed values to check shapes, 6/9 and d100. These are
+        not campaign rolls.
       </p>
     </header>
     <DiceScene roll={roll} animate={false} onDone={() => {}} />
     <section
       className="fixture-faces"
-      aria-label="Valori fissati per il controllo visivo"
+      aria-label="Fixed values for visual inspection"
     >
       {SIDES.map((sides, index) => (
         <figure key={sides}>

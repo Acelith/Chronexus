@@ -187,7 +187,7 @@ name change only. M4 backups are still readable.
   SQLite, `manifest.json`, SHA-256 of each payload and managed attachments. No
   copy of the open DB. ZIP/Deflate unencrypted; checksum for integrity, not signature.
 - Allowed paths: `data/nodex.sqlite3` and
-  `attachments/<UUID campagna>/<UUID file>[.<estensione minuscola>]`. No
+  `attachments/<campaign UUID>/<file UUID>[.<lowercase extension>]`. No
   ZIP directory, duplicate, symbolic link, or extra files. Limits: 9998 attachments,
   256 MiB/file, 512 MiB total/ZIP and 2 MiB manifest. Files never overwritten.
 - Restoration verifies checksum, exact schema of supported migrations,

@@ -36,7 +36,7 @@ beforeEach(() => {
   });
   vi.mocked(heraldApi.save).mockImplementation(async (s) => s);
 });
-test("l’offerta scelta dall’araldo scarica e verifica, ma non installa da sola", async () => {
+test("the herald offer downloads and verifies without automatic installation", async () => {
   const user = userEvent.setup();
   const used = vi.fn();
   render(
@@ -67,7 +67,7 @@ test("l’offerta scelta dall’araldo scarica e verifica, ma non installa da so
     sound: true,
   });
 });
-test("durante un’altra operazione l’offerta dell’araldo aspetta", async () => {
+test("the herald offer waits during another operation", async () => {
   const { rerender } = render(
     <UpdateSettings busy run={run} initialOffer={offer} />,
   );
@@ -78,7 +78,7 @@ test("durante un’altra operazione l’offerta dell’araldo aspetta", async ()
   rerender(<UpdateSettings busy={false} run={run} initialOffer={offer} />);
   expect(updatesApi.download).toHaveBeenCalledTimes(1);
 });
-test("legge solo impostazioni locali e controlla il server su richiesta", async () => {
+test("reads only local settings and checks the server on request", async () => {
   const user = userEvent.setup();
   render(<UpdateSettings busy={false} run={run} />);
   expect(await screen.findByText("0.4.0")).toBeInTheDocument();
@@ -92,7 +92,7 @@ test("legge solo impostazioni locali e controlla il server su richiesta", async 
     screen.queryByRole("button", { name: "Create backup and install" }),
   ).not.toBeInTheDocument();
 });
-test("permette installazione soltanto dopo download verificato e conserva errore backup", async () => {
+test("allows installation only after verified download and preserves backup errors", async () => {
   const user = userEvent.setup();
   render(<UpdateSettings busy={false} run={run} />);
   await user.click(
@@ -104,17 +104,17 @@ test("permette installazione soltanto dopo download verificato e conserva errore
   ).not.toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Download update" }));
   vi.mocked(updatesApi.install).mockRejectedValue(
-    Error("Backup non riuscito: disco pieno."),
+    Error("Backup failed: disk full."),
   );
   await user.click(
     await screen.findByRole("button", { name: "Create backup and install" }),
   );
-  expect(await screen.findByRole("alert")).toHaveTextContent("disco pieno");
+  expect(await screen.findByRole("alert")).toHaveTextContent("disk full");
   expect(
     screen.getByRole("button", { name: "Create backup and install" }),
   ).toBeInTheDocument();
 });
-test("firma Invalid impedisce di proporre installazione", async () => {
+test("an Invalid signature prevents offering installation", async () => {
   const user = userEvent.setup();
   vi.mocked(updatesApi.download).mockRejectedValue(Error("Firma Invalid"));
   render(<UpdateSettings busy={false} run={run} />);
@@ -130,7 +130,7 @@ test("firma Invalid impedisce di proporre installazione", async () => {
   ).not.toBeInTheDocument();
   expect(updatesApi.install).not.toHaveBeenCalled();
 });
-test("annulla un download e blocca le operazioni concorrenti", async () => {
+test("cancels a download and blocks concurrent operations", async () => {
   const user = userEvent.setup();
   let abort!: (error: Error) => void;
   vi.mocked(updatesApi.download).mockReturnValue(
@@ -155,7 +155,7 @@ test("annulla un download e blocca le operazioni concorrenti", async () => {
   expect(await screen.findByRole("alert")).toHaveTextContent("annullato");
   expect(updatesApi.cancel).toHaveBeenCalledOnce();
 });
-test("un nuovo canale deve essere salvato e invalida l’offerta precedente", async () => {
+test("a new channel must be saved and invalidates the previous offer", async () => {
   const user = userEvent.setup();
   render(<UpdateSettings busy={false} run={run} />);
   await user.click(

@@ -17,7 +17,7 @@ import { emptyCharacter } from "../features/player/api";
 import { spellFromCatalog } from "../features/player/catalog";
 import { editorDictionary } from "./editorLocale";
 afterEach(() => applyPreferences(defaultPreferences));
-describe("cataloghi locali", () => {
+describe("local catalogs", () => {
   it.each(locales.filter((l) => !["en", "tlh", "art-x-rihan"].includes(l.id)))(
     "$id: available translations preserve placeholders and report actual coverage",
     async ({ id }) => {
@@ -37,7 +37,7 @@ describe("cataloghi locali", () => {
       }
     },
   );
-  it("aggiorna etichette, funzioni e array senza tradurre token e dati salvati", async () => {
+  it("updates labels, functions and arrays without translating tokens or saved data", async () => {
     const labels = localizeLabels({
       name: "Name",
       sections: ["Character", "Inventory"],
@@ -71,7 +71,7 @@ describe("cataloghi locali", () => {
     expect(editorDictionary()).not.toEqual({});
   });
   it.each(["tlh", "art-x-rihan"] as const)(
-    "%s dichiara copertura parziale e ripiega in italiano",
+    "%s reports partial coverage and falls back to English",
     async (locale) => {
       await loadLocale(locale);
       applyPreferences({ ...defaultPreferences, locale });
@@ -84,7 +84,7 @@ describe("cataloghi locali", () => {
   );
 });
 
-it("localizza i plurali arabi e preserva URI e nomi del grafo", async () => {
+it("localizes Arabic plurals and preserves graph URIs and names", async () => {
   await loadLocale("ar");
   applyPreferences({ ...defaultPreferences, locale: "ar" });
   expect(resultCount(0)).toBe("لا نتائج");

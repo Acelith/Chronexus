@@ -145,10 +145,10 @@ a Logseq archive in a **blank and isolated debug profile**, via real Rust
 commands. They are not a general importer in the interface. Example:
 
 ```powershell
-py scripts/prepare-logseq.py C:/percorso/campagna.zip .tools/logseq-source
+py scripts/prepare-logseq.py C:/path/campaign.zip .tools/logseq-source
 # First run pnpm desktop with an absolute, empty NODEX_DEV_DATA_DIR,
 # WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9223
-node scripts/import-logseq.mjs .tools/logseq-source "Campagna di prova"
+node scripts/import-logseq.mjs .tools/logseq-source "Sample campaign"
 ```
 
 Only Markdown and raster images are read: configurations, Git, and graph scripts

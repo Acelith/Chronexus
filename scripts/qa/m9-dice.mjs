@@ -277,7 +277,7 @@ if (phase === "check") {
   // An interrupted scene must be available after returning to the dice view.
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page
-    .getByRole("spinbutton", { name: "Quantità d8", exact: true })
+    .getByRole("spinbutton", { name: "Quantity d8", exact: true })
     .fill("2");
   await page
     .getByRole("button", { name: "Roll the dice", exact: true })
@@ -490,7 +490,7 @@ if (phase === "check") {
     ),
   );
   console.log(
-    `PASS native ${phase}: storico e risultati invariati, ${report.count} tiri della campagna.`,
+    `PASS native ${phase}: history and results unchanged, ${report.count} campaign rolls.`,
   );
 }
 process.exit(0);

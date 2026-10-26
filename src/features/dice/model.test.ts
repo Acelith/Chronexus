@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { emptyQuantities, selections, sceneDice, mergeRolls } from "./model";
 import { SIDES, type Roll } from "./api";
-test("composizione mista valida e limiti espliciti", () => {
+test("valid mixed composition and explicit limits", () => {
   const q = emptyQuantities();
   q[6] = "3";
   q[20] = "2";
@@ -24,7 +24,7 @@ test("composizione mista valida e limiti espliciti", () => {
     2,
   );
 });
-test("scena limitata rappresenta tutti i tipi senza inventare o modificare risultati", () => {
+test("bounded scene represents every type without inventing or changing results", () => {
   const roll: Roll = {
     id: "a",
     campaignId: "c",
@@ -45,7 +45,7 @@ test("scena limitata rappresenta tutti i tipi senza inventare o modificare risul
   expect(new Set(shown.map((d) => d.key)).size).toBe(14);
   expect(JSON.stringify(roll)).toBe(original);
 });
-test("risposte storico tardive non cancellano il tiro appena salvato", () => {
+test("late history responses do not remove a newly saved roll", () => {
   const a: Roll = {
     id: "a",
     campaignId: "c",

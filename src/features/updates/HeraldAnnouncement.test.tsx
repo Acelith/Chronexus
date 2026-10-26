@@ -25,7 +25,7 @@ const announcement = {
   offer: {
     id: "o1",
     version: "0.5.0",
-    notes: "Novità <script>alert(1)</script>",
+    notes: "Updates <script>alert(1)</script>",
   },
   sound: true,
 };
@@ -44,7 +44,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });
-test("annuncio leggibile e accessibile; le azioni non installano nulla", async () => {
+test("announcement is readable and accessible and its actions do not install anything", async () => {
   const user = userEvent.setup();
   const props = {
     onUpdate: vi.fn(),
@@ -89,7 +89,7 @@ test("annuncio leggibile e accessibile; le azioni non installano nulla", async (
   expect(opener).toHaveFocus();
   opener.remove();
 });
-test("movimento ridotto: nessuna animazione da saltare", () => {
+test("reduced motion has no animation to skip", () => {
   motion(true);
   render(
     <HeraldAnnouncement
@@ -104,7 +104,7 @@ test("movimento ridotto: nessuna animazione da saltare", () => {
   expect(screen.queryByRole("button", { name: "Skip animation" })).toBeNull();
   expect(screen.queryByText(/audio automatico/)).toBeNull();
 });
-test("un solo controllo all’avvio; l’annuncio aspetta un’app inattiva", async () => {
+test("checks once on startup and waits until the app is idle before announcing", async () => {
   vi.useFakeTimers();
   vi.mocked(heraldApi.startupCheck).mockResolvedValue(announcement);
   vi.mocked(heraldApi.blocked).mockResolvedValue(false);
@@ -141,7 +141,7 @@ test("un solo controllo all’avvio; l’annuncio aspetta un’app inattiva", as
   expect(result.current.announcement).toBeNull();
   expect(heraldApi.startupCheck).toHaveBeenCalledTimes(1);
 });
-test("nessun annuncio se il controllo non trova novità o fallisce", async () => {
+test("does not announce when checking finds no update or fails", async () => {
   vi.useFakeTimers();
   vi.mocked(heraldApi.startupCheck).mockRejectedValue(Error("offline"));
   const { result } = renderHook(() => useStartupHerald(() => true));

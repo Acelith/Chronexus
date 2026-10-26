@@ -219,7 +219,7 @@ await writeFile(
   JSON.stringify({ phase, checks: "PASS", pageErrors }, null, 2),
 );
 console.log(
-  `PASS ${phase}: editor, UUID, ID fonte, formati visuali, SQLite${phase === "check" ? ", finestre, scroll, blocco navigazione e impostazioni" : " dopo riavvio"}.`,
+  `PASS ${phase}: editor, UUID, source IDs, visual formats, SQLite${phase === "check" ? ", windows, scrolling, navigation guard and settings" : " after restart"}.`,
 );
 // Disconnect without closing the native application (consistent with the AI harness).
 process.exit(0);

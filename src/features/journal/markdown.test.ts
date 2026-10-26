@@ -14,7 +14,7 @@ const original = {
   content: [{ type: "pageMention", props: { pageId: id, label: "Varek" } }],
   children: [],
 };
-test("Markdown conserva UUID e ID di blocco anche quando il titolo della pagina cambia", () => {
+test("Markdown preserves UUIDs and block IDs when the page title changes", () => {
   const exported = markdownBlocks([original]);
   expect(JSON.stringify(exported)).toContain(
     `https://chronexus.invalid/page/${id}`,
@@ -24,7 +24,7 @@ test("Markdown conserva UUID e ID di blocco anche quando il titolo della pagina 
   expect(restoreMarkdownBlocks(parsed, [original])).toEqual([original]);
   expect(original.content[0].type).toBe("pageMention");
 });
-test("blocchi duplicati non duplicano gli ID della fonte", () => {
+test("duplicated blocks do not duplicate source IDs", () => {
   const parsed = [
     { ...original, id: "new-1" },
     { ...original, id: "new-2" },
@@ -38,11 +38,10 @@ test.each([
   "<script>alert(1)</script>",
   "![mappa](https://example.org/a.png)",
   "#### Titolo",
-])(
-  "sintassi non supportata rifiutata senza conversioni silenziose: %s",
-  (source) => expect(() => validateMarkdown(source)).toThrow(),
+])("unsupported syntax is rejected without silent conversion: %s", (source) =>
+  expect(() => validateMarkdown(source)).toThrow(),
 );
-test("Markdown supportato e link campagna sono accettati", () =>
+test("supported Markdown and campaign links are accepted", () =>
   expect(() =>
     validateMarkdown(
       `# Diario\n\n- [x] **Indizio**\n\n> Fonte\n\n[Varek](chronexus://page/${id})`,
@@ -51,8 +50,8 @@ test("Markdown supportato e link campagna sono accettati", () =>
 test.each([
   "javascript:alert(1)",
   "file:///segreto",
-  "chronexus://page/non-valido",
-])("rifiuta link pericolosi o UUID non validi: %s", (href) =>
+  "chronexus://page/invalid",
+])("rejects unsafe links or invalid UUIDs: %s", (href) =>
   expect(() =>
     restoreMarkdownBlocks(
       [
@@ -67,16 +66,16 @@ test.each([
   ).toThrow(),
 );
 
-test("conversione URL interna reversibile attraverso il parser che filtra gli schemi custom", () => {
+test("internal URL conversion survives the parser that filters custom schemes", () => {
   const source = `[Varek](chronexus://page/${id})`;
   const parsed = markdownForParser(source);
   expect(parsed).toContain("https://chronexus.invalid/page/");
   expect(markdownForSource(parsed)).toBe(source);
   expect(() => validateMarkdown("[x](javascript:alert(1))")).toThrow();
-  expect(() => validateMarkdown("[x](chronexus://page/non-valido)")).toThrow();
+  expect(() => validateMarkdown("[x](chronexus://page/invalid)")).toThrow();
 });
 
-test("conserva sottolineatura, colore e allineamento dei blocchi non modificati nel sorgente", () => {
+test("preserves underline, color and alignment of blocks unchanged in source", () => {
   const previous = {
     id: "prova",
     type: "paragraph",

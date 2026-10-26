@@ -11,20 +11,20 @@ vi.mock("./DndCatalog", () => ({
     onImport: (d: AbilityDetails) => void;
     onClose: () => void;
   }) => (
-    <section aria-label="Catalogo di prova">
+    <section aria-label="Test catalog">
       <button
         onClick={() =>
           onImport({
             ...(emptyAsset("spell", "dnd5e-2014").details as AbilityDetails),
             name: "Base SRD",
-            description: "Testo di prova",
+            description: "Test text",
             catalogSource: { path: "spells/test-spell", name: "Base SRD" },
           })
         }
       >
-        Importa template prova
+        Import test template
       </button>
-      <button onClick={onClose}>Chiudi ricerca prova</button>
+      <button onClick={onClose}>Close test lookup</button>
     </section>
   ),
 }));
@@ -63,10 +63,10 @@ test("explicit template use preserves notes, flags and campaign links; draft rem
   await user.click(
     screen.getByRole("button", { name: "Search this name in D&D" }),
   );
-  await screen.findByRole("button", { name: "Importa template prova" });
+  await screen.findByRole("button", { name: "Import test template" });
   expect(screen.getByRole("button", { name: "Save entry" })).toBeDisabled();
   await user.click(
-    screen.getByRole("button", { name: "Importa template prova" }),
+    screen.getByRole("button", { name: "Import test template" }),
   );
   expect(onSave).not.toHaveBeenCalled();
   expect(screen.getByLabelText("Entry name")).toHaveValue("Base SRD");
@@ -107,7 +107,7 @@ test("closing lookup leaves the personal draft intact", async () => {
     screen.getByRole("button", { name: "Search this name in D&D" }),
   );
   await user.click(
-    await screen.findByRole("button", { name: "Chiudi ricerca prova" }),
+    await screen.findByRole("button", { name: "Close test lookup" }),
   );
   expect(screen.getByLabelText("Entry name")).toHaveValue("Mio incantesimo");
   expect(screen.getByRole("button", { name: "Save entry" })).toBeEnabled();

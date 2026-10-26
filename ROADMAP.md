@@ -46,7 +46,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 17 | M8a | Repair after C → D move | 24/10/2026 | `313e056` | Delivered |
 | 18 | M8b | Reference GUI, settings menu, scroll and graph | 24/10/2026 | `d5b07a1 → f8d6b68` | Windows |
 | 19 | M8c | Visual editor and Markdown source | 24/10/2026 | `64d65c6` | Windows |
-| 20 | M9 | Tiradadi and history | 24/10/2026 | `3b0e2ac → 6ef5222` | Windows |
+| 20 | M9 | Dice roller and history | 24/10/2026 | `3b0e2ac → 6ef5222` | Windows |
 | 21 | M10 | Alternative languages and scripts | 24/10/2026 | `79376ee → 3eaf56a` | Windows; open revision |
 | 22 | M12 | Animated dragons on the edges | 24/10/2026 | `45c0268` | Windows |
 | 23 | M13 | Espruar and Dethek | 24/10/2026 | `26d1c83` | Windows |
@@ -429,7 +429,7 @@ paths: verify the checkout directory at every new execution.
 
 ## M8c — Visual editor and Markdown code (retrospective)
 
-**Status:** operational on Windows, after GUI/scroll and before the M9 tiradadi.
+**Status:** operational on Windows, after GUI/scroll and before the M9 dice roller.
 **Git Evidence:** `64d65c6`. Tests in the editor checkpoint of docs/STATUS.md.
 
 - Usable editor with the mouse as requested: command bar, titles, formatting,
@@ -441,7 +441,7 @@ paths: verify the checkout directory at every new execution.
 - Preserve the insertion of Codex links and sources. Do not claim all
   Microsoft Word functionalities nor an unlimited round trip of any Markdown.
 
-## M9 - Internal Tiradadi and circle of dragons
+## M9 - Internal Dice roller and circle of dragons
 
 **Updated status:** Operational on Windows: mixed dice/d100, persistent history and animation. M12 subsequently adds extreme effects.
 
@@ -454,7 +454,7 @@ macOS/Linux and distribution remain, without declaring them executed.
 
 ### M9.1 - Composition and roll result
 
-- Tiradadi fully usable offline, with d4, d6, d8, d10, d12, d20
+- Dice roller fully usable offline, with d4, d6, d8, d10, d12, d20
   and d100. The d100 produces values from 1 to 100, without ambiguity on zero.
 - Separately select the quantity of each die type in the same
   roll: for example 3d6 or 2d20 + 3d6 + 1d100. Show the composition
@@ -1464,6 +1464,11 @@ counts in docs/STATUS.md. Schema 018 and legacy app/storage identifiers unchange
 Source version 0.8.1 is not a published release; installer/upgrade and other OS
 checks remain pending. Next planned milestone remains M23, then M24/M25.
 
+26 October follow-up: English source comments, test descriptions, diagnostics,
+export/import wrappers and tooling completed. macOS build/check evidence and the
+two reproduced baseline Rust test failures are in docs/STATUS.md; this does not
+close platform acceptance or publish a release.
+
 ## Residual acceptances and next phase
 
 - **M6:** runner/macOS/Linux packages and distribution tests not demonstrated
@@ -1486,7 +1491,7 @@ from 17,7 GB via the interface, macOS/Linux.
 
   a real update with backup in Documents. M18 is implemented on Windows; other GPU/OS and physical tests
   pending offline. Implement only upon request; the residues above remain open.
-- **Pianificate (25/10/2026):** M23 audit (next), then M24 shared campaign,
+- **Planned (25 October 2026):** M23 audit (next), then M24 shared campaign,
   then M25 Android. None are implemented; each requires an explicit request.
 
 ## Outside the current scope

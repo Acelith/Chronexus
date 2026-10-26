@@ -92,13 +92,13 @@ async function tab(name) {
 async function saved() {
   await expect(
     page.locator(".player-workspace").getByRole("status").first(),
-  ).toHaveText("Salvato sul computer.");
+  ).toHaveText("Saved on the computer.");
 }
 const detail = () =>
   page.getByRole("article", { name: "Dettaglio voce", exact: true });
 async function selectItem(name) {
   await page
-    .getByRole("navigation", { name: "Voci del personaggio" })
+    .getByRole("navigation", { name: "Character entries" })
     .getByRole("button", { name: new RegExp(name) })
     .click();
 }
@@ -108,7 +108,7 @@ async function close() {
   });
 }
 async function assertCharacter(data) {
-  await tab("Personaggio");
+  await tab("Character");
   await expect(
     page.getByRole("heading", { name: "Neme", exact: true }),
   ).toBeVisible();
@@ -121,7 +121,7 @@ async function assertCharacter(data) {
   );
 }
 async function assertContextNavigation() {
-  await tab("Inventario");
+  await tab("Inventory");
   await selectItem("Chiave del portone");
   await detail()
     .getByRole("button", { name: "PNG: Varek", exact: true })
@@ -129,12 +129,12 @@ async function assertContextNavigation() {
   await expect(
     page.getByRole("heading", { name: "Varek", exact: true }),
   ).toBeVisible();
-  await tab("Torna alla voce del personaggio");
+  await tab("Back to the character entry");
   await expect(
     detail().getByRole("heading", { name: "Chiave del portone", exact: true }),
   ).toBeVisible();
   await detail()
-    .getByRole("button", { name: "Apri sessione fonte al blocco", exact: true })
+    .getByRole("button", { name: "Open source session at block", exact: true })
     .click();
   await expect(page.locator('[data-id="m5-key-source"]').first()).toBeVisible();
   const focused = await page.evaluate(() =>
@@ -144,7 +144,7 @@ async function assertContextNavigation() {
       ?.getAttribute("data-id"),
   );
   assert.equal(focused, "m5-key-source");
-  await tab("Torna alla voce del personaggio");
+  await tab("Back to the character entry");
   await expect(
     detail().getByRole("heading", { name: "Chiave del portone", exact: true }),
   ).toBeVisible();
@@ -212,36 +212,36 @@ if (phase === "prepare") {
     document,
   });
   await page.reload();
-  await tab("Personaggio");
-  await tab("Crea personaggio");
-  await fill("Nome del personaggio", "Neme");
-  await fill("Regolamento", "Manuale della compagnia");
-  await fill("Origine o specie", "Viandante");
-  await fill("Classe o vocazione", "Esploratrice");
-  await fill("Livello (facoltativo)", 2);
-  await fill("PF massimi", 10);
-  await fill("PF attuali", 8);
-  await fill("PF temporanei", 2);
-  await tab("Aggiungi statistica");
-  await fill("Statistica 1: nome", "Difesa");
+  await tab("Character");
+  await tab("Create character");
+  await fill("Character name", "Neme");
+  await fill("Rules system", "Manuale della compagnia");
+  await fill("Origin or species", "Viandante");
+  await fill("Class or calling", "Esploratrice");
+  await fill("Level (optional)", 2);
+  await fill("Maximum HP", 10);
+  await fill("Current HP", 8);
+  await fill("Temporary HP", 2);
+  await tab("Add statistic");
+  await fill("Statistic 1: name", "Defense");
   await page
     .getByLabel("Statistica 1: categoria", { exact: true })
     .selectOption("defense");
   await fill("Statistica 1: valore", "12 manuale");
-  await tab("Aggiungi risorsa");
-  await fill("Risorsa 1: nome", "Focus");
+  await tab("Add resource");
+  await fill("Resource 1: name", "Focus");
   await fill("Risorsa 1: massimo", 3);
   await fill("Risorsa 1: attuale", 2);
-  await tab("Aggiungi risorsa");
-  await fill("Risorsa 2: nome", "Primo cerchio");
+  await tab("Add resource");
+  await fill("Resource 2: name", "Primo cerchio");
   await page
     .getByLabel("Risorsa 2: tipo", { exact: true })
     .selectOption("slot");
   await fill("Risorsa 2: massimo", 2);
   await fill("Risorsa 2: attuale", 1);
-  await fill("Condizioni", "Stanca, secondo il mio regolamento.");
-  await fill("Note del personaggio", "Appunti personali della scheda.");
-  await tab("Salva personaggio");
+  await fill("Conditions", "Stanca, secondo il mio regolamento.");
+  await fill("Character notes", "Appunti personali della scheda.");
+  await tab("Save character");
   await saved();
   await tab("Riduci Punti vita");
   await expect(page.getByLabel("Punti vita", { exact: true })).toHaveText(
@@ -251,66 +251,63 @@ if (phase === "prepare") {
   await expect(page.getByLabel("Focus", { exact: true })).toHaveText("1 / 3");
   await tab("Aumenta Focus");
   await expect(page.getByLabel("Focus", { exact: true })).toHaveText("2 / 3");
-  await tab("Riduci Primo cerchio");
+  await tab("Decrease Primo cerchio");
   await expect(page.getByLabel("Primo cerchio", { exact: true })).toHaveText(
     "0 / 2",
   );
   await expect(
-    page.getByRole("button", { name: "Riduci Primo cerchio", exact: true }),
+    page.getByRole("button", { name: "Decrease Primo cerchio", exact: true }),
   ).toBeDisabled();
   const characterBeforeAbilities = await invoke("get_character", {
     campaignId: campaign.id,
   });
   await page.screenshot({ path: ".tools/m5-character.png", fullPage: true });
   console.log(
-    "PASS scheda, statistiche, PF, risorse e slot con salvataggio reale",
+    "PASS sheet, statistics, HP, resources and slots with real persistence",
   );
-  await tab("Inventario");
-  await tab("Aggiungi oggetto");
-  await fill("Nome della voce", "Chiave del portone");
-  await fill("Quantità", 2);
-  await fill("Categoria oggetto", "Chiavi");
-  await fill("Peso (unità personale, facoltativo)", 0.2);
-  await fill("Valore o valuta (testo libero)", "Due monete annotate");
-  await fill("Descrizione", "Una chiave consegnata da Varek.");
+  await tab("Inventory");
+  await tab("Add item");
+  await fill("Entry name", "Chiave del portone");
+  await fill("Quantity", 2);
+  await fill("Item category", "Chiavi");
+  await fill("Weight (your own unit, optional)", 0.2);
+  await fill("Value or currency (free text)", "Due monete annotate");
+  await fill("Description", "Una chiave consegnata da Varek.");
   for (const [label, value] of [
-    ["PNG collegato", npc.id],
-    ["Luogo collegato", place.id],
-    ["Missione collegata", quest.id],
-    ["Pagina della voce nel Codex", itemPage.id],
-    ["Sessione fonte", session.id],
+    ["Linked NPC", npc.id],
+    ["Linked place", place.id],
+    ["Linked quest", quest.id],
+    ["Codex page of the entry", itemPage.id],
+    ["Source session", session.id],
     ["Blocco fonte", "m5-key-source"],
   ])
     await page.getByLabel(label, { exact: true }).selectOption(value);
-  await fill(
-    "Note di provenienza",
-    "Ricevuta nella Sessione 12, non acquistata.",
-  );
-  await tab("Personaggio");
-  await expect(page.getByRole("alert")).toContainText("Salva o annulla");
-  await expect(page.getByLabel("Nome della voce", { exact: true })).toHaveValue(
+  await fill("Provenance notes", "Ricevuta nella Sessione 12, non acquistata.");
+  await tab("Character");
+  await expect(page.getByRole("alert")).toContainText("Save or cancel");
+  await expect(page.getByLabel("Entry name", { exact: true })).toHaveValue(
     "Chiave del portone",
   );
-  await tab("Chiudi messaggio");
-  await tab("Salva voce");
+  await tab("Close message");
+  await tab("Save entry");
   await saved();
-  await tab("Aumenta Quantità");
-  await expect(detail().getByLabel("Quantità", { exact: true })).toHaveText(
+  await tab("Increase Quantity");
+  await expect(detail().getByLabel("Quantity", { exact: true })).toHaveText(
     "3",
   );
-  await tab("Riduci Quantità");
-  await expect(detail().getByLabel("Quantità", { exact: true })).toHaveText(
+  await tab("Decrease Quantity");
+  await expect(detail().getByLabel("Quantity", { exact: true })).toHaveText(
     "2",
   );
-  await tab("Equipaggia");
+  await tab("Equip");
   await saved();
-  await expect(detail()).toContainText("Equipaggiato");
-  await tab("Aggiungi oggetto");
-  await fill("Nome della voce", "Astuccio di prova");
-  await fill("Quantità", 0);
-  await tab("Salva voce");
+  await expect(detail()).toContainText("Equipped");
+  await tab("Add item");
+  await fill("Entry name", "Astuccio di prova");
+  await fill("Quantity", 0);
+  await tab("Save entry");
   await saved();
-  await expect(detail().getByLabel("Quantità", { exact: true })).toHaveText(
+  await expect(detail().getByLabel("Quantity", { exact: true })).toHaveText(
     "0",
   );
   await assertContextNavigation(); // Return must keep the key selected, not the first item.
@@ -323,63 +320,63 @@ if (phase === "prepare") {
   await expect(
     page.getByRole("heading", { name: "Chiave del portone", exact: true }),
   ).toBeVisible();
-  await tab("Torna alla voce del personaggio");
+  await tab("Back to the character entry");
   await selectItem("Astuccio di prova");
-  await tab("Elimina voce");
+  await tab("Delete entry");
   await expect(page.getByRole("alertdialog")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("alertdialog")).toHaveCount(0);
-  await tab("Elimina voce");
-  await tab("Conferma eliminazione");
+  await tab("Delete entry");
+  await tab("Confirm deletion");
   await expect(page.getByRole("alertdialog")).toHaveCount(0);
   await expect(
     detail().getByRole("heading", { name: "Chiave del portone", exact: true }),
   ).toBeVisible();
   await page.screenshot({ path: ".tools/m5-inventory.png", fullPage: true });
   console.log(
-    "PASS inventario, quantità zero, equipaggiamento, conferma eliminazione e navigazione di provenienza con ritorno",
+    "PASS inventory, zero quantity, equipment, deletion confirmation and source navigation with return",
   );
-  await tab("Capacità");
-  await tab("Aggiungi incantesimo");
-  await fill("Nome della voce", "Luce tenue");
-  await fill("Livello o rango (testo libero)", "Primo cerchio");
-  await fill("Scuola o tradizione", "Luce");
-  await fill("Tempo di attivazione", "Un gesto");
-  await fill("Durata", "Un breve momento");
-  await fill("Portata", "Vicino");
-  await fill("Componenti", "Voce");
-  await fill("Descrizione", "Un testo originale, senza regole commerciali.");
-  await page.getByLabel("Conosciuta", { exact: true }).check();
-  await page.getByLabel("Preparata", { exact: true }).check();
+  await tab("Abilities");
+  await tab("Add spell");
+  await fill("Entry name", "Luce tenue");
+  await fill("Level or rank (free text)", "Primo cerchio");
+  await fill("School or tradition", "Luce");
+  await fill("Activation time", "Un gesto");
+  await fill("Duration", "Un breve momento");
+  await fill("Range", "Vicino");
+  await fill("Components", "Voce");
+  await fill("Description", "Un testo originale, senza regole commerciali.");
+  await page.getByLabel("Known", { exact: true }).check();
+  await page.getByLabel("Prepared", { exact: true }).check();
   await page
-    .getByLabel("Pagina della voce nel Codex", { exact: true })
+    .getByLabel("Codex page of the entry", { exact: true })
     .selectOption(spellPage.id);
-  await tab("Salva voce");
+  await tab("Save entry");
   await saved();
   await page
-    .getByLabel("Stato o tipo", { exact: true })
+    .getByLabel("Status or type", { exact: true })
     .selectOption("prepared");
   await expect(detail()).toContainText("Conosciuta · Preparata");
-  await tab("Cambia preparata");
+  await tab("Toggle prepared");
   await expect(
-    page.getByText("Nessuna voce corrisponde ai filtri.", { exact: true }),
+    page.getByText("No entries match the filters.", { exact: true }),
   ).toBeVisible();
-  await page.getByLabel("Stato o tipo", { exact: true }).selectOption("all");
-  await tab("Aggiungi capacità");
-  await fill("Nome della voce", "Passo cauto");
-  await fill("Livello o rango (testo libero)", "Talento personale");
-  await page.getByLabel("Preparata", { exact: true }).check();
-  await tab("Salva voce");
+  await page.getByLabel("Status or type", { exact: true }).selectOption("all");
+  await tab("Add ability");
+  await fill("Entry name", "Passo cauto");
+  await fill("Level or rank (free text)", "Talento personale");
+  await page.getByLabel("Prepared", { exact: true }).check();
+  await tab("Save entry");
   await saved();
-  await fill("Cerca per nome", "Passo");
-  await fill("Filtra per rango", "Talento");
+  await fill("Search by name", "Passo");
+  await fill("Filter by level", "Talento");
   await expect(detail()).toContainText(
     "Non segnata come conosciuta · Preparata",
   );
   assert.deepEqual(
     await invoke("get_character", { campaignId: campaign.id }),
     characterBeforeAbilities,
-    "Le capacità non devono consumare risorse automaticamente",
+    "Abilities must not consume resources automatically",
   );
   const data = await capture();
   assert.equal(
@@ -405,18 +402,18 @@ if (phase === "prepare") {
     }),
   );
   await page.screenshot({ path: ".tools/m5-abilities.png", fullPage: true });
-  await tab("Backup e ripristino");
-  await tab("Crea backup");
+  await tab("Backup and restore");
+  await tab("Create backup");
   const receipt = page.getByRole("region", {
-    name: "Backup creato",
+    name: "Backup created",
     exact: true,
   });
   await expect(receipt).toBeVisible();
-  await expect(receipt.getByText("Personaggi", { exact: true })).toBeVisible();
+  await expect(receipt.getByText("Characters", { exact: true })).toBeVisible();
   assert((await readFile(bundleFile)).length > 0);
   await close();
   console.log(
-    "PASS capacità, filtri, nessuna regola automatica, backup M5 con immagine",
+    "PASS abilities, filters, no automatic rules, M5 backup with image",
   );
 } else {
   const expected = JSON.parse(await readFile(expectationFile, "utf8"));
@@ -426,19 +423,19 @@ if (phase === "prepare") {
       [],
       "Richiesto profilo .tools/m5-restored vuoto",
     );
-    await tab("Backup e ripristino");
-    await tab("Seleziona backup");
+    await tab("Backup and restore");
+    await tab("Select backup");
     await expect(page.getByRole("alertdialog")).toBeVisible();
     await expect(
-      page.getByRole("alertdialog").getByText("Personaggi", { exact: true }),
+      page.getByRole("alertdialog").getByText("Characters", { exact: true }),
     ).toBeVisible();
-    await tab("Sostituisci archivio");
+    await tab("Replace archive");
     await expect(
-      page.getByRole("region", { name: "Ripristino completato", exact: true }),
+      page.getByRole("region", { name: "Restore completed", exact: true }),
     ).toBeVisible();
     assert.deepEqual(await capture(), expected.data);
     await close();
-    console.log("PASS ripristino M5 su profilo vuoto con copia preventiva");
+    console.log("PASS M5 restore into an empty profile with safety copy");
   } else {
     assert.deepEqual(await capture(), expected.data);
     await assertCharacter(expected.data);
@@ -463,7 +460,7 @@ if (phase === "prepare") {
     await page.screenshot({ path: `.tools/m5-${phase}.png`, fullPage: true });
     await close();
     console.log(
-      `PASS ${phase}: scheda/asset/documenti/grafo identici, immagine integra, fonti e ritorno alla voce operativi`,
+      `PASS ${phase}: sheet/assets/documents/graph identical, image intact, sources and return navigation working`,
     );
   }
 }
