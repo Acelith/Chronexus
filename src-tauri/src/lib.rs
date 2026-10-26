@@ -31,6 +31,8 @@ mod knowledge_tests;
 mod party;
 #[cfg(test)]
 mod party_tests;
+#[cfg(test)]
+mod perf_tests;
 mod player;
 #[cfg(test)]
 mod player_tests;
