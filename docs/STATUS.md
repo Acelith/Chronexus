@@ -1,3 +1,25 @@
+# Chronexus status — 26 October 2026: reliability fixes and M28
+
+- **Reliability fixes** (app and server, each with a regression test that fails on
+  the old code): backups up to 32 GiB with a free-space check (a valid 279 MB
+  archive used to block backups and updates); server restore prepares and verifies
+  a staging copy before replacing the database; notification streams release slots
+  of stalled clients and no longer reveal private activity; the release publisher
+  is single-writer, requires the production-key signature test and reports
+  draft/public state; Codex metadata drafts are guarded; stale campaign refresh,
+  stuck graph loading, herald over typing and shortcuts behind native dialogs fixed.
+  The audit reports were then removed from the repository at the user's request.
+- **M28 implemented on Windows:** `i18n:check` exits 0 (1306 UI messages, all nine
+  catalogs complete, ten installer languages). About 450 misaligned older
+  translations corrected; German now uses "du" throughout. Translations are
+  AI-prepared: native review of each language is still open.
+- README presents the optional self-hosted Chronexus Server.
+- Checks: vitest 193 passed; tsc and eslint passed; cargo test 171 passed (app),
+  75 passed (server); release tools 32 passed; i18n tools 7 passed. A local
+  unsigned NSIS build compiled with ten languages; Arabic, Japanese and German views
+  checked in the debug app. Nothing published; version unchanged (0.9.2).
+- Next by priority: **M29** — signed release matrix for Windows, macOS and Linux.
+
 # Chronexus status — 26 October 2026: open milestones reprioritized
 
 - Planning only, no code change: ROADMAP gains M28–M40 and a priority table for

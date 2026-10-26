@@ -188,6 +188,11 @@ textarea {
   box-shadow: none;
   border: 1px solid transparent;
   color: #dfcfaf;
+  /* Long compound words (German "Kampagneneinstellungen") wrap instead of
+     overflowing; "anywhere" also lowers the label's minimum width in the flex row. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 .sidebar-menu > button:hover:not(:disabled),
 .sidebar-menu > button[aria-current="page"] {

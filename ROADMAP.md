@@ -67,6 +67,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 37 | M25 | Chronexus Server (separate repository `acelith/Chronexus-Server`) | In progress: server S1–S7 in source 0.1.0 | see server repo | S8 integration, release and deployment open; contract docs/SYNC_API.md |
 | 38 | M26 | English-first app, manifests, documentation and AI instructions | Implemented Windows, source 0.8.1 | — | **Closed** 26/10/2026; ships with the next authorized build/release |
 | 39 | M27 | Android App (APK) connected to the server with the same account | Planned | — | Moved from M25 on 26/10/2026; depends on M25 |
+| 40 | M28 | Complete translations and multilingual installer | Implemented 26/10/2026 | see docs/STATUS.md | Windows; native review open |
 
 Planned milestones M28–M40 are not in this log until they are delivered; their
 priority order is in [Open milestones in priority order](#open-milestones-in-priority-order).
@@ -1500,7 +1501,7 @@ request before implementation, and publication follows the standing release rule
 
 | Priority | Milestone | Why now | Depends on |
 | --- | --- | --- | --- |
-| 1 | M28 — Complete translations and multilingual installer | Blocks the next signed build (localization gate fails) | — |
+| 1 | M28 — Complete translations and multilingual installer | **Implemented** 26/10/2026; native review per language open | — |
 | 2 | M29 — Signed release matrix for Windows, macOS and Linux | Only Windows x64 is published; unsigned packages scare new users | M28 |
 | 3 | M30 — Automated desktop QA and cross-platform CI | Old smoke scripts are stale; releases on six targets need repeatable checks | — |
 | 4 | M25 — Chronexus Server (in progress) | The sharing client already ships in 0.9.x without a server | M24 |
@@ -1516,9 +1517,22 @@ request before implementation, and publication follows the standing release rule
 | 14 | M40 — Additional ruleset sheet presets | Reaches players beyond D&D 5e | License review |
 | 15 | M27 — Android app (APK) | Largest scope; needs the server and stable releases | M25, M29 |
 
-## M28 — Complete translations and multilingual installer (planned, priority 1)
+## M28 — Complete translations and multilingual installer (implemented on Windows, priority 1)
 
 **Goal:** pass the strict localization gate so a signed build can ship again.
+
+**Status (26 October 2026):** implemented. `i18n:check` exits 0 for the first time:
+1306 explicit UI messages, none missing in any of the nine catalogs, no parameter
+mismatch, all ten installer languages. Done: the 267 missing messages per catalog
+(plus three labels from the dynamic-label fix), about 450 older entries that carried
+another message's translation, German switched consistently to the informal form,
+whole-phrase labels in the item/spell/ability form and the editor suggestions, long
+words wrapping in the sidebar. A local unsigned NSIS build compiled the ten
+languages (English first as fallback). In the debug app, Arabic (RTL), Japanese and
+German showed no page overflow across seven views.
+Still open: native-speaker review of every non-Italian catalog (none had one; older
+entries of similar length may still be wrong), the installer seen on Windows set to
+German or Arabic (only compiled here), and the other languages' screenshots.
 
 - Translate the UI messages still missing in the eight non-Italian catalogs
   (267 each on 26 October 2026), with the same

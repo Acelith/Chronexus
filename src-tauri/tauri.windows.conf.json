@@ -8,7 +8,18 @@
         "installerIcon": "icons/icon.ico",
         "uninstallerIcon": "icons/icon.ico",
         "uninstallerHeaderImage": "../assets/brand/installer/header.bmp",
-        "languages": ["Italian"],
+        "languages": [
+          "English",
+          "Italian",
+          "German",
+          "French",
+          "Spanish",
+          "PortugueseBR",
+          "Japanese",
+          "Korean",
+          "SimpChinese",
+          "Arabic"
+        ],
         "displayLanguageSelector": false,
         "installMode": "currentUser"
       }
