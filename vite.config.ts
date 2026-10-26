@@ -7,7 +7,12 @@ export default defineConfig({
     port: 1420,
     strictPort: true,
     watch: {
-      ignored: ["**/.tools/**", "**/installers/**", "**/src-tauri/target/**"],
+      ignored: [
+        "**/.tools/**",
+        "**/.claude/**",
+        "**/installers/**",
+        "**/src-tauri/target/**",
+      ],
     },
   },
   clearScreen: false,
@@ -17,6 +22,8 @@ export default defineConfig({
     exclude: [
       ...configDefaults.exclude,
       "**/.tools/**",
+      // Agent worktrees are full checkouts: never run their tests here.
+      "**/.claude/**",
       "**/installers/**",
       "**/src-tauri/target/**",
     ],
