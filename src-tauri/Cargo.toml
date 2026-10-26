@@ -31,7 +31,10 @@ reqwest = { version = "0.13.5", default-features = false, features = ["json", "s
 tokio = { version = "1", features = ["macros", "sync", "time", "fs"] }
 
 tokio-util = { version = "0.7", features = ["io", "rt"] }
-tauri-plugin-updater = "~2.14.0"
+# The `zip` feature only handles legacy Tauri v1 compressed bundles (.msi.zip,
+# .exe.zip, .AppImage.tar.gz), which Chronexus never publishes, and pulls a zip 4.x
+# with RUSTSEC-2026-0367/0368/0369. macOS .app.tar.gz updates do not need it.
+tauri-plugin-updater = { version = "~2.14.0", default-features = false, features = ["rustls-tls", "system-proxy"] }
 # Free-space check before the explicit M22 runtime/model setup.
 fs4 = "1.1"
 # Inert HTML5 parsing of public Wikidot pages; no scripting or network of its own.
