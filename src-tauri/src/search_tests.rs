@@ -11,23 +11,14 @@ fn full_text_is_atomic_scoped_accent_insensitive_and_rebuildable_after_restart()
     let a = journal::create_campaign(&c, "A").unwrap();
     let b = journal::create_campaign(&c, "B").unwrap();
     let s = journal::create_session(&c, &a.id, 12, "The bridge", None).unwrap();
-    journal::save_document(
-        &c,
-        &a.id,
-        &s.id,
-        0,
-        document("The café hides a golden key"),
-    )
-    .unwrap();
+    journal::save_document(&c, &a.id, &s.id, 0, document("The café hides a golden key")).unwrap();
     let hits = search::find(&c, &a.id, "cafe key", None, "relevance").unwrap();
     assert_eq!(hits.len(), 1);
     assert_eq!(hits[0].block_id.as_deref(), Some("source"));
     assert!(search::find(&c, &b.id, "key", None, "relevance")
         .unwrap()
         .is_empty());
-    assert!(
-        journal::save_document(&c, &a.id, &s.id, 0, document("Wrong replacement")).is_err()
-    );
+    assert!(journal::save_document(&c, &a.id, &s.id, 0, document("Wrong replacement")).is_err());
     assert!(search::find(&c, &a.id, "wrong", None, "relevance")
         .unwrap()
         .is_empty());

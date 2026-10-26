@@ -21,9 +21,14 @@ fn seed(store: &Store) -> (String, String, String, String) {
     )
     .unwrap();
     let g = knowledge::create_page(c, &campaign.id, "Guild", "faction", "stub", &[]).unwrap();
-    let session =
-        journal::create_session(c, &campaign.id, 12, "The accusation", Some("2026-10-23".into()))
-            .unwrap();
+    let session = journal::create_session(
+        c,
+        &campaign.id,
+        12,
+        "The accusation",
+        Some("2026-10-23".into()),
+    )
+    .unwrap();
     let doc = json!({"version":1,"blocks":[{"id":"proof","type":"paragraph","props":{},"children":[],"content":[{"type":"text","text":"It is an assumption. ","styles":{}},{"type":"pageMention","props":{"pageId":v.id,"label":"Varek"}},{"type":"pageMention","props":{"pageId":g.id,"label":"Guild"}}]}]});
     journal::save_document(c, &campaign.id, &session.id, 0, doc.clone()).unwrap();
     knowledge::save_page_document(c, &campaign.id, &v.id, 0, doc).unwrap();

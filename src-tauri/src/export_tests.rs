@@ -13,8 +13,7 @@ fn readable_export_contains_canonical_data_stable_links_and_original_image_bytes
     let a = journal::create_campaign(c, "Campaign").unwrap();
     let other = journal::create_campaign(c, "Other").unwrap();
     knowledge::create_page(c, &other.id, "PrivateOther", "note", "active", &[]).unwrap();
-    let p =
-        knowledge::create_page(c, &a.id, "Varek", "npc", "active", &["Keeper".into()]).unwrap();
+    let p = knowledge::create_page(c, &a.id, "Varek", "npc", "active", &["Keeper".into()]).unwrap();
     let s = journal::create_session(c, &a.id, 12, "The key", None).unwrap();
     journal::save_document(c,&a.id,&s.id,0,json!({"version":1,"blocks":[{"id":"source","type":"paragraph","props":{},"children":[],"content":[{"type":"pageMention","props":{"pageId":p.id,"label":"Varek"}}]}]})).unwrap();
     let mut buffer = Cursor::new(vec![]);
