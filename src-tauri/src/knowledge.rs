@@ -92,8 +92,22 @@ pub fn list_pages(connection: &Connection, campaign_id: &str) -> AppResult<Vec<P
         .map_err(storage)?
         .collect::<Result<Vec<_>, _>>()
         .map_err(storage)?;
+    // One query for every alias of the campaign instead of one per page.
+    let mut by_page: std::collections::HashMap<String, Vec<String>> = Default::default();
+    let mut statement = connection
+        .prepare("SELECT a.page_id,a.alias FROM page_aliases a JOIN pages p ON p.id=a.page_id WHERE p.campaign_id=?1 ORDER BY a.page_id,a.alias_key")
+        .map_err(storage)?;
+    let rows = statement
+        .query_map([campaign_id], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+        })
+        .map_err(storage)?;
+    for row in rows {
+        let (page, alias) = row.map_err(storage)?;
+        by_page.entry(page).or_default().push(alias);
+    }
     for page in &mut pages {
-        page.aliases = aliases(connection, &page.id)?;
+        page.aliases = by_page.remove(&page.id).unwrap_or_default();
     }
     Ok(pages)
 }

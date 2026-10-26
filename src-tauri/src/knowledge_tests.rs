@@ -157,3 +157,34 @@ fn m1_migration_keeps_documents_and_is_applied_once() {
         );
     }
 }
+
+#[test]
+fn listed_pages_keep_their_own_sorted_aliases_within_the_campaign() {
+    let d = tempfile::tempdir().unwrap();
+    let c = crate::db::open(&d.path().join("test.sqlite3")).unwrap();
+    let first = crate::journal::create_campaign(&c, "First").unwrap();
+    let other = crate::journal::create_campaign(&c, "Other").unwrap();
+    let a = create_page(
+        &c,
+        &first.id,
+        "Alpha",
+        "npc",
+        "active",
+        &["Zed".into(), "Ash".into()],
+    )
+    .unwrap();
+    let b = create_page(&c, &first.id, "Beta", "place", "active", &[]).unwrap();
+    create_page(&c, &other.id, "Gamma", "npc", "active", &["Ghost".into()]).unwrap();
+    let pages = list_pages(&c, &first.id).unwrap();
+    assert_eq!(pages.len(), 2);
+    let find = |id: &str| pages.iter().find(|p| p.id == id).unwrap();
+    assert_eq!(
+        find(&a.id).aliases,
+        vec!["Ash".to_string(), "Zed".to_string()]
+    );
+    assert!(find(&b.id).aliases.is_empty());
+    assert_eq!(
+        get_page(&c, &first.id, &a.id).unwrap().aliases,
+        find(&a.id).aliases
+    );
+}
