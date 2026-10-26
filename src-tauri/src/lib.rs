@@ -925,7 +925,7 @@ async fn ai_install_runtime(
     if !accept {
         return Err("Confirm size, origin and license before installing Ollama.".into());
     }
-    if !cfg!(all(windows, target_arch = "x86_64")) {
+    if !ai_setup::SUPPORTED_PLATFORM {
         return Err("Guided installation is currently available only on Windows x64.".into());
     }
     let _gate = state.gate.try_lock().map_err(|_| AI_SETUP_BUSY)?;

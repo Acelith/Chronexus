@@ -226,14 +226,7 @@ fn extract(archive: &Path, staging: &Path, limit: u64) -> AppResult<usize> {
         }
         files += 1;
     }
-    if !staging
-        .join(if cfg!(windows) {
-            "ollama.exe"
-        } else {
-            "ollama"
-        })
-        .is_file()
-    {
+    if !staging.join(super::EXECUTABLE).is_file() {
         return Err("The archive does not contain the expected Ollama executable.".into());
     }
     Ok(files)

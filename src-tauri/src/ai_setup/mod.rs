@@ -37,12 +37,16 @@ pub fn runtime_dir(root: &Path) -> PathBuf {
 pub fn models_dir(root: &Path) -> PathBuf {
     base_dir(root).join("models")
 }
+/// Executable file name inside the pinned archive for this platform.
+pub const EXECUTABLE: &str = if cfg!(windows) {
+    "ollama.exe"
+} else {
+    "ollama"
+};
+/// Only the Windows x64 archive is pinned; other targets must not download it.
+pub const SUPPORTED_PLATFORM: bool = cfg!(all(windows, target_arch = "x86_64"));
 fn executable(root: &Path) -> PathBuf {
-    runtime_dir(root).join(if cfg!(windows) {
-        "ollama.exe"
-    } else {
-        "ollama"
-    })
+    runtime_dir(root).join(EXECUTABLE)
 }
 /// A managed runtime counts only with its receipt and executable: partial
 /// downloads or extractions are never reported as installed.
@@ -254,7 +258,7 @@ pub async fn status(root: &Path, state: &State, base: &str) -> AppResult<Status>
         models
     };
     Ok(Status {
-        supported_platform: cfg!(all(windows, target_arch = "x86_64")),
+        supported_platform: SUPPORTED_PLATFORM,
         managed_installed: managed_installed(root),
         managed_running: state.managed_running(),
         runtime_dir: shown(&runtime_dir(root)),

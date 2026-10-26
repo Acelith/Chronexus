@@ -113,7 +113,7 @@ use reqwest::Url;
 async fn verified_archive_installs_atomically_and_bad_ones_leave_nothing() {
     let root = tempfile::tempdir().unwrap();
     let archive = zip_bytes(&[
-        ("ollama.exe", b"fake runtime"),
+        (super::EXECUTABLE, b"fake runtime"),
         ("lib/ollama/cuda.dll", b"lib"),
     ]);
     let sha = format!("{:x}", Sha256::digest(&archive));
