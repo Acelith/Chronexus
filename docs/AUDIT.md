@@ -32,7 +32,7 @@ correctness, i18n and maintainability issues.
 | O-04 | Low | Fixed | Renaming a page with 20 aliases failed with a misleading message | `931fb46` |
 | O-06 | Low | Fixed | Closing the window during an operation was silently ignored | `931fb46` |
 | A-11 | Info | Done | Ticinese, Klingon and Romulan options removed (M23 scope, user confirmed) | `1826a4e` |
-| A-12 | Medium | Open | No CVE scan of dependencies (tool installation was not permitted) | — |
+| A-12 | High | Fixed | Updater pulled zip 4.6.1 with RUSTSEC-2026-0367/0368/0369 (legacy bundle extraction) | see §3 |
 
 ## 2. Architecture after the audit
 
@@ -100,14 +100,33 @@ Saved Ticinese preferences open in Italian, Klingon/Romulan in English, keeping 
 script choice. Ticinese wiki translations already saved remain valid archive data, so
 existing archives still back up and restore (test added).
 
-### A-12 — Dependency vulnerability scan (open)
+### A-12 — Dependency vulnerabilities (High, fixed)
 
-Installing `cargo-audit` was refused by the environment's permission policy, and
-`npm audit` would send the dependency list to a registry, which M23 excludes.
-Offline licence review done instead: 523 crates and 309 npm packages, no GPL; MPL-2.0
-(BlockNote, cssparser/selectors, dtoa-short, option-ext) and CDLA-Permissive-2.0
-(webpki-root-certs) need attribution in third-party notices. Duplicate transitive
-crates (hashbrown, getrandom, base64 ×3) come from the Tauri ecosystem.
+Scan run with user approval on 26 October 2026: `cargo audit` 0.22.2 (RustSec
+database, 1 378 advisories) and `pnpm audit` 11.25.0.
+
+- **Rust, before:** 3 vulnerabilities in `zip 4.6.1` (RUSTSEC-2026-0367 SUID/SGID
+  bits, 7.3 high; -0368 symlinks outside the destination; -0369 permissions through
+  symlinks, 9.1 critical), pulled only by `tauri-plugin-updater 2.14.0` (latest
+  stable) through its default `zip` feature. The plugin calls `ZipArchive::extract`
+  only on Windows for legacy Tauri v1 bundles (`.msi.zip`, `.exe.zip`); updates are
+  signature-checked first, so exploitation required a validly signed archive.
+- **Fix:** the updater is used with `default-features = false` and only
+  `rustls-tls` and `system-proxy`. Chronexus publishes v2 artifacts only
+  (`createUpdaterArtifacts: true`; the publisher accepts only `_x64-setup.exe` and
+  `latest.json`), and macOS `.app.tar.gz` updates use tar/flate2 as unconditional
+  macOS dependencies of the plugin. `zip 4.6.1` is gone from `Cargo.lock`.
+- **Rust, after:** 0 vulnerabilities (520 crates). Two warnings remain, both
+  transitive through Tauri's GTK3 stack on Linux and not fixable here:
+  `glib 0.18.5` unsound `VariantStrIter` (RUSTSEC-2024-0429; not used by Chronexus)
+  and unmaintained build-time `proc-macro-error` (RUSTSEC-2024-0370).
+- **npm:** `pnpm audit` reports no known vulnerabilities.
+- **Verified:** Rust tests 152/152 and clippy on macOS and Linux arm64. A Windows
+  target check could not run on macOS (`ring` needs MSVC headers): the Windows
+  updater path must be checked at the next Windows build.
+- **Licences (offline review):** 520 crates and 309 npm packages, no GPL; MPL-2.0
+  (BlockNote, cssparser/selectors, dtoa-short, option-ext) and CDLA-Permissive-2.0
+  (webpki-root-certs) need attribution in third-party notices.
 
 ### Remaining observations
 
@@ -159,7 +178,7 @@ no issue: loopback MCP bridge (token, constant-time compare, Origin/Host checks,
 limits), updater/Wikidot/Ollama/runtime HTTP clients, image import limits, backup ZIP
 parsing, CSP and capabilities. M24 client: HTTPS only, no redirects, bounded and
 validated responses, token outside backups with 0600 permissions, remote text
-rendered as text. Residual: A-12.
+rendered as text. Residual: the two transitive GTK3 warnings in A-12; Windows updater path to re-check on Windows.
 
 ## 7. Platforms (M6 and M16)
 
@@ -191,7 +210,7 @@ Not run: Windows, Playwright CDP scripts, real model runs, Python training tools
 
 | Priority | Item | Cost | Depends on |
 | --- | --- | --- | --- |
-| 1 | CVE scan of Rust and npm dependencies (A-12) | 0.5 day | permission to install `cargo-audit` or approve `pnpm audit` |
+| 1 | Re-check the Windows updater build and install path without the `zip` feature | 0.5 day | Windows machine |
 | 2 | Third-party licence notices bundled with releases (MPL-2.0, CDLA) | 0.5 day | — |
 | 3 | macOS Developer ID signing and notarization | 1 day | Apple developer account |
 | 4 | Translations of the new diagnostics and M24 strings beyond Italian | 1 day | native review |
