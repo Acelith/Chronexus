@@ -587,18 +587,21 @@ export default function CampaignSharing({
                         <span dir="auto">{item.title}</span>{" "}
                         <select
                           value={item.scope}
-                          onChange={(event) =>
+                          onChange={(event) => {
+                            // Read before the guarded action runs: a controlled select is
+                            // restored to its old value until the state updates.
+                            const scope = event.target.value as SyncScope;
                             void act(async () => {
                               setItems(
                                 await syncApi.setScope(
                                   campaignId,
                                   kind,
                                   item.itemId,
-                                  event.target.value as SyncScope,
+                                  scope,
                                 ),
                               );
-                            })
-                          }
+                            });
+                          }}
                         >
                           {(Object.keys(scopes) as SyncScope[])
                             .filter(

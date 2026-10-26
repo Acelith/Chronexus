@@ -20,7 +20,7 @@ export function stateText(status: SyncStatus): string {
           )
         : tr("Saved on this device · server not reachable, trying again");
     case "conflict":
-      return tr("Saved on this device · {0} conflicts need your decision", [
+      return tr("Saved on this device · conflicts needing your decision: {0}", [
         status.conflicts,
       ]);
     case "attention":
@@ -29,7 +29,7 @@ export function stateText(status: SyncStatus): string {
       ]);
     case "paused":
       return status.pending
-        ? tr("Paused · {0} changes stay on this device", [status.pending])
+        ? tr("Paused · changes kept on this device: {0}", [status.pending])
         : tr("Paused · everything is saved on this device");
     default:
       return tr("Not synchronized automatically");

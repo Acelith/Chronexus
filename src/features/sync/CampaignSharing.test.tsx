@@ -4,6 +4,7 @@ import { beforeEach, expect, test, vi } from "vitest";
 import { command } from "../journal/api";
 import CampaignSharing from "./CampaignSharing";
 import SyncStatusBadge from "./SyncStatusBadge";
+import { OperationContext } from "../../operations";
 vi.mock("../journal/api", async (original) => ({
   ...(await original<typeof import("../journal/api")>()),
   command: vi.fn(),
@@ -294,14 +295,17 @@ test("the save state never calls a local save a server save", async () => {
       status("offline", { pending: 1, retryInSeconds: 30 }),
       /Saved on this device · server not reachable, trying again in 30 s/,
     ],
-    [status("conflict", { conflicts: 2 }), /2 conflicts need your decision/],
+    [
+      status("conflict", { conflicts: 2 }),
+      /conflicts needing your decision: 2/,
+    ],
     [
       status("attention", { message: "Session expired" }),
       /Synchronization stopped: Session expired/,
     ],
     [
       status("paused", { pending: 3 }),
-      /Paused · 3 changes stay on this device/,
+      /Paused · changes kept on this device: 3/,
     ],
   ];
   for (const [value, text] of cases) {
@@ -453,4 +457,30 @@ test("sheet sections and images are shared read-only: no private option, text fo
   expect(
     await within(received).findByRole("img", { name: "Map of the keep" }),
   ).toBeVisible();
+});
+
+test("a choice survives the app's draft-flushing guard, which runs after the change event", async () => {
+  const user = userEvent.setup();
+  // The real guard flushes the editor first; React has restored the select by then.
+  const slowGuard = async (action: () => Promise<void>) => {
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    return action();
+  };
+  render(
+    <OperationContext.Provider value={slowGuard}>
+      <CampaignSharing campaignId="c1" busy={false} />
+    </OperationContext.Provider>,
+  );
+  await user.selectOptions(
+    await screen.findByRole("combobox", { name: /Neral/ }),
+    "shared",
+  );
+  await vi.waitFor(() =>
+    expect(command).toHaveBeenCalledWith("sync_set_scope", {
+      campaignId: "c1",
+      kind: "page",
+      itemId: "p1",
+      scope: "shared",
+    }),
+  );
 });

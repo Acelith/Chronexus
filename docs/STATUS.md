@@ -19,6 +19,16 @@ Not published; source version 0.8.1, schema 021. Server side: `Chronexus-Server`
   concurrent edits became a resolvable conflict; sharing, withdrawal and 120-item paging were
   checked; a member never saw private items. These live tests are `#[ignore]`d (they need the
   server binary) and were run with `--ignored --test-threads=1`.
+- **Real WebView check (Windows, isolated synthetic profile, debug build, Playwright over CDP):**
+  scope selectors, scope summary, opt-in and pause of automatic synchronization, the header badge
+  and the three destructive confirmations rendered and behaved correctly, with Axe reporting 0
+  violations at 1200 and 760 px. The app accepts only HTTPS servers, so no real server was reachable:
+  the link was seeded in the archive and "Synchronize now" honestly answered "Choose a sharing server
+  first", the badge "Sign in to the sharing server to continue". It found a real bug the component
+  tests missed (the scope selector read its value after the app's draft-flushing guard, so choices
+  were silently ignored); fixed with a regression test that fails without the fix. Also fixed the
+  checkbox layout and two "1 changes" phrasings. Sign-in, account deletion and downloading a
+  campaign were not exercised in the window (they need a reachable HTTPS server).
 - **Hermetic checks:** Rust lib 168 passed / 6 ignored (four of them the live real-server tests; the other two are older ignored tests); sync tests stable over 4 consecutive runs; Clippy `-D warnings`
   all targets and rustfmt clean; Vitest 178 passed; ESLint, `tsc --noEmit`, i18n catalog check
   pass. Backups of schemas 2-20 restore. Not run: macOS/Linux, GUI WebView, installers.

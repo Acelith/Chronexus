@@ -2142,3 +2142,18 @@ textarea::placeholder {
   border: 1px solid #b8a37a;
   border-radius: 4px;
 }
+
+.campaign-sharing label.sync-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.campaign-sharing label.sync-item {
+  justify-content: flex-start;
+}
+.campaign-sharing label.sync-item input[type="checkbox"] {
+  width: auto;
+  flex: none;
+  margin: 0;
+}
