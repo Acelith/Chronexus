@@ -1,3 +1,9 @@
+# Chronexus status — 26 October 2026: release 0.9.0 published
+
+Windows x64 installer 0.9.0 (schema 021) published and verified on github.com, tag `v0.9.0`
+(`d88425e`); Chronexus Server 0.1.0 published the same day. Other platforms, installer
+installation/upgrade and the Docker image remain unbuilt or unverified; see docs/INSTALLERS.md.
+
 # Chronexus status — 26 October 2026: S5/S6/S4 desktop replication (schema 021)
 
 Not published; source version 0.8.1, schema 021. Server side: `Chronexus-Server` commit

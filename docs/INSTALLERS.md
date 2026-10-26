@@ -28,6 +28,19 @@ request is documentation only: do not compile, install or publish now.
 This is a future distribution requirement under M11/M6, not a new completed
 milestone. The next functional milestone remains M23, followed by M24 and M25.
 
+# Release 0.9.0 — shared campaigns, English-first
+
+NSIS Windows x64 installer compiled from commit `d88425e` (annotated tag `v0.9.0`),
+updater signed and verified with the production key
+(`updates_signed_release_package_matches_production_key`). Size 33,842,720 bytes,
+SHA-256 `6c7dac0a369efc0b439430cdc0474ec47aaf589f8b5c7f6d4207307a566b394e`. Published on 26 October 2026 with `publish_app_update.py`: installer,
+`.sig` and `latest.json` verified as drafts and after publication. App only, no AI weights.
+Built with a temporary `pnpm.cmd` shim that forwards to `npm run` (pnpm is not installed here).
+**Not built or verified:** macOS, Linux, ARM64 (no toolchains here), installation and upgrade of the
+installer. The companion server is released separately:
+[Chronexus Server 0.1.0](https://github.com/Acelith/Chronexus-Server/releases/tag/v0.1.0)
+(Windows x64 binary only; no container image, Docker was unavailable).
+
 # Release 0.8.0 — M19, M20, M21, M22
 
 NSIS Windows x64 Installer compiled from commit `c540c2d` (annotated tag `v0.8.0`),

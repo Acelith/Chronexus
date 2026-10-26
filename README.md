@@ -20,8 +20,8 @@ in which session and for which faction, with no account and no cloud.
 </div>
 
 > [!NOTE]
-> The English-first changes are in source version 0.8.1. The latest published
-> installer is still 0.8.0; this change has not been published.
+> Latest release: **0.9.0** (Windows x64 installer): optional shared campaigns with
+> automatic synchronization, and the English-first interface. Other platforms are not built yet.
 
 ## What is Chronexus
 
