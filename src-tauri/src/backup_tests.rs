@@ -467,3 +467,40 @@ fn restore_with_directory_handle_without_delete_sharing_keeps_attachment_copy_wo
     );
     drop(handle);
 }
+
+#[test]
+fn backups_from_every_schema_version_restore_into_the_current_one() {
+    // M23 acceptance: archives written by any earlier release stay restorable.
+    for version in 2..=db::LATEST_SCHEMA {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("legacy");
+        fs::create_dir(&root).unwrap();
+        let c = rusqlite::Connection::open(root.join("nodex.sqlite3")).unwrap();
+        c.pragma_update(None, "foreign_keys", "ON").unwrap();
+        for migration in db::MIGRATIONS.iter().take(version as usize) {
+            c.execute_batch(migration).unwrap();
+        }
+        let campaign = journal::create_campaign(&c, &format!("Schema {version}")).unwrap();
+        let session = journal::create_session(&c, &campaign.id, 1, "Start", None).unwrap();
+        let file = temp.path().join(format!("schema-{version}.nodex"));
+        write_backup(&c, &root, &file).unwrap_or_else(|e| panic!("schema {version} backup: {e}"));
+        drop(c);
+        let mut store = Store::open(&temp.path().join("target")).unwrap();
+        let preview = store
+            .prepare(&file)
+            .unwrap_or_else(|e| panic!("schema {version} verify: {e}"));
+        assert_eq!(preview.manifest.schema_version, version);
+        store
+            .restore(&preview.token)
+            .unwrap_or_else(|e| panic!("schema {version} restore: {e}"));
+        let sessions = journal::list_sessions(&store.connection, &campaign.id).unwrap();
+        assert_eq!(sessions[0].id, session.id, "schema {version}");
+        let latest: i64 = store
+            .connection
+            .query_row("SELECT MAX(version) FROM schema_migrations", [], |r| {
+                r.get(0)
+            })
+            .unwrap();
+        assert_eq!(latest, db::LATEST_SCHEMA, "schema {version}");
+    }
+}
