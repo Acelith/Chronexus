@@ -1,3 +1,29 @@
+# Chronexus status — 26 October 2026: app/server audit completed
+
+- Evidence-led audit of app `e404194` and server `7784820`; full prioritized report:
+  [TURBO_AUDIT.md](TURBO_AUDIT.md). 14 actionable findings (12 P2, 2 P3), including
+  known gaps and newly reproduced variants. No source fixes, version bump or release.
+- First recovery risks: valid archives can exceed backup caps and block updates;
+  server restore activates staging before migration/session revocation completes.
+  Publisher race, post-publication verification and unenforced signature acceptance
+  are recorded alongside draft/navigation/graph/herald and scoped SSE defects.
+- Fresh checks: 188 frontend tests; app Rust 171 passed/7 ignored; server 71 passed;
+  four client acceptance tests against a real local server process passed separately.
+  TypeScript, ESLint, Vite build, 27 release-tool tests, seven scanner tests, catalog
+  normalization and five MCP checks passed. Fifteen synthetic frontend/server/release
+  probes pass by asserting current defects; a valid large archive fails the actual
+  backup acceptance test as expected. Fixtures/logs remain ignored, no personal data.
+- Strict localization audit still fails: now 1,305 explicit UI messages, 267 missing
+  in each of eight non-Italian catalogs, nine missing installer languages; additional
+  dynamic labels bypass the static audit. No gate weakened. Next roadmap: **M28**.
+- npm audit: no known advisories; Rust: no vulnerability-class advisories, but app
+  retains glib unsoundness and proc-macro-error maintenance warnings. React Doctor
+  0.9.18 full scan: complete 202-file coverage, zero errors, 97 warnings, score 63.
+  Warnings are triage candidates, not 97 confirmed bugs; editor chunk size also warns.
+- Skills used: Trail of Bits sharp-edges/variant-analysis, systematic-debugging,
+  Rust/SQLite, react-doctor/react-testing and accessibility. No native cross-platform,
+  Docker/TLS deployment, screen-reader or actual installed-upgrade claim.
+
 # Chronexus status — 26 October 2026: open milestones reprioritized
 
 - Planning only, no code change: ROADMAP gains M28–M40 and a priority table for
