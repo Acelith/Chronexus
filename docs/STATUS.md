@@ -21,6 +21,24 @@
 - No release was published for this UI change. Next roadmap milestone: **M29 —
   release matrix for Windows, macOS and Linux**.
 
+# Chronexus status — 27 October 2026 (afternoon): 0.10.0 pre-release, M30 CI, M28 removed
+
+- **M29 delivered unsigned** at the user's request: pre-release
+  [0.10.0](https://github.com/Acelith/Chronexus/releases/tag/v0.10.0) (tag on 2f30818) with
+  macOS arm64/x64 DMG, Linux arm64 .deb/AppImage, Linux x64 .deb, Windows x64 NSIS and
+  SHA256SUMS.txt, published by `scripts/release/publish_unsigned.py`; every asset re-downloaded
+  anonymously and verified. `releases/latest` stays on signed 0.9.2, so the in-app updater is
+  untouched. Install tests of the 0.10.0 files: Debian 12 / Ubuntu 24.04 arm64 (.deb), Debian 12
+  arm64 (AppImage), Ubuntu 24.04 amd64 (.deb, emulated), macOS arm64 from the DMG (signature
+  valid, version 0.10.0 started). Not run: Windows, Intel Mac.
+- **M30:** `.forgejo/workflows/ci.yml` (app and server), `scripts/qa/ipc/run-linux.sh`
+  (16/16 IPC flows), `scripts/qa/run-all.sh` on a `git archive` of a commit: checks, IPC,
+  package and install stages all passed on b470359. No Forgejo runner is registered yet.
+- **M28** removed from the open milestones; **M41** closed (wiki published, Getting Started
+  updated for 0.10.0).
+- Note: a second agent works on the UI in this checkout; release builds and run-all.sh use
+  committed revisions only.
+
 # Chronexus status — 27 October 2026: server integration, container builds, M41 wiki
 
 - **Server integration (M25.8 work):** Chronexus Server runs in Docker on macOS behind the
