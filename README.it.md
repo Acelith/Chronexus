@@ -19,6 +19,9 @@ in quale sessione e per quale fazione, senza account e senza cloud.
 
 </div>
 
+> [!NOTE]
+> Ultima release stabile: **[0.11.0](https://github.com/Acelith/Chronexus/releases/tag/v0.11.0)** per Windows x64. L’assistente resta locale per impostazione predefinita; puoi scegliere esplicitamente un server di condivisione compatibile per una campagna. L’installer ha la firma per gli aggiornamenti interni, ma non la firma Windows Authenticode. Per macOS e Linux resta disponibile la [pre-release 0.10.1](https://github.com/Acelith/Chronexus/releases/tag/v0.10.1), senza le modifiche della 0.11.0.
+
 > [!IMPORTANT]
 > **Chronexus è interamente vibecoded.** Codice, test e documentazione sono stati scritti
 > da agenti di programmazione AI (OpenAI Codex e Claude Code) seguendo le mie istruzioni,
@@ -88,7 +91,7 @@ gli incantesimi, e collega tutto con riferimenti stabili.
 | **Dal sorgente** | Sviluppatori | Vedi [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) |
 
 **Requisiti:** Windows 10/11 x64 con WebView2 (già presente nelle versioni recenti).
-Per l’assistente facoltativo serve una GPU NVIDIA; da **Impostazioni dell’app → AI
+Per l’assistente locale facoltativo serve una GPU NVIDIA; da **Impostazioni dell’app → AI
 locale: componenti** puoi installare Ollama e il modello senza usare il terminale.
 
 **Primo avvio:** crea una campagna, apri una sessione e scrivi. Digita `[[` per

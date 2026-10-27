@@ -20,9 +20,8 @@ in which session and for which faction, with no account and no cloud.
 </div>
 
 > [!NOTE]
-> Latest release: **[0.9.2](https://github.com/Acelith/Chronexus/releases/tag/v0.9.2)** (Windows x64): a Chronexus-branded installer, including the fixes for legacy backup verification and update checks at every launch.
-> If an older updater reports an unexpected database structure, use the 0.9.2 installer manually after preserving a verified backup. Existing archives migrate automatically.
-> Other platforms are not built for this hotfix.
+> Latest stable release: **[0.11.0](https://github.com/Acelith/Chronexus/releases/tag/v0.11.0)** (Windows x64). It adds an explicit, per-campaign choice between local assistant processing and a compatible sharing server; local remains the default. The installer is signed for the in-app updater, but not with Windows Authenticode.
+> The [0.10.1 pre-release](https://github.com/Acelith/Chronexus/releases/tag/v0.10.1) remains available for macOS and Linux. Those packages do not contain the 0.11.0 changes.
 
 > [!IMPORTANT]
 > **Chronexus is entirely vibecoded.** Its code, tests and documentation were written by
@@ -63,7 +62,7 @@ with stable references. The interface defaults to English and offers 10 language
 | <img src="docs/media/icons/dice.svg" alt="" width="24"> | **Dice roller** | Mixed d4–d100 rolls, per-campaign history, animated dragon circle with reduced motion |
 | <img src="docs/media/icons/scroll.svg" alt="" width="24"> | **Search** | Full text across notes, pages, sheet and items, opening the matching block (Ctrl/⌘ + K) |
 | <img src="docs/media/icons/wiki.svg" alt="" width="24"> | **D&D wiki** | Wikidot or Open5e on request, offline copies, local translation into the app language |
-| <img src="docs/media/icons/star.svg" alt="" width="24"> | **Local assistant (optional)** | Questions about your notes with citations, on the GPU and without cloud, using Qwen3.8-27B or Gemma 4 12B |
+| <img src="docs/media/icons/star.svg" alt="" width="24"> | **Assistant (optional)** | Local questions with citations on your GPU; an explicit per-campaign choice can use a compatible sharing server instead |
 | <img src="docs/media/icons/document.svg" alt="" width="24"> | **Languages and scripts** | 10 languages, right-to-left Arabic, Braille, Morse, Espruar, Dethek and more |
 | <img src="docs/media/icons/backup.svg" alt="" width="24"> | **Signed updates** | Check, verified download and mandatory backup before install, announced by the herald |
 | <img src="docs/media/icons/party.svg" alt="" width="24"> | **Shared campaigns (optional)** | With your own [Chronexus Server](#play-together-chronexus-server-optional): sync your devices and share chosen pages with your party |

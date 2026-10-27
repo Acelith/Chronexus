@@ -1,3 +1,22 @@
+# Release 0.11.0 — signed Windows x64 installer
+
+[Chronexus 0.11.0](https://github.com/Acelith/Chronexus/releases/tag/v0.11.0)
+was published on 27 October 2026 from source `1deb700` and annotated tag
+`v0.11.0`. The Windows x64 NSIS installer is 34,334,089 bytes, SHA-256
+`a9d288c9f911b36672965f98c0a1495df81560329302fc9cb5726a64b573f7ae`.
+The production updater signature on the exact package and tamper rejection passed.
+Installer, signature and `latest.json` were verified in the draft, then downloaded
+anonymously and checked after publication. The public stable API identifies 0.11.0.
+Exactly three unique assets are present; no existing release asset was replaced.
+
+This release includes the campaign's explicit local or server assistant choice and
+German, French and Spanish catalog improvements since pre-release 0.10.1. Schema
+remains 021. It has no AI weights or Windows Authenticode signature; SmartScreen
+may warn. The exact installer was not installed or upgraded in QA. Windows ARM64,
+macOS and Linux packages were not built for 0.11.0; the 0.10.1 packages remain
+available for those systems. See [release notes](releases/v0.11.0.md) and the
+current evidence in [STATUS.md](STATUS.md).
+
 # Release 0.9.2 — Chronexus-branded Windows installer
 
 [Chronexus 0.9.2](https://github.com/Acelith/Chronexus/releases/tag/v0.9.2), published

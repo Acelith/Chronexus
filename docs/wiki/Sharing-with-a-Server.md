@@ -33,8 +33,11 @@ its own choice:
 | Shared with the other players | The campaign's members, read-only and attributed to you |
 
 **Keep a private copy of everything** is a shortcut for the second option. Sheet sections
-and images can only be shared, never copied privately. The full sheet, AI data and
-preferences never leave your computer.
+and images can only be shared, never copied privately. The full sheet, stored AI
+conversations and preferences are never synchronized. If you explicitly choose
+server AI for this campaign, your questions and chosen model are sent to that
+server; it answers from items already available to you there, without uploading
+notes kept only on this computer.
 
 ## Synchronizing
 

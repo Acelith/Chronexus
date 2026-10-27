@@ -13,9 +13,10 @@ conversations, settings. No account, no telemetry, no analytics.
 | Rules wiki / SRD | Only when you search or open an entry | The term or entry you asked for |
 | AI components | Only when you press install | Nothing personal; downloads from official sources |
 | Your Chronexus Server | Only for campaigns you linked, items you chose | The items you chose, your account credentials |
+| Server AI | Only when you choose it for a linked campaign, then check its models or ask a question | The model check, or your question and chosen model; the server uses items already synchronized there, never notes kept only on this computer |
 
-Nothing is ever sent to an AI service on the internet: the optional assistant runs on
-your computer.
+The assistant runs locally by default. Server AI is an explicit per-campaign choice;
+there is no automatic cloud fallback or transmission of local-only campaign notes.
 
 ## Where the data lives
 

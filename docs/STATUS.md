@@ -1,4 +1,28 @@
-# Chronexus status — 27 October 2026 (night): M25.10 server AI client (unreleased)
+# Chronexus status — 27 October 2026: Windows 0.11.0 published
+
+- [Chronexus 0.11.0](https://github.com/Acelith/Chronexus/releases/tag/v0.11.0)
+  is the Windows x64 stable release built from `1deb700` and annotated tag `v0.11.0`.
+  The NSIS installer is 34,334,089 bytes, SHA-256
+  `a9d288c9f911b36672965f98c0a1495df81560329302fc9cb5726a64b573f7ae`.
+  The existing production updater key signed the installer; the test verified the
+  actual bytes and rejected tampering. GitHub has exactly three assets (installer,
+  `.sig`, `latest.json`), verified in the draft and downloaded anonymously after
+  publication; the stable latest API identifies 0.11.0. A publisher repair in
+  `e0d951a` uses final tagged URLs for public verification.
+- Checks: 211 frontend tests, 178 Rust tests (7 ignored), TypeScript, ESLint,
+  frontend build, Rust fmt and Clippy with warnings denied, 26 release-tool tests,
+  and `pnpm i18n:check` passed. The global Prettier check still fails on 118
+  pre-existing files; this release changed none of those files. The first
+  concurrent frontend run timed out twice; the full suite passed when rerun alone.
+- Windows Authenticode is unavailable; the actual installation and upgrade of this
+  exact installer were not run. Windows ARM64, macOS and Linux were not built for
+  0.11.0. Server AI still needs model/GPU qualification and a live question with
+  real weights. Schema remains 021 and existing local assistant choices stay local.
+- Release tooling used the Tauri v2 and systematic-debugging Skills for the signed
+  build and public URL diagnosis, and Plugin Management to check GitHub access.
+  Next roadmap milestone: **M25 — Chronexus Server** (in progress).
+
+# Chronexus status — 27 October 2026 (night): M25.10 server AI client (delivered in 0.11.0)
 
 - Campaign settings gain **Where the assistant runs**: this computer (default, unchanged) or
   the campaign's sharing server. The server is contacted only on *Check the server AI* or a
@@ -9,8 +33,8 @@
 - Evidence: 177 Rust tests (new: profile validation, server AI parsing/failures against the
   fake server), Clippy `-D warnings`, fmt; 211 Vitest tests (3 new), tsc, ESLint, Prettier;
   i18n gate 0 unregistered / 0 missing with 34 new messages in all ten languages.
-- Open: GPU/model qualification on the server (see Chronexus-Server docs/AI.md); not yet in a
-  release; no manual run against a server with real model weights.
+- Open: GPU/model qualification on the server (see Chronexus-Server docs/AI.md);
+  no manual run against a server with real model weights.
 
 # Chronexus status — 27 October 2026 (evening): 0.10.1 replaces 0.10.0
 

@@ -1,7 +1,8 @@
 # Local assistant (optional)
 
 The assistant answers questions about **one campaign's notes** — "where did we last see
-the cartographer?" — with citations you can reopen. It runs entirely on your computer.
+the cartographer?" — with citations you can reopen. It runs on your computer by default;
+you can explicitly choose a compatible sharing server for one campaign instead.
 
 ## What it is and is not
 
