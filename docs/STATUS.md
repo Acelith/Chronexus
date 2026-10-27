@@ -1,8 +1,11 @@
-# Chronexus status — 27 October 2026: GitHub migration prepared
+# Chronexus status — 27 October 2026: GitHub migration — reachable history sanitized
 
 - GitHub is the canonical source/release destination. The owner authorized a one-time
-  cleanup of all file revisions and commit/tag messages. Full private recovery bundles
-  have been verified outside both repositories; publication and history audit are pending.
+  cleanup of all file revisions and commit/tag messages. All 180 app commits and
+  30 server commits retain their authors, dates and parent graph. The 10 app and two
+  server tags were preserved and rewritten. Both origins now fetch/push GitHub only.
+  Independent fresh GitHub mirror clones passed the full reachable-object audit and
+  git fsck; release descriptions and the signed updater manifest are verified clean.
 - Current source, instructions, handbooks, release publishing and update downloads use
   GitHub. The source updater keeps signatures, bounded downloads and verified backups;
   only the fixed GitHub channel can follow redirects to the official release asset CDN.
@@ -15,6 +18,16 @@
   Clippy with warnings denied and the desktop debug build passed. Python 3.14: 23
   targeted publisher/manifest/package/origin tests passed; anonymous GitHub manifest
   download verified. Windows-only PowerShell installer tests are unavailable on macOS.
+- GitHub still resolves the previous main SHAs through its cache; those commits are
+  outside current branches/tags. Git cannot purge that platform storage. A private
+  support-request draft and complete recovery bundles/maps are kept outside both
+  projects; no support message was sent and no repository was deleted. Existing
+  installer bytes/signatures were preserved. No new application version was released.
+- Follow-up: the two GitHub channel failure messages now have translations in all
+  ten catalogs, with a dedicated regression. Catalog tests (13), update component
+  tests (7), localization gate, lint/typecheck/format and the final frontend build passed.
+- No specialized history-migration skill is installed; official GitHub/git-filter-repo
+  guidance and repository-specific validation were used.
 - Next roadmap milestone: **M25 — Chronexus Server**, then M42–M47 virtual tabletop.
 
 # Chronexus status — 27 October 2026: settings redesign (local source)

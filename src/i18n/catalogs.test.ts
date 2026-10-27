@@ -18,6 +18,20 @@ import { spellFromCatalog } from "../features/player/catalog";
 import { editorDictionary } from "./editorLocale";
 afterEach(() => applyPreferences(defaultPreferences));
 
+it("translates GitHub update channel failures in every selectable catalog", async () => {
+  for (const locale of locales.filter((entry) => entry.id !== "en")) {
+    await loadLocale(locale.id);
+    applyPreferences({ ...defaultPreferences, locale: locale.id });
+    for (const source of [
+      "The manifest version does not match the GitHub release.",
+      "Invalid GitHub release version.",
+    ]) {
+      expect(tr(source), locale.id).not.toBe(source);
+      expect(tr(source), locale.id).toContain("GitHub");
+    }
+  }
+});
+
 it("localizes the revised startup policy and server role labels in all selectable translations", async () => {
   const { roleText } = await import("../features/sync/labels");
   const source =
