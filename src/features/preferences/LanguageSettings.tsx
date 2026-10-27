@@ -45,7 +45,10 @@ export default function LanguageSettings({
     }
   }
   return (
-    <section className="language-settings" aria-label={tr("App settings")}>
+    <section
+      className="language-settings"
+      aria-label={tr("Language and script")}
+    >
       <h3>{tr("Language and script")}</h3>
       <p>
         {tr(

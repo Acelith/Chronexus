@@ -2,6 +2,22 @@
 
 Detailed guide of functions, moved from the README to M20 without content changes. For installation and overview see [README](../README.md); for real status and limits [STATUS.md](STATUS.md).
 
+## Settings
+
+**App settings** in the sidebar now has six categories: Language and script,
+Backup, D&D sources / Wiki, Local AI: components, Campaign sharing, and App
+updates. Choose a category in the settings navigation to work with its controls.
+Switching categories keeps unfinished form values in place; use each section's
+save or confirmation action to persist them. An update opened from the herald
+goes directly to App updates.
+
+**Campaign settings** is separate and applies to the selected campaign. Its
+Model, Sources and resources, Local knowledge, and local retraining sections
+share the same navigation pattern. Source changes remain drafts until **Save
+preferences**; an unsaved notice stays visible when you inspect another section.
+Refreshing knowledge does not retrain a model, and training still requires its
+own explicit confirmation.
+
 ## Languages and Scripts
 
 In the left menu, **App Settings → Language and Script**: 10 natural

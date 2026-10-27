@@ -42,14 +42,22 @@ test("loads only campaign data and saves edition preferences before refresh", as
   const user = userEvent.setup();
   vi.mocked(campaignAi.save).mockResolvedValue(initial.profile);
   vi.mocked(campaignAi.refresh).mockResolvedValue(initial);
-  render(<CampaignSettings campaignId="campaign-a" name="The campaign" />);
-  await screen.findByText("Sources and resources");
+  render(<CampaignSettings campaignId="campaign-a" />);
+  await screen.findByRole("button", { name: "Sources and resources" });
   expect(campaignAi.get).toHaveBeenCalledWith("campaign-a");
   expect(assistantApi.probe).not.toHaveBeenCalled();
+  await user.click(
+    screen.getByRole("button", { name: "Sources and resources" }),
+  );
   await user.selectOptions(screen.getByLabelText("D&D edition"), "5e-2024");
+  await user.click(screen.getByRole("button", { name: "Local knowledge" }));
   expect(
     screen.getByRole("button", { name: "Refresh knowledge" }),
   ).toBeDisabled();
+  await user.click(
+    screen.getByRole("button", { name: "Sources and resources" }),
+  );
+  expect(screen.getByLabelText("D&D edition")).toHaveValue("5e-2024");
   await user.click(screen.getByRole("button", { name: "Save preferences" }));
   await waitFor(() =>
     expect(campaignAi.save).toHaveBeenCalledWith(
@@ -57,13 +65,14 @@ test("loads only campaign data and saves edition preferences before refresh", as
       expect.objectContaining({ edition: "5e-2024", ruleKeys: [] }),
     ),
   );
+  await user.click(screen.getByRole("button", { name: "Local knowledge" }));
   await user.click(screen.getByRole("button", { name: "Refresh knowledge" }));
   await screen.findByText(/The model weights were not retrained/);
   expect(campaignAi.refresh).toHaveBeenCalledWith("campaign-a");
 });
 test("surfaces load errors without contacting Ollama", async () => {
   vi.mocked(campaignAi.get).mockRejectedValue(new Error("Archive unavailable"));
-  render(<CampaignSettings campaignId="campaign-a" name="The campaign" />);
+  render(<CampaignSettings campaignId="campaign-a" />);
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Archive unavailable",
   );
@@ -71,6 +80,6 @@ test("surfaces load errors without contacting Ollama", async () => {
   expect(screen.queryByText("Loading settings…")).not.toBeInTheDocument();
   vi.mocked(campaignAi.get).mockResolvedValue(structuredClone(initial));
   await userEvent.click(screen.getByRole("button", { name: "Retry settings" }));
-  await screen.findByText("Sources and resources");
+  await screen.findByRole("button", { name: "Sources and resources" });
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

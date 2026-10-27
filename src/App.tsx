@@ -59,23 +59,14 @@ const AssistantWorkspace = lazy(
   () => import("./features/assistant/AssistantWorkspace"),
 );
 const DiceWorkspace = lazy(() => import("./features/dice/DiceWorkspace"));
-const UpdateSettings = lazy(() => import("./features/updates/UpdateSettings"));
-const WikiSettings = lazy(() => import("./features/wiki/WikiSettings"));
-const BackupSettings = lazy(() => import("./features/backup/BackupSettings"));
-const AiSetupSettings = lazy(
-  () => import("./features/ai-setup/AiSetupSettings"),
-);
+const AppSettings = lazy(() => import("./features/preferences/AppSettings"));
 const HeraldAnnouncement = lazy(
   () => import("./features/updates/HeraldAnnouncement"),
-);
-const LanguageSettings = lazy(
-  () => import("./features/preferences/LanguageSettings"),
 );
 const CampaignSettings = lazy(
   () => import("./features/assistant/CampaignSettings"),
 );
 const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
-const SyncSettings = lazy(() => import("./features/sync/SyncSettings"));
 const CampaignSharing = lazy(() => import("./features/sync/CampaignSharing"));
 
 const modifiedDateFormat = {
@@ -642,27 +633,29 @@ export function App() {
                       onOpen={() => show("sharing")}
                     />
                   ) : null}
-                  <span className="last-modified">
-                    {[...sessions, ...pages].some((item) =>
-                      Number.isFinite(Date.parse(item.updatedAt)),
-                    ) ? (
-                      <>
-                        <Text source={"Last changed:"} />{" "}
-                        <time>
-                          {modifiedDateFormat.format(
-                            new Date(
-                              Math.max(
-                                ...[...sessions, ...pages]
-                                  .map((item) => Date.parse(item.updatedAt))
-                                  .filter(Number.isFinite),
+                  {view !== "preferences" ? (
+                    <span className="last-modified">
+                      {[...sessions, ...pages].some((item) =>
+                        Number.isFinite(Date.parse(item.updatedAt)),
+                      ) ? (
+                        <>
+                          <Text source={"Last changed:"} />{" "}
+                          <time>
+                            {modifiedDateFormat.format(
+                              new Date(
+                                Math.max(
+                                  ...[...sessions, ...pages]
+                                    .map((item) => Date.parse(item.updatedAt))
+                                    .filter(Number.isFinite),
+                                ),
                               ),
-                            ),
-                          )}
-                        </time>
-                      </>
-                    ) : null}
-                  </span>
-                  {campaign ? (
+                            )}
+                          </time>
+                        </>
+                      ) : null}
+                    </span>
+                  ) : null}
+                  {campaign && view !== "preferences" ? (
                     <details className="campaign-actions">
                       <summary aria-label={tr("Campaign actions")}>•••</summary>
                       <div className="actions">
@@ -807,22 +800,13 @@ export function App() {
                     <Suspense
                       fallback={<p role="status">{tr("Opening settings…")}</p>}
                     >
-                      <>
-                        <UpdateSettings
-                          busy={busy}
-                          run={run}
-                          initialOffer={updateHandoff}
-                          onHandoffUsed={() => setUpdateHandoff(null)}
-                        />
-                        <LanguageSettings disabled={busy} />
-                        <BackupSettings disabled={busy} />
-                        <WikiSettings disabled={busy} />
-                        <AiSetupSettings disabled={busy} />
-                        <SyncSettings
-                          disabled={busy}
-                          onCampaignAdded={() => void load()}
-                        />
-                      </>
+                      <AppSettings
+                        busy={busy}
+                        run={run}
+                        initialOffer={updateHandoff}
+                        onHandoffUsed={() => setUpdateHandoff(null)}
+                        onCampaignAdded={() => void load()}
+                      />
                     </Suspense>
                   ) : null}
                   {campaign && view === "dice" ? (
@@ -852,7 +836,6 @@ export function App() {
                       <CampaignSettings
                         key={campaign.id}
                         campaignId={campaign.id}
-                        name={campaign.name}
                         register={register}
                       />
                     </Suspense>

@@ -1,0 +1,223 @@
+.app-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(205px, 244px) minmax(0, 1fr);
+  max-width: 1360px;
+  min-height: min(690px, calc(100vh - 205px));
+  border: 1px solid #ad9569;
+  background: #f1e5ca;
+  box-shadow: 0 10px 30px #46341e14;
+}
+
+.campaign-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(205px, 244px) minmax(0, 1fr);
+  min-height: min(690px, calc(100vh - 230px));
+  border: 1px solid #ad9569;
+  background: #f1e5ca;
+  box-shadow: 0 10px 30px #46341e14;
+}
+
+.campaign-settings-content {
+  min-width: 0;
+  padding: clamp(20px, 3vw, 38px);
+}
+
+.campaign-settings-content > [hidden] {
+  display: none;
+}
+
+.campaign-settings .campaign-settings-content fieldset {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.campaign-settings .campaign-settings-content legend {
+  color: #562c26;
+  font:
+    32px/1.2 "Chronexus Text",
+    Georgia,
+    serif;
+  font-weight: 600;
+  padding: 0 0 18px;
+}
+
+.campaign-settings .campaign-settings-content h3 {
+  font-size: 24px;
+  margin: 18px 0 0;
+}
+
+.campaign-settings .campaign-settings-content label {
+  font-size: 16px;
+}
+
+.campaign-settings
+  .campaign-settings-content
+  .checkbox-row
+  input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin: 2px 0 0;
+}
+
+.campaign-settings .campaign-settings-content :is(input, select, textarea) {
+  max-width: 100%;
+}
+
+.settings-dirty-notice {
+  border-inline-start: 3px solid #7b3b31;
+  background: #e5ceb0;
+  padding: 10px 14px;
+  margin: 18px 0;
+  font-weight: 600;
+}
+
+.app-settings-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 22px 12px;
+  border-inline-end: 1px solid #b9a37c;
+  background: #e6d5b3;
+}
+
+.app-settings-nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  box-shadow: none;
+  color: #423324;
+  text-align: start;
+  line-height: 1.35;
+}
+
+.app-settings-nav button:hover:not(:disabled) {
+  background: #d9c39a;
+  border-color: #b9a37c;
+}
+
+.app-settings-nav button[aria-current="page"] {
+  background: #6e302b;
+  border-color: #6e302b;
+  color: #fff0d1;
+  font-weight: 600;
+}
+
+.app-settings-nav button[aria-current="page"] .ink-icon {
+  color: #fff0d1;
+}
+
+.app-settings-nav button[aria-current="page"]:hover:not(:disabled) {
+  background: #803a34;
+  border-color: #803a34;
+}
+
+.app-settings-nav .ink-icon {
+  width: 21px;
+  height: 21px;
+  flex: none;
+}
+
+.app-settings-content {
+  min-width: 0;
+  padding: clamp(22px, 3vw, 46px);
+}
+
+.app-settings-panel {
+  min-width: 0;
+}
+
+.app-settings-panel[hidden] {
+  display: none;
+}
+
+.app-settings-panel .language-settings {
+  max-width: 900px;
+  padding: 0;
+}
+
+.app-settings-panel .language-settings h3 {
+  color: #562c26;
+  font-size: clamp(29px, 2.5vw, 36px);
+  line-height: 1.2;
+  margin: 0 0 10px;
+}
+
+.app-settings-panel .language-settings > p {
+  max-width: 68ch;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.app-settings-panel .language-settings > h4,
+.app-settings-panel .language-settings > form,
+.app-settings-panel .language-settings > fieldset,
+.app-settings-panel .language-settings > dl {
+  border-top: 1px solid #c3ae86;
+  padding-top: 22px;
+}
+
+.app-settings-panel .language-settings form {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.app-settings-panel .language-settings label {
+  font-size: 15px;
+}
+
+.app-settings-panel :is(input, select, textarea) {
+  max-width: 100%;
+}
+
+.app-settings-panel :is(input, select, textarea, button):focus-visible,
+.app-settings-nav button:focus-visible {
+  outline: 3px solid #7b3b31;
+  outline-offset: 2px;
+}
+
+@media (max-width: 980px) {
+  .app-settings-layout,
+  .campaign-settings-layout {
+    display: block;
+    min-height: 0;
+  }
+
+  .app-settings-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-inline-end: 0;
+    border-bottom: 1px solid #b9a37c;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 800px) {
+  .app-settings-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-settings-nav button {
+    align-items: start;
+  }
+
+  .app-settings-content,
+  .campaign-settings-content {
+    padding: 22px 18px 32px;
+  }
+}
+
+@media (max-width: 370px) {
+  .app-settings-nav {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,3 +1,26 @@
+# Chronexus status — 27 October 2026: settings redesign (local source)
+
+- App settings now presents six persistent sections in a dedicated navigation
+  instead of one continuous stack. Campaign settings uses the same pattern for
+  model, sources, local knowledge and retraining. Switching sections preserves
+  unsaved form values; campaign source drafts remain visibly marked until saved.
+  The herald opens the update section directly. Campaign-only actions and the
+  campaign modification date no longer appear in App settings.
+- Existing backend commands, saved values, confirmation steps and campaign AI
+  boundaries are unchanged. All visible labels reuse translated catalog entries;
+  no database migration or new dependency. The guide documents the new paths.
+- Checks: 207 frontend tests, TypeScript, ESLint, Vite build and `pnpm i18n:check`
+  passed. Local browser previews were inspected at 1280×720 and the 760×600
+  desktop minimum, including RTL reflow, keyboard focus, and a corrected
+  campaign checkbox alignment. These previews used synthetic content and local
+  command stubs; native Tauri visual inspection remains pending. Rust tests
+  were not rerun because no Rust code or domain behavior changed.
+- Skills used: frontend-design for the product-specific layout, ui-taste and
+  imagegen for a visual direction and render review, ui-ux-pro-max for
+  navigation, readable line lengths and semantic controls.
+- No release was published for this UI change. Next roadmap milestone: **M29 —
+  release matrix for Windows, macOS and Linux**.
+
 # Chronexus status — 27 October 2026: server integration, container builds, M41 wiki
 
 - **Server integration (M25.8 work):** Chronexus Server runs in Docker on macOS behind the
