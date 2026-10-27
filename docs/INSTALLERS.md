@@ -72,7 +72,7 @@ a container because the signing key stays outside them.
 | macOS ARM64 | `.app` + DMG, natively | Installed from the DMG into `~/Applications`, started, created its archive | Ad-hoc signature now valid (`codesign --verify --deep --strict`) |
 | macOS x64 | `.app` + DMG, cross-built natively | Not started (no Rosetta on this Mac) | Ad-hoc signature valid |
 | Linux ARM64 | `.deb` + AppImage, in `chronexus-linux-qa` | `.deb` on Debian 12 and Ubuntu 24.04, AppImage on Debian 12, under Xvfb; release build signed in to the HTTPS test server and downloaded a synchronized campaign | AppImage needs the host's libgbm/ALSA (normal on desktops) |
-| Linux x64 | In progress or pending under QEMU emulation | — | See STATUS for the outcome |
+| Linux x64 | `.deb` under QEMU emulation (`LINUX_BUNDLES=deb`) | Installed and started on Ubuntu 24.04 amd64 (emulated), screenshot checked | AppImage not built: linuxdeploy does not run under QEMU; build it on a native x64 host |
 | Windows x64 | NSIS installer, in `chronexus-windows-build` | Not run (no Windows here) | Unsigned (no paid certificate) |
 | Windows ARM64 | **Blocked** | — | `ring`'s ARM64 assembly gets clang-cl `/imsvc` flags; cargo-xwin's clang mode then breaks `aws-lc-sys` with clang 14. Needs a newer LLVM or a Windows ARM64 runner |
 

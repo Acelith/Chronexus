@@ -19,9 +19,12 @@ config='{"build":{"beforeBuildCommand":""},"bundle":{"createUpdaterArtifacts":fa
 case "$target" in
   linux)
     arch=$(uname -m)
-    pnpm tauri build --config "$config" --bundles deb,appimage
+    # LINUX_BUNDLES=deb under QEMU emulation: linuxdeploy (an AppImage itself) does not run there.
+    bundles="${LINUX_BUNDLES:-deb,appimage}"
+    pnpm tauri build --config "$config" --bundles "$bundles"
     mkdir -p "/out/linux-$arch"
-    cp "$CARGO_TARGET_DIR"/release/bundle/deb/*.deb "$CARGO_TARGET_DIR"/release/bundle/appimage/*.AppImage "/out/linux-$arch/"
+    cp "$CARGO_TARGET_DIR"/release/bundle/deb/*.deb "/out/linux-$arch/"
+    case "$bundles" in *appimage*) cp "$CARGO_TARGET_DIR"/release/bundle/appimage/*.AppImage "/out/linux-$arch/" ;; esac
     ;;
   windows)
     # aarch64 is blocked for now (docs/INSTALLERS.md): ring's ARM64 assembly receives

@@ -18,12 +18,13 @@
   installed and started on Debian 12/Ubuntu 24.04, the installed release build signed in to
   the HTTPS server and downloaded a synced campaign; Windows x64 NSIS built in
   `chronexus-windows-build` (not run); Windows ARM64 blocked (ring/aws-lc-sys under
-  cargo-xwin); Linux x64 under QEMU emulation, see the next entry if added.
+  cargo-xwin); Linux x64 `.deb` built under QEMU and started on emulated Ubuntu 24.04
+  (AppImage needs a native x64 host: linuxdeploy fails under QEMU).
 - **Roadmap:** M29 no longer includes paid signing; server milestones renamed M25.0–M25.11;
   new **M41 project wiki**, next, with sources in `docs/wiki/` (not yet published).
 - Checks: cargo test 173 passed, clippy -D warnings passed, vitest 196 passed, tsc and eslint
   passed, i18n coverage 1319 messages / 0 missing.
-- Open: Windows install test on real Windows, Linux x64 result, Arabic view of the picker,
+- Open: Windows install test on real Windows, Linux x64 AppImage, Arabic view of the picker,
   the Account radio layout on Linux (misaligned in WebKitGTK), wiki publication on request.
 - Next: **M41** wiki publication (needs the go-ahead), then M28 native review, M29.
 
