@@ -25,6 +25,9 @@
     }
   },
   "bundle": {
+    "macOS": {
+      "signingIdentity": "-"
+    },
     "resources": {
       "../scripts/ai/train.py": "ai/train.py",
       "../scripts/automation/mcp.mjs": "automation/mcp.mjs",

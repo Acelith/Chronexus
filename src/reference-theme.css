@@ -168,11 +168,22 @@ textarea {
   text-transform: none;
   letter-spacing: 0;
   width: 100%;
-  background: #201b16b0;
+  /* Own appearance: WebKitGTK otherwise paints the native (light) GTK field under the
+     light text, which made the campaign name unreadable on Linux. */
+  appearance: none;
+  -webkit-appearance: none;
+  color-scheme: dark;
+  background: #201b16
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23f4e6c8' stroke-width='1.6'/%3E%3C/svg%3E")
+    no-repeat right 12px center / 12px 8px;
   border: 1px solid #b39154;
   color: #f4e6c8;
   font-size: 18px;
-  padding: 10px 12px;
+  padding: 10px 34px 10px 12px;
+}
+[dir="rtl"] .campaign-picker select {
+  background-position: left 12px center;
+  padding: 10px 12px 10px 34px;
 }
 .campaign-picker option {
   background: #241e17;
