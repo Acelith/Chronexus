@@ -87,7 +87,7 @@ with stable references. The interface defaults to English and offers 10 language
 | Method | For | How |
 | --- | --- | --- |
 | **Windows x64 installer** | Everyone | Download `Chronexus_<version>_x64-setup.exe` from the [latest release](https://github.com/Acelith/Chronexus/releases) and run it |
-| **macOS, Linux (pre-release 0.10.0)** | Testers | [0.10.0](https://github.com/Acelith/Chronexus/releases/tag/v0.10.0): DMG for Apple Silicon and Intel, `.deb` for ARM64 and x64, AppImage for ARM64, plus a Windows x64 installer; checksums in `SHA256SUMS.txt` |
+| **macOS, Linux (pre-release 0.10.1)** | Testers | [0.10.1](https://github.com/Acelith/Chronexus/releases/tag/v0.10.1): DMG for Apple Silicon and Intel, `.deb` for ARM64 and x64, AppImage for ARM64, plus a Windows x64 installer; checksums in `SHA256SUMS.txt` |
 | **In-app update** | Users of 0.4.0 or later | App settings → App updates |
 | **From source** | Developers | See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) |
 
@@ -101,7 +101,7 @@ character or place, then explore **Codex** and **Graph**.
 > [!WARNING]
 > The installer has no Windows Authenticode signature, so SmartScreen may ask for
 > confirmation. In-app updates are still verified with a dedicated cryptographic
-> signature. The [0.10.0 pre-release](https://github.com/Acelith/Chronexus/releases/tag/v0.10.0) has no signatures at all (no Authenticode,
+> signature. The [0.10.1 pre-release](https://github.com/Acelith/Chronexus/releases/tag/v0.10.1) has no signatures at all (no Authenticode,
 > no notarization, no updater signature) and is not offered by the in-app updater: on
 > first launch use *More info → Run anyway* on Windows and right-click → *Open* on macOS.
 > See the [wiki](https://github.com/Acelith/Chronexus/blob/main/docs/wiki/Getting-Started.md).

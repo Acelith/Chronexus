@@ -1,4 +1,19 @@
+# Chronexus status — 27 October 2026 (evening): 0.10.1 replaces 0.10.0
+
+- Pre-release [0.10.1](https://github.com/Acelith/Chronexus/releases/tag/v0.10.1) built from
+  tag v0.10.1 in a clean worktree (macOS natively, Linux/Windows in the build containers):
+  macOS arm64/x64 DMG, Linux arm64 .deb/AppImage, Linux x64 .deb, Windows x64 NSIS,
+  SHA256SUMS.txt. No executable contains the previous hosting address (checked inside every
+  package). Installed and started: macOS arm64 (DMG, valid ad-hoc signature), Debian 12 and
+  Ubuntu 24.04 arm64 (.deb), Debian 12 arm64 (AppImage), Ubuntu 24.04 amd64 (.deb, emulated).
+  All assets re-downloaded anonymously from GitHub and matched SHA256SUMS.txt.
+- The GitHub release 0.10.0 was deleted at the user's request (its tag remains);
+  `releases/latest` is still the signed 0.9.2.
+- Open: commit and tag metadata on GitHub still carry the author address of the previous
+  host's domain; changing it needs a new Git identity and a history rewrite (user decision).
+
 # Chronexus status — 27 October 2026: GitHub migration — reachable history sanitized
+
 
 - GitHub is the canonical source/release destination. The owner authorized a one-time
   cleanup of all file revisions and commit/tag messages. All 180 app commits and

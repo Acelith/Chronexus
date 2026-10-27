@@ -83,7 +83,7 @@ gli incantesimi, e collega tutto con riferimenti stabili.
 | Metodo | Per chi | Come |
 | --- | --- | --- |
 | **Installer Windows x64** | Tutti | Scarica `Chronexus_<versione>_x64-setup.exe` dall’[ultima release](https://github.com/Acelith/Chronexus/releases) ed eseguilo |
-| **macOS, Linux (pre-release 0.10.0)** | Chi vuole provarla | [0.10.0](https://github.com/Acelith/Chronexus/releases/tag/v0.10.0): DMG per Apple Silicon e Intel, `.deb` per ARM64 e x64, AppImage per ARM64 e un installer Windows x64; checksum in `SHA256SUMS.txt` |
+| **macOS, Linux (pre-release 0.10.1)** | Chi vuole provarla | [0.10.1](https://github.com/Acelith/Chronexus/releases/tag/v0.10.1): DMG per Apple Silicon e Intel, `.deb` per ARM64 e x64, AppImage per ARM64 e un installer Windows x64; checksum in `SHA256SUMS.txt` |
 | **Aggiornamento dall’app** | Chi ha già la 0.4.0 o successiva | Impostazioni dell’app → Aggiornamenti dell’app |
 | **Dal sorgente** | Sviluppatori | Vedi [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) |
 
@@ -97,7 +97,7 @@ collegare un personaggio o un luogo, poi esplora **Codex** e **Grafo**.
 > [!WARNING]
 > L’installer non ha una firma Authenticode di Windows: SmartScreen può chiedere
 > conferma. Gli aggiornamenti dall’app sono comunque verificati con una firma
-> crittografica dedicata. La [pre-release 0.10.0](https://github.com/Acelith/Chronexus/releases/tag/v0.10.0) non ha nessuna firma e non viene
+> crittografica dedicata. La [pre-release 0.10.1](https://github.com/Acelith/Chronexus/releases/tag/v0.10.1) non ha nessuna firma e non viene
 > proposta dall’aggiornamento interno: al primo avvio usa *Ulteriori informazioni → Esegui
 > comunque* su Windows e clic destro → *Apri* su macOS.
 

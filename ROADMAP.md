@@ -1502,7 +1502,7 @@ request before implementation, and publication follows the standing release rule
 | Priority | Milestone | Why now | Depends on |
 | --- | --- | --- | --- |
 | Done | M41 — Project wiki for app and server | Handbook published; canonical GitHub Markdown sources after migration | — |
-| Done | M29 — Release matrix for Windows, macOS and Linux | Unsigned pre-release 0.10.0 published 27/10/2026; Windows ARM64 and x64 AppImage open | — |
+| Done | M29 — Release matrix for Windows, macOS and Linux | Unsigned pre-release 0.10.1 published 27/10/2026 (replaces 0.10.0); Windows ARM64 and x64 AppImage open | — |
 | Done | M30 — Automated desktop QA and cross-platform CI | GitHub workflows and local runner in place; remote run acceptance open | — |
 | 1 | M25 — Chronexus Server (in progress) | The sharing client already ships in 0.9.x without a server | M24 |
 | 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Requested 27/10/2026: a GM runs combat for players; journals stay private | M25 |
@@ -1559,10 +1559,11 @@ At the user's request M28 no longer appears among the open milestones. Its imple
 (complete catalogs, ten-language installer, 26 October 2026) stays in the delivered log
 above and in docs/STATUS.md; the native-speaker review is no longer a tracked milestone.
 
-## M29 — Release matrix for Windows, macOS and Linux (delivered as unsigned pre-release 0.10.0)
+## M29 — Release matrix for Windows, macOS and Linux (delivered as unsigned pre-release 0.10.1)
 
 **Status (27 October 2026):** published as the unsigned pre-release
-[0.10.0](https://github.com/Acelith/Chronexus/releases/tag/v0.10.0), at the user's request
+[0.10.1](https://github.com/Acelith/Chronexus/releases/tag/v0.10.1) (rebuilt from the GitHub source; the 0.10.0
+release, whose binaries carried the previous update address, was removed from GitHub), at the user's request
 without any signature: macOS arm64/x64 DMG, Linux arm64 .deb/AppImage, Linux x64 .deb,
 Windows x64 NSIS, with SHA256SUMS.txt; every asset re-downloaded anonymously and verified.
 Not in the updater channel (`releases/latest` stays on signed 0.9.2). Open: Windows ARM64
