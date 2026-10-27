@@ -45,6 +45,43 @@ created outside Git during the diagnosis. No automatic installer was run.
 Windows x64 app only; no AI weights or Windows Authenticode signature. Other
 platforms/architectures and actual installation/upgrade remain unverified.
 
+# Building in containers — 27 October 2026
+
+User instruction: Linux and Windows packages are built in dedicated Docker containers,
+created when missing; macOS cannot run in a container (Docker shares a Linux kernel and the
+Apple toolchain needs macOS), so it is built natively on a Mac.
+
+| Image | Dockerfile | Produces |
+| --- | --- | --- |
+| `chronexus-linux-qa` | `scripts/qa/linux/Dockerfile` | `.deb` and AppImage for the host architecture; also runs debug/installed builds under Xvfb |
+| `chronexus-windows-build` | `scripts/build/windows/Dockerfile` | NSIS installers for x86_64 and aarch64 Windows (cargo-xwin) |
+
+Run `scripts/build/container-build.sh linux|windows` inside the image with the checkout
+mounted read-only at `/src`, an output folder at `/out` and cargo caches in volumes. On an
+Apple Silicon host the native Linux build is ARM64; x64 Linux needs `--platform
+linux/amd64` (QEMU emulation, slow). cargo-xwin downloads the Microsoft CRT and Windows
+SDK and accepts their licence; the user accepted it on 27 October 2026. Windows installers
+built this way have no Authenticode signature and cannot be started on the Mac: their
+installation remains unverified until run on Windows. Updater artifacts are never built in
+a container because the signing key stays outside them.
+
+## Results of 27 October 2026 (source 0.9.2 plus unreleased fixes; nothing published)
+
+| Target | Built | Installed / started | Notes |
+| --- | --- | --- | --- |
+| macOS ARM64 | `.app` + DMG, natively | Installed from the DMG into `~/Applications`, started, created its archive | Ad-hoc signature now valid (`codesign --verify --deep --strict`) |
+| macOS x64 | `.app` + DMG, cross-built natively | Not started (no Rosetta on this Mac) | Ad-hoc signature valid |
+| Linux ARM64 | `.deb` + AppImage, in `chronexus-linux-qa` | `.deb` on Debian 12 and Ubuntu 24.04, AppImage on Debian 12, under Xvfb; release build signed in to the HTTPS test server and downloaded a synchronized campaign | AppImage needs the host's libgbm/ALSA (normal on desktops) |
+| Linux x64 | In progress or pending under QEMU emulation | — | See STATUS for the outcome |
+| Windows x64 | NSIS installer, in `chronexus-windows-build` | Not run (no Windows here) | Unsigned (no paid certificate) |
+| Windows ARM64 | **Blocked** | — | `ring`'s ARM64 assembly gets clang-cl `/imsvc` flags; cargo-xwin's clang mode then breaks `aws-lc-sys` with clang 14. Needs a newer LLVM or a Windows ARM64 runner |
+
+Fixes found by these builds: the macOS bundle had only the linker's signature, so
+`codesign --verify` failed and a downloaded copy would be reported as damaged —
+`bundle.macOS.signingIdentity` is now `"-"` (free ad-hoc signing); bookworm's NSIS 3.08 lacks
+`Win\RestartManager.nsh`, so the Windows image takes NSIS 3.11 from trixie; on Linux the
+campaign picker was unreadable (WebKitGTK painted the native light field under light text).
+
 # Future build checklist — pending, 26 October 2026
 
 Apply this checklist at the next authorized build/release. The user's current
