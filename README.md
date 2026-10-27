@@ -9,7 +9,7 @@ in which session and for which faction, with no account and no cloud.
 
 [![Release](https://img.shields.io/gitea/v/release/acelith/Chronexus?gitea_url=https%3A%2F%2Fgithub.com&label=release&color=6c302b)](https://github.com/Acelith/Chronexus/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-354b3e)](LICENSE)
-[![Platform](https://img.shields.io/badge/Windows-x64-241e17)](#download-and-installation)
+[![Platform](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-x64%20%7C%20ARM64-241e17)](#download-and-installation)
 [![Offline](https://img.shields.io/badge/data-local%20only-b89b60)](#privacy-and-data)
 [![Languages](https://img.shields.io/badge/languages-10%20%2B%20scripts-354b3e)](docs/I18N.md)
 
@@ -87,6 +87,7 @@ with stable references. The interface defaults to English and offers 10 language
 | Method | For | How |
 | --- | --- | --- |
 | **Windows x64 installer** | Everyone | Download `Chronexus_<version>_x64-setup.exe` from the [latest release](https://github.com/Acelith/Chronexus/releases) and run it |
+| **macOS, Linux (pre-release 0.10.0)** | Testers | [0.10.0](https://github.com/Acelith/Chronexus/releases/tag/v0.10.0): DMG for Apple Silicon and Intel, `.deb` for ARM64 and x64, AppImage for ARM64, plus a Windows x64 installer; checksums in `SHA256SUMS.txt` |
 | **In-app update** | Users of 0.4.0 or later | App settings → App updates |
 | **From source** | Developers | See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) |
 
@@ -100,8 +101,10 @@ character or place, then explore **Codex** and **Graph**.
 > [!WARNING]
 > The installer has no Windows Authenticode signature, so SmartScreen may ask for
 > confirmation. In-app updates are still verified with a dedicated cryptographic
-> signature. No macOS, Linux or ARM64 packages are included in release 0.9.2;
-> installation and upgrade of this Windows installer have not been tested.
+> signature. The [0.10.0 pre-release](https://github.com/Acelith/Chronexus/releases/tag/v0.10.0) has no signatures at all (no Authenticode,
+> no notarization, no updater signature) and is not offered by the in-app updater: on
+> first launch use *More info → Run anyway* on Windows and right-click → *Open* on macOS.
+> See the [wiki](https://github.com/Acelith/Chronexus/wiki/Getting-Started).
 
 ## Updates and backups
 
