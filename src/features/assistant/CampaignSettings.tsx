@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { assistantApi, type Runtime, type Rule } from "./api";
 import { campaignAi, type Overview, type Profile } from "./campaignApi";
 import TrainingPanel from "./TrainingPanel";
+import { ServerAiSettings } from "./ServerAiPanel";
 import type { SaveGuard } from "../journal/Editor";
 import { errorMessage } from "../journal/api";
 import { Icon } from "../../components/Ornaments";
@@ -46,7 +47,7 @@ export default function CampaignSettings({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [section, setSection] = useState<
-    "model" | "sources" | "knowledge" | "training"
+    "execution" | "model" | "sources" | "knowledge" | "training"
   >("model");
   useEffect(() => {
     let active = true;
@@ -145,6 +146,11 @@ export default function CampaignSettings({
           >
             {(
               [
+                {
+                  id: "execution",
+                  label: "Where the assistant runs",
+                  icon: "settings",
+                },
                 { id: "model", label: "Local AI · model", icon: "star" },
                 { id: "sources", label: "Sources and resources", icon: "book" },
                 { id: "knowledge", label: "Local knowledge", icon: "wiki" },
@@ -180,6 +186,30 @@ export default function CampaignSettings({
                 />
               </p>
             )}
+            <div
+              id="campaign-settings-panel-execution"
+              role="region"
+              aria-labelledby="campaign-settings-link-execution"
+              hidden={section !== "execution"}
+            >
+              <ServerAiSettings
+                campaignId={campaignId}
+                profile={view.profile}
+                disabled={trainingActive}
+                onSaved={(saved) => {
+                  setView((v) => (v ? { ...v, profile: saved } : v));
+                  setDraft((d) =>
+                    d
+                      ? {
+                          ...d,
+                          execution: saved.execution,
+                          serverModel: saved.serverModel,
+                        }
+                      : d,
+                  );
+                }}
+              />
+            </div>
             <div
               id="campaign-settings-panel-model"
               role="region"

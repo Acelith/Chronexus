@@ -69,3 +69,34 @@ fn sources_and_limits_reject_foreign_editions_and_invalid_preferences() {
     p.include_kinds = vec!["conversation".into()];
     assert!(save_preferences(&c, &a.id, &p).is_err());
 }
+
+#[test]
+fn execution_choice_defaults_to_local_and_is_validated() {
+    let c = db::open(Path::new(":memory:")).unwrap();
+    let a = journal::create_campaign(&c, "A").unwrap();
+    // An archive saved before the choice existed has no execution field: it runs locally.
+    let old = serde_json::to_value(Profile::default()).unwrap();
+    let mut legacy = old.as_object().unwrap().clone();
+    legacy.remove("execution");
+    legacy.remove("serverModel");
+    c.execute(
+        "INSERT INTO campaign_ai_settings(campaign_id,payload) VALUES(?1,?2)",
+        rusqlite::params![a.id, serde_json::Value::Object(legacy).to_string()],
+    )
+    .unwrap();
+    let p = get(&c, &a.id).unwrap();
+    assert_eq!(
+        (p.execution.as_str(), p.server_model.as_str()),
+        ("local", "")
+    );
+    let mut server = p.clone();
+    server.execution = "server".into();
+    server.server_model = "qwen3.8:27b-q4_K_M".into();
+    assert_eq!(write(&c, &a.id, &server).unwrap().execution, "server");
+    for (execution, model) in [("cloud", ""), ("server", "bad model"), ("server", "x;rm")] {
+        let mut wrong = p.clone();
+        wrong.execution = execution.into();
+        wrong.server_model = model.into();
+        assert!(write(&c, &a.id, &wrong).is_err(), "{execution} {model}");
+    }
+}

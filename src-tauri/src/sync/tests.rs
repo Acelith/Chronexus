@@ -297,6 +297,10 @@ fn route(
             s.tokens.remove(token.as_ref().unwrap());
             (204, Value::Null)
         }
+        ("GET", ["api", "v1", "ai", "status"]) => (
+            200,
+            json!({"runtimeReachable":true,"cloudDisabled":true,"models":[{"name":"fake:1","pinnedDigest":null,"available":true}],"running":0,"waiting":0,"concurrency":1,"queue":4,"perUserHour":30,"timeoutSeconds":120,"maxQuestionChars":2000}),
+        ),
         ("POST", ["api", "v1", "campaigns"]) => {
             s.next += 1;
             let id = format!("camp-{}", s.next);
@@ -381,6 +385,14 @@ fn route(
                     200,
                     json!({"id":campaign,"name":s.campaigns[&campaign].name,"role":role}),
                 ),
+                ("POST", ["ai", "answers"]) => match body["question"].as_str() {
+                    Some("busy?") => (429, json!({"error":"queue"})),
+                    Some("down?") => (503, json!({"error":"down"})),
+                    _ => (
+                        200,
+                        json!({"answer":"North of the river [S1].","verified":true,"citations":[{"key":"S1","kind":"page","itemId":"p1","revision":2,"authorName":"ALICE","title":"Tower"}],"model":body["model"],"digest":"d","sourcesConsidered":1,"excludedSources":0,"runtimeUsed":true,"elapsedMs":5}),
+                    ),
+                },
                 ("GET", ["members"]) => {
                     let mut list: Vec<Value> = s.campaigns[&campaign]
                         .members
@@ -1012,6 +1024,50 @@ async fn role_changes_reach_the_member_and_leaving_clears_what_others_shared() {
     assert!(bob.remote().is_empty());
     assert!(bob.text_of(&claim).contains("Written while a reader"));
     assert_eq!(alice.client().members(&remote.id).await.unwrap().len(), 1);
+}
+
+#[tokio::test]
+async fn server_ai_answers_and_failures_are_parsed_and_explained() {
+    let fake = Fake::start();
+    let mut alice = Device::new("Alice's campaign");
+    let alice_id = alice.sign(&fake.base, Some("ADMIN-INVITE"), "alice").await;
+    let remote = alice.client().create_campaign("AI").await.unwrap();
+    alice.link(&fake.base, &alice_id, &remote);
+    let status = alice.client().ai_status().await.unwrap();
+    assert!(status.cloud_disabled && status.models[0].available);
+    let answer = alice
+        .client()
+        .ai_answer(&remote.id, "Where is the tower?", "fake:1", Some("en"))
+        .await
+        .unwrap();
+    assert!(answer.verified);
+    assert_eq!(answer.citations[0].author_name, "ALICE");
+    assert_eq!(answer.model, "fake:1");
+    let busy = alice
+        .client()
+        .ai_answer(&remote.id, "busy?", "fake:1", None)
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(busy, Failure::Unavailable(ref m) if m.contains("hourly limit")),
+        "{busy:?}"
+    );
+    let down = alice
+        .client()
+        .ai_answer(&remote.id, "down?", "fake:1", None)
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(down, Failure::Unavailable(ref m) if m.contains("switch this campaign to local AI")),
+        "{down:?}"
+    );
+    // A campaign the account is not a member of is refused by the server.
+    let missing = alice
+        .client()
+        .ai_answer("camp-404", "x?", "fake:1", None)
+        .await
+        .unwrap_err();
+    assert!(matches!(missing, Failure::Rejected(_)), "{missing:?}");
 }
 
 #[tokio::test]

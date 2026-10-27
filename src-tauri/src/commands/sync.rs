@@ -35,7 +35,7 @@ fn check_user(text: &str, what: &str, max: usize) -> AppResult<()> {
     Ok(())
 }
 /// The link must belong to the signed-in account on the configured server.
-async fn linked(
+pub(crate) async fn linked(
     db: &Database,
     campaign: &str,
     session: &Session,

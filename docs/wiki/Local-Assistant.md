@@ -22,6 +22,17 @@ the cartographer?" — with citations you can reopen. It runs entirely on your c
    button.
 2. In the campaign, open **Local assistant**, check the runtime and activate the model.
 
+## Running it on the sharing server instead
+
+If the campaign is linked to a sharing server whose operator enabled **server AI**,
+**Campaign settings → Where the assistant runs** lets you choose *On the campaign's sharing
+server*. Press **Check the server AI**, pick one of the installed models and **Use this
+choice**. Questions then go to the server with the model name; it answers only from what you
+can read there in this campaign (synchronized items and what others share), never from notes
+kept only on your computer, and it stores neither questions nor answers. If the server is
+busy, over your hourly limit or unavailable, the app says so and offers **Switch this
+campaign to local AI**; it never switches by itself. Server models are not qualified yet.
+
 ## Campaign retraining (advanced)
 
 With Gemma, **Campaign settings → Local AI → Retrain on new data** prepares a small

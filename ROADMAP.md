@@ -1624,8 +1624,12 @@ server releases 0.1.0 and 0.1.1 on GitHub (binaries, checksums, versioned contra
 compatibility table and upgrade checklist, desktop acceptance with three apps over HTTPS,
 proof that the desktop opens no connection without a configured server; container images
 on GHCR still need a GitHub credential with package permission. **M25.11** implemented: web
-interface for campaigns, members, invitations, devices and operators. Open: **M25.10**
-(server AI: needs qualified GPU hardware and models), **M25.9** (Android contract: needs
+interface for campaigns, members, invitations, devices and operators. **M25.10**
+implemented without GPU qualification: optional Compose `ai` profile (isolated Ollama, no
+internet), per-campaign choice in the desktop between local and server AI, sources limited to
+what the account can read, hourly allowance, bounded queue and timeout, explicit switch back
+to local AI. Open: **M25.10 qualification** (models and GPU sizing: needs hardware and
+weights), **M25.9** (Android contract: needs
 M27 on a real device), and a public deployment with real DNS/TLS (needs a host and domain).
 
 - Implement the server side of M24.1–M24.3 in `acelith/Chronexus-Server` following

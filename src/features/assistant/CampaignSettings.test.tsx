@@ -27,6 +27,8 @@ const initial: Overview = {
     ruleKeys: [],
     indexedAt: null,
     manifest: [],
+    execution: "local",
+    serverModel: "",
   },
   sources: [],
   added: 0,

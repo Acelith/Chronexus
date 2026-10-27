@@ -138,6 +138,68 @@ pub struct Member {
     pub revision: i64,
     pub joined_at: String,
 }
+/// The campaign server's optional AI (server milestone M25.10), as it reports itself.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ServerAiModel {
+    pub name: String,
+    pub pinned_digest: Option<String>,
+    pub available: bool,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ServerAiStatus {
+    pub runtime_reachable: bool,
+    pub cloud_disabled: bool,
+    pub models: Vec<ServerAiModel>,
+    pub running: u32,
+    pub waiting: u32,
+    pub per_user_hour: u32,
+    pub timeout_seconds: u64,
+    pub max_question_chars: u32,
+}
+/// A source the server used: what the asker may already read in that campaign.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ServerCitation {
+    pub key: String,
+    pub kind: String,
+    pub item_id: String,
+    pub revision: i64,
+    pub author_name: String,
+    pub title: String,
+}
+/// A transient, unverified draft computed on the server; never stored there.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ServerAnswer {
+    pub answer: String,
+    pub verified: bool,
+    pub citations: Vec<ServerCitation>,
+    pub model: String,
+    pub digest: String,
+    pub sources_considered: u32,
+    pub excluded_sources: u32,
+    pub runtime_used: bool,
+    pub elapsed_ms: u64,
+}
+fn ai_failure(status: u16) -> Failure {
+    match status {
+        404 => Failure::Rejected("Server AI is not enabled on this campaign's server.".into()),
+        400 => Failure::Rejected(
+            "The server refused the question or the model. Check the model chosen in Campaign settings.".into(),
+        ),
+        403 => Failure::Rejected("Your role in this shared campaign does not allow this operation.".into()),
+        429 => Failure::Unavailable(
+            "The server AI is busy or you reached your hourly limit. Try again later.".into(),
+        ),
+        502 | 503 => Failure::Unavailable(
+            "The server AI is not available right now. Try again later or switch this campaign to local AI.".into(),
+        ),
+        504 => Failure::Unavailable("The server AI did not answer in time.".into()),
+        other => failure(other),
+    }
+}
 /// One item as the server shows it to this account.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -568,6 +630,76 @@ impl Client {
             )),
             _ => Err(failure(status)),
         }
+    }
+    /// What the server's optional AI offers; a 404 means it is not enabled there.
+    pub async fn ai_status(&self) -> ApiResult<ServerAiStatus> {
+        let (status, value) = self
+            .send(Method::GET, self.url("/api/v1/ai/status")?, None, None)
+            .await?;
+        if status != 200 {
+            return Err(ai_failure(status));
+        }
+        let parsed: ServerAiStatus = serde_json::from_value(value)
+            .map_err(|_| Failure::Rejected("Invalid answer from the sharing server.".into()))?;
+        if parsed.models.len() > 32
+            || parsed
+                .models
+                .iter()
+                .any(|m| m.name.is_empty() || m.name.len() > 128)
+        {
+            return Err(Failure::Rejected(
+                "Invalid answer from the sharing server.".into(),
+            ));
+        }
+        Ok(parsed)
+    }
+    /// Asks the server's AI about one campaign. The server reads only what this account may
+    /// read there; the answer is a draft. Waits up to 15 minutes (queue plus generation).
+    pub async fn ai_answer(
+        &self,
+        campaign: &str,
+        question: &str,
+        model: &str,
+        locale: Option<&str>,
+    ) -> ApiResult<ServerAnswer> {
+        remote_id(campaign)?;
+        let url = self.url(&format!("/api/v1/campaigns/{campaign}/ai/answers"))?;
+        let mut request = self
+            .streaming
+            .post(url)
+            .json(&json!({"question":question,"model":model,"locale":locale}));
+        if let Some(token) = &self.token {
+            request = request.bearer_auth(token);
+        }
+        let response = tokio::time::timeout(Duration::from_secs(900), request.send())
+            .await
+            .map_err(|_| Failure::Unavailable("The server AI did not answer in time.".into()))?
+            .map_err(|_| {
+                Failure::Unavailable("Connection to the sharing server not available.".into())
+            })?;
+        let status = response.status().as_u16();
+        if status == 401 {
+            return Err(failure(401));
+        }
+        if status != 200 {
+            return Err(ai_failure(status));
+        }
+        let bytes = response.bytes().await.map_err(|_| {
+            Failure::Unavailable("Connection to the sharing server not available.".into())
+        })?;
+        if bytes.len() > 1 << 20 {
+            return Err(Failure::Rejected(
+                "Invalid answer from the sharing server.".into(),
+            ));
+        }
+        let answer: ServerAnswer = serde_json::from_slice(&bytes)
+            .map_err(|_| Failure::Rejected("Invalid answer from the sharing server.".into()))?;
+        if answer.answer.chars().count() > 12000 || answer.citations.len() > 16 {
+            return Err(Failure::Rejected(
+                "Invalid answer from the sharing server.".into(),
+            ));
+        }
+        Ok(answer)
     }
     /// Active members of a campaign (any member may read the list).
     pub async fn members(&self, campaign: &str) -> ApiResult<Vec<Member>> {

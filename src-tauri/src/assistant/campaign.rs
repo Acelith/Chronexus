@@ -22,6 +22,16 @@ pub struct Profile {
     pub rule_keys: Vec<String>,
     pub indexed_at: Option<String>,
     pub manifest: Vec<Stamp>,
+    /// Where questions run: "local" (this computer, the default) or "server" (the campaign's
+    /// sharing server, server milestone M25.10). Archives before it have no value: local.
+    #[serde(default = "local_execution")]
+    pub execution: String,
+    /// The model chosen among those the campaign's server allows; empty until chosen.
+    #[serde(default)]
+    pub server_model: String,
+}
+fn local_execution() -> String {
+    "local".into()
 }
 impl Default for Profile {
     fn default() -> Self {
@@ -40,6 +50,8 @@ impl Default for Profile {
             rule_keys: vec![],
             indexed_at: None,
             manifest: vec![],
+            execution: local_execution(),
+            server_model: String::new(),
         }
     }
 }
@@ -78,6 +90,17 @@ pub fn validate(p: &Profile) -> AppResult<()> {
         || p.indexed_at.as_ref().is_some_and(|s| s.len() > 40)
     {
         return Err("AI source preferences over the limits.".into());
+    }
+    if !["local", "server"].contains(&p.execution.as_str())
+        || p.server_model.len() > 128
+        || !p
+            .server_model
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || "._:-/".contains(c))
+    {
+        return Err(
+            "Choose where the assistant runs: this computer or the campaign's server.".into(),
+        );
     }
     for id in &p.excluded_ids {
         identifier(id)?;

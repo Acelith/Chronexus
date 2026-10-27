@@ -30,6 +30,7 @@ import { errorMessage } from "../journal/api";
 import type { SaveGuard } from "../journal/Editor";
 import type { SearchResult } from "../search/SearchPanel";
 import { campaignAi } from "./campaignApi";
+import { ServerAsk } from "./ServerAiPanel";
 const statuses: Record<string, string> = localizeLabels({
   running: "In progress",
   complete: "Answer finished · to be checked",
@@ -67,7 +68,9 @@ export default function AssistantWorkspace({
     [keys, setKeys] = useState<string[]>([]),
     [sourceNotice, setSourceNotice] = useState(""),
     [confirmDelete, setConfirmDelete] = useState(false),
-    [more, setMore] = useState(false);
+    [more, setMore] = useState(false),
+    [execution, setExecution] = useState<"local" | "server">("local"),
+    [serverModel, setServerModel] = useState("");
   const job = useRef<{ id: string; promise: Promise<void> } | null>(null),
     mounted = useRef(true);
   useEffect(() => {
@@ -92,6 +95,8 @@ export default function AssistantWorkspace({
           setEdition(preferences.profile.edition);
           setApprovedKeys(preferences.profile.ruleKeys);
           setKeys(preferences.profile.ruleKeys);
+          setExecution(preferences.profile.execution);
+          setServerModel(preferences.profile.serverModel);
         }
       })
       .catch((e) => {
@@ -282,6 +287,31 @@ export default function AssistantWorkspace({
       <p role="status">
         <Text source={"Opening local assistant…"} />
       </p>
+    );
+  if (execution === "server")
+    return (
+      <section className="assistant-workspace">
+        <header className="section-heading">
+          <div>
+            <p className="eyebrow">
+              <Text source={"The wayfarer's counsel"} />
+            </p>
+            <h2>{tr("Server assistant")}</h2>
+            <p>
+              <Text
+                source={
+                  "Ask your notes or the D&D sources saved in the Wiki. Answers must be checked and never change the campaign."
+                }
+              />
+            </p>
+          </div>
+        </header>
+        <ServerAsk
+          campaignId={campaignId}
+          model={serverModel}
+          onSwitchedToLocal={() => setExecution("local")}
+        />
+      </section>
     );
   return (
     <section className="assistant-workspace">

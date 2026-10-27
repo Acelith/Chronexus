@@ -1,3 +1,17 @@
+# Chronexus status — 27 October 2026 (night): M25.10 server AI client (unreleased)
+
+- Campaign settings gain **Where the assistant runs**: this computer (default, unchanged) or
+  the campaign's sharing server. The server is contacted only on *Check the server AI* or a
+  question; only installed models are offered. The profile keeps `execution`/`serverModel`
+  (serde defaults, no schema change; old profiles stay local). Commands `server_ai_status`,
+  `set_campaign_ai_execution`, `ask_server_ai`; failures (disabled, busy/limit, unavailable,
+  timeout) are explained and offer *Try again* or an explicit *Switch to local AI*.
+- Evidence: 177 Rust tests (new: profile validation, server AI parsing/failures against the
+  fake server), Clippy `-D warnings`, fmt; 211 Vitest tests (3 new), tsc, ESLint, Prettier;
+  i18n gate 0 unregistered / 0 missing with 34 new messages in all ten languages.
+- Open: GPU/model qualification on the server (see Chronexus-Server docs/AI.md); not yet in a
+  release; no manual run against a server with real model weights.
+
 # Chronexus status — 27 October 2026 (evening): 0.10.1 replaces 0.10.0
 
 - Pre-release [0.10.1](https://github.com/Acelith/Chronexus/releases/tag/v0.10.1) built from

@@ -137,6 +137,95 @@ pub async fn save_campaign_ai(
         .await
 }
 
+/// The campaign's sharing server and what its optional AI offers. Network only on request.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ServerAiView {
+    pub server: String,
+    pub status: crate::sync::api::ServerAiStatus,
+}
+async fn server_client(
+    db: &Database,
+    campaign: &str,
+) -> AppResult<(String, String, crate::sync::api::Client)> {
+    let (current, session, client) = crate::commands::sync::signed_in(db)?;
+    let server = current.server.clone().unwrap_or_default();
+    let link = crate::commands::sync::linked(db, campaign, &session, &server)
+        .await
+        .map_err(|_| {
+            "Server AI needs this campaign to be linked to your sharing server (Sharing view)."
+                .to_string()
+        })?;
+    Ok((server, link.remote_id, client))
+}
+#[tauri::command]
+pub async fn server_ai_status(
+    db: tauri::State<'_, Database>,
+    campaign_id: String,
+) -> AppResult<ServerAiView> {
+    let (server, _, client) = server_client(&db, &campaign_id).await?;
+    let status = client.ai_status().await.map_err(String::from)?;
+    Ok(ServerAiView { server, status })
+}
+/// Explicit choice of where questions about this campaign run. Switching never moves
+/// notes, models or history.
+#[tauri::command]
+pub async fn set_campaign_ai_execution(
+    db: tauri::State<'_, Database>,
+    state: tauri::State<'_, assistant::service::State>,
+    campaign_id: String,
+    execution: String,
+    server_model: String,
+) -> AppResult<assistant::campaign::Profile> {
+    if assistant::service::busy(&state)? {
+        return Err("Wait for or cancel the AI operation before changing where it runs.".into());
+    }
+    db.run(move |c| {
+        let mut p = assistant::campaign::get(c, &campaign_id)?;
+        p.execution = execution;
+        p.server_model = server_model;
+        assistant::campaign::write(c, &campaign_id, &p)
+    })
+    .await
+}
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ServerAiAnswer {
+    pub server: String,
+    pub answer: crate::sync::api::ServerAnswer,
+}
+/// Asks the campaign's server. The question and the model name go to that server only; it
+/// answers from what this account may read there. Nothing is written to the archive.
+#[tauri::command]
+pub async fn ask_server_ai(
+    db: tauri::State<'_, Database>,
+    campaign_id: String,
+    question: String,
+    locale: Option<String>,
+) -> AppResult<ServerAiAnswer> {
+    assistant::store::question(&question)?;
+    let id = campaign_id.clone();
+    let profile = db.run(move |c| assistant::campaign::get(c, &id)).await?;
+    if profile.execution != "server" {
+        return Err("This campaign's assistant runs on this computer. Choose the server in Campaign settings first.".into());
+    }
+    if profile.server_model.is_empty() {
+        return Err("Choose a server model in Campaign settings first.".into());
+    }
+    let locale = locale.filter(|l| l.len() <= 16);
+    let (server, remote, client) = server_client(&db, &campaign_id).await?;
+    let answer = client
+        .ai_answer(
+            &remote,
+            question.trim(),
+            &profile.server_model,
+            locale.as_deref(),
+        )
+        .await
+        .map_err(String::from)?;
+    Ok(ServerAiAnswer { server, answer })
+}
+
 #[tauri::command]
 pub async fn refresh_campaign_ai(
     db: tauri::State<'_, Database>,
