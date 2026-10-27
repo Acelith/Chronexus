@@ -14,6 +14,7 @@ tar --exclude=./node_modules --exclude=./src-tauri/target --exclude=./.git \
   --exclude=./.tools --exclude=./dist --exclude=./.claude -cf - . | (cd /work && tar -xf -)
 cd /work
 CI=true pnpm install --frozen-lockfile >/tmp/pnpm.log 2>&1 || { tail -30 /tmp/pnpm.log; exit 1; }
+pnpm icons >/tmp/icons.log 2>&1 || { tail -30 /tmp/icons.log; exit 1; }
 pnpm build >/tmp/frontend.log 2>&1 || { tail -30 /tmp/frontend.log; exit 1; }
 config='{"build":{"beforeBuildCommand":""},"bundle":{"createUpdaterArtifacts":false}}'
 case "$target" in
@@ -23,8 +24,9 @@ case "$target" in
     bundles="${LINUX_BUNDLES:-deb,appimage}"
     pnpm tauri build --config "$config" --bundles "$bundles"
     mkdir -p "/out/linux-$arch"
-    cp "$CARGO_TARGET_DIR"/release/bundle/deb/*.deb "/out/linux-$arch/"
-    case "$bundles" in *appimage*) cp "$CARGO_TARGET_DIR"/release/bundle/appimage/*.AppImage "/out/linux-$arch/" ;; esac
+    version=$(node -p "require('./package.json').version")
+    cp "$CARGO_TARGET_DIR"/release/bundle/deb/*_"$version"_*.deb "/out/linux-$arch/"
+    case "$bundles" in *appimage*) cp "$CARGO_TARGET_DIR"/release/bundle/appimage/*_"$version"_*.AppImage "/out/linux-$arch/" ;; esac
     ;;
   windows)
     # aarch64 is blocked for now (docs/INSTALLERS.md): ring's ARM64 assembly receives
@@ -32,7 +34,7 @@ case "$target" in
     for triple in ${WINDOWS_TARGETS:-x86_64-pc-windows-msvc}; do
       pnpm tauri build --config "$config" --runner cargo-xwin --target "$triple" --bundles nsis
       mkdir -p "/out/windows-${triple%%-*}"
-      cp "$CARGO_TARGET_DIR/$triple"/release/bundle/nsis/*.exe "/out/windows-${triple%%-*}/"
+      cp "$CARGO_TARGET_DIR/$triple"/release/bundle/nsis/*_"$(node -p "require('./package.json').version")"_*.exe "/out/windows-${triple%%-*}/"
     done
     ;;
   *)
