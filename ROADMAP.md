@@ -1501,29 +1501,29 @@ request before implementation, and publication follows the standing release rule
 
 | Priority | Milestone | Why now | Depends on |
 | --- | --- | --- | --- |
-| Next | M41 — Project wiki for app and server | Added 27/10/2026 at the user's request: users and developers need one place that explains everything | — |
-| 1 | M28 — Complete translations and multilingual installer | **Implemented** 26/10/2026; native review per language open | — |
-| 2 | M29 — Release matrix for Windows, macOS and Linux | Only Windows x64 is published; the other five targets need verified packages | M28 |
-| 3 | M30 — Automated desktop QA and cross-platform CI | Old smoke scripts are stale; releases on six targets need repeatable checks | — |
-| 4 | M25 — Chronexus Server (in progress) | The sharing client already ships in 0.9.x without a server | M24 |
-| 5 | M31 — Clue board and open questions | Strengthens the player-knowledge differentiator | — |
-| 6 | M32 — First start and demo campaign | New users must see the value in minutes | M28 |
-| 7 | M33 — Trust and transparency | The project is openly vibecoded: give verifiable evidence | M29 |
-| 8 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
-| 9 | M35 — "Previously on…" session recap | Faster start of every game session | M31 helpful |
-| 10 | M36 — Import from Obsidian, Kanka and character exports | Lowers the cost of switching to Chronexus | — |
-| 11 | M37 — Campaign timeline and in-world calendar | Long campaigns need chronology | — |
-| 12 | M38 — Maps with linked pins | Places and routes are central to play | — |
-| 13 | M39 — Print and PDF export | Paper sheets and campaign booklets at the table | — |
-| 14 | M40 — Additional ruleset sheet presets | Reaches players beyond D&D 5e | License review |
-| 15 | M27 — Android app (APK) | Largest scope; needs the server and stable releases | M25, M29 |
+| Done | M41 — Project wiki for app and server | Published 27/10/2026 on github.com | — |
+| 1 | M29 — Release matrix for Windows, macOS and Linux | Only Windows x64 is published; the other five targets need verified packages | — |
+| 2 | M30 — Automated desktop QA and cross-platform CI | Old smoke scripts are stale; releases on six targets need repeatable checks | — |
+| 3 | M25 — Chronexus Server (in progress) | The sharing client already ships in 0.9.x without a server | M24 |
+| 4 | M31 — Clue board and open questions | Strengthens the player-knowledge differentiator | — |
+| 5 | M32 — First start and demo campaign | New users must see the value in minutes | — |
+| 6 | M33 — Trust and transparency | The project is openly vibecoded: give verifiable evidence | M29 |
+| 7 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
+| 8 | M35 — "Previously on…" session recap | Faster start of every game session | M31 helpful |
+| 9 | M36 — Import from Obsidian, Kanka and character exports | Lowers the cost of switching to Chronexus | — |
+| 10 | M37 — Campaign timeline and in-world calendar | Long campaigns need chronology | — |
+| 11 | M38 — Maps with linked pins | Places and routes are central to play | — |
+| 12 | M39 — Print and PDF export | Paper sheets and campaign booklets at the table | — |
+| 13 | M40 — Additional ruleset sheet presets | Reaches players beyond D&D 5e | License review |
+| 14 | M27 — Android app (APK) | Largest scope; needs the server and stable releases | M25, M29 |
 
-## M41 — Project wiki for app and server (next)
+## M41 — Project wiki for app and server (published 27 October 2026)
 
 **Goal:** use the wiki built into Forgejo (github.com) — the same model GitHub uses — so
 players, server operators and developers find everything in one place.
 
-**Requested 27 October 2026.** Sources live in each repository under `docs/wiki/`, one
+**Published 27 October 2026** at https://github.com/Acelith/Chronexus/wiki and
+https://github.com/Acelith/Chronexus-Server/wiki, linked from both READMEs. Sources live in each repository under `docs/wiki/`, one
 Markdown file per page with Forgejo page names, and are published by pushing them to the
 repository's separate wiki (`<repo>.wiki.git`). Publication needs the user's go-ahead.
 
@@ -1547,36 +1547,13 @@ repository's separate wiki (`<repo>.wiki.git`). Publication needs the user's go-
   (planned features marked as planned), both wikis published on github.com after the
   user's go-ahead, README links to them.
 
-## M28 — Complete translations and multilingual installer (implemented on Windows, priority 1)
+## M28 — removed from the open milestones (27 October 2026)
 
-**Goal:** pass the strict localization gate so a signed build can ship again.
+At the user's request M28 no longer appears among the open milestones. Its implementation
+(complete catalogs, ten-language installer, 26 October 2026) stays in the delivered log
+above and in docs/STATUS.md; the native-speaker review is no longer a tracked milestone.
 
-**Status (26 October 2026):** implemented. `i18n:check` exits 0 for the first time:
-1306 explicit UI messages, none missing in any of the nine catalogs, no parameter
-mismatch, all ten installer languages. Done: the 267 missing messages per catalog
-(plus three labels from the dynamic-label fix), about 450 older entries that carried
-another message's translation, German switched consistently to the informal form,
-whole-phrase labels in the item/spell/ability form and the editor suggestions, long
-words wrapping in the sidebar. A local unsigned NSIS build compiled the ten
-languages (English first as fallback). In the debug app, Arabic (RTL), Japanese and
-German showed no page overflow across seven views.
-Still open: native-speaker review of every non-Italian catalog (none had one; older
-entries of similar length may still be wrong), the installer seen on Windows set to
-German or Arabic (only compiled here), and the other languages' screenshots.
-
-- Translate the UI messages still missing in the eight non-Italian catalogs
-  (267 each on 26 October 2026), with the same
-  rules as M26: stable message IDs, English fallback, no copied English to
-  pass the check.
-- Make the NSIS installer multilingual (the ten app languages), defaulting to
-  the OS language like the app does, with English as the fallback.
-- Flag machine-prepared catalogs as awaiting native review in the app; record
-  which languages had a human review.
-- Acceptance: `i18n:check` exits 0; native screenshots of the main views in
-  every language, RTL Arabic and a CJK language without overflow; installer
-  shown in at least Italian, German and Arabic on Windows.
-
-## M29 — Release matrix for Windows, macOS and Linux (planned, priority 2)
+## M29 — Release matrix for Windows, macOS and Linux (planned, priority 1)
 
 **Goal:** publish verified packages for the six targets of docs/INSTALLERS.md
 (Windows, macOS, Linux × x64, ARM64) at no cost.
@@ -1600,7 +1577,7 @@ and how to open the app anyway.
   mandatory backup on at least one target per OS, checksums and updater
   signatures verified by a script.
 
-## M30 — Automated desktop QA and cross-platform CI (planned, priority 3)
+## M30 — Automated desktop QA and cross-platform CI (planned, priority 2)
 
 **Goal:** make the real-app checks repeatable instead of manual one-offs.
 
@@ -1615,7 +1592,7 @@ and how to open the app anyway.
 - Acceptance: a fresh clone runs the suite with one command per OS; a broken
   label or failing flow makes CI red; results are linked from docs/STATUS.md.
 
-## M25 — Chronexus Server in a separate repository (in progress, priority 4)
+## M25 — Chronexus Server in a separate repository (in progress, priority 3)
 
 **Order:** after the M24 client, requested on 26 October 2026; Android moved to M27.
 **Status:** in progress. The repository `acelith/Chronexus-Server` exists; its
@@ -1635,7 +1612,7 @@ request.
 - Acceptance: the M24 acceptance list below, run with the real desktop client against
   a test deployment, plus the server security tests in SERVER_NOTES.md.
 
-## M31 — Clue board and open questions (planned, priority 5)
+## M31 — Clue board and open questions (planned, priority 4)
 
 **Goal:** a board of what the character does not know yet, the player-side
 counterpart of the relationship graph.
@@ -1653,7 +1630,7 @@ counterpart of the relationship graph.
 - Acceptance: create, edit, resolve and reopen with keyboard only; backlinks
   survive page renames; backup/restore round trip; translated UI.
 
-## M32 — First start and demo campaign (planned, priority 6)
+## M32 — First start and demo campaign (planned, priority 5)
 
 **Goal:** a new user understands Chronexus in a few minutes.
 
@@ -1665,7 +1642,7 @@ counterpart of the relationship graph.
 - Acceptance: fresh profile in each app language; demo creation and removal
   leave no residue; tour fully keyboard and screen-reader usable.
 
-## M33 — Trust and transparency (planned, priority 7)
+## M33 — Trust and transparency (planned, priority 6)
 
 **Goal:** verifiable reasons to trust an openly AI-written project.
 
@@ -1679,7 +1656,7 @@ counterpart of the relationship graph.
 - Acceptance: documents reviewed against the code; SBOM and scan generated
   by the release tooling, not by hand.
 
-## M34 — Manual diagnostic bundle (planned, priority 8)
+## M34 — Manual diagnostic bundle (planned, priority 7)
 
 **Goal:** useful bug reports with no telemetry.
 
@@ -1691,7 +1668,7 @@ counterpart of the relationship graph.
 - Acceptance: tests prove campaign text and secrets are absent; the bundle is
   readable and bounded in size.
 
-## M35 — "Previously on…" session recap (planned, priority 9)
+## M35 — "Previously on…" session recap (planned, priority 8)
 
 **Goal:** start each session knowing where the story stopped.
 
@@ -1703,7 +1680,7 @@ counterpart of the relationship graph.
 - Acceptance: works fully without AI; the AI draft path shows sources and
   stays disabled when campaign AI is off.
 
-## M36 — Import from Obsidian, Kanka and character exports (planned, priority 10)
+## M36 — Import from Obsidian, Kanka and character exports (planned, priority 9)
 
 **Goal:** bring existing campaign notes in safely, as M6 did for Logseq.
 
@@ -1717,7 +1694,7 @@ counterpart of the relationship graph.
 - Acceptance: synthetic fixtures for each format; renamed pages keep links;
   import is undoable through the pre-import backup.
 
-## M37 — Campaign timeline and in-world calendar (planned, priority 11)
+## M37 — Campaign timeline and in-world calendar (planned, priority 10)
 
 **Goal:** see the campaign in its own chronology, not only by session number.
 
@@ -1728,7 +1705,7 @@ counterpart of the relationship graph.
 - Acceptance: custom calendar round-trips through backup; timeline readable by
   keyboard and screen reader; RTL layout works.
 
-## M38 — Maps with linked pins (planned, priority 12)
+## M38 — Maps with linked pins (planned, priority 11)
 
 **Goal:** use map images as navigation.
 
@@ -1739,7 +1716,7 @@ counterpart of the relationship graph.
 - Acceptance: create, move and delete pins by mouse and keyboard; backup and
   restore keep pins and images; large maps stay responsive.
 
-## M39 — Print and PDF export (planned, priority 13)
+## M39 — Print and PDF export (planned, priority 12)
 
 **Goal:** paper at the table.
 
@@ -1749,7 +1726,7 @@ counterpart of the relationship graph.
 - Acceptance: readable output in light print style for the main languages,
   including RTL and CJK; no personal data beyond what the user selected.
 
-## M40 — Additional ruleset sheet presets (planned, priority 14)
+## M40 — Additional ruleset sheet presets (planned, priority 13)
 
 **Goal:** serve players of other systems with the generic character model.
 
@@ -1760,7 +1737,7 @@ counterpart of the relationship graph.
 - Acceptance: presets selectable per character; data survives switching
   presets; attribution visible.
 
-## M27 — Chronexus on Android (APK) connected to the server (planned, priority 15)
+## M27 — Chronexus on Android (APK) connected to the server (planned, priority 14)
 
 **Order:** last in the priority list: after M25, which it depends on for accounts
 and shared data (moved from M25 on 26 October 2026), and after the M29 release

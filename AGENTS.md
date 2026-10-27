@@ -303,11 +303,13 @@ request. Never upload private notes, sheets, AI data or preferences unless the u
 that item for the server (`private` or `shared`). Sheet sections and images (schema 021) can
 only be `shared`, as read-only projections; the full sheet, AI data and preferences are never
 replicated.
-## Open milestone priority (planned M28–M40)
+## Open milestone priority (planned M29–M40)
+
+M41 (project wiki) is published: keep `docs/wiki/` and the Forgejo wikis in step with
+visible behaviour. M28 was removed from the open list on 27 October 2026.
 
 ROADMAP "Open milestones in priority order" is the single source for what comes
-next: M41 project wiki (user guide + developer docs for app and server, sources in
-`docs/wiki/`, published to the Forgejo wiki only on request), M28 translations/installer, M29 six-target releases (free signing only, no paid certificates), M30 desktop QA
+next: M29 six-target releases (free signing only, no paid certificates), M30 desktop QA
 and CI, M25 server (in progress), M31 clue board, M32 first start/demo, M33 trust
 and transparency, M34 diagnostic bundle, M35 session recap, M36 imports, M37
 timeline, M38 maps, M39 print/PDF, M40 other rulesets, then M27 Android. All are
