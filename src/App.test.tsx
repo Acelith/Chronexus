@@ -193,7 +193,9 @@ test("restoring into an empty archive updates the campaign bar and opens restore
     "a",
   );
   expect(await screen.findByText("Test editor")).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "The bridge" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "The bridge" }),
+  ).toBeInTheDocument();
 });
 
 test("creates a typed page and renames it while keeping the Codex open", async () => {
@@ -255,9 +257,7 @@ test("a backlink opens the source session after saving", async () => {
   render(<App />);
   await screen.findByText("Test editor");
   await user.click(screen.getByRole("button", { name: "Codex" }));
-  await user.click(
-    await screen.findByRole("button", { name: /I met Varek/ }),
-  );
+  await user.click(await screen.findByRole("button", { name: /I met Varek/ }));
   expect(
     await screen.findByRole("heading", { name: "The bridge" }),
   ).toBeInTheDocument();
@@ -296,7 +296,9 @@ test("a write error blocks switching campaigns and preserves the open note", asy
   expect(
     screen.getByRole("heading", { name: "Campagna A" }),
   ).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "The bridge" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "The bridge" }),
+  ).toBeInTheDocument();
   expect(api.sessions).toHaveBeenCalledTimes(1);
 });
 

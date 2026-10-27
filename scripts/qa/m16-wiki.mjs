@@ -80,9 +80,7 @@ if (phase === "check") {
   await page.getByRole("button", { name: "Create character" }).click();
   await page.getByLabel("Character name").fill("Test Oran");
   await page.getByRole("button", { name: "Save character" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Test Oran" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Test Oran" })).toBeVisible();
 
   await page.getByRole("button", { name: "D&D Wiki", exact: true }).click();
   await expect(page.getByText(/Fonte attiva: Wikidot D&D 5e/)).toBeVisible();

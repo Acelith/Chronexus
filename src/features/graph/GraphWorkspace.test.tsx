@@ -143,10 +143,7 @@ test("creates a relationship with certainty and a source block without changing 
     "session:s",
   );
   await user.selectOptions(screen.getByLabelText("Source block"), "b");
-  await user.type(
-    screen.getByLabelText("Evidence or quote"),
-    "A claim.",
-  );
+  await user.type(screen.getByLabelText("Evidence or quote"), "A claim.");
   await user.type(
     screen.getByLabelText("Relationship notes"),
     "To be checked.",

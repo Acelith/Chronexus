@@ -185,9 +185,7 @@ if (phase === "prepare") {
         type: "paragraph",
         props: {},
         children: [],
-        content: [
-          { type: "text", text: "We reached the bridge.", styles: {} },
-        ],
+        content: [{ type: "text", text: "We reached the bridge.", styles: {} }],
       },
       {
         id: "m5-key-source",
@@ -370,9 +368,7 @@ if (phase === "prepare") {
   await saved();
   await fill("Search by name", "Careful");
   await fill("Filter by level", "Personal");
-  await expect(detail()).toContainText(
-    "Not marked as known · Prepared",
-  );
+  await expect(detail()).toContainText("Not marked as known · Prepared");
   assert.deepEqual(
     await invoke("get_character", { campaignId: campaign.id }),
     characterBeforeAbilities,

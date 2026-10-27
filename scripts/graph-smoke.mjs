@@ -161,9 +161,7 @@ try {
     await page.getByLabel("Relationship label").fill("To keep");
     await page.getByRole("button", { name: "Journal", exact: true }).click();
     await expect(page.getByRole("alert")).toContainText("Save or cancel");
-    await expect(page.getByLabel("Relationship label")).toHaveValue(
-      "To keep",
-    );
+    await expect(page.getByLabel("Relationship label")).toHaveValue("To keep");
     await page
       .getByRole("button", { name: "Close message", exact: true })
       .click();
