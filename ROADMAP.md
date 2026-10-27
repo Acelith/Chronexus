@@ -1501,6 +1501,7 @@ request before implementation, and publication follows the standing release rule
 
 | Priority | Milestone | Why now | Depends on |
 | --- | --- | --- | --- |
+| Next | M41 — Project wiki for app and server | Added 27/10/2026 at the user's request: users and developers need one place that explains everything | — |
 | 1 | M28 — Complete translations and multilingual installer | **Implemented** 26/10/2026; native review per language open | — |
 | 2 | M29 — Release matrix for Windows, macOS and Linux | Only Windows x64 is published; the other five targets need verified packages | M28 |
 | 3 | M30 — Automated desktop QA and cross-platform CI | Old smoke scripts are stale; releases on six targets need repeatable checks | — |
@@ -1516,6 +1517,35 @@ request before implementation, and publication follows the standing release rule
 | 13 | M39 — Print and PDF export | Paper sheets and campaign booklets at the table | — |
 | 14 | M40 — Additional ruleset sheet presets | Reaches players beyond D&D 5e | License review |
 | 15 | M27 — Android app (APK) | Largest scope; needs the server and stable releases | M25, M29 |
+
+## M41 — Project wiki for app and server (next)
+
+**Goal:** use the wiki built into Forgejo (github.com) — the same model GitHub uses — so
+players, server operators and developers find everything in one place.
+
+**Requested 27 October 2026.** Sources live in each repository under `docs/wiki/`, one
+Markdown file per page with Forgejo page names, and are published by pushing them to the
+repository's separate wiki (`<repo>.wiki.git`). Publication needs the user's go-ahead.
+
+- **App wiki — user part.** How Chronexus works from the player's side, screen by screen:
+  what each area does (journal, Codex, mentions and backlinks, graph and relationships,
+  character sheet, inventory and abilities, party, dice, search, rules wiki and SRD
+  catalog, images, local assistant, languages and scripts, backups and restore, updates
+  and herald, sharing with a server), what never happens implicitly, privacy, FAQ and
+  troubleshooting. No code in this part.
+- **App wiki — developer part.** Architecture, repository map, data model and migrations,
+  sync client, i18n workflow, build and test commands, container builds, QA scenarios,
+  release process and contribution rules, linking to the canonical files in `docs/`.
+- **Server wiki.** Operator guide (what the server does and does not do, installation
+  with Docker Compose and HTTPS, accounts and invitations, roles, sharing model, backups,
+  upgrades, security, CLI) and a developer part (architecture, API contract, tests,
+  milestones M25.n).
+- Keep wiki and `docs/` consistent: the wiki explains; the canonical technical detail
+  stays in the repository files it links to. Update the wiki in the same change as any
+  user-visible behaviour.
+- **Acceptance:** every sidebar link resolves, pages describe only behaviour that exists
+  (planned features marked as planned), both wikis published on github.com after the
+  user's go-ahead, README links to them.
 
 ## M28 — Complete translations and multilingual installer (implemented on Windows, priority 1)
 
