@@ -1,5 +1,5 @@
 #!/bin/sh
-# One local runner for the M30 checks, equivalent to .forgejo/workflows/ci.yml.
+# One local runner for the M30 checks, equivalent to the CI workflow in .github/workflows.
 # It always tests a committed revision: the revision is exported from Git into a clean folder,
 # so unfinished work in the checkout (yours or another agent's) is never included.
 #

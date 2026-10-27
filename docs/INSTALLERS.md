@@ -331,7 +331,7 @@ new build and new version are required. No existing tag or attachment is overwri
 
 ### LAN resumption explicitly authorized
 
-The user indicated `http://192.168.162.26:3000` for this resumption. It is the only
+The user indicated a private LAN address of the previous host for this resumption. It is the only
 allowed alternative endpoint and must be explicitly selected via
 `publish(authorization, base_url=LOCAL_BASE, finalize=False)`. Compare repository
 (id/name/permissions) and draft with the canonical site before any writing.

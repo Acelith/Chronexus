@@ -1059,7 +1059,7 @@ Two independent failed attempts: second HTTP 502 after 297.304.064 bytes in
 235,52 s; APIs declare 2048 MiB limit, curl proxy_used=0. No invented server
 cause: requested gateway details/logs from user. Authenticated access OK.
 Resume authorized by user on October 24, with explicit transport
-http://192.168.162.26:3000. The previous stop is bypassed for this delivery.
+a private LAN address of the previous host. The previous stop is bypassed for this delivery.
 Local service verified: Forgejo 12.0.4, same repository id 13 and same
 public site draft v0.2.0. No change in Git origin or compiled tag.
 LAN support added with exact whitelist, redirect block and identity comparison;
