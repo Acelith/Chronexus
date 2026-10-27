@@ -13,7 +13,7 @@ in quale sessione e per quale fazione, senza account e senza cloud.
 [![Offline](https://img.shields.io/badge/dati-solo%20locali-b89b60)](#privacy-e-dati)
 [![Lingue](https://img.shields.io/badge/lingue-11%20%2B%20scritture-354b3e)](docs/I18N.md)
 
-[Scarica](#download-e-installazione) · [Funzionalità](#funzionalità) · [Giocare insieme](#giocare-insieme-chronexus-server-facoltativo) · [Guida](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [English](README.md)
+[Scarica](#download-e-installazione) · [Funzionalità](#funzionalità) · [Giocare insieme](#giocare-insieme-chronexus-server-facoltativo) · [Wiki](https://github.com/Acelith/Chronexus/wiki) · [Guida](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [English](README.md)
 
 <img src="docs/media/hero.webp" alt="Diario di una sessione con appunti, menzioni dei personaggi e barra laterale con il logo dell’araldo" width="900">
 
@@ -183,6 +183,10 @@ Le milestone consegnate, quelle aperte e i limiti ancora da verificare sono in
 [docs/STATUS.md](docs/STATUS.md).
 
 ## Sviluppo e contributi
+
+La **[wiki](https://github.com/Acelith/Chronexus/wiki)** (in inglese) spiega ogni area dell'app per chi gioca e ha una
+sezione per sviluppatori (architettura, dati, sincronizzazione, traduzioni, build, QA,
+rilasci); i sorgenti sono in [docs/wiki](docs/wiki).
 
 Chronexus è scritto con Tauri 2, Rust, React e TypeScript, con SQLite locale.
 Prerequisiti, comandi e verifiche sono in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md);

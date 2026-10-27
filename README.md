@@ -13,7 +13,7 @@ in which session and for which faction, with no account and no cloud.
 [![Offline](https://img.shields.io/badge/data-local%20only-b89b60)](#privacy-and-data)
 [![Languages](https://img.shields.io/badge/languages-10%20%2B%20scripts-354b3e)](docs/I18N.md)
 
-[Download](#download-and-installation) · [Features](#features) · [Play together](#play-together-chronexus-server-optional) · [Guide](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [Italiano](README.it.md)
+[Download](#download-and-installation) · [Features](#features) · [Play together](#play-together-chronexus-server-optional) · [Wiki](https://github.com/Acelith/Chronexus/wiki) · [Guide](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [Italiano](README.it.md)
 
 <img src="docs/media/hero.webp" alt="Session journal with notes, character mentions and the herald logo in the sidebar" width="900">
 
@@ -180,6 +180,10 @@ Delivered and open milestones, plus limits still to verify, are in
 [docs/STATUS.md](docs/STATUS.md).
 
 ## Development and contributing
+
+The **[wiki](https://github.com/Acelith/Chronexus/wiki)** explains every area of the app for players and has a developer
+section (architecture, data, sync, i18n, builds, QA, releases); its sources are in
+[docs/wiki](docs/wiki).
 
 Chronexus is built with Tauri 2, Rust, React and TypeScript on local SQLite.
 Prerequisites, commands and checks are in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md);
