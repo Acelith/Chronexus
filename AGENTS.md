@@ -309,13 +309,23 @@ M41 (project wiki) is published: keep `docs/wiki/` and the Forgejo wikis in step
 visible behaviour. M28 was removed from the open list on 27 October 2026.
 
 ROADMAP "Open milestones in priority order" is the single source for what comes
-next: M29 six-target releases (free signing only, no paid certificates), M30 desktop QA
-and CI, M25 server (in progress), M31 clue board, M32 first start/demo, M33 trust
+next: M25 server (in progress), M42–M47 virtual tabletop (docs/VTT.md), M31 clue board, M32 first start/demo, M33 trust
 and transparency, M34 diagnostic bundle, M35 session recap, M36 imports, M37
 timeline, M38 maps, M39 print/PDF, M40 other rulesets, then M27 Android. All are
 planning only: implement one only on explicit request, keep the IDs, and update
 the table when priorities change. Clue items, recaps, imports and pins follow the
 same rules as notes: no implicit factual relationships or AI-written facts.
+
+## Planned virtual tabletop (M42–M47, Chronexus Table)
+
+Planning only (27 October 2026); see docs/VTT.md. It adds an optional GM role limited to a
+separate *table* space (maps, tokens, monsters, initiative, fog, combat log) on the server.
+It does not change the journal's rules: the GM never reads or edits players' journal items
+unless their author chose the explicit audience *shared with the GM too*; GM-only content is
+filtered on the server, never sent to players and never enters journals, search, AI sources
+or `.nodex` backups. No implicit sheet changes from combat. Combat distances always show ft
+and m (stored values keep their unit; the conversion convention is labelled). Proprietary
+VTTs are references for concepts only.
 
 ## English-first internationalization (M26)
 

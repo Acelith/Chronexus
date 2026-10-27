@@ -1505,17 +1505,23 @@ request before implementation, and publication follows the standing release rule
 | Done | M29 — Release matrix for Windows, macOS and Linux | Unsigned pre-release 0.10.0 published 27/10/2026; Windows ARM64 and x64 AppImage open | — |
 | Done | M30 — Automated desktop QA and cross-platform CI | Workflows and local runner in place; needs a Forgejo runner | — |
 | 1 | M25 — Chronexus Server (in progress) | The sharing client already ships in 0.9.x without a server | M24 |
-| 2 | M31 — Clue board and open questions | Strengthens the player-knowledge differentiator | — |
-| 3 | M32 — First start and demo campaign | New users must see the value in minutes | — |
-| 4 | M33 — Trust and transparency | The project is openly vibecoded: give verifiable evidence | M29 |
-| 5 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
-| 6 | M35 — "Previously on…" session recap | Faster start of every game session | M31 helpful |
-| 7 | M36 — Import from Obsidian, Kanka and character exports | Lowers the cost of switching to Chronexus | — |
-| 8 | M37 — Campaign timeline and in-world calendar | Long campaigns need chronology | — |
-| 9 | M38 — Maps with linked pins | Places and routes are central to play | — |
-| 10 | M39 — Print and PDF export | Paper sheets and campaign booklets at the table | — |
-| 11 | M40 — Additional ruleset sheet presets | Reaches players beyond D&D 5e | License review |
-| 12 | M27 — Android app (APK) | Largest scope; needs the server and stable releases | M25, M29 |
+| 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Requested 27/10/2026: a GM runs combat for players; journals stay private | M25 |
+| 3 | M43 — Live table channel and GM web interface | Real-time play needs a server-authoritative channel and a GM UI | M42 |
+| 4 | M44 — Maps, grid, tokens and movement, ft/m everywhere | The core of the table; every distance in ft and m with an on-screen converter | M43 |
+| 5 | M45 — Combat tracker | Initiative, turns, rounds, conditions, combat log | M44 |
+| 6 | M46 — Fog of war and vision | Hide what characters cannot see | M44 |
+| 7 | M47 — Monster library and encounters | SRD monsters with attribution, custom monsters, prepared encounters | M45 |
+| 8 | M31 — Clue board and open questions | Strengthens the player-knowledge differentiator | — |
+| 9 | M32 — First start and demo campaign | New users must see the value in minutes | — |
+| 10 | M33 — Trust and transparency | The project is openly vibecoded: give verifiable evidence | M29 |
+| 11 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
+| 12 | M35 — "Previously on…" session recap | Faster start of every game session | M31 helpful |
+| 13 | M36 — Import from Obsidian, Kanka and character exports | Lowers the cost of switching to Chronexus | — |
+| 14 | M37 — Campaign timeline and in-world calendar | Long campaigns need chronology | — |
+| 15 | M38 — Maps with linked pins | Places and routes are central to play | — |
+| 16 | M39 — Print and PDF export | Paper sheets and campaign booklets at the table | — |
+| 17 | M40 — Additional ruleset sheet presets | Reaches players beyond D&D 5e | License review |
+| 18 | M27 — Android app (APK) | Largest scope; needs the server and stable releases | M25, M29 |
 
 ## M41 — Project wiki for app and server (published 27 October 2026)
 
@@ -1629,7 +1635,37 @@ request.
 - Acceptance: the M24 acceptance list below, run with the real desktop client against
   a test deployment, plus the server security tests in SERVER_NOTES.md.
 
-## M31 — Clue board and open questions (planned, priority 2)
+## M42–M47 — Chronexus Table: virtual tabletop and combat (planned, priorities 2–7)
+
+**Requested 27 October 2026.** Full requirements, boundaries, architecture, inspiration
+sources and acceptance are in [docs/VTT.md](docs/VTT.md). Planning only; each milestone needs
+an explicit request.
+
+A GM creates a table on the server's web interface and invites players with a code; players
+join from the desktop app. The GM shows a battle map with a grid, places player tokens and
+monsters and runs initiative; everyone moves on the grid. **Every distance in the combat
+screen shows feet and metres, with an on-screen converter** (table convention 5 ft = 1.5 m or
+exact 1 ft = 0.3048 m, always labelled; stored values never change). The GM never sees or
+changes players' journals: authors keep choosing per item who sees it, with a new explicit
+audience *shared with the GM too*.
+
+- **M42 — GM accounts, tables and invitations.** GM capability, tables, seats, table
+  invitation codes with sign-up, server-enforced journal privacy wall; desktop joins by code.
+- **M43 — Live table channel and GM web interface.** Server-authoritative WebSocket with
+  per-recipient views (hidden content never sent), presence, revisions and reconnection;
+  web app for GMs built on the planned server web management (M25.11).
+- **M44 — Maps, grid, tokens and movement.** Scenes, map upload and Universal VTT import,
+  square/hex grid with calibration, layers (map, tokens, GM), tokens for players and
+  monsters, snap-to-grid movement with ruler, diagonal rule option, movement budget, area
+  templates, all in ft and m; on-screen ft↔m converter; PixiJS canvas.
+- **M45 — Combat tracker.** Initiative (dice roller, GM secret rolls), turn order, rounds,
+  conditions with durations, combat log; HP changes are explicit (players own theirs).
+- **M46 — Fog of war and vision.** Manual fog first; then walls, doors, lights and
+  server-side line of sight.
+- **M47 — Monster library and encounters.** SRD 5.1 monsters via the allowlisted APIs with
+  attribution, custom monsters, encounter presets.
+
+## M31 — Clue board and open questions (planned, priority 8)
 
 **Goal:** a board of what the character does not know yet, the player-side
 counterpart of the relationship graph.
@@ -1647,7 +1683,7 @@ counterpart of the relationship graph.
 - Acceptance: create, edit, resolve and reopen with keyboard only; backlinks
   survive page renames; backup/restore round trip; translated UI.
 
-## M32 — First start and demo campaign (planned, priority 3)
+## M32 — First start and demo campaign (planned, priority 9)
 
 **Goal:** a new user understands Chronexus in a few minutes.
 
@@ -1659,7 +1695,7 @@ counterpart of the relationship graph.
 - Acceptance: fresh profile in each app language; demo creation and removal
   leave no residue; tour fully keyboard and screen-reader usable.
 
-## M33 — Trust and transparency (planned, priority 4)
+## M33 — Trust and transparency (planned, priority 10)
 
 **Goal:** verifiable reasons to trust an openly AI-written project.
 
@@ -1673,7 +1709,7 @@ counterpart of the relationship graph.
 - Acceptance: documents reviewed against the code; SBOM and scan generated
   by the release tooling, not by hand.
 
-## M34 — Manual diagnostic bundle (planned, priority 5)
+## M34 — Manual diagnostic bundle (planned, priority 11)
 
 **Goal:** useful bug reports with no telemetry.
 
@@ -1685,7 +1721,7 @@ counterpart of the relationship graph.
 - Acceptance: tests prove campaign text and secrets are absent; the bundle is
   readable and bounded in size.
 
-## M35 — "Previously on…" session recap (planned, priority 6)
+## M35 — "Previously on…" session recap (planned, priority 12)
 
 **Goal:** start each session knowing where the story stopped.
 
@@ -1697,7 +1733,7 @@ counterpart of the relationship graph.
 - Acceptance: works fully without AI; the AI draft path shows sources and
   stays disabled when campaign AI is off.
 
-## M36 — Import from Obsidian, Kanka and character exports (planned, priority 7)
+## M36 — Import from Obsidian, Kanka and character exports (planned, priority 13)
 
 **Goal:** bring existing campaign notes in safely, as M6 did for Logseq.
 
@@ -1711,7 +1747,7 @@ counterpart of the relationship graph.
 - Acceptance: synthetic fixtures for each format; renamed pages keep links;
   import is undoable through the pre-import backup.
 
-## M37 — Campaign timeline and in-world calendar (planned, priority 8)
+## M37 — Campaign timeline and in-world calendar (planned, priority 14)
 
 **Goal:** see the campaign in its own chronology, not only by session number.
 
@@ -1722,7 +1758,7 @@ counterpart of the relationship graph.
 - Acceptance: custom calendar round-trips through backup; timeline readable by
   keyboard and screen reader; RTL layout works.
 
-## M38 — Maps with linked pins (planned, priority 9)
+## M38 — Maps with linked pins (planned, priority 15)
 
 **Goal:** use map images as navigation.
 
@@ -1733,7 +1769,7 @@ counterpart of the relationship graph.
 - Acceptance: create, move and delete pins by mouse and keyboard; backup and
   restore keep pins and images; large maps stay responsive.
 
-## M39 — Print and PDF export (planned, priority 10)
+## M39 — Print and PDF export (planned, priority 16)
 
 **Goal:** paper at the table.
 
@@ -1743,7 +1779,7 @@ counterpart of the relationship graph.
 - Acceptance: readable output in light print style for the main languages,
   including RTL and CJK; no personal data beyond what the user selected.
 
-## M40 — Additional ruleset sheet presets (planned, priority 11)
+## M40 — Additional ruleset sheet presets (planned, priority 17)
 
 **Goal:** serve players of other systems with the generic character model.
 
@@ -1754,7 +1790,7 @@ counterpart of the relationship graph.
 - Acceptance: presets selectable per character; data survives switching
   presets; attribution visible.
 
-## M27 — Chronexus on Android (APK) connected to the server (planned, priority 12)
+## M27 — Chronexus on Android (APK) connected to the server (planned, priority 18)
 
 **Order:** last in the priority list: after M25, which it depends on for accounts
 and shared data (moved from M25 on 26 October 2026), and after the M29 release
