@@ -51,6 +51,38 @@ last line, visible text, and bold/title/list formatting in a
 second session. Control images are saved under `.tools/`.
 The test does not delete data: to repeat from scratch, use another new profile.
 
+## Sharing across devices (real server, macOS and Linux in Docker)
+
+`scripts/qa/sync/` runs the M24/M25 acceptance with three debug-build devices against one
+HTTPS deployment of Chronexus Server. Roles: `owner` (creates and shares part of a
+campaign, invites), `player` (another account), `owner2` (second computer of the owner).
+They meet through `board.mjs`, which also issues server invitations and stops/starts the
+HTTPS proxy for the offline step. Covered: invitations, per-item scope (none/private/
+shared), attribution, live edits through continuous synchronization, a concurrent-edit
+conflict resolved on the other device, unsharing, offline work and realignment, role change
+(player → reader → player, with edits waiting locally while a reader), leaving, re-joining
+and removal by the owner. Synthetic data only.
+
+1. Test deployment: in the server repository, `docker compose --profile https up -d` with
+   `CHRONEXUS_DOMAIN=chronexus.localhost`, `CHRONEXUS_PUBLIC_ORIGIN=https://chronexus.localhost:8443`
+   and `CHRONEXUS_HTTPS_PORT=8443`. Caddy issues a certificate from its local CA; copy
+   `/data/caddy/pki/authorities/local/root.crt` out of the proxy container.
+2. `CHRONEXUS_SYNC_COMPOSE=<wrapper running docker compose for that deployment> node scripts/qa/sync/board.mjs`.
+3. Linux roles: build the image `scripts/qa/linux/Dockerfile`, copy the checkout into a
+   volume, build the debug app there, then run `scripts/qa/sync/run-linux-role.sh` in one
+   container per role with `--add-host chronexus.localhost:host-gateway`, the root
+   certificate at `/qa/root.crt`, `CHRONEXUS_SYNC_ROLE`, `CHRONEXUS_SYNC_SERVER` and
+   `CHRONEXUS_SYNC_BOARD=http://host.docker.internal:7700`.
+4. macOS role: `CHRONEXUS_SYNC_ROLE=owner CHRONEXUS_SYNC_SERVER=https://chronexus.localhost:8443
+   node node_modules/vite/bin/vite.js --config scripts/qa/sync/vite.config.mjs`, then the
+   debug app with `NODEX_DEV_DATA_DIR`, `NODEX_DEV_DOCUMENTS_DIR` (new empty folders) and
+   `NODEX_DEV_SYNC_ROOT_CA=<root.crt>`. That variable exists only in debug builds: it adds
+   the test CA to the sharing client without touching the system trust store.
+5. Reports: `<role>.json` in `CHRONEXUS_SYNC_REPORTS` (default `.tools/sync`), one line per
+   step with timing; a failing role stops the others.
+
+Windows is not covered: there is no Windows engine in Docker on macOS.
+
 ## Cross-platform IPC flows (macOS, Linux, Windows)
 
 The CDP scripts above need WebView2. `scripts/qa/ipc/` runs the main flows in any
