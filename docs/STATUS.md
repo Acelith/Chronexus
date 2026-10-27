@@ -37,7 +37,12 @@
 - **M28** removed from the open milestones; **M41** closed (wiki published, Getting Started
   updated for 0.10.0).
 - Note: a second agent works on the UI in this checkout; release builds and run-all.sh use
-  committed revisions only.
+  committed revisions only. run-all.sh checks+ipc also passed on 085b5dc (includes its
+  settings commit) before main was published.
+- **Published on GitHub too:** main and tags of both repositories; releases 0.9.2 (latest)
+  and 0.10.0 (pre-release) mirrored byte for byte from github.com and verified. GitHub
+  wikis not yet created (GitHub needs a first page made on the website by a signed-in user).
+- **Planned:** M42–M47 *Chronexus Table* virtual tabletop (docs/VTT.md), after M25.
 
 # Chronexus status — 27 October 2026: server integration, container builds, M41 wiki
 
