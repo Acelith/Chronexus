@@ -1,3 +1,15 @@
+# Local 0.12.0 Windows x64 M31 build — unpublished
+
+The M31 source builds as a Windows x64 NSIS installer at
+`installers/Chronexus-0.12.0-Windows-x64-unpublished/Chronexus_0.12.0_x64-setup.exe`.
+It is 34,373,952 bytes, SHA-256
+`15568a3c4ee24bab98b557f4268c4964b232a624c7404f8e45c220b26ed31538`;
+`SHA256SUMS.txt` accompanies the local file. This build has no Tauri updater
+signature or Windows Authenticode signature. The production updater password
+could not be unprotected by the current Windows profile. It has not been
+installed or published, and 0.11.0 remains the stable public release. See
+[draft notes](releases/v0.12.0.md) and [status](STATUS.md).
+
 # Release 0.11.0 — signed Windows x64 installer
 
 [Chronexus 0.11.0](https://github.com/Acelith/Chronexus/releases/tag/v0.11.0)

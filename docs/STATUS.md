@@ -1,3 +1,20 @@
+# Chronexus status — 27 October 2026: M31 Windows build, publication pending
+
+- M31 code is committed in the desktop and server repositories. The Windows x64
+  0.12.0 NSIS installer compiled and its local copy matches SHA-256
+  `15568a3c4ee24bab98b557f4268c4964b232a624c7404f8e45c220b26ed31538`
+  (34,373,952 bytes). It is deliberately unpublished and unsigned for the
+  Tauri updater. The signed build stopped because this Windows profile could
+  not unprotect the existing DPAPI password; the installer was compiled with
+  updater artifacts disabled. Installation on a clean Windows profile is pending.
+- Publication is blocked independently by unavailable GitHub CLI credentials
+  and by `check-public-origin.py --history --origin`: the local repositories
+  retain pre-migration backup/checkpoint refs (206 desktop and 41 server object
+  failures). Current tracked-file audits pass; the server origin now pushes only
+  to GitHub. No remote branch, tag, release or asset was changed in this turn.
+- 0.11.0 remains the latest published stable version. Next roadmap priority:
+  **M25 — Chronexus Server** (in progress), then M42–M47 virtual tabletop.
+
 # Chronexus status — 27 October 2026: Windows 0.11.0 published
 
 - [Chronexus 0.11.0](https://github.com/Acelith/Chronexus/releases/tag/v0.11.0)

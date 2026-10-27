@@ -1694,7 +1694,8 @@ Implemented in schema 022. The board, source-block creation/backlinks, search,
 backup/export, per-item sharing, and server contract are in source. Windows Rust,
 frontend and real-server clue replication checks are recorded in `docs/STATUS.md`.
 macOS/Linux installation and published-package verification remain separate release
-checks; the 0.11.0 installer predates M31.
+checks; a local unsigned Windows x64 0.12.0 installer exists, while 0.11.0 is
+still the latest published stable release.
 
 ## M32 — First start and demo campaign (planned, priority 9)
 
