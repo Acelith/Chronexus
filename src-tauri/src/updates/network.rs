@@ -19,12 +19,56 @@ pub fn url(value: &str) -> AppResult<Url> {
 }
 pub fn artifact(endpoint: &Url, download: &Url) -> AppResult<()> {
     url(download.as_str())?;
+    if github_source(endpoint) {
+        return if github_asset(download) {
+            Ok(())
+        } else {
+            Err("The package must be on the same HTTPS server as the manifest.".into())
+        };
+    }
     if endpoint.origin() != download.origin() {
         return Err("The package must be on the same HTTPS server as the manifest.".into());
     }
     Ok(())
 }
-/// Callers validate the initial URL. Redirects must retain its HTTPS origin.
+fn github_asset(value: &Url) -> bool {
+    value.scheme() == "https"
+        && value.port_or_known_default() == Some(443)
+        && value.host_str() == Some("github.com")
+        && (value
+            .path()
+            .starts_with("/Acelith/Chronexus/releases/download/")
+            || value
+                .path()
+                .starts_with("/Acelith/Chronexus/releases/latest/download/"))
+}
+fn github_source(value: &Url) -> bool {
+    github_asset(value)
+        || (value.scheme() == "https"
+            && value.port_or_known_default() == Some(443)
+            && value.host_str() == Some("api.github.com")
+            && value.path() == "/repos/Acelith/Chronexus/releases/latest")
+}
+/// Only the fixed GitHub release channel can redirect to GitHub's signed asset CDN.
+/// Custom channels retain the original same-origin policy. No credentials are sent.
+pub fn redirect(initial: &Url, destination: &Url) -> AppResult<()> {
+    if github_source(initial)
+        && destination.scheme() == "https"
+        && destination.host_str() == Some("release-assets.githubusercontent.com")
+        && destination.port_or_known_default() == Some(443)
+        && destination.username().is_empty()
+        && destination.password().is_none()
+        && destination.fragment().is_none()
+        && destination.as_str().len() <= 8192
+        && destination
+            .path()
+            .starts_with("/github-production-release-asset/")
+    {
+        return Ok(());
+    }
+    artifact(initial, destination)
+}
+/// Callers validate the initial URL; each redirect is checked before requesting it.
 pub async fn fetch(
     client: &Client,
     initial: Url,
@@ -48,7 +92,7 @@ pub async fn fetch(
             destination = destination
                 .join(location)
                 .map_err(|_| "Invalid update redirect.")?;
-            artifact(&initial, &destination)?;
+            redirect(&initial, &destination)?;
             continue;
         }
         match response.status().as_u16() {
@@ -84,7 +128,7 @@ pub async fn fetch(
     Err("Too many redirects in the update channel.".into())
 }
 
-/// Accept either a static Tauri manifest or the public Forgejo latest-release API.
+/// Accept either a static Tauri manifest or a public latest-release API response.
 pub fn manifest_asset(
     value: &serde_json::Value,
     endpoint: &Url,
@@ -98,7 +142,7 @@ pub fn manifest_asset(
     let tag = value["tag_name"]
         .as_str()
         .filter(|s| !s.is_empty() && s.len() < 100)
-        .ok_or("Invalid Forgegit release version.")?;
+        .ok_or("Invalid GitHub release version.")?;
     let matches = value["assets"]
         .as_array()
         .ok_or("Release assets missing.")?

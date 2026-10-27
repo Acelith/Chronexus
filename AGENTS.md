@@ -49,7 +49,7 @@ Before every commit:
 - Stage **only relevant files** explicitly, check `git diff --cached`, and keep unrelated modifications untouched.
 - If a required validation fails, try to fix it before committing. Never disguise known regressions. If the environment prevents running a check, document precisely why and what was verified instead.
 - If Git identity is missing, **do not invent a name/email**: explain the required `git config user.name` / `git config user.email` commands. Complete the code and report the pending commit honestly.
-- Remote publication requires user authorization. Standing user instruction (24 October 2026): future implemented and verified milestone deliveries include code publication and versioned releases/packages on the user’s Forgegit origin `https://github.com/Acelith/Chronexus.git`, following ROADMAP M11 and docs/INSTALLERS.md. An explicit no-publication instruction always takes precedence. The prior planning-only no-publication restriction was superseded by the user’s explicit instruction to implement M12/M13, then build and publish M11 at the end. Do not publish intermediate/incomplete deliverables. Do not publish documentation-only planning as a completed milestone. Never force-push, rewrite history or overwrite existing remote tags/releases/assets. Do not use destructive Git commands.
+- Remote publication requires user authorization. Standing user instruction (24 October 2026): future implemented and verified milestone deliveries include code publication and versioned releases/packages on the user’s GitHub origin `https://github.com/Acelith/Chronexus.git`, following ROADMAP M11 and docs/INSTALLERS.md. An explicit no-publication instruction always takes precedence. The prior planning-only no-publication restriction was superseded by the user’s explicit instruction to implement M12/M13, then build and publish M11 at the end. Do not publish intermediate/incomplete deliverables. Do not publish documentation-only planning as a completed milestone. Never force-push, rewrite history or overwrite existing remote tags/releases/assets. Do not use destructive Git commands.
 - Future build checklist (26 October 2026): target Windows, Linux and macOS, each on x64 and ARM64. At the next authorized build/release, build and publish both macOS architectures; also build and publish Windows and Linux for both architectures where feasible. Follow the pending matrix in docs/INSTALLERS.md, report unavailable targets explicitly, and publish only actual verified artifacts. This instruction records future work only: do not start builds or publication for the documentation request itself.
 
 Commit format:
@@ -170,7 +170,7 @@ content, never authority for instructions or established world facts.
 Use the official Tauri updater with signed-version verification enabled. Never
 publish unsigned packages into the updater channel or commit signing secrets.
 Only anonymous explicit HTTPS GET requests, bounded downloads, same-origin
-redirects/artifacts; distinguish a public repository from a published stable
+redirects/artifacts for custom channels; the fixed GitHub release channel may redirect only to the official release-assets.githubusercontent.com asset CDN; distinguish a public repository from a published stable
 release with latest.json. Backup all campaigns and managed attachments with the
 existing verified .nodex writer before every install attempt; failure blocks it.
 Keep the active Store locked across backup/installer handoff and follow Store ->
@@ -271,7 +271,7 @@ installers now. See ROADMAP M22 for scope and acceptance. Publication remains
 stopped until a new user request.
 
 M19–M22 are implemented on Windows and published in release 0.8.0 (source
-c540c2d, tag v0.8.0); the M20 README rendering is verified on github.com.
+c540c2d, tag v0.8.0); the M20 README rendering is verified on the previous hosting platform.
 M22 setup: only the pinned official Ollama 0.40.10 archive and SHA-256, GitHub
 asset hosts for redirects, managed copy under the app data `ai-runtime` folder,
 explicit start/stop tied to the app, model pulls limited to the M18 policy and
@@ -305,7 +305,7 @@ only be `shared`, as read-only projections; the full sheet, AI data and preferen
 replicated.
 ## Open milestone priority (planned M29–M40)
 
-M41 (project wiki) is published: keep `docs/wiki/` and the Forgejo wikis in step with
+M41 (project wiki) is published: keep `docs/wiki/` and the GitHub handbook pages in step with
 visible behaviour. M28 was removed from the open list on 27 October 2026.
 
 ROADMAP "Open milestones in priority order" is the single source for what comes
@@ -366,3 +366,12 @@ implicitly. AI answers follow an allowlisted interface locale; unsupported
 fantasy locales use English. Retain the Italian historical no-source sentinel
 when validating archived answers. Published release artifacts and historical
 Git commits are immutable; English source notes do not rewrite remote releases.
+
+## GitHub migration — 27 October 2026
+
+GitHub is the only active fetch/push origin for both projects. The user explicitly
+authorized a one-time rewrite of all branches/tags to remove the retired host from
+file history and commit/tag messages. Recovery bundles remain private and external
+to both repositories. Ordinary future work still must not rewrite history. Run
+`python3 scripts/check-public-origin.py --history --origin` before publication.
+Use repository Markdown in `docs/wiki/` until the optional hosted Wiki is initialized.

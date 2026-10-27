@@ -7,13 +7,13 @@
 Write session notes, keep your character sheet and find out who gave you that key,
 in which session and for which faction, with no account and no cloud.
 
-[![Release](https://img.shields.io/gitea/v/release/acelith/Chronexus?gitea_url=https%3A%2F%2Fgithub.com&label=release&color=6c302b)](https://github.com/Acelith/Chronexus/releases)
+[![Release](https://img.shields.io/github/v/release/Acelith/Chronexus?label=release&color=6c302b)](https://github.com/Acelith/Chronexus/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-354b3e)](LICENSE)
 [![Platform](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-x64%20%7C%20ARM64-241e17)](#download-and-installation)
 [![Offline](https://img.shields.io/badge/data-local%20only-b89b60)](#privacy-and-data)
 [![Languages](https://img.shields.io/badge/languages-10%20%2B%20scripts-354b3e)](docs/I18N.md)
 
-[Download](#download-and-installation) · [Features](#features) · [Play together](#play-together-chronexus-server-optional) · [Wiki](https://github.com/Acelith/Chronexus/wiki) · [Guide](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [Italiano](README.it.md)
+[Download](#download-and-installation) · [Features](#features) · [Play together](#play-together-chronexus-server-optional) · [Wiki](https://github.com/Acelith/Chronexus/blob/main/docs/wiki/Home.md) · [Guide](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [Italiano](README.it.md)
 
 <img src="docs/media/hero.webp" alt="Session journal with notes, character mentions and the herald logo in the sidebar" width="900">
 
@@ -104,7 +104,7 @@ character or place, then explore **Codex** and **Graph**.
 > signature. The [0.10.0 pre-release](https://github.com/Acelith/Chronexus/releases/tag/v0.10.0) has no signatures at all (no Authenticode,
 > no notarization, no updater signature) and is not offered by the in-app updater: on
 > first launch use *More info → Run anyway* on Windows and right-click → *Open* on macOS.
-> See the [wiki](https://github.com/Acelith/Chronexus/wiki/Getting-Started).
+> See the [wiki](https://github.com/Acelith/Chronexus/blob/main/docs/wiki/Getting-Started.md).
 
 ## Updates and backups
 
@@ -161,8 +161,8 @@ network, everything stays local.
 
 > [!NOTE]
 > The server is in active development: its features are implemented and tested in
-> source, but **no server release has been published yet**; you can build it with
-> Docker Compose by following the
+> source. **Server 0.1.1 is available on GitHub**; container deployment currently builds
+> locally with Docker Compose, following the
 > [installation guide](https://github.com/Acelith/Chronexus-Server/blob/main/docs/INSTALLATION.md).
 > Data is protected by HTTPS but is **not end-to-end encrypted**: the server
 > operator can read what you upload. Android access is planned.
@@ -184,7 +184,7 @@ Delivered and open milestones, plus limits still to verify, are in
 
 ## Development and contributing
 
-The **[wiki](https://github.com/Acelith/Chronexus/wiki)** explains every area of the app for players and has a developer
+The **[wiki](https://github.com/Acelith/Chronexus/blob/main/docs/wiki/Home.md)** explains every area of the app for players and has a developer
 section (architecture, data, sync, i18n, builds, QA, releases); its sources are in
 [docs/wiki](docs/wiki).
 
@@ -211,3 +211,5 @@ project rules in [AGENTS.md](AGENTS.md). Reports and ideas are welcome in the
 *People, places, ideas. Everything is connected.*
 
 </div>
+
+Repository hosting, history migration and download provenance: [GitHub migration](docs/GITHUB_MIGRATION.md).

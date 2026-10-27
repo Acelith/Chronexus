@@ -1369,7 +1369,7 @@
   "m_c4d62727b3ec": "Todavía hay una operación en curso. Vuelve a cerrar Chronexus cuando haya terminado.",
   "m_c4dc8a3877a4": "Equipado",
   "m_c4e42b974c33": "Cada día",
-  "m_c52987e50503": "Usa la API pública de la última versión de Forgegit o un manifiesto latest.json en tu servidor HTTPS. Solo se aceptan paquetes firmados por Chronexus en el mismo servidor.",
+  "m_c52987e50503": "Usa el canal de versiones de GitHub o un manifiesto latest.json en tu servidor HTTPS. Solo se aceptan paquetes de Chronexus firmados. Las descargas de GitHub usan su CDN oficial de archivos adjuntos.",
   "m_c5483b4108cf": "Agrega un d{0}",
   "m_c575f342d74f": "Introduce cantidades enteras desde 0 hasta 50 para cada tipo de dado.",
   "m_c587c2601ccf": "Visión",

@@ -720,10 +720,10 @@ separate from the campaign's integrated assistant.
 **Git evidence:** `c7d95ca`, `d75f5f3`, `db8fc68`, `ad7760d`. Checks and limits in [docs/STATUS.md](docs/STATUS.md).
 
 Implemented the request from 25 October 2026: explicit check, download and
-installation from global settings, with a public Forgegit channel or configurable
+installation from global settings, with a public GitHub channel or configurable
 HTTPS server. No client login, telemetry, or campaign sending.
 
-- Discover the latest stable release with Forgejo API and its `latest.json`, or
+- Discover the latest stable GitHub release and its `latest.json`, or
   read a static Tauri manifest. Reject drafts/previews and insecure URLs.
 - Verify signature and signed version before making installation available;
   timeout, limits, cancellation, and recoverable errors. No implicit downgrade.
@@ -1017,7 +1017,7 @@ milestones remain distinct and verifiable; this addition is only planning.
 
 - Make branding and icon available to M20 for the README header
   (light/dark versions if necessary); optional social image or avatar of the
-  Forgegit repository only with explicit authorization.
+  GitHub repository only with explicit authorization.
 - Documented licenses and provenance; no campaign data in images.
 
 ### M21 Acceptance
@@ -1266,7 +1266,7 @@ receipt. M15 guarantees remain: verified backup before the installer, Store
 **Updated status:** Italian README and `README.en.md` rewritten, user guide and
 development moved without loss to `docs/GUIDE.md` and `docs/DEVELOPMENT.md`,
 screens from synthetic campaign in `docs/media/`. Rendering verified on 25/10/2026
-on the real page at github.com (Forgejo 12.0.4) after the push: callout, `<details>`,
+on the real page at the previous host (Forgejo 12.0.4) after the push: callout, `<details>`,
 centering, tables, images and badges (release v0.7.0) corrected; 12 internal links 200.
 
 **Original status:** requested on 25 October 2026; not implemented. The current `README.md`
@@ -1308,12 +1308,12 @@ alternative text, declared total weight and content.
 - Every statement corresponds to STATUS: platforms and verifications only if performed,
   versions and real numbers. Complete credits and licenses: OFL fonts, SRD 5.1 CC BY 4.0,
   Open5e, Wikidot (license declared by the pages), Ollama/Gemma, libraries.
-- Any descriptions, topics, and social images of the Forgegit repository are
+- Any descriptions, topics, and social images of the GitHub repository are
   remote settings: modify them only with explicit authorization.
 
 ### M20 Acceptance
 
-- Rendering verified on the actual github.com page (Forgejo): HTML allowed,
+- Rendering verified on the previous hosting page (Forgejo): HTML allowed,
   callout, light/dark images, tables and `<details>`; adaptations if an element
   is not supported. Also check mobile width.
 - All internal and external links valid; no private data in images; image weight
@@ -1396,12 +1396,12 @@ remains **optional**: without activating it, Chronexus works offline as it does 
 | Third-party cloud service (Firebase/Supabase hosted) | Fast | Data held by third parties, external dependency: contrary to project principles |
 
 **User confirmed choice (25/10/2026):** Chronexus **self-hosted** server
-(Rust, Docker container) on the user's infrastructure, alongside Forgegit, with
+(Rust, Docker container) on the user's infrastructure, independent of the repository host, with
 the desktop remaining **local-first**: local SQLite archive as it is today and
 explicit synchronization of shared elements only. P2P remains a
 future option for live sessions, not the base.
 
-**Separate Repository:** the server lives in an **external repository** on Forgegit
+**Separate Repository:** the server lives in an **external repository** on GitHub
 (proposed name `acelith/Chronexus-Server`), with its own code, versions, releases, and
 Docker images; this repository contains only the desktop/Android
 synchronization client. The contract between the two is an HTTP API
@@ -1501,9 +1501,9 @@ request before implementation, and publication follows the standing release rule
 
 | Priority | Milestone | Why now | Depends on |
 | --- | --- | --- | --- |
-| Done | M41 — Project wiki for app and server | Published 27/10/2026 on github.com | — |
+| Done | M41 — Project wiki for app and server | Handbook published; canonical GitHub Markdown sources after migration | — |
 | Done | M29 — Release matrix for Windows, macOS and Linux | Unsigned pre-release 0.10.0 published 27/10/2026; Windows ARM64 and x64 AppImage open | — |
-| Done | M30 — Automated desktop QA and cross-platform CI | Workflows and local runner in place; needs a Forgejo runner | — |
+| Done | M30 — Automated desktop QA and cross-platform CI | GitHub workflows and local runner in place; remote run acceptance open | — |
 | 1 | M25 — Chronexus Server (in progress) | The sharing client already ships in 0.9.x without a server | M24 |
 | 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Requested 27/10/2026: a GM runs combat for players; journals stay private | M25 |
 | 3 | M43 — Live table channel and GM web interface | Real-time play needs a server-authoritative channel and a GM UI | M42 |
@@ -1525,13 +1525,13 @@ request before implementation, and publication follows the standing release rule
 
 ## M41 — Project wiki for app and server (published 27 October 2026)
 
-**Goal:** use the wiki built into Forgejo (github.com) — the same model GitHub uses — so
-players, server operators and developers find everything in one place.
+**Goal:** keep player and developer guidance in one maintained handbook.
 
-**Published 27 October 2026** at https://github.com/Acelith/Chronexus/wiki and
-https://github.com/Acelith/Chronexus-Server/wiki, linked from both READMEs. Sources live in each repository under `docs/wiki/`, one
-Markdown file per page with Forgejo page names, and are published by pushing them to the
-repository's separate wiki (`<repo>.wiki.git`). Publication needs the user's go-ahead.
+The handbook was first published on 27 October 2026. Its canonical GitHub entry points
+are https://github.com/Acelith/Chronexus/blob/main/docs/wiki/Home.md and
+https://github.com/Acelith/Chronexus-Server/blob/main/docs/wiki/Home.md. Sources stay
+under `docs/wiki/`, with Markdown links that work directly in each repository.
+The optional GitHub hosted Wiki is not initialized and is not claimed as published.
 
 - **App wiki — user part.** How Chronexus works from the player's side, screen by screen:
   what each area does (journal, Codex, mentions and backlinks, graph and relationships,
@@ -1550,7 +1550,7 @@ repository's separate wiki (`<repo>.wiki.git`). Publication needs the user's go-
   stays in the repository files it links to. Update the wiki in the same change as any
   user-visible behaviour.
 - **Acceptance:** every sidebar link resolves, pages describe only behaviour that exists
-  (planned features marked as planned), both wikis published on github.com after the
+  (planned features marked as planned), both wikis published on the previous host after the
   user's go-ahead, README links to them.
 
 ## M28 — removed from the open milestones (27 October 2026)
@@ -1598,7 +1598,7 @@ and how to open the app anyway.
 real-app IPC flows under Xvfb, .deb artifact; server fmt/clippy/tests/contract/audit) and
 `scripts/qa/run-all.sh`, which runs the same stages plus clean-distro install tests on a
 `git archive` of a commit: all passed on b470359. Forgejo Actions is enabled but no runner
-is registered on github.com, so the workflows have not run there yet. Windows CDP smoke
+was registered on the retired host, so the workflows have not run there yet. Windows CDP smoke
 scripts remain manual legacy checks; macOS/Windows jobs need native runners.
 
 
@@ -1610,7 +1610,7 @@ scripts remain manual legacy checks; macOS/Windows jobs need native runners.
   (`NODEX_DEV_DATA_DIR`, `NODEX_DEV_DOCUMENTS_DIR`), runs the selected scripts
   and always cleans up; WebView2 on Windows, WebKitGTK via tauri-driver on
   Linux where CDP is not available.
-- CI on Forgegit runners (or documented local equivalents) for frontend tests,
+- CI on GitHub runners (or documented local equivalents) for frontend tests,
   Rust tests, clippy, i18n gate and a smoke subset on Windows, Linux and macOS.
 - Acceptance: a fresh clone runs the suite with one command per OS; a broken
   label or failing flow makes CI red; results are linked from docs/STATUS.md.

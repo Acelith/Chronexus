@@ -37,5 +37,5 @@ campaigns, saved spells, images, backups or settings.
 ## Translating an entry
 
 An entry can be translated into the interface language **on your computer** with the
-[local assistant](Local-Assistant)'s model. Translations are unreviewed drafts; the
+[local assistant](Local-Assistant.md)'s model. Translations are unreviewed drafts; the
 original text and its attribution always stay available. No translation service is used.

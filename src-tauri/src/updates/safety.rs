@@ -13,6 +13,20 @@ use std::{
 };
 use tempfile::NamedTempFile;
 const FILE: &str = "update-settings.json";
+// Fingerprints of the two retired built-in channels. Custom saved channels stay explicit.
+const RETIRED_CHANNELS: [&str; 2] = [
+    "099a18d111681020404e5bf57c6e348251f9e29e57a6d39a33bd12eb83c41a27",
+    "ff0c0696874e1b5eb2bb134367921935f6903ef1d7fbad7e63d473914e556e25",
+];
+fn migrate_channel(settings: &mut Settings, fingerprints: &[&str]) -> bool {
+    let digest = format!("{:x}", Sha256::digest(settings.endpoint.as_bytes()));
+    if fingerprints.contains(&digest.as_str()) {
+        settings.endpoint = DEFAULT_ENDPOINT.into();
+        true
+    } else {
+        false
+    }
+}
 fn read_json(path: &Path) -> AppResult<Option<serde_json::Value>> {
     let meta = match fs::symlink_metadata(path) {
         Ok(m) => m,
@@ -28,12 +42,15 @@ fn read_json(path: &Path) -> AppResult<Option<serde_json::Value>> {
         .map_err(|_| "Damaged preferences: keep your data and fix them before updating.".into())
 }
 pub fn read_settings(root: &Path) -> AppResult<Settings> {
-    let settings = match read_json(&root.join(FILE))? {
+    let mut settings = match read_json(&root.join(FILE))? {
         Some(value) => serde_json::from_value(value).map_err(|_| "Invalid update preferences.")?,
         None => Settings {
             endpoint: DEFAULT_ENDPOINT.into(),
         },
     };
+    if migrate_channel(&mut settings, &RETIRED_CHANNELS) {
+        write_settings(root, &settings)?;
+    }
     super::network::url(&settings.endpoint)?;
     Ok(settings)
 }
@@ -109,4 +126,22 @@ pub fn before_install<T>(
         .map_err(|_| "Backup receipt not saved: installation blocked.")?;
     backup::sync_dir(&directory)?;
     install(&receipt, notice.as_deref())
+}
+
+#[cfg(test)]
+mod channel_tests {
+    use super::*;
+
+    #[test]
+    fn only_exact_retired_channels_are_migrated() {
+        let custom = "https://example.org/updates/latest.json";
+        let mut settings = Settings {
+            endpoint: custom.into(),
+        };
+        assert!(!migrate_channel(&mut settings, &RETIRED_CHANNELS));
+        assert_eq!(settings.endpoint, custom);
+        let fingerprint = format!("{:x}", Sha256::digest(custom.as_bytes()));
+        assert!(migrate_channel(&mut settings, &[&fingerprint]));
+        assert_eq!(settings.endpoint, DEFAULT_ENDPOINT);
+    }
 }

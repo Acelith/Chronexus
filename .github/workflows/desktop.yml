@@ -15,6 +15,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 scripts/check-public-origin.py --history --origin
       - uses: pnpm/action-setup@v4
         with:
           version: 11.25.0
@@ -37,6 +40,8 @@ jobs:
       - run: pnpm test
       - run: pnpm test:automation
       - run: python -m unittest discover -s scripts/release -p test_updater_manifest.py
+      - run: python -m unittest discover -s scripts/release -p test_github_release.py
+      - run: python -m unittest discover -s scripts/release -p test_app_update_publisher.py
       - run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
       - run: cargo test --locked --manifest-path src-tauri/Cargo.toml
       - run: cargo clippy --locked --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings

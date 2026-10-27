@@ -106,7 +106,7 @@ request is documentation only: do not compile, install or publish now.
 - Run relevant checks per target and record build, startup, installation/upgrade
   evidence and signing limitations separately. Preserve the M15 updater signature
   and backup guarantees; include only supported, signed artifacts in its channel.
-- Publish verified packages to the existing Forgegit origin with explicit OS and
+- Publish verified packages to the existing GitHub origin with explicit OS and
   architecture labels, checksums and release notes. Verify downloaded assets;
   preserve existing releases/tags/assets and report partial delivery honestly.
 
@@ -166,7 +166,7 @@ and does not distribute the 27B. Do not overwrite existing releases.
 
 ## Update M17 — October 25 2026
 
-[Chronexus 0.6.0](https://github.com/Acelith/Chronexus/releases/tag/v0.6.0)
+[Chronexus 0.6.0](https://github.com/Acelith/Chronexus/tree/v0.6.0)
 includes the local translation of the wiki. Windows x64 app Installer signed updater,
 additive 017 schema. Local package in `installers/Chronexus-0.6.0-Windows-x64/`.
 Actual signature and anonymous downloads verified, no personal installation
@@ -174,7 +174,7 @@ performed. Runtime and Qwen3 4b-instruct remain separate; already translated cop
 read without runtime. This is historical checkpoint M17. Details in WIKI_TRANSLATION.md
 and STATUS.md; previous packages/releases were not overwritten.
 
-## Forgegit Policy — planned with M11
+## GitHub publication policy — planned with M11
 
 Verified destination of `origin`: `https://github.com/Acelith/Chronexus.git`,
 user repository. For future milestones implemented and verified,
@@ -300,13 +300,11 @@ SHA-256 and size; `AI/bundle.json` guides the offline PowerShell installer.
 Do not extract volumes manually. app/font and runtime/model licenses included;
 no scanning of campaign folders or training profiles.
 
-`forgejo_release.py` receives authorization only in RAM from an
-interactive session; it does not search for credentials in the system and does not write them. Fixed destination
-user origin. Requires a clean tree, consistent annotated/version/remote commit tags
-and checksum reports. Create draft, upload six attachments (including the app-only light package), download/verify
-each, then publish. Do not overwrite others' tags/releases/attachments. A local receipt
-ignored allows recognizing a draft of the same execution; on
-error, stop, do not delete or present a partial release as finished.
+The former hosting-specific ZIP publisher is retired. `publish_unsigned.py`
+creates GitHub pre-releases only, without `latest.json`; `publish_app_update.py`
+keeps the production-key signature gate, single-writer lock, draft ownership checks
+and explicit finalization for signed stable updates. Both verify downloaded bytes.
+GitHub credentials stay in memory and never follow redirects to the asset CDN.
 
 Actual evidence and version limits are in `docs/releases/v0.2.0.md`.
 SHA256SUMS.txt and package-report.json remain with local packages; the six

@@ -35,4 +35,4 @@ reading or archiving elsewhere. It is not a restore format — use `.nodex` for 
   folders.
 - Limits: 32 GiB per backup; Chronexus checks free disk space first.
 - Before every update Chronexus makes a verified backup automatically (see
-  [Updates](Updates)).
+  [Updates](Updates.md)).

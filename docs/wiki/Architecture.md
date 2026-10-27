@@ -29,7 +29,7 @@ React UI (src/features/*)  ──invoke──▶  Tauri commands (src-tauri/src/
   source and certainty.
 - Autosave persists reliably and surfaces failure; revisions refuse stale writes.
 - No implicit mutation: no auto-consumption, no inferred facts, no AI-written facts.
-- Every UI change passes the [localization gate](Localization-Workflow).
+- Every UI change passes the [localization gate](Localization-Workflow.md).
 
 ## Optional subsystems
 
@@ -38,5 +38,5 @@ React UI (src/features/*)  ──invoke──▶  Tauri commands (src-tauri/src/
 | Local assistant | `assistant/`, `ai_setup/` | Fixed loopback Ollama, cloud verified off, GPU preflight, citations |
 | Rules wiki | `wiki.rs`, `wikidot/`, `wiki_provider.rs`, `catalog.rs` | Allowlisted hosts/paths, bounded caches, inert text |
 | Updates | `updates/` | Tauri updater with signature, mandatory backup before install |
-| Sharing | `sync/` | Opt-in, HTTPS, per-item scope; see [Sync client](Sync-Client) |
+| Sharing | `sync/` | Opt-in, HTTPS, per-item scope; see [Sync client](Sync-Client.md) |
 | Automation | `automation/` | Hidden opt-in MCP adapter (`docs/AUTOMATION.md`) |

@@ -33,4 +33,4 @@ is gone: received copies are cleared, own items stay.
 - `sync::tests::live` — the same client against the real server binary:
   `CHRONEXUS_SERVER_BIN=… cargo test live -- --ignored --test-threads=1`.
 - `scripts/qa/sync/` — three real app instances (macOS + Linux containers) against an
-  HTTPS deployment; see [QA scenarios](QA-Scenarios).
+  HTTPS deployment; see [QA scenarios](QA-Scenarios.md).

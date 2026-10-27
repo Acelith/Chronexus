@@ -33,7 +33,7 @@ unchanged. The 0.6.0 checkpoint below is historical; personal installation not p
 
 # Internal updates — M15
 
-Current release: [0.6.0 — M17](https://github.com/Acelith/Chronexus/releases/tag/v0.6.0),
+Current release: [0.6.0 — M17](https://github.com/Acelith/Chronexus/tree/v0.6.0),
 signed Windows x64 installer and verified public channel. 017 Schema: pre-installation
 backups also include the derived cache of wiki translations, without
 changing the originals. Installed upgrade 0.5.0 → 0.6.0 not yet tested;
@@ -84,21 +84,24 @@ the update. The adjacent JSON receipt separately preserves UI preferences;
 the `.nodex` restore continues to maintain the current language. Do not copy an
 open SQLite and do not attempt an automatic downgrade after future migrations.
 
-## Public Endpoint Forgegit or own server
+## Public GitHub channel or your own HTTPS server
 
-Default endpoint, without authentication:
+The default channel is anonymous and points to the stable release's manifest:
 
 ```text
-https://api.github.com/repos/Acelith/Chronexus/releases/latest
+https://github.com/Acelith/Chronexus/releases/latest/download/latest.json
 ```
 
-The client reads the published stable release, rejects drafts/previews and requests
-a single `latest.json` attachment. Download the manifest from the attachment URL
-returned by the API and check that the version matches the release tag.
-It does not use the GitHub `releases/latest/download` route, absent in Forgejo 12.
-It is also possible to configure the direct URL of a static Tauri manifest.
+Custom channels keep same-origin HTTPS redirects and package URLs. The fixed
+Chronexus GitHub channel additionally allows GitHub's official release asset CDN
+(`release-assets.githubusercontent.com`), including its short-lived signed query.
+No credentials or campaign data are sent, and signed-version/package verification,
+bounded downloads and mandatory pre-installation backups remain required. GitHub's
+public release API for this repository is also accepted; previews stay excluded.
+Only exact retired built-in channel fingerprints migrate; custom saved channels stay.
+Historical packages predate this source migration and have not been rebuilt.
 
-**25 Status October 2026:** [release 0.4.0 published](https://github.com/Acelith/Chronexus/releases/tag/v0.4.0),
+**25 Status October 2026:** [release 0.4.0 published](https://github.com/Acelith/Chronexus/tree/v0.4.0),
 three attachments with anonymous downloads and verified SHA-256; latest API and
 app checks working. The initial installer is available for manual bootstrap.
 
@@ -166,7 +169,7 @@ The runner secrets are `TAURI_SIGNING_PRIVATE_KEY` and
 
 ## Checks and limits
 
-Automatic tests: HTTPS/isolation, Forgejo discovery, size/nullification,
+Automatic tests: HTTPS/isolation, GitHub release discovery, size/nullification,
 cryptographic and version checks, verified restorable backup with images,
 installer block after backup error and preservation after installer error,
 screen states and endpoint change. Synthetic Windows Desktop: settings,
@@ -205,13 +208,13 @@ again retries only the public verification.
 ```powershell
 # Write access already configured in Git for this exact repository;
 # no scanning of credentials, files or variables of other services.
-python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --git-credentials
+python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --github-credentials
 # After verifying all three attachments in the draft:
-python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --git-credentials --finalize
+python scripts/release/publish_app_update.py installers/Chronexus-0.4.0-Windows-x64 --github-credentials --finalize
 ```
 
-Without `--git-credentials`, the program requires a token in the terminal, without
-echo/saving. Ordinary Git credential used only on the Forgegit HTTPS origin;
+Without `--github-credentials`, the program requires a token in the terminal, without
+echo/saving. GitHub CLI credentials are used only on api.github.com and uploads.github.com;
 no token in the installed client. The local receipt contains only
 ID, version, source and URL of attachments, and allows resumption without duplicating them.
 Finalization also verifies anonymous downloads and latest API. Errors keep

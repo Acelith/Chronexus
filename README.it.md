@@ -7,13 +7,13 @@
 Annota le sessioni, tieni la scheda del personaggio e ritrova chi ti ha dato quella chiave,
 in quale sessione e per quale fazione, senza account e senza cloud.
 
-[![Release](https://img.shields.io/gitea/v/release/acelith/Chronexus?gitea_url=https%3A%2F%2Fgithub.com&label=release&color=6c302b)](https://github.com/Acelith/Chronexus/releases)
+[![Release](https://img.shields.io/github/v/release/Acelith/Chronexus?label=release&color=6c302b)](https://github.com/Acelith/Chronexus/releases)
 [![Licenza](https://img.shields.io/badge/licenza-Apache--2.0-354b3e)](LICENSE)
 [![Piattaforma](https://img.shields.io/badge/Windows-x64-241e17)](#download-e-installazione)
 [![Offline](https://img.shields.io/badge/dati-solo%20locali-b89b60)](#privacy-e-dati)
 [![Lingue](https://img.shields.io/badge/lingue-11%20%2B%20scritture-354b3e)](docs/I18N.md)
 
-[Scarica](#download-e-installazione) · [Funzionalità](#funzionalità) · [Giocare insieme](#giocare-insieme-chronexus-server-facoltativo) · [Wiki](https://github.com/Acelith/Chronexus/wiki) · [Guida](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [English](README.md)
+[Scarica](#download-e-installazione) · [Funzionalità](#funzionalità) · [Giocare insieme](#giocare-insieme-chronexus-server-facoltativo) · [Wiki](https://github.com/Acelith/Chronexus/blob/main/docs/wiki/Home.md) · [Guida](docs/GUIDE.md) · [Roadmap](ROADMAP.md) · [English](README.md)
 
 <img src="docs/media/hero.webp" alt="Diario di una sessione con appunti, menzioni dei personaggi e barra laterale con il logo dell’araldo" width="900">
 
@@ -158,7 +158,7 @@ nulla: nessun account, nessuna rete, tutto resta in locale.
 
 > [!NOTE]
 > Il server è in sviluppo attivo: le funzioni sono implementate e testate nel
-> codice sorgente, ma **non è ancora stata pubblicata una release del server**; puoi
+> codice sorgente, ma **la release 0.1.1 del server è disponibile su GitHub**; puoi
 > compilarlo con Docker Compose seguendo la
 > [guida di installazione](https://github.com/Acelith/Chronexus-Server/blob/main/docs/INSTALLATION.md).
 > I dati sono protetti da HTTPS ma **non sono cifrati end-to-end**: chi gestisce il
@@ -187,7 +187,7 @@ Le milestone consegnate, quelle aperte e i limiti ancora da verificare sono in
 
 ## Sviluppo e contributi
 
-La **[wiki](https://github.com/Acelith/Chronexus/wiki)** (in inglese) spiega ogni area dell'app per chi gioca e ha una
+La **[wiki](https://github.com/Acelith/Chronexus/blob/main/docs/wiki/Home.md)** (in inglese) spiega ogni area dell'app per chi gioca e ha una
 sezione per sviluppatori (architettura, dati, sincronizzazione, traduzioni, build, QA,
 rilasci); i sorgenti sono in [docs/wiki](docs/wiki).
 

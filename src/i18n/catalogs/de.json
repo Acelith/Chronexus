@@ -1369,7 +1369,7 @@
   "m_c4d62727b3ec": "Ein Vorgang läuft noch. Schließe Chronexus erneut, wenn er abgeschlossen ist.",
   "m_c4dc8a3877a4": "Ausgerüstet",
   "m_c4e42b974c33": "Täglich",
-  "m_c52987e50503": "Verwende die öffentliche API der neuesten Forgegit-Release oder ein latest.json-Manifest auf deinem HTTPS-Server. Es werden nur von Chronexus signierte Pakete auf demselben Server akzeptiert.",
+  "m_c52987e50503": "Verwende den GitHub-Release-Kanal oder eine latest.json-Datei auf deinem HTTPS-Server. Nur signierte Chronexus-Pakete werden akzeptiert. GitHub-Downloads verwenden das offizielle CDN für Release-Dateien.",
   "m_c5483b4108cf": "Füge einen d{0} hinzu",
   "m_c575f342d74f": "Gib für jede Würfelart eine ganze Zahl von 0 bis 50 ein.",
   "m_c587c2601ccf": "Sicht",

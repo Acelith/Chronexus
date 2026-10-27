@@ -9,23 +9,24 @@ from pathlib import Path
 from unittest.mock import patch
 import publish_app_update as publisher
 
-URL='https://github.com/attachments/01234567-89ab-cdef-0123-456789abcdef'
+URL='https://github.com/Acelith/Chronexus/releases/download/v0.4.0/latest.json'
 
-def fake_forgejo(calls,assets=None,releases=None,fail_verify=None):
-    """A minimal Forgejo release API: one draft release with id 100."""
+def fake_github(calls,assets=None,releases=None,fail_verify=None):
+    """A minimal GitHub release API: one draft release with id 100."""
     state={'draft':True,'assets':[] if assets is None else assets,'next':200}
     class Fake:
         def __init__(self,authorization):pass
         def api(self,path,method='GET',body=None):
             calls.append((method,path))
-            if path==publisher.API:return {'full_name':'acelith/Chronexus','private':False,'permissions':{'push':True}}
+            if path==publisher.API:return {'full_name':'Acelith/Chronexus','private':False,'permissions':{'push':True}}
             if '/tags/' in path:raise urllib.error.HTTPError('https://github.com',404,'absent',{},None)
-            if path.endswith('/releases?limit=50'):return [{'id':100,'tag_name':'v0.4.0'}] if releases is None else releases
+            if path.endswith('/releases?per_page=100'):return [{'id':100,'tag_name':'v0.4.0'}] if releases is None else releases
             if method=='POST':return {'id':100,'tag_name':'v0.4.0','draft':True}
             if method=='PATCH':state['draft']=False;return {'id':100,'tag_name':'v0.4.0','draft':False}
             if path.endswith('/assets'):return list(state['assets'])
             if path.endswith('/releases/100'):return {'id':100,'tag_name':'v0.4.0','draft':state['draft']}
             raise AssertionError('Unexpected request '+method+' '+path)
+        def asset_api_url(self,asset):return publisher.BASE+publisher.API+f"/releases/assets/{asset}"
         def upload(self,release,path):
             state['next']+=1
             asset={'id':state['next'],'name':path.name,'size':4,'browser_download_url':URL}
@@ -46,22 +47,21 @@ class PublisherTests(unittest.TestCase):
         with patch.object(publisher,'ROOT',root),patch.object(publisher,'validate',return_value=(package,report)),patch.object(publisher,'verify_signature'),patch.object(publisher,'Client',fake),patch.object(publisher.urllib.request,'build_opener',side_effect=AssertionError('no public network in tests')):
             return publisher.publish('token synthetic-secret',package,finalize)
 
-    def test_download_paths_are_fixed_to_release_assets_on_forgegit(self):
+    def test_download_paths_are_fixed_to_release_assets_on_github(self):
         self.assertEqual(publisher.allowed_download(URL),URL)
         self.assertEqual(publisher.allowed_download('https://github.com/Acelith/Chronexus/releases/download/v0.4.0/latest.json').split('/')[-1],'latest.json')
         for url in ['https://foreign.example/attachments/abc','http://github.com/attachments/abc','https://github.com/api/v1/user','https://github.com/attachments/abc?token=secret','https://github.com/Acelith/Chronexus/releases/download/../../config']:
             with self.assertRaises(ValueError):publisher.allowed_download(url)
 
-    def test_git_helper_is_scoped_and_never_accepts_another_host(self):
+    def test_github_cli_credentials_stay_in_memory_and_select_the_github_host(self):
         class Result:
             returncode=0
-            stdout='protocol=https\nhost=github.com\nusername=synthetic\npassword=test-only\n'
-        with patch.object(publisher.subprocess,'run',return_value=Result()) as run:
-            auth=publisher.authorized_git_header()
-            self.assertEqual(auth,'Basic '+base64.b64encode(b'synthetic:test-only').decode())
-            self.assertEqual(run.call_args.kwargs['input'],'url=https://github.com/Acelith/Chronexus.git\n\n')
-        Result.stdout=Result.stdout.replace('github.com','foreign.example')
-        with patch.object(publisher.subprocess,'run',return_value=Result()):
+            stdout='synthetic-test-token\n'
+        with patch('github_release.subprocess.run',return_value=Result()) as run:
+            self.assertEqual(publisher.authorized_git_header(),'Bearer synthetic-test-token')
+            self.assertEqual(run.call_args.args[0],['gh','auth','token','--hostname','github.com'])
+        Result.stdout=''
+        with patch('github_release.subprocess.run',return_value=Result()):
             with self.assertRaises(ValueError):publisher.authorized_git_header()
 
     def test_remote_content_must_match_size_and_hash(self):
@@ -77,9 +77,9 @@ class PublisherTests(unittest.TestCase):
     def test_corrupt_draft_asset_never_finalizes_and_receipt_keeps_no_secret(self):
         with tempfile.TemporaryDirectory() as folder:
             root,package,report=self.package(folder);calls=[]
-            with self.assertRaises(ValueError):self.run_publish(root,package,report,fake_forgejo(calls,fail_verify=lambda anonymous:True))
+            with self.assertRaises(ValueError):self.run_publish(root,package,report,fake_github(calls,fail_verify=lambda anonymous:True))
             self.assertFalse(any(method=='PATCH' for method,_ in calls))
-            content=(package/'forgejo-update-receipt.json').read_text()
+            content=(package/'github-update-receipt.json').read_text()
             self.assertNotIn('synthetic-secret',content)
             self.assertEqual(json.loads(content)['releaseId'],100)
             self.assertFalse((package/'.publish.lock').exists())
@@ -88,7 +88,7 @@ class PublisherTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root,package,report=self.package(folder);calls=[]
             foreign=[{'id':999,'name':'latest.json','size':4,'browser_download_url':URL}]
-            with self.assertRaises(ValueError) as error:self.run_publish(root,package,report,fake_forgejo(calls,assets=foreign))
+            with self.assertRaises(ValueError) as error:self.run_publish(root,package,report,fake_github(calls,assets=foreign))
             self.assertIn('another publisher',str(error.exception))
             self.assertFalse(any(method=='PATCH' for method,_ in calls))
 
@@ -96,17 +96,17 @@ class PublisherTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root,package,report=self.package(folder);calls=[]
             twins=[{'id':100,'tag_name':'v0.4.0'},{'id':101,'tag_name':'v0.4.0'}]
-            with self.assertRaises(ValueError) as error:self.run_publish(root,package,report,fake_forgejo(calls,releases=twins))
+            with self.assertRaises(ValueError) as error:self.run_publish(root,package,report,fake_github(calls,releases=twins))
             self.assertIn('More than one release',str(error.exception))
             self.assertFalse(any(method=='PATCH' for method,_ in calls))
 
     def test_a_failed_public_check_says_the_release_is_public_and_can_be_resumed(self):
         with tempfile.TemporaryDirectory() as folder:
             root,package,report=self.package(folder);calls=[]
-            fake=fake_forgejo(calls,fail_verify=lambda anonymous:anonymous)
+            fake=fake_github(calls,fail_verify=lambda anonymous:anonymous)
             with self.assertRaises(publisher.PublicationError) as error:self.run_publish(root,package,report,fake)
             self.assertIn('PUBLIC',str(error.exception))
-            receipt=json.loads((package/'forgejo-update-receipt.json').read_text())
+            receipt=json.loads((package/'github-update-receipt.json').read_text())
             self.assertEqual(receipt['state'],'public-unverified')
             self.assertNotIn('published',receipt)
             # Resuming retries only the verification: no second PATCH, nothing deleted.
@@ -123,7 +123,7 @@ class PublisherTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root,package,report=self.package(folder);calls=[]
             (package/'.publish.lock').write_text('1234')
-            with self.assertRaises(ValueError) as error:self.run_publish(root,package,report,fake_forgejo(calls))
+            with self.assertRaises(ValueError) as error:self.run_publish(root,package,report,fake_github(calls))
             self.assertIn('.publish.lock',str(error.exception))
             self.assertEqual(calls,[])
 

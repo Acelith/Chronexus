@@ -6,16 +6,16 @@ service is needed at runtime.
 
 | Page | Contents |
 | --- | --- |
-| [Architecture](Architecture) | Layers, data flow, invariants |
-| [Repository map](Repository-Map) | Where things live |
-| [Data and migrations](Data-and-Migrations) | Schema, migrations, backups, compatibility |
-| [Sync client](Sync-Client) | How the app talks to Chronexus Server |
-| [Localization workflow](Localization-Workflow) | The mandatory i18n gate |
-| [Build and test](Build-and-Test) | Prerequisites, commands, checks |
-| [Container builds](Container-Builds) | Linux and Windows packages in Docker |
-| [QA scenarios](QA-Scenarios) | Real-app and multi-device tests |
-| [Release process](Release-Process) | Versions, signing, publication |
-| [Contributing](Contributing) | Rules, commits, review |
+| [Architecture](Architecture.md) | Layers, data flow, invariants |
+| [Repository map](Repository-Map.md) | Where things live |
+| [Data and migrations](Data-and-Migrations.md) | Schema, migrations, backups, compatibility |
+| [Sync client](Sync-Client.md) | How the app talks to Chronexus Server |
+| [Localization workflow](Localization-Workflow.md) | The mandatory i18n gate |
+| [Build and test](Build-and-Test.md) | Prerequisites, commands, checks |
+| [Container builds](Container-Builds.md) | Linux and Windows packages in Docker |
+| [QA scenarios](QA-Scenarios.md) | Real-app and multi-device tests |
+| [Release process](Release-Process.md) | Versions, signing, publication |
+| [Contributing](Contributing.md) | Rules, commits, review |
 
 **Canonical sources.** This wiki explains; the repository holds the authoritative detail:
 `PROJECT_SPEC.md` (product), `ROADMAP.md` (milestones), `AGENTS.md` (engineering rules),

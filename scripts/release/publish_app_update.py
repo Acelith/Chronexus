@@ -1,4 +1,4 @@
-"""Publish a verified app-only updater release to the fixed Chronexus Forgejo origin.
+"""Publish a verified app-only updater release to the fixed Chronexus GitHub origin.
 No credential discovery: an interactive token or explicitly selected Git credential
 helper supplies authorization in memory, exclusively for this repository/host.
 
@@ -10,7 +10,6 @@ records whether the release is still a draft or already public.
 """
 from __future__ import annotations
 import argparse
-import base64
 import getpass
 import hashlib
 import json
@@ -20,13 +19,14 @@ import subprocess
 import urllib.error
 import urllib.parse
 import urllib.request
-import uuid
 from pathlib import Path
+from github_release import GitHubReleaseClient, authorization as github_authorization, allowed_download as github_download
 
 ROOT = Path(__file__).resolve().parents[2]
-BASE = "https://github.com"
-API = "/api/v1/repos/acelith/Chronexus"
-ORIGIN = BASE + "/acelith/Chronexus.git"
+BASE = "https://api.github.com"
+WEB = "https://github.com"
+API = "/repos/Acelith/Chronexus"
+ORIGIN = WEB + "/Acelith/Chronexus.git"
 MAX_PACKAGE = 256 * 1024 * 1024
 
 class PublicationError(ValueError):
@@ -48,24 +48,12 @@ def sha(path):
 
 
 def authorized_git_header():
-    """Use only the normal credential helper for the explicitly selected origin."""
-    env = os.environ.copy()
-    env.update(GIT_TERMINAL_PROMPT="0", GCM_INTERACTIVE="Never", GIT_TRACE="0", GIT_TRACE_CURL="0")
-    result = subprocess.run(["git", "-c", "credential.interactive=never", "credential", "fill"], input=f"url={ORIGIN}\n\n", cwd=ROOT, env=env, text=True, capture_output=True)
-    if result.returncode: raise ValueError("Git credentials unavailable; use an interactive Forgejo token")
-    fields = dict(line.split("=", 1) for line in result.stdout.splitlines() if "=" in line)
-    if fields.get("protocol") != "https" or fields.get("host") != "github.com" or not fields.get("username") or not fields.get("password"):
-        raise ValueError("Credential helper did not return the selected Forgejo identity")
-    return "Basic " + base64.b64encode((fields["username"] + ":" + fields["password"]).encode()).decode()
+    """Read the explicitly selected GitHub CLI credential into memory only."""
+    return github_authorization()
 
 
 def allowed_download(url):
-    p = urllib.parse.urlsplit(url)
-    if p.scheme != "https" or p.netloc != "github.com" or p.username or p.password or p.query or p.fragment:
-        raise ValueError("Unexpected download origin")
-    if not (re.fullmatch(r"/attachments/[a-fA-F0-9-]+", p.path) or re.fullmatch(r"/acelith/Chronexus/releases/download/v[0-9]+\.[0-9]+\.[0-9]+/(?:Chronexus_[0-9]+\.[0-9]+\.[0-9]+_x64-setup\.exe(?:\.sig)?|latest\.json)", p.path)):
-        raise ValueError("Unexpected release download path")
-    return url
+    return github_download(url, "Acelith/Chronexus")
 
 
 def validate(folder):
@@ -85,7 +73,7 @@ def validate(folder):
     if manifest["version"] != version or list(manifest["platforms"]) != ["windows-x86_64"]:
         raise ValueError("Manifest version/target mismatch")
     installer = next(a for a in report["assets"] if a["name"].endswith(".exe"))
-    if entry["url"] != f"{BASE}/acelith/Chronexus/releases/download/v{version}/{installer['name']}" or entry.get("sha256") != installer["sha256"] or entry.get("size") != installer["size"]:
+    if entry["url"] != f"{WEB}/Acelith/Chronexus/releases/download/v{version}/{installer['name']}" or entry.get("sha256") != installer["sha256"] or entry.get("size") != installer["size"]:
         raise ValueError("Manifest artifact mismatch")
     if entry["signature"] != (folder / (installer["name"] + ".sig")).read_text().strip(): raise ValueError("Manifest signature mismatch")
     if git("status", "--porcelain") or git("remote", "get-url", "origin") != ORIGIN: raise ValueError("Clean tree and exact origin required")
@@ -149,7 +137,7 @@ def check_assets(client, release_id, receipt, expected_names, complete):
 
 
 def single_draft(client, tag, release_id):
-    same = [r for r in client.api(f"{API}/releases?limit=50") if r.get("tag_name") == tag]
+    same = [r for r in client.api(f"{API}/releases?per_page=100") if r.get("tag_name") == tag]
     if [int(r["id"]) for r in same] != [release_id]:
         raise ValueError(f"More than one release exists for {tag}: another publisher may be running. Nothing was made public")
 
@@ -158,42 +146,9 @@ def save(receipt_path, receipt):
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
 
 
-class Client:
+class Client(GitHubReleaseClient):
     def __init__(self, authorization):
-        self.authorization = authorization
-        self.opener = urllib.request.build_opener(NoRedirect())
-
-    def api(self, path, method="GET", body=None):
-        if not (path == API or path.startswith(API + "/")) or ".." in path or "\\" in path: raise ValueError("Unexpected API path")
-        req = urllib.request.Request(BASE + path, method=method, data=None if body is None else json.dumps(body).encode(), headers={"Authorization":self.authorization,"Content-Type":"application/json","Accept":"application/json"})
-        with self.opener.open(req, timeout=60) as response:
-            data=response.read(1_000_001)
-            if len(data)>1_000_000: raise ValueError("API response too large")
-            return json.loads(data)
-
-    def upload(self, release, path):
-        boundary="chronexus-"+uuid.uuid4().hex
-        body=(f'--{boundary}\r\nContent-Disposition: form-data; name="attachment"; filename="{path.name}"\r\nContent-Type: application/octet-stream\r\n\r\n').encode()+path.read_bytes()+f"\r\n--{boundary}--\r\n".encode()
-        req=urllib.request.Request(f"{BASE}{API}/releases/{int(release)}/assets?name={urllib.parse.quote(path.name)}",data=body,headers={"Authorization":self.authorization,"Content-Type":f"multipart/form-data; boundary={boundary}"},method="POST")
-        with self.opener.open(req,timeout=300) as response: return json.loads(response.read(1_000_000))
-
-    def verify(self, url, expected, anonymous=False):
-        url=allowed_download(url)
-        digest=hashlib.sha256();size=0
-        for _ in range(6):
-            req=urllib.request.Request(url,headers={} if anonymous else {"Authorization":self.authorization})
-            try: response=self.opener.open(req,timeout=300)
-            except urllib.error.HTTPError as error:
-                if error.code in [301,302,303,307,308]: url=allowed_download(urllib.parse.urljoin(url,error.headers["Location"]));continue
-                raise
-            with response:
-                while block:=response.read(1024*1024):
-                    size+=len(block)
-                    if size>expected["size"]: raise ValueError("Remote asset oversized")
-                    digest.update(block)
-            break
-        else: raise ValueError("Too many asset redirects")
-        if size!=expected["size"] or digest.hexdigest()!=expected["sha256"]: raise ValueError("Remote checksum mismatch")
+        super().__init__(authorization, "Acelith/Chronexus")
 
 
 def publish(authorization, directory, finalize=False):
@@ -206,8 +161,8 @@ def publish(authorization, directory, finalize=False):
 def _publish(authorization, folder, report, finalize):
     client=Client(authorization)
     repository=client.api(API)
-    if repository.get("full_name")!="acelith/Chronexus" or repository.get("private") or not repository.get("permissions",{}).get("push"): raise ValueError("Public owned repository with write access required")
-    version=report["version"];tag="v"+version;receipt_path=folder/"forgejo-update-receipt.json"
+    if repository.get("full_name")!="Acelith/Chronexus" or repository.get("private") or not repository.get("permissions",{}).get("push"): raise ValueError("Public owned repository with write access required")
+    version=report["version"];tag="v"+version;receipt_path=folder/"github-update-receipt.json"
     if receipt_path.exists():
         receipt=json.loads(receipt_path.read_text())
         if receipt.get("version")!=version or receipt.get("sourceCommit")!=report["sourceCommit"]: raise ValueError("Unknown publication receipt")
@@ -238,11 +193,11 @@ def _publish(authorization, folder, report, finalize):
             if uploaded.get("name")!=name or uploaded.get("size")!=expected["size"]: raise ValueError("Unexpected upload response")
             receipt["assets"][name]={"id":uploaded["id"],"url":allowed_download(uploaded["browser_download_url"])}
             save(receipt_path,receipt)
-        client.verify(receipt["assets"][name]["url"],expected)
+        client.verify(client.asset_api_url(receipt["assets"][name]["id"]),expected)
         print("Verified draft asset: "+name,flush=True)
     check_assets(client,release_id,receipt,expected_names,True)
     if not finalize:
-        print("Draft prepared and verified", f"{BASE}/acelith/Chronexus/releases/tag/{tag}",flush=True)
+        print("Draft prepared and verified", f"{WEB}/Acelith/Chronexus/releases/tag/{tag}",flush=True)
         return receipt
     if release.get("draft"):
         single_draft(client,tag,release_id)
@@ -251,14 +206,14 @@ def _publish(authorization, folder, report, finalize):
         try:
             release=client.api(f"{API}/releases/{release_id}","PATCH",{"draft":False})
         except (urllib.error.HTTPError,urllib.error.URLError,OSError) as error:
-            raise PublicationError(f"The request to make the release public failed ({error}). It may or may not be public now: check {BASE}/acelith/Chronexus/releases/tag/{tag}, then run --finalize again. Nothing was deleted") from None
+            raise PublicationError(f"The request to make the release public failed ({error}). It may or may not be public now: check {WEB}/Acelith/Chronexus/releases/tag/{tag}, then run --finalize again. Nothing was deleted") from None
     receipt["state"]="public-unverified"
     save(receipt_path,receipt)
     # Anonymous access is only provable once public. A failure here leaves the release
     # public; it is reported as such and can be retried, never rolled back by deletion.
     try:
         for expected in report["assets"]: client.verify(receipt["assets"][expected["name"]]["url"],expected,anonymous=True)
-        client.verify(f"{BASE}/acelith/Chronexus/releases/download/{tag}/latest.json",next(a for a in report["assets"] if a["name"]=="latest.json"),anonymous=True)
+        client.verify(f"{WEB}/Acelith/Chronexus/releases/download/{tag}/latest.json",next(a for a in report["assets"] if a["name"]=="latest.json"),anonymous=True)
         public=urllib.request.build_opener(NoRedirect())
         with public.open(BASE+API+"/releases/latest",timeout=30) as response: latest=json.load(response)
         if latest.get("id")!=release_id or latest.get("draft") or latest.get("prerelease"): raise ValueError("Public stable channel mismatch")
@@ -267,22 +222,22 @@ def _publish(authorization, folder, report, finalize):
     receipt["state"]="published"
     receipt["published"]=True
     save(receipt_path,receipt)
-    print("Published and verified", f"{BASE}/acelith/Chronexus/releases/tag/{tag}",flush=True)
+    print("Published and verified", f"{WEB}/Acelith/Chronexus/releases/tag/{tag}",flush=True)
     return receipt
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("directory",type=Path)
-    p.add_argument("--git-credentials",action="store_true",help="Explicitly use the already configured Git helper for this origin only")
+    p.add_argument("--github-credentials", "--git-credentials", dest="git_credentials", action="store_true", help="Explicitly use gh credentials for github.com only")
     p.add_argument("--finalize",action="store_true",help="Publish after verifying all draft assets")
     args=p.parse_args()
-    authorization=authorized_git_header() if args.git_credentials else "token "+getpass.getpass("Forgejo token (kept only in memory): ")
+    authorization=authorized_git_header() if args.git_credentials else "Bearer "+getpass.getpass("GitHub token (kept only in memory): ")
     publish(authorization,args.directory,args.finalize)
 
 if __name__=="__main__":
     try: main()
     # Failures after the release became public are PublicationErrors with their own message;
     # any HTTP error that reaches this point happened while the release was still a draft.
-    except urllib.error.HTTPError as error: raise SystemExit(f"Forgejo HTTP {error.code}; the release was not made public by this run, no credentials logged")
+    except urllib.error.HTTPError as error: raise SystemExit(f"GitHub HTTP {error.code}; the release was not made public by this run, no credentials logged")
     except (ValueError,subprocess.CalledProcessError) as error: raise SystemExit(str(error) if isinstance(error,ValueError) else "Git validation failed; no credentials logged")

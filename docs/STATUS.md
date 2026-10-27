@@ -1,3 +1,22 @@
+# Chronexus status — 27 October 2026: GitHub migration prepared
+
+- GitHub is the canonical source/release destination. The owner authorized a one-time
+  cleanup of all file revisions and commit/tag messages. Full private recovery bundles
+  have been verified outside both repositories; publication and history audit are pending.
+- Current source, instructions, handbooks, release publishing and update downloads use
+  GitHub. The source updater keeps signatures, bounded downloads and verified backups;
+  only the fixed GitHub channel can follow redirects to the official release asset CDN.
+  All ten UI catalogs describe the new channel. Custom saved channels remain explicit.
+- Retired hosting workflows/publisher removed; existing GitHub workflows fetch full
+  history and run a read-only origin audit. The server defaults to a local container build
+  until GHCR publication is verified. Details: docs/GITHUB_MIGRATION.md.
+- Validation: 207 frontend tests, TypeScript, ESLint, Vite build, localization gate
+  (all ten catalogs), 176 Rust tests plus the real production-key package verification,
+  Clippy with warnings denied and the desktop debug build passed. Python 3.14: 23
+  targeted publisher/manifest/package/origin tests passed; anonymous GitHub manifest
+  download verified. Windows-only PowerShell installer tests are unavailable on macOS.
+- Next roadmap milestone: **M25 — Chronexus Server**, then M42–M47 virtual tabletop.
+
 # Chronexus status — 27 October 2026: settings redesign (local source)
 
 - App settings now presents six persistent sections in a dedicated navigation
@@ -40,7 +59,7 @@
   committed revisions only. run-all.sh checks+ipc also passed on 085b5dc (includes its
   settings commit) before main was published.
 - **Published on GitHub too:** main and tags of both repositories; releases 0.9.2 (latest)
-  and 0.10.0 (pre-release) mirrored byte for byte from github.com and verified. GitHub
+  and 0.10.0 (pre-release) copied byte for byte from the previous hosting platform and verified. GitHub
   wikis not yet created (GitHub needs a first page made on the website by a signed-in user).
 - **Planned:** M42–M47 *Chronexus Table* virtual tabletop (docs/VTT.md), after M25.
 
@@ -424,7 +443,7 @@ server. Details in ROADMAP.
 
 # Chronexus Status — 25 October 2026 (release 0.8.0)
 
-Release [0.8.0](https://github.com/Acelith/Chronexus/releases/tag/v0.8.0)
+Release [0.8.0](https://github.com/Acelith/Chronexus/tree/v0.8.0)
 with M19, M20, M21 and M22 published. Source compiled `c540c2d`, tag annotated `v0.8.0`,
 `main` on origin. NSIS Windows x64 installer compiled from commit `c540c2d` (tag annotated `v0.8.0`),
 updater signed and verified with the production key
@@ -527,7 +546,7 @@ instead of emojis and logo composition; accessibility for AI panel and logo name
 ; react-testing for tests; imagegen not necessary (user images).
 
 Push of the 25/10/2026: `main` on origin at 7f2dd90 (no release). README rendering
-verified on the real page of github.com (Forgejo 12.0.4): callout WARNING/
+verified on the real page of the previous host (Forgejo 12.0.4): callout WARNING/
 IMPORTANT/NOTE, two collapsible sections, centering, three tables, all images
 e i badge loaded (release v0.7.0), 12 internal links with response 200.
 
@@ -655,7 +674,7 @@ Actual verifications:
   no new reports after correcting block identities.
 - Test script release 26 PASS; MCP protocol 5 PASS, no new tools exposed.
 
-Distribution **0.6.0 published**: https://github.com/Acelith/Chronexus/releases/tag/v0.6.0
+Distribution **0.6.0 published**: https://github.com/Acelith/Chronexus/tree/v0.6.0
 (release id 5, three attachments). Source/tag `v0.6.0` → `b4f04c4`
 (`feat(wiki): traduce le voci nella lingua dell'app con cache locale`).
 Build NSIS Windows x64 signed updater, installer 32.603.355 byte; SHA-256
@@ -691,7 +710,7 @@ version 0.5.0 and release unchanged; no publication.
 
 # Release 0.5.0 — 25 October 2026: published
 
-https://github.com/Acelith/Chronexus/releases/tag/v0.5.0 — release id 4, three
+https://github.com/Acelith/Chronexus/tree/v0.5.0 — release id 4, three
 attachments. Publisher: draft, upload and redownload SHA-256 verified, then
 publication with verification of anonymous downloads, the static route `latest.json`
 and the API `releases/latest` (v0.5.0, not draft, not preview). Independent curl
@@ -907,7 +926,7 @@ No publication/version for this planning change.
 ## M15 — operational on Windows, public release 0.4.0
 
 Release published and verified without authentication:
-https://github.com/Acelith/Chronexus/releases/tag/v0.4.0
+https://github.com/Acelith/Chronexus/tree/v0.4.0
 Stable API: https://api.github.com/repos/Acelith/Chronexus/releases/latest
 Release ID 3, three attachments: Windows x64 setup, .sig and latest.json. Upload,
 download, SHA-256, anonymous downloads and latest API PASS. M11 draft ID 2 unchanged.

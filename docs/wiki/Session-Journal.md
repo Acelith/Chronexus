@@ -9,7 +9,7 @@ share a number.
 The editor works with **blocks**: paragraphs, headings, lists, checklists, quotes, bold and
 italics. Type `/` to see every block type. A Markdown view is available too.
 
-- `[[` opens the link menu — see [Codex and mentions](Codex-and-Mentions).
+- `[[` opens the link menu — see [Codex and mentions](Codex-and-Mentions.md).
 - Every block has a stable identity, so search results, backlinks and item origins can
   open *exactly* the paragraph they come from.
 

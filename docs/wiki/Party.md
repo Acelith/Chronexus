@@ -7,7 +7,7 @@ character.
   player's name, the role and whether they are present.
 - **What I know** is your private notebook about that companion. It is saved on the same
   Codex page, so it is searchable and shows up in backlinks.
-- Images use the same [images](Images) as the Codex page.
+- Images use the same [images](Images.md) as the Codex page.
 - **Remove from party** only removes the membership: the page, its notes and its images
   stay.
 

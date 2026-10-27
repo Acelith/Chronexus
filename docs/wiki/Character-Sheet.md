@@ -38,5 +38,5 @@ whole session can still be opened. Origins never create relationships in the gra
 
 Write your own abilities and spells with system, rank, school, activation, duration,
 range, components and separate *known* / *prepared* markers. To start from official
-text, use the [rules wiki or the SRD catalog](Rules-Wiki-and-SRD): an imported spell is
+text, use the [rules wiki or the SRD catalog](Rules-Wiki-and-SRD.md): an imported spell is
 an editable copy that keeps its source, edition and licence visible.

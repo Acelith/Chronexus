@@ -3,7 +3,7 @@
 Chronexus is complete on its own. With a **Chronexus Server** that you or your group host,
 you can keep a campaign on several computers and share chosen items with your party.
 How to install a server: see the
-[server wiki](https://github.com/Acelith/Chronexus-Server/wiki).
+[server wiki](https://github.com/Acelith/Chronexus-Server/blob/main/docs/wiki/Home.md).
 
 ## Connect
 

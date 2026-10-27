@@ -1369,7 +1369,7 @@
   "m_c4d62727b3ec": "Une opération est encore en cours. Fermez de nouveau Chronexus lorsqu’elle sera terminée.",
   "m_c4dc8a3877a4": "Équipé",
   "m_c4e42b974c33": "Chaque jour",
-  "m_c52987e50503": "Utilisez l’API publique de la dernière version Forgegit ou un manifeste latest.json sur votre serveur HTTPS. Seuls les paquets signés par Chronexus sur le même serveur sont acceptés.",
+  "m_c52987e50503": "Utilisez le canal des versions GitHub ou un manifeste latest.json sur votre serveur HTTPS. Seuls les paquets Chronexus signés sont acceptés. Les téléchargements GitHub utilisent le CDN officiel des fichiers joints.",
   "m_c5483b4108cf": "Ajouter un d{0}",
   "m_c575f342d74f": "Saisissez des valeurs entières allant de 0 à 50 pour chaque type de dé.",
   "m_c587c2601ccf": "Vision",

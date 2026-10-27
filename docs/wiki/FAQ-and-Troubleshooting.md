@@ -12,7 +12,7 @@ Your text is still in the editor. Press *Save now*; if it keeps failing, create 
 from *Backup and restore* and report the message.
 
 **Windows or macOS refuses to open the app.**
-Chronexus has no paid signing certificate. See [Getting started](Getting-Started).
+Chronexus has no paid signing certificate. See [Getting started](Getting-Started.md).
 
 **The sharing status says "waiting to be sent".**
 Your change is saved on this computer and will be sent at the next synchronization (or

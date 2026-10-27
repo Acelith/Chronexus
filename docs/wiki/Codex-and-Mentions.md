@@ -7,7 +7,7 @@ per character, place, faction, quest, item, event, piece of knowledge or free no
 
 Each page has a **type**, a **title**, optional **aliases** (other names the same thing
 goes by), a **draft / active** status and its own notes, written with the same editor as
-the sessions. Pages can carry [images](Images).
+the sessions. Pages can carry [images](Images.md).
 
 When you rename a page, the old title is kept as an alias, so older notes still find it.
 
@@ -34,4 +34,4 @@ the paragraph. Opening a backlink jumps to that exact paragraph and highlights i
 
 A mention only says *this page is named in this note*. It does **not** say the two things
 are related. To record "Varek works for the Guild", declare a relationship in the
-[graph](Graph-and-Relationships).
+[graph](Graph-and-Relationships.md).

@@ -40,4 +40,4 @@ artifacts:
 pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 ```
 
-Linux and Windows packages can be built in Docker: see [Container builds](Container-Builds).
+Linux and Windows packages can be built in Docker: see [Container builds](Container-Builds.md).

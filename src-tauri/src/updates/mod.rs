@@ -16,7 +16,7 @@ use tauri_plugin_updater::{Update, UpdaterExt};
 use tokio_util::sync::CancellationToken;
 
 pub const DEFAULT_ENDPOINT: &str =
-    "https://api.github.com/repos/Acelith/Chronexus/releases/latest";
+    "https://github.com/Acelith/Chronexus/releases/latest/download/latest.json";
 const MAX_MANIFEST: usize = 1_000_000;
 const MAX_PACKAGE: usize = 256 * 1024 * 1024;
 #[derive(Clone, Serialize, Deserialize)]
@@ -287,7 +287,7 @@ async fn check(app: &tauri::AppHandle) -> AppResult<Option<Offer>> {
             .map(|v| v.trim_start_matches('v'))
             != Some(version.trim_start_matches('v'))
         {
-            return Err("The manifest version does not match the Forgegit release.".into());
+            return Err("The manifest version does not match the GitHub release.".into());
         }
     }
     let exit_handle = app.clone();

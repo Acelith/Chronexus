@@ -296,7 +296,7 @@ export default function UpdateSettings({
             <summary>{tr("Update server")}</summary>
             <p>
               {tr(
-                "Use the public API of the latest Forgegit release or a latest.json manifest on your HTTPS server. Only packages signed by Chronexus on the same server are accepted.",
+                "Use the GitHub release channel or a latest.json manifest on your HTTPS server. Only signed Chronexus packages are accepted. GitHub downloads use its official asset CDN.",
               )}
             </p>
             <form

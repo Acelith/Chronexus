@@ -1369,7 +1369,7 @@
   "m_c4d62727b3ec": "仍有操作正在进行。操作完成后，请再次关闭 Chronexus。",
   "m_c4dc8a3877a4": "装备中",
   "m_c4e42b974c33": "每天",
-  "m_c52987e50503": "使用最新 Forgegit 发行版的公共 API，或你 HTTPS 服务器上的 latest.json 清单。只接受同一服务器上由 Chronexus 签名的安装包。",
+  "m_c52987e50503": "使用 GitHub 发行版频道，或你 HTTPS 服务器上的 latest.json 清单。只接受已签名的 Chronexus 安装包。GitHub 下载使用其官方发行文件 CDN。",
   "m_c5483b4108cf": "添加一个 d{0}",
   "m_c575f342d74f": "为每种骰子输入0到50之间的整数数量。",
   "m_c587c2601ccf": "视野",

@@ -192,9 +192,9 @@ async fn cancelled_download_stops_before_installation() {
 }
 
 #[test]
-fn forgejo_discovery_accepts_only_stable_release_with_unique_same_origin_manifest() {
+fn release_discovery_accepts_only_stable_release_with_unique_scoped_manifest() {
     let endpoint = network::url(DEFAULT_ENDPOINT).unwrap();
-    let mut release = serde_json::json!({"draft":false,"prerelease":false,"tag_name":"v0.4.0","assets":[{"name":"latest.json","browser_download_url":"https://github.com/attachments/synthetic"}]});
+    let mut release = serde_json::json!({"draft":false,"prerelease":false,"tag_name":"v0.4.0","assets":[{"name":"latest.json","browser_download_url":"https://github.com/Acelith/Chronexus/releases/download/v0.4.0/latest.json"}]});
     assert_eq!(
         network::manifest_asset(&release, &endpoint)
             .unwrap()
@@ -219,6 +219,27 @@ fn forgejo_discovery_accepts_only_stable_release_with_unique_same_origin_manifes
     )
     .unwrap()
     .is_none());
+}
+
+#[test]
+fn github_redirects_are_anonymous_and_restricted_to_the_official_asset_cdn() {
+    let initial = network::url(DEFAULT_ENDPOINT).unwrap();
+    let cdn = "https://release-assets.githubusercontent.com/github-production-release-asset/123/fixture?sig=ephemeral".parse().unwrap();
+    assert!(network::redirect(&initial, &cdn).is_ok());
+    assert!(network::artifact(&initial, &cdn).is_err());
+    let custom = network::url("https://updates.example.org/latest.json").unwrap();
+    assert!(network::redirect(&custom, &cdn).is_err());
+    for value in [
+        "http://release-assets.githubusercontent.com/github-production-release-asset/123/file",
+        "https://release-assets.githubusercontent.com.evil.example/github-production-release-asset/123/file",
+        "https://release-assets.githubusercontent.com/other/file",
+        "https://user:secret@release-assets.githubusercontent.com/github-production-release-asset/123/file",
+        "https://release-assets.githubusercontent.com:8443/github-production-release-asset/123/file",
+        "https://github.com/Other/Chronexus/releases/download/v1/file",
+        "https://github.com/Acelith/Chronexus/issues/1",
+    ] {
+        assert!(network::redirect(&initial, &value.parse().unwrap()).is_err(), "{value}");
+    }
 }
 #[test]
 fn update_backup_goes_to_documents_with_receipt_or_blocks_installer() {
