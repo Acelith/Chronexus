@@ -128,6 +128,16 @@ pub struct Invite {
     pub role: String,
     pub expires_at: String,
 }
+/// One active member of a campaign; `revision` guards role changes and removals.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct Member {
+    pub account_id: String,
+    pub display_name: String,
+    pub role: String,
+    pub revision: i64,
+    pub joined_at: String,
+}
 /// One item as the server shows it to this account.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -193,6 +203,16 @@ impl Client {
                 .user_agent(concat!("Chronexus/", env!("CARGO_PKG_VERSION")));
             if let Some(limit) = timeout {
                 builder = builder.read_timeout(limit).timeout(Duration::from_secs(60));
+            }
+            // Debug builds only: trust the private CA of a local test deployment (docs/QA.md)
+            // without touching the system trust store. Release builds never read it.
+            #[cfg(debug_assertions)]
+            if let Some(pem) =
+                std::env::var_os("NODEX_DEV_SYNC_ROOT_CA").and_then(|path| std::fs::read(path).ok())
+            {
+                if let Ok(roots) = reqwest::Certificate::from_pem_bundle(&pem) {
+                    builder = builder.tls_certs_merge(roots);
+                }
             }
             builder.build()
         };
@@ -531,6 +551,91 @@ impl Client {
             Some(json!({"role":role})),
         )
         .await
+    }
+    /// This account's current view of one campaign, including its role now: the owner may
+    /// have changed it since this device joined.
+    pub async fn campaign(&self, campaign: &str) -> ApiResult<RemoteCampaign> {
+        remote_id(campaign)?;
+        let url = self.url(&format!("/api/v1/campaigns/{campaign}"))?;
+        let (status, value) = self.send(Method::GET, url, None, None).await?;
+        match status {
+            200 => checked(serde_json::from_value(value).map_err(|_| {
+                Failure::Rejected("Invalid answer from the sharing server.".into())
+            })?),
+            // As for the change feed: refused or missing means the access is gone.
+            403 | 404 => Err(Failure::AccessLost(
+                "You no longer have access to this campaign on the server: you were removed, or it was deleted.".into(),
+            )),
+            _ => Err(failure(status)),
+        }
+    }
+    /// Active members of a campaign (any member may read the list).
+    pub async fn members(&self, campaign: &str) -> ApiResult<Vec<Member>> {
+        remote_id(campaign)?;
+        let members: Vec<Member> = self
+            .call(
+                Method::GET,
+                &format!("/api/v1/campaigns/{campaign}/members"),
+                None,
+            )
+            .await?;
+        let invalid = members.len() > 100
+            || members.iter().any(|m| {
+                remote_id(&m.account_id).is_err()
+                    || !["owner", "player", "reader"].contains(&m.role.as_str())
+                    || m.revision < 1
+                    || m.display_name.trim().is_empty()
+                    || m.display_name.chars().count() > 100
+            });
+        if invalid {
+            return Err(Failure::Rejected(
+                "Invalid answer from the sharing server.".into(),
+            ));
+        }
+        Ok(members)
+    }
+    /// Owner only; `base_revision` makes a change based on a stale list fail with 409.
+    pub async fn change_member(
+        &self,
+        campaign: &str,
+        account: &str,
+        role: &str,
+        base_revision: i64,
+    ) -> ApiResult<()> {
+        remote_id(campaign)?;
+        remote_id(account)?;
+        let (status, _) = self
+            .send(
+                Method::PATCH,
+                self.url(&format!("/api/v1/campaigns/{campaign}/members/{account}"))?,
+                Some(json!({"role":role,"baseRevision":base_revision})),
+                None,
+            )
+            .await?;
+        if status == 204 {
+            Ok(())
+        } else {
+            Err(failure(status))
+        }
+    }
+    /// The owner removes a member, or a member removes itself (leaves the campaign).
+    pub async fn remove_member(
+        &self,
+        campaign: &str,
+        account: &str,
+        base_revision: i64,
+    ) -> ApiResult<()> {
+        remote_id(campaign)?;
+        remote_id(account)?;
+        let mut url = self.url(&format!("/api/v1/campaigns/{campaign}/members/{account}"))?;
+        url.query_pairs_mut()
+            .append_pair("baseRevision", &base_revision.to_string());
+        let (status, _) = self.send(Method::DELETE, url, None, None).await?;
+        if status == 204 {
+            Ok(())
+        } else {
+            Err(failure(status))
+        }
     }
     fn page(status: u16, value: Value) -> ApiResult<Page> {
         match status {

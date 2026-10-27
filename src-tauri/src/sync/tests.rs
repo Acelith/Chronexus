@@ -377,6 +377,40 @@ fn route(
                 return Some((403, json!({})));
             };
             match (method, rest) {
+                ("GET", []) => (
+                    200,
+                    json!({"id":campaign,"name":s.campaigns[&campaign].name,"role":role}),
+                ),
+                ("GET", ["members"]) => {
+                    let mut list: Vec<Value> = s.campaigns[&campaign]
+                        .members
+                        .iter()
+                        .map(|(id, role)| {
+                            json!({"accountId":id,"displayName":s.accounts[id].1,"role":role,"revision":1,"joinedAt":"2026-10-26T12:00:00Z"})
+                        })
+                        .collect();
+                    list.sort_by_key(|v| v["accountId"].as_str().unwrap().to_string());
+                    (200, Value::Array(list))
+                }
+                ("PATCH", ["members", account]) if role == "owner" => {
+                    let members = &mut s.campaigns.get_mut(&campaign).unwrap().members;
+                    match members.get_mut(*account) {
+                        Some(r) if r != "owner" => {
+                            *r = body["role"].as_str().unwrap().into();
+                            (204, Value::Null)
+                        }
+                        Some(_) => (403, json!({})),
+                        None => (404, json!({})),
+                    }
+                }
+                ("DELETE", ["members", account]) if role == "owner" || *account == me => {
+                    let members = &mut s.campaigns.get_mut(&campaign).unwrap().members;
+                    if members.get(*account).is_some_and(|r| r == "owner") {
+                        return Some((403, json!({})));
+                    }
+                    members.remove(*account);
+                    (204, Value::Null)
+                }
                 ("POST", ["invites"]) if role == "owner" => {
                     s.next += 1;
                     let code = format!("JOIN-{}", s.next);
@@ -906,6 +940,78 @@ async fn three_members_share_selectively_update_revoke_and_stay_attributed() {
     assert!(alice
         .with(|c| journal::get_session(c, &alice.campaign, &session))
         .is_ok());
+}
+
+#[tokio::test]
+async fn role_changes_reach_the_member_and_leaving_clears_what_others_shared() {
+    let fake = Fake::start();
+    let mut alice = Device::new("Alice's campaign");
+    let alice_id = alice.sign(&fake.base, Some("ADMIN-INVITE"), "alice").await;
+    let remote = alice.client().create_campaign("Roles").await.unwrap();
+    alice.link(&fake.base, &alice_id, &remote);
+    let tower = alice.page("Tower", "place");
+    alice.scope("page", &tower, "shared").unwrap();
+    alice.sync().await;
+    let invite = alice.client().invite(&remote.id, "player").await.unwrap();
+    let mut bob = Device::new("Bob's campaign");
+    fake.invite("BOB-ACCOUNT");
+    let bob_id = bob.sign(&fake.base, Some("BOB-ACCOUNT"), "bob").await;
+    let joined = bob.client().join(&invite.code).await.unwrap();
+    bob.link(&fake.base, &bob_id, &joined);
+    let claim = bob.page("Claim", "lore");
+    bob.scope("page", &claim, "shared").unwrap();
+    assert_eq!(bob.sync().await.pushed, 1);
+
+    // The owner sees both members and makes Bob a reader.
+    let members = alice.client().members(&remote.id).await.unwrap();
+    let roles: Vec<_> = members.iter().map(|m| m.role.as_str()).collect();
+    assert_eq!(members.len(), 2, "{roles:?}");
+    let bob_member = members.iter().find(|m| m.account_id == bob_id).unwrap();
+    alice
+        .client()
+        .change_member(&remote.id, &bob_id, "reader", bob_member.revision)
+        .await
+        .unwrap();
+    // Bob's next pass learns the new role: no refused write, the edit waits here.
+    bob.edit(&claim, "Written while a reader.");
+    let report = bob.sync().await;
+    assert_eq!(report.pushed, 0);
+    let link = bob
+        .with(|c| engine::link(c, &bob.campaign))
+        .unwrap()
+        .unwrap();
+    assert_eq!(link.role, "reader");
+    assert!(bob
+        .with(|c| engine::items(c, &bob.campaign))
+        .unwrap()
+        .iter()
+        .any(|i| i.item_id == claim && i.status == "pending"));
+    let counts = bob.with(|c| engine::counts(c, &bob.campaign)).unwrap();
+    assert_eq!(
+        counts.pending, 1,
+        "the waiting edit is never shown as saved"
+    );
+    // Promoted again, the waiting edit is sent.
+    alice
+        .client()
+        .change_member(&remote.id, &bob_id, "player", bob_member.revision)
+        .await
+        .unwrap();
+    assert_eq!(bob.sync().await.pushed, 1);
+
+    // Bob leaves: what Alice shared is cleared from his device, his own page stays.
+    assert!(!bob.remote().is_empty());
+    bob.client()
+        .remove_member(&remote.id, &bob_id, bob_member.revision)
+        .await
+        .unwrap();
+    assert!(matches!(
+        bob.try_sync().await.unwrap_err(),
+        Failure::AccessLost(_)
+    ));
+    assert!(bob.remote().is_empty());
+    assert!(bob.text_of(&claim).contains("Written while a reader"));
+    assert_eq!(alice.client().members(&remote.id).await.unwrap().len(), 1);
 }
 
 #[tokio::test]
@@ -1621,7 +1727,11 @@ mod live {
                 child: None,
                 port,
                 base: format!("http://127.0.0.1:{port}"),
-                dir: tempfile::tempdir().unwrap(),
+                // The server refuses database paths through symbolic links, and the macOS
+                // temporary directory sits behind the /var link.
+                dir: tempfile::tempdir_in("/private/tmp")
+                    .or_else(|_| tempfile::tempdir())
+                    .unwrap(),
                 bin,
             };
             server.run();

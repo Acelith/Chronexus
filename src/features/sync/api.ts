@@ -102,6 +102,14 @@ export interface RemoteItem {
   updatedAt: string;
   mine: boolean;
 }
+/** One active member of a shared campaign; `revision` guards role changes and removals. */
+export interface SyncMember {
+  accountId: string;
+  displayName: string;
+  role: "owner" | "player" | "reader";
+  revision: number;
+  joinedAt: string;
+}
 export interface SyncInvite {
   code: string;
   role: string;
@@ -136,6 +144,29 @@ export const syncApi = {
   unlink: (campaignId: string) => command<void>("sync_unlink", { campaignId }),
   invite: (campaignId: string, role: "player" | "reader") =>
     command<SyncInvite>("sync_invite", { campaignId, role }),
+  members: (campaignId: string) =>
+    command<SyncMember[]>("sync_members", { campaignId }),
+  changeMember: (
+    campaignId: string,
+    accountId: string,
+    role: "player" | "reader",
+    revision: number,
+  ) =>
+    command<SyncMember[]>("sync_change_member", {
+      campaignId,
+      accountId,
+      role,
+      revision,
+    }),
+  removeMember: (campaignId: string, accountId: string, revision: number) =>
+    command<SyncMember[]>("sync_remove_member", {
+      campaignId,
+      accountId,
+      revision,
+    }),
+  /** A player or reader leaves; what others shared is cleared here, own items stay. */
+  leave: (campaignId: string) =>
+    command<SyncLink>("sync_leave_campaign", { campaignId }),
   items: (campaignId: string) =>
     command<SyncItem[]>("sync_items", { campaignId }),
   setScope: (

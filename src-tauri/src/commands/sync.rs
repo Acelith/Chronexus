@@ -274,6 +274,135 @@ pub async fn sync_invite(
         .await
         .map_err(String::from)
 }
+/// Members of a linked campaign as the server lists them; any member may read the list.
+#[tauri::command]
+pub async fn sync_members(
+    db: tauri::State<'_, Database>,
+    campaign_id: String,
+) -> AppResult<Vec<api::Member>> {
+    let (current, session, client) = signed_in(&db)?;
+    let link = linked(
+        &db,
+        &campaign_id,
+        &session,
+        current.server.as_deref().unwrap_or(""),
+    )
+    .await?;
+    client.members(&link.remote_id).await.map_err(String::from)
+}
+/// Owner only: switches another member between player and reader.
+#[tauri::command]
+pub async fn sync_change_member(
+    db: tauri::State<'_, Database>,
+    gate: tauri::State<'_, sync::Gate>,
+    campaign_id: String,
+    account_id: String,
+    role: String,
+    revision: i64,
+) -> AppResult<Vec<api::Member>> {
+    let _busy = gate.0.try_lock().map_err(|_| BUSY)?;
+    if !["player", "reader"].contains(&role.as_str()) {
+        return Err("A member can be a player or a reader.".into());
+    }
+    let (current, session, client) = signed_in(&db)?;
+    let link = linked(
+        &db,
+        &campaign_id,
+        &session,
+        current.server.as_deref().unwrap_or(""),
+    )
+    .await?;
+    if link.role != "owner" {
+        return Err("Only the owner of the shared campaign can change roles.".into());
+    }
+    client
+        .change_member(&link.remote_id, &account_id, &role, revision)
+        .await
+        .map_err(member_failure)?;
+    client.members(&link.remote_id).await.map_err(String::from)
+}
+/// The owner removes another member. The member's devices clear what they received at their
+/// next synchronization; the member keeps its own items. Explicit, confirmed in the UI.
+#[tauri::command]
+pub async fn sync_remove_member(
+    db: tauri::State<'_, Database>,
+    gate: tauri::State<'_, sync::Gate>,
+    campaign_id: String,
+    account_id: String,
+    revision: i64,
+) -> AppResult<Vec<api::Member>> {
+    let _busy = gate.0.try_lock().map_err(|_| BUSY)?;
+    let (current, session, client) = signed_in(&db)?;
+    let link = linked(
+        &db,
+        &campaign_id,
+        &session,
+        current.server.as_deref().unwrap_or(""),
+    )
+    .await?;
+    if link.role != "owner" || account_id == session.account_id {
+        return Err("Only the owner of the shared campaign can remove other members.".into());
+    }
+    client
+        .remove_member(&link.remote_id, &account_id, revision)
+        .await
+        .map_err(member_failure)?;
+    client.members(&link.remote_id).await.map_err(String::from)
+}
+/// A player or reader leaves the shared campaign. What other members shared is cleared from
+/// this device as for a removal; every local item stays. Explicit, confirmed in the UI.
+#[tauri::command]
+pub async fn sync_leave_campaign(
+    db: tauri::State<'_, Database>,
+    gate: tauri::State<'_, sync::Gate>,
+    auto: tauri::State<'_, Auto>,
+    campaign_id: String,
+) -> AppResult<engine::Link> {
+    let (current, session, client) = signed_in(&db)?;
+    let link = linked(
+        &db,
+        &campaign_id,
+        &session,
+        current.server.as_deref().unwrap_or(""),
+    )
+    .await?;
+    if link.role == "owner" {
+        return Err("The owner cannot leave the campaign; delete it on the server instead.".into());
+    }
+    {
+        let _busy = gate.0.try_lock().map_err(|_| BUSY)?;
+        let me = client
+            .members(&link.remote_id)
+            .await
+            .map_err(String::from)?
+            .into_iter()
+            .find(|m| m.account_id == session.account_id)
+            .ok_or("You are no longer a member of this campaign.")?;
+        client
+            .remove_member(&link.remote_id, &me.account_id, me.revision)
+            .await
+            .map_err(member_failure)?;
+    }
+    // The next pass sees the lost access and clears the received copies; that refusal is
+    // the expected outcome here, not an error to show.
+    match auto.sync_once(&campaign_id).await {
+        Ok(_) | Err(api::Failure::AccessLost(_)) => {}
+        Err(error) => return Err(String::from(error)),
+    }
+    let id = campaign_id.clone();
+    db.run(move |c| engine::set_auto(c, &id, false, false))
+        .await?;
+    auto.reload().await;
+    db.run(move |c| engine::require_link(c, &campaign_id)).await
+}
+fn member_failure(error: api::Failure) -> String {
+    match error {
+        api::Failure::Rejected(m) if m.contains("HTTP 409") => {
+            "The member list changed on the server in the meantime: reload it and try again.".into()
+        }
+        other => other.into(),
+    }
+}
 #[tauri::command]
 pub async fn sync_items(
     db: tauri::State<'_, Database>,

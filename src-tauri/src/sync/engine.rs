@@ -610,12 +610,11 @@ pub enum Job {
         base: i64,
     },
 }
-/// Changes to send, computed from one consistent snapshot of the archive.
+/// Changes to send, computed from one consistent snapshot of the archive. A reader's changes
+/// are listed too, so the visible state never claims they reached the server; the pass only
+/// sends them once the account may write again.
 pub fn pending(c: &Connection, campaign: &str) -> AppResult<(Vec<Job>, usize)> {
-    let link = require_link(c, campaign)?;
-    if link.role == "reader" {
-        return Ok((vec![], 0));
-    }
+    require_link(c, campaign)?;
     let mut q = c
         .prepare("SELECT kind,item_id,state,pushed_hash,remote_revision,visibility,pushed_visibility FROM sync_shares s WHERE campaign_id=?1 AND NOT EXISTS(SELECT 1 FROM sync_conflicts k WHERE k.campaign_id=s.campaign_id AND k.kind=s.kind AND k.item_id=s.item_id) AND NOT EXISTS(SELECT 1 FROM sync_outbox o WHERE o.campaign_id=s.campaign_id AND o.kind=s.kind AND o.item_id=s.item_id) ORDER BY kind,item_id")
         .map_err(storage)?;
@@ -1729,13 +1728,39 @@ async fn sync_pass(
     campaign: &str,
     report: &mut Report,
 ) -> ApiResult<()> {
+    // The owner may have changed this account's role since the device joined: a reader must
+    // not keep sending writes the server refuses, and a promoted reader may share again.
+    let role = client.campaign(&link.remote_id).await?.role;
+    let link = &if role == link.role {
+        link.clone()
+    } else {
+        let (id, changed) = (campaign.to_string(), role.clone());
+        db.run(move |c| set_role(c, &id, &changed)).await?;
+        Link {
+            role,
+            ..link.clone()
+        }
+    };
     // Operations left on the wire by a crash or a lost response are settled first, under
     // their original IDs: the server acknowledges instead of re-applying them, and the
     // echo of such a write is then not mistaken for a change made elsewhere.
-    settle_outbox(db, client, link, campaign, report).await?;
+    if link.role != "reader" {
+        settle_outbox(db, client, link, campaign, report).await?;
+    }
     let pulled = pull(db, client, link, campaign).await?;
     add(report, pulled);
-    push_pending(db, client, link, campaign, report).await?;
+    // A reader only receives; its own changes stay pending here until it may write again.
+    if link.role != "reader" {
+        push_pending(db, client, link, campaign, report).await?;
+    }
+    Ok(())
+}
+fn set_role(c: &Connection, campaign: &str, role: &str) -> AppResult<()> {
+    c.execute(
+        "UPDATE sync_links SET role=?2 WHERE campaign_id=?1",
+        params![campaign, role],
+    )
+    .map_err(storage)?;
     Ok(())
 }
 fn add(total: &mut Report, part: Report) {

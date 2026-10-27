@@ -15,6 +15,7 @@ import {
   type SyncScope,
   projectionKinds,
 } from "./api";
+import CampaignMembers from "./CampaignMembers";
 import { stateText } from "./SyncStatusBadge";
 import { roleText } from "./labels";
 
@@ -339,10 +340,20 @@ export default function CampaignSharing({
             <p className="sync-invite" role="status">
               {tr(
                 "Invitation code for a {0}: {1} (valid until {2}). Share it privately; it works once.",
-                [invite.role, invite.code, invite.expiresAt],
+                [roleText(invite.role), invite.code, invite.expiresAt],
               )}
             </p>
           ) : null}
+          <CampaignMembers
+            campaignId={campaignId}
+            link={link}
+            disabled={disabled}
+            act={act}
+            onLink={(next) => {
+              setLink(next);
+              void reload();
+            }}
+          />
           {confirmErase ? (
             <div
               role="alertdialog"
