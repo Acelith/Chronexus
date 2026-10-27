@@ -1504,7 +1504,7 @@ request before implementation, and publication follows the standing release rule
 | Done | M41 — Project wiki for app and server | Handbook published; canonical GitHub Markdown sources after migration | — |
 | Done | M29 — Release matrix for Windows, macOS and Linux | Unsigned pre-release 0.10.1 published 27/10/2026 (replaces 0.10.0); Windows ARM64 and x64 AppImage open | — |
 | Done | M30 — Automated desktop QA and cross-platform CI | GitHub workflows and local runner in place; remote run acceptance open | — |
-| 1 | M25 — Chronexus Server (in progress) | The sharing client already ships in 0.9.x without a server | M24 |
+| 1 | M25 — Chronexus Server (in progress) | 0.1.1 released, web interface done; server AI, Android contract and public deployment open | M24 |
 | 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Requested 27/10/2026: a GM runs combat for players; journals stay private | M25 |
 | 3 | M43 — Live table channel and GM web interface | Real-time play needs a server-authoritative channel and a GM UI | M42 |
 | 4 | M44 — Maps, grid, tokens and movement, ft/m everywhere | The core of the table; every distance in ft and m with an on-screen converter | M43 |
@@ -1619,12 +1619,14 @@ scripts remain manual legacy checks; macOS/Windows jobs need native runners.
 ## M25 — Chronexus Server in a separate repository (in progress, priority 1)
 
 **Order:** after the M24 client, requested on 26 October 2026; Android moved to M27.
-**Status:** in progress. The repository `acelith/Chronexus-Server` exists; its
-milestones M25.1–M25.7 (accounts, membership, selective sharing, continuous sync,
-deletion, security and recovery) are implemented in source 0.1.0, not published.
-Open: M25.8 desktop integration and first server release, a test deployment with
-TLS, and the acceptance below. Choosing the domain and deploying need an explicit
-request.
+**Status (27 October 2026):** in progress. M25.1–M25.7 implemented; **M25.8** delivered —
+server releases 0.1.0 and 0.1.1 on GitHub (binaries, checksums, versioned contract),
+compatibility table and upgrade checklist, desktop acceptance with three apps over HTTPS,
+proof that the desktop opens no connection without a configured server; container images
+on GHCR still need a GitHub credential with package permission. **M25.11** implemented: web
+interface for campaigns, members, invitations, devices and operators. Open: **M25.10**
+(server AI: needs qualified GPU hardware and models), **M25.9** (Android contract: needs
+M27 on a real device), and a public deployment with real DNS/TLS (needs a host and domain).
 
 - Implement the server side of M24.1–M24.3 in `acelith/Chronexus-Server` following
   [docs/SERVER_NOTES.md](docs/SERVER_NOTES.md) and the contract
