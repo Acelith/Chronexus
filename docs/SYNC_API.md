@@ -1,4 +1,4 @@
-# Chronexus sharing API — contract v1 (M24, S5)
+# Chronexus sharing API — contract v1 (M24, M25.5)
 
 Status: **the server repository `Chronexus-Server` now generates the authoritative
 OpenAPI** (`api/openapi.json`, with TypeScript schemas) from its implemented code; read
@@ -7,7 +7,7 @@ rules the client depends on. The executable fake in `src-tauri/src/sync/tests.rs
 mirrors the server rules for hermetic tests; `sync::tests::live` runs the same client
 against the real server binary (see Acceptance).
 
-## S5 replication endpoints (used by this client since schema 020)
+## M25.5 replication endpoints (used by this client since schema 020)
 
 The client replicates the items the user chose, privately or shared, over the typed
 content API, and no longer uses `/items` or `/changes` (both are still served for older
@@ -41,7 +41,7 @@ Client rules that rely on the contract:
   becomes a conflict, never an overwrite.
 - A tombstone for an item of this account stops its replication here and keeps the local
   item; deletions are never propagated into another device's archive silently.
-- **Projections (S4).** `sheetSection` and `image` items are shared only (`visibility: members`):
+- **Projections (M25.4).** `sheetSection` and `image` items are shared only (`visibility: members`):
   the payload keys are those of the server's OpenAPI (`characterId, name, section, fields[]`;
   `attachmentId, caption`). Section item IDs are derived from the character ID and the section
   name so every computer agrees on them; images use their local ID. An image's original is
@@ -50,7 +50,7 @@ Client rules that rely on the contract:
   kept as attributed read-only copies; an image's bytes are fetched on request, verified against
   the checksum the server sent, and never become a local image. A projection of this account from
   another computer is displayed, not created locally.
-- **Access loss (S6).** A `403` or `404` on `/sync` or the full listing (removed from the
+- **Access loss (M25.6).** A `403` or `404` on `/sync` or the full listing (removed from the
   campaign, or the campaign was deleted: `404 "This campaign was deleted."`) is `AccessLost`:
   received copies of other players' items are cleared, this account's own items, replication
   choices, drafts and pending operations stay, the cursor restarts, automatic synchronization

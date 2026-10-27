@@ -59,7 +59,8 @@ request is documentation only: do not compile, install or publish now.
 - Extend the build/release tooling to cover this six-target matrix. This checklist
   does not mean that cross-platform packaging or CI is already implemented.
 - For macOS, produce distinct x64 and ARM64 packages from the same release source;
-  check platform dependencies, signing/notarization requirements and native runtime
+  check platform dependencies, ad-hoc signing (no paid Developer ID or notarization,
+  see ROADMAP M29) and native runtime
   compatibility for each architecture. Do not assume the Windows-only managed AI
   runtime or its packages work on other targets.
 - For Windows and Linux, attempt both architectures when suitable toolchains,

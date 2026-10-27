@@ -546,7 +546,7 @@ with a contract published by the server; no manual copy of types or
 schemas between repositories. Hosting, registration, and end-to-end encryption remain to
 be decided at the start of M24.
 
-## 26 October 2026 — S5 desktop: derived pending work, one stored operation, opt-in loop
+## 26 October 2026 — M25.5 desktop: derived pending work, one stored operation, opt-in loop
 
 - **No separate outbound queue for content.** An item is pending when its payload or
   visibility differs from what the server last accepted. That difference is computed from the
@@ -580,7 +580,7 @@ be decided at the start of M24.
   bytes within the server's limits and fetched only on request.
 - Schema 020 is additive; the legacy cursor is reset because `/sync` cursors differ from the
   legacy feed's.
-- **S6 on the desktop: losing access is not an error to retry.** A refused or missing campaign
+- **M25.6 on the desktop: losing access is not an error to retry.** A refused or missing campaign
   read clears only what came from other players, keeps everything the account owns locally, resets
   the cursor and switches automatic synchronization off with a visible reason, so nothing keeps
   knocking and nothing local is lost. Server-side erasure, campaign deletion and account deletion

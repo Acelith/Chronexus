@@ -24,7 +24,7 @@
 
 - Planning only, no code change: ROADMAP gains M28–M40 and a priority table for
   all open milestones (M28, M29, M30, M25, M31–M40, then M27). M25 is recorded as
-  in progress (server S1–S7 in source 0.1.0; S8, release and deployment open).
+  in progress (server M25.1–M25.7 in source 0.1.0; M25.8, release and deployment open).
 - Next milestone by priority: **M28 — complete translations and multilingual
   installer**, which also clears the localization blocker below. Nothing starts
   without an explicit request.
@@ -141,10 +141,10 @@ concurrent publication investigation. ROADMAP still lists M25 server acceptance 
 its server binary is now published separately, while deployment/TLS acceptance remains
 open, followed by M27 Android (not started).
 
-# Chronexus status — 26 October 2026: S5/S6/S4 desktop replication (schema 021)
+# Chronexus status — 26 October 2026: M25.5/M25.6/M25.4 desktop replication (schema 021)
 
 Not published; source version 0.8.1, schema 021. Server side: `Chronexus-Server` commit
-3e4629d (S5 incremental sync, idempotent mutations, notifications).
+3e4629d (M25.5 incremental sync, idempotent mutations, notifications).
 
 - **What works:** each page, session, relationship or party member can stay on this device,
   be replicated **privately** to the same account's other computers, or be **shared**. A
@@ -175,14 +175,14 @@ Not published; source version 0.8.1, schema 021. Server side: `Chronexus-Server`
 - **Hermetic checks:** Rust lib 168 passed / 6 ignored (four of them the live real-server tests; the other two are older ignored tests); sync tests stable over 4 consecutive runs; Clippy `-D warnings`
   all targets and rustfmt clean; Vitest 178 passed; ESLint, `tsc --noEmit`, i18n catalog check
   pass. Backups of schemas 2-20 restore. Not run: macOS/Linux, GUI WebView, installers.
-- **S6 desktop (same day):** losing access (removed, or the campaign was deleted) clears the
+- **M25.6 desktop (same day):** losing access (removed, or the campaign was deleted) clears the
   copies received from other players, keeps own items, drafts and replication choices, restarts
   the cursor, stops automatic synchronization with a visible reason and resumes if switched on
   again after a new invitation; "Delete my copy on the server", "Delete the campaign on the
   server" (exact name) and "Delete my account" are confirmed actions that never delete a local
   item. Hermetic lifecycle tests plus a third real-server test (member removal and return,
-  erasure, campaign and account deletion) passed against the S6 server.
-- **S4 desktop (schema 021):** character sheet sections (identity, combat, equipment,
+  erasure, campaign and account deletion) passed against the M25.6 server.
+- **M25.4 desktop (schema 021):** character sheet sections (identity, combat, equipment,
   spellcasting: only non-empty fields, never notes or conditions) and images can be **shared**
   (not replicated privately). Images are uploaded as originals within the server's limits
   (larger ones are reported instead of retried); members see sections as read-only text and fetch

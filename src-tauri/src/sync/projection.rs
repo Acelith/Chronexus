@@ -1,5 +1,5 @@
 //! Shareable projections of data that is not a plain Codex item: selected sections of the
-//! character sheet and managed images (S4). Both can only be **shared**: the server has no
+//! character sheet and managed images (M25.4). Both can only be **shared**: the server has no
 //! kind that would let another computer rebuild a full sheet or re-attach an image to its
 //! owner, so a private replica would be a copy nobody could use. They are never part of
 //! "keep a private copy of everything".

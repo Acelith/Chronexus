@@ -64,7 +64,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 34 | M19 | Backup folder in Documents, periodic and update backups | Delivered on Windows, release 0.8.0 | — | Moved to the bottom on user instruction; executed on October 25 2026 |
 | 35 | M23 | Full code review: bugs, duplication, multilingual support, remove Ticinese/Romulan/Klingon, optimization | Implemented 26/10/2026 | `fa27012 → 7a70a22` | macOS and Linux verified |
 | 36 | M24 | Shared campaign: desktop sharing client and API contract v1 | Client implemented 26/10/2026 | see docs/STATUS.md | Server is M25; verified against the in-repo contract fake |
-| 37 | M25 | Chronexus Server (separate repository `acelith/Chronexus-Server`) | In progress: server S1–S7 in source 0.1.0 | see server repo | S8 integration, release and deployment open; contract docs/SYNC_API.md |
+| 37 | M25 | Chronexus Server (separate repository `acelith/Chronexus-Server`) | In progress: server M25.1–M25.7 in source 0.1.0 | see server repo | M25.8 integration, release and deployment open; contract docs/SYNC_API.md |
 | 38 | M26 | English-first app, manifests, documentation and AI instructions | Implemented Windows, source 0.8.1 | — | **Closed** 26/10/2026; ships with the next authorized build/release |
 | 39 | M27 | Android App (APK) connected to the server with the same account | Planned | — | Moved from M25 on 26/10/2026; depends on M25 |
 | 40 | M28 | Complete translations and multilingual installer | Implemented 26/10/2026 | see docs/STATUS.md | Windows; native review open |
@@ -1371,11 +1371,11 @@ measurements are in the commits and docs/STATUS.md.
   repeated executions. Desktop testing of main flows on an isolated profile.
 - No data loss: backups of every previous version are still restorable.
 
-## M24 — Shared campaign between multiple people (client implemented; S5 desktop done)
+## M24 — Shared campaign between multiple people (client implemented; M25.5 desktop done)
 
 **Order:** after M23. **Status:** desktop client implemented on 26 October 2026
 (schema 019, sharing commands and views, API contract v1 in
-[docs/SYNC_API.md](docs/SYNC_API.md)); the same day the **S5 desktop** slice added schema
+[docs/SYNC_API.md](docs/SYNC_API.md)); the same day the **M25.5 desktop** slice added schema
 020: private and shared per-item scope, a derived outbound change set with an idempotent
 in-flight operation, continuous synchronization per campaign (debounced, notification
 stream with polling fallback, backoff, pause), visible save states, downloading a campaign
@@ -1502,7 +1502,7 @@ request before implementation, and publication follows the standing release rule
 | Priority | Milestone | Why now | Depends on |
 | --- | --- | --- | --- |
 | 1 | M28 — Complete translations and multilingual installer | **Implemented** 26/10/2026; native review per language open | — |
-| 2 | M29 — Signed release matrix for Windows, macOS and Linux | Only Windows x64 is published; unsigned packages scare new users | M28 |
+| 2 | M29 — Release matrix for Windows, macOS and Linux | Only Windows x64 is published; the other five targets need verified packages | M28 |
 | 3 | M30 — Automated desktop QA and cross-platform CI | Old smoke scripts are stale; releases on six targets need repeatable checks | — |
 | 4 | M25 — Chronexus Server (in progress) | The sharing client already ships in 0.9.x without a server | M24 |
 | 5 | M31 — Clue board and open questions | Strengthens the player-knowledge differentiator | — |
@@ -1546,24 +1546,29 @@ German or Arabic (only compiled here), and the other languages' screenshots.
   every language, RTL Arabic and a CJK language without overflow; installer
   shown in at least Italian, German and Arabic on Windows.
 
-## M29 — Signed release matrix for Windows, macOS and Linux (planned, priority 2)
+## M29 — Release matrix for Windows, macOS and Linux (planned, priority 2)
 
 **Goal:** publish verified packages for the six targets of docs/INSTALLERS.md
-(Windows, macOS, Linux × x64, ARM64) with platform signing.
+(Windows, macOS, Linux × x64, ARM64) at no cost.
+
+**Scope decision (27 October 2026):** the user will not pay for this project.
+Paid code signing — Windows Authenticode certificates and Apple Developer ID
+membership with notarization — is **out of scope** and removed from this milestone.
+Only free integrity mechanisms are used; README and the download guide must say
+plainly that Windows SmartScreen and macOS Gatekeeper will warn on first launch
+and how to open the app anyway.
 
 - Extend build/release tooling to the six-target matrix; report unavailable
   targets explicitly instead of skipping them silently.
-- Windows: Authenticode code signing for installer and binary, so SmartScreen
-  does not block first-time users. macOS: Developer ID signing and Apple
-  notarization for both architectures (current packages are ad-hoc signed).
-  Linux: .deb plus AppImage, with checksums.
+- Free integrity only: the existing M15 updater signature (minisign key outside
+  Git), SHA-256 checksums for every artifact, ad-hoc macOS signing as today.
+  Linux: .deb plus AppImage.
 - Updater channel (M15) gains the new targets with signed `latest.json`
-  entries; never publish an unsigned package into it.
-- Signing secrets stay outside Git (as for the M15 key). Certificates and
-  Apple developer membership need the user's explicit decision and costs.
-- Acceptance: each published artifact installed and started on its platform,
-  update from the previous release with mandatory backup on at least one
-  target per OS, checksums and signatures verified by a script.
+  entries; never publish a package without the updater signature into it.
+- Acceptance: each published artifact installed and started on its platform
+  (or the target reported as unverified), update from the previous release with
+  mandatory backup on at least one target per OS, checksums and updater
+  signatures verified by a script.
 
 ## M30 — Automated desktop QA and cross-platform CI (planned, priority 3)
 
@@ -1584,9 +1589,9 @@ German or Arabic (only compiled here), and the other languages' screenshots.
 
 **Order:** after the M24 client, requested on 26 October 2026; Android moved to M27.
 **Status:** in progress. The repository `acelith/Chronexus-Server` exists; its
-milestones S1–S7 (accounts, membership, selective sharing, continuous sync,
+milestones M25.1–M25.7 (accounts, membership, selective sharing, continuous sync,
 deletion, security and recovery) are implemented in source 0.1.0, not published.
-Open: S8 desktop integration and first server release, a test deployment with
+Open: M25.8 desktop integration and first server release, a test deployment with
 TLS, and the acceptance below. Choosing the domain and deploying need an explicit
 request.
 

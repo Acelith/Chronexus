@@ -287,7 +287,7 @@ actions only, HTTPS only, invitation-only accounts, per-item sharing with defaul
 private, received items read-only and attributed (never campaign facts), revision
 conflicts resolved by the user, no CRDT or end-to-end encryption in v1. The session
 token lives in `sync-account.json` outside Git and backups and never reaches the
-UI. S5 desktop (implemented 26 October 2026, schema 020): the per-item choice is
+UI. M25.5 desktop (implemented 26 October 2026, schema 020): the per-item choice is
 `none` (only here), `private` (replicated to the same account's devices, invisible to
 members) or `shared`; continuous synchronization (`sync/auto.rs`) exists only for
 campaigns the user switched on, resumes at startup only for those, pauses on request and
@@ -306,7 +306,7 @@ replicated.
 ## Open milestone priority (planned M28–M40)
 
 ROADMAP "Open milestones in priority order" is the single source for what comes
-next: M28 translations/installer, M29 signed six-target releases, M30 desktop QA
+next: M28 translations/installer, M29 six-target releases (free signing only, no paid certificates), M30 desktop QA
 and CI, M25 server (in progress), M31 clue board, M32 first start/demo, M33 trust
 and transparency, M34 diagnostic bundle, M35 session recap, M36 imports, M37
 timeline, M38 maps, M39 print/PDF, M40 other rulesets, then M27 Android. All are
