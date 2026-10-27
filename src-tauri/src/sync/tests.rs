@@ -7,7 +7,72 @@ use super::{
     api::{self, Failure},
     auto, engine, server_url,
 };
-use crate::{backup, graph, journal, knowledge, party, Database};
+use crate::{backup, clues, graph, journal, knowledge, party, Database};
+
+#[test]
+fn clue_replication_requires_explicit_source_choices_and_preserves_refs() {
+    let device = Device::new("Clue test");
+    let page = device.page("Witness", "npc");
+    let session = device
+        .with(|c| journal::create_session(c, &device.campaign, 1, "Bridge", None).unwrap())
+        .id;
+    let clue = device.with(|c| {
+        clues::save(
+            c,
+            &device.campaign,
+            None,
+            None,
+            clues::Input {
+                kind: "question".into(),
+                title: "Who took the seal?".into(),
+                details: "Unconfirmed".into(),
+                certainty: "unknown".into(),
+                status: "open".into(),
+                sources: vec![clues::Source {
+                    kind: "session".into(),
+                    id: session.clone(),
+                    block_id: Some("proof".into()),
+                }],
+                page_ids: vec![page.clone()],
+                resolution_session_id: None,
+            },
+        )
+        .unwrap()
+    });
+    let link = engine::Link {
+        campaign_id: device.campaign.clone(),
+        server: "https://example.invalid".into(),
+        remote_id: uuid::Uuid::new_v4().to_string(),
+        account_id: uuid::Uuid::new_v4().to_string(),
+        role: "owner".into(),
+        cursor: String::new(),
+        synced_at: None,
+        auto: false,
+        paused: false,
+        last_error: None,
+        access_lost: false,
+    };
+    device.with(|c| engine::save_link(c, &link)).unwrap();
+    assert!(device.scope("clue", &clue.id, "shared").is_err());
+    device.scope("page", &page, "shared").unwrap();
+    assert!(device.scope("clue", &clue.id, "shared").is_err());
+    device.scope("session", &session, "shared").unwrap();
+    device.scope("clue", &clue.id, "shared").unwrap();
+    let payload = device
+        .with(|c| engine::payload(c, &device.campaign, "clue", &clue.id))
+        .unwrap()
+        .unwrap();
+    assert_eq!(payload["sources"][0]["blockId"], "proof");
+    engine::validate_payload("clue", &payload).unwrap();
+    device.scope("session", &session, "none").unwrap();
+    let item = device
+        .with(|c| engine::items(c, &device.campaign))
+        .unwrap()
+        .into_iter()
+        .find(|item| item.item_id == clue.id)
+        .unwrap();
+    assert_ne!(item.scope, "shared");
+}
 use serde_json::{json, Value};
 use std::{
     collections::HashMap,
@@ -1842,6 +1907,61 @@ mod live {
             poll: Duration::from_secs(60),
             ..fast()
         }
+    }
+
+    #[tokio::test]
+    #[ignore = "needs the Chronexus-Server binary (CHRONEXUS_SERVER_BIN)"]
+    async fn clue_with_source_round_trips_through_real_server() {
+        let server = Real::start();
+        let mut laptop = Device::new("Clue campaign");
+        let account = laptop
+            .sign(&server.base, Some(&server.invite()), "clue-owner")
+            .await;
+        let remote = laptop
+            .client()
+            .create_campaign("Clue campaign")
+            .await
+            .unwrap();
+        laptop.link(&server.base, &account, &remote);
+        let page = laptop.page("Witness", "npc");
+        let session = laptop
+            .with(|c| journal::create_session(c, &laptop.campaign, 1, "Bridge", None).unwrap())
+            .id;
+        let clue = laptop.with(|c| {
+            clues::save(
+                c,
+                &laptop.campaign,
+                None,
+                None,
+                clues::Input {
+                    kind: "question".into(),
+                    title: "Who took the seal?".into(),
+                    details: "Unverified".into(),
+                    certainty: "unknown".into(),
+                    status: "open".into(),
+                    sources: vec![clues::Source {
+                        kind: "session".into(),
+                        id: session.clone(),
+                        block_id: Some("proof".into()),
+                    }],
+                    page_ids: vec![page.clone()],
+                    resolution_session_id: None,
+                },
+            )
+            .unwrap()
+        });
+        laptop.scope("page", &page, "private").unwrap();
+        laptop.scope("session", &session, "private").unwrap();
+        laptop.scope("clue", &clue.id, "private").unwrap();
+        assert_eq!(laptop.sync().await.pushed, 3);
+        let desktop = second_device(&server.base, "clue-owner", &remote).await;
+        assert_eq!(desktop.sync().await.materialized, 3);
+        let copy = desktop
+            .with(|c| clues::get(c, &desktop.campaign, &clue.id))
+            .unwrap();
+        assert_eq!(copy.sources[0].block_id.as_deref(), Some("proof"));
+        assert_eq!(copy.page_ids, vec![page]);
+        assert_eq!(copy.status, "open");
     }
 
     #[tokio::test]

@@ -13,7 +13,7 @@ use super::{
     kind, projection, remote_id,
 };
 use crate::{
-    graph, journal,
+    clues, graph, journal,
     journal::{identifier, storage, title, AppResult},
     knowledge, party, Database,
 };
@@ -123,6 +123,7 @@ fn rank(kind_name: &str) -> u8 {
         "page" => 0,
         "session" => 1,
         "party" => 2,
+        "clue" => 3,
         _ => 3,
     }
 }
@@ -301,16 +302,23 @@ pub fn set_error(c: &Connection, campaign: &str, message: Option<&str>) -> AppRe
 }
 
 /// Replicated pages and the visibility they must have on the server.
-fn page_shares(c: &Connection, campaign: &str) -> AppResult<HashMap<String, String>> {
+fn shares_for(
+    c: &Connection,
+    campaign: &str,
+    kind_name: &str,
+) -> AppResult<HashMap<String, String>> {
     let mut q = c
-        .prepare("SELECT item_id,visibility FROM sync_shares WHERE campaign_id=?1 AND kind='page' AND state='shared'")
+        .prepare("SELECT item_id,visibility FROM sync_shares WHERE campaign_id=?1 AND kind=?2 AND state='shared'")
         .map_err(storage)?;
     let rows = q
-        .query_map([campaign], |r| Ok((r.get(0)?, r.get(1)?)))
+        .query_map(params![campaign, kind_name], |r| Ok((r.get(0)?, r.get(1)?)))
         .map_err(storage)?
         .collect::<rusqlite::Result<HashMap<String, String>>>()
         .map_err(storage);
     rows
+}
+fn page_shares(c: &Connection, campaign: &str) -> AppResult<HashMap<String, String>> {
+    shares_for(c, campaign, "page")
 }
 
 /// The shared form of a local item, or None when it no longer exists.
@@ -335,6 +343,7 @@ pub fn payload(
         }),
         "sheetSection" => projection::section_payload(c, campaign, id)?,
         "image" => projection::image_payload(c, campaign, id)?,
+        "clue" => clues::get(c, campaign, id).ok().map(|clue| json!({"kind":clue.kind,"title":clue.title,"details":clue.details,"certainty":clue.certainty,"status":clue.status,"sources":clue.sources,"pageIds":clue.page_ids,"resolutionSessionId":clue.resolution_session_id})),
         _ => party::list(c, campaign)?
             .into_iter()
             .find(|m| m.page.id == id)
@@ -362,8 +371,37 @@ fn endpoints(kind_name: &str, value: &Value) -> Vec<String> {
             .filter_map(|k| id(k))
             .collect(),
         "party" => id("pageId").into_iter().collect(),
+        "clue" => value["pageIds"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .chain(
+                value["sources"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .filter(|s| s["kind"] == "page")
+                    .filter_map(|s| s["id"].as_str()),
+            )
+            .map(String::from)
+            .collect(),
         _ => vec![],
     }
+}
+fn session_endpoints(kind_name: &str, value: &Value) -> Vec<String> {
+    if kind_name != "clue" {
+        return vec![];
+    }
+    value["sources"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter(|s| s["kind"] == "session")
+        .filter_map(|s| s["id"].as_str())
+        .chain(value["resolutionSessionId"].as_str())
+        .map(String::from)
+        .collect()
 }
 /// An item cannot be sent while a page it refers to is not replicated, nor shared with
 /// the members while a page it refers to is private.
@@ -372,6 +410,7 @@ fn blocked(
     value: &Value,
     visibility: &str,
     pages: &HashMap<String, String>,
+    sessions: &HashMap<String, String>,
 ) -> bool {
     // An image the server would refuse is reported as waiting, not retried forever.
     if kind_name == "image" && projection::image_too_large(value) {
@@ -383,6 +422,12 @@ fn blocked(
             None => true,
             Some(v) => visibility == "members" && v != "members",
         })
+        || session_endpoints(kind_name, value)
+            .iter()
+            .any(|id| match sessions.get(id) {
+                None => true,
+                Some(v) => visibility == "members" && v != "members",
+            })
 }
 
 type ShareRow = (String, String, i64, String, String);
@@ -427,6 +472,9 @@ pub fn items(c: &Connection, campaign: &str) -> AppResult<Vec<Item>> {
     for member in party::list(c, campaign)? {
         ids.push(("party".into(), member.page.id));
     }
+    for clue in clues::list(c, campaign)? {
+        ids.push(("clue".into(), clue.id));
+    }
     for (id, _, _) in projection::sections(c, campaign)? {
         ids.push(("sheetSection".into(), id));
     }
@@ -434,6 +482,7 @@ pub fn items(c: &Connection, campaign: &str) -> AppResult<Vec<Item>> {
         ids.push(("image".into(), id));
     }
     let pages = page_shares(c, campaign)?;
+    let sessions = shares_for(c, campaign, "session")?;
     let mut out = vec![];
     for (kind_name, id) in ids {
         let Some(value) = payload(c, campaign, &kind_name, &id)? else {
@@ -446,7 +495,9 @@ pub fn items(c: &Connection, campaign: &str) -> AppResult<Vec<Item>> {
             None => "private",
             Some(_) if conflict => "conflict",
             Some((state, ..)) if state == "revoked" => "revoking",
-            Some((_, _, _, visibility, _)) if blocked(&kind_name, &value, visibility, &pages) => {
+            Some((_, _, _, visibility, _))
+                if blocked(&kind_name, &value, visibility, &pages, &sessions) =>
+            {
                 "blocked"
             }
             Some((_, _, 0, ..)) => "new",
@@ -510,11 +561,12 @@ pub fn set_scope(
     let tx = c.unchecked_transaction().map_err(storage)?;
     if scope != "none" {
         let pages = page_shares(&tx, campaign)?;
-        if blocked(kind_name, &value, visibility, &pages) {
+        let sessions = shares_for(&tx, campaign, "session")?;
+        if blocked(kind_name, &value, visibility, &pages, &sessions) {
             return Err(if visibility == "members" {
-                "Share the pages this item refers to first.".into()
+                "Share the pages and sessions this item refers to first.".into()
             } else {
-                "Replicate the pages this item refers to first.".to_string()
+                "Replicate the pages and sessions this item refers to first.".to_string()
             });
         }
         tx.execute(
@@ -525,10 +577,10 @@ pub fn set_scope(
     } else {
         stop_replicating(&tx, campaign, kind_name, id)?;
     }
-    if kind_name == "page" && scope != "shared" {
+    if (kind_name == "page" || kind_name == "session") && scope != "shared" {
         // Dependent items must not outlive the visibility of the pages they refer to.
         let mut q = tx
-            .prepare("SELECT kind,item_id,visibility FROM sync_shares WHERE campaign_id=?1 AND kind IN ('relationship','party') AND state='shared'")
+            .prepare("SELECT kind,item_id,visibility FROM sync_shares WHERE campaign_id=?1 AND kind IN ('relationship','party','clue') AND state='shared'")
             .map_err(storage)?;
         let rows = q
             .query_map([campaign], |r| {
@@ -543,8 +595,15 @@ pub fn set_scope(
             .map_err(storage)?;
         drop(q);
         for (dependent_kind, dependent, current) in rows {
-            let refers = payload(&tx, campaign, &dependent_kind, &dependent)?
-                .is_some_and(|v| endpoints(&dependent_kind, &v).iter().any(|p| p == id));
+            let refers = payload(&tx, campaign, &dependent_kind, &dependent)?.is_some_and(|v| {
+                if kind_name == "page" {
+                    endpoints(&dependent_kind, &v).iter().any(|p| p == id)
+                } else {
+                    session_endpoints(&dependent_kind, &v)
+                        .iter()
+                        .any(|s| s == id)
+                }
+            });
             if !refers {
                 continue;
             }
@@ -635,12 +694,13 @@ pub fn pending(c: &Connection, campaign: &str) -> AppResult<(Vec<Job>, usize)> {
         .map_err(storage)?;
     drop(q);
     let pages = page_shares(c, campaign)?;
+    let sessions = shares_for(c, campaign, "session")?;
     let (mut jobs, mut blocked_count) = (vec![], 0);
     for (kind_name, id, state, pushed, base, visibility, pushed_visibility) in rows {
         let current = payload(c, campaign, &kind_name, &id)?;
         match (state.as_str(), current) {
             ("shared", Some(value)) => {
-                if blocked(&kind_name, &value, &visibility, &pages) {
+                if blocked(&kind_name, &value, &visibility, &pages, &sessions) {
                     blocked_count += 1;
                     continue;
                 }
@@ -682,7 +742,7 @@ pub fn pending(c: &Connection, campaign: &str) -> AppResult<(Vec<Job>, usize)> {
 /// Cheap by design: counts, revision sums and newest timestamps, no payloads.
 pub fn fingerprint(c: &Connection, campaign: &str) -> AppResult<String> {
     c.query_row(
-        "SELECT (SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM pages WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM sessions WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM relationships WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0) FROM party_members WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(length(visibility)+length(state)),0) FROM sync_shares WHERE campaign_id=?1)||'|'||(SELECT count(*) FROM sync_conflicts WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0) FROM characters WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(max(caption),'') FROM image_attachments WHERE campaign_id=?1)",
+        "SELECT (SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM pages WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM sessions WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM relationships WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0) FROM party_members WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(length(visibility)+length(state)),0) FROM sync_shares WHERE campaign_id=?1)||'|'||(SELECT count(*) FROM sync_conflicts WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0) FROM characters WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(max(caption),'') FROM image_attachments WHERE campaign_id=?1)||'|'||(SELECT count(*)||':'||coalesce(sum(revision),0)||':'||coalesce(max(updated_at),'') FROM clues WHERE campaign_id=?1)",
         [campaign],
         |r| r.get(0),
     )
@@ -1102,6 +1162,11 @@ fn materialize(c: &Connection, campaign: &str, change: &api::Change) -> AppResul
                 },
             )?;
         }
+        "clue" => {
+            let input: clues::Input =
+                serde_json::from_value(remote.clone()).map_err(|_| invalid())?;
+            clues::save(c, campaign, Some(&change.id), None, input)?;
+        }
         _ => {
             party::save(
                 c,
@@ -1312,6 +1377,12 @@ fn apply_local(
             input.evidence = text("evidence");
             input.notes = text("notes");
             graph::save_relationship(c, campaign, Some(id), Some(local.revision), input)?;
+        }
+        "clue" => {
+            let local = clues::get(c, campaign, id)?;
+            let input: clues::Input =
+                serde_json::from_value(remote.clone()).map_err(|_| invalid())?;
+            clues::save(c, campaign, Some(id), Some(local.revision), input)?;
         }
         _ => {
             let member = party::list(c, campaign)?
@@ -1524,6 +1595,50 @@ pub fn validate_payload(kind_name: &str, value: &Value) -> AppResult<()> {
         Ok(())
     };
     match kind_name {
+        "clue" => {
+            only(&[
+                "kind",
+                "title",
+                "details",
+                "certainty",
+                "status",
+                "sources",
+                "pageIds",
+                "resolutionSessionId",
+            ])?;
+            let input: clues::Input =
+                serde_json::from_value(value.clone()).map_err(|_| invalid())?;
+            title(&input.title)?;
+            if !["question", "lead", "suspicion", "rumour"].contains(&input.kind.as_str())
+                || !["confirmed", "suspected", "disproven", "unknown"]
+                    .contains(&input.certainty.as_str())
+                || !["open", "resolved", "disproven"].contains(&input.status.as_str())
+                || (input.status == "disproven" && input.certainty != "disproven")
+                || (input.status == "open" && input.resolution_session_id.is_some())
+                || input.details.chars().count() > 8000
+                || input.sources.len() > 20
+                || input.page_ids.len() > 20
+            {
+                return Err(invalid());
+            }
+            for id in &input.page_ids {
+                identifier(id)?;
+            }
+            if let Some(id) = &input.resolution_session_id {
+                identifier(id)?;
+            }
+            for source in &input.sources {
+                identifier(&source.id)?;
+                if !["page", "session"].contains(&source.kind.as_str())
+                    || source
+                        .block_id
+                        .as_ref()
+                        .is_some_and(|id| id.len() > 128 || id.contains('\0'))
+                {
+                    return Err(invalid());
+                }
+            }
+        }
         "page" => {
             only(&["title", "kind", "status", "aliases", "document"])?;
             title(object["title"].as_str().ok_or_else(invalid)?)?;

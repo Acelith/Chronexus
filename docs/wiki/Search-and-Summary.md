@@ -3,8 +3,9 @@
 ## Search (Ctrl/⌘ + K)
 
 Full-text search across the open campaign: note paragraphs, page titles and aliases, the
-character sheet, inventory and abilities. Filter by kind; opening a result jumps to the
-exact paragraph. Search understands accents and plurals of the interface language.
+character sheet, inventory, abilities and clue titles and notes. Filter by kind;
+opening a note result jumps to the exact paragraph, while a clue result opens the
+board. Search understands accents and plurals of the interface language.
 
 **Search maintenance** rebuilds the local search index if results ever look stale. The
 index lives only on your computer.

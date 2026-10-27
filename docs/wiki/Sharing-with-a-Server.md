@@ -23,7 +23,7 @@ computer), use **App settings → Campaign sharing**.
 
 ## Choose what leaves this computer
 
-Every page, session, relationship, party member, character-sheet section and image has
+Every page, session, relationship, party member, clue, character-sheet section and image has
 its own choice:
 
 | Choice | Who sees it |
@@ -38,6 +38,8 @@ conversations and preferences are never synchronized. If you explicitly choose
 server AI for this campaign, your questions and chosen model are sent to that
 server; it answers from items already available to you there, without uploading
 notes kept only on this computer.
+Clues carry their linked page and source-block references; share or privately copy
+those pages and sessions first. Choosing a clue alone never uploads its source note.
 
 ## Synchronizing
 

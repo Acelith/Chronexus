@@ -6,6 +6,7 @@ export type View =
   | "journal"
   | "codex"
   | "graph"
+  | "clues"
   | "wiki"
   | "party"
   | "assistant"

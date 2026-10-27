@@ -5,6 +5,7 @@
 - [Session journal](Session-Journal.md)
 - [Codex and mentions](Codex-and-Mentions.md)
 - [Graph and relationships](Graph-and-Relationships.md)
+- [Clue board](Clue-Board.md)
 - [Character sheet](Character-Sheet.md)
 - [Party](Party.md)
 - [Dice roller](Dice-Roller.md)

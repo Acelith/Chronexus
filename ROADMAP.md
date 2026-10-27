@@ -1494,7 +1494,7 @@ close platform acceptance or publish a release.
 ## Open milestones in priority order
 
 Reorganized on 26 October 2026 at the user's request. Every milestone below is
-**planned, not implemented**, except M25 (in progress). The sections follow this
+**planned, not implemented**, except M25 (in progress) and M31 (implemented on Windows). The sections follow this
 priority, not numeric order; IDs M28–M40 are new and were assigned in priority
 order, while M25 and M27 keep their IDs. Each milestone still needs an explicit
 request before implementation, and publication follows the standing release rules.
@@ -1504,6 +1504,7 @@ request before implementation, and publication follows the standing release rule
 | Done | M41 — Project wiki for app and server | Handbook published; canonical GitHub Markdown sources after migration | — |
 | Done | M29 — Release matrix for Windows, macOS and Linux | Unsigned pre-release 0.10.1 published 27/10/2026 (replaces 0.10.0); Windows ARM64 and x64 AppImage open | — |
 | Done | M30 — Automated desktop QA and cross-platform CI | GitHub workflows and local runner in place; remote run acceptance open | — |
+| Done | M31 — Clue board and open questions | Implemented on Windows with schema 022 and selective sharing | — |
 | 1 | M25 — Chronexus Server (in progress) | 0.1.1 released, web interface done; server AI, Android contract and public deployment open | M24 |
 | 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Requested 27/10/2026: a GM runs combat for players; journals stay private | M25 |
 | 3 | M43 — Live table channel and GM web interface | Real-time play needs a server-authoritative channel and a GM UI | M42 |
@@ -1511,7 +1512,6 @@ request before implementation, and publication follows the standing release rule
 | 5 | M45 — Combat tracker | Initiative, turns, rounds, conditions, combat log | M44 |
 | 6 | M46 — Fog of war and vision | Hide what characters cannot see | M44 |
 | 7 | M47 — Monster library and encounters | SRD monsters with attribution, custom monsters, prepared encounters | M45 |
-| 8 | M31 — Clue board and open questions | Strengthens the player-knowledge differentiator | — |
 | 9 | M32 — First start and demo campaign | New users must see the value in minutes | — |
 | 10 | M33 — Trust and transparency | The project is openly vibecoded: give verifiable evidence | M29 |
 | 11 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
@@ -1672,7 +1672,7 @@ audience *shared with the GM too*.
 - **M47 — Monster library and encounters.** SRD 5.1 monsters via the allowlisted APIs with
   attribution, custom monsters, encounter presets.
 
-## M31 — Clue board and open questions (planned, priority 8)
+## M31 — Clue board and open questions (implemented on Windows)
 
 **Goal:** a board of what the character does not know yet, the player-side
 counterpart of the relationship graph.
@@ -1689,6 +1689,12 @@ counterpart of the relationship graph.
 - New schema migration with UUIDs and foreign keys, no destructive change.
 - Acceptance: create, edit, resolve and reopen with keyboard only; backlinks
   survive page renames; backup/restore round trip; translated UI.
+
+Implemented in schema 022. The board, source-block creation/backlinks, search,
+backup/export, per-item sharing, and server contract are in source. Windows Rust,
+frontend and real-server clue replication checks are recorded in `docs/STATUS.md`.
+macOS/Linux installation and published-package verification remain separate release
+checks; the 0.11.0 installer predates M31.
 
 ## M32 — First start and demo campaign (planned, priority 9)
 

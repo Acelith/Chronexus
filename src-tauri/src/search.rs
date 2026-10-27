@@ -1,4 +1,5 @@
 use crate::{
+    clues,
     journal::{require_campaign, storage, AppResult},
     knowledge, player,
 };
@@ -138,6 +139,23 @@ pub fn page(c: &Connection, campaign: &str, id: &str) -> AppResult<()> {
         &p.document,
     )
 }
+pub fn clue(c: &Connection, campaign: &str, id: &str) -> AppResult<()> {
+    if !available(c)? {
+        return Ok(());
+    }
+    let item = clues::get(c, campaign, id)?;
+    remove(c, campaign, "clue", id)?;
+    insert(
+        c,
+        campaign,
+        "clue",
+        id,
+        "",
+        &item.title,
+        &item.details,
+        &item.updated_at,
+    )
+}
 fn user_text(value: &Value) -> String {
     match value {
         Value::String(s) => s.clone(),
@@ -205,12 +223,24 @@ pub fn rebuild_all(c: &Connection) -> AppResult<i64> {
         .map_err(storage)?;
     c.execute("DELETE FROM search_documents", [])
         .map_err(storage)?;
+    let has_clues: bool = c
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='clues')",
+            [],
+            |r| r.get(0),
+        )
+        .map_err(storage)?;
     for campaign in crate::journal::list_campaigns(c)? {
         for s in crate::journal::list_sessions(c, &campaign.id)? {
             session(c, &campaign.id, &s.id)?;
         }
         for p in knowledge::list_pages(c, &campaign.id)? {
             page(c, &campaign.id, &p.id)?;
+        }
+        if has_clues {
+            for item in clues::list(c, &campaign.id)? {
+                clue(c, &campaign.id, &item.id)?;
+            }
         }
         character(c, &campaign.id)?;
         if let Some(pc) = player::get_character(c, &campaign.id)? {
@@ -253,7 +283,16 @@ pub fn find(
     if query.chars().count() > 200
         || !["relevance", "recent"].contains(&sort)
         || kind.is_some_and(|k| {
-            !["session", "page", "character", "item", "spell", "ability"].contains(&k)
+            ![
+                "session",
+                "page",
+                "clue",
+                "character",
+                "item",
+                "spell",
+                "ability",
+            ]
+            .contains(&k)
         })
     {
         return Err("Invalid filters or search text.".into());

@@ -141,13 +141,14 @@ pub fn remote_id(value: &str) -> AppResult<()> {
     }
     Ok(())
 }
-pub const KINDS: [&str; 6] = [
+pub const KINDS: [&str; 7] = [
     "page",
     "session",
     "relationship",
     "party",
     "sheetSection",
     "image",
+    "clue",
 ];
 pub fn kind(value: &str) -> AppResult<()> {
     if !KINDS.contains(&value) {

@@ -22,6 +22,7 @@ The optional companion server has its own wiki in the
 | [Session journal](Session-Journal.md) | Writing notes, autosave, the editor |
 | [Codex and mentions](Codex-and-Mentions.md) | Pages for characters, places, factions; `[[` links and backlinks |
 | [Graph and relationships](Graph-and-Relationships.md) | Seeing connections; why a mention is not a fact |
+| [Clue board](Clue-Board.md) | Questions, leads, sources and resolution without inventing facts |
 | [Character sheet](Character-Sheet.md) | Sheet, resources, inventory, abilities and spells |
 | [Party](Party.md) | The other characters at the table and what you know about them |
 | [Dice roller](Dice-Roller.md) | Rolling and history |

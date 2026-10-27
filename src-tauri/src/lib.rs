@@ -6,6 +6,9 @@ mod backup_folder;
 #[cfg(test)]
 mod backup_tests;
 mod catalog;
+mod clues;
+#[cfg(test)]
+mod clues_tests;
 mod commands;
 mod db;
 mod dice;
@@ -245,6 +248,9 @@ pub fn run() {
             commands::campaign::list_sessions,
             commands::campaign::create_session,
             commands::campaign::save_document,
+            commands::clues::list_clues,
+            commands::clues::save_clue,
+            commands::clues::delete_clue,
             commands::knowledge::list_party,
             commands::knowledge::save_party_member,
             commands::knowledge::remove_party_member,

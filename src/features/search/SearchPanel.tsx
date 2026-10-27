@@ -5,7 +5,8 @@ import { Text } from "../../i18n/Text";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { command, errorMessage } from "../journal/api";
 export interface SearchResult {
-  kind: "session" | "page" | "character" | "item" | "spell" | "ability";
+  kind:
+    "session" | "page" | "clue" | "character" | "item" | "spell" | "ability";
   sourceId: string;
   blockId: string | null;
   title: string;
@@ -15,6 +16,7 @@ export interface SearchResult {
 const kinds = localizeLabels({
   session: "Sessions",
   page: "Pages",
+  clue: "Clue board",
   character: "Character",
   item: "Items",
   spell: "Spells",

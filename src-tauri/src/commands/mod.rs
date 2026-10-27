@@ -3,6 +3,7 @@
 pub mod ai;
 pub mod archive;
 pub mod campaign;
+pub mod clues;
 pub mod knowledge;
 pub mod player;
 pub mod settings;

@@ -34,12 +34,19 @@ import WordToolbar from "./WordToolbar";
 import { KnowledgeContext } from "../knowledge/context";
 import { knowledgeApi, pageKinds, type KnowledgePage } from "../knowledge/api";
 import { canCreatePage, matchingPages } from "../knowledge/links";
+import ClueBacklinks from "../clues/ClueBacklinks";
 
 export type SaveGuard = { flush: () => Promise<void>; dirty: () => boolean };
 type Props = {
   register: (guard: SaveGuard | null) => void;
   focusBlock?: string;
   disabled?: boolean;
+  onCreateClue?: (source: {
+    kind: "session" | "page";
+    id: string;
+    blockId: string;
+  }) => void;
+  onOpenClue?: (id: string) => void;
 } & (
   | { session: Session; onSaved: (session: Session) => void }
   | { page: KnowledgePage; onSaved: (page: KnowledgePage) => void }
@@ -107,7 +114,6 @@ function NoteEditor(props: Props) {
       saver.dispose();
     };
   }, [register, saver]);
-
   useEffect(() => {
     if (!focusBlock) return;
     let node: HTMLElement | undefined;
@@ -293,6 +299,22 @@ function NoteEditor(props: Props) {
           insertPage={insertPage}
         />
       </EditorModeBar>
+      {props.onCreateClue && mode === "visual" ? (
+        <button
+          type="button"
+          disabled={!!blocked}
+          onClick={() => {
+            const blockId = editor.getTextCursorPosition().block.id;
+            props.onCreateClue?.({
+              kind: "session" in props ? "session" : "page",
+              id: session.id,
+              blockId,
+            });
+          }}
+        >
+          {tr("Create clue from selected block")}
+        </button>
+      ) : null}
       {sourceError ? (
         <p role="alert" className="error">
           {sourceError}
@@ -354,6 +376,14 @@ function NoteEditor(props: Props) {
         </BlockNoteView>
       </div>
       <p className="editor-hint">{appText.editorHint}</p>
+      {props.onOpenClue ? (
+        <ClueBacklinks
+          campaignId={session.campaignId}
+          sourceKind={"session" in props ? "session" : "page"}
+          sourceId={session.id}
+          onOpen={props.onOpenClue}
+        />
+      ) : null}
     </>
   );
 }

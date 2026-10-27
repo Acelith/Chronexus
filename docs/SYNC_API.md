@@ -26,6 +26,15 @@ servers that do not (it also uses `change-notifications` when present).
 
 Client rules that rely on the contract:
 
+M31 adds `clue` as a player-authored content kind. Its typed payload contains
+`kind`, `title`, `details`, `certainty`, `status`, `sources` (session/page IDs and
+optional block IDs), `pageIds` and `resolutionSessionId`. It has the same
+`none`/`private`/`shared` choice as notes. Before a clue can leave the device,
+all referenced pages and sessions must be chosen for the same audience. The
+server validates those dependencies and withdraws a publicly visible clue when
+a referenced source loses public visibility. Remote copies use stable IDs and
+normal clue validation; a received claim is never promoted to a relationship.
+
 - Every outbound operation gets a **UUIDv7** request ID that is stored in `sync_outbox`
   together with the exact payload *before* the request is sent. After a crash or a lost
   response the stored operation is replayed first and acknowledged by the server's

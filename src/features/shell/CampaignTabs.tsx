@@ -19,6 +19,7 @@ export function CampaignTabs({
     ["journal", "book", <Text source={"Journal"} />],
     ["codex", "books", <Text source={"Codex"} />],
     ["graph", "graph", <Text source={"Graph"} />],
+    ["clues", "document", <Text source={"Clue board"} />],
     ["party", "party", <Text source={"Party"} />],
     ["character", "helmet", tr("Character")],
     ["inventory", "bag", tr("Inventory")],

@@ -33,6 +33,7 @@ import { KnowledgeContext } from "./features/knowledge/context";
 import type { GraphNode, SourceRef } from "./features/graph/api";
 import type { AbilityDetails, PlayerView } from "./features/player/api";
 import type { SearchResult } from "./features/search/SearchPanel";
+import type { ClueSource } from "./features/clues/api";
 import { OperationContext } from "./operations";
 import { heraldApi, type UpdateOffer } from "./features/updates/api";
 import { usePeriodicBackup } from "./features/backup/usePeriodicBackup";
@@ -43,6 +44,7 @@ import { AppSidebar } from "./features/shell/AppSidebar";
 import { CampaignTabs } from "./features/shell/CampaignTabs";
 import type { View } from "./features/shell/views";
 const SearchPanel = lazy(() => import("./features/search/SearchPanel"));
+const ClueWorkspace = lazy(() => import("./features/clues/ClueWorkspace"));
 
 const Editor = lazy(() => import("./features/journal/Editor"));
 const CodexWorkspace = lazy(
@@ -97,6 +99,8 @@ export function App() {
   /** Spell prepared in the wiki, waiting to open as an unsaved form. */
   const [wikiDraft, setWikiDraft] = useState<AbilityDetails | null>(null);
   const [focusBlock, setFocusBlock] = useState<string | undefined>();
+  const [clueSource, setClueSource] = useState<ClueSource>();
+  const [selectedClueId, setSelectedClueId] = useState<string>();
   const [form, setForm] = useState<"campaign" | "rename" | "session" | null>(
     null,
   );
@@ -276,6 +280,10 @@ export function App() {
     void run(async () => {
       if (options.closeBackup) setBackupOpen(false);
       setView(next);
+      if (next === "clues") {
+        setClueSource(undefined);
+        setSelectedClueId(undefined);
+      }
       setForm(null);
       options.before?.();
       if (options.clearFocus) setFocusBlock(undefined);
@@ -300,6 +308,8 @@ export function App() {
       setPages(knowledge);
       setPageId(null);
       setView("journal");
+      setClueSource(undefined);
+      setSelectedClueId(undefined);
       setFocusBlock(undefined);
       setForm(null);
     });
@@ -375,6 +385,9 @@ export function App() {
         setPageId(result.sourceId);
         setFallback(result.title);
         setView("codex");
+      } else if (result.kind === "clue") {
+        setSelectedClueId(result.sourceId);
+        setView("clues");
       } else {
         const target =
           result.kind === "character"
@@ -441,6 +454,24 @@ export function App() {
       sequence: null,
       blockId: source.blockId ?? "",
       preview: "",
+    });
+  }
+  function createClueFromBlock(source: {
+    kind: "session" | "page";
+    id: string;
+    blockId: string;
+  }) {
+    void run(async () => {
+      setClueSource({ ...source });
+      setSelectedClueId(undefined);
+      setView("clues");
+    });
+  }
+  function openClue(id: string) {
+    void run(async () => {
+      setClueSource(undefined);
+      setSelectedClueId(id);
+      setView("clues");
     });
   }
   function openGraphNode(node: GraphNode) {
@@ -790,6 +821,8 @@ export function App() {
                         onSaved={onPageSaved}
                         onSelect={openPage}
                         onSource={openSource}
+                        onCreateClue={createClueFromBlock}
+                        onOpenClue={openClue}
                         onCreate={createPage}
                         onUpdate={updatePage}
                         onRecover={recoverPage}
@@ -848,6 +881,37 @@ export function App() {
                         key={campaign.id}
                         campaignId={campaign.id}
                         busy={busy}
+                      />
+                    </Suspense>
+                  ) : null}
+                  {campaign && view === "clues" ? (
+                    <Suspense
+                      fallback={<p role="status">{tr("Loading clues…")}</p>}
+                    >
+                      <ClueWorkspace
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        pages={pages}
+                        sessions={sessions}
+                        initialSource={clueSource}
+                        selectedId={selectedClueId}
+                        externalEpoch={externalEpoch}
+                        register={register}
+                        busy={busy}
+                        onSource={(source) =>
+                          openGraphSource({
+                            kind: source.kind,
+                            id: source.id,
+                            title:
+                              source.kind === "session"
+                                ? (sessions.find((s) => s.id === source.id)
+                                    ?.title ?? "")
+                                : (pages.find((p) => p.id === source.id)
+                                    ?.title ?? ""),
+                            blockId: source.blockId,
+                          })
+                        }
+                        onPage={openPage}
                       />
                     </Suspense>
                   ) : null}
@@ -1067,6 +1131,8 @@ export function App() {
                                 onSaved={onSaved}
                                 focusBlock={focusBlock}
                                 disabled={busy}
+                                onCreateClue={createClueFromBlock}
+                                onOpenClue={openClue}
                               />
                             </Suspense>
                             {session.document.importedFrom === "logseq" ? (

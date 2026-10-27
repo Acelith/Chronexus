@@ -28,7 +28,13 @@ export interface SyncLink {
   accessLost: boolean;
 }
 export type SharedKind =
-  "page" | "session" | "relationship" | "party" | "sheetSection" | "image";
+  | "page"
+  | "session"
+  | "relationship"
+  | "party"
+  | "sheetSection"
+  | "image"
+  | "clue";
 /** Shared read-only; never replicated privately and never created on another computer. */
 export const projectionKinds: SharedKind[] = ["sheetSection", "image"];
 /** none: only on this device · private: this account's devices · shared: the members. */

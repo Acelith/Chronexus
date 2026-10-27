@@ -125,6 +125,7 @@ pub fn write_export(
     let pictures = images::all(c, campaign_id)?;
     let sources = crate::import_sources::all(c, campaign_id)?;
     let party = crate::party::list(c, campaign_id)?;
+    let clues = crate::clues::list(c, campaign_id)?;
     let mut conversations = Vec::new();
     loop {
         let batch = crate::assistant::store::history(c, campaign_id, conversations.len() as u32)?;
@@ -146,7 +147,7 @@ pub fn write_export(
         .into_iter()
         .map(|id| graph::get_relationship(c, campaign_id, &id))
         .collect::<AppResult<Vec<_>>>()?;
-    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"importSources":sources,"party":party,"assistantConversations":conversations,"assistantCampaignSettings":crate::assistant::campaign::get(c,campaign_id)?,"assistantTraining":crate::assistant::training::all(c,campaign_id)?,"diceRolls":crate::dice::all(c,campaign_id)?});
+    let data = json!({"formatVersion":1,"schemaVersion":db::LATEST_SCHEMA,"campaign":campaign,"sessions":sessions,"pages":pages,"character":character,"assets":assets,"images":pictures,"relationships":relationships,"clues":clues,"importSources":sources,"party":party,"assistantConversations":conversations,"assistantCampaignSettings":crate::assistant::campaign::get(c,campaign_id)?,"assistantTraining":crate::assistant::training::all(c,campaign_id)?,"diceRolls":crate::dice::all(c,campaign_id)?});
     let mut files: Vec<(String, Vec<u8>)> = vec![(
         "campaign.json".into(),
         serde_json::to_vec_pretty(&data).map_err(|_| "JSON export failed.")?,
@@ -196,6 +197,53 @@ pub fn write_export(
             session.title.replace(']', "\\]"),
             session.id
         ));
+    }
+    if !clues.is_empty() {
+        index.push_str("\n## Clue board\n\nQuestions, leads and suspicions are player notes, not established campaign facts.\n\n");
+        for clue in &clues {
+            let mut text = format!(
+                "# {}\n\nType: {}\n\nStatus: {}\n\nCertainty: {}\n\n{}\n\n",
+                clue.title, clue.kind, clue.status, clue.certainty, clue.details
+            );
+            if !clue.page_ids.is_empty() {
+                text.push_str("## Linked pages\n\n");
+                for page in &clue.page_ids {
+                    text.push_str(&format!("- [Page](../pages/{page}.md)\n"));
+                }
+            }
+            if !clue.sources.is_empty() {
+                text.push_str("\n## Sources\n\n");
+                for source in &clue.sources {
+                    let target = if source.kind == "session" {
+                        "sessions"
+                    } else {
+                        "pages"
+                    };
+                    text.push_str(&format!(
+                        "- [{}](../{target}/{}.md){}\n",
+                        source.kind,
+                        source.id,
+                        source
+                            .block_id
+                            .as_ref()
+                            .map(|id| format!(" (block {id})"))
+                            .unwrap_or_default()
+                    ));
+                }
+            }
+            if let Some(id) = &clue.resolution_session_id {
+                text.push_str(&format!(
+                    "\nResolution session: [Session](../sessions/{id}.md)\n"
+                ));
+            }
+            files.push((format!("clues/{}.md", clue.id), text.into_bytes()));
+            index.push_str(&format!(
+                "- [{}](clues/{}.md) — {}\n",
+                clue.title.replace(']', "\\]"),
+                clue.id,
+                clue.status
+            ));
+        }
     }
     if let Some(pc) = &character {
         let mut text = format!(

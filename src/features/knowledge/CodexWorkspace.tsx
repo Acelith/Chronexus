@@ -33,6 +33,12 @@ interface Props {
   register: (guard: SaveGuard | null) => void;
   onSelect: (id: string, label: string) => void;
   onSource: (link: Backlink) => void;
+  onCreateClue?: (source: {
+    kind: "session" | "page";
+    id: string;
+    blockId: string;
+  }) => void;
+  onOpenClue?: (id: string) => void;
   onSaved: (page: KnowledgePage) => void;
   onCreate: (metadata: PageMetadata) => Promise<KnowledgePage | undefined>;
   onUpdate: (
@@ -191,6 +197,8 @@ export default function CodexWorkspace(props: Props) {
                   onSaved={props.onSaved}
                   focusBlock={props.focusBlock}
                   disabled={props.busy}
+                  onCreateClue={props.onCreateClue}
+                  onOpenClue={props.onOpenClue}
                 />
               </Suspense>
               <Suspense

@@ -111,6 +111,8 @@ pub struct Counts {
     pub pages: u64,
     pub mentions: u64,
     pub relationships: u64,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub clues: u64,
     pub attachments: u64,
     #[serde(default, skip_serializing_if = "is_zero")]
     pub characters: u64,
@@ -210,6 +212,11 @@ fn counts(connection: &Connection, attachments: u64, schema: i64) -> AppResult<C
         },
         relationships: if schema >= 4 {
             count(connection, "relationships")?
+        } else {
+            0
+        },
+        clues: if schema >= 22 {
+            count(connection, "clues")?
         } else {
             0
         },
@@ -386,6 +393,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     }
     if expected_version >= 19 {
         crate::sync::engine::validate_archive(&connection)?;
+    }
+    if expected_version >= 22 {
+        crate::clues::validate_archive(&connection)?;
     }
     if expected_version >= 9 {
         crate::import_sources::validate_archive(&connection)?;

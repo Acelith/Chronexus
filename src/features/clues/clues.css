@@ -1,0 +1,115 @@
+.clue-workspace {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: var(--ink, #312a22);
+}
+.clue-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.clue-heading h2 {
+  margin: 0.2rem 0;
+  font-family: var(--font-display, Georgia, serif);
+}
+.clue-heading p {
+  max-width: 65ch;
+}
+.clue-form,
+.clue-card {
+  background: var(--paper, #eee4cc);
+  border: 1px solid #8c7858;
+  box-shadow: 0 4px 16px #0002;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.clue-form label,
+.clue-filters label {
+  display: grid;
+  gap: 0.25rem;
+}
+.clue-form > label {
+  margin-block: 0.8rem;
+}
+.clue-form-grid,
+.clue-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.clue-form-grid > label,
+.clue-filters > label {
+  flex: 1 1 160px;
+}
+.clue-form input:not([type="checkbox"]),
+.clue-form select,
+.clue-form textarea,
+.clue-filters select {
+  width: 100%;
+  box-sizing: border-box;
+}
+.clue-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  max-height: 9rem;
+  overflow: auto;
+}
+.clue-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.clue-actions,
+.clue-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.clue-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: start;
+}
+.clue-card-head h3 {
+  margin: 0.35rem 0;
+}
+.clue-card-head span {
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+}
+.clue-details {
+  white-space: pre-wrap;
+}
+.clue-links {
+  margin-top: 0.6rem;
+}
+.clue-empty {
+  padding: 2rem;
+  border: 1px dashed #8c7858;
+  text-align: center;
+}
+@media (max-width: 680px) {
+  .clue-heading,
+  .clue-card-head {
+    flex-direction: column;
+  }
+  .clue-workspace {
+    padding: 0.75rem;
+  }
+}
+.clue-backlinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1rem;
+  border-top: 1px solid #8c7858;
+  padding-top: 0.75rem;
+}

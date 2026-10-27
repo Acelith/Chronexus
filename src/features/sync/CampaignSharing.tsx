@@ -26,6 +26,7 @@ const kindLabels = (): Record<SharedKind, string> => ({
   party: tr("Party members"),
   sheetSection: tr("Character sheet sections"),
   image: tr("Images"),
+  clue: tr("Clue board"),
 });
 const statusLabels = (): Record<SyncItem["status"], string> => ({
   private: tr("only on this device"),
@@ -33,7 +34,7 @@ const statusLabels = (): Record<SyncItem["status"], string> => ({
   pending: tr("changed, to send"),
   synced: tr("synchronized"),
   conflict: tr("conflict"),
-  blocked: tr("waiting: the pages it refers to must go first"),
+  blocked: tr("waiting: referenced pages and sessions must go first"),
   revoking: tr("removal from the server at next synchronization"),
 });
 const scopeLabels = (): Record<SyncScope, string> => ({
@@ -446,6 +447,11 @@ export default function CampaignSharing({
               <p>
                 {tr(
                   "Every page, session, relationship and party member of this campaign will be copied to your account on the server so your other computers can download them. They stay private: the other players see nothing unless you share an item. Character sheets, images, AI data and preferences are not included.",
+                )}
+              </p>
+              <p>
+                {tr(
+                  "Clues are copied too. Their referenced pages and sessions must be copied first.",
                 )}
               </p>
               <button

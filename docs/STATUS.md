@@ -1514,3 +1514,30 @@ core 1972,7 MiB, volumes 1800/1800/1800/1806,4 MiB, all below the 2048 limit.
 Real and repeated AI installation PASS, no overwriting. The old out-of-limit
 test is archived under .tools, excluded from delivery. Remote publication
 still to be executed and verified; not declared finished in this commit.
+# Chronexus status — 27 October 2026: M31 clue board (source, Windows verified)
+
+- Schema 022 adds player-authored questions, leads, suspicions and rumours with
+  certainty, status, source-block/session links, Codex page IDs and optional
+  resolution session. Editing or resolving a clue never changes its source note
+  or creates a factual graph relationship. Create from the selected note block;
+  filter by status/page/session, follow links and backlinks. Search, `.nodex`
+  backup/restore and readable ZIP export include clues.
+- Sharing has an explicit `none`/`private`/`shared` choice per clue. Referenced
+  pages and source sessions must be selected for the same audience first. The
+  companion server adds a typed clue payload and withdraws publicly visible
+  clues if a referenced source loses visibility. A real-server test replicated
+  a clue with source block and linked page onto a second local device.
+- Windows source checks: 181 Rust tests passed (8 ignored); 216 frontend
+  tests passed, including English, Italian and Arabic board flows; the dedicated
+  real-server clue test passed. TypeScript, ESLint, Vite build, Rust Clippy and
+  `pnpm i18n:check` passed. Local browser preview at 1280×800 and 760×600 showed no
+  horizontal overflow, including RTL Arabic and the form. Native installer and
+  macOS/Linux checks are pending. React Doctor's new effect warning was removed;
+  the existing complex Editor function remains a maintainability warning.
+- Skills applied: SQLite Expert for migration and ownership constraints, Rust
+  Best Practices and Tauri v2 for async typed commands, React Testing for UI
+  coverage, Impeccable for theme/layout review, Webapp Testing for the local
+  browser check, Systematic Debugging for test failures, React Doctor for the
+  changed React code. Next open roadmap milestone: **M25 — Chronexus Server**
+  (in progress), then M42–M47 virtual tabletop; M32 is the next local-only
+  feature in the priority list.
