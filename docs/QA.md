@@ -83,6 +83,13 @@ and removal by the owner. Synthetic data only.
 
 Windows is not covered: there is no Windows engine in Docker on macOS.
 
+## No network without a configured server
+
+`scripts/qa/linux/no-network-check.sh` runs the IPC flows of a Linux debug build under
+`strace` (container with `--cap-add SYS_PTRACE`) and lists every `connect()` outside
+loopback. With sharing not configured the expected result is none. Run on 27 October 2026
+(app main 9200f7c): 16/16 flows, 40 connections traced, 0 outside loopback.
+
 ## Cross-platform IPC flows (macOS, Linux, Windows)
 
 The CDP scripts above need WebView2. `scripts/qa/ipc/` runs the main flows in any
