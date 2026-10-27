@@ -1,3 +1,32 @@
+# Chronexus status — 27 October 2026: server integration, container builds, M41 wiki
+
+- **Server integration (M25.8 work):** Chronexus Server runs in Docker on macOS behind the
+  bundled Caddy with HTTPS (`chronexus.localhost:8443`, local CA). Three real apps — macOS
+  owner, two Debian arm64 containers (player, owner's second device) — pass the new
+  `scripts/qa/sync` scenario, 37/37 steps: invitations, per-item scope, attribution, live
+  edits (~3.3 s), conflict, unsharing, offline and realignment, role change, leaving,
+  removal. Live client tests against the real server binary: 4 passed on macOS.
+- **Fixed:** desktop had no member management (list, role, remove, leave) though the server
+  offers it; the stored role never refreshed (a demoted reader retried refused writes
+  forever, a promoted reader could not share); a reader's unsent edits showed as saved; live
+  tests could not start the server on macOS (symlinked temp dir); macOS bundle had no valid
+  ad-hoc signature (now `signingIdentity "-"`); Linux campaign picker unreadable.
+  Server side: compose `https` profile never started (IP clash), `backup`/`verify` failed
+  on macOS, OpenAPI drift.
+- **Packages (local, unpublished):** macOS arm64 DMG installed and started; macOS x64 DMG
+  built (not run, no Rosetta); Linux arm64 `.deb`/AppImage built in `chronexus-linux-qa`,
+  installed and started on Debian 12/Ubuntu 24.04, the installed release build signed in to
+  the HTTPS server and downloaded a synced campaign; Windows x64 NSIS built in
+  `chronexus-windows-build` (not run); Windows ARM64 blocked (ring/aws-lc-sys under
+  cargo-xwin); Linux x64 under QEMU emulation, see the next entry if added.
+- **Roadmap:** M29 no longer includes paid signing; server milestones renamed M25.0–M25.11;
+  new **M41 project wiki**, next, with sources in `docs/wiki/` (not yet published).
+- Checks: cargo test 173 passed, clippy -D warnings passed, vitest 196 passed, tsc and eslint
+  passed, i18n coverage 1319 messages / 0 missing.
+- Open: Windows install test on real Windows, Linux x64 result, Arabic view of the picker,
+  the Account radio layout on Linux (misaligned in WebKitGTK), wiki publication on request.
+- Next: **M41** wiki publication (needs the go-ahead), then M28 native review, M29.
+
 # Chronexus status — 26 October 2026: reliability fixes and M28
 
 - **Reliability fixes** (app and server, each with a regression test that fails on
