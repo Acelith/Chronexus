@@ -1,6 +1,6 @@
 [package]
 name = "chronexus"
-version = "0.10.1"
+version = "0.11.0"
 description = "Your offline RPG campaign journal"
 edition = "2021"
 license = "Apache-2.0"
