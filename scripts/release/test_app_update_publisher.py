@@ -29,7 +29,7 @@ def fake_github(calls,assets=None,releases=None,fail_verify=None):
         def asset_api_url(self,asset):return publisher.BASE+publisher.API+f"/releases/assets/{asset}"
         def upload(self,release,path):
             state['next']+=1
-            asset={'id':state['next'],'name':path.name,'size':4,'browser_download_url':URL}
+            asset={'id':state['next'],'name':path.name,'size':4,'browser_download_url':'https://github.com/Acelith/Chronexus/releases/download/untagged-draft/latest.json'}
             state['assets'].append(asset)
             return asset
         def verify(self,url,expected,anonymous=False):
@@ -110,12 +110,16 @@ class PublisherTests(unittest.TestCase):
             self.assertEqual(receipt['state'],'public-unverified')
             self.assertNotIn('published',receipt)
             # Resuming retries only the verification: no second PATCH, nothing deleted.
-            fake.verify=lambda self,url,expected,anonymous=False:None
+            verified=[]
+            fake.verify=lambda self,url,expected,anonymous=False:verified.append((url,anonymous))
             with patch.object(publisher.urllib.request,'build_opener') as opener:
                 opener.return_value.open.return_value=io.BytesIO(json.dumps({'id':100,'draft':False,'prerelease':False}).encode())
                 with patch.object(publisher,'ROOT',root),patch.object(publisher,'validate',return_value=(package,report)),patch.object(publisher,'verify_signature'),patch.object(publisher,'Client',fake):
                     receipt=publisher.publish('token synthetic-secret',package,True)
             self.assertEqual(receipt['state'],'published')
+            self.assertIn((URL,True),verified)
+            self.assertFalse(any('untagged-draft' in url and anonymous for url,anonymous in verified))
+            self.assertEqual(receipt['assets']['latest.json']['url'],URL)
             self.assertEqual(sum(method=='PATCH' for method,_ in calls),1)
             self.assertFalse(any(method=='DELETE' for method,_ in calls))
 

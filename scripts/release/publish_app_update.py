@@ -212,7 +212,12 @@ def _publish(authorization, folder, report, finalize):
     # Anonymous access is only provable once public. A failure here leaves the release
     # public; it is reported as such and can be retried, never rolled back by deletion.
     try:
-        for expected in report["assets"]: client.verify(receipt["assets"][expected["name"]]["url"],expected,anonymous=True)
+        # Draft asset URLs use an untagged temporary path that returns 404 once
+        # GitHub publishes the release. The tagged path is the stable public URL.
+        for expected in report["assets"]:
+            public_url=f"{WEB}/Acelith/Chronexus/releases/download/{tag}/{urllib.parse.quote(expected['name'])}"
+            client.verify(public_url,expected,anonymous=True)
+            receipt["assets"][expected["name"]]["url"]=public_url
         client.verify(f"{WEB}/Acelith/Chronexus/releases/download/{tag}/latest.json",next(a for a in report["assets"] if a["name"]=="latest.json"),anonymous=True)
         public=urllib.request.build_opener(NoRedirect())
         with public.open(BASE+API+"/releases/latest",timeout=30) as response: latest=json.load(response)
