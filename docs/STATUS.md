@@ -1,19 +1,23 @@
-# Chronexus status — 27 October 2026: M31 Windows build, publication pending
+# Chronexus status — 28 October 2026: Windows 0.12.0 published (M31)
 
-- M31 code is committed in the desktop and server repositories. The Windows x64
-  0.12.0 NSIS installer compiled and its local copy matches SHA-256
-  `15568a3c4ee24bab98b557f4268c4964b232a624c7404f8e45c220b26ed31538`
-  (34,373,952 bytes). It is deliberately unpublished and unsigned for the
-  Tauri updater. The signed build stopped because this Windows profile could
-  not unprotect the existing DPAPI password; the installer was compiled with
-  updater artifacts disabled. Installation on a clean Windows profile is pending.
-- Publication is blocked independently by unavailable GitHub CLI credentials
-  and by `check-public-origin.py --history --origin`: the local repositories
-  retain pre-migration backup/checkpoint refs (206 desktop and 41 server object
-  failures). Current tracked-file audits pass; the server origin now pushes only
-  to GitHub. No remote branch, tag, release or asset was changed in this turn.
-- 0.11.0 remains the latest published stable version. Next roadmap priority:
-  **M25 — Chronexus Server** (in progress), then M42–M47 virtual tabletop.
+- [Chronexus 0.12.0](https://github.com/Acelith/Chronexus/releases/tag/v0.12.0)
+  is the Windows x64 stable release built from `611343e` and annotated tag `v0.12.0`.
+  The NSIS installer is 34,368,477 bytes, SHA-256
+  `9111985a3fab798e3315ad8c4e2bde6f973d3470c0254b0eabca27e59662dbb3`.
+  The DPAPI-protected production key password unprotected in this profile; the
+  updater signature test verified the actual bytes. `publish_app_update.py`
+  verified the three draft assets, published them, then verified anonymous tagged
+  downloads and that the stable latest API and `latest.json` report 0.12.0.
+- Before the build: i18n:check, typecheck, lint, vitest (216), cargo fmt, cargo
+  test (181 passed, 8 ignored), clippy -D warnings and 26 release-tool tests passed.
+- `check-public-origin.py --history` still reports 206 objects, all from local
+  pre-migration backup/checkpoint refs; objects reachable from `main` audit clean.
+  Those refs were not changed. The previous unsigned 0.12.0 local build is superseded.
+- The first draft run stopped on a GitHub list-after-create delay (single draft
+  check); rerunning from the receipt resumed the same draft without duplicates.
+- Not verified: installation/upgrade of this installer, Authenticode, Windows
+  ARM64, macOS, Linux. Next roadmap priority: **M25 — Chronexus Server**
+  (in progress), then M42–M47 virtual tabletop.
 
 # Chronexus status — 27 October 2026: Windows 0.11.0 published
 

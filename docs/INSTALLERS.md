@@ -1,14 +1,16 @@
-# Local 0.12.0 Windows x64 M31 build — unpublished
+# Release 0.12.0 — signed Windows x64 installer (M31)
 
-The M31 source builds as a Windows x64 NSIS installer at
-`installers/Chronexus-0.12.0-Windows-x64-unpublished/Chronexus_0.12.0_x64-setup.exe`.
-It is 34,373,952 bytes, SHA-256
-`15568a3c4ee24bab98b557f4268c4964b232a624c7404f8e45c220b26ed31538`;
-`SHA256SUMS.txt` accompanies the local file. This build has no Tauri updater
-signature or Windows Authenticode signature. The production updater password
-could not be unprotected by the current Windows profile. It has not been
-installed or published, and 0.11.0 remains the stable public release. See
-[draft notes](releases/v0.12.0.md) and [status](STATUS.md).
+NSIS Windows x64 installer compiled from commit `611343e` (annotated tag `v0.12.0`),
+updater signed and verified with the production key
+(`updates_signed_release_package_matches_production_key`). Size 34,368,477 bytes,
+SHA-256 `9111985a3fab798e3315ad8c4e2bde6f973d3470c0254b0eabca27e59662dbb3`.
+Published on 28 October 2026 with `publish_app_update.py`: installer, `.sig` and
+`latest.json` verified as drafts and after publication with anonymous SHA-256
+checks; latest = v0.12.0. App only, no AI weights. Built with a temporary
+`pnpm.cmd` shim forwarding to `corepack pnpm`. The earlier unsigned local 0.12.0
+build is superseded and was never published. **Not built or verified:** macOS,
+Linux, ARM64, Authenticode, installation and upgrade of this installer.
+See [release notes](releases/v0.12.0.md).
 
 # Release 0.11.0 — signed Windows x64 installer
 
