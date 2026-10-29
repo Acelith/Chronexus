@@ -5,6 +5,7 @@ usage: publish_unsigned.py VERSION NOTES.md ASSET [ASSET...]
 The annotated tag must already be on origin. Existing releases/assets are never
 replaced. Draft downloads and public downloads must match the local SHA-256.
 Unsigned packages never include latest.json and never enter the signed updater.
+The SBOM and licence report (sbom.py, M33) are generated from the tagged tree and attached.
 """
 import hashlib
 import re
@@ -13,6 +14,7 @@ import sys
 import tempfile
 from pathlib import Path
 from github_release import GitHubReleaseClient, authorization
+import sbom
 
 ROOT = Path(__file__).resolve().parents[2]
 REPO = "Acelith/Chronexus"
@@ -54,6 +56,8 @@ def main():
     if any(release["tag_name"] == tag for release in client.api(client.prefix + "/releases?per_page=100")):
         raise ValueError("Release already exists; it is never replaced")
     with tempfile.TemporaryDirectory() as directory:
+        subprocess.run([sys.executable, str(Path(sbom.__file__)), version, directory], check=True)
+        assets += sorted(Path(directory).glob(f"chronexus-{version}-*"))
         sums = Path(directory) / "SHA256SUMS.txt"
         sums.write_text("".join(f"{sha(asset)}  {asset.name}\n" for asset in assets), encoding="utf-8")
         assets.append(sums)

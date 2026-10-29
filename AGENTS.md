@@ -309,8 +309,8 @@ M41 (project wiki) is published: keep `docs/wiki/` and the GitHub handbook pages
 visible behaviour. M28 was removed from the open list on 27 October 2026.
 
 ROADMAP "Open milestones in priority order" is the single source for what comes
-next: M25 server (in progress), M42–M47 virtual tabletop (docs/VTT.md), M31 clue board, M32 first start/demo, M33 trust
-and transparency, M34 diagnostic bundle, M35 session recap, M36 imports, M37
+next: M25 server (in progress), M42–M47 virtual tabletop (docs/VTT.md), M34 diagnostic bundle
+(M31, M32 and M33 are implemented; docs/TRUST.md host table is CI-checked: update it with any new network host), M35 session recap, M36 imports, M37
 timeline, M38 maps, M39 print/PDF, M40 other rulesets. All are
 planning only: implement one only on explicit request, keep the IDs, and update
 the table when priorities change. Clue items, recaps, imports and pins follow the

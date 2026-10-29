@@ -1514,7 +1514,7 @@ request before implementation, and publication follows the standing release rule
 | 6 | M46 — Fog of war and vision | Hide what characters cannot see | M44 |
 | 7 | M47 — Monster library and encounters | SRD monsters with attribution, custom monsters, prepared encounters | M45 |
 | Done | M32 — First start and demo campaign | Implemented 29/10/2026 (source); packaged-app check open | — |
-| 10 | M33 — Trust and transparency | The project is openly vibecoded: give verifiable evidence | M29 |
+| Done | M33 — Trust and transparency | Implemented 29/10/2026; first CI run and release attachment open | M29 |
 | 11 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
 | 12 | M35 — "Previously on…" session recap | Faster start of every game session | M31 helpful |
 | 13 | M36 — Import from Obsidian, Kanka and character exports | Lowers the cost of switching to Chronexus | — |
@@ -1716,7 +1716,7 @@ the tour by keyboard, Escape, confirmation of removal and all ten languages of t
 The existing empty states already name the next action in every view. Not yet run: a fresh
 profile in the packaged app on each platform.
 
-## M33 — Trust and transparency (planned, priority 10)
+## M33 — Trust and transparency (implemented 29 October 2026)
 
 **Goal:** verifiable reasons to trust an openly AI-written project.
 
@@ -1729,6 +1729,14 @@ profile in the packaged app on each platform.
 - A "verify your download" guide for checksums and signatures (M29).
 - Acceptance: documents reviewed against the code; SBOM and scan generated
   by the release tooling, not by hand.
+
+Implemented: [docs/TRUST.md](docs/TRUST.md) with a host table that CI checks against the
+code (`scripts/trust/check-network.mjs`), `scripts/release/sbom.py` (CycloneDX + licence
+report, attached by `publish_unsigned.py` or `attach_sbom.py`), a CI `supply-chain` job
+(`cargo audit`, `pnpm audit --prod`, SBOM artifact), [docs/REPRODUCIBLE_BUILDS.md](docs/REPRODUCIBLE_BUILDS.md)
+(frontend verified reproducible; Rust binaries and installers not) and the
+[Verify your download](docs/wiki/Verify-Your-Download.md) guide. Not yet run: the CI job on
+GitHub and an SBOM attached to a real release.
 
 ## M34 — Manual diagnostic bundle (planned, priority 11)
 

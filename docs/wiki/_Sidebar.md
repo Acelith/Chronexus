@@ -18,6 +18,7 @@
 - [Updates](Updates.md)
 - [Sharing with a server](Sharing-with-a-Server.md)
 - [Privacy and data](Privacy-and-Data.md)
+- [Verify your download](Verify-Your-Download.md)
 - [FAQ and troubleshooting](FAQ-and-Troubleshooting.md)
 
 **For developers**

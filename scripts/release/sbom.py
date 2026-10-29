@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+"""Generate the release SBOM (CycloneDX 1.5 JSON) and a dependency licence report (M33).
+
+usage: sbom.py VERSION OUTPUT_DIR
+
+Reads `cargo metadata --locked` for src-tauri and `pnpm licenses list --json` (all and
+--prod) for the frontend. Writes chronexus-VERSION-sbom.cdx.json and
+chronexus-VERSION-licenses.md. Rust crates reachable through normal or build dependencies
+and npm production packages are scope "required"; dev-only packages are "optional". Local
+paths are never written. Run by the release tooling, never edited by hand.
+"""
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+# Licences that impose obligations worth a human look before shipping.
+REVIEW = re.compile(r"\b(A?GPL|LGPL|MPL|EPL|CDDL|SSPL|BUSL|CC-BY-SA|Unlicensed|UNKNOWN)\b", re.I)
+
+
+def run(*args, cwd=ROOT):
+    return subprocess.run(args, cwd=cwd, check=True, capture_output=True, text=True).stdout
+
+
+def pnpm():
+    exe = shutil.which("pnpm")
+    return [exe] if exe else ["npx", "--yes", "pnpm@11.25.0"]
+
+
+def spdx(expression):
+    """Old crates write `MIT/Apache-2.0`; CycloneDX expects an SPDX expression."""
+    return re.sub(r"\s*/\s*", " OR ", expression.strip()) if expression else expression
+
+
+def cargo_components(metadata):
+    """Crates in the resolved graph; scope from the root's normal/build reachability."""
+    packages = {p["id"]: p for p in metadata["packages"]}
+    nodes = {n["id"]: n for n in metadata["resolve"]["nodes"]}
+    root = metadata["resolve"]["root"]
+    required, stack = set(), [root]
+    while stack:
+        current = stack.pop()
+        if current in required:
+            continue
+        required.add(current)
+        for dep in nodes[current]["deps"]:
+            if any(kind["kind"] in (None, "build") for kind in dep["dep_kinds"]):
+                stack.append(dep["pkg"])
+    components = []
+    for node_id in sorted(nodes):
+        if node_id == root:
+            continue
+        package = packages[node_id]
+        components.append({
+            "type": "library",
+            "name": package["name"],
+            "version": package["version"],
+            "scope": "required" if node_id in required else "optional",
+            "purl": f"pkg:cargo/{package['name']}@{package['version']}",
+            "licenses": [{"expression": spdx(package["license"])}] if package.get("license") else [],
+            "properties": [{"name": "chronexus:ecosystem", "value": "cargo"}],
+        })
+    return packages[root]["version"], components
+
+
+def npm_components(all_licenses, prod_licenses):
+    """`pnpm licenses list --json` output: {licence: [{name, versions, license, ...}]}."""
+    production = {(entry["name"], version)
+                  for entries in prod_licenses.values() for entry in entries
+                  for version in entry["versions"]}
+    seen, components = set(), []
+    for licence, entries in sorted(all_licenses.items()):
+        for entry in entries:
+            for version in entry["versions"]:
+                key = (entry["name"], version)
+                if key in seen:
+                    continue
+                seen.add(key)
+                expression = spdx(entry.get("license") or licence)
+                components.append({
+                    "type": "library",
+                    "name": entry["name"],
+                    "version": version,
+                    "scope": "required" if key in production else "optional",
+                    "purl": f"pkg:npm/{entry['name'].replace('@', '%40')}@{version}",
+                    "licenses": [{"expression": expression}] if expression else [],
+                    "properties": [{"name": "chronexus:ecosystem", "value": "npm"}],
+                })
+    return sorted(components, key=lambda c: (c["name"], c["version"]))
+
+
+def document(version, components, timestamp=None, serial=None):
+    return {
+        "bomFormat": "CycloneDX",
+        "specVersion": "1.5",
+        "serialNumber": serial or f"urn:uuid:{uuid.uuid4()}",
+        "version": 1,
+        "metadata": {
+            "timestamp": timestamp or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "tools": {"components": [{"type": "application", "name": "chronexus-sbom", "version": "1"}]},
+            "component": {
+                "type": "application", "name": "Chronexus", "version": version,
+                "purl": f"pkg:github/Acelith/Chronexus@v{version}",
+                "licenses": [{"expression": "MIT"}],
+            },
+        },
+        "components": components,
+    }
+
+
+def licence_report(version, components):
+    def expression(component):
+        return component["licenses"][0]["expression"] if component["licenses"] else "UNKNOWN"
+    lines = [f"# Chronexus {version} dependency licences", "",
+             "Generated by scripts/release/sbom.py from the lockfiles. *Shipped* means a Rust",
+             "crate reachable through normal or build dependencies, or an npm production",
+             "package; development-only tools are listed separately.", ""]
+    for scope, title in (("required", "Shipped"), ("optional", "Development only")):
+        chosen = [c for c in components if c["scope"] == scope]
+        counts = {}
+        for component in chosen:
+            counts[expression(component)] = counts.get(expression(component), 0) + 1
+        lines += [f"## {title} ({len(chosen)} packages)", "", "| Licence | Packages |", "| --- | --- |"]
+        lines += [f"| {licence} | {count} |" for licence, count in sorted(counts.items(), key=lambda x: (-x[1], x[0]))]
+        flagged = [c for c in chosen if REVIEW.search(expression(c))]
+        lines += ["", "Needs review (copyleft, missing or unknown licence):" if flagged else "No copyleft, missing or unknown licence.", ""]
+        lines += [f"- {c['name']} {c['version']} ({c['properties'][0]['value']}): {expression(c)}" for c in flagged]
+        lines.append("")
+    return "\n".join(lines)
+
+
+def main():
+    if len(sys.argv) != 3 or not re.fullmatch(r"\d+\.\d+\.\d+", sys.argv[1]):
+        raise SystemExit(__doc__)
+    version, out = sys.argv[1], Path(sys.argv[2])
+    out.mkdir(parents=True, exist_ok=True)
+    metadata = json.loads(run("cargo", "metadata", "--format-version", "1", "--locked",
+                              cwd=ROOT / "src-tauri"))
+    crate_version, crates = cargo_components(metadata)
+    if crate_version != version:
+        raise SystemExit(f"src-tauri is {crate_version}, not {version}")
+    env = {**os.environ, "CI": "true"}
+    listing = lambda *extra: json.loads(subprocess.run(
+        [*pnpm(), "licenses", "list", "--json", *extra], cwd=ROOT, check=True,
+        capture_output=True, text=True, env=env).stdout)
+    packages = npm_components(listing(), listing("--prod"))
+    components = crates + packages
+    sbom = out / f"chronexus-{version}-sbom.cdx.json"
+    sbom.write_text(json.dumps(document(version, components), indent=2) + "\n", encoding="utf-8")
+    report = out / f"chronexus-{version}-licenses.md"
+    report.write_text(licence_report(version, components), encoding="utf-8")
+    print(f"{sbom.name}: {len(crates)} crates, {len(packages)} npm packages")
+    print(report.name)
+
+
+if __name__ == "__main__":
+    main()

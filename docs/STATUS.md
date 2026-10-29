@@ -1,3 +1,22 @@
+# Chronexus status — 29 October 2026: M25 on local Docker, M32 and M33 in source
+
+- **Scope:** Android (M27, server M25.9) removed at the user's request (`ae7218c`).
+- **M25 (server repo):** local Docker test deployment (Compose https + ai) found and fixed
+  a 20 s request bound that cut every server AI answer; `scripts/qualify-ai.py` run with
+  qwen3:4b on CPU: scoping and exclusion correct, 2/14 answers pass quality, so no model is
+  qualified. Web interface translated into ten languages. Desktop `sync::tests::live` 5/5
+  against current server source. Open: a qualified model (needs more memory/GPU), GHCR
+  (token lacks `write:packages`), production DNS/TLS. Details in the server STATUS.
+- **M32 (`5bed9a2`):** removable demo campaign, first-start tour, Getting started panel.
+  Correction: that commit body says vitest 224 passed; the actual count was **220** (216 + 4).
+- **M33:** docs/TRUST.md with CI-checked host table, SBOM + licence report generator wired
+  into the release scripts, CI supply-chain job, reproducibility doc (frontend verified
+  identical, 72 files; Rust/installers not), Verify-your-download guide. Local `cargo audit`:
+  0 vulnerabilities (2 allowed warnings); `pnpm audit --prod`: none.
+- Checks run on macOS arm64: cargo fmt/clippy/test (184 passed, 8 ignored), tsc, eslint,
+  vitest 220, i18n:check, test_sbom (2), check-network. Not run: GitHub CI, packaged app on
+  a fresh profile, any release. **M34 not started** (user asked to stop after M33).
+
 # Chronexus status — 28 October 2026: Windows 0.12.0 published (M31)
 
 - [Chronexus 0.12.0](https://github.com/Acelith/Chronexus/releases/tag/v0.12.0)
