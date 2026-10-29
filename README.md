@@ -164,7 +164,7 @@ network, everything stays local.
 > locally with Docker Compose, following the
 > [installation guide](https://github.com/Acelith/Chronexus-Server/blob/main/docs/INSTALLATION.md).
 > Data is protected by HTTPS but is **not end-to-end encrypted**: the server
-> operator can read what you upload. Android access is planned.
+> operator can read what you upload.
 
 ## Privacy and data
 

@@ -278,7 +278,7 @@ explicit start/stop tied to the app, model pulls limited to the M18 policy and
 verified by weight digest. Never overwrite or stop a runtime Chronexus did not start.
 README screenshots come only from synthetic campaigns (scripts/qa/m20-readme-media.mjs).
 
-## M23 code review, M24 sharing client, planned M25 server and M27 Android
+## M23 code review, M24 sharing client, M25 server (Android removed)
 
 M23 (implemented 26 October 2026). Archive commands are
 async (`Database::run`), never block the main thread; keep new commands that way.
@@ -297,8 +297,8 @@ device are created locally by ID; tombstones never delete local items; a stale c
 a full listing. The server OpenAPI is the contract; docs/SYNC_API.md explains the client.
 Real-server acceptance is `sync::tests::live` (ignored by default; needs the server binary).
 M25 is the server in the separate repository `acelith/Chronexus-Server` (notes in
-docs/SERVER_NOTES.md); this repository keeps only the client. M27 is the Android APK
-(moved from M25). Creating the repository, domains or deployments needs an explicit
+docs/SERVER_NOTES.md); this repository keeps only the client. Android (M27) was removed
+on 29 October 2026: desktop client and server only; do not plan mobile work without a new request. Creating the repository, domains or deployments needs an explicit
 request. Never upload private notes, sheets, AI data or preferences unless the user chose
 that item for the server (`private` or `shared`). Sheet sections and images (schema 021) can
 only be `shared`, as read-only projections; the full sheet, AI data and preferences are never
@@ -311,7 +311,7 @@ visible behaviour. M28 was removed from the open list on 27 October 2026.
 ROADMAP "Open milestones in priority order" is the single source for what comes
 next: M25 server (in progress), M42–M47 virtual tabletop (docs/VTT.md), M31 clue board, M32 first start/demo, M33 trust
 and transparency, M34 diagnostic bundle, M35 session recap, M36 imports, M37
-timeline, M38 maps, M39 print/PDF, M40 other rulesets, then M27 Android. All are
+timeline, M38 maps, M39 print/PDF, M40 other rulesets. All are
 planning only: implement one only on explicit request, keep the IDs, and update
 the table when priorities change. Clue items, recaps, imports and pins follow the
 same rules as notes: no implicit factual relationships or AI-written facts.

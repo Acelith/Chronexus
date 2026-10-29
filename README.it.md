@@ -165,7 +165,7 @@ nulla: nessun account, nessuna rete, tutto resta in locale.
 > compilarlo con Docker Compose seguendo la
 > [guida di installazione](https://github.com/Acelith/Chronexus-Server/blob/main/docs/INSTALLATION.md).
 > I dati sono protetti da HTTPS ma **non sono cifrati end-to-end**: chi gestisce il
-> server può leggere ciò che carichi. L'accesso da Android è pianificato.
+> server può leggere ciò che carichi.
 
 ## Privacy e dati
 

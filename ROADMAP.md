@@ -66,7 +66,7 @@ are indicated in the status, without pretending they occurred earlier.
 | 36 | M24 | Shared campaign: desktop sharing client and API contract v1 | Client implemented 26/10/2026 | see docs/STATUS.md | Server is M25; verified against the in-repo contract fake |
 | 37 | M25 | Chronexus Server (separate repository `acelith/Chronexus-Server`) | In progress: server M25.1–M25.7 in source 0.1.0 | see server repo | M25.8 integration, release and deployment open; contract docs/SYNC_API.md |
 | 38 | M26 | English-first app, manifests, documentation and AI instructions | Implemented Windows, source 0.8.1 | — | **Closed** 26/10/2026; ships with the next authorized build/release |
-| 39 | M27 | Android App (APK) connected to the server with the same account | Planned | — | Moved from M25 on 26/10/2026; depends on M25 |
+| 39 | M27 | Android App (APK) connected to the server with the same account | **Removed** 29/10/2026 | — | Dropped at the user's request: Chronexus focuses on the desktop client and the server |
 | 40 | M28 | Complete translations and multilingual installer | Implemented 26/10/2026 | see docs/STATUS.md | Windows; native review open |
 
 Planned milestones M28–M40 are not in this log until they are delivered; their
@@ -1403,7 +1403,7 @@ future option for live sessions, not the base.
 
 **Separate Repository:** the server lives in an **external repository** on GitHub
 (proposed name `acelith/Chronexus-Server`), with its own code, versions, releases, and
-Docker images; this repository contains only the desktop/Android
+Docker images; this repository contains only the desktop
 synchronization client. The contract between the two is an HTTP API
 versioned and documented (OpenAPI schema and shared types published by the server,
 never copied manually), with declared compatibility between app and server versions.
@@ -1496,7 +1496,8 @@ close platform acceptance or publish a release.
 Reorganized on 26 October 2026 at the user's request. Every milestone below is
 **planned, not implemented**, except M25 (in progress) and M31 (implemented on Windows). The sections follow this
 priority, not numeric order; IDs M28–M40 are new and were assigned in priority
-order, while M25 and M27 keep their IDs. Each milestone still needs an explicit
+order, while M25 keeps its ID. M27 (Android) was removed on 29 October 2026 at the
+user's request: the project focuses on the desktop client and the server. Each milestone still needs an explicit
 request before implementation, and publication follows the standing release rules.
 
 | Priority | Milestone | Why now | Depends on |
@@ -1505,7 +1506,7 @@ request before implementation, and publication follows the standing release rule
 | Done | M29 — Release matrix for Windows, macOS and Linux | Unsigned pre-release 0.10.1 published 27/10/2026 (replaces 0.10.0); Windows ARM64 and x64 AppImage open | — |
 | Done | M30 — Automated desktop QA and cross-platform CI | GitHub workflows and local runner in place; remote run acceptance open | — |
 | Done | M31 — Clue board and open questions | Implemented on Windows with schema 022 and selective sharing | — |
-| 1 | M25 — Chronexus Server (in progress) | 0.1.1 released, web interface done; server AI, Android contract and public deployment open | M24 |
+| 1 | M25 — Chronexus Server (in progress) | 0.1.1 released, web interface done; server AI qualification and public deployment open | M24 |
 | 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Requested 27/10/2026: a GM runs combat for players; journals stay private | M25 |
 | 3 | M43 — Live table channel and GM web interface | Real-time play needs a server-authoritative channel and a GM UI | M42 |
 | 4 | M44 — Maps, grid, tokens and movement, ft/m everywhere | The core of the table; every distance in ft and m with an on-screen converter | M43 |
@@ -1521,7 +1522,6 @@ request before implementation, and publication follows the standing release rule
 | 15 | M38 — Maps with linked pins | Places and routes are central to play | — |
 | 16 | M39 — Print and PDF export | Paper sheets and campaign booklets at the table | — |
 | 17 | M40 — Additional ruleset sheet presets | Reaches players beyond D&D 5e | License review |
-| 18 | M27 — Android app (APK) | Largest scope; needs the server and stable releases | M25, M29 |
 
 ## M41 — Project wiki for app and server (published 27 October 2026)
 
@@ -1618,7 +1618,8 @@ scripts remain manual legacy checks; macOS/Windows jobs need native runners.
 
 ## M25 — Chronexus Server in a separate repository (in progress, priority 1)
 
-**Order:** after the M24 client, requested on 26 October 2026; Android moved to M27.
+**Order:** after the M24 client, requested on 26 October 2026. Android (M27 and server
+M25.9) was removed on 29 October 2026.
 **Status (27 October 2026):** in progress. M25.1–M25.7 implemented; **M25.8** delivered —
 server releases 0.1.0 and 0.1.1 on GitHub (binaries, checksums, versioned contract),
 compatibility table and upgrade checklist, desktop acceptance with three apps over HTTPS,
@@ -1629,8 +1630,7 @@ implemented without GPU qualification: optional Compose `ai` profile (isolated O
 internet), per-campaign choice in the desktop between local and server AI, sources limited to
 what the account can read, hourly allowance, bounded queue and timeout, explicit switch back
 to local AI. Open: **M25.10 qualification** (models and GPU sizing: needs hardware and
-weights), **M25.9** (Android contract: needs
-M27 on a real device), and a public deployment with real DNS/TLS (needs a host and domain).
+weights), and a public deployment with real DNS/TLS (needs a host and domain).
 
 - Implement the server side of M24.1–M24.3 in `acelith/Chronexus-Server` following
   [docs/SERVER_NOTES.md](docs/SERVER_NOTES.md) and the contract
@@ -1803,34 +1803,6 @@ checks; the signed Windows x64 0.12.0 release was published on 28 October 2026.
 - Acceptance: presets selectable per character; data survives switching
   presets; attribution visible.
 
-## M27 — Chronexus on Android (APK) connected to the server (planned, priority 18)
-
-**Order:** last in the priority list: after M25, which it depends on for accounts
-and shared data (moved from M25 on 26 October 2026), and after the M29 release
-matrix. **Status:** planned, not started.
-
-- Android app with Tauri 2 mobile (same React/Rust code; Android icons are
-  already generated by `pnpm icons`), distributed as a **signed APK** in the releases
-  Forgegit; Play Store outside the perimeter unless requested.
-- Access to the M25 server with the **same account** as the desktop: campaign list,
-  consultation of pages, sessions, graph, party, and shared cards; local cache
-  for offline consultation. First version primarily in read-only mode; modifications
-  mobile stats after testing (quick notes, dice rolls, hit points).
-- Interface adapted for small and touch screens: navigation, single-
-  reading, graph with gestures, readable texts, dark mode, accessibility.
-- Beyond the first version: local AI, training, Logseq import, backup
-  `.nodex` complete on mobile.
-- Security: token in Android Keystore, mandatory HTTPS, no private data
-  in addition to what was shared, local deletion upon logout.
-
-### M27 Acceptance
-
-- Signed APK installed on a real Android device (minimum version to
-  be declared), access with the desktop account, shared contents visible and
-  updated, offline cache usage, logout that removes local data.
-- Frontend tests on mobile viewport, tests on at least one real phone; iOS out
-  perimeter unless new request.
-
 ## Residual acceptances and next phase
 
 - **M6:** verified on 26 October 2026 on macOS (arm64 app/DMG run, x64 app/DMG
@@ -1862,7 +1834,7 @@ from 17,7 GB via the interface, macOS/Linux.
   pending offline. Implement only upon request; the residues above remain open.
 - **26 October 2026:** M23 code review implemented; M24 sharing client implemented; the
   open milestones were reprioritized: M28, M29, M30, M25, M31–M40, then M27 Android.
-  Each requires an explicit request.
+  Each requires an explicit request. **29 October 2026:** M27 Android removed.
 
 ## Outside the current scope
 

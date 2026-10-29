@@ -586,3 +586,9 @@ be decided at the start of M24.
   knocking and nothing local is lost. Server-side erasure, campaign deletion and account deletion
   are separate, typed, confirmed commands that forget replication state but never delete a local
   item.
+
+## 29 October 2026 — Android removed from the scope
+
+At the user's request the Android client (M27, server M25.9) is dropped. Chronexus
+targets the desktop client (Windows, macOS, Linux) and the self-hosted server. Earlier
+entries that mention Android remain as history; no mobile code or contract is maintained.

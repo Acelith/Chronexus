@@ -433,7 +433,7 @@ data-folder `update-backups/`; they are never deleted automatically and existing
 ones are only copied on request. Warn that Documents may be cloud-synced. Details
 and acceptance in ROADMAP M19.
 
-## M23–M25 — Code review, shared campaigns, Android (planned)
+## M23–M25 — Code review, shared campaigns, server
 
 Planned 25 October 2026, not implemented. M23: measured review of correctness,
 security, duplication and performance. M24: optional shared
@@ -441,6 +441,6 @@ campaigns through a self-hosted Chronexus server, developed in a separate
 repository with a versioned API contract (accounts, roles, invites,
 per-item sharing defaulting to private, incremental sync with visible conflicts
 and revocation); the local SQLite archive stays the primary copy and nothing is
-sent while sharing is off. M25: Android APK with Tauri 2 mobile, signing in to the
-same server account to browse shared content with an offline cache. Options and
-acceptance in ROADMAP M23–M25.
+sent while sharing is off. M25: the self-hosted server. An Android client (formerly
+M27) was removed from the scope on 29 October 2026; Chronexus targets desktop
+clients and the server only. Options and acceptance in ROADMAP M23–M25.
