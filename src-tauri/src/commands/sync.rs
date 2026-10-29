@@ -206,6 +206,7 @@ pub async fn sync_connect_campaign(
     let id = campaign_id.clone();
     let name = db
         .run(move |c| {
+            crate::demo::refuse(c, &id)?;
             if engine::link(c, &id)?.is_some() {
                 return Err("This campaign is already linked. Unlink it first.".into());
             }

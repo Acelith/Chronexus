@@ -41,6 +41,7 @@ import { useStartupHerald } from "./features/updates/useStartupHerald";
 import { PeriodicBackupNotice } from "./features/backup/PeriodicBackupNotice";
 import { CampaignForm, SessionForm } from "./features/journal/EntryForms";
 import { AppSidebar } from "./features/shell/AppSidebar";
+import { onboardingApi } from "./features/onboarding/api";
 import { CampaignTabs } from "./features/shell/CampaignTabs";
 import type { View } from "./features/shell/views";
 const SearchPanel = lazy(() => import("./features/search/SearchPanel"));
@@ -70,6 +71,7 @@ const CampaignSettings = lazy(
 );
 const ImportSource = lazy(() => import("./features/knowledge/ImportSource"));
 const CampaignSharing = lazy(() => import("./features/sync/CampaignSharing"));
+const GuidedTour = lazy(() => import("./features/onboarding/GuidedTour"));
 
 const modifiedDateFormat = {
   format: (value: Date) =>
@@ -107,6 +109,7 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const searchButton = useRef<HTMLButtonElement>(null);
   const [error, setError] = useState("");
@@ -178,11 +181,11 @@ export function App() {
     [],
   );
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (preferred?: string) => {
     const version = ++loadVersion.current;
     try {
       const items = await api.campaigns();
-      const first = items[0];
+      const first = items.find((item) => item.id === preferred) ?? items[0];
       const [notes, knowledge] = first
         ? await Promise.all([
             api.sessions(first.id),
@@ -197,6 +200,16 @@ export function App() {
       setPages(knowledge);
       setPageId(null);
       setPlayerReturn(null);
+      if (!items.length) {
+        // M32: offer the tour once on a fresh profile; a failure only skips the offer.
+        onboardingApi
+          .firstStart()
+          .then((state) => {
+            if (!state.tourSeen && version === loadVersion.current)
+              setTourOpen(true);
+          })
+          .catch(() => undefined);
+      }
     } catch (reason) {
       if (version === loadVersion.current) setError(errorMessage(reason));
     } finally {
@@ -335,6 +348,22 @@ export function App() {
         setView("journal");
       }
       setForm(null);
+    });
+  }
+
+  function closeTour() {
+    setTourOpen(false);
+    onboardingApi.setTourSeen(true).catch((reason: unknown) => {
+      setError(errorMessage(reason));
+    });
+  }
+
+  async function openDemo() {
+    await run(async () => {
+      setBackupOpen(false);
+      const created = await onboardingApi.createDemo();
+      await load(created.id);
+      setView("overview");
     });
   }
 
@@ -538,6 +567,11 @@ export function App() {
         outcome={periodic.outcome}
         onClose={periodic.dismiss}
       />
+      {tourOpen && !herald.announcement ? (
+        <Suspense fallback={null}>
+          <GuidedTour onClose={closeTour} />
+        </Suspense>
+      ) : null}
       {herald.announcement ? (
         <Suspense fallback={null}>
           <HeraldAnnouncement
@@ -655,6 +689,9 @@ export function App() {
                       {view === "preferences"
                         ? tr("App settings")
                         : (campaign?.name ?? appText.emptyCampaigns)}
+                      {view !== "preferences" && campaign?.demo ? (
+                        <span className="demo-badge">{tr("Demo")}</span>
+                      ) : null}
                     </h2>
                   </div>
                   {campaign && view !== "preferences" ? (
@@ -791,12 +828,26 @@ export function App() {
                       </span>
                       <p>{appText.emptyCampaignHint}</p>
                       {form !== "campaign" ? (
-                        <button
-                          className="primary"
-                          onClick={() => setForm("campaign")}
-                        >
-                          {appText.createCampaign}
-                        </button>
+                        <div className="first-start-actions">
+                          <button
+                            className="primary"
+                            onClick={() => setForm("campaign")}
+                          >
+                            {appText.createCampaign}
+                          </button>
+                          <button
+                            disabled={busy}
+                            onClick={() => void openDemo()}
+                          >
+                            <Text source={"Try the demo campaign"} />
+                          </button>
+                          <button
+                            disabled={busy}
+                            onClick={() => setTourOpen(true)}
+                          >
+                            <Text source={"Take the guided tour"} />
+                          </button>
+                        </div>
                       ) : null}
                     </section>
                   ) : null}
@@ -836,6 +887,8 @@ export function App() {
                       <AppSettings
                         busy={busy}
                         run={run}
+                        onOpenTour={() => setTourOpen(true)}
+                        onDemoChanged={(id) => load(id ?? undefined)}
                         initialOffer={updateHandoff}
                         onHandoffUsed={() => setUpdateHandoff(null)}
                         onCampaignAdded={() => void load()}

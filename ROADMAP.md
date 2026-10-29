@@ -1513,7 +1513,7 @@ request before implementation, and publication follows the standing release rule
 | 5 | M45 — Combat tracker | Initiative, turns, rounds, conditions, combat log | M44 |
 | 6 | M46 — Fog of war and vision | Hide what characters cannot see | M44 |
 | 7 | M47 — Monster library and encounters | SRD monsters with attribution, custom monsters, prepared encounters | M45 |
-| 9 | M32 — First start and demo campaign | New users must see the value in minutes | — |
+| Done | M32 — First start and demo campaign | Implemented 29/10/2026 (source); packaged-app check open | — |
 | 10 | M33 — Trust and transparency | The project is openly vibecoded: give verifiable evidence | M29 |
 | 11 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
 | 12 | M35 — "Previously on…" session recap | Faster start of every game session | M31 helpful |
@@ -1696,7 +1696,7 @@ frontend and real-server clue replication checks are recorded in `docs/STATUS.md
 macOS/Linux installation and published-package verification remain separate release
 checks; the signed Windows x64 0.12.0 release was published on 28 October 2026.
 
-## M32 — First start and demo campaign (planned, priority 9)
+## M32 — First start and demo campaign (implemented 29 October 2026)
 
 **Goal:** a new user understands Chronexus in a few minutes.
 
@@ -1707,6 +1707,14 @@ checks; the signed Windows x64 0.12.0 release was published on 28 October 2026.
 - Empty states that explain the next action in every main view.
 - Acceptance: fresh profile in each app language; demo creation and removal
   leave no residue; tour fully keyboard and screen-reader usable.
+
+Implemented in source (no schema change: the demo id lives in `app_metadata`). Rust tests
+compare the row count of every table before creation and after removal, check the images
+folder is deleted, that real campaigns are untouched, that a translation missing a mention
+marker creates nothing, and that sharing and training refuse the demo. Frontend tests cover
+the tour by keyboard, Escape, confirmation of removal and all ten languages of the demo text.
+The existing empty states already name the next action in every view. Not yet run: a fresh
+profile in the packaged app on each platform.
 
 ## M33 — Trust and transparency (planned, priority 10)
 

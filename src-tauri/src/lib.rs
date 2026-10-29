@@ -11,6 +11,9 @@ mod clues;
 mod clues_tests;
 mod commands;
 mod db;
+mod demo;
+#[cfg(test)]
+mod demo_tests;
 mod dice;
 mod export;
 #[cfg(test)]
@@ -245,6 +248,10 @@ pub fn run() {
             commands::campaign::list_campaigns,
             commands::campaign::create_campaign,
             commands::campaign::rename_campaign,
+            commands::campaign::get_first_start,
+            commands::campaign::set_tour_seen,
+            commands::campaign::create_demo_campaign,
+            commands::campaign::remove_demo_campaign,
             commands::campaign::list_sessions,
             commands::campaign::create_session,
             commands::campaign::save_document,

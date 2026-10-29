@@ -27,6 +27,17 @@ you start it:
 Updates installed from inside the app are still checked with Chronexus's own
 cryptographic signature (see [Updates](Updates.md)).
 
+## First start: tour and demo campaign
+
+On a profile without campaigns Chronexus offers a short **guided tour** (seven steps,
+keyboard and screen-reader friendly; Escape skips it). The empty start screen also offers
+**Try the demo campaign**: an invented campaign, *Demo — The Salt Tower*, with two journal
+sessions, four Codex pages, three relationships (one only suspected), two clues and a
+character, written in your interface language. It is labelled *Demo* everywhere, cannot be
+shared or used for AI training, and **App settings → Getting started → Remove the demo
+campaign** deletes it completely, including anything you added and its images. The tour can
+be reopened from the same panel.
+
 ## The main screen
 
 - **Left menu** — your campaigns and, for the open campaign, its areas: Summary, Sessions,

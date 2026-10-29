@@ -368,6 +368,7 @@ async fn run(
 ) -> AppResult<Job> {
     let db = app.state::<Database>();
     let (generation,root,p,sources,mut j)=db.with_store(|s|{
+        crate::demo::refuse(&s.connection,campaign)?;
         let v=overview(&s.connection,&s.root,campaign)?;
         if v.dataset_hash!=expected{return Err("The sources changed: reload the preview before retraining.".into());}
         if !v.backend_installed{return Err("Local QLoRA backend not installed. See docs/AI_TRAINING.md; no simulated training.".into());}

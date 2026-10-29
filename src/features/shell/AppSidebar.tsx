@@ -80,7 +80,9 @@ export function AppSidebar({
             ) : null}
             {campaigns.map((campaign) => (
               <option key={campaign.id} value={campaign.id}>
-                {campaign.name}
+                {campaign.demo
+                  ? tr("{0} (demo)", [campaign.name])
+                  : campaign.name}
               </option>
             ))}
           </select>

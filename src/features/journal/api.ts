@@ -4,6 +4,8 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 export interface Campaign {
   id: string;
   name: string;
+  /** M32: the synthetic demo campaign. */
+  demo?: boolean;
 }
 export interface JournalDocument {
   importedFrom?: "logseq";

@@ -11,6 +11,9 @@ pub type AppResult<T> = Result<T, String>;
 pub struct Campaign {
     pub id: String,
     pub name: String,
+    /// M32: the synthetic demo campaign, shown with a label and removable in one step.
+    #[serde(default)]
+    pub demo: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -76,13 +79,14 @@ pub(crate) fn require_campaign(connection: &Connection, id: &str) -> AppResult<(
 
 pub fn list_campaigns(connection: &Connection) -> AppResult<Vec<Campaign>> {
     let mut statement = connection
-        .prepare("SELECT id,name FROM campaigns ORDER BY created_at,id")
+        .prepare("SELECT c.id,c.name,EXISTS(SELECT 1 FROM app_metadata m WHERE m.key='demo_campaign_id' AND m.value=c.id) FROM campaigns c ORDER BY c.created_at,c.id")
         .map_err(storage)?;
     let rows = statement
         .query_map([], |row| {
             Ok(Campaign {
                 id: row.get(0)?,
                 name: row.get(1)?,
+                demo: row.get(2)?,
             })
         })
         .map_err(storage)?
@@ -95,6 +99,7 @@ pub fn create_campaign(connection: &Connection, name: &str) -> AppResult<Campaig
     let campaign = Campaign {
         id: Uuid::new_v4().to_string(),
         name: title(name)?.to_string(),
+        demo: false,
     };
     connection
         .execute(
@@ -111,6 +116,7 @@ pub fn rename_campaign(connection: &Connection, id: &str, name: &str) -> AppResu
     connection.execute("UPDATE campaigns SET name=?1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?2", params![name,id]).map_err(storage)?;
     Ok(Campaign {
         id: id.into(),
+        demo: crate::demo::is_demo(connection, id)?,
         name,
     })
 }

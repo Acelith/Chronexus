@@ -8,9 +8,11 @@ import SyncSettings from "../sync/SyncSettings";
 import UpdateSettings from "../updates/UpdateSettings";
 import WikiSettings from "../wiki/WikiSettings";
 import LanguageSettings from "./LanguageSettings";
+import GettingStarted from "../onboarding/GettingStarted";
 import "./app-settings.css";
 
 const sections = [
+  { id: "start", label: "Getting started", icon: "scroll" },
   { id: "language", label: "Language and script", icon: "book" },
   { id: "backup", label: "Backup", icon: "backup" },
   { id: "wiki", label: "D&D sources / Wiki", icon: "wiki" },
@@ -27,12 +29,16 @@ export default function AppSettings({
   initialOffer,
   onHandoffUsed,
   onCampaignAdded,
+  onOpenTour = () => undefined,
+  onDemoChanged = () => undefined,
 }: {
   busy: boolean;
   run: (action: () => Promise<void>) => Promise<unknown>;
   initialOffer: UpdateOffer | null;
   onHandoffUsed: () => void;
   onCampaignAdded: () => void;
+  onOpenTour?: () => void;
+  onDemoChanged?: (campaignId: string | null) => void | Promise<void>;
 }) {
   const [active, setActive] = useState<Section>(
     initialOffer ? "updates" : "language",
@@ -65,7 +71,13 @@ export default function AppSettings({
             aria-labelledby={`app-settings-link-${id}`}
             hidden={selected !== id}
           >
-            {id === "language" ? (
+            {id === "start" ? (
+              <GettingStarted
+                disabled={busy}
+                onOpenTour={onOpenTour}
+                onDemoChanged={onDemoChanged}
+              />
+            ) : id === "language" ? (
               <LanguageSettings disabled={busy} />
             ) : id === "backup" ? (
               <BackupSettings disabled={busy} />

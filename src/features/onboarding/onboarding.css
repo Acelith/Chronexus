@@ -1,0 +1,64 @@
+.guided-tour {
+  color: var(--ink, #30251d);
+}
+.guided-tour::backdrop {
+  background: #060b16c9;
+}
+.guided-tour h4:focus {
+  outline: none;
+}
+.guided-tour h4:focus-visible {
+  outline: 2px solid #795a2e;
+  outline-offset: 4px;
+}
+.tour-progress {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+.tour-dots {
+  display: flex;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+}
+.tour-dots li {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #795a2e55;
+}
+.tour-dots li.current {
+  background: #795a2e;
+}
+.guided-tour .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.tour-spacer {
+  flex: 1;
+}
+.demo-badge {
+  display: inline-block;
+  margin-inline-start: 10px;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font-size: 0.6em;
+  vertical-align: middle;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.getting-started section + section {
+  margin-top: 24px;
+}
+.empty .first-start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}

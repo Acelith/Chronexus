@@ -1,5 +1,5 @@
 use crate::{
-    dice,
+    demo, dice,
     journal::{self, AppResult, Campaign, Session},
     Database,
 };
@@ -33,6 +33,37 @@ pub async fn list_campaigns(db: tauri::State<'_, Database>) -> AppResult<Vec<Cam
 #[tauri::command]
 pub async fn create_campaign(db: tauri::State<'_, Database>, name: String) -> AppResult<Campaign> {
     db.run(move |c| journal::create_campaign(c, &name)).await
+}
+
+#[tauri::command]
+pub async fn get_first_start(db: tauri::State<'_, Database>) -> AppResult<demo::FirstStart> {
+    db.run(demo::first_start).await
+}
+
+#[tauri::command]
+pub async fn set_tour_seen(
+    db: tauri::State<'_, Database>,
+    seen: bool,
+) -> AppResult<demo::FirstStart> {
+    db.run(move |c| demo::set_tour_seen(c, seen)).await
+}
+
+#[tauri::command]
+pub async fn create_demo_campaign(
+    db: tauri::State<'_, Database>,
+    text: demo::DemoText,
+) -> AppResult<Campaign> {
+    db.run_store(move |s| demo::create(&s.connection, &s.directory, &text))
+        .await
+}
+
+#[tauri::command]
+pub async fn remove_demo_campaign(
+    db: tauri::State<'_, Database>,
+    campaign_id: String,
+) -> AppResult<()> {
+    db.run_store(move |s| demo::remove(&s.connection, &s.directory, &campaign_id))
+        .await
 }
 
 #[tauri::command]
