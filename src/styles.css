@@ -269,6 +269,19 @@ label {
   font-size: 14px;
   flex: 1;
 }
+/* A radio sits beside its text, not stretched on a grid row above it. */
+input[type="radio"] {
+  width: auto;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  accent-color: #795a2e;
+}
+label:has(> input[type="radio"]) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .shell {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
@@ -2119,6 +2132,23 @@ textarea::placeholder {
 }
 .sync-state {
   font-weight: 600;
+}
+.sync-account fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+}
+.sync-account legend {
+  padding: 0;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.sync-account fieldset label {
+  flex: none;
 }
 .sync-item select {
   max-width: 100%;
