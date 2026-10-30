@@ -15,6 +15,7 @@ mod demo;
 #[cfg(test)]
 mod demo_tests;
 mod dice;
+mod diagnostics;
 mod export;
 #[cfg(test)]
 mod export_tests;
@@ -203,6 +204,8 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            diagnostics::preview_diagnostics,
+            diagnostics::save_diagnostics,
             backup_folder::commands::get_backup_settings,
             backup_folder::commands::save_backup_schedule,
             backup_folder::commands::choose_backup_destination,

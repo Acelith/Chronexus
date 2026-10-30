@@ -8,6 +8,7 @@ import SyncSettings from "../sync/SyncSettings";
 import UpdateSettings from "../updates/UpdateSettings";
 import WikiSettings from "../wiki/WikiSettings";
 import LanguageSettings from "./LanguageSettings";
+import DiagnosticsSettings from "./DiagnosticsSettings";
 import GettingStarted from "../onboarding/GettingStarted";
 import "./app-settings.css";
 
@@ -19,6 +20,7 @@ const sections = [
   { id: "ai", label: "Local AI: components", icon: "star" },
   { id: "sharing", label: "Campaign sharing", icon: "party" },
   { id: "updates", label: "App updates", icon: "scroll" },
+  { id: "diagnostics", label: "Diagnostics", icon: "scroll" },
 ] as const;
 type Section = (typeof sections)[number]["id"];
 
@@ -87,6 +89,8 @@ export default function AppSettings({
               <AiSetupSettings disabled={busy} />
             ) : id === "sharing" ? (
               <SyncSettings disabled={busy} onCampaignAdded={onCampaignAdded} />
+            ) : id === "diagnostics" ? (
+              <DiagnosticsSettings disabled={busy} />
             ) : (
               <UpdateSettings
                 busy={busy}

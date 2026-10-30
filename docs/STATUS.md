@@ -1,3 +1,16 @@
+# Chronexus status — 30 October 2026: M34 diagnostic preview in source
+
+- M34 first slice: App settings can preview an allowlisted JSON diagnostic report and
+  save those exact bytes to a user-chosen local file. It contains app/OS/architecture
+  and schema versions plus feature availability. It never reads campaign data,
+  paths, credentials, conversations or logs. Recent errors and log excerpts are
+  empty because Chronexus does not currently retain a safe diagnostic log; M34
+  acceptance remains open for that part. No upload is performed.
+- Windows environment: `pnpm i18n:check`, `pnpm typecheck`, `pnpm lint`,
+  `pnpm build` and Vitest (220 tests) passed.
+  Rust tests/build were blocked: `cargo` is unavailable on PATH. M35, M36 and
+  Logseq import in the desktop UI are not implemented yet.
+
 # Chronexus status — 29 October 2026: M25 on local Docker, M32 and M33 in source
 
 - **Scope:** Android (M27, server M25.9) removed at the user's request (`ae7218c`).
