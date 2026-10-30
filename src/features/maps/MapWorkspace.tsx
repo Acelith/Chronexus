@@ -193,13 +193,27 @@ export default function MapWorkspace({
       setBusy(false);
     }
   }
+  function selectMap(id: string) {
+    setLoading(true);
+    setError("");
+    setUrl("");
+    setPins([]);
+    setRoutes([]);
+    setSelected(id);
+    setEditing(null);
+    setDraft(blank());
+    setFrom("");
+    setTo("");
+    setRouteLabel("");
+    setRelinkTo("");
+    drag.current = null;
+  }
   async function relink() {
     setBusy(true);
     setError("");
     try {
       await mapsApi.relink(campaignId, selected, relinkTo);
-      setSelected(relinkTo);
-      setRelinkTo("");
+      selectMap(relinkTo);
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -273,17 +287,13 @@ export default function MapWorkspace({
       {loading && <p role="status">{tr("Opening maps…")}</p>}
       {!loading && images.length === 0 && <p>{tr("No map images yet.")}</p>}
       {images.length > 0 && (
-        <>
+        <fieldset disabled={busy || loading}>
           <label>
             {tr("Map image")}
             <select
               value={selected}
               onChange={(e) => {
-                setLoading(true);
-                setUrl("");
-                setSelected(e.target.value);
-                setEditing(null);
-                setDraft(blank());
+                selectMap(e.target.value);
               }}
               disabled={busy}
             >
@@ -299,6 +309,7 @@ export default function MapWorkspace({
               className="map-stage"
               ref={stage}
               onPointerDown={(e) => {
+                if (busy || loading) return;
                 if (
                   e.target === stage.current ||
                   e.target instanceof HTMLImageElement
@@ -349,6 +360,10 @@ export default function MapWorkspace({
                   onPointerDown={(e) => move(e, pin)}
                   onPointerMove={moving}
                   onPointerUp={() => void moved()}
+                  onPointerCancel={() => {
+                    drag.current = null;
+                    setDraft({ ...pin.input });
+                  }}
                   onClick={() => {
                     setEditing(pin);
                     setDraft(pin.input);
@@ -588,7 +603,7 @@ export default function MapWorkspace({
               </button>
             </div>
           )}
-        </>
+        </fieldset>
       )}
       {error && (
         <p role="alert" className="error">

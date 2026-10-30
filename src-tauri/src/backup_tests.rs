@@ -584,3 +584,146 @@ fn installed_archive_can_be_backed_up_without_modifying_the_source() {
     let checked = prepare_restore(&migrated_output, staging.path()).unwrap();
     assert_eq!(checked.manifest.schema_version, db::LATEST_SCHEMA);
 }
+
+#[test]
+fn imported_originals_calendar_pins_and_routes_round_trip_through_verified_backup() {
+    use crate::{images, import_sources, maps, timeline};
+    let temp = tempfile::tempdir().unwrap();
+    let source = Store::open(&temp.path().join("source")).unwrap();
+    let c = &source.connection;
+    let campaign = journal::create_campaign(c, "Synthetic import").unwrap();
+    let page = knowledge::create_page(c, &campaign.id, "Port", "place", "active", &[]).unwrap();
+    let original = "{\"entity\":{\"id\":5,\"name\":\"Port\"}}\r\n";
+    let imported = import_sources::add(
+        c,
+        &campaign.id,
+        "page",
+        &page.id,
+        "locations/port_5.json",
+        original,
+    )
+    .unwrap();
+    timeline::save_calendar(
+        c,
+        &campaign.id,
+        timeline::Calendar {
+            months: vec![timeline::Month {
+                name: "Dawn".into(),
+                days: 30,
+            }],
+            weekdays: vec!["Firstday".into()],
+            eras: vec!["Age".into()],
+        },
+    )
+    .unwrap();
+    timeline::save(
+        c,
+        &campaign.id,
+        None,
+        None,
+        timeline::EntryInput {
+            source_kind: "page".into(),
+            source_id: page.id.clone(),
+            era: "Age".into(),
+            year: Some(7),
+            month: Some(1),
+            day: Some(30),
+            precision: "approximate".into(),
+            note: "Player estimate".into(),
+        },
+    )
+    .unwrap();
+    let mut bytes = std::io::Cursor::new(Vec::new());
+    image::DynamicImage::ImageRgb8(image::RgbImage::from_pixel(2, 2, image::Rgb([1, 2, 3])))
+        .write_to(&mut bytes, image::ImageFormat::Png)
+        .unwrap();
+    let image = images::add(
+        c,
+        &source.directory,
+        &campaign.id,
+        &images::ImageTarget {
+            kind: "page".into(),
+            id: page.id.clone(),
+        },
+        "Map",
+        "map",
+        bytes.into_inner(),
+    )
+    .unwrap();
+    let mut pin_ids = Vec::new();
+    for (label, x) in [("Port", 100000), ("Gate", 900000)] {
+        let pin = maps::save_pin(
+            c,
+            &campaign.id,
+            &image.id,
+            None,
+            None,
+            maps::PinInput {
+                source_kind: "page".into(),
+                source_id: page.id.clone(),
+                label: label.into(),
+                x,
+                y: 500000,
+            },
+        )
+        .unwrap();
+        pin_ids.push(pin.id);
+    }
+    maps::add_route(
+        c,
+        &campaign.id,
+        &image.id,
+        &pin_ids[0],
+        &pin_ids[1],
+        "Player route",
+    )
+    .unwrap();
+    let before = json!({
+        "calendar": timeline::calendar(c, &campaign.id).unwrap(),
+        "timeline": timeline::list(c, &campaign.id).unwrap(),
+        "pins": maps::pins(c, &campaign.id, &image.id).unwrap(),
+        "routes": maps::routes(c, &campaign.id, &image.id).unwrap(),
+    });
+    let bundle = temp.path().join("roundtrip.nodex");
+    write_backup(c, &source.directory, &bundle).unwrap();
+    let mut target = Store::open(&temp.path().join("target")).unwrap();
+    let preview = target.prepare(&bundle).unwrap();
+    target.restore(&preview.token).unwrap();
+    drop(target);
+    let target = Store::open(&temp.path().join("target")).unwrap();
+    let c = &target.connection;
+    assert_eq!(
+        before,
+        json!({
+            "calendar": timeline::calendar(c, &campaign.id).unwrap(),
+            "timeline": timeline::list(c, &campaign.id).unwrap(),
+            "pins": maps::pins(c, &campaign.id, &image.id).unwrap(),
+            "routes": maps::routes(c, &campaign.id, &image.id).unwrap(),
+        })
+    );
+    let restored = import_sources::get(c, &campaign.id, "page", &page.id)
+        .unwrap()
+        .unwrap();
+    assert_eq!(restored.content.as_bytes(), original.as_bytes());
+    assert_eq!(restored.sha256, imported.sha256);
+    knowledge::update_page(
+        c,
+        &campaign.id,
+        &page.id,
+        "Renamed harbor",
+        "place",
+        "active",
+        &[],
+    )
+    .unwrap();
+    assert_eq!(
+        maps::pins(c, &campaign.id, &image.id).unwrap()[0]
+            .input
+            .source_id,
+        page.id
+    );
+    assert_eq!(
+        timeline::list(c, &campaign.id).unwrap()[0].input.source_id,
+        page.id
+    );
+}

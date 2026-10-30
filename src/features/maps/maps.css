@@ -34,3 +34,10 @@
   outline: 3px solid var(--burgundy, #6c302b);
   outline-offset: 3px;
 }
+
+.map-workspace > fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}

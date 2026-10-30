@@ -1517,9 +1517,9 @@ request before implementation, and publication follows the standing release rule
 | Done | M33 — Trust and transparency | Implemented 29/10/2026; first CI run and release attachment open | M29 |
 | 11 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
 | 12 | M35 — "Previously on…" session recap | Faster start of every game session | M31 helpful |
-| 13 | M36 — Import from Obsidian, Kanka and character exports | Lowers the cost of switching to Chronexus | — |
-| 14 | M37 — Campaign timeline and in-world calendar | Long campaigns need chronology | — |
-| 15 | M38 — Maps with linked pins | Places and routes are central to play | — |
+| Done | M36 — Import from Obsidian, Kanka and character exports | Local previews, mandatory backup, immutable originals; bounded supported formats (docs/IMPORTS.md) | — |
+| Done | M37 — Campaign timeline and in-world calendar | Source/schema 023; custom calendar and attributed dates, backup round-trip tested | — |
+| Done | M38 — Maps with linked pins | Source/schema 024; relative pins, routes, explicit same-size relink; package checks pending | — |
 | 16 | M39 — Print and PDF export | Paper sheets and campaign booklets at the table | — |
 | 17 | M40 — Additional ruleset sheet presets | Reaches players beyond D&D 5e | License review |
 
@@ -1762,7 +1762,7 @@ GitHub and an SBOM attached to a real release.
 - Acceptance: works fully without AI; the AI draft path shows sources and
   stays disabled when campaign AI is off.
 
-## M36 — Import from Obsidian, Kanka and character exports (planned, priority 13)
+## M36 — Import from Obsidian, Kanka and character exports (implemented in source)
 
 **Goal:** bring existing campaign notes in safely, as M6 did for Logseq.
 
@@ -1776,7 +1776,7 @@ GitHub and an SBOM attached to a real release.
 - Acceptance: synthetic fixtures for each format; renamed pages keep links;
   import is undoable through the pre-import backup.
 
-## M37 — Campaign timeline and in-world calendar (planned, priority 14)
+## M37 — Campaign timeline and in-world calendar (implemented in source)
 
 **Goal:** see the campaign in its own chronology, not only by session number.
 
@@ -1787,7 +1787,7 @@ GitHub and an SBOM attached to a real release.
 - Acceptance: custom calendar round-trips through backup; timeline readable by
   keyboard and screen reader; RTL layout works.
 
-## M38 — Maps with linked pins (planned, priority 15)
+## M38 — Maps with linked pins (implemented in source)
 
 **Goal:** use map images as navigation.
 

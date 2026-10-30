@@ -12,6 +12,7 @@
 - [Search and summary](Search-and-Summary.md)
 - [Rules wiki and SRD](Rules-Wiki-and-SRD.md)
 - [Images](Images.md)
+- [Imports, timeline and maps](Imports-Timeline-and-Maps.md)
 - [Local assistant](Local-Assistant.md)
 - [Languages and scripts](Languages-and-Scripts.md)
 - [Backups and restore](Backups-and-Restore.md)

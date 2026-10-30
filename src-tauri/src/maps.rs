@@ -281,6 +281,14 @@ pub fn relink(c: &Connection, campaign: &str, old: &str, new: &str) -> AppResult
     tx.commit().map_err(storage)
 }
 pub fn validate_archive(c: &Connection) -> AppResult<()> {
+    // The legacy image FK alone does not prove campaign ownership or map role.
+    let invalid: bool = c.query_row(
+        "SELECT EXISTS(SELECT 1 FROM map_pins p JOIN image_attachments i ON i.id=p.image_id WHERE p.campaign_id!=i.campaign_id OR i.role!='map') OR EXISTS(SELECT 1 FROM map_routes r JOIN map_pins p ON p.id=r.from_pin_id JOIN map_pins q ON q.id=r.to_pin_id WHERE r.campaign_id!=p.campaign_id OR r.campaign_id!=q.campaign_id)", [], |r| r.get(0)
+    ).map_err(storage)?;
+    if invalid {
+        return Err("Invalid map pin.".into());
+    }
+
     for campaign in crate::journal::list_campaigns(c)? {
         for image in images(c, &campaign.id)? {
             for pin in pins(c, &campaign.id, &image.id)? {
@@ -383,6 +391,20 @@ mod tests {
         assert_eq!(pins(&c, &campaign.id, &second.id).unwrap().len(), 2);
         assert_eq!(routes(&c, &campaign.id, &second.id).unwrap().len(), 1);
         validate_archive(&c).unwrap();
+        c.execute(
+            "UPDATE image_attachments SET role='reference' WHERE id=?1",
+            [&second.id],
+        )
+        .unwrap();
+        assert!(
+            validate_archive(&c).is_err(),
+            "pins must belong to map images"
+        );
+        c.execute(
+            "UPDATE image_attachments SET role='map' WHERE id=?1",
+            [&second.id],
+        )
+        .unwrap();
         assert!(crate::images::detach(&c, &campaign.id, &second.id).is_err());
         crate::images::detach(&c, &campaign.id, &first.id).unwrap();
     }

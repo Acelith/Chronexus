@@ -26,7 +26,9 @@ fn content() -> AppResult<String> {
 
 #[tauri::command]
 pub async fn preview_diagnostics() -> AppResult<Preview> {
-    Ok(Preview { content: content()? })
+    Ok(Preview {
+        content: content()?,
+    })
 }
 
 #[tauri::command]
@@ -37,22 +39,31 @@ pub async fn save_diagnostics(app: tauri::AppHandle, content: String) -> AppResu
     }
     crate::blocking(app, "Diagnostic save interrupted.", move |app| {
         use tauri_plugin_dialog::DialogExt;
-        let path = app.dialog().file()
+        let path = app
+            .dialog()
+            .file()
             .add_filter("JSON", &["json"])
             .set_title("Save Chronexus diagnostics")
             .set_file_name("chronexus-diagnostics.json")
             .blocking_save_file();
         let Some(path) = path else { return Ok(false) };
-        let path = path.into_path().map_err(|_| "Choose a local file.".to_string())?;
-        if path.exists() { return Err("Choose a new diagnostic file name.".into()); }
+        let path = path
+            .into_path()
+            .map_err(|_| "Choose a local file.".to_string())?;
+        if path.exists() {
+            return Err("Choose a new diagnostic file name.".into());
+        }
         let parent = path.parent().ok_or("Choose a local file.")?;
         let mut file = tempfile::NamedTempFile::new_in(parent)
             .map_err(|_| "Cannot create the diagnostic file.".to_string())?;
         use std::io::Write;
-        file.write_all(expected.as_bytes()).map_err(|_| "Cannot write the diagnostic file.".to_string())?;
-        file.persist_noclobber(path).map_err(|_| "Cannot save the diagnostic file.".to_string())?;
+        file.write_all(expected.as_bytes())
+            .map_err(|_| "Cannot write the diagnostic file.".to_string())?;
+        file.persist_noclobber(path)
+            .map_err(|_| "Cannot save the diagnostic file.".to_string())?;
         Ok(true)
-    }).await
+    })
+    .await
 }
 
 #[cfg(test)]
@@ -65,6 +76,9 @@ mod tests {
         assert!(!report.contains("campaignId"));
         assert!(!report.contains("token"));
         assert!(!report.contains("C:\\Users"));
-        assert_eq!(serde_json::from_str::<serde_json::Value>(&report).unwrap()["schemaVersion"], db::LATEST_SCHEMA);
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&report).unwrap()["schemaVersion"],
+            db::LATEST_SCHEMA
+        );
     }
 }

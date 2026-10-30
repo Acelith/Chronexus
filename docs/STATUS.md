@@ -1,26 +1,57 @@
-# Chronexus status — 30 October 2026: M36–M38 paused at user request
+# Chronexus status — 30 October 2026: M36–M38 completed in source
 
-- **Last committed code:** `74e5bb1` adds the Obsidian/Logseq slice of M36.
-  The current worktree contains **uncommitted, incomplete** work: M37 schema 023,
-  Rust timeline commands and UI; M38 schema 024, Rust map pin/route commands and
-  UI; M36 character JSON parser and UI, plus a preliminary Kanka ZIP inspection
-  command. The Kanka import UI and end-to-end write flow are absent. Do not treat
-  M36, M37 or M38 as delivered or publish this state.
-- **Checks on the paused worktree:** `pnpm typecheck`, `pnpm lint`, and
-  `git diff --check` passed. `pnpm i18n:check` **failed** because the new
-  CharacterImport strings are not registered in all catalogs. Before the later
-  character/Kanka edits, Vitest passed 226 tests and Python SQLite smoke tests
-  applied migrations 023/024 and exercised route relinking. Those results do not
-  validate the current whole worktree. Rust tests/build remain unrun because
-  `cargo` is unavailable; no packaged desktop test was run.
-- **Resume first:** inspect all uncommitted files. Fix the known Kanka
-  `info.md` version parser ordering for `kanka_version::`, verify ZIP field
-  shape against the synthetic fixtures requested by the user, finish Kanka
-  preview/import, and translate all new UI/backend errors. Review Rust compile,
-  archive validation, and migration round-trips on a Rust-equipped platform.
-  Then run the full test/build/i18n gates, inspect the UI in English, Italian
-  and RTL, and commit coherent M36, M37 and M38 deliveries separately. No
-  release or remote publication has been authorized in this request.
+- Resumed at the user's request. The earlier paused checkpoint was stale: M37
+  and M38 had since been committed as `8f3b8b0` and `101201b`; `4f683f1` also
+  contained the Kanka UI and character importer. This completion reviewed that
+  source, repaired remaining gaps and verified it on macOS arm64. No release or
+  remote publication was requested or performed; published 0.12.0 is unchanged.
+- **M36:** Obsidian/Logseq, bounded Kanka JSON ZIP and the documented D&D 5e 2014
+  character JSON format are available from the campaign overview. Preview and a
+  completed verified backup precede writes; originals keep their SHA-256. Kanka
+  entity IDs are distinct from child IDs, duplicate IDs reject the ZIP, title
+  suffixes cannot collide or exceed backend bounds, relations stay unknown and
+  attributed. The `info.md` double-colon version ordering is fixed and tested.
+  Warnings and the native Kanka dialog title are localized. Partial failure
+  shows the recovery backup and removes the immediate duplicate-retry action.
+  Existing characters are never replaced; invalid explicit numbers are refused.
+  Exact supported fields, upstream references and limitations: [IMPORTS.md](IMPORTS.md).
+- **M37:** schema 023 calendar/timeline was already present. Restore now validates
+  dates against the custom calendar, including missing dates that SQLite CHECK
+  alone cannot reject. Saving a calendar exits entry editing consistently.
+- **M38:** schema 024 map pins/routes was already present. Restore now rejects
+  pins on a foreign campaign's image or a non-map image, and foreign routes.
+  Switching/relinking maps clears old drafts and routes, disables writes while
+  loading and discards cancelled pointer drags. Mouse and keyboard coordinate
+  controls remain available. No new migration or storage-identifier change.
+- **Actually run:** 250 Vitest tests; TypeScript; ESLint; frontend build;
+  `pnpm i18n:check` (1533 explicit UI messages, zero missing UI translations or
+  placeholder mismatches in all ten locales); Cargo fmt; Cargo Clippy all targets
+  with warnings denied; Rust tests (194 unit tests passed, 8 ignored, plus one
+  updater signature integration test passed/one release-package case ignored);
+  native `cargo build --offline`; changed-frontend Prettier and `git diff --check`.
+  The initial restricted Rust run could not open loopback sockets; the complete
+  rerun with local connections allowed passed. The later strengthened map test
+  was rerun separately and passed.
+- **Recovery proof:** a real `.nodex` backup/verify/restore/reopen test preserves
+  source bytes/checksums, calendar, approximate dates, map pins/routes and managed
+  image; renaming the target page keeps timeline/map IDs linked. Hostile date and
+  non-map-image cases are tested. Synthetic Kanka/character component tests cover
+  successful writes, cancelled backup, partial failure and existing-character refusal.
+- **UI verification:** components tested in English, Italian and Arabic; browser
+  previews with synthetic command stubs at 760×600 and 1280×800, 18 combinations,
+  no horizontal overflow or axe violations. Screenshots visually reviewed for
+  imports, calendar and RTL map controls. These are browser previews, not a native
+  packaged desktop acceptance run. UI/UX Pro Max applied to import feedback,
+  announced errors, disabled/loading controls and the accessibility review.
+- **Limits:** no new installers, Windows/Linux run, native file-dialog exercise,
+  screen-reader session or maximum-size map stress test. The frontend still warns
+  about existing large chunks. Non-UI candidate catalog gaps remain (48 Italian,
+  460 per other translation); changed UI/errors have translations, but the whole
+  diagnostic candidate catalog is not claimed complete. Imports are multi-command:
+  recovery from partial writes is the displayed pre-import backup, not atomic undo.
+- **Next roadmap priority:** M25 — Chronexus Server (in progress, separate repo),
+  followed by M42–M47 virtual tabletop. M34's retained safe-error/log capture and
+  M35 remain open; this request does not implement them.
 
 # Chronexus status — 30 October 2026: M36 Obsidian/Logseq import slice in source
 

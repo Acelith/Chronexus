@@ -29,6 +29,7 @@ The optional companion server has its own wiki in the
 | [Search and summary](Search-and-Summary.md) | Finding anything; the campaign summary |
 | [Rules wiki and SRD catalog](Rules-Wiki-and-SRD.md) | Looking up spells and rules online, offline copies, translation |
 | [Images](Images.md) | Portraits, maps and references |
+| [Imports, timeline and maps](Imports-Timeline-and-Maps.md) | Local imports, world dates and linked map pins |
 | [Local assistant](Local-Assistant.md) | Optional questions about your notes, on your own GPU |
 | [Languages and scripts](Languages-and-Scripts.md) | Ten languages, right-to-left, Braille, Morse and fantasy scripts |
 | [Backups and restore](Backups-and-Restore.md) | Manual and periodic backups, restoring, exporting |
