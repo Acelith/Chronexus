@@ -9,10 +9,17 @@ const label = (value: unknown) =>
   typeof value === "string" ? value.trim().slice(0, 200) : "";
 const prose = (value: unknown) =>
   typeof value === "string" ? value.slice(0, 16000) : "";
-const integer = (value: unknown) =>
-  typeof value === "number" && Number.isSafeInteger(value) && value >= 0
-    ? value
-    : null;
+const integer = (value: unknown): number | null => {
+  if (value === undefined || value === null) return null;
+  if (
+    typeof value !== "number" ||
+    !Number.isSafeInteger(value) ||
+    value < 0 ||
+    value > 1_000_000
+  )
+    throw Error(tr("Unsupported character JSON format."));
+  return value;
+};
 export function parseCharacterJson(value: unknown): CharacterInput {
   const source = record(value),
     race = record(source.race),

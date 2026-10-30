@@ -63,3 +63,22 @@ declare global {
     __kankaRan?: boolean;
   }
 }
+
+it("avoids collisions with suffixed titles from earlier imports", () => {
+  const titles = kankaTitles(
+    [entity("1", "Guard"), entity("2", "Guard (Kanka 1) · 2")],
+    ["Guard", "Guard (Kanka 1)"],
+  );
+  expect(new Set([...titles.values(), "Guard", "Guard (Kanka 1)"]).size).toBe(
+    4,
+  );
+});
+
+it("keeps disambiguated titles within the backend length limit", () => {
+  const name = "A".repeat(200);
+  const titles = kankaTitles(
+    [entity("12345678901234567890", name)],
+    [name.slice(0, 180)],
+  );
+  expect([...titles.values()][0].length).toBeLessThanOrEqual(200);
+});

@@ -1,3 +1,4 @@
+import { tr } from "../../i18n/store";
 import { command } from "../journal/api";
 import type { PageKind } from "../knowledge/api";
 
@@ -19,10 +20,13 @@ export interface KankaEntity {
 export interface KankaPreview {
   version: string;
   entities: KankaEntity[];
-  warnings: string[];
+  warnings: { name: string; reason: string }[];
 }
 export const kankaApi = {
-  inspect: () => command<KankaPreview | null>("inspect_kanka_export"),
+  inspect: () =>
+    command<KankaPreview | null>("inspect_kanka_export", {
+      title: tr("Choose a Kanka JSON export ZIP"),
+    }),
 };
 
 const normalized = (value: string) =>
@@ -87,7 +91,10 @@ export function kankaTitles(
       taken.has(normalized(title)) ||
       (counts.get(normalized(e.name)) ?? 0) > 1
     )
-      title = `${title} (Kanka ${e.sourceId})`;
+      title = `${title.slice(0, 165)} (Kanka ${e.sourceId})`;
+    const base = title.slice(0, 190);
+    let suffix = 2;
+    while (taken.has(normalized(title))) title = `${base} · ${suffix++}`;
     taken.add(normalized(title));
     titles.set(e.sourceId, title);
   }
@@ -117,4 +124,19 @@ export function kankaRelations(entities: KankaEntity[]) {
       kept.push({ from: e.sourceId, to: r.targetId, label: r.label });
     }
   return { kept, missing };
+}
+
+export function kankaWarning(reason: string): string {
+  switch (reason) {
+    case "relations":
+      return tr("Only the first 200 relations are offered.");
+    case "size":
+      return tr("File exceeds 1 MB and was skipped.");
+    case "json":
+      return tr("Invalid JSON; file skipped.");
+    case "entity":
+      return tr("No entity data; file skipped.");
+    default:
+      return tr("Missing name or entity ID; file skipped.");
+  }
 }

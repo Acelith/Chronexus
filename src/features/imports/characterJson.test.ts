@@ -32,3 +32,18 @@ it("rejects unrelated JSON and impossible hit point values", () => {
     }),
   ).toThrow();
 });
+
+it.each([-1, 1.5, 1_000_001, "12"])(
+  "rejects invalid explicit numeric values: %s",
+  (max) => {
+    expect(() =>
+      parseCharacterJson({
+        name: "Arin",
+        player: { name: "Player" },
+        race: { name: "Elf" },
+        ability_scores: { dex: 15 },
+        hit_points: { max, current: 0 },
+      }),
+    ).toThrow("Unsupported character JSON format.");
+  },
+);

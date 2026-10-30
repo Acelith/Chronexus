@@ -39,10 +39,17 @@ pub struct Entity {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct Warning {
+    pub name: String,
+    pub reason: String,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Preview {
     pub version: String,
     pub entities: Vec<Entity>,
-    pub warnings: Vec<String>,
+    pub warnings: Vec<Warning>,
 }
 
 fn category(path: &str) -> Option<&'static str> {
@@ -142,14 +149,15 @@ fn supported(version: &str) -> bool {
     major > 2 || (major == 2 && minor >= 1)
 }
 
-fn relations(entity: &Value, warnings: &mut Vec<String>, name: &str) -> Vec<Relation> {
+fn relations(entity: &Value, warnings: &mut Vec<Warning>, name: &str) -> Vec<Relation> {
     let Some(list) = entity.get("relationships").and_then(Value::as_array) else {
         return Vec::new();
     };
     if list.len() > MAX_RELATIONS {
-        warnings.push(format!(
-            "{name}: only the first {MAX_RELATIONS} relations are offered"
-        ));
+        warnings.push(Warning {
+            name: name.into(),
+            reason: "relations".into(),
+        });
     }
     list.iter()
         .take(MAX_RELATIONS)
@@ -183,6 +191,7 @@ pub fn parse(bytes: Vec<u8>) -> AppResult<Preview> {
         return Err("Kanka export version 2.1 or later is required.".into());
     }
     let mut entities = Vec::new();
+    let mut ids = std::collections::HashSet::new();
     let mut warnings = Vec::new();
     let mut total = 0_u64;
     for index in 0..zip.len() {
@@ -215,16 +224,25 @@ pub fn parse(bytes: Vec<u8>) -> AppResult<Preview> {
             continue;
         }
         if file.size() > 1_000_000 {
-            warnings.push(format!("{name}: larger than 1 MB, skipped"));
+            warnings.push(Warning {
+                name: name.clone(),
+                reason: "size".into(),
+            });
             continue;
         }
         let original = read_limited(&mut file, 1_000_000)?;
         let Ok(value) = serde_json::from_str::<Value>(&original) else {
-            warnings.push(format!("{name}: invalid JSON, skipped"));
+            warnings.push(Warning {
+                name: name.clone(),
+                reason: "json".into(),
+            });
             continue;
         };
         let Some(entity) = value.get("entity").filter(|v| v.is_object()) else {
-            warnings.push(format!("{name}: no entity data, skipped"));
+            warnings.push(Warning {
+                name: name.clone(),
+                reason: "entity".into(),
+            });
             continue;
         };
         let entity_name = {
@@ -237,8 +255,14 @@ pub fn parse(bytes: Vec<u8>) -> AppResult<Preview> {
         };
         let source_id = id(entity.get("id"));
         if entity_name.trim().is_empty() || source_id.is_empty() {
-            warnings.push(format!("{name}: missing name or entity ID, skipped"));
+            warnings.push(Warning {
+                name: name.clone(),
+                reason: "identity".into(),
+            });
             continue;
+        }
+        if !ids.insert(source_id.clone()) {
+            return Err("Invalid Kanka export information.".into());
         }
         if entities.len() >= MAX_ENTITIES {
             return Err("The Kanka export has more than 2000 supported entities.".into());
@@ -267,14 +291,17 @@ pub fn parse(bytes: Vec<u8>) -> AppResult<Preview> {
 }
 
 #[tauri::command]
-pub async fn inspect_kanka_export(app: tauri::AppHandle) -> AppResult<Option<Preview>> {
+pub async fn inspect_kanka_export(
+    app: tauri::AppHandle,
+    title: String,
+) -> AppResult<Option<Preview>> {
     crate::blocking(app, "Kanka inspection interrupted.", move |app| {
         use tauri_plugin_dialog::DialogExt;
         let Some(file) = app
             .dialog()
             .file()
             .add_filter("Kanka JSON ZIP", &["zip"])
-            .set_title("Choose a Kanka JSON export ZIP")
+            .set_title(title.chars().take(200).collect::<String>())
             .blocking_pick_file()
         else {
             return Ok(None);
@@ -287,7 +314,13 @@ pub async fn inspect_kanka_export(app: tauri::AppHandle) -> AppResult<Option<Pre
         if meta.len() > MAX_ZIP {
             return Err("The Kanka ZIP is empty or larger than 50 MB.".into());
         }
-        parse(std::fs::read(path).map_err(|_| "Cannot read the Kanka ZIP.".to_string())?).map(Some)
+        let mut bytes = Vec::new();
+        std::fs::File::open(path)
+            .map_err(|_| "Cannot read the Kanka ZIP.".to_string())?
+            .take(MAX_ZIP + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|_| "Cannot read the Kanka ZIP.".to_string())?;
+        parse(bytes).map(Some)
     })
     .await
 }
@@ -363,6 +396,16 @@ mod tests {
         ]))
         .is_err());
         assert!(parse(archive(&[("locations/port_5.json", PORT)])).is_err());
+    }
+
+    #[test]
+    fn duplicate_entity_ids_are_rejected_before_any_write() {
+        assert!(parse(archive(&[
+            ("info.json", r#"{"kanka_version":"2.6.1"}"#),
+            ("characters/a_42.json", WITNESS),
+            ("characters/b_42.json", WITNESS),
+        ]))
+        .is_err());
     }
 
     #[test]

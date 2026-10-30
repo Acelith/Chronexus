@@ -9,6 +9,7 @@ import {
   kankaApi,
   kankaRelations,
   kankaTitles,
+  kankaWarning,
   type KankaPreview,
 } from "./kanka";
 import { document } from "./markdown";
@@ -107,6 +108,7 @@ export default function KankaImport({
         `${errorMessage(reason)} ${tr("Restore the backup to undo this import.")}`,
       );
       await onImported();
+      setPreview(null);
     } finally {
       setPending(false);
     }
@@ -167,8 +169,8 @@ export default function KankaImport({
               </summary>
               <ul>
                 {preview.warnings.map((warning) => (
-                  <li key={warning}>
-                    <bdi>{warning}</bdi>
+                  <li key={`${warning.name}:${warning.reason}`}>
+                    <bdi>{warning.name}</bdi>: {kankaWarning(warning.reason)}
                   </li>
                 ))}
               </ul>
