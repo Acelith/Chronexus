@@ -171,16 +171,7 @@ pub fn list(c: &Connection, campaign: &str) -> AppResult<Vec<Entry>> {
     });
     Ok(rows)
 }
-pub fn save(
-    c: &Connection,
-    campaign: &str,
-    id: Option<String>,
-    revision: Option<i64>,
-    input: EntryInput,
-) -> AppResult<Entry> {
-    require_campaign(c, campaign)?;
-    let (field, table) = source_column(&input.source_kind)?;
-    identifier(&input.source_id)?;
+fn validate_input(c: &Connection, campaign: &str, input: &EntryInput) -> AppResult<()> {
     if input.note.chars().count() > 1000
         || input.note.contains('\0')
         || !["exact", "approximate", "unknown"].contains(&input.precision.as_str())
@@ -209,6 +200,19 @@ pub fn save(
             return Err("Date is outside the campaign calendar.".into());
         }
     }
+    Ok(())
+}
+pub fn save(
+    c: &Connection,
+    campaign: &str,
+    id: Option<String>,
+    revision: Option<i64>,
+    input: EntryInput,
+) -> AppResult<Entry> {
+    require_campaign(c, campaign)?;
+    let (field, table) = source_column(&input.source_kind)?;
+    identifier(&input.source_id)?;
+    validate_input(c, campaign, &input)?;
     let found: bool = c
         .query_row(
             &format!("SELECT EXISTS(SELECT 1 FROM {table} WHERE campaign_id=?1 AND id=?2)"),
@@ -277,6 +281,7 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
         for entry in list(c, &campaign.id)? {
             source_column(&entry.input.source_kind)?;
             identifier(&entry.id)?;
+            validate_input(c, &campaign.id, &entry.input)?;
         }
     }
     Ok(())
@@ -285,6 +290,57 @@ pub fn validate_archive(c: &Connection) -> AppResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn archive_validation_rejects_missing_and_out_of_calendar_dates() {
+        let directory = tempfile::tempdir().unwrap();
+        let c = crate::db::open(&directory.path().join("invalid.sqlite3")).unwrap();
+        let campaign = crate::journal::create_campaign(&c, "Test").unwrap();
+        let page = crate::knowledge::create_page(&c, &campaign.id, "Port", "place", "active", &[])
+            .unwrap();
+        save_calendar(
+            &c,
+            &campaign.id,
+            Calendar {
+                months: vec![Month {
+                    name: "Dawn".into(),
+                    days: 30,
+                }],
+                weekdays: vec!["Firstday".into()],
+                eras: vec!["Age".into()],
+            },
+        )
+        .unwrap();
+        let entry = save(
+            &c,
+            &campaign.id,
+            None,
+            None,
+            EntryInput {
+                source_kind: "page".into(),
+                source_id: page.id,
+                era: "Age".into(),
+                year: Some(1),
+                month: Some(1),
+                day: Some(30),
+                precision: "exact".into(),
+                note: String::new(),
+            },
+        )
+        .unwrap();
+        c.execute(
+            "UPDATE timeline_entries SET day=31 WHERE id=?1",
+            [&entry.id],
+        )
+        .unwrap();
+        assert!(validate_archive(&c).is_err());
+        c.execute(
+            "UPDATE timeline_entries SET day=NULL WHERE id=?1",
+            [&entry.id],
+        )
+        .unwrap();
+        assert!(validate_archive(&c).is_err());
+    }
+
     #[test]
     fn calendar_and_session_date_survive_reopen() {
         let directory = tempfile::tempdir().unwrap();

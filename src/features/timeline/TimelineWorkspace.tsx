@@ -119,6 +119,7 @@ export default function TimelineWorkspace({
       };
       const result = await timelineApi.saveCalendar(campaignId, parsed);
       setCalendar(result);
+      setEditing(null);
       setDraft(empty(result));
     } catch (e) {
       setError(errorMessage(e));
