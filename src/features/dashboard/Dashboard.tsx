@@ -6,6 +6,7 @@ import { errorMessage, type Session } from "../journal/api";
 import { pageKinds, type KnowledgePage } from "../knowledge/api";
 import { blockOptions } from "../knowledge/blocks";
 import ImportWorkspace from "../imports/ImportWorkspace";
+import TimelineWorkspace from "../timeline/TimelineWorkspace";
 export default function Dashboard({
   campaignId,
   sessions,
@@ -15,6 +16,7 @@ export default function Dashboard({
   onCharacter,
   onNewSession,
   onImported = async () => undefined,
+  onClue = () => undefined,
 }: {
   campaignId: string;
   sessions: Session[];
@@ -24,11 +26,13 @@ export default function Dashboard({
   onCharacter: () => void;
   onNewSession: () => void;
   onImported?: () => Promise<unknown>;
+  onClue?: (id: string) => void;
 }) {
   const [character, setCharacter] = useState<Character | null>(null),
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
-    [refresh, setRefresh] = useState(0);
+    [refresh, setRefresh] = useState(0),
+    [timelineOpen, setTimelineOpen] = useState(false);
   useEffect(() => {
     let active = true;
     playerApi
@@ -192,6 +196,26 @@ export default function Dashboard({
         existingTitles={pages.map((p) => p.title)}
         onImported={onImported}
       />
+      <button
+        type="button"
+        aria-expanded={timelineOpen}
+        aria-controls="overview-timeline"
+        onClick={() => setTimelineOpen((value) => !value)}
+      >
+        {tr("Campaign timeline")}
+      </button>
+      {timelineOpen && (
+        <div id="overview-timeline">
+          <TimelineWorkspace
+            campaignId={campaignId}
+            sessions={sessions}
+            pages={pages}
+            onSession={onSession}
+            onPage={onPage}
+            onClue={onClue}
+          />
+        </div>
+      )}
     </section>
   );
 }

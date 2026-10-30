@@ -8,4 +8,5 @@ pub mod knowledge;
 pub mod player;
 pub mod settings;
 pub mod sync;
+pub mod timeline;
 pub mod wiki;

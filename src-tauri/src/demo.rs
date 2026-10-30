@@ -340,7 +340,9 @@ fn populate(c: &Connection, campaign: &str, t: &DemoText) -> AppResult<()> {
 }
 
 /// Tables that hold rows of one campaign, children before parents.
-const CAMPAIGN_TABLES: [&str; 22] = [
+const CAMPAIGN_TABLES: [&str; 24] = [
+    "timeline_entries",
+    "world_calendars",
     "sync_conflicts",
     "sync_outbox",
     "sync_remote_items",

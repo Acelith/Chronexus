@@ -1037,6 +1037,7 @@ export function App() {
                         sessions={sessions}
                         pages={pages}
                         onImported={refreshExternal}
+                        onClue={openClue}
                         onSession={(s) =>
                           openSource({
                             sourceKind: "session",

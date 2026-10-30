@@ -14,8 +14,8 @@ mod db;
 mod demo;
 #[cfg(test)]
 mod demo_tests;
-mod dice;
 mod diagnostics;
+mod dice;
 mod export;
 #[cfg(test)]
 mod export_tests;
@@ -50,6 +50,7 @@ mod search_tests;
 mod sync;
 #[cfg(test)]
 mod test_support;
+mod timeline;
 mod updates;
 mod wiki;
 mod wiki_provider;
@@ -292,6 +293,11 @@ pub fn run() {
             commands::player::store_catalog_cache,
             commands::settings::get_interface_preferences,
             commands::settings::save_interface_preferences,
+            commands::timeline::get_world_calendar,
+            commands::timeline::save_world_calendar,
+            commands::timeline::list_timeline,
+            commands::timeline::save_timeline_entry,
+            commands::timeline::delete_timeline_entry,
             commands::sync::sync_account,
             commands::sync::sync_set_server,
             commands::sync::sync_sign_in,
