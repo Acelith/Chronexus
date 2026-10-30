@@ -8,6 +8,8 @@ import { blockOptions } from "../knowledge/blocks";
 import ImportWorkspace from "../imports/ImportWorkspace";
 import TimelineWorkspace from "../timeline/TimelineWorkspace";
 import MapWorkspace from "../maps/MapWorkspace";
+import CharacterImport from "../imports/CharacterImport";
+import KankaImport from "../imports/KankaImport";
 export default function Dashboard({
   campaignId,
   sessions,
@@ -198,6 +200,12 @@ export default function Dashboard({
         existingTitles={pages.map((p) => p.title)}
         onImported={onImported}
       />
+      <KankaImport
+        campaignId={campaignId}
+        existingTitles={pages.map((p) => p.title)}
+        onImported={onImported}
+      />
+      <CharacterImport campaignId={campaignId} onImported={onImported} />
       <button
         type="button"
         aria-expanded={timelineOpen}

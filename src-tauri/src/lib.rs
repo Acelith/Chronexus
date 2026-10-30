@@ -32,6 +32,7 @@ mod journal;
 #[cfg(test)]
 mod journal_tests;
 mod json_file;
+mod kanka_import;
 mod knowledge;
 #[cfg(test)]
 mod knowledge_tests;
@@ -307,6 +308,7 @@ pub fn run() {
             commands::maps::add_map_route,
             commands::maps::delete_map_route,
             commands::maps::relink_map_image,
+            kanka_import::inspect_kanka_export,
             commands::sync::sync_account,
             commands::sync::sync_set_server,
             commands::sync::sync_sign_in,
