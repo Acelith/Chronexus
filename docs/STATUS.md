@@ -1,3 +1,27 @@
+# Chronexus status — 30 October 2026: M36–M38 paused at user request
+
+- **Last committed code:** `74e5bb1` adds the Obsidian/Logseq slice of M36.
+  The current worktree contains **uncommitted, incomplete** work: M37 schema 023,
+  Rust timeline commands and UI; M38 schema 024, Rust map pin/route commands and
+  UI; M36 character JSON parser and UI, plus a preliminary Kanka ZIP inspection
+  command. The Kanka import UI and end-to-end write flow are absent. Do not treat
+  M36, M37 or M38 as delivered or publish this state.
+- **Checks on the paused worktree:** `pnpm typecheck`, `pnpm lint`, and
+  `git diff --check` passed. `pnpm i18n:check` **failed** because the new
+  CharacterImport strings are not registered in all catalogs. Before the later
+  character/Kanka edits, Vitest passed 226 tests and Python SQLite smoke tests
+  applied migrations 023/024 and exercised route relinking. Those results do not
+  validate the current whole worktree. Rust tests/build remain unrun because
+  `cargo` is unavailable; no packaged desktop test was run.
+- **Resume first:** inspect all uncommitted files. Fix the known Kanka
+  `info.md` version parser ordering for `kanka_version::`, verify ZIP field
+  shape against the synthetic fixtures requested by the user, finish Kanka
+  preview/import, and translate all new UI/backend errors. Review Rust compile,
+  archive validation, and migration round-trips on a Rust-equipped platform.
+  Then run the full test/build/i18n gates, inspect the UI in English, Italian
+  and RTL, and commit coherent M36, M37 and M38 deliveries separately. No
+  release or remote publication has been authorized in this request.
+
 # Chronexus status — 30 October 2026: M36 Obsidian/Logseq import slice in source
 
 - M36 partial: the campaign overview now previews a selected Obsidian or
