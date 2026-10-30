@@ -1,3 +1,18 @@
+# Chronexus status — 30 October 2026: M36 Obsidian/Logseq import slice in source
+
+- M36 partial: the campaign overview now previews a selected Obsidian or
+  Logseq folder, rejects duplicate titles and oversized input, reports unresolved
+  references, requires a verified user-chosen `.nodex` backup before writes,
+  creates stable-ID pages and mentions, stores immutable Markdown originals with
+  SHA-256 through the existing archive command, and imports supported local
+  images through the managed attachment command. It does not run scripts or
+  read plugin settings. A failed multi-page import may leave partial data; the
+  displayed backup is the recovery route. Kanka and character export imports
+  remain open pending a documented format and fixtures. M37 and M38 remain open.
+- Verified: `pnpm i18n:check`, typecheck, lint, build and Vitest (224 tests).
+  Impeccable detector: no findings. React Doctor blocked by a broken `npx`
+  installation. No packaged desktop or platform validation was run.
+
 # Chronexus status — 30 October 2026: M34 diagnostic preview in source
 
 - M34 first slice: App settings can preview an allowlisted JSON diagnostic report and

@@ -5,6 +5,7 @@ import { playerApi, type Character } from "../player/api";
 import { errorMessage, type Session } from "../journal/api";
 import { pageKinds, type KnowledgePage } from "../knowledge/api";
 import { blockOptions } from "../knowledge/blocks";
+import ImportWorkspace from "../imports/ImportWorkspace";
 export default function Dashboard({
   campaignId,
   sessions,
@@ -13,6 +14,7 @@ export default function Dashboard({
   onPage,
   onCharacter,
   onNewSession,
+  onImported = async () => undefined,
 }: {
   campaignId: string;
   sessions: Session[];
@@ -21,6 +23,7 @@ export default function Dashboard({
   onPage: (p: KnowledgePage) => void;
   onCharacter: () => void;
   onNewSession: () => void;
+  onImported?: () => Promise<unknown>;
 }) {
   const [character, setCharacter] = useState<Character | null>(null),
     [loading, setLoading] = useState(true),
@@ -184,6 +187,11 @@ export default function Dashboard({
           </p>
         </section>
       </div>
+      <ImportWorkspace
+        campaignId={campaignId}
+        existingTitles={pages.map((p) => p.title)}
+        onImported={onImported}
+      />
     </section>
   );
 }

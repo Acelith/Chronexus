@@ -1036,6 +1036,7 @@ export function App() {
                         campaignId={campaign.id}
                         sessions={sessions}
                         pages={pages}
+                        onImported={refreshExternal}
                         onSession={(s) =>
                           openSource({
                             sourceKind: "session",
