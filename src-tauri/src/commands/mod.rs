@@ -5,6 +5,7 @@ pub mod archive;
 pub mod campaign;
 pub mod clues;
 pub mod knowledge;
+pub mod maps;
 pub mod player;
 pub mod settings;
 pub mod sync;

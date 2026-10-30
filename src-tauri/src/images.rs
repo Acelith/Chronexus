@@ -274,6 +274,16 @@ pub fn read(
 }
 pub fn detach(c: &Connection, campaign: &str, id: &str) -> AppResult<()> {
     get(c, campaign, id)?;
+    let pinned: bool = c
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM map_pins WHERE campaign_id=?1 AND image_id=?2)",
+            params![campaign, id],
+            |r| r.get(0),
+        )
+        .map_err(storage)?;
+    if pinned {
+        return Err("This map has pins. Delete its pins or move them to another map first.".into());
+    }
     c.execute(
         "DELETE FROM image_attachments WHERE campaign_id=?1 AND id=?2",
         params![campaign, id],

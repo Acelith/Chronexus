@@ -400,6 +400,9 @@ fn validate_db(path: &Path, expected_version: i64) -> AppResult<Connection> {
     if expected_version >= 23 {
         crate::timeline::validate_archive(&connection)?;
     }
+    if expected_version >= 24 {
+        crate::maps::validate_archive(&connection)?;
+    }
     if expected_version >= 9 {
         crate::import_sources::validate_archive(&connection)?;
     }

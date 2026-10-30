@@ -7,6 +7,7 @@ import { pageKinds, type KnowledgePage } from "../knowledge/api";
 import { blockOptions } from "../knowledge/blocks";
 import ImportWorkspace from "../imports/ImportWorkspace";
 import TimelineWorkspace from "../timeline/TimelineWorkspace";
+import MapWorkspace from "../maps/MapWorkspace";
 export default function Dashboard({
   campaignId,
   sessions,
@@ -32,7 +33,8 @@ export default function Dashboard({
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
     [refresh, setRefresh] = useState(0),
-    [timelineOpen, setTimelineOpen] = useState(false);
+    [timelineOpen, setTimelineOpen] = useState(false),
+    [mapsOpen, setMapsOpen] = useState(false);
   useEffect(() => {
     let active = true;
     playerApi
@@ -207,6 +209,26 @@ export default function Dashboard({
       {timelineOpen && (
         <div id="overview-timeline">
           <TimelineWorkspace
+            campaignId={campaignId}
+            sessions={sessions}
+            pages={pages}
+            onSession={onSession}
+            onPage={onPage}
+            onClue={onClue}
+          />
+        </div>
+      )}
+      <button
+        type="button"
+        aria-expanded={mapsOpen}
+        aria-controls="overview-maps"
+        onClick={() => setMapsOpen((value) => !value)}
+      >
+        {tr("Campaign maps")}
+      </button>
+      {mapsOpen && (
+        <div id="overview-maps">
+          <MapWorkspace
             campaignId={campaignId}
             sessions={sessions}
             pages={pages}

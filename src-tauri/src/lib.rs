@@ -35,6 +35,7 @@ mod json_file;
 mod knowledge;
 #[cfg(test)]
 mod knowledge_tests;
+mod maps;
 mod party;
 #[cfg(test)]
 mod party_tests;
@@ -298,6 +299,14 @@ pub fn run() {
             commands::timeline::list_timeline,
             commands::timeline::save_timeline_entry,
             commands::timeline::delete_timeline_entry,
+            commands::maps::list_map_images,
+            commands::maps::list_map_pins,
+            commands::maps::save_map_pin,
+            commands::maps::delete_map_pin,
+            commands::maps::list_map_routes,
+            commands::maps::add_map_route,
+            commands::maps::delete_map_route,
+            commands::maps::relink_map_image,
             commands::sync::sync_account,
             commands::sync::sync_set_server,
             commands::sync::sync_sign_in,
