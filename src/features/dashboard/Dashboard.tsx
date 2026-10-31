@@ -1,3 +1,5 @@
+import Recap from "../recap/Recap";
+import PrintWorkspace from "../export/PrintWorkspace";
 import { tr } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
 import { useEffect, useState } from "react";
@@ -195,6 +197,23 @@ export default function Dashboard({
           </p>
         </section>
       </div>
+      <details>
+        <summary>{tr("Session recap")}</summary>
+        <Recap
+          key={campaignId}
+          campaignId={campaignId}
+          sessions={sessions}
+          pages={pages}
+          onPage={onPage}
+          onSession={onSession}
+        />
+      </details>
+      <PrintWorkspace
+        key={`print-${campaignId}`}
+        campaignId={campaignId}
+        sessions={sessions}
+        pages={pages}
+      />
       <ImportWorkspace
         campaignId={campaignId}
         existingTitles={pages.map((p) => p.title)}

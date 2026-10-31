@@ -2187,3 +2187,77 @@ textarea::placeholder {
   flex: none;
   margin: 0;
 }
+
+.recap-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.chronexus-print {
+  display: none;
+}
+.print-preview {
+  background: white;
+  color: #161616;
+  padding: 2rem;
+  max-height: 65vh;
+  overflow: auto;
+}
+.print-preview dl > div,
+.chronexus-print dl > div {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+@media print {
+  @page {
+    margin: 18mm;
+  }
+  body > *:not(.chronexus-print) {
+    display: none !important;
+  }
+  body,
+  .chronexus-print {
+    background: white !important;
+    color: black !important;
+    font-family: sans-serif;
+    font-size: 11pt;
+  }
+  .chronexus-print {
+    display: block;
+  }
+  .chronexus-print > section {
+    break-before: page;
+  }
+  .chronexus-print > section:first-child {
+    break-before: auto;
+  }
+  .chronexus-print h1,
+  .chronexus-print h2,
+  .chronexus-print h3 {
+    break-after: avoid;
+    color: black;
+  }
+  .chronexus-print p,
+  .chronexus-print dd {
+    overflow-wrap: anywhere;
+  }
+}
+
+.print-controls > label,
+.print-controls fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-block: 0.5rem;
+}
+.print-controls input[type="checkbox"] {
+  width: auto;
+  flex: 0 0 auto;
+  margin: 0;
+}
+.print-controls fieldset {
+  min-width: 0;
+}
+.print-controls label {
+  overflow-wrap: anywhere;
+}

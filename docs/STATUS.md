@@ -1,3 +1,38 @@
+# Chronexus status — 31 October 2026: M35/M39 source implementation
+
+- Campaign overview offers a session recap: latest session by sequence, open clue
+  items, inventory explicitly sourced to that session, asserted relationships
+  scoped to that session with certainty, and notes pinned through the explicit
+  `chronexus:recap-pin` alias. Manual recap creation uses existing persistent Codex
+  notes and its guarded editor, revisions and backups; no schema change.
+- Explicit local AI draft action reuses campaign settings, locale, qualified model
+  checks and cited immutable sources. Disabled campaigns cannot request drafts.
+  Answers remain unreviewed and are never automatically copied into notes.
+- Print/PDF offers opt-in selection of sessions, Codex pages and the character.
+  Light print CSS isolates the selected document from the rest of the app; text
+  is rendered inert and without the old 100-character block truncation. Both
+  generic and D&D manual sheet fields use existing localized labels. PDF uses
+  `window.print()` and the system dialog, as supported by Tauri's documentation.
+- Verified: typecheck, ESLint, frontend build, i18n check (all ten UI catalogs,
+  zero missing UI translations), 255 tests passed with two workers; the initial
+  unconstrained run had two timing failures, both passed on targeted rerun.
+  New tests cover selected-content isolation in English, Italian and Arabic,
+  inert hostile markup, long text, nested blocks and mention labels. Impeccable
+  detector returned no findings. React Doctor could not start because the local
+  npx installation lacks npm/bin/npx-cli.js.
+- Skills applied: Impeccable (existing visual system), React Testing (observable
+  behavior tests), React Doctor (attempted regression check), webapp-testing
+  (synthetic browser print verification). No Rust source changed.
+- Browser evidence: synthetic Edge preview visually inspected; headless Edge
+  rendered an A4 PDF successfully. This does not verify native printer dialogs.
+- Acceptance still pending: native system-dialog exercise on Windows/macOS/Linux,
+  visual RTL/CJK print review and local-model recap quality evaluation. Equipment
+  and spell printouts currently include names/descriptions/notes, not every
+  structured combat field. No installer or release publication for this incomplete
+  acceptance checkpoint. Existing candidate diagnostic catalog gaps remain.
+- Next requested work: finish M35/M39 acceptance above. Overall roadmap priority
+  remains M25 server, then M42–M47; neither is authorized by this request.
+
 # Chronexus status — 30 October 2026: M36–M38 completed in source
 
 - Resumed at the user's request. The earlier paused checkpoint was stale: M37

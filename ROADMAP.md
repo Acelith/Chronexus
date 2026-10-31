@@ -1750,7 +1750,7 @@ GitHub and an SBOM attached to a real release.
 - Acceptance: tests prove campaign text and secrets are absent; the bundle is
   readable and bounded in size.
 
-## M35 — "Previously on…" session recap (planned, priority 12)
+## M35 — "Previously on…" session recap (source implemented; acceptance pending)
 
 **Goal:** start each session knowing where the story stopped.
 
@@ -1798,7 +1798,7 @@ GitHub and an SBOM attached to a real release.
 - Acceptance: create, move and delete pins by mouse and keyboard; backup and
   restore keep pins and images; large maps stay responsive.
 
-## M39 — Print and PDF export (planned, priority 16)
+## M39 — Print and PDF export (source implemented; acceptance pending)
 
 **Goal:** paper at the table.
 
