@@ -1,3 +1,20 @@
+# Chronexus status — 31 October 2026: M40 manual Fate presets
+
+- Character editor offers additive Fate Core / Fate Accelerated manual presets,
+  generic and custom-system preservation. Selecting a preset never deletes old
+  values or UUIDs, nor computes HP, resources or formulas. Saving uses the existing
+  typed character contract; backup storage is unchanged. Too many fields blocks
+  the operation without truncation. Attribution is visible beside the selector.
+- Official CC BY 3.0 review and full attribution recorded in docs/RULESETS.md
+  before implementation. No artwork, setting or rules prose copied.
+- Typecheck, ESLint, build and i18n coverage passed (all ten UI languages).
+  Eleven targeted player/preset tests passed, including switch/reapply stability,
+  overflow refusal and existing save guards. React Doctor remains unavailable
+  because npx lacks its CLI; no claim of a completed Doctor scan.
+- Skills: Impeccable for inherited character-editor controls; React Testing for
+  preserved-data behavior. Native character-editor acceptance remains pending.
+- Server work is owned by another active chat; preserve its working tree.
+
 # Chronexus status — 31 October 2026: M34 safe session diagnostics
 
 - Completed the missing diagnostic collection with a bounded in-memory ring of

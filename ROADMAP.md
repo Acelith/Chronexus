@@ -1808,7 +1808,7 @@ GitHub and an SBOM attached to a real release.
 - Acceptance: readable output in light print style for the main languages,
   including RTL and CJK; no personal data beyond what the user selected.
 
-## M40 — Additional ruleset sheet presets (planned, priority 17)
+## M40 — Additional ruleset sheet presets (implemented in source)
 
 **Goal:** serve players of other systems with the generic character model.
 

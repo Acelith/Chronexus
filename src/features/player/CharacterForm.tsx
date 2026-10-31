@@ -1,3 +1,4 @@
+import { applyPreset, fateAttribution } from "./presets";
 import { tr } from "../../i18n/store";
 import { Text } from "../../i18n/Text";
 import { useState } from "react";
@@ -25,6 +26,7 @@ export default function CharacterForm({
   const [data, setData] = useState<CharacterInput>(
     () => initial?.data ?? emptyCharacter(),
   );
+  const [presetError, setPresetError] = useState("");
   const update = <K extends keyof CharacterInput>(
     key: K,
     value: CharacterInput[K],
@@ -47,6 +49,41 @@ export default function CharacterForm({
             }
           />
         </p>
+        <label>
+          {tr("Sheet preset")}
+          <select
+            value={
+              ["generic", "fate-core", "fate-accelerated"].includes(
+                data.systemId,
+              )
+                ? data.systemId
+                : "custom"
+            }
+            onChange={(e) => {
+              setPresetError("");
+              try {
+                setData(applyPreset(data, e.target.value));
+              } catch (error) {
+                setPresetError(error instanceof Error ? error.message : "");
+              }
+            }}
+          >
+            <option value="custom" disabled>
+              {tr("Custom")}
+            </option>
+            <option value="generic">{tr("Manual values")}</option>
+            <option value="fate-core">Fate Core</option>
+            <option value="fate-accelerated">Fate Accelerated</option>
+          </select>
+        </label>
+        {presetError && <p role="alert">{presetError}</p>}
+        {(data.systemId === "fate-core" ||
+          data.systemId === "fate-accelerated") && (
+          <p className="muted">
+            {fateAttribution}{" "}
+            <a href="https://fate-srd.com/official-licensing-fate">CC BY 3.0</a>
+          </p>
+        )}
         <div className="player-fields">
           <TextField
             label={tr("Character name")}

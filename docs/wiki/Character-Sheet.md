@@ -40,3 +40,11 @@ Write your own abilities and spells with system, rank, school, activation, durat
 range, components and separate *known* / *prepared* markers. To start from official
 text, use the [rules wiki or the SRD catalog](Rules-Wiki-and-SRD.md): an imported spell is
 an editable copy that keeps its source, edition and licence visible.
+
+## Additional manual presets
+
+In the character editor, choose **Sheet preset** to add Fate Core or Fate
+Accelerated fields. The preset adds only missing statistics with empty values;
+fill them manually. Existing statistics and values remain when changing presets
+or returning to generic. Save the character to persist the selection. Attribution
+and the CC BY 3.0 reference appear beside the selector; no rules are calculated.

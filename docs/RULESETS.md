@@ -110,3 +110,28 @@ See docs/AI_LOCAL.md; no runtime or model has been executed.
 UI labels are localized; names/rules/imports, edition, and provenance
 remain original. Do not translate API queries, identifiers, or persisted values of the
 presets to change language. Choices, drafts, and limits: I18N.md.
+
+## M40 review — 31 October 2026
+
+The first additional manual presets are Fate Core and Fate Accelerated, rather
+than unreviewed proprietary sheets. Official licensing, verified before work:
+https://fate-srd.com/official-licensing-fate (officially endorsed by Evil Hat).
+Fate Core/Accelerated SRD permits CC BY 3.0 reuse. Only short field names are
+adapted, no artwork, logo, setting, rules prose or calculations. Labels can be
+edited locally. This does not imply publisher endorsement.
+
+Attribution: This work is based on Fate Core System and Fate Accelerated Edition
+(https://www.faterpg.com/), products of Evil Hat Productions, LLC, developed,
+authored, and edited by Leonard Balsera, Brian Engard, Jeremy Keller, Ryan Macklin,
+Mike Olson, Clark Valentine, Amanda Valentine, Fred Hicks, and Rob Donoghue,
+and licensed under Creative Commons Attribution 3.0 Unported
+(https://creativecommons.org/licenses/by/3.0/). Changes: manual editable field
+presets only; no automatic rules or original artwork. Attribution is shown beside
+the preset selector and retained here.
+
+Presets add missing fields with UUIDs to the generic statistics model, keep every
+existing field/value/UUID, and change only the selected system label. No HP,
+resource or derived-value defaults are guessed. Fields survive preset changes,
+saving, export and restore through the existing character contract. Unknown/custom
+system labels remain editable. Pathfinder and Call of Cthulhu remain outside this
+implementation pending a separate content/attribution review.
