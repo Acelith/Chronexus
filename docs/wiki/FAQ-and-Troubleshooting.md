@@ -34,3 +34,11 @@ The rest of Chronexus works without it.
 **Where do I report a problem?**
 In the [issues](https://github.com/Acelith/Chronexus/issues). Never attach your personal
 backups or notes.
+
+## Manual diagnostic report
+
+App settings → Diagnostics previews a local JSON report before saving it.
+It includes app/platform/schema information and the last 32 fixed diagnostic event
+codes from this app session. It never retains raw errors, campaign text, paths,
+credentials or AI conversations. Nothing is uploaded. A preview remains unchanged
+if a new event occurs; reopening the app clears the event buffer.

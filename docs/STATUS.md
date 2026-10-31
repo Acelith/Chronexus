@@ -1,3 +1,21 @@
+# Chronexus status — 31 October 2026: M34 safe session diagnostics
+
+- Completed the missing diagnostic collection with a bounded in-memory ring of
+  typed event codes (archive failure, unavailable archive, interrupted operation).
+  No error message or payload can enter it; sequence numbers carry no user data.
+  The last 32 events feed both recent errors and safe log excerpts. Nothing is
+  written automatically, uploaded, or persisted between launches.
+- Saving accepts an exact one-of-four issued preview snapshots, so later failures
+  do not alter a preview the user already reviewed. Existing atomic local save,
+  bounded report and no-overwrite behavior remain.
+- Windows: targeted diagnostic tests, full Rust tests, Cargo fmt and Clippy all
+  targets with warnings denied passed. Native debug build executed separately.
+  No UI strings or migration; existing diagnostic settings use the same contract.
+- Skills: Rust Best Practices (typed boundary, bounded state, focused tests).
+- User expanded scope to remaining desktop milestones including M42–M47. Another
+  chat owns the existing server fog/library changes; do not stage or overwrite
+  them. Continue desktop M40, M35/M39 and table integration against committed APIs.
+
 # Chronexus status — 31 October 2026: M35/M39 source implementation
 
 - Campaign overview offers a session recap: latest session by sequence, open clue

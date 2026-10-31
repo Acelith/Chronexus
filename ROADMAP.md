@@ -1738,7 +1738,7 @@ report, attached by `publish_unsigned.py` or `attach_sbom.py`), a CI `supply-cha
 [Verify your download](docs/wiki/Verify-Your-Download.md) guide. Not yet run: the CI job on
 GitHub and an SBOM attached to a real release.
 
-## M34 — Manual diagnostic bundle (planned, priority 11)
+## M34 — Manual diagnostic bundle (implemented in source)
 
 **Goal:** useful bug reports with no telemetry.
 

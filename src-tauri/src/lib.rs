@@ -130,13 +130,22 @@ impl Database {
         &self,
         action: impl FnOnce(&mut backup::Store) -> AppResult<T> + Send + 'static,
     ) -> AppResult<T> {
-        let shared = self.shared()?;
-        tauri::async_runtime::spawn_blocking(move || {
+        let shared = self
+            .shared()
+            .inspect_err(|_| diagnostics::record(diagnostics::Event::ArchiveUnavailable))?;
+        let result = tauri::async_runtime::spawn_blocking(move || {
             let mut store = shared.lock().map_err(|_| POISONED.to_string())?;
             action(&mut store)
         })
         .await
-        .map_err(|_| INTERRUPTED.to_string())?
+        .map_err(|_| {
+            diagnostics::record(diagnostics::Event::OperationInterrupted);
+            INTERRUPTED.to_string()
+        })?;
+        if result.is_err() {
+            diagnostics::record(diagnostics::Event::ArchiveOperationFailed);
+        }
+        result
     }
 }
 
