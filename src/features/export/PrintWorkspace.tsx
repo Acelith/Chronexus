@@ -1,3 +1,6 @@
+import CatalogSourceNote from "../player/CatalogSourceNote";
+import type { AssetDetails } from "../player/api";
+import { trainingLabels } from "../player/sheet";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { tr } from "../../i18n/store";
@@ -143,7 +146,8 @@ export default function PrintWorkspace({
                 <div key={s.id}>
                   <dt>{s.label}</dt>
                   <dd>
-                    {s.value} {s.modifier}
+                    {s.value} {s.modifier}{" "}
+                    {s.training ? trainingLabels[s.training] : ""}
                   </dd>
                 </div>
               ))}
@@ -175,6 +179,24 @@ export default function PrintWorkspace({
                 </dl>
               </section>
             ))}
+            <dl>
+              {[
+                [
+                  tr("Inspiration"),
+                  character.data.sheet.inspiration ? tr("Yes") : tr("No"),
+                ],
+                [
+                  tr("Death save successes"),
+                  character.data.sheet.deathSuccesses,
+                ],
+                [tr("Death save failures"), character.data.sheet.deathFailures],
+              ].map(([k, v]) => (
+                <div key={String(k)}>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
             <h2>{tr("Attacks")}</h2>
             {character.data.sheet.attacks.map((a) => (
               <p key={a.id}>
@@ -187,6 +209,7 @@ export default function PrintWorkspace({
             {assets.map((a) => (
               <section key={a.id}>
                 <h3>{a.input.details.name}</h3>
+                <AssetFields details={a.input.details} />
                 <p>{a.input.details.description}</p>
                 <p>{a.input.details.notes}</p>
               </section>
@@ -215,4 +238,47 @@ export default function PrintWorkspace({
       </>
     );
   }
+}
+
+function AssetFields({ details: d }: { details: AssetDetails }) {
+  const yes = (v: boolean | undefined) => (v ? tr("Yes") : tr("No"));
+  const fields: (readonly [string, string | number | null | undefined])[] =
+    d.kind === "item"
+      ? [
+          [tr("Quantity"), d.quantity],
+          [tr("Location (backpack, pocket, worn…)"), d.location],
+          [tr("Item category"), d.category],
+          [tr("Weight (your own unit, optional)"), d.weight],
+          [tr("Value or currency (free text)"), d.value],
+          [tr("Equipped"), yes(d.equipped)],
+          [tr("Consumable"), yes(d.consumable)],
+        ]
+      : [
+          [tr("Ability rules system"), d.systemId],
+          [tr("Level or rank (free text)"), d.rank],
+          [tr("School or tradition"), d.school],
+          [tr("Activation time"), d.castingTime],
+          [tr("Duration"), d.duration],
+          [tr("Range"), d.range],
+          [tr("Components"), d.components],
+          [tr("Ritual"), yes(d.ritual)],
+          [tr("Concentration"), yes(d.concentration)],
+          [tr("Known"), yes(d.known)],
+          [tr("Prepared"), yes(d.prepared)],
+        ];
+  return (
+    <>
+      <dl>
+        {fields.map(([label, value]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+      {d.kind !== "item" && d.catalogSource && (
+        <CatalogSourceNote source={d.catalogSource} />
+      )}
+    </>
+  );
 }
