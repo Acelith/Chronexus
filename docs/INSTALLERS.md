@@ -1,3 +1,17 @@
+# Release 0.13.0 — signed Windows x64 installer (Chronexus Table)
+
+NSIS Windows x64 installer compiled from commit `aaea60a` (annotated tag `v0.13.0`)
+in a clean detached worktree, updater signed with the production key and verified by
+`publish_app_update.py`. Size 34,978,006 bytes, SHA-256
+`b17430fd25248ad61fb57cde2d3eb137d1f32ebe349dadca1bb38343e90588fe`. Published on
+1 November 2026: installer, `.sig` and `latest.json` verified as drafts and after
+publication with anonymous SHA-256 checks; latest = v0.13.0. Tables need Chronexus
+Server 0.2.0. App only, no AI weights. The worktree needs a real `pnpm install`
+(pnpm refuses a junctioned `node_modules`) and the build script must run under
+`cmd` redirection, not PowerShell `*>`, or pnpm's stderr aborts it. **Not built or
+verified:** macOS, Linux, ARM64, Authenticode, installation and upgrade of this
+installer. See [release notes](releases/v0.13.0.md).
+
 # Release 0.12.0 — signed Windows x64 installer (M31)
 
 NSIS Windows x64 installer compiled from commit `611343e` (annotated tag `v0.12.0`),
