@@ -2635,5 +2635,10 @@
   "m_2beeece12192": "Scollega il tavolo da questa campagna",
   "m_8389fcae64e9": "I messaggi del tavolo non inviati saranno scartati.",
   "m_27fd2220e65e": "Lascia tavolo",
-  "m_462af717bca6": "Lasciare il tavolo?"
+  "m_462af717bca6": "Lasciare il tavolo?",
+  "m_a9c9b3f8569e": "ha tirato {0}",
+  "m_1fcc4b37141c": "scartato",
+  "m_beeb6aa44277": "Totale {0}",
+  "m_880b9d1e11f4": "solo per il GM",
+  "m_cfa5e19c1f58": "Tira con /r 1d20+5, con vantaggio /r 2d20kh1, in segreto /gr 1d6; sussurra al GM con /w gm. I dadi li tira il server."
 }

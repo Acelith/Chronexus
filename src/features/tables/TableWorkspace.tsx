@@ -3,12 +3,64 @@ import {
   createTableRuntime,
   type BoardWidget,
 } from "../../../vendor/table-runtime/index.js";
-import { usePreferences, tr } from "../../i18n/store";
+import { usePreferences, tr, number } from "../../i18n/store";
 import { syncApi } from "../sync/api";
 import JournalGrants from "./JournalGrants";
 import { uuid7 } from "./operation-id";
 import { tablesApi, type Table } from "./api";
 import type { BoardOperation, LiveEvent } from "./server-types";
+
+/** Server-rolled dice and GM-only lines; the desktop only displays them. */
+function ChatLine({ event }: { event: LiveEvent }) {
+  const whisper = event.audience === "gm",
+    roll = event.roll;
+  return (
+    <li className={whisper ? "chat-whisper" : roll ? "chat-roll" : undefined}>
+      <b>{event.authorName}</b>
+      {roll ? (
+        <>
+          {" "}
+          {tr("rolled {0}", [roll.expression])}
+          {roll.label && ` · ${roll.label}`}
+          <span className="roll-dice">
+            {roll.terms.map((term, i) => (
+              <span key={i}>
+                {(i > 0 || term.sign < 0) && (
+                  <span aria-hidden="true">
+                    {term.sign < 0 ? " − " : " + "}
+                  </span>
+                )}
+                {term.sides
+                  ? term.results.map((value, n) => (
+                      <span
+                        key={n}
+                        className={term.kept[n] ? "die" : "die die-dropped"}
+                        title={
+                          term.kept[n]
+                            ? `d${term.sides}`
+                            : `d${term.sides} · ${tr("discarded")}`
+                        }
+                      >
+                        {number(value)}
+                      </span>
+                    ))
+                  : number(term.value)}
+              </span>
+            ))}
+          </span>
+          <strong className="roll-total">
+            {tr("Total {0}", [roll.total])}
+          </strong>
+        </>
+      ) : (
+        <>
+          : {whisper ? event.text.replace(/^\s*\/w\s+gm\s+/i, "") : event.text}
+        </>
+      )}
+      {whisper && <i className="chat-tag"> · {tr("to the GM only")}</i>}
+    </li>
+  );
+}
 import CharacterProjection from "./CharacterProjection";
 
 function element(
@@ -178,6 +230,10 @@ export default function TableWorkspace({
         seats,
         confirm: ask,
         active: () => active,
+        ping: (p: { sceneId: string; x: number; y: number }) => {
+          const id = subscription.current;
+          if (id) void tablesApi.ping(id, p.sceneId, p.x, p.y).catch(() => {});
+        },
       });
       widget.current = instance;
       container?.replaceChildren(instance.root);
@@ -195,6 +251,21 @@ export default function TableWorkspace({
           setError(
             tr("Table access ended. Sign in again or check your invitation."),
           );
+          return;
+        }
+        if (
+          frame.type === "ping" &&
+          typeof frame.sceneId === "string" &&
+          typeof frame.x === "number" &&
+          typeof frame.y === "number"
+        ) {
+          instance?.showPing({
+            sceneId: frame.sceneId,
+            x: frame.x,
+            y: frame.y,
+            authorId: frame.authorId,
+            authorName: frame.authorName,
+          });
           return;
         }
         if (frame.type === "disconnected") {
@@ -355,9 +426,7 @@ export default function TableWorkspace({
         <summary>{tr("Table messages")}</summary>
         <ol>
           {events.map((event) => (
-            <li key={event.operationId}>
-              <b>{event.authorName}</b>: {event.text}
-            </li>
+            <ChatLine key={event.operationId} event={event} />
           ))}
         </ol>
         <form
@@ -378,6 +447,11 @@ export default function TableWorkspace({
             {pending ? tr("Retry") : tr("Send")}
           </button>
         </form>
+        <p className="muted">
+          {tr(
+            "Roll with /r 1d20+5, advantage with /r 2d20kh1, secretly with /gr 1d6; whisper to the GM with /w gm. The server rolls the dice.",
+          )}
+        </p>
       </details>
       <JournalGrants
         key={online ? "connected" : "disconnected"}

@@ -49,6 +49,8 @@ export const tablesApi = {
       baseRevision,
       text,
     }),
+  ping: (subscription: string, sceneId: string, x: number, y: number) =>
+    call<void>("table_live_ping", { subscription, sceneId, x, y }),
   start: (tableId: string, receive: (frame: LiveFrame) => void) => {
     const onEvent = new Channel<LiveFrame>();
     onEvent.onmessage = receive;
@@ -101,6 +103,11 @@ export interface LiveFrame {
   reset?: boolean;
   revision?: number;
   operationId?: string;
+  sceneId?: string;
+  x?: number;
+  y?: number;
+  authorId?: string;
+  authorName?: string;
 }
 async function call<T>(
   name: string,

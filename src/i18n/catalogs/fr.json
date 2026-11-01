@@ -2193,5 +2193,10 @@
   "m_2beeece12192": "Délier la table de cette campagne",
   "m_8389fcae64e9": "Les messages non envoyés seront abandonnés.",
   "m_27fd2220e65e": "Quitter la table",
-  "m_462af717bca6": "Quitter la table ?"
+  "m_462af717bca6": "Quitter la table ?",
+  "m_a9c9b3f8569e": "lance {0}",
+  "m_1fcc4b37141c": "écarté",
+  "m_beeb6aa44277": "Total {0}",
+  "m_880b9d1e11f4": "au MJ seulement",
+  "m_cfa5e19c1f58": "Lancez avec /r 1d20+5, avec avantage /r 2d20kh1, en secret /gr 1d6 ; murmurez au MJ avec /w gm. Le serveur lance les dés."
 }

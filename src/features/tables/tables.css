@@ -105,3 +105,193 @@
     border-block-start: 1px solid #a18a61;
   }
 }
+/* Shared runtime layout: tool palette, pan/zoom viewport and tabbed sidebar. */
+.chronexus-table .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.chronexus-table .vtt {
+  container-type: inline-size;
+  margin-block: 12px;
+}
+.chronexus-table .vtt:fullscreen {
+  background: #2a221b;
+  padding: 8px;
+}
+.chronexus-table .vtt-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 10px;
+  background: #2a221b;
+  color: #f4e6c8;
+  border-radius: 8px 8px 0 0;
+}
+.chronexus-table .vtt-topbar .vtt-notice {
+  margin: 0;
+  font-weight: 600;
+  color: #e9c98b;
+}
+.chronexus-table .vtt-unit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #f4e6c8;
+}
+.chronexus-table .vtt-zoom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+.chronexus-table .vtt-zoom-level {
+  min-width: 5ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.chronexus-table .vtt-icon,
+.chronexus-table .vtt-tool {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #f4e6c8;
+  border: 1px solid transparent;
+}
+.chronexus-table .vtt-tool[aria-pressed="true"],
+.chronexus-table .vtt-icon[aria-pressed="true"] {
+  background: #f2e7ce;
+  color: #2a221b;
+  border-color: #9a7a3f;
+}
+.chronexus-table .vtt-icon-svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chronexus-table .vtt-body {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-rows: minmax(340px, 60vh) auto;
+  background: #2a221b;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+.chronexus-table .vtt-palette {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  overflow-y: auto;
+}
+.chronexus-table .vtt-center {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: #1b1915;
+}
+.chronexus-table .vtt-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  direction: ltr;
+  touch-action: none;
+}
+.chronexus-table .vtt-viewport[data-tool="pan"],
+.chronexus-table .vtt-viewport.panning {
+  cursor: grab;
+}
+.chronexus-table .vtt-viewport[data-tool="ping"] {
+  cursor: crosshair;
+}
+.chronexus-table .vtt-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+.chronexus-table .vtt .battle-map {
+  width: auto;
+  max-width: none;
+  border: 0;
+}
+.chronexus-table .vtt-summary {
+  margin: 0;
+  padding: 6px 10px;
+  color: #e6d7b6;
+  background: #231d17;
+  font-size: 0.9rem;
+}
+.chronexus-table .vtt-status:empty {
+  display: none;
+}
+.chronexus-table .vtt-sidebar {
+  grid-column: 1 / -1;
+  background: #fbf6ea;
+  border-block-start: 1px solid #4a3c30;
+}
+.chronexus-table .vtt-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  background: #e6d6b2;
+}
+.chronexus-table .vtt-tabs [role="tab"] {
+  flex: 1 1 auto;
+  min-height: 38px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  border-block-end: 3px solid transparent;
+}
+.chronexus-table .vtt-tabs [role="tab"][aria-selected="true"] {
+  background: #fbf6ea;
+  border-block-end-color: #7a2e2a;
+  font-weight: 600;
+}
+.chronexus-table .vtt-panel {
+  padding: 12px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.chronexus-table .chat-whisper {
+  background: #efe3f0;
+}
+.chronexus-table .roll-dice {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-inline: 8px;
+}
+.chronexus-table .die {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2em;
+  padding: 0 4px;
+  border-radius: 6px;
+  background: #2a221b;
+  color: #f4e6c8;
+  font-variant-numeric: tabular-nums;
+}
+.chronexus-table .die-dropped {
+  background: transparent;
+  color: #65553e;
+  border: 1px dashed #a18a61;
+  text-decoration: line-through;
+}
+.chronexus-table .roll-total {
+  font-variant-numeric: tabular-nums;
+}

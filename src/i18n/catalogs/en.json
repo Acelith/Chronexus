@@ -2653,5 +2653,10 @@
   "m_2beeece12192": "Unlink table from this campaign",
   "m_8389fcae64e9": "Unsent table messages will be discarded.",
   "m_27fd2220e65e": "Leave table",
-  "m_462af717bca6": "Leave table?"
+  "m_462af717bca6": "Leave table?",
+  "m_a9c9b3f8569e": "rolled {0}",
+  "m_1fcc4b37141c": "discarded",
+  "m_beeb6aa44277": "Total {0}",
+  "m_880b9d1e11f4": "to the GM only",
+  "m_cfa5e19c1f58": "Roll with /r 1d20+5, advantage with /r 2d20kh1, secretly with /gr 1d6; whisper to the GM with /w gm. The server rolls the dice."
 }

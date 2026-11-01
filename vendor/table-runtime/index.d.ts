@@ -7,6 +7,14 @@ export interface BoardWidget {
   refresh(): Promise<void>;
   readonly snapshot: BoardView | null;
   readonly selected: string | null;
+  showPing(frame: PingFrame): void;
+}
+export interface PingFrame {
+  sceneId: string;
+  x: number;
+  y: number;
+  authorId?: string;
+  authorName?: string;
 }
 export function createTableRuntime(locale: string): {
   board: { create(options: unknown): BoardWidget };

@@ -1,3 +1,23 @@
+# Chronexus status — 1 November 2026: table workspace, chat dice and pings
+
+- The bundled table runtime (server source `c29bab7`, schema 016) now opens as a
+  workspace: tool palette, zoom/pan/fit viewport, full screen and tabbed panels
+  (Tokens, Combat, Measure). Player view only; GM preparation stays in the server
+  web interface, which gained the same layout plus Chat/Players panels.
+- Table messages show server-rolled dice (kept and discarded dice, total, label)
+  and GM-only whispers/secret rolls. Help text documents `/r`, `/gr` and `/w gm`.
+  The desktop never rolls or chooses an audience; the server does.
+- New native command `table_live_ping` sends a bounded ping frame on the existing
+  stream (validated scene ID and coordinates, current account and subscription).
+  Received pings are drawn on the shown scene and announced politely.
+- Windows: typecheck, ESLint, 271 frontend tests, i18n gate (all ten catalogs, 0
+  missing UI translations), runtime integrity, Clippy with warnings denied, 201
+  Rust library tests and 6 ignored real-server live tests passed (three-player
+  scenario extended with ping and secret-roll filtering).
+- Skills: Impeccable (existing parchment/leather system, SVG icons), React Testing
+  (observable roll/whisper/ping test), Rust Best Practices (narrow command).
+- Unrelated recap/print working-tree changes are preserved and not committed.
+
 # Chronexus status — 1 November 2026: M42–M47 desktop table integration
 
 - Explicit table list/join/open/leave and campaign associations; the live table

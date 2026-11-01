@@ -2193,5 +2193,10 @@
   "m_2beeece12192": "Tisch von dieser Kampagne trennen",
   "m_8389fcae64e9": "Nicht gesendete Tischnachrichten werden verworfen.",
   "m_27fd2220e65e": "Tisch verlassen",
-  "m_462af717bca6": "Tisch verlassen?"
+  "m_462af717bca6": "Tisch verlassen?",
+  "m_a9c9b3f8569e": "würfelt {0}",
+  "m_1fcc4b37141c": "verworfen",
+  "m_beeb6aa44277": "Summe {0}",
+  "m_880b9d1e11f4": "nur an die SL",
+  "m_cfa5e19c1f58": "Würfle mit /r 1d20+5, mit Vorteil /r 2d20kh1, verdeckt /gr 1d6; flüstere der SL mit /w gm. Der Server würfelt."
 }

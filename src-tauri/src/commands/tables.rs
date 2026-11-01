@@ -202,6 +202,34 @@ pub fn table_live_message(
         .ok_or(TableError { status: 401 })?;
     slot.sender.try_send(json!({"operationId":operation_id,"baseRevision":base_revision,"audience":"public","text":text})).map_err(|_|TableError{status:503})
 }
+/// Transient map ping on the active scene. The server validates the scene, bounds and rate.
+#[tauri::command]
+pub fn table_live_ping(
+    db: tauri::State<'_, Database>,
+    live: tauri::State<'_, Live>,
+    subscription: String,
+    scene_id: String,
+    x: f64,
+    y: f64,
+) -> Result<(), TableError> {
+    if sync::remote_id(&scene_id).is_err()
+        || !x.is_finite()
+        || !y.is_finite()
+        || !(0.0..=100_000.0).contains(&x)
+        || !(0.0..=100_000.0).contains(&y)
+    {
+        return Err(TableError { status: 400 });
+    }
+    let current = sync::read_account(&db.root()?)?;
+    let slot = live.0.lock().map_err(|_| TableError { status: 503 })?;
+    let slot = slot
+        .as_ref()
+        .filter(|s| s.id == subscription && s.account == current)
+        .ok_or(TableError { status: 401 })?;
+    slot.sender
+        .try_send(json!({"type":"ping","sceneId":scene_id,"x":x,"y":y}))
+        .map_err(|_| TableError { status: 503 })
+}
 #[tauri::command]
 pub async fn table_links(
     db: tauri::State<'_, Database>,

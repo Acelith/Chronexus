@@ -181,6 +181,38 @@ async fn three_players_reconnect_move_and_receive_filtered_combat_and_fog() {
         assert_eq!(frame["type"], "state");
         assert_eq!(frame["board"]["tokens"].as_array().unwrap().len(), 3);
     }
+    // Pings and server-rolled chat dice use the same desktop stream; a secret roll
+    // reaches its author (and the GM) only.
+    channels[0]
+        .1
+        .send(json!({"type":"ping","sceneId":scene,"x":10.0,"y":10.0}))
+        .await
+        .unwrap();
+    let base = gm_client.table_board(id).await.unwrap()["revision"].clone();
+    channels[0].1.send(json!({"operationId":uuid::Uuid::now_v7().to_string(),"baseRevision":base,"audience":"public","text":"/gr 2d20kh1+3"})).await.unwrap();
+    let rolled = base.as_i64().unwrap() + 1;
+    for (n, (_, _, frames, _)) in channels.iter_mut().enumerate() {
+        let (mut pinged, mut committed, mut saw_roll) = (false, false, false);
+        while !(pinged && committed) {
+            let frame = tokio::time::timeout(Duration::from_secs(5), frames.recv())
+                .await
+                .unwrap()
+                .unwrap();
+            if frame["type"] == "ping" {
+                assert_eq!(frame["authorId"], players[0].0.account_id);
+                pinged = true;
+            }
+            if frame["type"] == "state" && frame["revision"].as_i64() >= Some(rolled) {
+                committed = true;
+                saw_roll |= frame["events"].as_array().unwrap().iter().any(|e| {
+                    e["roll"]["total"]
+                        .as_i64()
+                        .is_some_and(|t| (4..=23).contains(&t))
+                });
+            }
+        }
+        assert_eq!(saw_roll, n == 0, "secret roll visible only to its author");
+    }
     operation(
         &players[0].1,
         id,

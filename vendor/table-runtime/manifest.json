@@ -2,10 +2,10 @@
   "license": "Apache-2.0",
   "source": "https://github.com/Acelith/Chronexus-Server",
   "inputs": [
-    "9f420441c457cced578d7ca3c199db92eb1329ac5ab200b1841ed2b315bafdbe",
+    "2a0dc0bd3f53207efc987b5fba343f9786329c132e8c39b6291e9efec73036a9",
     "edec6baec68adf9640523bb2f91a9ad874b01fb1e87780a0722bcdb335b878cd",
-    "39546696efdda0c9f081f277e4c9000ce47bf0e0f147fbcc25dba4b60ae548e1"
+    "9038b766ced08e8706b2017b08aa686182d5f1ef2cb82b6172e7d11bcb8aaf05"
   ],
-  "runtime": "688673fa6af2dea8a89817b03bf429b1c131d0d238264c3ce39a481b6ca9ff5f",
-  "types": "0f5c30a7132bc09c9d58a3f5df17db3f1895269856916d2a7c4d3ce3702988cd"
+  "runtime": "80dc4949c998a54df64e691f48c5558c05f84471dea41f59ac5674623a31dc64",
+  "types": "608966d85cee60a42e00c689d024b46b2f4cbe77e4996f88245e4c70a886cf35"
 }

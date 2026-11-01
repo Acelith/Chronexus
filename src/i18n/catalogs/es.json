@@ -2193,5 +2193,10 @@
   "m_2beeece12192": "Desvincular mesa de esta campaña",
   "m_8389fcae64e9": "Los mensajes sin enviar se descartarán.",
   "m_27fd2220e65e": "Salir de la mesa",
-  "m_462af717bca6": "¿Salir de la mesa?"
+  "m_462af717bca6": "¿Salir de la mesa?",
+  "m_a9c9b3f8569e": "tiró {0}",
+  "m_1fcc4b37141c": "descartado",
+  "m_beeb6aa44277": "Total {0}",
+  "m_880b9d1e11f4": "solo para el DJ",
+  "m_cfa5e19c1f58": "Tira con /r 1d20+5, con ventaja /r 2d20kh1, en secreto /gr 1d6; susurra al DJ con /w gm. El servidor tira los dados."
 }

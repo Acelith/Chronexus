@@ -23,6 +23,7 @@ vi.mock("./api", () => ({
     start: vi.fn(),
     stop: vi.fn(),
     message: vi.fn(),
+    ping: vi.fn(),
     character: vi.fn(),
     project: vi.fn(),
     grant: vi.fn(),
@@ -202,4 +203,87 @@ test("bundled table catalogs contain every label in all ten natural languages", 
     expect(r.i18n.t("boardFailed")).not.toBe("boardFailed");
     expect(document.documentElement.lang).toBeTruthy();
   }
+});
+
+test("server rolls, GM-only lines and pings are shown without trusting markup", async () => {
+  await loadLocale("it");
+  applyPreferences({
+    version: 2,
+    locale: "it",
+    script: "standard",
+    showOriginal: false,
+  });
+  vi.mocked(tablesApi.ping).mockResolvedValue();
+  const view = render(
+    <TableWorkspace campaignId="campaign" table={table} onClose={() => {}} />,
+  );
+  await waitFor(() => expect(tablesApi.start).toHaveBeenCalledOnce());
+  const event = (n: number, extra: object) => ({
+    revision: n,
+    operationId: `op-${n}`,
+    authorId: "self",
+    authorName: "Self",
+    createdAt: "",
+    audience: "public",
+    text: "",
+    ...extra,
+  });
+  act(() =>
+    receive({
+      type: "state",
+      board: snapshot(),
+      online: 2,
+      events: [
+        event(2, {
+          text: "/r 2d20kh1+5 <img src=x>",
+          roll: {
+            expression: "2d20kh1+5",
+            label: "<img src=x>",
+            total: 22,
+            terms: [
+              {
+                sign: 1,
+                count: 2,
+                sides: 20,
+                keep: "kh",
+                keepCount: 1,
+                results: [17, 4],
+                kept: [true, false],
+                value: 17,
+              },
+              { sign: 1, results: [], kept: [], value: 5 },
+            ],
+          },
+        }),
+        event(3, { audience: "gm", text: "/w gm segreto" }),
+      ],
+    }),
+  );
+  expect(view.container.querySelector(".die-dropped")?.textContent).toBe("4");
+  expect(screen.getByText(tr("Total {0}", [22]))).toBeInTheDocument();
+  expect(view.container.querySelector("li img")).toBeNull();
+  expect(view.container.querySelector(".chat-whisper")?.textContent).toContain(
+    ": segreto",
+  );
+  expect(view.container.querySelector(".chat-whisper")?.textContent).toContain(
+    tr("to the GM only"),
+  );
+  // A ping on another scene is ignored; the runtime announces one on the shown scene.
+  act(() =>
+    receive({ type: "ping", sceneId: "other", x: 1, y: 1, authorName: "Self" }),
+  );
+  act(() =>
+    receive({
+      type: "ping",
+      sceneId: "scene",
+      x: 10,
+      y: 10,
+      authorName: "Ally",
+    }),
+  );
+  await waitFor(() =>
+    expect(
+      view.container.querySelector(".vtt-center [aria-live]")?.textContent,
+    ).toContain("Ally"),
+  );
 });

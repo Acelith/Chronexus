@@ -2193,5 +2193,10 @@
   "m_2beeece12192": "Desvincular mesa desta campanha",
   "m_8389fcae64e9": "As mensagens não enviadas serão descartadas.",
   "m_27fd2220e65e": "Sair da mesa",
-  "m_462af717bca6": "Sair da mesa?"
+  "m_462af717bca6": "Sair da mesa?",
+  "m_a9c9b3f8569e": "rolou {0}",
+  "m_1fcc4b37141c": "descartado",
+  "m_beeb6aa44277": "Total {0}",
+  "m_880b9d1e11f4": "só para o mestre",
+  "m_cfa5e19c1f58": "Role com /r 1d20+5, com vantagem /r 2d20kh1, em segredo /gr 1d6; sussurre ao mestre com /w gm. O servidor rola os dados."
 }
