@@ -2,7 +2,11 @@ import { useState } from "react";
 import { tr } from "../../i18n/store";
 import { command, errorMessage } from "../journal/api";
 
-export default function DiagnosticsSettings({ disabled }: { disabled: boolean }) {
+export default function DiagnosticsSettings({
+  disabled,
+}: {
+  disabled: boolean;
+}) {
   const [content, setContent] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -31,15 +35,44 @@ export default function DiagnosticsSettings({ disabled }: { disabled: boolean })
       setPending(false);
     }
   }
-  return <section className="language-settings" aria-label={tr("Diagnostics")}>
-    <h3>{tr("Diagnostics")}</h3>
-    <p>{tr("Preview a local diagnostic report before saving it. Chronexus never sends it.")}</p>
-    <button type="button" disabled={disabled || pending} onClick={() => void preview()}>{tr("Preview diagnostics")}</button>
-    {content && <>
-      <pre tabIndex={0} style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{content}</pre>
-      <button type="button" disabled={disabled || pending} onClick={() => void save()}>{tr("Save diagnostic file…")}</button>
-    </>}
-    {saved && <p role="status">{tr("Diagnostic file saved.")}</p>}
-    {error && <p className="error" role="alert">{error}</p>}
-  </section>;
+  return (
+    <section className="language-settings" aria-label={tr("Diagnostics")}>
+      <h3>{tr("Diagnostics")}</h3>
+      <p>
+        {tr(
+          "Preview a local diagnostic report before saving it. Chronexus never sends it.",
+        )}
+      </p>
+      <button
+        type="button"
+        disabled={disabled || pending}
+        onClick={() => void preview()}
+      >
+        {tr("Preview diagnostics")}
+      </button>
+      {content && (
+        <>
+          <pre
+            tabIndex={0}
+            style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
+          >
+            {content}
+          </pre>
+          <button
+            type="button"
+            disabled={disabled || pending}
+            onClick={() => void save()}
+          >
+            {tr("Save diagnostic file…")}
+          </button>
+        </>
+      )}
+      {saved && <p role="status">{tr("Diagnostic file saved.")}</p>}
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
+    </section>
+  );
 }
