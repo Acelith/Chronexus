@@ -5,7 +5,9 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dirname, "../.."),
   source = resolve(root, "../Chronexus-Server");
 const target = resolve(root, "vendor/table-runtime");
-const hash = (s) => createHash("sha256").update(s).digest("hex");
+// Hash and write LF text so Git line-ending conversion cannot change the result.
+const lf = (s) => s.replace(/\r\n/g, "\n");
+const hash = (s) => createHash("sha256").update(lf(s)).digest("hex");
 if (process.argv.includes("--check")) {
   const manifest = JSON.parse(
     await readFile(resolve(target, "manifest.json"), "utf8"),
@@ -23,12 +25,12 @@ if (process.argv.includes("--check")) {
 await mkdir(target, { recursive: true });
 const parts = await Promise.all(
   ["i18n.js", "combat.js", "board.js"].map((f) =>
-    readFile(resolve(source, "web", f), "utf8"),
+    readFile(resolve(source, "web", f), "utf8").then(lf),
   ),
 );
 const code = `// Chronexus Table. Apache-2.0. First-party sources pinned in manifest.json.\n// Regenerate with node scripts/tables/sync-runtime.mjs.\nexport function createTableRuntime(locale) {\nconst window={};\nconst localStorage={getItem:key=>key==='chronexus-web-locale'?locale:globalThis.localStorage.getItem(key),setItem:(key,value)=>{if(key!=='chronexus-web-locale')globalThis.localStorage.setItem(key,value);}};\n${parts[0].replaceAll("  apply();", "")}\n${parts[1]}\n${parts[2]}\nreturn {board:window.ChronexusBoard,i18n:window.ChronexusI18n};\n}\n`;
 const normalizedCode = code.replace(/[ \t]+$/gm, "");
-const types = await readFile(resolve(source, "api/types.ts"), "utf8");
+const types = lf(await readFile(resolve(source, "api/types.ts"), "utf8"));
 const manifest = {
   license: "Apache-2.0",
   source: "https://github.com/Acelith/Chronexus-Server",
