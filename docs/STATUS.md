@@ -1,3 +1,16 @@
+# Chronexus status — 1 November 2026: roadmap synchronised with releases
+
+- ROADMAP priority table now has a *State* column matching the source and releases:
+  M42–M47 released in Chronexus 0.13.0 / Server 0.2.0 (physical multi-device acceptance
+  open); M34 and M40 (Fate presets) done; M35 recap and M39 print/PDF implemented in
+  source, with native print dialogs, RTL/CJK print review and local-model recap quality
+  still open. Section notes record the post-0.13.0 recap pin toggles, AI-draft cancel and
+  structured print fields on `main` (commit f35df4a).
+- Checked for this update: vitest src/features/recap and src/features/export (4 files,
+  9 tests) and tsc --noEmit passed. Documentation only.
+- Next: M25 production deployment/server AI qualification and a physical multi-device
+  M42–M47 session; then M35/M39 native acceptance.
+
 # Chronexus status — 1 November 2026: table workspace, chat dice and pings
 
 - The bundled table runtime (server source `c29bab7`, schema 016) now opens as a

@@ -309,11 +309,14 @@ M41 (project wiki) is published: keep `docs/wiki/` and the GitHub handbook pages
 visible behaviour. M28 was removed from the open list on 27 October 2026.
 
 ROADMAP "Open milestones in priority order" is the single source for what comes
-next: M25 server (in progress), M42–M47 virtual tabletop (docs/VTT.md), M34 diagnostic bundle
-(M31, M32 and M33 are implemented; docs/TRUST.md host table is CI-checked: update it with any new network host), M35 session recap, M36 imports, M37
-timeline, M38 maps, M39 print/PDF, M40 other rulesets. All are
-planning only: implement one only on explicit request, keep the IDs, and update
-the table when priorities change. Clue items, recaps, imports and pins follow the
+next and for each milestone's state. As of 1 November 2026: M25 server in progress
+(production deployment and server AI qualification open); M42–M47 virtual tabletop
+(docs/VTT.md) released in server 0.2.0 / desktop 0.13.0 with physical multi-device
+acceptance open; M35 recap and M39 print/PDF implemented in source with native and
+quality acceptance open; M31–M34 and M36–M38 implemented; M40 has Fate presets (other
+rulesets need a new license review). docs/TRUST.md host table is CI-checked: update it
+with any new network host. New work still needs an explicit request: keep the IDs and
+update the table when priorities or states change. Clue items, recaps, imports and pins follow the
 same rules as notes: no implicit factual relationships or AI-written facts.
 
 ## Planned virtual tabletop (M42–M47, Chronexus Table)

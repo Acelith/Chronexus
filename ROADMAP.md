@@ -1,6 +1,8 @@
 # ROADMAP.md — Chronexus: milestone and real delivery order
 
-Updated on 26 October 2026 (open milestones reprioritized, M28–M40 added).
+Updated on 1 November 2026 (priority table synchronised with the source and with
+releases Chronexus 0.13.0 / Chronexus Server 0.2.0); open milestones were reprioritized
+and M28–M40 added on 26 October 2026.
 The historical numbering M0–M15 remains stable to
 avoid ambiguity in commits, guides, and releases. The suffixes **a/b/c/d** identify
 extensions inserted between existing phases: those already delivered are retrospective;
@@ -1493,35 +1495,37 @@ close platform acceptance or publish a release.
 
 ## Open milestones in priority order
 
-Reorganized on 26 October 2026 at the user's request. Every milestone below is
-**planned, not implemented**, except M25 (in progress) and M31 (implemented on Windows). The sections follow this
+Reorganized on 26 October 2026 at the user's request and synchronised with the source on
+1 November 2026. The *State* column says what exists: "source implemented" means the code,
+tests and Windows checks are committed while the acceptance listed in the milestone section
+(native platforms, physical devices, model quality) is still open. The sections follow this
 priority, not numeric order; IDs M28–M40 are new and were assigned in priority
 order, while M25 keeps its ID. M27 (Android) was removed on 29 October 2026 at the
 user's request: the project focuses on the desktop client and the server. Each milestone still needs an explicit
 request before implementation, and publication follows the standing release rules.
 
-| Priority | Milestone | Why now | Depends on |
+| Priority | Milestone | State | Depends on |
 | --- | --- | --- | --- |
 | Done | M41 — Project wiki for app and server | Handbook published; canonical GitHub Markdown sources after migration | — |
 | Done | M29 — Release matrix for Windows, macOS and Linux | Unsigned pre-release 0.10.1 published 27/10/2026 (replaces 0.10.0); Windows ARM64 and x64 AppImage open | — |
 | Done | M30 — Automated desktop QA and cross-platform CI | GitHub workflows and local runner in place; remote run acceptance open | — |
 | Done | M31 — Clue board and open questions | Implemented on Windows with schema 022 and selective sharing | — |
-| 1 | M25 — Chronexus Server (in progress) | 0.1.1 released, web interface done; server AI qualification and public deployment open | M24 |
-| 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Source implemented; physical cross-platform acceptance open | M25 |
-| 3 | M43 — Live table channel and GM web interface | Source implemented; physical cross-platform acceptance open | M42 |
-| 4 | M44 — Maps, grid, tokens and movement, ft/m everywhere | Source implemented; physical cross-platform acceptance open | M43 |
-| 5 | M45 — Combat tracker | Source implemented; physical cross-platform acceptance open | M44 |
-| 6 | M46 — Fog of war and vision | Source implemented; physical cross-platform acceptance open | M44 |
-| 7 | M47 — Monster library and encounters | Source implemented; physical cross-platform acceptance open | M45 |
+| 1 | M25 — Chronexus Server (in progress) | Server 0.2.0 released with GHCR images (linux/amd64, linux/arm64) and the table web workspace; server AI model qualification and public production deployment open | M24 |
+| 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Server 0.2.0 and desktop 0.13.0 released; physical multi-device acceptance open | M25 |
+| 3 | M43 — Live table channel and GM web interface | Released (GM workspace, chat dice, whispers, pings; desktop player view); physical multi-device and LAN latency acceptance open | M42 |
+| 4 | M44 — Maps, grid, tokens and movement, ft/m everywhere | Released in server 0.2.0 and desktop 0.13.0; physical multi-device acceptance open | M43 |
+| 5 | M45 — Combat tracker | Released in server 0.2.0 and desktop 0.13.0; physical multi-device acceptance open | M44 |
+| 6 | M46 — Fog of war and vision | Released in server 0.2.0 and desktop 0.13.0; physical multi-device acceptance open | M44 |
+| 7 | M47 — Monster library and encounters | Released in server 0.2.0 (GM web only); physical multi-device acceptance open | M45 |
 | Done | M32 — First start and demo campaign | Implemented 29/10/2026 (source); packaged-app check open | — |
 | Done | M33 — Trust and transparency | Implemented 29/10/2026; first CI run and release attachment open | M29 |
-| 11 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
-| 12 | M35 — "Previously on…" session recap | Faster start of every game session | M31 helpful |
+| Done | M34 — Manual diagnostic bundle | Source implemented and released in 0.13.0: local preview and save, bounded safe event codes, no upload | — |
+| 8 | M35 — "Previously on…" session recap | Source implemented (0.13.0 plus per-note pin toggles and AI-draft cancel on main); native and local-model quality acceptance open | M31 helpful |
 | Done | M36 — Import from Obsidian, Kanka and character exports | Local previews, mandatory backup, immutable originals; bounded supported formats (docs/IMPORTS.md) | — |
 | Done | M37 — Campaign timeline and in-world calendar | Source/schema 023; custom calendar and attributed dates, backup round-trip tested | — |
 | Done | M38 — Maps with linked pins | Source/schema 024; relative pins, routes, explicit same-size relink; package checks pending | — |
-| 16 | M39 — Print and PDF export | Paper sheets and campaign booklets at the table | — |
-| 17 | M40 — Additional ruleset sheet presets | Reaches players beyond D&D 5e | License review |
+| 9 | M39 — Print and PDF export | Source implemented (0.13.0 plus structured item/ability fields on main); native print dialogs and RTL/CJK print review open | — |
+| Done | M40 — Additional ruleset sheet presets | Manual Fate Core / Fate Accelerated presets released in 0.13.0 (CC BY 3.0, docs/RULESETS.md); other systems need a new license review and request | License review |
 
 ## M41 — Project wiki for app and server (published 27 October 2026)
 
@@ -1646,8 +1650,12 @@ weights), and a public deployment with real DNS/TLS (needs a host and domain).
 
 **Requested 27 October 2026.** Full requirements, boundaries, architecture, inspiration
 sources and acceptance are in [docs/VTT.md](docs/VTT.md). Server and desktop source are
-implemented as requested; Windows build and three-client protocol tests passed. Physical
-multi-platform sessions, production TLS and LAN latency remain open.
+implemented as requested; Windows build and three-client protocol tests passed. Released
+on 1 November 2026 in Chronexus Server 0.2.0 (GM web workspace, server chat dice, `/gr`
+secret rolls, `/w gm` whispers, map pings) and Chronexus 0.13.0 (desktop player view of
+the same workspace). A loopback session the same day covered GM table creation, invitation,
+scene, token, fog reveal, combat start and the fogged player view. Physical multi-platform
+sessions, production TLS and LAN latency remain open.
 
 A GM creates a table on the server's web interface and invites players with a code; players
 join from the desktop app. The GM shows a battle map with a grid, places player tokens and
@@ -1762,6 +1770,10 @@ GitHub and an SBOM attached to a real release.
   become campaign facts or edit notes.
 - Acceptance: works fully without AI; the AI draft path shows sources and
   stays disabled when campaign AI is off.
+- **State (1 November 2026):** implemented in source and shipped in 0.13.0. After that
+  release, `main` lets the player pin or unpin each Codex page with a checkbox (per-page
+  alias `chronexus:recap-pin:<id>`, legacy alias still read) and cancel a running AI draft,
+  with focused tests. Open: native-platform runs and local-model recap quality.
 
 ## M36 — Import from Obsidian, Kanka and character exports (implemented in source)
 
@@ -1808,6 +1820,11 @@ GitHub and an SBOM attached to a real release.
 - PDF through the system print dialog first; a direct PDF writer only if needed.
 - Acceptance: readable output in light print style for the main languages,
   including RTL and CJK; no personal data beyond what the user selected.
+- **State (1 November 2026):** implemented in source and shipped in 0.13.0 (sessions,
+  Codex pages and the character through `window.print()`). After that release, `main`
+  also prints skill training, inspiration, death saves and structured item/ability
+  fields with catalog attribution. Open: native print dialogs on Windows/macOS/Linux and
+  a visual RTL/CJK print review.
 
 ## M40 — Additional ruleset sheet presets (implemented in source)
 
