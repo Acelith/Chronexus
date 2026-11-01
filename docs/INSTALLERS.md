@@ -1,3 +1,17 @@
+# Release 0.13.1 — signed Windows x64 installer (sync hardening)
+
+NSIS Windows x64 installer compiled from commit `1210e7f` (annotated tag `v0.13.1`)
+in a clean detached worktree, updater signed with the production key and verified by
+the production-key test and `publish_app_update.py`. Size 34,988,702 bytes, SHA-256
+`da812bebf112040001b0edd8a15d6ed438f0d2e871646adb5f3085a9694eb5fa`. Published on
+1 November 2026: installer, `.sig` and `latest.json` verified as drafts and after
+publication with anonymous SHA-256 checks; latest = v0.13.1. The first draft run
+stopped on GitHub API lag ("more than one release"); the rerun resumed from the
+receipt with a single draft. `check-public-origin.py --history` fails locally only on
+objects reachable from local `refs/codex/` checkpoint refs; none are reachable from
+`main` or tags. **Not built or verified:** macOS, Linux, ARM64, Authenticode,
+installation and upgrade of this installer. See [release notes](releases/v0.13.1.md).
+
 # Release 0.13.0 — signed Windows x64 installer (Chronexus Table)
 
 NSIS Windows x64 installer compiled from commit `aaea60a` (annotated tag `v0.13.0`)
