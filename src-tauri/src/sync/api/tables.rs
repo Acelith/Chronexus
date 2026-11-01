@@ -1,5 +1,5 @@
 //! Fixed table routes. Table state is transient and never enters the journal Store.
-use super::{remote_id, ApiResult, Client, Failure};
+use super::{read_capped, remote_id, ApiResult, Client, Failure};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -55,17 +55,7 @@ impl Client {
         if status != 200 {
             return Err(TableError { status });
         }
-        let mut out = Vec::new();
-        while let Some(chunk) = response
-            .chunk()
-            .await
-            .map_err(|_| TableError { status: 503 })?
-        {
-            if out.len() + chunk.len() > 4096 {
-                return Err(TableError { status: 400 });
-            }
-            out.extend_from_slice(&chunk);
-        }
+        let out = read_capped(&mut response, 4096).await?;
         let value: Value = serde_json::from_slice(&out).map_err(|_| TableError { status: 400 })?;
         let id = value["id"].as_str().ok_or(TableError { status: 400 })?;
         remote_id(id).map_err(TableError::from)?;
@@ -124,24 +114,10 @@ impl Client {
             .and_then(|v| v.to_str().ok())
             .unwrap_or("")
             .to_owned();
-        if !["image/png", "image/jpeg", "image/webp"].contains(&mime.as_str())
-            || response
-                .content_length()
-                .is_some_and(|n| n > 32 * 1024 * 1024)
-        {
+        if !["image/png", "image/jpeg", "image/webp"].contains(&mime.as_str()) {
             return Err(TableError { status: 400 });
         }
-        let mut bytes = Vec::new();
-        while let Some(chunk) = response
-            .chunk()
-            .await
-            .map_err(|_| TableError { status: 503 })?
-        {
-            if bytes.len() + chunk.len() > 32 * 1024 * 1024 {
-                return Err(TableError { status: 400 });
-            }
-            bytes.extend_from_slice(&chunk);
-        }
+        let bytes = read_capped(&mut response, 32 * 1024 * 1024).await?;
         tokio::task::spawn_blocking(move || {
             use image::ImageDecoder;
             let mut reader = image::ImageReader::new(std::io::Cursor::new(&bytes))

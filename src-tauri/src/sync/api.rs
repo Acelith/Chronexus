@@ -326,25 +326,7 @@ impl Client {
                 "The sharing server answered with a redirect: request stopped.".into(),
             ));
         }
-        if response
-            .content_length()
-            .is_some_and(|n| n > MAX_RESPONSE as u64)
-        {
-            return Err(Failure::Rejected(
-                "Answer from the sharing server too large.".into(),
-            ));
-        }
-        let mut bytes = Vec::new();
-        while let Some(chunk) = response.chunk().await.map_err(|_| {
-            Failure::Unavailable("Connection to the sharing server interrupted.".into())
-        })? {
-            if bytes.len() + chunk.len() > MAX_RESPONSE {
-                return Err(Failure::Rejected(
-                    "Answer from the sharing server too large.".into(),
-                ));
-            }
-            bytes.extend_from_slice(&chunk);
-        }
+        let bytes = read_capped(&mut response, MAX_RESPONSE).await?;
         let value = if bytes.is_empty() {
             Value::Null
         } else {
@@ -559,14 +541,15 @@ impl Client {
         if let Some(token) = &self.token {
             request = request.bearer_auth(token);
         }
-        let response = request.send().await.map_err(|_| {
+        let mut response = request.send().await.map_err(|_| {
             Failure::Unavailable("Sharing server not reachable. Check the address, the connection and its HTTPS certificate.".into())
         })?;
         let status = response.status().as_u16();
-        let value: Value = response.json().await.unwrap_or(Value::Null);
         if ![200, 201].contains(&status) {
             return Err(failure(status));
         }
+        let value: Value = serde_json::from_slice(&read_capped(&mut response, MAX_RESPONSE).await?)
+            .unwrap_or(Value::Null);
         let id = value["id"].as_str().unwrap_or("");
         crate::journal::identifier(id)?;
         if value["sha256"].as_str() != Some(sha256) {
@@ -610,17 +593,7 @@ impl Client {
             .and_then(|v| v.to_str().ok())
             .unwrap_or("")
             .to_string();
-        let mut bytes = Vec::new();
-        while let Some(chunk) = response.chunk().await.map_err(|_| {
-            Failure::Unavailable("Connection to the sharing server interrupted.".into())
-        })? {
-            if bytes.len() + chunk.len() > MAX_RESPONSE {
-                return Err(Failure::Rejected(
-                    "Answer from the sharing server too large.".into(),
-                ));
-            }
-            bytes.extend_from_slice(&chunk);
-        }
+        let bytes = read_capped(&mut response, MAX_RESPONSE).await?;
         let actual = format!("{:x}", sha2::Sha256::digest(&bytes));
         if !["image/png", "image/jpeg", "image/webp"].contains(&mime.as_str()) || actual != expected
         {
@@ -706,27 +679,22 @@ impl Client {
         if let Some(token) = &self.token {
             request = request.bearer_auth(token);
         }
-        let response = tokio::time::timeout(Duration::from_secs(900), request.send())
-            .await
-            .map_err(|_| Failure::Unavailable("The server AI did not answer in time.".into()))?
-            .map_err(|_| {
+        // Covers the body too: the streaming client has no read timeout of its own.
+        let bytes = tokio::time::timeout(Duration::from_secs(900), async {
+            let mut response = request.send().await.map_err(|_| {
                 Failure::Unavailable("Connection to the sharing server not available.".into())
             })?;
-        let status = response.status().as_u16();
-        if status == 401 {
-            return Err(failure(401));
-        }
-        if status != 200 {
-            return Err(ai_failure(status));
-        }
-        let bytes = response.bytes().await.map_err(|_| {
-            Failure::Unavailable("Connection to the sharing server not available.".into())
-        })?;
-        if bytes.len() > 1 << 20 {
-            return Err(Failure::Rejected(
-                "Invalid answer from the sharing server.".into(),
-            ));
-        }
+            let status = response.status().as_u16();
+            if status == 401 {
+                return Err(failure(401));
+            }
+            if status != 200 {
+                return Err(ai_failure(status));
+            }
+            read_capped(&mut response, 1 << 20).await
+        })
+        .await
+        .map_err(|_| Failure::Unavailable("The server AI did not answer in time.".into()))??;
         let answer: ServerAnswer = serde_json::from_slice(&bytes)
             .map_err(|_| Failure::Rejected("Invalid answer from the sharing server.".into()))?;
         if answer.answer.chars().count() > 12000 || answer.citations.len() > 16 {
@@ -958,6 +926,28 @@ impl Client {
         Ok(())
     }
 }
+/// Reads a response body, stopping as soon as it exceeds `limit` bytes.
+pub(super) async fn read_capped(
+    response: &mut reqwest::Response,
+    limit: usize,
+) -> ApiResult<Vec<u8>> {
+    let too_large = || Failure::Rejected("Answer from the sharing server too large.".into());
+    if response.content_length().is_some_and(|n| n > limit as u64) {
+        return Err(too_large());
+    }
+    let mut bytes = Vec::new();
+    while let Some(chunk) = response
+        .chunk()
+        .await
+        .map_err(|_| Failure::Unavailable("Connection to the sharing server interrupted.".into()))?
+    {
+        if bytes.len() + chunk.len() > limit {
+            return Err(too_large());
+        }
+        bytes.extend_from_slice(&chunk);
+    }
+    Ok(bytes)
+}
 fn checked(c: RemoteCampaign) -> ApiResult<RemoteCampaign> {
     remote_id(&c.id)?;
     if !["owner", "player", "reader"].contains(&c.role.as_str()) || c.name.chars().count() > 200 {
@@ -1074,6 +1064,38 @@ mod tests {
         let mut out = reader.push(&long);
         out.extend(reader.push(b"\nok\n"));
         assert_eq!(out, vec![None, Some("ok".into())]);
+    }
+
+    #[tokio::test]
+    async fn bodies_without_a_length_stop_at_the_limit() {
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        std::thread::spawn(move || {
+            for _ in 0..2 {
+                let (mut socket, _) = listener.accept().unwrap();
+                let _ = socket.read(&mut [0; 1024]);
+                // Chunked, no Content-Length: only the streaming cap can stop it.
+                let _ = socket.write_all(b"HTTP/1.1 200 OK\r\ntransfer-encoding: chunked\r\n\r\n");
+                for _ in 0..8 {
+                    let _ = socket.write_all(b"400\r\n");
+                    let _ = socket.write_all(&[b'x'; 1024]);
+                    let _ = socket.write_all(b"\r\n");
+                }
+                let _ = socket.write_all(b"0\r\n\r\n");
+            }
+        });
+        let url = format!("http://{address}/");
+        let mut big = reqwest::get(&url).await.unwrap();
+        assert!(matches!(
+            super::read_capped(&mut big, 4096).await,
+            Err(super::Failure::Rejected(_))
+        ));
+        let mut fits = reqwest::get(&url).await.unwrap();
+        assert_eq!(
+            super::read_capped(&mut fits, 8192).await.unwrap().len(),
+            8192
+        );
     }
 }
 

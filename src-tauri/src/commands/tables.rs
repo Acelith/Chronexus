@@ -136,22 +136,32 @@ pub async fn table_live_start(
             let watched = cancel.clone();
             let root_check = root.clone();
             let identity = account.clone();
+            let mut checked_at = std::time::Instant::now();
             let stream = client.table_stream(
                 &table_id,
                 move |value| {
                     if watched.is_cancelled() {
                         return false;
                     }
-                    if sync::read_account(&root_check).ok().as_ref() != Some(&identity) {
-                        let _ = sent.send(json!({"type":"accessLost"}));
-                        return false;
+                    // At most once a second: the account file is a blocking disk read.
+                    if checked_at.elapsed() >= std::time::Duration::from_secs(1) {
+                        checked_at = std::time::Instant::now();
+                        if sync::read_account(&root_check).ok().as_ref() != Some(&identity) {
+                            let _ = sent.send(json!({"type":"accessLost"}));
+                            return false;
+                        }
                     }
                     sent.send(value).is_ok()
                 },
                 bound,
                 &mut outgoing,
             );
+            let opened = std::time::Instant::now();
             let result = tokio::select! {_ = cancel.cancelled()=>break,result=stream=>result};
+            // A connection that held for a minute was healthy: the next drop retries fast.
+            if opened.elapsed() >= std::time::Duration::from_secs(60) {
+                delay = 1;
+            }
             if matches!(
                 result,
                 Err(sync::api::Failure::Unauthorized(_) | sync::api::Failure::AccessLost(_))
