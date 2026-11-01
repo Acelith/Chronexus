@@ -592,3 +592,18 @@ be decided at the start of M24.
 At the user's request the Android client (M27, server M25.9) is dropped. Chronexus
 targets the desktop client (Windows, macOS, Linux) and the self-hosted server. Earlier
 entries that mention Android remain as history; no mobile code or contract is maintained.
+
+## 1 November 2026 — Shared table renderer and transient native bridge
+
+- Reuse the first-party Apache-2.0 Canvas 2D table renderer already qualified in
+  Chronexus-Server, instead of maintaining a second PixiJS renderer. A generation
+  script wraps its locale/runtime without changing the app locale; bundled hashes
+  and generated OpenAPI TypeScript are checked offline. Regeneration needs the
+  sibling source checkout, running the app and integrity check do not.
+- React owns the journal dock, consent and local character projection. Rust owns
+  authenticated HTTPS/WSS, bounded decoding and one-use live tickets. The WebView
+  receives no credentials. Table snapshots and images remain in memory; schema 025
+  stores only campaign/server/account/table links and validates them on restore.
+- Projection is an explicit revision-checked copy of selected fields, never a
+  full sheet or continuous synchronization. Applying table HP back to the local
+  sheet is a separate confirmed local action using existing save guards.

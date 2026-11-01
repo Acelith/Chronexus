@@ -1507,12 +1507,12 @@ request before implementation, and publication follows the standing release rule
 | Done | M30 — Automated desktop QA and cross-platform CI | GitHub workflows and local runner in place; remote run acceptance open | — |
 | Done | M31 — Clue board and open questions | Implemented on Windows with schema 022 and selective sharing | — |
 | 1 | M25 — Chronexus Server (in progress) | 0.1.1 released, web interface done; server AI qualification and public deployment open | M24 |
-| 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Requested 27/10/2026: a GM runs combat for players; journals stay private | M25 |
-| 3 | M43 — Live table channel and GM web interface | Real-time play needs a server-authoritative channel and a GM UI | M42 |
-| 4 | M44 — Maps, grid, tokens and movement, ft/m everywhere | The core of the table; every distance in ft and m with an on-screen converter | M43 |
-| 5 | M45 — Combat tracker | Initiative, turns, rounds, conditions, combat log | M44 |
-| 6 | M46 — Fog of war and vision | Hide what characters cannot see | M44 |
-| 7 | M47 — Monster library and encounters | SRD monsters with attribution, custom monsters, prepared encounters | M45 |
+| 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Source implemented; physical cross-platform acceptance open | M25 |
+| 3 | M43 — Live table channel and GM web interface | Source implemented; physical cross-platform acceptance open | M42 |
+| 4 | M44 — Maps, grid, tokens and movement, ft/m everywhere | Source implemented; physical cross-platform acceptance open | M43 |
+| 5 | M45 — Combat tracker | Source implemented; physical cross-platform acceptance open | M44 |
+| 6 | M46 — Fog of war and vision | Source implemented; physical cross-platform acceptance open | M44 |
+| 7 | M47 — Monster library and encounters | Source implemented; physical cross-platform acceptance open | M45 |
 | Done | M32 — First start and demo campaign | Implemented 29/10/2026 (source); packaged-app check open | — |
 | Done | M33 — Trust and transparency | Implemented 29/10/2026; first CI run and release attachment open | M29 |
 | 11 | M34 — Manual diagnostic bundle | Useful bug reports without telemetry once the audience grows | — |
@@ -1642,11 +1642,12 @@ weights), and a public deployment with real DNS/TLS (needs a host and domain).
 - Acceptance: the M24 acceptance list below, run with the real desktop client against
   a test deployment, plus the server security tests in SERVER_NOTES.md.
 
-## M42–M47 — Chronexus Table: virtual tabletop and combat (planned, priorities 2–7)
+## M42–M47 — Chronexus Table: source implemented, acceptance pending
 
 **Requested 27 October 2026.** Full requirements, boundaries, architecture, inspiration
-sources and acceptance are in [docs/VTT.md](docs/VTT.md). Planning only; each milestone needs
-an explicit request.
+sources and acceptance are in [docs/VTT.md](docs/VTT.md). Server and desktop source are
+implemented as requested; Windows build and three-client protocol tests passed. Physical
+multi-platform sessions, production TLS and LAN latency remain open.
 
 A GM creates a table on the server's web interface and invites players with a code; players
 join from the desktop app. The GM shows a battle map with a grid, places player tokens and
@@ -1664,7 +1665,7 @@ audience *shared with the GM too*.
 - **M44 — Maps, grid, tokens and movement.** Scenes, map upload and Universal VTT import,
   square/hex grid with calibration, layers (map, tokens, GM), tokens for players and
   monsters, snap-to-grid movement with ruler, diagonal rule option, movement budget, area
-  templates, all in ft and m; on-screen ft↔m converter; PixiJS canvas.
+  templates, all in ft and m; on-screen ft↔m converter; shared Canvas 2D renderer.
 - **M45 — Combat tracker.** Initiative (dice roller, GM secret rolls), turn order, rounds,
   conditions with durations, combat log; HP changes are explicit (players own theirs).
 - **M46 — Fog of war and vision.** Manual fog first; then walls, doors, lights and

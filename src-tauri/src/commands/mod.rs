@@ -9,5 +9,6 @@ pub mod maps;
 pub mod player;
 pub mod settings;
 pub mod sync;
+pub mod tables;
 pub mod timeline;
 pub mod wiki;

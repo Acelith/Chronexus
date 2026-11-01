@@ -29,6 +29,10 @@ Not in the code, but reachable on your explicit request:
 - **Your sharing server** (M24/M25): the HTTPS origin you configure. Only items you mark
   *private* (your own devices) or *shared* (campaign members) are uploaded; the server operator
   can read them (no end-to-end encryption). The session token stays in `sync-account.json`.
+  Opening a table explicitly starts same-origin HTTPS/WSS and presence; closing
+  stops it. Table messages, moves and selected character fields/portrait bytes go
+  to that server only after user actions. Granting the GM journal access is an
+  explicit per-item choice. No table state becomes local AI context or a backup.
 - **The Ollama model registry**: when you pull a qualified model in App settings, the local
   Ollama runtime downloads it; Chronexus then checks the weight digest.
 

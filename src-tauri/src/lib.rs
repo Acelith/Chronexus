@@ -50,6 +50,7 @@ mod search;
 #[cfg(test)]
 mod search_tests;
 mod sync;
+mod tables;
 #[cfg(test)]
 mod test_support;
 mod timeline;
@@ -158,6 +159,8 @@ pub fn run() {
         .manage(wikidot::State::default())
         .manage(ai_setup::State::default())
         .manage(sync::Gate::default())
+        .manage(commands::tables::Live::default())
+        .manage(commands::tables::Images::default())
         .setup(|app| {
             // Keep the window usable when initialization fails so the UI can explain recovery.
             let connection = (|| -> Result<_, Box<dyn std::error::Error>> {
@@ -216,6 +219,21 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::sync::table_list,
+            commands::sync::table_join,
+            commands::sync::table_board,
+            commands::tables::table_operation,
+            commands::tables::table_image,
+            commands::tables::table_seats,
+            commands::tables::table_leave,
+            commands::tables::table_live_start,
+            commands::tables::table_live_stop,
+            commands::tables::table_live_message,
+            commands::tables::table_links,
+            commands::tables::table_link,
+            commands::tables::table_grant,
+            commands::tables::table_character_preview,
+            commands::tables::table_project_character,
             diagnostics::preview_diagnostics,
             diagnostics::save_diagnostics,
             backup_folder::commands::get_backup_settings,

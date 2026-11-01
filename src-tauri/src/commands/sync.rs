@@ -686,3 +686,29 @@ pub async fn sync_remote_image(
         .map_err(String::from)?;
     Ok(format!("data:{mime};base64,{}", STANDARD.encode(bytes)))
 }
+
+/// Explicit table actions: no campaign content is read or transmitted.
+#[tauri::command]
+pub async fn table_list(db: tauri::State<'_, Database>) -> AppResult<Vec<api::Table>> {
+    let (_, _, client) = signed_in(&db)?;
+    Ok(client.tables().await?)
+}
+#[tauri::command]
+pub async fn table_join(db: tauri::State<'_, Database>, code: String) -> AppResult<api::Table> {
+    check_user(&code, "invitation code", 512)?;
+    let (_, _, client) = signed_in(&db)?;
+    Ok(client.join_table(code.trim()).await?)
+}
+#[tauri::command]
+pub async fn table_board(
+    db: tauri::State<'_, Database>,
+    table_id: String,
+) -> Result<serde_json::Value, api::tables::TableError> {
+    let (_, _, client) = signed_in(&db)?;
+    api::tables::validate_board(
+        client
+            .table_board(&table_id)
+            .await
+            .map_err(api::tables::TableError::from)?,
+    )
+}

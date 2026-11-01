@@ -1,0 +1,107 @@
+.table-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 45%);
+  height: 100dvh;
+  overflow: hidden;
+}
+.table-layout > .shell {
+  min-width: 0;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.table-dock {
+  min-width: 0;
+  overflow: auto;
+  padding: 20px;
+  background: #ead9b1;
+  color: #321d13;
+  border-inline-start: 1px solid #a18a61;
+}
+.table-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+.chronexus-table {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.chronexus-table .board-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+.chronexus-table .board-tools label {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-width: 110px;
+}
+.chronexus-table .board-tools input {
+  width: 100px;
+}
+.chronexus-table .battle-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #292b28;
+  touch-action: none;
+  border: 1px solid #a18a61;
+}
+.chronexus-table .battle-map:focus-visible {
+  outline: 3px solid #1f5f8b;
+}
+.chronexus-table .board-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+.chronexus-table .token-roster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block: 14px;
+}
+.chronexus-table .board-editor form,
+.chronexus-table .combat-tracker form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.chronexus-table input,
+.chronexus-table select,
+.chronexus-table textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+.chronexus-table label {
+  display: block;
+}
+.chronexus-table .combat-order li[aria-current="true"] {
+  outline: 2px solid #9a7a3f;
+}
+.chronexus-table .combat-log {
+  max-height: 240px;
+  overflow: auto;
+}
+.chronexus-table .muted {
+  color: #65553e;
+}
+.chronexus-table .restore-confirmation {
+  max-width: min(600px, 90vw);
+}
+@media (max-width: 1150px) {
+  .table-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(250px, 45dvh);
+  }
+  .table-dock {
+    border-inline-start: 0;
+    border-block-start: 1px solid #a18a61;
+  }
+}

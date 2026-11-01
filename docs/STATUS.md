@@ -1,3 +1,45 @@
+# Chronexus status — 1 November 2026: M42–M47 desktop table integration
+
+- Explicit table list/join/open/leave and campaign associations; the live table
+  sits beside the journal. Rust holds credentials, HTTPS/WSS and one-use tickets,
+  bounded reconnect/message/image queues, cancellation and account-change guards.
+  Disconnect freezes table edits; lost access clears received state. No startup
+  table requests. Schema 025 stores only local association identifiers, validated
+  by archive restore; board, combat, maps and GM data never enter Store/AI/backups.
+- Shared audited first-party Canvas 2D runtime covers square/hex grids, movement,
+  rulers, templates, ft/m converter, initiative, conditions, rolls, combat log and
+  filtered fog. GM scenes, vision, monster/encounter and image-library preparation
+  live in the server web interface. No second renderer or remote code download.
+- Selected character projection requires review, confirmation, current character
+  revision and an owned active token. Optional managed portrait bytes are copied
+  explicitly; notes/resources/full sheets are excluded. Applying table HP to the
+  local sheet is a separate confirmed action. Journal grants require an already
+  shared/synchronized item and explicit per-item GM consent.
+- Windows checks: native debug build in isolated tables-native target passed,
+  Rust library suite 201 passed / 9 ignored; separately executed real-server
+  three-player scenario passed (moves, ownership rejection, three combat rounds,
+  fog filtering and reconnect). Clippy all targets with warnings denied and fmt
+  passed. Full frontend suite 270 passed; targeted tables 10 and restore 8 passed.
+  Typecheck, ESLint, production frontend build, ten-language i18n gate, runtime
+  integrity and network-host inventory passed. Build retains the existing large
+  bundle warning. Global format check still reports pre-existing formatting issues;
+  changed handwritten table sources are formatted, unrelated files untouched.
+- Synthetic browser review: Italian at 1440 px and Arabic RTL at 390 px; no page
+  horizontal overflow in the latter. Keyboard move/disconnect/access-loss tests
+  run in English/Italian/Arabic; runtime catalogs checked in all ten languages.
+  Mechanical design detector: no findings in new table components. React Doctor
+  changed scan: 83/100, unchanged score; one unrelated Recap.tsx loading warning
+  and one maintainability warning for the table lifecycle component remain.
+- Skills: Tauri v2 and Rust Best Practices for native boundaries, SQLite Expert for
+  additive links, Impeccable for the existing parchment UI, React Testing and React
+  Best Practices for lifecycle/consent checks, Systematic Debugging for restore
+  remount regression, React Doctor for diagnostics. Server support is schema 015;
+  source in Chronexus-Server, with 117 Rust and 33 web DOM tests passing.
+- Source delivery only; no installer/release publication. Native macOS/Linux,
+  physical three-OS play, production TLS and measured LAN latency remain open.
+  Next roadmap priority: finish M25 production/model qualification, plus physical
+  M42–M47 acceptance. Unrelated recap/print working-tree changes are preserved.
+
 # Chronexus status — 31 October 2026: M40 manual Fate presets
 
 - Character editor offers additive Fate Core / Fate Accelerated manual presets,

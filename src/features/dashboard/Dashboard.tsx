@@ -1,3 +1,4 @@
+import Tables from "../tables/Tables";
 import Recap from "../recap/Recap";
 import PrintWorkspace from "../export/PrintWorkspace";
 import { tr } from "../../i18n/store";
@@ -208,6 +209,7 @@ export default function Dashboard({
           onSession={onSession}
         />
       </details>
+      <Tables key={`tables-${campaignId}`} campaignId={campaignId} />
       <PrintWorkspace
         key={`print-${campaignId}`}
         campaignId={campaignId}

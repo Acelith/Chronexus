@@ -10,6 +10,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::Digest;
 use std::time::Duration;
+pub mod tables;
 
 const MAX_RESPONSE: usize = 8 * 1024 * 1024;
 /// A single `/sync` page holds at most this many items (server limit with margin).
@@ -364,6 +365,40 @@ impl Client {
         }
         serde_json::from_value(value)
             .map_err(|_| Failure::Rejected("Invalid answer from the sharing server.".into()))
+    }
+
+    /// Table membership is independent of campaign synchronization. Fixed routes only.
+    pub async fn tables(&self) -> ApiResult<Vec<Table>> {
+        let tables: Vec<Table> = self.call(Method::GET, "/api/v1/tables", None).await?;
+        if tables.len() > 1000 {
+            return Err(Failure::Rejected(
+                "Invalid answer from the sharing server.".into(),
+            ));
+        }
+        for table in &tables {
+            remote_id(&table.id)?;
+            if table.name.len() > 2000
+                || !["gm", "player", "spectator"].contains(&table.role.as_str())
+            {
+                return Err(Failure::Rejected(
+                    "Invalid answer from the sharing server.".into(),
+                ));
+            }
+        }
+        Ok(tables)
+    }
+    pub async fn join_table(&self, code: &str) -> ApiResult<Table> {
+        self.call(
+            Method::POST,
+            "/api/v1/tables/join",
+            Some(json!({"inviteCode":code})),
+        )
+        .await
+    }
+    pub async fn table_board(&self, table: &str) -> ApiResult<Value> {
+        remote_id(table)?;
+        self.call(Method::GET, &format!("/api/v1/tables/{table}/board"), None)
+            .await
     }
 
     pub async fn meta(&self) -> ApiResult<Meta> {
@@ -1040,4 +1075,13 @@ mod tests {
         out.extend(reader.push(b"\nok\n"));
         assert_eq!(out, vec![None, Some("ok".into())]);
     }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Table {
+    pub id: String,
+    pub name: String,
+    pub role: String,
+    pub revision: i64,
 }

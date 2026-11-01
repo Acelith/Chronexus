@@ -36,6 +36,8 @@ jobs:
       - run: pnpm icons
       - run: pnpm lint
       - run: pnpm typecheck
+      - name: Verify bundled table runtime
+        run: pnpm tables:check
       - run: pnpm format:check
       - run: pnpm test
       - run: pnpm test:automation

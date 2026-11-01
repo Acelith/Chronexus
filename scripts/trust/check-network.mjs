@@ -4,9 +4,9 @@
 // The documented list sits between markers in docs/TRUST.md.
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { pathToFileURL, fileURLToPath } from "node:url";
 
-const root = new URL("../..", import.meta.url).pathname;
+const root = fileURLToPath(new URL("../..", import.meta.url));
 // Literals that are attribution or licence links shown to the user, never fetched.
 const displayOnly = new Set(["dnd.wizards.com", "creativecommons.org"]);
 

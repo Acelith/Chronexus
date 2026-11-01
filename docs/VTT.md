@@ -1,7 +1,9 @@
-# Chronexus Table — virtual tabletop and combat (planned M42–M47)
+# Chronexus Table — virtual tabletop and combat (M42–M47)
 
-Requested on 27 October 2026. **Planning only**: nothing here is implemented. Each milestone
-starts only on an explicit request, like every other open milestone.
+Requested on 27 October 2026; server and desktop source implemented by 1 November 2026.
+Windows native build and automated three-player protocol acceptance passed. Physical
+macOS/Linux/Windows sessions, production TLS and LAN latency acceptance remain open.
+See docs/STATUS.md for executed checks and limitations.
 
 ## 1. Goal in one paragraph
 
@@ -164,15 +166,16 @@ a **converter on screen**.
     contents or secret rolls). Commands (`move token`, `next turn`, …) carry an operation ID
     and the state revision; the server validates and broadcasts the result. Reconnection
     resumes from a revision or reloads a snapshot.
-  - **Web interface** for GMs (shares the React codebase and components with the desktop):
+  - **Web interface** for GMs (shares the audited first-party Canvas runtime with desktop):
     account, tables, invitations, scene editor, map/grid calibration, monster library,
     encounter builder, combat. Builds on the planned web management (server M25.11).
   - Journal sharing gains the audience *shared with the GM too*; the GM sees nothing else.
 - **Desktop (Chronexus)**
   - *Tables* view: join by code, list tables, open the live table; the journal stays next to
     it. Offline: the table shows a reconnecting state; the journal is unaffected.
-  - Rendering with a 2D canvas engine (**PixiJS**, MIT, WebGL with canvas fallback) for maps,
-    grid, tokens, fog and templates; React for panels (tracker, converter, log).
+  - Rendering uses the qualified server Canvas 2D runtime for maps, grid, tokens, fog,
+    templates and combat, hosted in React. Pinned first-party source hashes and generated
+    types are checked by `pnpm tables:check`; no remote code loading or PixiJS dependency.
   - Character link: the player chooses which character values feed their token (name,
     portrait, speed, AC, HP display) — a projection, as today's shared sheet sections.
 - **Protocol and data rules**: UUIDs everywhere, revisions on every mutable record, server
@@ -191,13 +194,13 @@ a **converter on screen**.
 | PixiJS | Fast 2D rendering of maps and tokens | MIT |
 | Red Blob Games — hex grids | Hex coordinates, distances, line drawing | Articles; reimplement |
 
-## 8. Milestones (planned, app IDs; server parts in Chronexus-Server's roadmap)
+## 8. Milestones (source implemented; cross-platform acceptance pending)
 
 | ID | Milestone | Server | Desktop | Depends on |
 | --- | --- | --- | --- | --- |
 | M42 | GM accounts, tables and invitations | GM capability, tables, seats, table invitations with sign-up, *shared with the GM* audience enforced | Join a table by code, table list, audience choice per item | M25 |
 | M43 | Live table channel and GM web interface | WebSocket with per-recipient views, presence, revisions, reconnect; web app shell for GMs | Live connection, presence, reconnecting state | M42 |
-| M44 | Maps, grid, tokens and movement, ft/m everywhere | Scenes, map assets, grid, tokens, move validation, rulers | Table canvas (PixiJS), drag on grid, ruler and templates in ft+m, on-screen converter, unit setting | M43 |
+| M44 | Maps, grid, tokens and movement, ft/m everywhere | Scenes, map assets, grid, tokens, move validation, rulers | Table canvas (Canvas 2D), drag on grid, ruler and templates in ft+m, on-screen converter, unit setting | M43 |
 | M45 | Combat tracker | Combat state, initiative, turns, rounds, conditions, log, secret rolls | Tracker panel, own initiative and HP actions, combat log | M44 |
 | M46 | Fog of war and vision | Fog geometry, then walls/doors/lights, server-side visibility | Fog rendering, Universal VTT import for walls | M44 |
 | M47 | Monster library and encounters | SRD import with attribution, custom monsters, encounters | (GM tools live in the web interface; desktop shows tokens only) | M45 |

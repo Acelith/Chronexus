@@ -8,6 +8,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
+    "tables:check": "node scripts/tables/sync-runtime.mjs --check",
     "format": "prettier --write src scripts eslint.config.js vite.config.ts tsconfig.json index.html",
     "format:check": "prettier --check src scripts eslint.config.js vite.config.ts tsconfig.json index.html",
     "lint": "eslint src",

@@ -7,6 +7,8 @@ pub mod auto;
 pub mod engine;
 pub mod projection;
 #[cfg(test)]
+mod table_live_tests;
+#[cfg(test)]
 mod tests;
 
 use crate::{

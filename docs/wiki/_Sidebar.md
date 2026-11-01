@@ -18,6 +18,7 @@
 - [Backups and restore](Backups-and-Restore.md)
 - [Updates](Updates.md)
 - [Sharing with a server](Sharing-with-a-Server.md)
+- [Chronexus Table](Chronexus-Table.md)
 - [Privacy and data](Privacy-and-Data.md)
 - [Verify your download](Verify-Your-Download.md)
 - [FAQ and troubleshooting](FAQ-and-Troubleshooting.md)

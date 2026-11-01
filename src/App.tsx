@@ -1,3 +1,4 @@
+import { TableDockProvider } from "./features/tables/TableDock";
 import { date as formatDateTime } from "./i18n/store";
 import { localeInfo } from "./i18n/locales";
 import { getPreferences } from "./i18n/store";
@@ -598,620 +599,629 @@ export function App() {
       <KnowledgeContext.Provider
         value={{ pages, open: openPage, create: createLinkedPage }}
       >
-        <div className="shell" aria-busy={busy || loading}>
-          <AppSidebar
-            campaigns={campaigns}
-            campaignId={campaignId}
-            hasCampaign={!!campaign}
-            backupOpen={backupOpen}
-            view={view}
-            busy={busy}
-            loading={loading}
-            onSelectCampaign={selectCampaign}
-            onNewCampaign={() =>
-              void run(async () => {
-                setBackupOpen(false);
-                setForm("campaign");
-              })
-            }
-            onOpenBackup={() =>
-              void run(async () => {
-                setForm(null);
-                setBackupOpen(true);
-              })
-            }
-            onShow={(next) => show(next, { closeBackup: true })}
-          />
-          <main>
-            {searchOpen && campaignId ? (
-              <Suspense
-                fallback={
-                  <p role="status">
-                    <Text source={"Opening search…"} />
-                  </p>
-                }
-              >
-                <SearchPanel
-                  campaignId={campaignId}
-                  onSelect={selectSearch}
-                  onClose={() => {
-                    setSearchOpen(false);
-                    searchButton.current?.focus();
-                  }}
-                />
-              </Suspense>
-            ) : null}
-            {error ? (
-              <div className="error" role="alert">
-                <p>{error}</p>
-                {campaigns.length ? (
-                  <button type="button" onClick={() => setError("")}>
-                    <Text source={"Close message"} />
-                  </button>
-                ) : null}
-                {!campaigns.length ? (
-                  <button
-                    disabled={loading}
-                    onClick={() => {
-                      setLoading(true);
-                      setError("");
-                      void load();
+        <TableDockProvider campaignId={campaignId ?? ""}>
+          <div className="shell" aria-busy={busy || loading}>
+            <AppSidebar
+              campaigns={campaigns}
+              campaignId={campaignId}
+              hasCampaign={!!campaign}
+              backupOpen={backupOpen}
+              view={view}
+              busy={busy}
+              loading={loading}
+              onSelectCampaign={selectCampaign}
+              onNewCampaign={() =>
+                void run(async () => {
+                  setBackupOpen(false);
+                  setForm("campaign");
+                })
+              }
+              onOpenBackup={() =>
+                void run(async () => {
+                  setForm(null);
+                  setBackupOpen(true);
+                })
+              }
+              onShow={(next) => show(next, { closeBackup: true })}
+            />
+            <main>
+              {searchOpen && campaignId ? (
+                <Suspense
+                  fallback={
+                    <p role="status">
+                      <Text source={"Opening search…"} />
+                    </p>
+                  }
+                >
+                  <SearchPanel
+                    campaignId={campaignId}
+                    onSelect={selectSearch}
+                    onClose={() => {
+                      setSearchOpen(false);
+                      searchButton.current?.focus();
                     }}
-                  >
-                    {appText.retry}
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
-            {backupOpen ? (
-              <Suspense
-                fallback={
-                  <p role="status">
-                    <Text source={"Opening backup…"} />
-                  </p>
-                }
-              >
-                <BackupWorkspace
-                  register={register}
-                  onRestored={async () => {
-                    setError("");
-                    await load();
-                  }}
-                />
-              </Suspense>
-            ) : loading ? (
-              <p role="status">{appText.loading}</p>
-            ) : (
-              <>
-                <header className="campaign-header">
-                  <div>
-                    <h2>
-                      {view === "preferences"
-                        ? tr("App settings")
-                        : (campaign?.name ?? appText.emptyCampaigns)}
-                      {view !== "preferences" && campaign?.demo ? (
-                        <span className="demo-badge">{tr("Demo")}</span>
-                      ) : null}
-                    </h2>
-                  </div>
-                  {campaign && view !== "preferences" ? (
-                    <SyncStatusBadge
-                      key={campaign.id}
-                      campaignId={campaign.id}
-                      onOpen={() => show("sharing")}
+                  />
+                </Suspense>
+              ) : null}
+              {error ? (
+                <div className="error" role="alert">
+                  <p>{error}</p>
+                  {campaigns.length ? (
+                    <button type="button" onClick={() => setError("")}>
+                      <Text source={"Close message"} />
+                    </button>
+                  ) : null}
+                  {!campaigns.length ? (
+                    <button
+                      disabled={loading}
+                      onClick={() => {
+                        setLoading(true);
+                        setError("");
+                        void load();
+                      }}
+                    >
+                      {appText.retry}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+              {backupOpen ? (
+                <Suspense
+                  fallback={
+                    <p role="status">
+                      <Text source={"Opening backup…"} />
+                    </p>
+                  }
+                >
+                  <BackupWorkspace
+                    register={register}
+                    onRestored={async () => {
+                      setError("");
+                      await load();
+                    }}
+                  />
+                </Suspense>
+              ) : loading ? (
+                <p role="status">{appText.loading}</p>
+              ) : (
+                <>
+                  <header className="campaign-header">
+                    <div>
+                      <h2>
+                        {view === "preferences"
+                          ? tr("App settings")
+                          : (campaign?.name ?? appText.emptyCampaigns)}
+                        {view !== "preferences" && campaign?.demo ? (
+                          <span className="demo-badge">{tr("Demo")}</span>
+                        ) : null}
+                      </h2>
+                    </div>
+                    {campaign && view !== "preferences" ? (
+                      <SyncStatusBadge
+                        key={campaign.id}
+                        campaignId={campaign.id}
+                        onOpen={() => show("sharing")}
+                      />
+                    ) : null}
+                    {view !== "preferences" ? (
+                      <span className="last-modified">
+                        {[...sessions, ...pages].some((item) =>
+                          Number.isFinite(Date.parse(item.updatedAt)),
+                        ) ? (
+                          <>
+                            <Text source={"Last changed:"} />{" "}
+                            <time>
+                              {modifiedDateFormat.format(
+                                new Date(
+                                  Math.max(
+                                    ...[...sessions, ...pages]
+                                      .map((item) => Date.parse(item.updatedAt))
+                                      .filter(Number.isFinite),
+                                  ),
+                                ),
+                              )}
+                            </time>
+                          </>
+                        ) : null}
+                      </span>
+                    ) : null}
+                    {campaign && view !== "preferences" ? (
+                      <details className="campaign-actions">
+                        <summary aria-label={tr("Campaign actions")}>
+                          •••
+                        </summary>
+                        <div className="actions">
+                          <button
+                            ref={searchButton}
+                            disabled={busy}
+                            onClick={openSearch}
+                            title={tr("Ctrl+K / ⌘K")}
+                          >
+                            <Text source={"Search the campaign"} />
+                          </button>
+                          <Suspense fallback={null}>
+                            <ExportButton
+                              key={campaign.id}
+                              campaignId={campaign.id}
+                              busy={busy}
+                            />
+                          </Suspense>
+                          <button
+                            disabled={busy}
+                            onClick={() => {
+                              void run(async () => setForm("rename"));
+                            }}
+                          >
+                            {appText.rename}
+                          </button>
+                          <button
+                            className="primary"
+                            disabled={busy}
+                            onClick={() => {
+                              void run(async () => setForm("session"));
+                            }}
+                          >
+                            + {appText.newSession}
+                          </button>
+                        </div>
+                      </details>
+                    ) : null}
+                  </header>
+                  {campaign ? (
+                    <CampaignTabs
+                      view={view}
+                      busy={busy}
+                      onShow={(next) =>
+                        show(next, {
+                          // Overview, Party and Wiki keep the focused source block.
+                          clearFocus: !["overview", "party", "wiki"].includes(
+                            next,
+                          ),
+                          before:
+                            next === "codex" && !pageId
+                              ? () => setPageId(pages[0]?.id ?? null)
+                              : undefined,
+                        })
+                      }
                     />
                   ) : null}
-                  {view !== "preferences" ? (
-                    <span className="last-modified">
-                      {[...sessions, ...pages].some((item) =>
-                        Number.isFinite(Date.parse(item.updatedAt)),
-                      ) ? (
-                        <>
-                          <Text source={"Last changed:"} />{" "}
-                          <time>
-                            {modifiedDateFormat.format(
-                              new Date(
-                                Math.max(
-                                  ...[...sessions, ...pages]
-                                    .map((item) => Date.parse(item.updatedAt))
-                                    .filter(Number.isFinite),
-                                ),
-                              ),
-                            )}
-                          </time>
-                        </>
-                      ) : null}
-                    </span>
-                  ) : null}
-                  {campaign && view !== "preferences" ? (
-                    <details className="campaign-actions">
-                      <summary aria-label={tr("Campaign actions")}>•••</summary>
-                      <div className="actions">
-                        <button
-                          ref={searchButton}
-                          disabled={busy}
-                          onClick={openSearch}
-                          title={tr("Ctrl+K / ⌘K")}
-                        >
-                          <Text source={"Search the campaign"} />
-                        </button>
-                        <Suspense fallback={null}>
-                          <ExportButton
-                            key={campaign.id}
-                            campaignId={campaign.id}
-                            busy={busy}
-                          />
-                        </Suspense>
-                        <button
-                          disabled={busy}
-                          onClick={() => {
-                            void run(async () => setForm("rename"));
+                  <div className={`workspace-content view-${view}`}>
+                    {playerReturn &&
+                    (view === "journal" || view === "codex") ? (
+                      <button
+                        className="player-return"
+                        disabled={busy}
+                        onClick={() => {
+                          void run(async () => {
+                            setView(playerReturn.view);
+                            setForm(null);
+                            setFocusBlock(undefined);
+                          });
+                        }}
+                      >
+                        <Text source={"Back to the character entry"} />
+                      </button>
+                    ) : null}
+                    {form === "campaign" || form === "rename" ? (
+                      <CampaignForm
+                        key={`${form}-${campaignId}`}
+                        initialName={
+                          form === "rename" ? (campaign?.name ?? "") : ""
+                        }
+                        rename={form === "rename"}
+                        busy={busy}
+                        onSave={saveCampaign}
+                        onCancel={() => setForm(null)}
+                      />
+                    ) : null}
+                    {form === "session" ? (
+                      <SessionForm
+                        initialSequence={Math.min(
+                          999999,
+                          Math.max(
+                            0,
+                            ...sessions.map((item) => item.sequence),
+                          ) + 1,
+                        )}
+                        busy={busy}
+                        onSave={saveSession}
+                        onCancel={() => setForm(null)}
+                      />
+                    ) : null}
+                    {!campaign && !error && view !== "preferences" ? (
+                      <section className="empty">
+                        <span className="book-mark" aria-hidden="true">
+                          ◇
+                        </span>
+                        <p>{appText.emptyCampaignHint}</p>
+                        {form !== "campaign" ? (
+                          <div className="first-start-actions">
+                            <button
+                              className="primary"
+                              onClick={() => setForm("campaign")}
+                            >
+                              {appText.createCampaign}
+                            </button>
+                            <button
+                              disabled={busy}
+                              onClick={() => void openDemo()}
+                            >
+                              <Text source={"Try the demo campaign"} />
+                            </button>
+                            <button
+                              disabled={busy}
+                              onClick={() => setTourOpen(true)}
+                            >
+                              <Text source={"Take the guided tour"} />
+                            </button>
+                          </div>
+                        ) : null}
+                      </section>
+                    ) : null}
+                    {campaign && view === "codex" ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">
+                            <Text source={"Opening Codex…"} />
+                          </p>
+                        }
+                      >
+                        <CodexWorkspace
+                          key={campaign.id}
+                          externalEpoch={externalEpoch}
+                          campaignId={campaign.id}
+                          pages={pages}
+                          selectedId={pageId}
+                          fallback={fallback}
+                          busy={busy}
+                          focusBlock={focusBlock}
+                          register={register}
+                          onSaved={onPageSaved}
+                          onSelect={openPage}
+                          onSource={openSource}
+                          onCreateClue={createClueFromBlock}
+                          onOpenClue={openClue}
+                          onCreate={createPage}
+                          onUpdate={updatePage}
+                          onRecover={recoverPage}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {view === "preferences" ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">{tr("Opening settings…")}</p>
+                        }
+                      >
+                        <AppSettings
+                          busy={busy}
+                          run={run}
+                          onOpenTour={() => setTourOpen(true)}
+                          onDemoChanged={(id) => load(id ?? undefined)}
+                          initialOffer={updateHandoff}
+                          onHandoffUsed={() => setUpdateHandoff(null)}
+                          onCampaignAdded={() => void load()}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign && view === "dice" ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">
+                            <Text source={"Opening dice roller…"} />
+                          </p>
+                        }
+                      >
+                        <DiceWorkspace
+                          key={campaign.id}
+                          campaignId={campaign.id}
+                          register={register}
+                          busy={busy}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign && view === "settings" ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">
+                            <Text source={"Opening settings…"} />
+                          </p>
+                        }
+                      >
+                        <CampaignSettings
+                          key={campaign.id}
+                          campaignId={campaign.id}
+                          register={register}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign && view === "sharing" ? (
+                      <Suspense
+                        fallback={<p role="status">{tr("Opening sharing…")}</p>}
+                      >
+                        <CampaignSharing
+                          key={campaign.id}
+                          campaignId={campaign.id}
+                          busy={busy}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign && view === "clues" ? (
+                      <Suspense
+                        fallback={<p role="status">{tr("Loading clues…")}</p>}
+                      >
+                        <ClueWorkspace
+                          key={campaign.id}
+                          campaignId={campaign.id}
+                          pages={pages}
+                          sessions={sessions}
+                          initialSource={clueSource}
+                          selectedId={selectedClueId}
+                          externalEpoch={externalEpoch}
+                          register={register}
+                          busy={busy}
+                          onSource={(source) =>
+                            openGraphSource({
+                              kind: source.kind,
+                              id: source.id,
+                              title:
+                                source.kind === "session"
+                                  ? (sessions.find((s) => s.id === source.id)
+                                      ?.title ?? "")
+                                  : (pages.find((p) => p.id === source.id)
+                                      ?.title ?? ""),
+                              blockId: source.blockId,
+                            })
+                          }
+                          onPage={openPage}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign && view === "assistant" ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">
+                            <Text source={"Opening assistant…"} />
+                          </p>
+                        }
+                      >
+                        <AssistantWorkspace
+                          key={campaign.id}
+                          campaignId={campaign.id}
+                          register={register}
+                          onSource={selectSearch}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign && view === "wiki" ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">
+                            <Text source={"Opening wiki…"} />
+                          </p>
+                        }
+                      >
+                        <WikiWorkspace
+                          onImportSpell={(spell) =>
+                            void run(async () => {
+                              setWikiDraft(spell);
+                              setPlayerReturn(null);
+                              setView("abilities");
+                              setForm(null);
+                            })
+                          }
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign && view === "party" ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">
+                            <Text source={"Opening party…"} />
+                          </p>
+                        }
+                      >
+                        <PartyWorkspace
+                          key={`${campaign.id}:${externalEpoch}`}
+                          campaignId={campaign.id}
+                          pages={pages}
+                          register={register}
+                          onSaved={onPageSaved}
+                          onOpen={(p) => openPage(p.id, p.title)}
+                          busy={busy}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign && view === "overview" ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">
+                            <Text source={"Opening overview…"} />
+                          </p>
+                        }
+                      >
+                        <Dashboard
+                          key={campaign.id}
+                          campaignId={campaign.id}
+                          sessions={sessions}
+                          pages={pages}
+                          onImported={refreshExternal}
+                          onClue={openClue}
+                          onSession={(s) =>
+                            openSource({
+                              sourceKind: "session",
+                              sourceId: s.id,
+                              sourceTitle: s.title,
+                              sequence: s.sequence,
+                              blockId: "",
+                              preview: "",
+                            })
+                          }
+                          onPage={(p) => openPage(p.id, p.title)}
+                          onCharacter={() =>
+                            void run(async () => setView("character"))
+                          }
+                          onNewSession={() =>
+                            void run(async () => setForm("session"))
+                          }
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign && view === "graph" ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">
+                            <Text source={"Opening graph…"} />
+                          </p>
+                        }
+                      >
+                        <GraphWorkspace
+                          key={`${campaign.id}:${externalEpoch}`}
+                          campaignId={campaign.id}
+                          pages={pages}
+                          sessions={sessions}
+                          busy={busy}
+                          register={register}
+                          onNode={openGraphNode}
+                          onSource={openGraphSource}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign &&
+                    (view === "character" ||
+                      view === "inventory" ||
+                      view === "abilities") ? (
+                      <Suspense
+                        fallback={
+                          <p role="status">
+                            <Text source={"Opening character…"} />
+                          </p>
+                        }
+                      >
+                        <PlayerWorkspace
+                          key={`${campaign.id}-${view}:${externalEpoch}`}
+                          campaignId={campaign.id}
+                          view={view}
+                          pages={pages}
+                          sessions={sessions}
+                          busy={busy}
+                          register={register}
+                          initialSelection={
+                            playerReturn?.view === view
+                              ? playerReturn.assetId
+                              : undefined
+                          }
+                          initialDraft={view === "abilities" ? wikiDraft : null}
+                          onDraftUsed={() => setWikiDraft(null)}
+                          onPage={(id, title, assetId, view) => {
+                            setPlayerReturn({ view, assetId });
+                            openPage(id, title);
                           }}
-                        >
-                          {appText.rename}
-                        </button>
+                          onSource={(source, assetId, view) => {
+                            setPlayerReturn({ view, assetId });
+                            openGraphSource(source);
+                          }}
+                        />
+                      </Suspense>
+                    ) : null}
+                    {campaign &&
+                    view === "journal" &&
+                    !sessions.length &&
+                    form !== "session" ? (
+                      <section className="empty">
+                        <h3>{appText.emptySessions}</h3>
+                        <p>{appText.emptySessionsHint}</p>
                         <button
                           className="primary"
                           disabled={busy}
-                          onClick={() => {
-                            void run(async () => setForm("session"));
-                          }}
+                          onClick={() => setForm("session")}
                         >
-                          + {appText.newSession}
+                          {appText.newSession}
                         </button>
-                      </div>
-                    </details>
-                  ) : null}
-                </header>
-                {campaign ? (
-                  <CampaignTabs
-                    view={view}
-                    busy={busy}
-                    onShow={(next) =>
-                      show(next, {
-                        // Overview, Party and Wiki keep the focused source block.
-                        clearFocus: !["overview", "party", "wiki"].includes(
-                          next,
-                        ),
-                        before:
-                          next === "codex" && !pageId
-                            ? () => setPageId(pages[0]?.id ?? null)
-                            : undefined,
-                      })
-                    }
-                  />
-                ) : null}
-                <div className={`workspace-content view-${view}`}>
-                  {playerReturn && (view === "journal" || view === "codex") ? (
-                    <button
-                      className="player-return"
-                      disabled={busy}
-                      onClick={() => {
-                        void run(async () => {
-                          setView(playerReturn.view);
-                          setForm(null);
-                          setFocusBlock(undefined);
-                        });
-                      }}
-                    >
-                      <Text source={"Back to the character entry"} />
-                    </button>
-                  ) : null}
-                  {form === "campaign" || form === "rename" ? (
-                    <CampaignForm
-                      key={`${form}-${campaignId}`}
-                      initialName={
-                        form === "rename" ? (campaign?.name ?? "") : ""
-                      }
-                      rename={form === "rename"}
-                      busy={busy}
-                      onSave={saveCampaign}
-                      onCancel={() => setForm(null)}
-                    />
-                  ) : null}
-                  {form === "session" ? (
-                    <SessionForm
-                      initialSequence={Math.min(
-                        999999,
-                        Math.max(0, ...sessions.map((item) => item.sequence)) +
-                          1,
-                      )}
-                      busy={busy}
-                      onSave={saveSession}
-                      onCancel={() => setForm(null)}
-                    />
-                  ) : null}
-                  {!campaign && !error && view !== "preferences" ? (
-                    <section className="empty">
-                      <span className="book-mark" aria-hidden="true">
-                        ◇
-                      </span>
-                      <p>{appText.emptyCampaignHint}</p>
-                      {form !== "campaign" ? (
-                        <div className="first-start-actions">
-                          <button
-                            className="primary"
-                            onClick={() => setForm("campaign")}
-                          >
-                            {appText.createCampaign}
-                          </button>
-                          <button
-                            disabled={busy}
-                            onClick={() => void openDemo()}
-                          >
-                            <Text source={"Try the demo campaign"} />
-                          </button>
-                          <button
-                            disabled={busy}
-                            onClick={() => setTourOpen(true)}
-                          >
-                            <Text source={"Take the guided tour"} />
-                          </button>
-                        </div>
-                      ) : null}
-                    </section>
-                  ) : null}
-                  {campaign && view === "codex" ? (
-                    <Suspense
-                      fallback={
-                        <p role="status">
-                          <Text source={"Opening Codex…"} />
-                        </p>
-                      }
-                    >
-                      <CodexWorkspace
-                        key={campaign.id}
-                        externalEpoch={externalEpoch}
-                        campaignId={campaign.id}
-                        pages={pages}
-                        selectedId={pageId}
-                        fallback={fallback}
-                        busy={busy}
-                        focusBlock={focusBlock}
-                        register={register}
-                        onSaved={onPageSaved}
-                        onSelect={openPage}
-                        onSource={openSource}
-                        onCreateClue={createClueFromBlock}
-                        onOpenClue={openClue}
-                        onCreate={createPage}
-                        onUpdate={updatePage}
-                        onRecover={recoverPage}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {view === "preferences" ? (
-                    <Suspense
-                      fallback={<p role="status">{tr("Opening settings…")}</p>}
-                    >
-                      <AppSettings
-                        busy={busy}
-                        run={run}
-                        onOpenTour={() => setTourOpen(true)}
-                        onDemoChanged={(id) => load(id ?? undefined)}
-                        initialOffer={updateHandoff}
-                        onHandoffUsed={() => setUpdateHandoff(null)}
-                        onCampaignAdded={() => void load()}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign && view === "dice" ? (
-                    <Suspense
-                      fallback={
-                        <p role="status">
-                          <Text source={"Opening dice roller…"} />
-                        </p>
-                      }
-                    >
-                      <DiceWorkspace
-                        key={campaign.id}
-                        campaignId={campaign.id}
-                        register={register}
-                        busy={busy}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign && view === "settings" ? (
-                    <Suspense
-                      fallback={
-                        <p role="status">
-                          <Text source={"Opening settings…"} />
-                        </p>
-                      }
-                    >
-                      <CampaignSettings
-                        key={campaign.id}
-                        campaignId={campaign.id}
-                        register={register}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign && view === "sharing" ? (
-                    <Suspense
-                      fallback={<p role="status">{tr("Opening sharing…")}</p>}
-                    >
-                      <CampaignSharing
-                        key={campaign.id}
-                        campaignId={campaign.id}
-                        busy={busy}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign && view === "clues" ? (
-                    <Suspense
-                      fallback={<p role="status">{tr("Loading clues…")}</p>}
-                    >
-                      <ClueWorkspace
-                        key={campaign.id}
-                        campaignId={campaign.id}
-                        pages={pages}
-                        sessions={sessions}
-                        initialSource={clueSource}
-                        selectedId={selectedClueId}
-                        externalEpoch={externalEpoch}
-                        register={register}
-                        busy={busy}
-                        onSource={(source) =>
-                          openGraphSource({
-                            kind: source.kind,
-                            id: source.id,
-                            title:
-                              source.kind === "session"
-                                ? (sessions.find((s) => s.id === source.id)
-                                    ?.title ?? "")
-                                : (pages.find((p) => p.id === source.id)
-                                    ?.title ?? ""),
-                            blockId: source.blockId,
-                          })
-                        }
-                        onPage={openPage}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign && view === "assistant" ? (
-                    <Suspense
-                      fallback={
-                        <p role="status">
-                          <Text source={"Opening assistant…"} />
-                        </p>
-                      }
-                    >
-                      <AssistantWorkspace
-                        key={campaign.id}
-                        campaignId={campaign.id}
-                        register={register}
-                        onSource={selectSearch}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign && view === "wiki" ? (
-                    <Suspense
-                      fallback={
-                        <p role="status">
-                          <Text source={"Opening wiki…"} />
-                        </p>
-                      }
-                    >
-                      <WikiWorkspace
-                        onImportSpell={(spell) =>
-                          void run(async () => {
-                            setWikiDraft(spell);
-                            setPlayerReturn(null);
-                            setView("abilities");
-                            setForm(null);
-                          })
-                        }
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign && view === "party" ? (
-                    <Suspense
-                      fallback={
-                        <p role="status">
-                          <Text source={"Opening party…"} />
-                        </p>
-                      }
-                    >
-                      <PartyWorkspace
-                        key={`${campaign.id}:${externalEpoch}`}
-                        campaignId={campaign.id}
-                        pages={pages}
-                        register={register}
-                        onSaved={onPageSaved}
-                        onOpen={(p) => openPage(p.id, p.title)}
-                        busy={busy}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign && view === "overview" ? (
-                    <Suspense
-                      fallback={
-                        <p role="status">
-                          <Text source={"Opening overview…"} />
-                        </p>
-                      }
-                    >
-                      <Dashboard
-                        key={campaign.id}
-                        campaignId={campaign.id}
-                        sessions={sessions}
-                        pages={pages}
-                        onImported={refreshExternal}
-                        onClue={openClue}
-                        onSession={(s) =>
-                          openSource({
-                            sourceKind: "session",
-                            sourceId: s.id,
-                            sourceTitle: s.title,
-                            sequence: s.sequence,
-                            blockId: "",
-                            preview: "",
-                          })
-                        }
-                        onPage={(p) => openPage(p.id, p.title)}
-                        onCharacter={() =>
-                          void run(async () => setView("character"))
-                        }
-                        onNewSession={() =>
-                          void run(async () => setForm("session"))
-                        }
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign && view === "graph" ? (
-                    <Suspense
-                      fallback={
-                        <p role="status">
-                          <Text source={"Opening graph…"} />
-                        </p>
-                      }
-                    >
-                      <GraphWorkspace
-                        key={`${campaign.id}:${externalEpoch}`}
-                        campaignId={campaign.id}
-                        pages={pages}
-                        sessions={sessions}
-                        busy={busy}
-                        register={register}
-                        onNode={openGraphNode}
-                        onSource={openGraphSource}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign &&
-                  (view === "character" ||
-                    view === "inventory" ||
-                    view === "abilities") ? (
-                    <Suspense
-                      fallback={
-                        <p role="status">
-                          <Text source={"Opening character…"} />
-                        </p>
-                      }
-                    >
-                      <PlayerWorkspace
-                        key={`${campaign.id}-${view}:${externalEpoch}`}
-                        campaignId={campaign.id}
-                        view={view}
-                        pages={pages}
-                        sessions={sessions}
-                        busy={busy}
-                        register={register}
-                        initialSelection={
-                          playerReturn?.view === view
-                            ? playerReturn.assetId
-                            : undefined
-                        }
-                        initialDraft={view === "abilities" ? wikiDraft : null}
-                        onDraftUsed={() => setWikiDraft(null)}
-                        onPage={(id, title, assetId, view) => {
-                          setPlayerReturn({ view, assetId });
-                          openPage(id, title);
-                        }}
-                        onSource={(source, assetId, view) => {
-                          setPlayerReturn({ view, assetId });
-                          openGraphSource(source);
-                        }}
-                      />
-                    </Suspense>
-                  ) : null}
-                  {campaign &&
-                  view === "journal" &&
-                  !sessions.length &&
-                  form !== "session" ? (
-                    <section className="empty">
-                      <h3>{appText.emptySessions}</h3>
-                      <p>{appText.emptySessionsHint}</p>
-                      <button
-                        className="primary"
-                        disabled={busy}
-                        onClick={() => setForm("session")}
-                      >
-                        {appText.newSession}
-                      </button>
-                    </section>
-                  ) : null}
-                  {view === "journal" && sessions.length ? (
-                    <div className="journal-layout">
-                      <nav
-                        className="session-list"
-                        aria-label={appText.journal}
-                      >
-                        {sessions.map((item) => (
-                          <button
-                            key={item.id}
-                            disabled={busy}
-                            aria-current={
-                              item.id === sessionId ? "page" : undefined
-                            }
-                            onClick={() => {
-                              if (item.id !== sessionId)
-                                void run(async () => {
-                                  setSessionId(item.id);
-                                  setFocusBlock(undefined);
-                                  setForm(null);
-                                });
-                            }}
-                          >
-                            <span className="session-number">
-                              <Text source={"Session "} />
-                              {item.sequence}
-                            </span>
-                            <strong>{item.title}</strong>
-                            <span>{formatDate(item.playedOn)}</span>
-                          </button>
-                        ))}
-                      </nav>
-                      <article className="journal-page">
-                        {session ? (
-                          <>
-                            <header className="note-header">
-                              <p>
-                                <Text source={"Session "} />
-                                {session.sequence}{" "}
-                                <span aria-hidden="true">/</span>{" "}
-                                {formatDate(session.playedOn)}
-                              </p>
-                              <h3>{session.title}</h3>
-                            </header>
-                            <Suspense
-                              fallback={
-                                <p role="status">{appText.editorLoading}</p>
+                      </section>
+                    ) : null}
+                    {view === "journal" && sessions.length ? (
+                      <div className="journal-layout">
+                        <nav
+                          className="session-list"
+                          aria-label={appText.journal}
+                        >
+                          {sessions.map((item) => (
+                            <button
+                              key={item.id}
+                              disabled={busy}
+                              aria-current={
+                                item.id === sessionId ? "page" : undefined
                               }
+                              onClick={() => {
+                                if (item.id !== sessionId)
+                                  void run(async () => {
+                                    setSessionId(item.id);
+                                    setFocusBlock(undefined);
+                                    setForm(null);
+                                  });
+                              }}
                             >
-                              <Editor
-                                key={`${session.id}:${externalEpoch}`}
-                                session={session}
-                                register={register}
-                                onSaved={onSaved}
-                                focusBlock={focusBlock}
-                                disabled={busy}
-                                onCreateClue={createClueFromBlock}
-                                onOpenClue={openClue}
-                              />
-                            </Suspense>
-                            {session.document.importedFrom === "logseq" ? (
-                              <Suspense fallback={null}>
-                                <ImportSource
-                                  key={session.id}
-                                  campaignId={session.campaignId}
-                                  kind="session"
-                                  id={session.id}
+                              <span className="session-number">
+                                <Text source={"Session "} />
+                                {item.sequence}
+                              </span>
+                              <strong>{item.title}</strong>
+                              <span>{formatDate(item.playedOn)}</span>
+                            </button>
+                          ))}
+                        </nav>
+                        <article className="journal-page">
+                          {session ? (
+                            <>
+                              <header className="note-header">
+                                <p>
+                                  <Text source={"Session "} />
+                                  {session.sequence}{" "}
+                                  <span aria-hidden="true">/</span>{" "}
+                                  {formatDate(session.playedOn)}
+                                </p>
+                                <h3>{session.title}</h3>
+                              </header>
+                              <Suspense
+                                fallback={
+                                  <p role="status">{appText.editorLoading}</p>
+                                }
+                              >
+                                <Editor
+                                  key={`${session.id}:${externalEpoch}`}
+                                  session={session}
+                                  register={register}
+                                  onSaved={onSaved}
+                                  focusBlock={focusBlock}
+                                  disabled={busy}
+                                  onCreateClue={createClueFromBlock}
+                                  onOpenClue={openClue}
                                 />
                               </Suspense>
-                            ) : null}
-                          </>
-                        ) : (
-                          <p>{appText.chooseSession}</p>
-                        )}
-                      </article>
-                    </div>
-                  ) : null}
-                </div>
-              </>
-            )}
-          </main>
-        </div>
+                              {session.document.importedFrom === "logseq" ? (
+                                <Suspense fallback={null}>
+                                  <ImportSource
+                                    key={session.id}
+                                    campaignId={session.campaignId}
+                                    kind="session"
+                                    id={session.id}
+                                  />
+                                </Suspense>
+                              ) : null}
+                            </>
+                          ) : (
+                            <p>{appText.chooseSession}</p>
+                          )}
+                        </article>
+                      </div>
+                    ) : null}
+                  </div>
+                </>
+              )}
+            </main>
+          </div>
+        </TableDockProvider>
       </KnowledgeContext.Provider>
     </OperationContext.Provider>
   );
