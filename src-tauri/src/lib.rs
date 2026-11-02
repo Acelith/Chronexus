@@ -230,6 +230,8 @@ pub fn run() {
             commands::tables::table_live_stop,
             commands::tables::table_live_message,
             commands::tables::table_live_ping,
+            commands::tables::table_upload_map,
+            commands::tables::table_gm_request,
             commands::tables::table_links,
             commands::tables::table_link,
             commands::tables::table_grant,

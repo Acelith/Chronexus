@@ -1,5 +1,11 @@
 import { command } from "../journal/api";
-import { Channel, invoke, isTauri } from "@tauri-apps/api/core";
+import {
+  Channel,
+  invoke,
+  isTauri,
+  type InvokeArgs,
+  type InvokeOptions,
+} from "@tauri-apps/api/core";
 import { tr } from "../../i18n/store";
 import type {
   BoardView,
@@ -22,6 +28,15 @@ export const tablesApi = {
     call<{ revision: number }>("table_operation", { tableId, operation }),
   image: (tableId: string, assetId: string, map: boolean) =>
     call<string>("table_image", { tableId, assetId, map }),
+  // GM only: the native side checks the server-reported role of the open table.
+  uploadMap: async (tableId: string, image: Blob) =>
+    call<{ id: string; width: number; height: number }>(
+      "table_upload_map",
+      new Uint8Array(await image.arrayBuffer()),
+      { headers: { "x-table-id": tableId, "x-image-type": image.type } },
+    ),
+  gmRequest: (tableId: string, route: "uvtt" | "catalog", body: unknown) =>
+    call<unknown>("table_gm_request", { tableId, route, body }),
   leave: (tableId: string) => call<void>("table_leave", { tableId }),
   links: (campaignId: string) =>
     command<TableLink[]>("table_links", { campaignId }),
@@ -111,14 +126,15 @@ export interface LiveFrame {
 }
 async function call<T>(
   name: string,
-  args: Record<string, unknown>,
+  args: InvokeArgs,
+  options?: InvokeOptions,
 ): Promise<T> {
   if (!isTauri())
     throw new Error(
       tr("Start Chronexus as a desktop app to access your local archive."),
     );
   try {
-    return await invoke<T>(name, args);
+    return await invoke<T>(name, args, options);
   } catch (reason) {
     const status =
       typeof reason === "object" && reason !== null && "status" in reason

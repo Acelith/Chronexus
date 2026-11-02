@@ -15,6 +15,15 @@ struct Subscription {
     cancel: CancellationToken,
     sender: tokio::sync::mpsc::Sender<Value>,
     account: sync::Account,
+    /// The role the server reported when this table was opened; the server re-checks it on every write.
+    gm: bool,
+}
+/// Whether the open live table `table_id` belongs to the signed-in account as GM.
+pub(crate) fn gm_table(live: &Live, current: &sync::Account, table_id: &str) -> bool {
+    live.0.lock().is_ok_and(|slot| {
+        slot.as_ref()
+            .is_some_and(|s| s.table_id == table_id && s.gm && &s.account == current)
+    })
 }
 #[derive(Default)]
 pub struct Live(std::sync::Mutex<Option<Subscription>>);
@@ -27,12 +36,70 @@ impl Default for Images {
 #[tauri::command]
 pub async fn table_operation(
     db: tauri::State<'_, Database>,
+    live: tauri::State<'_, Live>,
     table_id: String,
     operation: Value,
 ) -> Result<Value, TableError> {
-    validate_operation(&operation)?;
-    let (_, _, client) = super::sync::signed_in(&db)?;
+    let (current, _, client) = super::sync::signed_in(&db)?;
+    validate_operation(&operation, gm_table(&live, &current, &table_id))?;
     client.table_operation(&table_id, operation).await
+}
+/// GM map or library image chosen in the table view. Raw IPC body; the table travels in a header.
+#[tauri::command]
+pub async fn table_upload_map(
+    db: tauri::State<'_, Database>,
+    live: tauri::State<'_, Live>,
+    request: tauri::ipc::Request<'_>,
+) -> Result<Value, TableError> {
+    let header = |name: &str| {
+        request
+            .headers()
+            .get(name)
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_owned)
+            .ok_or(TableError { status: 400 })
+    };
+    let (table_id, mime) = (header("x-table-id")?, header("x-image-type")?);
+    let tauri::ipc::InvokeBody::Raw(bytes) = request.body() else {
+        return Err(TableError { status: 400 });
+    };
+    let (current, _, client) = super::sync::signed_in(&db)?;
+    if !gm_table(&live, &current, &table_id) {
+        return Err(TableError { status: 403 });
+    }
+    client
+        .upload_table_map(&table_id, bytes.clone(), &mime)
+        .await
+}
+/// GM-only fixed routes: Universal VTT import and the server's public catalog lookup.
+#[tauri::command]
+pub async fn table_gm_request(
+    db: tauri::State<'_, Database>,
+    live: tauri::State<'_, Live>,
+    table_id: String,
+    route: String,
+    body: Value,
+) -> Result<Value, TableError> {
+    let limit = match route.as_str() {
+        "uvtt" => 48 * 1024 * 1024,
+        "catalog" => 4096,
+        _ => return Err(TableError { status: 400 }),
+    };
+    if body.to_string().len() > limit {
+        return Err(TableError { status: 400 });
+    }
+    let (current, _, client) = super::sync::signed_in(&db)?;
+    if !gm_table(&live, &current, &table_id) {
+        return Err(TableError { status: 403 });
+    }
+    client
+        .table_call(
+            reqwest::Method::POST,
+            &table_id,
+            &format!("/{route}"),
+            Some(body),
+        )
+        .await
 }
 #[tauri::command]
 pub async fn table_image(
@@ -92,7 +159,16 @@ pub async fn table_live_start(
     on_event: tauri::ipc::Channel<Value>,
 ) -> AppResult<String> {
     sync::remote_id(&table_id)?;
-    let (account, _, _) = super::sync::signed_in(&db)?;
+    let (account, _, client) = super::sync::signed_in(&db)?;
+    // GM tools follow the role the server reports for this table, never a client claim.
+    let gm = client
+        .tables()
+        .await?
+        .iter()
+        .find(|t| t.id == table_id)
+        .ok_or("Table access ended. Sign in again or check your invitation.")?
+        .role
+        == "gm";
     let root = db.root()?;
     let id = uuid::Uuid::new_v4().to_string();
     let cancel = CancellationToken::new();
@@ -108,6 +184,7 @@ pub async fn table_live_start(
             cancel: cancel.clone(),
             sender,
             account: account.clone(),
+            gm,
         });
     }
     tauri::async_runtime::spawn(async move {
@@ -139,6 +216,7 @@ pub async fn table_live_start(
             let mut checked_at = std::time::Instant::now();
             let stream = client.table_stream(
                 &table_id,
+                gm,
                 move |value| {
                     if watched.is_cancelled() {
                         return false;
@@ -366,6 +444,7 @@ pub async fn table_project_character(
             .table_board(&table_id)
             .await
             .map_err(TableError::from)?,
+        false,
     )?;
     if board["revision"].as_i64() != Some(base_revision) {
         return Err(TableError { status: 409 });

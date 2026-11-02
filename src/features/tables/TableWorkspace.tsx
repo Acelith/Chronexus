@@ -195,7 +195,7 @@ export default function TableWorkspace({
       const adapter = async (
         method: string,
         path: string,
-        body?: BoardOperation,
+        body?: BoardOperation | Blob | unknown,
         binary = false,
       ) => {
         if (!active)
@@ -205,17 +205,31 @@ export default function TableWorkspace({
         if (method === "GET" && path === prefix + "/board")
           return tablesApi.board(table.id);
         if (method === "POST" && path === prefix + "/board/operations" && body)
-          return tablesApi.operate(table.id, body);
-        if (method === "GET" && binary && path.startsWith(prefix + "/maps/"))
+          return tablesApi.operate(table.id, body as BoardOperation);
+        if (method === "GET" && binary && path.startsWith(prefix + "/maps/")) {
+          const [asset, thumbnail] = path
+            .slice((prefix + "/maps/").length)
+            .split("/");
+          // Library previews use the small size; scene maps the large one.
           return dataBlob(
             await tablesApi.image(
               table.id,
-              path.slice((prefix + "/maps/").length),
-              !!instance?.snapshot?.scenes.some(
-                (s) => s.mapId === path.slice((prefix + "/maps/").length),
-              ),
+              asset,
+              thumbnail !== "thumbnail" &&
+                !!instance?.snapshot?.scenes.some((s) => s.mapId === asset),
             ),
           );
+        }
+        if (table.role === "gm" && method === "POST") {
+          if (path === prefix + "/maps" && body instanceof Blob)
+            return tablesApi.uploadMap(table.id, body);
+          if (path === prefix + "/uvtt" || path === prefix + "/catalog")
+            return tablesApi.gmRequest(
+              table.id,
+              path === prefix + "/uvtt" ? "uvtt" : "catalog",
+              body,
+            );
+        }
         throw new Error(
           tr("Table access ended. Sign in again or check your invitation."),
         );
@@ -225,7 +239,7 @@ export default function TableWorkspace({
         t: runtime.i18n.t,
         api: adapter,
         tableId: table.id,
-        role: table.role === "gm" ? "spectator" : table.role,
+        role: table.role,
         account: account.accountId,
         seats,
         confirm: ask,
@@ -400,13 +414,6 @@ export default function TableWorkspace({
           : tr("Table disconnected — editing is paused.")}{" "}
         · {people}
       </p>
-      {table.role === "gm" && (
-        <p>
-          {tr(
-            "GM preparation tools are available in the server web interface.",
-          )}
-        </p>
-      )}
       {error && (
         <p role="alert" className="error">
           {error}

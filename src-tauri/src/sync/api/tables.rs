@@ -32,14 +32,47 @@ impl Client {
         bytes: Vec<u8>,
         mime: &str,
     ) -> Result<String, TableError> {
+        let value = self
+            .upload_table_image(table, "portraits", bytes, mime, 8 * 1024 * 1024)
+            .await?;
+        Ok(value["id"].as_str().unwrap_or_default().into())
+    }
+    /// GM map or library image: the server validates and stores the original bytes.
+    pub async fn upload_table_map(
+        &self,
+        table: &str,
+        bytes: Vec<u8>,
+        mime: &str,
+    ) -> Result<Value, TableError> {
+        let value = self
+            .upload_table_image(table, "maps", bytes, mime, 32 * 1024 * 1024)
+            .await?;
+        for key in ["width", "height"] {
+            if value[key].as_u64().is_none_or(|n| n == 0 || n > 16384) {
+                return Err(TableError { status: 400 });
+            }
+        }
+        Ok(value)
+    }
+    async fn upload_table_image(
+        &self,
+        table: &str,
+        route: &str,
+        bytes: Vec<u8>,
+        mime: &str,
+        limit: usize,
+    ) -> Result<Value, TableError> {
         remote_id(table).map_err(TableError::from)?;
-        if bytes.len() > 8 * 1024 * 1024 {
+        if bytes.is_empty()
+            || bytes.len() > limit
+            || !["image/png", "image/jpeg", "image/webp"].contains(&mime)
+        {
             return Err(TableError { status: 400 });
         }
         let mut request = self
             .http
             .post(
-                self.url(&format!("/api/v1/tables/{table}/portraits"))
+                self.url(&format!("/api/v1/tables/{table}/{route}"))
                     .map_err(TableError::from)?,
             )
             .header("content-type", mime)
@@ -59,7 +92,7 @@ impl Client {
         let value: Value = serde_json::from_slice(&out).map_err(|_| TableError { status: 400 })?;
         let id = value["id"].as_str().ok_or(TableError { status: 400 })?;
         remote_id(id).map_err(TableError::from)?;
-        Ok(id.into())
+        Ok(value)
     }
     pub async fn table_call(
         &self,
@@ -163,6 +196,7 @@ impl Client {
     pub async fn table_stream(
         &self,
         table: &str,
+        gm: bool,
         mut frame: impl FnMut(Value) -> bool,
         cancel: tokio_util::sync::CancellationToken,
         outgoing: &mut tokio::sync::mpsc::Receiver<Value>,
@@ -221,7 +255,7 @@ impl Client {
                     if message.is_text(){let text=message.to_text().map_err(|_|Failure::Rejected("Invalid table frame.".into()))?;let mut value:Value=serde_json::from_str(text).map_err(|_|Failure::Rejected("Invalid table frame.".into()))?;
                     if value["type"]=="state"{
                         if value["events"].as_array().is_none_or(|a|a.len()>1000||a.iter().any(|e|e["text"].as_str().is_none_or(|s|s.chars().count()>2000))){return Err(Failure::Rejected("Invalid table frame.".into()));}
-                        value["board"]=validate_board(value["board"].take()).map_err(|_|Failure::Rejected("Invalid table frame.".into()))?;
+                        value["board"]=validate_board(value["board"].take(),gm).map_err(|_|Failure::Rejected("Invalid table frame.".into()))?;
                     }
                         if !frame(value){return Ok(());}
                     }
@@ -266,7 +300,10 @@ fn table_tls() -> ApiResult<tokio_tungstenite::Connector> {
     )))
 }
 
-pub fn validate_board(mut value: Value) -> Result<Value, TableError> {
+/// Bounds a received board. GM preparation data (monster and encounter library, images,
+/// fog editor) is kept only for a table where the server reported this account as GM; it
+/// stays in memory for the open table and is never stored on the device.
+pub fn validate_board(mut value: Value, gm: bool) -> Result<Value, TableError> {
     let invalid = || TableError { status: 400 };
     let scenes = value["scenes"].as_array().ok_or_else(invalid)?;
     if scenes.len() > 50 || value["revision"].as_i64().is_none_or(|n| n < 1) {
@@ -321,13 +358,63 @@ pub fn validate_board(mut value: Value) -> Result<Value, TableError> {
             return Err(invalid());
         }
     }
-    for key in ["geometry", "fogEditor", "monsters", "encounters", "assets"] {
-        value.as_object_mut().ok_or_else(invalid)?.remove(key);
+    let gm_lists = [
+        ("fogEditor", 50),
+        ("monsters", 200),
+        ("encounters", 200),
+        ("assets", 200),
+    ];
+    for (key, max) in gm_lists {
+        let keep = gm
+            && value
+                .get(key)
+                .is_some_and(|v| v.as_array().is_some_and(|a| a.len() <= max));
+        if !keep {
+            value.as_object_mut().ok_or_else(invalid)?.remove(key);
+        }
     }
+    value
+        .as_object_mut()
+        .ok_or_else(invalid)?
+        .remove("geometry");
     Ok(value)
 }
 
-pub fn validate_operation(op: &Value) -> Result<(), TableError> {
+/// Board commands a GM may send from the desktop; the server re-checks the role of every one.
+const GM_COMMANDS: [&str; 16] = [
+    "importVision",
+    "saveAsset",
+    "saveMonster",
+    "saveEncounter",
+    "removeLibrary",
+    "deployEncounter",
+    "placeMonster",
+    "saveFog",
+    "saveScene",
+    "importScene",
+    "activateScene",
+    "saveToken",
+    "removeToken",
+    "move",
+    "saveTemplate",
+    "removeTemplate",
+];
+const GM_COMBAT: [&str; 12] = [
+    "start",
+    "end",
+    "initiative",
+    "order",
+    "next",
+    "delay",
+    "add",
+    "remove",
+    "setVitals",
+    "setCondition",
+    "removeCondition",
+    "roll",
+];
+
+pub fn validate_operation(op: &Value, gm: bool) -> Result<(), TableError> {
     let invalid = || TableError { status: 400 };
     let id = op["operationId"].as_str().ok_or_else(invalid)?;
     if uuid::Uuid::parse_str(id).map_or(true, |u| u.get_version_num() != 7)
@@ -337,6 +424,14 @@ pub fn validate_operation(op: &Value) -> Result<(), TableError> {
         return Err(invalid());
     }
     let kind = op["command"]["type"].as_str().ok_or_else(invalid)?;
+    if gm {
+        let combat = op["command"]["action"]["type"].as_str().unwrap_or("");
+        return if GM_COMMANDS.contains(&kind) || (kind == "combat" && GM_COMBAT.contains(&combat)) {
+            Ok(())
+        } else {
+            Err(invalid())
+        };
+    }
     if !["move", "saveTemplate", "removeTemplate", "combat"].contains(&kind) {
         return Err(invalid());
     }
@@ -366,7 +461,7 @@ mod tests {
     #[test]
     fn desktop_commands_cannot_edit_gm_state_or_upload_arbitrary_payloads() {
         let mut op = json!({"operationId":uuid::Uuid::now_v7().to_string(),"baseRevision":1,"command":{"type":"move","tokenId":uuid::Uuid::new_v4().to_string(),"path":[{"x":1,"y":1}]}});
-        assert!(validate_operation(&op).is_ok());
+        assert!(validate_operation(&op, false).is_ok());
         for kind in [
             "saveScene",
             "saveToken",
@@ -376,24 +471,57 @@ mod tests {
             "projectToken",
         ] {
             op["command"]["type"] = json!(kind);
-            assert!(validate_operation(&op).is_err());
+            assert!(validate_operation(&op, false).is_err());
         }
         op["command"] = json!({"type":"combat","action":{"type":"next"}});
-        assert!(validate_operation(&op).is_err());
+        assert!(validate_operation(&op, false).is_err());
         op["command"]["action"]["type"] = json!("setVitals");
-        assert!(validate_operation(&op).is_ok());
+        assert!(validate_operation(&op, false).is_ok());
         op["baseRevision"] = json!(-1);
-        assert!(validate_operation(&op).is_err());
+        assert!(validate_operation(&op, false).is_err());
     }
     #[test]
     fn transient_view_discards_gm_libraries_and_rejects_unbounded_masks() {
         let mut b = json!({"revision":1,"scenes":[],"tokens":[],"templates":[],"fog":[],"vitals":[],"combatLog":[],"monsters":["SECRET"],"geometry":"SECRET","fogEditor":"SECRET"});
-        assert!(!validate_board(b.clone())
+        assert!(!validate_board(b.clone(), false)
             .unwrap()
             .to_string()
             .contains("SECRET"));
         b["fog"] = json!([{"columns":0,"rows":32,"visible":[]}]);
-        assert!(validate_board(b).is_err());
+        assert!(validate_board(b, false).is_err());
+    }
+    #[test]
+    fn gm_view_keeps_bounded_preparation_data_and_drops_vision_geometry() {
+        let mut b = json!({"revision":1,"scenes":[],"tokens":[],"templates":[],"fog":[],"vitals":[],"combatLog":[],"monsters":[{"name":"Synthetic"}],"encounters":[],"assets":[],"fogEditor":[],"geometry":"SECRET"});
+        let kept = validate_board(b.clone(), true).unwrap();
+        assert_eq!(kept["monsters"][0]["name"], "Synthetic");
+        assert!(kept.get("assets").is_some() && kept.get("fogEditor").is_some());
+        assert!(kept.get("geometry").is_none());
+        b["monsters"] = json!(vec![json!({}); 201]);
+        b["assets"] = json!("not a list");
+        let bounded = validate_board(b, true).unwrap();
+        assert!(bounded.get("monsters").is_none() && bounded.get("assets").is_none());
+    }
+    #[test]
+    fn gm_commands_need_the_server_reported_gm_role() {
+        let mut op = json!({"operationId":uuid::Uuid::now_v7().to_string(),"baseRevision":1,"command":{"type":"placeMonster","sceneId":"s","spawn":{}}});
+        assert!(validate_operation(&op, false).is_err());
+        assert!(validate_operation(&op, true).is_ok());
+        for kind in ["saveScene", "activateScene", "saveAsset", "deployEncounter"] {
+            op["command"]["type"] = json!(kind);
+            assert!(validate_operation(&op, true).is_ok(), "{kind}");
+        }
+        for kind in ["projectToken", "dropDatabase"] {
+            op["command"]["type"] = json!(kind);
+            assert!(validate_operation(&op, true).is_err(), "{kind}");
+        }
+        op["command"] = json!({"type":"combat","action":{"type":"next"}});
+        assert!(validate_operation(&op, true).is_ok());
+        op["command"]["action"]["type"] = json!("rewind");
+        assert!(validate_operation(&op, true).is_err());
+        op["operationId"] = json!(uuid::Uuid::new_v4().to_string());
+        op["command"]["action"]["type"] = json!("next");
+        assert!(validate_operation(&op, true).is_err());
     }
     #[test]
     fn native_tls_configuration_uses_a_verifying_connector() {

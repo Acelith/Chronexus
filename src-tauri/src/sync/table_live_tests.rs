@@ -165,6 +165,7 @@ async fn three_players_reconnect_move_and_receive_filtered_combat_and_fog() {
             client
                 .table_stream(
                     &table,
+                    false,
                     move |frame| frames.send(frame).is_ok(),
                     cancelled,
                     &mut incoming,
@@ -263,7 +264,7 @@ async fn three_players_reconnect_move_and_receive_filtered_combat_and_fog() {
                 .unwrap();
             assert!(!frame.to_string().contains("gmNote"));
             if frame["type"] == "state" && frame["revision"] == ack["revision"] {
-                let view = validate_board(frame["board"].clone()).unwrap();
+                let view = validate_board(frame["board"].clone(), false).unwrap();
                 assert!(view["tokens"].as_array().unwrap().is_empty());
                 assert!(view.get("fogEditor").is_none());
                 break;
@@ -291,6 +292,7 @@ async fn three_players_reconnect_move_and_receive_filtered_combat_and_fog() {
         client
             .table_stream(
                 &table,
+                false,
                 move |frame| frames.send(frame).is_ok(),
                 other,
                 &mut incoming,

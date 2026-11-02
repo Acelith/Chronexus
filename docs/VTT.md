@@ -203,7 +203,7 @@ a **converter on screen**.
 | M44 | Maps, grid, tokens and movement, ft/m everywhere | Scenes, map assets, grid, tokens, move validation, rulers | Table canvas (Canvas 2D), drag on grid, ruler and templates in ft+m, on-screen converter, unit setting | M43 |
 | M45 | Combat tracker | Combat state, initiative, turns, rounds, conditions, log, secret rolls | Tracker panel, own initiative and HP actions, combat log | M44 |
 | M46 | Fog of war and vision | Fog geometry, then walls/doors/lights, server-side visibility | Fog rendering, Universal VTT import for walls | M44 |
-| M47 | Monster library and encounters | SRD import with attribution, custom monsters, encounters | (GM tools live in the web interface; desktop shows tokens only) | M45 |
+| M47 | Monster library and encounters | SRD import with attribution, custom monsters, encounters | Same GM tools as the web interface through the shared runtime (role reported by the server); click placement and one-step maps | M45 |
 
 ### Acceptance for each milestone
 - Server-enforced privacy: an automated matrix proves a GM cannot read any player journal

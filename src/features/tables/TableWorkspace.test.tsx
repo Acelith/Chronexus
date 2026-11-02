@@ -20,6 +20,8 @@ vi.mock("./api", () => ({
     seats: vi.fn(),
     operate: vi.fn(),
     image: vi.fn(),
+    uploadMap: vi.fn(),
+    gmRequest: vi.fn(),
     start: vi.fn(),
     stop: vi.fn(),
     message: vi.fn(),
@@ -168,6 +170,88 @@ for (const locale of ["en", "it", "ar"] as const)
       expect(tablesApi.stop).toHaveBeenCalledWith("subscription"),
     );
   });
+test("a GM prepares maps and stamps library monsters through native commands", async () => {
+  await loadLocale("en");
+  applyPreferences({
+    version: 2,
+    locale: "en",
+    script: "standard",
+    showOriginal: false,
+  });
+  const t = createTableRuntime("en").i18n.t;
+  vi.mocked(tablesApi.uploadMap).mockResolvedValue({
+    id: "map",
+    width: 800,
+    height: 600,
+  });
+  render(
+    <TableWorkspace
+      campaignId="campaign"
+      table={{ ...table, role: "gm" }}
+      onClose={() => {}}
+    />,
+  );
+  await waitFor(() => expect(tablesApi.start).toHaveBeenCalledOnce());
+  const board = {
+    ...snapshot(),
+    monsters: [
+      {
+        id: "monster",
+        name: "Synthetic goblin",
+        hp: 7,
+        ac: 15,
+        speed: { value: 30, unit: "ft" },
+        size: 1,
+        statBlock: "",
+        source: null,
+        portraitId: null,
+      },
+    ],
+    encounters: [],
+    assets: [],
+  };
+  act(() => receive({ type: "state", board, events: [], online: 1 }));
+  expect(
+    screen.queryByText(
+      "GM preparation tools are available in the server web interface.",
+    ),
+  ).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("tab", { name: t("tab.library") }));
+  await userEvent.click(
+    screen.getAllByRole("button", { name: t("placeOnMap") })[0],
+  );
+  const canvas = screen.getByLabelText(t("boardKeys"));
+  fireEvent.keyDown(canvas, { key: "Enter" });
+  await waitFor(() =>
+    expect(tablesApi.operate).toHaveBeenCalledWith(
+      "table",
+      expect.objectContaining({
+        command: expect.objectContaining({
+          type: "placeMonster",
+          spawn: expect.objectContaining({ monsterId: "monster" }),
+        }),
+      }),
+    ),
+  );
+  await userEvent.click(screen.getByRole("tab", { name: t("tab.scene") }));
+  const file = new File(["png"], "Crypt.png", { type: "image/png" });
+  await userEvent.upload(screen.getByLabelText(t("uploadMap")), file);
+  await userEvent.click(screen.getByRole("button", { name: t("uploadMap") }));
+  await waitFor(() =>
+    expect(tablesApi.uploadMap).toHaveBeenCalledWith("table", file),
+  );
+  await waitFor(() =>
+    expect(tablesApi.operate).toHaveBeenCalledWith(
+      "table",
+      expect.objectContaining({
+        command: expect.objectContaining({
+          type: "saveScene",
+          scene: expect.objectContaining({ mapId: "map", width: 800 }),
+        }),
+      }),
+    ),
+  );
+});
 test("a late live subscription is stopped after unmount and no table is stored", async () => {
   let finish!: (id: string) => void;
   vi.mocked(tablesApi.start).mockImplementation(

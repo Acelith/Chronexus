@@ -25,10 +25,19 @@ Character projection lets you review and confirm selected name, HP/AC, portrait
 and manual speed. Nothing is selected by default. Applying token HP to the local
 sheet is a separate confirmed action. Notes and resources never accompany this copy.
 
-The GM prepares scenes, fog, walls, monsters, encounters and artwork in the server
-web interface. Its image library supports computer PNG/JPEG/WebP import and explicit
-licensed Wikimedia Commons searches/imports. The server filters hidden information
-before sending it to players. Fog uses a coarse visibility mask, not pixel precision.
+A GM prepares the table from the desktop or the server web interface, which share
+the same tools. In **Scenes**, drop a PNG/JPEG/WebP or Universal VTT file on the map
+(or upload it): a new scene is created at the image size, and players see it only
+after **Activate scene**. In **Library**, choose **Place on map** on a saved monster
+or **Place as token** on an image, then click map cells: each click adds one token
+until Esc (Enter places one at the map centre). Placed monsters get their own private
+HP and AC. **Public catalogs** searches, only on request, game-icons.net token icons
+(recoloured into round tokens, CC BY 3.0/CC0 with attribution kept), Wikimedia Commons
+images with open licences and SRD 2014 monsters; the server makes those requests, never
+the desktop. The desktop keeps GM library data only in memory while the table is open,
+and only when the server reports you as that table's GM. The server filters hidden
+information before sending it to players. Fog uses a coarse visibility mask, not pixel
+precision.
 
 GM journal access is granted per selected already shared/synchronized item and can
 be revoked. Table snapshots are transient; backups retain only your local journal

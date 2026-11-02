@@ -1,3 +1,24 @@
+# Chronexus status — 2 November 2026: GM table tools on the desktop
+
+- A GM now opens their table on the desktop with the same preparation tools as the
+  server web interface (bundled runtime from server `dd008ae`): drop or upload a map to
+  create a scene, stamp library monsters/images on clicked cells (Enter/Esc for keyboard),
+  search game-icons.net token icons, Wikimedia Commons images and SRD monsters. Catalog
+  requests are made by the server, never by the desktop.
+- GM capability follows the role the server reports when the live table opens. Only then
+  does the native side keep GM library/fog-editor data (bounded, in memory, never stored)
+  and accept GM board commands; players keep the previous allowlist. New narrow commands:
+  `table_upload_map` (raw IPC body, PNG/JPEG/WebP ≤ 32 MiB) and `table_gm_request`
+  (fixed `uvtt`/`catalog` routes). `dragDropEnabled: false` lets HTML file drops reach
+  the webview (no feature used native drag-drop events).
+- Windows: tsc, ESLint, 272 frontend tests, i18n gate (0 missing UI translations), runtime
+  integrity check, cargo fmt, Clippy with warnings denied, 204 Rust library tests and 6
+  ignored real-server live tests passed. Browser check of the shared runtime on a synthetic
+  loopback server. The native desktop window itself was not driven by hand: drag-and-drop
+  and GM uploads in the packaged app remain to be checked; macOS/Linux pending.
+- Skills: React Testing (observable GM placement/upload test), Rust Best Practices (narrow
+  role-checked commands).
+
 # Chronexus status — 1 November 2026: roadmap synchronised with releases
 
 - ROADMAP priority table now has a *State* column matching the source and releases:

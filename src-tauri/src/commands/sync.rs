@@ -702,13 +702,16 @@ pub async fn table_join(db: tauri::State<'_, Database>, code: String) -> AppResu
 #[tauri::command]
 pub async fn table_board(
     db: tauri::State<'_, Database>,
+    live: tauri::State<'_, super::tables::Live>,
     table_id: String,
 ) -> Result<serde_json::Value, api::tables::TableError> {
-    let (_, _, client) = signed_in(&db)?;
+    let (current, _, client) = signed_in(&db)?;
+    let gm = super::tables::gm_table(&live, &current, &table_id);
     api::tables::validate_board(
         client
             .table_board(&table_id)
             .await
             .map_err(api::tables::TableError::from)?,
+        gm,
     )
 }

@@ -215,8 +215,13 @@
 .chronexus-table .vtt-viewport.panning {
   cursor: grab;
 }
-.chronexus-table .vtt-viewport[data-tool="ping"] {
+.chronexus-table .vtt-viewport[data-tool="ping"],
+.chronexus-table .vtt-viewport[data-placing] {
   cursor: crosshair;
+}
+.chronexus-table .vtt-viewport.dropping {
+  outline: 3px dashed #e9c98b;
+  outline-offset: -6px;
 }
 .chronexus-table .vtt-stage {
   position: absolute;
