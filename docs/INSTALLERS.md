@@ -1,3 +1,17 @@
+# Release 0.14.0 — signed Windows x64 installer (desktop GM table tools)
+
+NSIS Windows x64 installer compiled from commit `6f5a81d` (annotated tag `v0.14.0`)
+in a clean detached worktree, updater signed with the production key and verified by
+the production-key test and `publish_app_update.py`. Size 34,970,964 bytes, SHA-256
+`12785da8262ae7b6c20a8b2830fb86f216fc57b3e5e2a6920fd4462664e4881d`. Published on
+2 November 2026: installer, `.sig` and `latest.json` verified as drafts and after
+publication with anonymous SHA-256 checks; latest = v0.14.0. GM tools need Chronexus
+Server 0.3.0 (published the same day). The publisher needs `CARGO` set to the local
+toolchain for its signature test. `check-public-origin.py --history` again flags only
+objects reachable from local `refs/codex/` refs; none are reachable from `main` or
+tags. **Not built or verified:** macOS, Linux, ARM64, Authenticode, installation and
+upgrade of this installer. See [release notes](releases/v0.14.0.md).
+
 # Release 0.13.1 — signed Windows x64 installer (sync hardening)
 
 NSIS Windows x64 installer compiled from commit `1210e7f` (annotated tag `v0.13.1`)

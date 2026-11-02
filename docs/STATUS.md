@@ -1,3 +1,16 @@
+# Chronexus status — 2 November 2026: release 0.14.0 published
+
+- [Chronexus 0.14.0](https://github.com/Acelith/Chronexus/releases/tag/v0.14.0) (tag on
+  `6f5a81d`): signed Windows x64 NSIS installer and updater manifest, verified anonymously;
+  the stable updater channel now offers 0.14.0. Details in docs/INSTALLERS.md.
+- Native debug GM session before release (Windows, synthetic loopback server behind TLS,
+  Italian profile): map upload and HTML drop became scenes, a game-icons.net token was
+  imported and placed twice by click, server board confirmed, no page errors. It found
+  the unreadable board status line, fixed in `4a07348`.
+- Companion: [Chronexus Server 0.3.0](https://github.com/Acelith/Chronexus-Server/releases/tag/v0.3.0).
+- Not built: Windows ARM64, macOS, Linux packages; no Authenticode signature.
+- Skills: none loaded for the release; the repository release scripts were followed.
+
 # Chronexus status — 2 November 2026: GM table tools on the desktop
 
 - A GM now opens their table on the desktop with the same preparation tools as the
