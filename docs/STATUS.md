@@ -16,8 +16,7 @@
   ignored real-server live tests passed. Browser check of the shared runtime on a synthetic
   loopback server. The native desktop window itself was not driven by hand: drag-and-drop
   and GM uploads in the packaged app remain to be checked; macOS/Linux pending.
-- Skills: React Testing (observable GM placement/upload test), Rust Best Practices (narrow
-  role-checked commands).
+- Skills: none loaded for this change; existing repository test patterns were followed.
 
 # Chronexus status — 1 November 2026: roadmap synchronised with releases
 
