@@ -1,7 +1,7 @@
 # ROADMAP.md — Chronexus: milestone and real delivery order
 
-Updated on 1 November 2026 (priority table synchronised with the source and with
-releases Chronexus 0.13.0 / Chronexus Server 0.2.0); open milestones were reprioritized
+Updated on 2 November 2026 (priority table synchronised with the source and with
+releases Chronexus 0.14.0 / Chronexus Server 0.3.0); open milestones were reprioritized
 and M28–M40 added on 26 October 2026.
 The historical numbering M0–M15 remains stable to
 avoid ambiguity in commits, guides, and releases. The suffixes **a/b/c/d** identify
@@ -1510,13 +1510,13 @@ request before implementation, and publication follows the standing release rule
 | Done | M29 — Release matrix for Windows, macOS and Linux | Unsigned pre-release 0.10.1 published 27/10/2026 (replaces 0.10.0); Windows ARM64 and x64 AppImage open | — |
 | Done | M30 — Automated desktop QA and cross-platform CI | GitHub workflows and local runner in place; remote run acceptance open | — |
 | Done | M31 — Clue board and open questions | Implemented on Windows with schema 022 and selective sharing | — |
-| 1 | M25 — Chronexus Server (in progress) | Server 0.2.0 released with GHCR images (linux/amd64, linux/arm64) and the table web workspace; server AI model qualification and public production deployment open | M24 |
+| 1 | M25 — Chronexus Server (in progress) | Server 0.3.0 released with GHCR images (linux/amd64, linux/arm64) and the table web workspace; server AI model qualification and public production deployment open | M24 |
 | 2 | M42 — GM accounts, tables and invitations (virtual tabletop) | Server 0.2.0 and desktop 0.13.0 released; physical multi-device acceptance open | M25 |
 | 3 | M43 — Live table channel and GM web interface | Released (GM workspace, chat dice, whispers, pings; desktop player view); physical multi-device and LAN latency acceptance open | M42 |
-| 4 | M44 — Maps, grid, tokens and movement, ft/m everywhere | Released in server 0.2.0 and desktop 0.13.0; physical multi-device acceptance open | M43 |
+| 4 | M44 — Maps, grid, tokens and movement, ft/m everywhere | Released in server 0.2.0 and desktop 0.13.0; one-step maps and click placement in server 0.3.0 / desktop 0.14.0; physical multi-device acceptance open | M43 |
 | 5 | M45 — Combat tracker | Released in server 0.2.0 and desktop 0.13.0; physical multi-device acceptance open | M44 |
 | 6 | M46 — Fog of war and vision | Released in server 0.2.0 and desktop 0.13.0; physical multi-device acceptance open | M44 |
-| 7 | M47 — Monster library and encounters | Released in server 0.2.0 (GM web only); physical multi-device acceptance open | M45 |
+| 7 | M47 — Monster library and encounters | Released in server 0.2.0; game-icons.net token catalog and desktop GM tools in server 0.3.0 / desktop 0.14.0; physical multi-device acceptance open | M45 |
 | Done | M32 — First start and demo campaign | Implemented 29/10/2026 (source); packaged-app check open | — |
 | Done | M33 — Trust and transparency | Implemented 29/10/2026; first CI run and release attachment open | M29 |
 | Done | M34 — Manual diagnostic bundle | Source implemented and released in 0.13.0: local preview and save, bounded safe event codes, no upload | — |
@@ -1653,7 +1653,9 @@ sources and acceptance are in [docs/VTT.md](docs/VTT.md). Server and desktop sou
 implemented as requested; Windows build and three-client protocol tests passed. Released
 on 1 November 2026 in Chronexus Server 0.2.0 (GM web workspace, server chat dice, `/gr`
 secret rolls, `/w gm` whispers, map pings) and Chronexus 0.13.0 (desktop player view of
-the same workspace). A loopback session the same day covered GM table creation, invitation,
+the same workspace). Server 0.3.0 and Chronexus 0.14.0 (2 November 2026) add one-step
+maps, click placement of NPC tokens, a game-icons.net token catalog and the GM tools in
+the desktop app. A loopback session on 1 November covered GM table creation, invitation,
 scene, token, fog reveal, combat start and the fogged player view. Physical multi-platform
 sessions, production TLS and LAN latency remain open.
 
