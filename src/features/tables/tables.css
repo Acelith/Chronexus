@@ -241,6 +241,10 @@
   background: #231d17;
   font-size: 0.9rem;
 }
+.chronexus-table .vtt-status {
+  padding: 6px 12px;
+  background: #fbf6ea;
+}
 .chronexus-table .vtt-status:empty {
   display: none;
 }
